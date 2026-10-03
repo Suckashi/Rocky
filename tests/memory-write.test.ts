@@ -7,12 +7,22 @@ import { AIMessage } from "@langchain/core/messages";
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 
-test.each(["approve", "reject", "locked", "race", "rollback", "update"])(
+test.each([
+  "approve",
+  "reject",
+  "locked",
+  "race",
+  "rollback",
+  "update",
+  "stop",
+  "shutdown",
+  "reopen",
+])(
   "native memory write exact approval: %s",
   async (mode) => {
     const root = await mkdtemp(join(tmpdir(), "rocky-memory-write-"));
-    const service = new WorkService(root),
-      id = randomUUID();
+    let service = new WorkService(root);
+    const id = randomUUID();
     const provider = await startAgentProvider({
       reply: async (messages) =>
         messages.filter((m) => m.type === "tool").length >=
@@ -125,12 +135,48 @@ test.each(["approve", "reject", "locked", "race", "rollback", "update"])(
           }),
         ).toThrow();
       }
-      service.decide(work.id, {
+      if (mode === "stop" || mode === "shutdown") {
+        if (mode === "stop") {
+          const current = service.store.get(work.id);
+          service.stop(work.id, {
+            requestId: randomUUID(),
+            runId: current.runId,
+            executionSessionId: current.executionSessionId,
+            expectedRevision: current.revision,
+          });
+        }
+        await service.close();
+        service = new WorkService(root);
+        expect(service.store.get(work.id)).toMatchObject({
+          status: "cancelled",
+          approval: { status: "expired" },
+        });
+        expect(() =>
+          service.previewMemory(approval.id, previewInput),
+        ).toThrow();
+        expect(() =>
+          service.decide(work.id, {
+            requestId: randomUUID(),
+            ...previewInput,
+            decision: "approve",
+          }),
+        ).toThrow();
+        expect(() => service.memories.get(id)).toThrow("not found");
+        expect(service.operations.list(work.id)[0]).toMatchObject({
+          outcome: "not_executed",
+        });
+        expect(
+          service.store.db.prepare("SELECT * FROM memory_receipts").all(),
+        ).toHaveLength(0);
+        return;
+      }
+      const decision = {
         requestId: randomUUID(),
         expectedRevision: approval.revision,
         intentFingerprint: approval.intentFingerprint,
         decision: mode === "reject" ? "reject" : "approve",
-      });
+      };
+      service.decide(work.id, decision);
       if (mode === "update") {
         await expect
           .poll(
@@ -166,7 +212,25 @@ test.each(["approve", "reject", "locked", "race", "rollback", "update"])(
         )
         .toBe(true);
       expect(() => service.previewMemory(approval.id, previewInput)).toThrow();
-      if (mode === "approve" || mode === "update") {
+      if (mode === "reopen") {
+        const saved = service.memories.get(id);
+        const operations = service.operations.list(work.id);
+        const receipts = service.store.db
+          .prepare("SELECT * FROM memory_receipts")
+          .all();
+        expect(receipts).toHaveLength(1);
+        await service.close();
+        service = new WorkService(root);
+        expect(service.store.get(work.id).status).toBe("completed");
+        expect(service.memories.get(id)).toEqual(saved);
+        expect(service.operations.list(work.id)).toEqual(operations);
+        service.decide(work.id, decision);
+        expect(service.memories.get(id)).toEqual(saved);
+        expect(
+          service.store.db.prepare("SELECT * FROM memory_receipts").all(),
+        ).toEqual(receipts);
+      }
+      if (mode === "approve" || mode === "update" || mode === "reopen") {
         expect(service.memories.get(id)).toMatchObject({
           content:
             "Model proposed preference" + (mode === "update" ? " updated" : ""),
