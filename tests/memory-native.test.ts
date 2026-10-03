@@ -7,6 +7,8 @@ import { AIMessage } from "@langchain/core/messages";
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 import { createApp } from "../apps/daemon/src/http.js";
+import { Tiktoken } from "js-tiktoken/lite";
+import cl100k from "js-tiktoken/ranks/cl100k_base";
 
 test.each([
   "granted",
@@ -15,6 +17,8 @@ test.each([
   "private",
   "escalated",
   "submitted",
+  "budget",
+  "empty",
 ])(
   "native memory boundary: %s",
   async (mode) => {
@@ -42,8 +46,9 @@ test.each([
               args: {
                 scope: "user",
                 includePrivate: ["private", "escalated"].includes(mode),
-                query: "native-marker",
-                tokenBudget: 2048,
+                query:
+                  mode === "empty" ? "no-matching-memory" : "native-marker",
+                tokenBudget: mode === "budget" ? 128 : 2048,
               },
               type: "tool_call",
             },
@@ -60,7 +65,8 @@ test.each([
           scope: { kind: "user" },
           content:
             "native-marker " +
-            (privateEntry ? "PRIVATE_MEMORY" : "PUBLIC_MEMORY"),
+            (privateEntry ? "PRIVATE_MEMORY" : "PUBLIC_MEMORY") +
+            (mode === "budget" ? "字".repeat(300) : ""),
           private: privateEntry,
         });
       const connectionId = randomUUID();
@@ -138,12 +144,26 @@ test.each([
           { timeout: 15000 },
         )
         .toBe(true);
-      if (["granted", "private", "submitted"].includes(mode)) {
+      if (
+        ["granted", "private", "submitted", "budget", "empty"].includes(mode)
+      ) {
         expect(service.store.get(work.id).status).toBe("completed");
-        expect(delivered).toContain("PUBLIC_MEMORY");
-        if (mode === "private") expect(delivered).toContain("PRIVATE_MEMORY");
-        else expect(delivered).not.toContain("PRIVATE_MEMORY");
-        expect(JSON.parse(delivered)[0].status).toBe("unverified");
+        const payload = JSON.parse(delivered);
+        expect(
+          new Tiktoken(cl100k).encode(delivered, [], []).length,
+        ).toBeLessThanOrEqual(payload.tokenBudget);
+        expect(payload.untrustedData).toBe(true);
+        expect(payload.encoding).toBe("cl100k_base");
+        if (["budget", "empty"].includes(mode)) {
+          expect(payload.items).toEqual([]);
+          expect(payload.truncated).toBe(mode === "budget");
+        } else {
+          expect(delivered).toContain("PUBLIC_MEMORY");
+          if (mode === "private") expect(delivered).toContain("PRIVATE_MEMORY");
+          else expect(delivered).not.toContain("PRIVATE_MEMORY");
+          expect(payload.items[0].status).toBe("unverified");
+          expect(payload.truncated).toBe(false);
+        }
       } else {
         expect(
           service.store

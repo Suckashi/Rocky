@@ -82,19 +82,39 @@ export class MemoryRegistry {
         "This Work has no active memory read grant for this scope and privacy selection",
         403,
       );
-    return {
-      ...this.search(
-        {
-          scope,
-          query: command.query,
-          tokenBudget: command.tokenBudget,
-          byteBudget: 16384,
-        },
-        !command.includePrivate,
-        true,
-      ),
+    const result = this.search(
+      {
+        scope,
+        query: command.query,
+        tokenBudget: command.tokenBudget,
+        byteBudget: 16384,
+      },
+      !command.includePrivate,
+      true,
+    );
+    const delivery = {
+      items: result.items,
+      truncated: result.truncated,
+      encoding: result.encoding,
+      tokenBudget: command.tokenBudget,
       untrustedData: true,
     };
+    let context = JSON.stringify(delivery);
+    while (
+      contextTokens(context) > command.tokenBudget &&
+      delivery.items.length
+    ) {
+      delivery.items.pop();
+      delivery.truncated = true;
+      context = JSON.stringify(delivery);
+    }
+    if (contextTokens(context) > command.tokenBudget)
+      throw new RockyError(
+        "memory_budget",
+        "Memory response metadata exceeds token budget",
+        422,
+      );
+    return { ...delivery, context, contextTokens: contextTokens(context) };
   }
   private scope(value: unknown) {
     const scope = memoryScopeSchema.parse(value);

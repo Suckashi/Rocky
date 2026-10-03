@@ -62,7 +62,7 @@ export const memoryReadToolSchema = z.strictObject({
   scope: z.enum(["user", "project", "task"]),
   includePrivate: z.boolean().default(false),
   query: z.string().trim().max(128).default(""),
-  tokenBudget: z.number().int().min(2).max(16384).default(2048),
+  tokenBudget: z.number().int().min(128).max(16384).default(2048),
 });
 export const memoryReadGrantSchema = z.strictObject({
   requestId: z.uuid(),
