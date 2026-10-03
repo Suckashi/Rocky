@@ -27,12 +27,7 @@ export class ModelRegistry {
     abort: AbortController;
     model: ConfiguredModel;
   }>();
-  acquireModel(
-    id: string,
-    revision: number,
-    accounting: ModelAccounting,
-    signal: AbortSignal,
-  ) {
+  assertRunnable(id: string, revision: number) {
     if (this.closed)
       throw new RockyError("shutting_down", "Daemon is shutting down", 503);
     const connection = this.get(id);
@@ -51,6 +46,15 @@ export class ModelRegistry {
         "Configure a context window with room for input before running an Agent",
         422,
       );
+    return connection;
+  }
+  acquireModel(
+    id: string,
+    revision: number,
+    accounting: ModelAccounting,
+    signal: AbortSignal,
+  ) {
+    const connection = this.assertRunnable(id, revision);
     const abort = new AbortController();
     const model = new ConfiguredModel(
       connection.config,

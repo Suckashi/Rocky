@@ -15,6 +15,10 @@ export const sequenceSchema = z
     "Sequence exceeds storage range",
   );
 export const timestampSchema = z.iso.datetime();
+export const modelSelectionSchema = z.strictObject({
+  connectionId: idSchema,
+  revision: revisionSchema,
+});
 export const workStatus = z.enum([
   "queued",
   "running",
@@ -30,9 +34,17 @@ export const submissionSchema = z
     requestId: idSchema,
     text: z.string().trim().min(1).max(8000),
     transport: z.enum(["stdio", "http"]).default("stdio"),
-    mode: z.literal("fixture"),
+    mode: z.enum(["fixture", "configured"]),
+    modelSelection: modelSelectionSchema.optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (value) =>
+      (value.mode === "configured") === (value.modelSelection !== undefined),
+    {
+      message: "Configured mode requires an explicit model connection revision",
+    },
+  );
 export const decisionSchema = z
   .object({
     requestId: idSchema,
@@ -67,7 +79,8 @@ export const workSchema = z
     requestId: idSchema,
     text: z.string(),
     transport: z.enum(["stdio", "http"]),
-    mode: z.literal("fixture"),
+    mode: z.enum(["fixture", "configured"]),
+    modelSelection: modelSelectionSchema.optional(),
     runMode: z.enum(["normal", "evaluation", "unknown"]),
     status: workStatus,
     revision: revisionSchema,
@@ -76,7 +89,12 @@ export const workSchema = z
     error: z.string().optional(),
     createdAt: timestampSchema,
   })
-  .strict();
+  .strict()
+  .refine(
+    (value) =>
+      (value.mode === "configured") === (value.modelSelection !== undefined),
+    { message: "Work model selection does not match its mode" },
+  );
 export const domainPayloadSchema = z
   .object({
     kind: z.literal("domain"),

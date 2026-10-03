@@ -79,7 +79,7 @@ test("T-007 model API requires local session, rejects raw keys and preserves unk
     expect(capabilities.model).toEqual({
       configured: true,
       verified: false,
-      runtimeAvailable: false,
+      runtimeAvailable: true,
       connectionProbing: true,
     });
   } finally {

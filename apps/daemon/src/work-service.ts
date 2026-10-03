@@ -23,7 +23,7 @@ type Agent = ReturnType<typeof createRockyAgent>;
 type Active = {
   agent: Agent;
   connection: Awaited<ReturnType<typeof connectFixture>>;
-  model: Awaited<ReturnType<typeof startModelFixture>>;
+  model: { close: () => Promise<void> };
   abort: AbortController;
   promise?: Promise<void>;
   closing?: Promise<void>;
@@ -107,6 +107,11 @@ export class WorkService {
     }
     if (new Set([...this.active.keys(), ...this.starting.keys()]).size >= 3)
       throw new RockyError("capacity", "Fixture capacity reached", 429);
+    if (parsed.modelSelection)
+      this.models.assertRunnable(
+        parsed.modelSelection.connectionId,
+        parsed.modelSelection.revision,
+      );
     const work: Work = {
       id: randomUUID(),
       runId: randomUUID(),
@@ -114,7 +119,10 @@ export class WorkService {
       requestId: parsed.requestId,
       text: parsed.text,
       transport: parsed.transport,
-      mode: "fixture",
+      mode: parsed.mode,
+      ...(parsed.modelSelection
+        ? { modelSelection: parsed.modelSelection }
+        : {}),
       runMode,
       status: "queued",
       revision: 1,
@@ -138,128 +146,195 @@ export class WorkService {
     { abort: AbortController; promise: Promise<void> }
   >();
   private async start(work: Work, abort: AbortController) {
+    const cleanup: Array<() => Promise<void>> = [];
+    let handedOff = false;
     try {
       const connection = await connectFixture(work.transport);
+      cleanup.push(() => connection.close());
       if (abort.signal.aborted) {
-        await connection.close();
         return;
       }
-      const model = await startModelFixture();
-      if (abort.signal.aborted) {
-        await connection.close();
-        await model.close();
-        return;
-      }
-      this.emit(work, "rocky.model.configured", {
-        endpoint: model.endpoint,
-        purpose: "target",
-        mode: "fixture",
-      });
-      this.modelBudgets.open(work.runId);
-      const agent = createRockyAgent(this.saver, {
-        modelRequest: async (messages, child) => {
-          abort.signal.throwIfAborted();
-          const requestId = randomUUID();
-          this.modelBudgets.reserve(work.runId, {
-            requestId,
-            purpose: child ? "subagent" : "target",
-            inputTokenBound: null,
-            outputTokenBound: null,
-          });
-          const result = await model.request(messages, child);
-          // The deterministic fixture does not report model token usage. Never invent zero usage.
-          this.modelBudgets.settle(work.runId, requestId, null);
-          this.emit(this.store.get(work.id), "rocky.model.completed", {
-            destination: model.endpoint,
-            purpose: "target",
-            child,
-          });
-          return result;
+      const modelCleanup: Array<() => Promise<void>> = [];
+      const fixtureModel =
+        work.mode === "fixture" ? await startModelFixture() : undefined;
+      if (fixtureModel) modelCleanup.push(() => fixtureModel.close());
+      const model = {
+        close: async () => {
+          await Promise.all(modelCleanup.map((close) => close()));
         },
-        event: (name, data) => this.emit(this.store.get(work.id), name, data),
-        call: async (name, args, callId) => {
-          abort.signal.throwIfAborted();
-          const current = this.store.get(work.id);
-          const identity = work.runId + ":" + callId,
-            argsHash = hash({ name, args });
-          const existing = this.store.db
-            .prepare("SELECT * FROM operations WHERE id=?")
-            .get(identity) as
-            { args_hash: string; outcome: string; result: string } | undefined;
-          if (existing) {
-            if (existing.args_hash !== argsHash)
+      };
+      cleanup.push(model.close);
+      if (abort.signal.aborted) {
+        return;
+      }
+      this.modelBudgets.open(work.runId);
+      const selection = work.modelSelection;
+      const configuredModels = selection
+        ? (() => {
+            const acquire = (child: boolean) => {
+              const lease = this.models.acquireModel(
+                selection.connectionId,
+                selection.revision,
+                {
+                  reserve: (requestId, inputTokenBound, outputTokenBound) => {
+                    this.modelBudgets.reserve(work.runId, {
+                      requestId,
+                      purpose: child ? "subagent" : "target",
+                      inputTokenBound,
+                      outputTokenBound,
+                    });
+                  },
+                  settle: (requestId, usage) => {
+                    this.modelBudgets.settle(work.runId, requestId, usage);
+                    this.emit(
+                      this.store.get(work.id),
+                      "rocky.model.completed",
+                      {
+                        requestId,
+                        connectionId: selection.connectionId,
+                        connectionRevision: selection.revision,
+                        purpose: child ? "subagent" : "target",
+                        child,
+                        usage,
+                      },
+                    );
+                  },
+                },
+                abort.signal,
+              );
+              modelCleanup.push(lease.release);
+              return lease.model;
+            };
+            return { root: acquire(false), child: acquire(true) };
+          })()
+        : undefined;
+      this.emit(work, "rocky.model.configured", {
+        ...(fixtureModel
+          ? { endpoint: fixtureModel.endpoint }
+          : { modelSelection: selection }),
+        purpose: "target",
+        mode: work.mode,
+        toolScope: "synthetic",
+      });
+      const agent = createRockyAgent(
+        this.saver,
+        {
+          modelRequest: fixtureModel
+            ? async (messages, child) => {
+                abort.signal.throwIfAborted();
+                const requestId = randomUUID();
+                this.modelBudgets.reserve(work.runId, {
+                  requestId,
+                  purpose: child ? "subagent" : "target",
+                  inputTokenBound: null,
+                  outputTokenBound: null,
+                });
+                const result = await fixtureModel.request(messages, child);
+                // The deterministic fixture does not report model token usage. Never invent zero usage.
+                this.modelBudgets.settle(work.runId, requestId, null);
+                this.emit(this.store.get(work.id), "rocky.model.completed", {
+                  destination: fixtureModel.endpoint,
+                  purpose: "target",
+                  child,
+                });
+                return result;
+              }
+            : undefined,
+          event: (name, data) => this.emit(this.store.get(work.id), name, data),
+          call: async (name, args, callId) => {
+            abort.signal.throwIfAborted();
+            const current = this.store.get(work.id);
+            if (current.modelSelection)
+              this.models.assertRunnable(
+                current.modelSelection.connectionId,
+                current.modelSelection.revision,
+              );
+            const identity = work.runId + ":" + callId,
+              argsHash = hash({ name, args });
+            const existing = this.store.db
+              .prepare("SELECT * FROM operations WHERE id=?")
+              .get(identity) as
+              | { args_hash: string; outcome: string; result: string }
+              | undefined;
+            if (existing) {
+              if (existing.args_hash !== argsHash)
+                throw new RockyError(
+                  "operation_conflict",
+                  "Operation arguments changed",
+                  409,
+                );
+              if (existing.outcome === "succeeded") return existing.result;
               throw new RockyError(
-                "operation_conflict",
-                "Operation arguments changed",
+                "unknown_effect",
+                "Prior operation outcome requires reconciliation",
                 409,
               );
-            if (existing.outcome === "succeeded") return existing.result;
-            throw new RockyError(
-              "unknown_effect",
-              "Prior operation outcome requires reconciliation",
-              409,
-            );
-          }
-          if (name === "write_sample") {
-            const approval = current.approval;
-            if (
-              approval?.status !== "approved" ||
-              approval.intentFingerprint !==
-                this.fingerprint(current, name, args)
-            )
+            }
+            if (name === "write_sample") {
+              const approval = current.approval;
+              if (
+                approval?.status !== "approved" ||
+                approval.intentFingerprint !==
+                  this.fingerprint(current, name, args)
+              )
+                throw new RockyError(
+                  "approval_required",
+                  "Exact server approval required",
+                  403,
+                );
+            } else if (name !== "inspect_sample")
               throw new RockyError(
-                "approval_required",
-                "Exact server approval required",
+                "tool_denied",
+                "Tool is not in fixture scope",
                 403,
               );
-          } else if (name !== "inspect_sample")
-            throw new RockyError(
-              "tool_denied",
-              "Tool is not in fixture scope",
-              403,
-            );
-          this.store.transaction(() => {
-            this.store.db
-              .prepare("INSERT INTO operations VALUES(?,?,?,NULL)")
-              .run(identity, argsHash, "unknown");
-            this.store.event(current, "rocky.operation.dispatched", {
-              operationId: identity,
-              name,
-              destination: connection.destination,
-            });
-          });
-          this.flushOutbox();
-          try {
-            const result = await connection.client.callTool(
-              { name, arguments: args },
-              undefined,
-              { signal: abort.signal, timeout: 10000 },
-            );
-            if (result.isError) throw Error("MCP fixture returned an error");
-            const serialized = JSON.stringify(result);
             this.store.transaction(() => {
               this.store.db
-                .prepare("UPDATE operations SET outcome=?, result=? WHERE id=?")
-                .run("succeeded", serialized, identity);
-              this.store.event(current, "rocky.operation.succeeded", {
+                .prepare("INSERT INTO operations VALUES(?,?,?,NULL)")
+                .run(identity, argsHash, "unknown");
+              this.store.event(current, "rocky.operation.dispatched", {
                 operationId: identity,
                 name,
-                result,
+                destination: connection.destination,
               });
             });
             this.flushOutbox();
-            return serialized;
-          } catch (error) {
-            this.emit(current, "rocky.operation.unknown", {
-              operationId: identity,
-              name,
-            });
-            throw error;
-          }
+            try {
+              const result = await connection.client.callTool(
+                { name, arguments: args },
+                undefined,
+                { signal: abort.signal, timeout: 10000 },
+              );
+              if (result.isError) throw Error("MCP fixture returned an error");
+              const serialized = JSON.stringify(result);
+              this.store.transaction(() => {
+                this.store.db
+                  .prepare(
+                    "UPDATE operations SET outcome=?, result=? WHERE id=?",
+                  )
+                  .run("succeeded", serialized, identity);
+                this.store.event(current, "rocky.operation.succeeded", {
+                  operationId: identity,
+                  name,
+                  result,
+                });
+              });
+              this.flushOutbox();
+              return serialized;
+            } catch (error) {
+              this.emit(current, "rocky.operation.unknown", {
+                operationId: identity,
+                name,
+              });
+              throw error;
+            }
+          },
         },
-      });
+        configuredModels,
+      );
       const active = { agent, connection, model, abort };
       this.active.set(work.id, active);
+      handedOff = true;
       await this.run(work.id, undefined);
     } catch (error) {
       if (!abort.signal.aborted) {
@@ -268,6 +343,8 @@ export class WorkService {
         current.error = error instanceof Error ? error.message : "Run failed";
         this.update(current);
       }
+    } finally {
+      if (!handedOff) await Promise.allSettled(cleanup.map((close) => close()));
     }
   }
   private fingerprint(work: Work, tool: string, args: Record<string, unknown>) {
@@ -279,6 +356,7 @@ export class WorkService {
       transport: work.transport,
       policyRevision: 1,
       fixtureSchemaRevision: 1,
+      ...(work.modelSelection ? { modelSelection: work.modelSelection } : {}),
     });
   }
   private async run(id: string, decision?: "approve" | "reject") {
@@ -411,6 +489,11 @@ export class WorkService {
         "Approval fingerprint or revision changed",
         409,
       );
+    if (work.modelSelection)
+      this.models.assertRunnable(
+        work.modelSelection.connectionId,
+        work.modelSelection.revision,
+      );
     work.approval.status =
       decision.decision === "approve" ? "approved" : "rejected";
     work.approval.revision++;
@@ -495,10 +578,10 @@ export class WorkService {
   async close() {
     this.stopping = true;
     clearInterval(this.deliveryTimer);
-    await this.models.close();
     for (const work of this.store.list())
       if (["queued", "running", "waiting_approval"].includes(work.status))
         this.cancelWork(work.id);
+    await this.models.close();
     await Promise.all([...this.starting.values()].map((a) => a.promise));
     await Promise.all(
       [...this.active.entries()].map(async ([id, a]) => {

@@ -209,7 +209,7 @@ export class Store {
       );
     const result = this.db
       .prepare(
-        "UPDATE works SET data=? WHERE id=? AND json_extract(data,'$.revision')=? AND request_id=? AND json_extract(data,'$.runId')=? AND json_extract(data,'$.executionSessionId')=?",
+        "UPDATE works SET data=? WHERE id=? AND json_extract(data,'$.revision')=? AND request_id=? AND json_extract(data,'$.runId')=? AND json_extract(data,'$.executionSessionId')=? AND json_extract(data,'$.mode')=? AND json_extract(data,'$.modelSelection.connectionId') IS ? AND json_extract(data,'$.modelSelection.revision') IS ?",
       )
       .run(
         JSON.stringify(workSchema.parse(work)),
@@ -218,6 +218,9 @@ export class Store {
         work.requestId,
         work.runId,
         work.executionSessionId,
+        work.mode,
+        work.modelSelection?.connectionId ?? null,
+        work.modelSelection?.revision ?? null,
       );
     if (result.changes !== 1)
       throw new RockyError("revision_conflict", "Work revision changed", 409);

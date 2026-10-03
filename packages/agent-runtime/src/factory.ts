@@ -72,7 +72,11 @@ export function createRockyAgent(
     name: "rocky",
     model: models?.root ?? new FixtureModel(false, hooks.modelRequest),
     checkpointer,
-    systemPrompt: ROCKY_PERSONA + "\nThis run uses synthetic fixtures.",
+    systemPrompt:
+      ROCKY_PERSONA +
+      (models
+        ? "\nYou use the explicitly configured model. Available tools operate only on synthetic samples; never claim to have read or modified real files."
+        : "\nThis run uses synthetic fixtures."),
     tools: [write],
     middleware: [todoListMiddleware(), guard(false)],
     subagents: [

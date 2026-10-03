@@ -19,9 +19,15 @@ const initial = (): ModelConfig => ({
 export function ModelSettings({
   locale,
   request,
+  onSelect,
 }: {
   locale: "zh" | "en";
   request: (path: string, body?: unknown) => Promise<unknown>;
+  onSelect: (model: {
+    connectionId: string;
+    revision: number;
+    name: string;
+  }) => void;
 }) {
   const zh = locale === "zh";
   const [models, setModels] = useState<PublicModel[]>([]),
@@ -144,8 +150,8 @@ export function ModelSettings({
       <summary>{zh ? "模型連線設定" : "Model connections"}</summary>
       <p>
         {zh
-          ? "先保存，再由你啟動測試。測試最多發送 5 次 nonce 請求，每次輸出上限 128 tokens，可能產生供應商費用。聊天目前仍使用合成模型。"
-          : "Save first, then explicitly test. A probe sends up to 5 nonce requests with at most 128 output tokens each and may incur provider charges. Chat still uses synthetic models."}
+          ? "先保存，再由你啟動測試或選擇模型。測試最多發送 5 次 nonce 請求，每次輸出上限 128 tokens，可能產生供應商費用。使用模型前須設定 context，且大於輸出上限。"
+          : "Save first, then explicitly test or select a model. A probe sends up to 5 nonce requests with at most 128 output tokens each and may incur provider charges. Model use requires a context window larger than its output limit."}
       </p>
       <form className="model-form" onSubmit={save}>
         <fieldset disabled={busy}>
@@ -368,6 +374,25 @@ export function ModelSettings({
             <p>{zh ? "尚未測試此版本" : "This revision has not been tested"}</p>
           )}
           <div className="model-actions">
+            <button
+              disabled={
+                busy ||
+                model.config.contextWindowTokens === null ||
+                model.config.contextWindowTokens <=
+                  model.config.maxOutputTokens ||
+                (model.credential.configured && !model.credential.available)
+              }
+              onClick={() =>
+                onSelect({
+                  connectionId: model.id,
+                  revision: model.revision,
+                  name: model.config.name,
+                })
+              }
+            >
+              {zh ? "使用此模型" : "Use this model"}
+            </button>
+
             <button
               disabled={busy || model.probe?.status === "running"}
               onClick={() => void probe(model)}

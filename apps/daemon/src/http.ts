@@ -8,6 +8,7 @@ import {
   RockyError,
   errorSchema,
   sequenceSchema,
+  modelSelectionSchema,
 } from "../../../packages/contracts/src/index.js";
 import { WorkService } from "./work-service.js";
 async function readJson(c: Context): Promise<unknown> {
@@ -136,7 +137,7 @@ export function createApp(service: WorkService) {
       model: {
         configured: service.models.list().length > 0,
         verified: false,
-        runtimeAvailable: false,
+        runtimeAvailable: true,
         connectionProbing: true,
       },
       fixture: { available: true },
@@ -213,7 +214,8 @@ export function createApp(service: WorkService) {
     const input = RunAgentInputSchema.parse(await readJson(c));
     const props = z
       .object({
-        mode: z.literal("fixture"),
+        mode: z.enum(["fixture", "configured"]),
+        modelSelection: modelSelectionSchema.optional(),
         transport: z.enum(["stdio", "http"]),
       })
       .strict()

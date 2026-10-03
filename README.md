@@ -6,4 +6,4 @@ This is an independent greenfield implementation, not a fork or migration. The a
 
 Development: Node 24.12.0 / npm 11.6.4, `npm ci`, `npm run dev`. Build with `npm run build`, then `npm start`. P0 uses explicitly selected synthetic fixtures; no model account or paid request is needed. No remote repository or release is established by these instructions.
 
-The collapsed **Model connections** panel can now save and explicitly probe a configured endpoint. Chat remains synthetic; see [connection setup and current limits](docs/implementation/model-connections.md).
+The collapsed **Model connections** panel can save, probe and select a configured endpoint for Work. Tools currently operate only on synthetic samples; see [connection setup and current limits](docs/implementation/model-connections.md).

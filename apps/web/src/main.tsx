@@ -33,7 +33,7 @@ const labels = {
     setup: "本地連線",
     title: "一起把問題做完。",
     intro:
-      "我是 Rocky，一起用可核對的步驟把工作做完。聊天目前使用合成模型；你也可以在下方設定並測試自己的模型連線。",
+      "我是 Rocky，一起用可核對的步驟把工作做完。你可以選擇自己的模型，或體驗合成流程；目前工具僅操作合成範例。",
     fixture: "啟用合成測試",
     placeholder: "描述想驗證的流程…",
     send: "開始驗證",
@@ -64,7 +64,7 @@ const labels = {
     setup: "Local connection",
     title: "Let’s work through it.",
     intro:
-      "I’m Rocky. Let’s work through clear steps and verifiable results. Chat uses a synthetic model for now; you can configure and test your own model connections below.",
+      "I’m Rocky. Let’s work through clear steps and verifiable results. Select your own model or try the synthetic workflow; tools currently operate only on synthetic samples.",
     fixture: "Enable synthetic fixture",
     placeholder: "Describe a workflow to verify…",
     send: "Run verification",
@@ -103,6 +103,11 @@ function App() {
     [connected, setConnected] = useState(false),
     [busy, setBusy] = useState(false);
   const t = labels[locale];
+  const [selectedModel, setSelectedModel] = useState<{
+    connectionId: string;
+    revision: number;
+    name: string;
+  } | null>(null);
   useEffect(() => {
     document.documentElement.lang = locale === "zh" ? "zh-Hant" : "en";
     document.documentElement.dataset.theme = theme;
@@ -143,7 +148,7 @@ function App() {
   }, []);
   async function send(e: FormEvent) {
     e.preventDefault();
-    if (!text.trim() || !enabled || busy) return;
+    if (!text.trim() || (!enabled && !selectedModel) || busy) return;
     setError("");
     setBusy(true);
     try {
@@ -155,7 +160,16 @@ function App() {
       setText("");
       await agent.runAgent({
         runId: crypto.randomUUID(),
-        forwardedProps: { mode: "fixture", transport },
+        forwardedProps: selectedModel
+          ? {
+              mode: "configured",
+              transport,
+              modelSelection: {
+                connectionId: selectedModel.connectionId,
+                revision: selectedModel.revision,
+              },
+            }
+          : { mode: "fixture", transport },
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -233,7 +247,10 @@ function App() {
               <input
                 type="checkbox"
                 checked={enabled}
-                onChange={(e) => setEnabled(e.target.checked)}
+                onChange={(e) => {
+                  setEnabled(e.target.checked);
+                  if (e.target.checked) setSelectedModel(null);
+                }}
               />
               {t.fixture}
             </label>
@@ -246,7 +263,14 @@ function App() {
               <option value="http">MCP · Streamable HTTP</option>
             </select>
           </section>
-          <ModelSettings locale={locale} request={request} />
+          <ModelSettings
+            locale={locale}
+            request={request}
+            onSelect={(model) => {
+              setSelectedModel(model);
+              setEnabled(false);
+            }}
+          />
           <div id="works" className="works">
             {!works.length && <p className="empty">{t.empty}</p>}
             {works.map((w) => (
@@ -331,6 +355,16 @@ function App() {
           </div>
         </section>
         <div className="composer-wrap">
+          {selectedModel && (
+            <p role="status">
+              {locale === "zh"
+                ? `使用 ${selectedModel.name}：訊息會送至此模型，可能產生費用。工具只操作合成範例。`
+                : `Using ${selectedModel.name}: messages go to this model and may incur charges. Tools operate only on synthetic samples.`}{" "}
+              <button onClick={() => setSelectedModel(null)}>
+                {locale === "zh" ? "取消選取" : "Clear selection"}
+              </button>
+            </p>
+          )}
           {error && (
             <p role="alert" className="error">
               {error}
@@ -347,10 +381,19 @@ function App() {
             <button
               className="primary"
               disabled={
-                !enabled || !text.trim() || busy || !isReady || !connected
+                (!enabled && !selectedModel) ||
+                !text.trim() ||
+                busy ||
+                !isReady ||
+                !connected
               }
             >
-              {t.send} ↗
+              {selectedModel
+                ? locale === "zh"
+                  ? "傳送至模型"
+                  : "Send to model"
+                : t.send}{" "}
+              ↗
             </button>
           </form>
           <footer>{t.foot}</footer>
