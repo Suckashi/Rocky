@@ -171,3 +171,5 @@ Skills review (7e2712bba4993f3e7accf22085609ddb740a808f) reuses existing OpenDot
 Skill folder import (bf1cbf1b91305775569ac399718de3d287a485aa) adds a collapsed form inside the existing Skills dialog, reusing model-card/fieldset/input/select/action styling. No new visual token system or upstream source copy. [Four-width import screenshots](evidence/2026-10-04/skill-import.json);320 inspected. Matched reference comparison and complete theme/language/focus matrix remain pending.
 
 Skill file/history review (6f08d5068e5e5a801a069f034347e4b65e748e81) extends the existing dialog with compact previous/next buttons and a file select, retaining original names and collapsed hashes. Existing neutral form/proposal styles reused; no new CSS. [Four-width after evidence](evidence/2026-10-04/skill-files.json),320 inspected. Matched reference comparison remains pending.
+
+Skill update (0ad24f8d7be0d5495aae684c2a227c88f0c72e70) reuses the same folder form with a target/version summary, disabled scope and cancel action. Picker focus is browser-verified; no additional CSS. [320px evidence](evidence/2026-10-04/skill-update.json). Matched reference comparison remains pending.

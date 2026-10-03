@@ -1,0 +1,29 @@
+{
+  "commit": "0ad24f8d7be0d5495aae684c2a227c88f0c72e70",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "playwright production skills.spec.ts (3 passed), focused real-local-folder after focus change (1 passed); npm run check; scoped eslint; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/skill-update.json",
+  "testFiles": ["tests/e2e/skills.spec.ts"],
+  "limitations": [
+    "Concurrent update rejection covered by daemon CAS tests; dedicated stale-update browser draft/retry matrix pending",
+    "Project update and full language/theme/accessibility matrix pending",
+    "No automatic discovery, version diff/audit presentation or matched OpenDots comparison in this slice",
+    "No Ubuntu/live provider/fullAT claim"
+  ],
+  "browserTests": 3,
+  "browserSeconds": 6.5,
+  "finalFocusedBrowserSeconds": 3.9,
+  "focusTestCommit": "cb00ecd",
+  "screenshots": [
+    "docs/implementation/evidence/2026-10-04/skill-update/after-320.png"
+  ],
+  "assertions": [
+    "New revision uses same skill ID and immutable scope with expected current revision",
+    "Folder update creates revision2; original reference bytes remain in revision1",
+    "Published selection stays revision1 until explicit new review/activation",
+    "Update picker gets focus, scope control disabled and320 has no page overflow"
+  ]
+}

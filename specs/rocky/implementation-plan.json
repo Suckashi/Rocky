@@ -4292,6 +4292,24 @@
             "Chinese/light Chromium after screenshots only; complete language/theme/keyboard matrix and matched reference comparison pending",
             "No live provider/Ubuntu/fullAT completion claim"
           ]
+        },
+        {
+          "commit": "0ad24f8d7be0d5495aae684c2a227c88f0c72e70",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "playwright production skills.spec.ts (3 passed), focused real-local-folder after focus change (1 passed); npm run check; scoped eslint; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-update.json",
+          "testFiles": [
+            "tests/e2e/skills.spec.ts"
+          ],
+          "limitations": [
+            "Concurrent update rejection covered by daemon CAS tests; dedicated stale-update browser draft/retry matrix pending",
+            "Project update and full language/theme/accessibility matrix pending",
+            "No automatic discovery, version diff/audit presentation or matched OpenDots comparison in this slice",
+            "No Ubuntu/live provider/fullAT claim"
+          ]
         }
       ],
       "blockedReason": null,
