@@ -26,6 +26,7 @@ import { OperationReconciler } from "./operation-reconciler.js";
 import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
 import { WorkerJobs } from "./worker-jobs.js";
+import { ModelSlots } from "./model-slots.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -43,6 +44,7 @@ export class WorkService {
   readonly modelBudgets: ModelBudgetLedger;
   readonly operations: OperationLedger;
   readonly grants: GrantRegistry;
+  readonly modelSlots = new ModelSlots(2);
   readonly events = new EventEmitter();
   private active = new Map<string, Active>();
   private stopping = false;
@@ -501,24 +503,33 @@ export class WorkService {
           this.store,
           work.id,
           entry,
-          async (_owned, payload) => {
+          async (_owned, payload, requestSignal) => {
             if (payload.kind === "tool_request")
               return hooks.call(
                 payload.tool,
                 payload.args,
                 payload.logicalToolCallId,
               );
-            const messages = fromModelWire(payload.messages);
-            const reply = configuredModels
-              ? await (
-                  payload.child ? configuredModels.child : configuredModels.root
-                )
-                  .bindTools((payload.tools ?? []) as BindToolsInput[])
-                  .invoke(messages)
-              : ((await hooks.modelRequest!(messages, payload.child))
-                  .generations[0]?.message as AIMessage | undefined);
-            if (!reply) throw Error("Model returned no message");
-            return { content: reply.content, tool_calls: reply.tool_calls };
+            const signal = AbortSignal.any([abort.signal, requestSignal]);
+            return this.modelSlots.run(
+              this.admissionClass(work),
+              signal,
+              async () => {
+                const messages = fromModelWire(payload.messages);
+                const reply = configuredModels
+                  ? await (
+                      payload.child
+                        ? configuredModels.child
+                        : configuredModels.root
+                    )
+                      .bindTools((payload.tools ?? []) as BindToolsInput[])
+                      .invoke(messages, { signal })
+                  : ((await hooks.modelRequest!(messages, payload.child))
+                      .generations[0]?.message as AIMessage | undefined);
+                if (!reply) throw Error("Model returned no message");
+                return { content: reply.content, tool_calls: reply.tool_calls };
+              },
+            );
           },
           {
             graphPath: join(this.store.root, "graph-checkpoints.sqlite"),

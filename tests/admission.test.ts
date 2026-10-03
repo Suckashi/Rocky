@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { Store } from "../apps/daemon/src/store.js";
+import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 
 test("T-010 main admission remains available with two independent background sessions", async () => {
   const root = mkdtempSync(join(tmpdir(), "rocky-admission-"));
@@ -75,6 +76,62 @@ test("T-010 main admission remains available with two independent background ses
     ]);
   } finally {
     await service.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("T-010 main model request waits for a global slot and dispatches when a background call stops", async () => {
+  const fixture = await startAgentProvider({ hold: true });
+  const root = mkdtempSync(join(tmpdir(), "rocky-model-admission-"));
+  const service = new WorkService(root);
+  try {
+    const connectionId = randomUUID();
+    service.models.save({
+      requestId: randomUUID(),
+      id: connectionId,
+      expectedRevision: 0,
+      config: {
+        name: "held provider",
+        provider: "openai-compatible",
+        baseUrl: fixture.baseUrl,
+        modelId: "scripted",
+        contextWindowTokens: 4096,
+        maxOutputTokens: 128,
+      },
+    });
+    const submit = (kind: "main" | "background", text: string) =>
+      service.submit({
+        requestId: randomUUID(),
+        text,
+        kind,
+        mode: "configured",
+        transport: "http",
+        modelSelection: { connectionId, revision: 1 },
+      });
+    const a = submit("background", "Background A");
+    submit("background", "Background B");
+    await expect
+      .poll(() => fixture.requests.length, { timeout: 10000 })
+      .toBe(2);
+    const main = submit("main", "Main request");
+    await expect
+      .poll(() => service.modelSlots.snapshot.waiting, { timeout: 10000 })
+      .toBe(1);
+    expect(fixture.requests).toHaveLength(2);
+    const current = service.store.get(a.id);
+    service.stop(a.id, {
+      requestId: randomUUID(),
+      runId: current.runId,
+      executionSessionId: current.executionSessionId,
+      expectedRevision: current.revision,
+    });
+    await expect
+      .poll(() => fixture.requests.length, { timeout: 10000 })
+      .toBe(3);
+    expect(service.store.get(main.id).status).toBe("running");
+  } finally {
+    await service.close();
+    await fixture.close();
     rmSync(root, { recursive: true, force: true });
   }
 });
