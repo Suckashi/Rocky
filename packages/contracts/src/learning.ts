@@ -35,3 +35,19 @@ export const learningPolicyCommandSchema = z
     if (new Set(keys).size !== keys.length)
       ctx.addIssue({ code: "custom", message: "Duplicate Learning scope" });
   });
+
+export const learningWorkConsentSchema = z.strictObject({
+  workId: z.uuid(),
+  revision: z.number().int().nonnegative(),
+  private: z.boolean(),
+  excluded: z.boolean(),
+  sourceReuseAllowed: z.boolean(),
+  updatedAt: z.string().datetime().nullable(),
+});
+export const learningWorkConsentCommandSchema = z.strictObject({
+  requestId: z.uuid(),
+  expectedRevision: z.number().int().nonnegative(),
+  private: z.boolean(),
+  excluded: z.boolean(),
+  sourceReuseAllowed: z.boolean(),
+});

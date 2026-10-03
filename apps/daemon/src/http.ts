@@ -275,6 +275,14 @@ export function createApp(service: WorkService) {
   app.get("/api/v1/artifacts", (c) =>
     c.json({ artifacts: service.artifacts.list() }),
   );
+  app.get("/api/v1/works/:id/learning-consent", (c) =>
+    c.json(service.learning.workConsent(c.req.param("id"))),
+  );
+  app.post("/api/v1/works/:id/learning-consent", async (c) =>
+    c.json(
+      service.learning.saveWorkConsent(c.req.param("id"), await readJson(c)),
+    ),
+  );
   app.get("/api/v1/learning/policy", (c) => c.json(service.learning.policy()));
   app.post("/api/v1/learning/policy", async (c) =>
     c.json(service.learning.savePolicy(await readJson(c))),
