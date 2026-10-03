@@ -4155,6 +4155,24 @@
             "Quarantine denies future registry reads, not yet wired to all native tool calls or active Work notifications",
             "No new browser, Ubuntu/live model or full AT evidence; T-026/T-027 remain in_progress"
           ]
+        },
+        {
+          "commit": "054a8d1e270f7dd52826563844630c3d170fd7ba",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npx vitest run tests/skill-backend.test.ts; npx eslint packages/agent-runtime/src/skill-backend.ts tests/skill-backend.test.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-backend.json",
+          "testFiles": [
+            "tests/skill-backend.test.ts"
+          ],
+          "limitations": [
+            "Adapter is not yet connected to worker RPC or production createRockyAgent; native Agent skill execution not_run",
+            "Native createSkillsMiddleware construction validates interface only, not full discovery/model flow",
+            "glob/grep intentionally return unavailable; binary assets available via backend download but read_file remains text-only",
+            "No new browser/UI/Ubuntu/live evidence; T-026 remains in_progress"
+          ]
         }
       ],
       "blockedReason": null,
