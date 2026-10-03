@@ -122,3 +122,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 native name isolation: same-name metadata overwrite limitation is resolved by ID-qualified native metadata/source paths while preserving original package content. Two same-name user skills have actual native discovery evidence; mixed-scope test coverage remains pending. UUID-qualified names are runtime identities, not proposed product UI labels.
 
 2026-10-04 loaded Skill revoke: earlier read-only revoke limitation is superseded by shared native tool guard and daemon RPC checks. Actual post-load write_todos denial and durable revoke event are verified. Broader child/pending-approval/in-flight coverage and user-facing revoke UI remain incomplete. Prior side effects and delivered model/history/checkpoint copies are not withdrawn; cross-ID quarantine remains open.
+
+2026-10-04 revoked pending approval: new approve decisions now fail before acceptance when a loaded skill is quarantined. Native memory_write case has actual approval/rejection evidence. This does not cover every external effect/in-flight race or add a browser revoke banner; those gaps remain.

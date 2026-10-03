@@ -1,0 +1,24 @@
+{
+  "commit": "9a9017a344c78f533a1710dfe3717ce62480403a",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/skill-native.test.ts; npm run check; npx eslint apps/daemon/src/work-service.ts tests/skill-native.test.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/skill-revoke-approval.json",
+  "testFiles": ["tests/skill-native.test.ts"],
+  "limitations": [
+    "Dedicated pending-approval test uses native memory_write; MCP/workspace/child/in-flight matrix remains incomplete",
+    "Rejection remains available; dedicated browser revoked-approval presentation still missing",
+    "Existing exact decision receipt replay remains historical and does not authorize new execution",
+    "No browser/Ubuntu/live provider/global AT completion claim"
+  ],
+  "tests": 6,
+  "testSeconds": 7.07,
+  "assertions": [
+    "Actual native skill load followed by memory_write interrupt and owner quarantine",
+    "Approval request rejected before approval revision/status or decision receipt changes",
+    "Owner rejection still accepted, Work finishes with operation not_executed and no memory row",
+    "Previously implemented published/untrusted/quarantine/same-name/post-load cases remain green"
+  ]
+}

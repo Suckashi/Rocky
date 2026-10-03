@@ -4310,6 +4310,24 @@
             "Quarantine still keyed by skill ID/hash; cross-ID equivalent package policy remains open",
             "No new browser/Ubuntu/live provider/fullAT evidence; T-026/T-027 in_progress"
           ]
+        },
+        {
+          "commit": "9a9017a344c78f533a1710dfe3717ce62480403a",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/skill-native.test.ts; npm run check; npx eslint apps/daemon/src/work-service.ts tests/skill-native.test.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-revoke-approval.json",
+          "testFiles": [
+            "tests/skill-native.test.ts"
+          ],
+          "limitations": [
+            "Dedicated pending-approval test uses native memory_write; MCP/workspace/child/in-flight matrix remains incomplete",
+            "Rejection remains available; dedicated browser revoked-approval presentation still missing",
+            "Existing exact decision receipt replay remains historical and does not authorize new execution",
+            "No browser/Ubuntu/live provider/global AT completion claim"
+          ]
         }
       ],
       "blockedReason": null,
