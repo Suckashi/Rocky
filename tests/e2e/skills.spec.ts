@@ -158,6 +158,59 @@ test("owner imports a real local folder as untrusted snapshot", async ({
       await page.request.get(`/api/v1/skills/${imported.id}/selection`)
     ).json();
     expect(selection.selection).toBeNull();
+    const { token } = await (await page.request.get("/api/v1/session")).json();
+    expect(
+      (
+        await page.request.post(`/api/v1/skills/${imported.id}/selection`, {
+          headers: { "x-rocky-session": token },
+          data: {
+            requestId: randomUUID(),
+            expectedRevision: 0,
+            skillRevision: 1,
+            contentHash: imported.contentHash,
+            action: "publish",
+          },
+        })
+      ).ok(),
+    ).toBe(true);
+    await writeFile(
+      join(folder, "references", "guide.md"),
+      "UPDATED_REFERENCE_BYTES",
+    );
+    await card.getByRole("button", { name: "匯入新版", exact: true }).click();
+    await expect(form.getByLabel("匯入範圍")).toBeDisabled();
+    await page.setViewportSize({ width: 320, height: 844 });
+    await form.scrollIntoViewIfNeeded();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: "test-results/skill-update-320.png",
+      fullPage: true,
+    });
+    await form.getByLabel("技能資料夾", { exact: true }).setInputFiles(folder);
+    await form.getByRole("button", { name: "保存未信任套件" }).click();
+    await expect(card).toContainText("r2");
+    const stillSelected = await (
+      await page.request.get(`/api/v1/skills/${imported.id}/selection`)
+    ).json();
+    expect(stillSelected.selection).toMatchObject({
+      skillRevision: 1,
+      state: "published",
+    });
+    const newer = await (
+      await page.request.get(`/api/v1/skills/${imported.id}/revisions/2`)
+    ).json();
+    expect(
+      Buffer.from(
+        newer.package.files.find(
+          (f: { path: string }) => f.path === "references/guide.md",
+        ).contentBase64,
+        "base64",
+      ).toString(),
+    ).toBe("UPDATED_REFERENCE_BYTES");
     const detail = await (
       await page.request.get(`/api/v1/skills/${imported.id}/revisions/1`)
     ).json();

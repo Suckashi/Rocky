@@ -5,18 +5,26 @@ export function SkillImport({
   locale,
   request,
   onImported,
+  target,
 }: {
   locale: "zh" | "en";
   request: (path: string, body?: unknown) => Promise<unknown>;
   onImported: () => void;
+  target?: {
+    id: string;
+    revision: number;
+    scope: { kind: "user" | "project"; projectId?: string };
+    source: { reference: string; license: string };
+    metadata: { name: string };
+  };
 }) {
   const zh = locale === "zh";
   const [workspaces, setWorkspaces] = useState<{ id: string; name: string }[]>(
       [],
     ),
     [scope, setScope] = useState("user"),
-    [source, setSource] = useState(""),
-    [license, setLicense] = useState(""),
+    [source, setSource] = useState(target?.source.reference ?? ""),
+    [license, setLicense] = useState(target?.source.license ?? ""),
     [files, setFiles] = useState<File[]>([]),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
@@ -26,6 +34,9 @@ export function SkillImport({
   const intent = useRef<
     { key: string; requestId: string; id: string } | undefined
   >(undefined);
+  useEffect(() => {
+    if (target) picker.current?.focus();
+  }, [target]);
   useEffect(() => {
     alive.current = true;
     void request("/workspaces")
@@ -87,11 +98,12 @@ export function SkillImport({
         });
       }
       const body = {
-        expectedRevision: 0,
+        expectedRevision: target?.revision ?? 0,
         scope:
-          scope === "user"
+          target?.scope ??
+          (scope === "user"
             ? { kind: "user" }
-            : { kind: "project", projectId: scope },
+            : { kind: "project", projectId: scope }),
         source: {
           type: "manual",
           reference: source.trim(),
@@ -99,12 +111,12 @@ export function SkillImport({
         },
         package: { directoryName, files: snapshot },
       };
-      const key = JSON.stringify(body);
+      const key = JSON.stringify({ target: target?.id, ...body });
       if (intent.current?.key !== key)
         intent.current = {
           key,
           requestId: crypto.randomUUID(),
-          id: crypto.randomUUID(),
+          id: target?.id ?? crypto.randomUUID(),
         };
       await request("/skills/import", {
         ...body,
@@ -127,8 +139,17 @@ export function SkillImport({
     }
   }
   return (
-    <details className="skill-import">
-      <summary>{zh ? "匯入技能資料夾" : "Import skill folder"}</summary>
+    <details className="skill-import" open={target ? true : undefined}>
+      <summary>
+        {target
+          ? (zh ? "匯入新版：" : "Import revision: ") +
+            target.metadata.name +
+            " · r" +
+            target.revision
+          : zh
+            ? "匯入技能資料夾"
+            : "Import skill folder"}
+      </summary>
       <form className="model-card" onSubmit={submit}>
         <fieldset disabled={busy}>
           <p>
@@ -158,7 +179,11 @@ export function SkillImport({
           </p>
           <label>
             {zh ? "匯入範圍" : "Import scope"}
-            <select value={scope} onChange={(e) => setScope(e.target.value)}>
+            <select
+              disabled={!!target}
+              value={target?.scope.projectId ?? scope}
+              onChange={(e) => setScope(e.target.value)}
+            >
               <option value="user">{zh ? "個人" : "User"}</option>
               {workspaces.map((w) => (
                 <option key={w.id} value={w.id}>

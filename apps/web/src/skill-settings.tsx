@@ -59,6 +59,7 @@ export function SkillSettings({
     path: string;
   }>();
   const [trusted, setTrusted] = useState(false);
+  const [updating, setUpdating] = useState<Revision>();
   const epoch = useRef(0),
     intent = useRef({ key: "", requestId: "" });
   useEffect(
@@ -183,10 +184,20 @@ export function SkillSettings({
     <details className="model-settings skill-settings" open>
       <summary>{zh ? "技能" : "Skills"}</summary>
       <SkillImport
+        key={updating ? `${updating.id}:${updating.revision}` : "new"}
+        target={updating}
         locale={locale}
         request={request}
-        onImported={() => void refresh()}
+        onImported={() => {
+          setUpdating(undefined);
+          void refresh();
+        }}
       />
+      {updating && (
+        <button onClick={() => setUpdating(undefined)}>
+          {zh ? "取消更新" : "Cancel update"}
+        </button>
+      )}
       <p>
         {zh
           ? "審查固定版本後再啟用。技能不會授予額外工具權限；新版本只影響新工作。"
@@ -216,6 +227,9 @@ export function SkillSettings({
           </p>
           <button disabled={busy} onClick={() => void open(item)}>
             {zh ? "審查此版本" : "Review this revision"}
+          </button>
+          <button disabled={busy} onClick={() => setUpdating(item)}>
+            {zh ? "匯入新版" : "Import new revision"}
           </button>
           {review?.revision.id === item.id && (
             <section aria-label={zh ? "技能版本審查" : "Skill revision review"}>
