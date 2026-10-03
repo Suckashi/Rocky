@@ -608,6 +608,40 @@ export class WorkService {
                 "Select the exact discovered registry revision",
                 400,
               );
+            if (query.kind !== "tools") {
+              const data = await this.mcpManager.dataCatalog(
+                query.serverId,
+                query.registryRevision,
+                abort.signal,
+              );
+              const items =
+                query.kind === "resources"
+                  ? [
+                      ...data.resources.map((resource) => ({
+                        ...resource,
+                        kind: "resource",
+                      })),
+                      ...data.resourceTemplates.map((template) => ({
+                        ...template,
+                        kind: "resource_template",
+                      })),
+                    ]
+                  : data.prompts;
+              return JSON.stringify(
+                this.models.redact(
+                  this.mcp.redact({
+                    serverId: query.serverId,
+                    registryRevision: query.registryRevision,
+                    kind: query.kind,
+                    items: items.slice(query.offset, query.offset + 5),
+                    nextOffset:
+                      query.offset + 5 < items.length ? query.offset + 5 : null,
+                    untrustedData: true,
+                    metadataOnly: true,
+                  }),
+                ),
+              );
+            }
             const tools = this.mcpManager.catalog(
               query.serverId,
               query.registryRevision,

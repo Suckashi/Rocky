@@ -147,6 +147,7 @@ export async function startHttpFixture(
   receiptRoot?: string,
   failAfterEffect = false,
   includeVisual = false,
+  createFixture?: () => McpServer,
 ) {
   const active = new Set<StreamableHTTPServerTransport>();
   const http = createServer(async (req, res) => {
@@ -158,7 +159,9 @@ export async function startHttpFixture(
       res.writeHead(405).end();
       return;
     }
-    const server = fixtureServer(receiptRoot, failAfterEffect, includeVisual);
+    const server = createFixture
+      ? createFixture()
+      : fixtureServer(receiptRoot, failAfterEffect, includeVisual);
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });

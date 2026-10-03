@@ -23,6 +23,7 @@ export const mcpStateSchema = z.strictObject({
 });
 export type McpState = z.infer<typeof mcpStateSchema>;
 export const mcpDiscoverSchema = z.strictObject({
+  kind: z.enum(["tools", "resources", "prompts"]).default("tools"),
   serverId: z
     .string()
     .regex(/^[a-z][a-z0-9-]{0,63}$/)

@@ -7,6 +7,11 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import {
   ToolListChangedNotificationSchema,
+  ResourceListChangedNotificationSchema,
+  PromptListChangedNotificationSchema,
+  type Resource,
+  type ResourceTemplate,
+  type Prompt,
   type Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import {
@@ -32,6 +37,11 @@ type Connection = {
   stderrDecoder?: StringDecoder;
   promise?: Promise<McpState>;
   closing?: Promise<void>;
+  dataCatalog?: {
+    resources: Resource[];
+    resourceTemplates: ResourceTemplate[];
+    prompts: Prompt[];
+  };
 };
 export class McpManager {
   private failureMessage(error: unknown) {
@@ -330,6 +340,23 @@ export class McpManager {
           );
       },
     );
+    const invalidateData = async () => {
+      if (!connection.closing)
+        void this.closeConnection(
+          id,
+          connection,
+          "configured",
+          "Resource/prompt list changed; reconnect to refresh metadata",
+        );
+    };
+    client.setNotificationHandler(
+      ResourceListChangedNotificationSchema,
+      invalidateData,
+    );
+    client.setNotificationHandler(
+      PromptListChangedNotificationSchema,
+      invalidateData,
+    );
     const signal = AbortSignal.any([
       abort.signal,
       AbortSignal.timeout(spec.startupTimeoutMs),
@@ -348,7 +375,11 @@ export class McpManager {
           cursors = new Set<string>();
         let cursor: string | undefined,
           totalBytes = 0;
-        for (let page = 0; page < 100; page++) {
+        for (
+          let page = 0;
+          client.getServerCapabilities()?.tools && page < 100;
+          page++
+        ) {
           const result = await client.listTools(
             cursor ? { cursor } : undefined,
             { signal, timeout: spec.startupTimeoutMs },
@@ -485,6 +516,124 @@ export class McpManager {
       .prepare("SELECT data FROM mcp_catalog WHERE server_id=?")
       .get(id) as { data: string };
     return JSON.parse(row.data) as Tool[];
+  }
+  /** Metadata only: neither links nor prompt messages are fetched or executed. */
+  async dataCatalog(id: string, revision: number, signal?: AbortSignal) {
+    signal?.throwIfAborted();
+    this.catalog(id, revision);
+    const connection = this.active.get(id)!;
+    if (connection.dataCatalog) return structuredClone(connection.dataCatalog);
+    const spec = this.registry.launchSpec(id, connection.state.configRevision);
+    const options = {
+      signal: AbortSignal.any([
+        ...(signal ? [signal] : []),
+        connection.abort.signal,
+        AbortSignal.timeout(spec.toolTimeoutMs),
+      ]),
+      timeout: spec.toolTimeoutMs,
+    };
+    const capabilities = connection.client.getServerCapabilities();
+    let bytes = 0;
+    const pages = async <T>(
+      fetch: (cursor?: string) => Promise<{ items: T[]; nextCursor?: string }>,
+      key: (item: T) => string,
+    ) => {
+      const items: T[] = [],
+        cursors = new Set<string>(),
+        identities = new Set<string>();
+      let cursor: string | undefined;
+      for (let page = 0; page < 100; page++) {
+        const result = await fetch(cursor);
+        this.assertCurrent(id, connection);
+        bytes += Buffer.byteLength(JSON.stringify(result));
+        if (bytes > 2097152 || items.length + result.items.length > 1000)
+          throw new RockyError(
+            "mcp_catalog_limit",
+            "MCP data catalog exceeds its limit",
+            422,
+          );
+        if (this.registry.containsSecret(result))
+          throw new RockyError(
+            "mcp_catalog_secret",
+            "MCP data catalog contains a credential",
+            422,
+          );
+        for (const item of result.items) {
+          const identity = key(item);
+          if (identities.has(identity))
+            throw new RockyError(
+              "mcp_catalog_duplicate",
+              "MCP data catalog contains duplicate entries",
+              422,
+            );
+          identities.add(identity);
+          items.push(item);
+        }
+        if (!result.nextCursor) return items;
+        if (cursors.has(result.nextCursor))
+          throw new RockyError(
+            "mcp_catalog_cursor",
+            "MCP data catalog repeated a cursor",
+            422,
+          );
+        cursors.add(result.nextCursor);
+        cursor = result.nextCursor;
+      }
+      throw new RockyError(
+        "mcp_catalog_limit",
+        "MCP data catalog exceeded its page limit",
+        422,
+      );
+    };
+    const resources = capabilities?.resources
+      ? await pages(
+          async (cursor) => {
+            const result = await connection.client.listResources(
+              cursor ? { cursor } : undefined,
+              options,
+            );
+            return { items: result.resources, nextCursor: result.nextCursor };
+          },
+          (item) => item.uri,
+        )
+      : [];
+    const resourceTemplates = capabilities?.resources
+      ? await pages(
+          async (cursor) => {
+            const result = await connection.client.listResourceTemplates(
+              cursor ? { cursor } : undefined,
+              options,
+            );
+            return {
+              items: result.resourceTemplates,
+              nextCursor: result.nextCursor,
+            };
+          },
+          (item) => item.uriTemplate,
+        )
+      : [];
+    const prompts = capabilities?.prompts
+      ? await pages(
+          async (cursor) => {
+            const result = await connection.client.listPrompts(
+              cursor ? { cursor } : undefined,
+              options,
+            );
+            return { items: result.prompts, nextCursor: result.nextCursor };
+          },
+          (item) => item.name,
+        )
+      : [];
+    this.assertCurrent(id, connection);
+    if (resources.length + resourceTemplates.length + prompts.length > 1000)
+      throw new RockyError(
+        "mcp_catalog_limit",
+        "MCP data catalog exceeds its combined entry limit",
+        422,
+      );
+    const result = { resources, resourceTemplates, prompts };
+    connection.dataCatalog = result;
+    return structuredClone(result);
   }
   /** Validate before preparing any operation; this method never dispatches a tool. */
   prepareTool(id: string, revision: number, name: string, args: unknown) {
