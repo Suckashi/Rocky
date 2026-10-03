@@ -18,6 +18,7 @@ import { ModelRegistry } from "./model-registry.js";
 import { ModelBudgetLedger } from "./model-budget.js";
 import { intentHash } from "./intent.js";
 import { OperationLedger } from "./operation-ledger.js";
+import { authorizeOperation } from "./policy.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -273,25 +274,52 @@ export class WorkService {
                 "Prior operation outcome requires reconciliation",
                 409,
               );
-            if (name === "write_sample") {
-              const approval = current.approval;
-              if (
-                approval?.status !== "approved" ||
-                approval.operationId !== operation.id ||
-                approval.intentFingerprint !==
-                  this.fingerprint(current, name, args)
-              )
-                throw new RockyError(
-                  "approval_required",
-                  "Exact server approval required",
-                  403,
-                );
-            } else if (name !== "inspect_sample")
-              throw new RockyError(
-                "tool_denied",
-                "Tool is not in fixture scope",
-                403,
-              );
+            const owner = {
+              workId: current.id,
+              runId: current.runId,
+              executionSessionId: current.executionSessionId,
+            };
+            const targetHash = intentHash({
+              fixture: current.runId,
+              transport: current.transport,
+            });
+            authorizeOperation({
+              owner: {
+                workId: work.id,
+                runId: work.runId,
+                executionSessionId: work.executionSessionId,
+              },
+              resolvedOwner: owner,
+              mode: current.runMode,
+              effect:
+                name === "inspect_sample"
+                  ? "known_read"
+                  : name === "write_sample"
+                    ? "critical"
+                    : "denied",
+              configurationAllowed: true,
+              resourceAllowed: true,
+              revoked: false,
+              preparedTargetHash: intentHash({
+                fixture: work.runId,
+                transport: work.transport,
+              }),
+              currentTargetHash: targetHash,
+              policyRevision: 1,
+              preparedPolicyRevision: 1,
+              operationId: operation.id,
+              intentFingerprint: this.fingerprint(current, name, args),
+              synthetic: true,
+              allowLocalNew: false,
+              targetExists: true,
+              approval: current.approval
+                ? {
+                    status: current.approval.status,
+                    operationId: current.approval.operationId,
+                    intentFingerprint: current.approval.intentFingerprint,
+                  }
+                : null,
+            });
             operation = this.operations.transition(
               current,
               operation,
