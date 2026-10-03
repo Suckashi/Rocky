@@ -676,6 +676,11 @@ export class WorkService {
         call: async (name, args, callId) => {
           abort.signal.throwIfAborted();
           const current = this.store.get(work.id);
+          if (name === "rocky_skill_backend") {
+            const result = this.skills.backend(work, args);
+            this.flushOutbox();
+            return JSON.stringify(result);
+          }
           if (name === "memory_write")
             return this.callMemoryWrite(current, args, callId, abort.signal);
           if (name === "memory_search") {

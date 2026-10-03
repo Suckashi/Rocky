@@ -271,6 +271,93 @@ export class SkillRegistry {
       .get(id) as { data: string } | undefined;
     return row ? (JSON.parse(row.data) as SkillSelection) : null;
   }
+  backend(work: Work, input: unknown) {
+    const command = z
+      .object({
+        operation: z.enum(["sources", "list", "read"]),
+        path: z.string().max(1024).optional(),
+        metadata: z.boolean().default(false),
+      })
+      .strict()
+      .parse(input);
+    const current = this.store.get(work.id);
+    if (
+      current.runId !== work.runId ||
+      current.executionSessionId !== work.executionSessionId ||
+      current.status !== "running"
+    )
+      throw new RockyError(
+        "skill_scope",
+        "Skill backend requires active execution",
+        403,
+      );
+    const catalog = this.catalog(work.id);
+    if (command.operation === "sources")
+      return (catalog?.items ?? []).map(
+        (item) => `/skills/${item.id}/${item.name}/`,
+      );
+    const path = command.path ?? "";
+    if (
+      !path.startsWith("/") ||
+      path.includes("\\") ||
+      path.includes("\0") ||
+      path.split("/").some((part) => part === "." || part === "..")
+    )
+      throw new RockyError("skill_path", "Invalid skill path", 403);
+    // CompositeBackend strips its /skills/ mount prefix.
+    const [, id, name, ...parts] = path.split("/");
+    if (!id || !name)
+      throw new RockyError("skill_path", "Skill identity path required", 403);
+    const result = this.readForWork(work, id);
+    if (name !== result.revision.metadata.name)
+      throw new RockyError(
+        "skill_path",
+        "Skill path does not match catalog",
+        403,
+      );
+    const relative = parts.join("/");
+    if (command.operation === "list") {
+      const prefix =
+        relative && !relative.endsWith("/") ? relative + "/" : relative;
+      const entries = new Map<
+        string,
+        { path: string; is_dir: boolean; size?: number }
+      >();
+      for (const file of result.package.files) {
+        if (!file.path.startsWith(prefix)) continue;
+        const rest = file.path.slice(prefix.length),
+          first = rest.split("/")[0]!;
+        const is_dir = rest.includes("/");
+        const entryPath = `/${id}/${name}/${prefix}${first}${is_dir ? "/" : ""}`;
+        entries.set(entryPath, {
+          path: entryPath,
+          is_dir,
+          ...(!is_dir ? { size: file.bytes } : {}),
+        });
+      }
+      return [...entries.values()];
+    }
+    const file = result.package.files.find((file) => file.path === relative);
+    if (!file) throw new RockyError("skill_file", "Skill file not found", 404);
+    const text = Buffer.from(file.contentBase64, "base64").toString("utf8");
+    if (this.store.publicEvidence(text) !== text)
+      throw new RockyError(
+        "skill_content",
+        "Protected skill content cannot be delivered",
+        403,
+      );
+    if (!command.metadata)
+      this.store.event(current, "rocky.skill.loaded", {
+        skillId: id,
+        revision: result.revision.revision,
+        contentHash: result.revision.contentHash,
+        path: relative,
+      });
+    return {
+      contentBase64: file.contentBase64,
+      createdAt: result.revision.createdAt,
+    };
+  }
   select(id: string, input: unknown) {
     z.uuid().parse(id);
     const command = selectionSchema.parse(input);

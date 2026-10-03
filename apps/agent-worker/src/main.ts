@@ -6,6 +6,7 @@ import type { BaseMessage } from "@langchain/core/messages";
 import type { ChatResult } from "@langchain/core/outputs";
 import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
 import { createRockyAgent } from "../../../packages/agent-runtime/src/factory.js";
+import { z } from "zod";
 import { runtimeToolReplySchema } from "../../../packages/contracts/src/mcp-result.js";
 import type { RuntimeHooks } from "../../../packages/agent-runtime/src/factory.js";
 import { WorkerModel } from "../../../packages/agent-runtime/src/worker-model.js";
@@ -333,7 +334,7 @@ async function invoke(requestId: string, decision?: "approve" | "reject") {
     running = false;
   }
 }
-process.on("message", (wire) => {
+process.on("message", async (wire) => {
   try {
     if (typeof wire !== "string") throw Error("Invalid IPC wire");
     const message = parseIpcMessage(wire);
@@ -445,6 +446,22 @@ process.on("message", (wire) => {
           maxInputTokens,
           imageInputs,
         );
+      const skillSources =
+        message.payload.mode === "configured"
+          ? z
+              .array(z.string())
+              .parse(
+                JSON.parse(
+                  String(
+                    await hooks.call(
+                      "rocky_skill_backend",
+                      { operation: "sources" },
+                      "skill-sources",
+                    ),
+                  ),
+                ),
+              )
+          : [];
       agent = createRockyAgent(
         saver,
         hooks,
@@ -455,6 +472,7 @@ process.on("message", (wire) => {
             }
           : undefined,
         message.payload.testFixtureTools === true,
+        skillSources,
       );
       void invoke(message.requestId);
     } else if (message.payload.kind === "resume")

@@ -8,7 +8,10 @@ import type {
 /** The daemon supplies pinned files; this adapter owns no cache or authority. */
 export type SkillFilePort = {
   list(path: string): Promise<FileInfo[]>;
-  read(path: string): Promise<{ contentBase64: string; createdAt: string }>;
+  read(
+    path: string,
+    metadata?: boolean,
+  ): Promise<{ contentBase64: string; createdAt: string }>;
 };
 export class SkillBackend implements BackendProtocolV2 {
   constructor(private port: SkillFilePort) {}
@@ -68,7 +71,7 @@ export class SkillBackend implements BackendProtocolV2 {
     if (paths.length > 128) throw Error("Skill download batch exceeds limit");
     const result: FileDownloadResponse[] = [];
     for (const path of paths) {
-      const raw = await this.port.read(path);
+      const raw = await this.port.read(path, true);
       result.push({
         path,
         content: Buffer.from(raw.contentBase64, "base64"),
