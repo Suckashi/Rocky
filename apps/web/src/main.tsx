@@ -6,6 +6,7 @@ import { API_PREFIX } from "../../../packages/contracts/src/index.js";
 import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
+import { MemorySettings } from "./memory-settings.js";
 import { WriteProposal } from "./write-proposal.js";
 import { WorkArtifacts } from "./work-artifacts.js";
 import type { Artifact } from "../../../packages/contracts/src/artifacts.js";
@@ -286,6 +287,11 @@ function App() {
             }}
           />
           <McpSettings locale={locale} request={request} />
+          <MemorySettings
+            locale={locale}
+            request={request}
+            works={presenceWorks}
+          />
         </>
       }
     >

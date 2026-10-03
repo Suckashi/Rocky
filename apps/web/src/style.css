@@ -518,6 +518,21 @@ li {
 .model-settings {
   font-size: 13px;
 }
+.memory-settings textarea {
+  min-height: 120px;
+  width: 100%;
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--canvas);
+  color: var(--ink);
+  font: inherit;
+  resize: vertical;
+}
+.memory-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .mcp-settings form {
   display: grid;
   gap: 10px;
