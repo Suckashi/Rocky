@@ -2009,6 +2009,7 @@ export class WorkService {
         "Approval fingerprint or revision changed",
         409,
       );
+    if (decision.decision === "approve") this.skills.assertToolsAllowed(work);
     if (work.modelSelection)
       this.models.assertRunnable(
         work.modelSelection.connectionId,

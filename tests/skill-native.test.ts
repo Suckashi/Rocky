@@ -13,13 +13,15 @@ test.each([
   "quarantined",
   "same-name",
   "revoke-loaded",
+  "revoke-pending",
 ])(
   "native progressive skill read: %s",
   async (mode) => {
     const root = await mkdtemp(join(tmpdir(), "rocky-skill-native-"));
     const service = new WorkService(root),
       id = randomUUID(),
-      secondId = randomUUID();
+      secondId = randomUUID(),
+      memoryId = randomUUID();
     let observed = "",
       initial = "";
     const provider = await startAgentProvider({
@@ -27,6 +29,28 @@ test.each([
         const result = messages.find((m) => m.type === "tool");
         if (result) {
           observed = JSON.stringify(result);
+          if (
+            mode === "revoke-pending" &&
+            messages.filter((m) => m.type === "tool").length === 1
+          )
+            return new AIMessage({
+              content: "",
+              tool_calls: [
+                {
+                  id: "pending-memory",
+                  name: "memory_write",
+                  args: {
+                    id: memoryId,
+                    expectedRevision: 0,
+                    scope: "user",
+                    content: "MUST_NOT_BE_WRITTEN",
+                    private: true,
+                    sources: [],
+                  },
+                  type: "tool_call",
+                },
+              ],
+            });
           if (mode === "revoke-loaded") {
             service.skills.select(id, {
               requestId: randomUUID(),
@@ -155,6 +179,48 @@ test.each([
         mode: "configured",
         modelSelection: { connectionId, revision: 1 },
       });
+      if (mode === "revoke-pending") {
+        await expect
+          .poll(() => service.store.get(work.id).status, { timeout: 15000 })
+          .toBe("waiting_approval");
+        const pending = service.store.get(work.id);
+        const approval = pending.approval!;
+        service.skills.select(id, {
+          requestId: randomUUID(),
+          expectedRevision: 1,
+          skillRevision: 1,
+          contentHash: revision.contentHash,
+          action: "quarantine",
+        });
+        const decision = {
+          requestId: randomUUID(),
+          expectedRevision: approval.revision,
+          intentFingerprint: approval.intentFingerprint,
+          decision: "approve",
+        };
+        expect(() => service.decide(work.id, decision)).toThrow("quarantined");
+        expect(service.store.get(work.id)).toEqual(pending);
+        expect(
+          service.store.db
+            .prepare("SELECT * FROM decisions WHERE request_id=?")
+            .get(decision.requestId),
+        ).toBeUndefined();
+        expect(() => service.memories.get(memoryId)).toThrow("not found");
+        service.decide(work.id, {
+          ...decision,
+          requestId: randomUUID(),
+          decision: "reject",
+        });
+        await expect
+          .poll(() => service.store.get(work.id).status, { timeout: 15000 })
+          .toBe("completed");
+        expect(service.store.get(work.id).approval?.status).toBe("rejected");
+        expect(service.operations.list(work.id)[0]?.outcome).toBe(
+          "not_executed",
+        );
+        expect(() => service.memories.get(memoryId)).toThrow("not found");
+        return;
+      }
       await expect
         .poll(() => service.store.get(work.id).status, { timeout: 15000 })
         .toBe(
