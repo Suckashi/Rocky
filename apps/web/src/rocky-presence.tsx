@@ -29,7 +29,9 @@ export function RockyPresence({
   locale,
   completion,
   lastConfirmedAt,
+  onOpenWork,
 }: {
+  onOpenWork: (id: string) => void;
   completion?: CompletionFeedback;
   lastConfirmedAt?: string;
   works: PresenceInput["works"];
@@ -148,12 +150,53 @@ export function RockyPresence({
         </p>
       )}
       {Object.values(count).some(Boolean) && (
-        <p>
-          {zh ? "背景工作" : "Background work"}: {zh ? "執行" : "Running"}{" "}
-          {count.running} · {zh ? "排隊" : "Queued"} {count.queued} ·{" "}
-          {zh ? "待核准" : "Approval"} {count.approval} ·{" "}
-          {zh ? "需處理" : "Attention"} {count.attention}
-        </p>
+        <details className="presence-background">
+          <summary>
+            {zh ? "背景工作" : "Background work"}: {zh ? "執行" : "Running"}{" "}
+            {count.running} · {zh ? "排隊" : "Queued"} {count.queued} ·{" "}
+            {zh ? "待核准" : "Approval"} {count.approval} ·{" "}
+            {zh ? "需處理" : "Attention"} {count.attention}
+          </summary>
+          <ul>
+            {works
+              .filter(
+                (work) =>
+                  work.runMode === "normal" &&
+                  work.kind === "background" &&
+                  [
+                    "running",
+                    "queued",
+                    "waiting_approval",
+                    "failed",
+                    "interrupted",
+                    "blocked",
+                  ].includes(work.status),
+              )
+              .map((work) => (
+                <li key={work.id}>
+                  <button
+                    onClick={(event) => {
+                      event.currentTarget
+                        .closest("details")
+                        ?.removeAttribute("open");
+                      onOpenWork(work.id);
+                    }}
+                  >
+                    <span>{work.text}</span>
+                    <small>
+                      {
+                        (labels[
+                          work.status === "waiting_approval"
+                            ? "awaiting_approval"
+                            : work.status
+                        ] ?? labels.idle)![zh ? 0 : 1]
+                      }
+                    </small>
+                  </button>
+                </li>
+              ))}
+          </ul>
+        </details>
       )}
       <button
         className="presence-motion"

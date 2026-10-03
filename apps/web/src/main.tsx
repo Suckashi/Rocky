@@ -127,6 +127,20 @@ function App() {
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const [resultRequest, setResultRequest] = useState<{ artifact: Artifact }>();
+  const [focusedWork, setFocusedWork] = useState<{ id: string }>();
+  const focusedRecord = presenceWorks.find(
+    (work) => work.id === focusedWork?.id && work.runMode === "normal",
+  );
+  const displayWorks =
+    focusedRecord && !works.some((work) => work.id === focusedRecord.id)
+      ? [...works, focusedRecord]
+      : works;
+  useEffect(() => {
+    if (!focusedWork) return;
+    const element = document.getElementById("work-" + focusedWork.id);
+    element?.focus({ preventScroll: true });
+    element?.scrollIntoView({ block: "start" });
+  }, [focusedWork]);
   const [maxCalls, setMaxCalls] = useState("48");
   const modelTools = useRef<HTMLDetailsElement>(null);
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace>(),
@@ -280,6 +294,7 @@ function App() {
           <section className="conversation">
             <RockyPresence
               works={presenceWorks}
+              onOpenWork={(id) => setFocusedWork({ id })}
               completion={completion}
               lastConfirmedAt={lastConfirmedAt}
               events={events}
@@ -327,9 +342,15 @@ function App() {
                   {historyError}
                 </p>
               )}
-              {!works.length && <p className="empty">{t.empty}</p>}
-              {works.map((w) => (
-                <article className="work" key={w.id}>
+              {!displayWorks.length && <p className="empty">{t.empty}</p>}
+              {displayWorks.map((w) => (
+                <article
+                  className="work"
+                  key={w.id}
+                  id={"work-" + w.id}
+                  tabIndex={-1}
+                  aria-label={w.text}
+                >
                   <div className="work-heading">
                     <strong>{w.text}</strong>
                     <span className={"status " + w.status}>
