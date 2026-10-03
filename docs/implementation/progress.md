@@ -204,3 +204,11 @@ Implementation `25d006ae666c6ec44eb54ad079a6b12c91b59951` connects WorkService t
 87 tests across 24 files passed before the API addition; 15 focused tests passed afterward, followed by a final six-test reconciliation run exercising session denial, client-outcome rejection and real HTTP routes. Both MCP transports recovered deliberately discarded replies after restart without rewriting receipts. Three network tests and four full-Agent fixture evaluations passed. Typecheck, server build, lint, formatting and source guards passed. See [MCP reconciliation evidence](evidence/2026-10-03/policy/mcp-reconciliation.json).
 
 This proves the synthetic adapter, not arbitrary external MCP status semantics. Owner reconciliation UI and real workspace adapters remain pending. T-008 and Goal remain active; Ubuntu/strict browser egress remain unverified and no global AT status changed. No live model or remote repository action.
+
+## T-008 continuation: owner reconciliation UI
+
+Implementation `1a3c131891e4896eb049d9b94d1465e90f838797` adds collapsed Operations and reconciliation to Work details. It loads schema-validated operation summaries, refreshes on confirmed operation events, queries existing receipts and distinguishes known success from still-unknown outcomes. Query errors retain the same request ID for retry. The copy states that querying does not resend the tool or automatically restart Work.
+
+Eight functional browser tests passed, including real UI to daemon to MCP receipt queries for recorded and absent receipts, reload persistence and 320px screenshots. The test harness seeds a simulated crash boundary before starting the isolated daemon; no production fault endpoint exists. Receipt files remain unchanged across queries. Typecheck, production build, lint, formatting and source guards passed. See [reconciliation UI evidence](evidence/2026-10-03/policy/reconciliation-ui.json).
+
+Only the synthetic write adapter is supported. Real workspace integration and external adapter semantics remain pending; T-008 and Goal stay active. Strict browser egress was excluded, Ubuntu remains unverified, and global AT statuses are unchanged. No live/remote action.
