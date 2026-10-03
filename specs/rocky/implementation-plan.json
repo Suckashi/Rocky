@@ -1291,6 +1291,28 @@
             "T-007/T-008 remain open; T-009 starts only its independent channel layer and is not complete",
             "Windows only; Ubuntu/browser egress gates unchanged; no live or remote actions"
           ]
+        },
+        {
+          "commit": "7f973e4422d91ac355a2bdd011f42f977bc681cf",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/worker/job-lifecycle.json",
+          "testFiles": [
+            "tests/worker-channel.test.ts",
+            "tests/operation-ledger.test.ts"
+          ],
+          "limitations": [
+            "Domain v10 tracks daemon-owned child process state; native Deep Agents execution is still daemon-resident",
+            "A clean child exit is process evidence, not proof that a Work completed",
+            "Recovery marks stale process records interrupted but cannot prove a detached orphan process has stopped; descendant cleanup evidence remains pending",
+            "Abort remains a local wait boundary; unknown external effects stay governed by operation ledger",
+            "Ubuntu and strict browser egress remain unverified; no live model or remote repository action",
+            "T-009 remains in_progress; no global acceptance promotion"
+          ]
         }
       ],
       "blockedReason": null,

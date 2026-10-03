@@ -221,3 +221,11 @@ Implementation `48a6efda0f2c0b5c9ff1c675c50715cb6d09cfe0` adds a daemon-owned ch
 Five real child lifecycle tests plus two contract tests passed on Windows. Capability forgery never reaches the handler; roundtrip returns the correlated result; flood and stubborn-child cases clean up. Typecheck, server build, lint, formatting and source guards passed. See [channel evidence](evidence/2026-10-03/worker/channel.json).
 
 T-009 is in_progress for this independent channel layer only: upstream T-007/T-008 remain open, and Deep Agents still runs in the daemon. Agent IPC integration, durable daemon-owned jobs and descendant process-tree tests remain required. This is not an OS sandbox or evidence that cancelled external effects stopped. No global acceptance promotion, live or remote action.
+
+## T-009 continuation: durable worker process state
+
+Implementation `7f973e4422d91ac355a2bdd011f42f977bc681cf` adds Rocky domain v10 worker jobs. The daemon atomically records starting, running and terminal child states, with one active worker per run and public events. The real child channel records process exit, protocol failure and explicit cancellation separately. On daemon restart, stale starting/running rows become interrupted exactly once; Work restart recovery still blocks the prior active Work. A clean process exit is not treated as Work completion.
+
+All 93 tests in 25 files passed on Windows. The dedicated real-child tests cover normal exit, capability violations, queue overflow, shutdown and restart recovery. Typecheck, server build, lint, formatting and source guards passed. See [worker job evidence](evidence/2026-10-03/worker/job-lifecycle.json).
+
+T-009 remains in_progress: the Deep Agents runtime still runs in the daemon, and process-tree cleanup and durable job admission are not complete. Recovery cannot prove an orphaned detached process stopped. Ubuntu and strict browser egress gates remain open; no live model, remote action or global AT promotion.
