@@ -79,11 +79,12 @@ export function createApp(service: WorkService) {
         403,
       );
     // Document text still has a 64KiB decoded-byte cap; allow bounded JSON escaping.
-    const bodyLimit = /^\/api\/v1\/documents(?:\/[a-f0-9-]{36})?$/i.test(
-      c.req.path,
-    )
-      ? 524288
-      : 65536;
+    const bodyLimit =
+      c.req.path === "/api/v1/skills/import"
+        ? 6291456
+        : /^\/api\/v1\/documents(?:\/[a-f0-9-]{36})?$/i.test(c.req.path)
+          ? 524288
+          : 65536;
     if (Number(c.req.header("content-length") ?? 0) > bodyLimit)
       return c.json({ code: "too_large", message: "Request too large" }, 413);
     // Enforce bytes actually received, including chunked bodies without Content-Length.
@@ -273,6 +274,15 @@ export function createApp(service: WorkService) {
   });
   app.get("/api/v1/artifacts", (c) =>
     c.json({ artifacts: service.artifacts.list() }),
+  );
+  app.get("/api/v1/skills", (c) => c.json({ skills: service.skills.list() }));
+  app.post("/api/v1/skills/import", async (c) =>
+    c.json(service.skills.import(await readJson(c))),
+  );
+  app.get("/api/v1/skills/:id/revisions/:revision", (c) =>
+    c.json(
+      service.skills.get(c.req.param("id"), Number(c.req.param("revision"))),
+    ),
   );
   app.post("/api/v1/memories/search", async (c) =>
     c.json(service.memories.search(await c.req.json())),
