@@ -102,6 +102,11 @@ function App() {
     [error, setError] = useState(""),
     [connected, setConnected] = useState(false),
     [busy, setBusy] = useState(false);
+  const [maxCalls, setMaxCalls] = useState("48");
+  const validBudget =
+    /^\d+$/.test(maxCalls) &&
+    Number(maxCalls) >= 1 &&
+    Number(maxCalls) <= 10000;
   const t = labels[locale];
   const [selectedModel, setSelectedModel] = useState<{
     connectionId: string;
@@ -148,7 +153,8 @@ function App() {
   }, []);
   async function send(e: FormEvent) {
     e.preventDefault();
-    if (!text.trim() || (!enabled && !selectedModel) || busy) return;
+    if (!text.trim() || (!enabled && !selectedModel) || busy || !validBudget)
+      return;
     setError("");
     setBusy(true);
     try {
@@ -164,12 +170,17 @@ function App() {
           ? {
               mode: "configured",
               transport,
+              modelBudget: { maxCalls: Number(maxCalls) },
               modelSelection: {
                 connectionId: selectedModel.connectionId,
                 revision: selectedModel.revision,
               },
             }
-          : { mode: "fixture", transport },
+          : {
+              mode: "fixture",
+              transport,
+              modelBudget: { maxCalls: Number(maxCalls) },
+            },
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -305,6 +316,12 @@ function App() {
                 {w.error && <p role="alert">{w.error}</p>}
                 <details>
                   <summary>{t.detail}</summary>
+                  <p>
+                    {locale === "zh"
+                      ? "此工作模型呼叫上限"
+                      : "Model call limit for this work"}
+                    : {w.modelBudget?.maxCalls ?? 48}
+                  </p>
                   <ol>
                     {events
                       .filter(
@@ -370,7 +387,32 @@ function App() {
               {error}
             </p>
           )}
-          <form onSubmit={send}>
+          <details className="work-budget">
+            <summary>
+              {locale === "zh" ? "工作預算" : "Work budget"} · {maxCalls || "—"}
+            </summary>
+            <label htmlFor="max-model-calls">
+              {locale === "zh" ? "模型呼叫上限" : "Maximum model calls"}
+            </label>{" "}
+            <input
+              id="max-model-calls"
+              form="compose"
+              type="number"
+              min="1"
+              max="10000"
+              step="1"
+              required
+              value={maxCalls}
+              onChange={(event) => setMaxCalls(event.target.value)}
+              aria-describedby="budget-help"
+            />
+            <p id="budget-help">
+              {locale === "zh"
+                ? "每個新工作與其子代理共用此上限。送出後固定；這不是金額或 token 上限。"
+                : "Each new work shares this limit with its subagents. Fixed after sending; this is not a money or token limit."}
+            </p>
+          </details>
+          <form id="compose" onSubmit={send}>
             <textarea
               aria-label={t.placeholder}
               placeholder={t.placeholder}
@@ -384,6 +426,7 @@ function App() {
                 (!enabled && !selectedModel) ||
                 !text.trim() ||
                 busy ||
+                !validBudget ||
                 !isReady ||
                 !connected
               }

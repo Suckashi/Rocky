@@ -49,7 +49,8 @@ for (const decision of ["approve", "reject"] as const)
         JSON.stringify({ transport: "http", decision }),
       );
       expect(result).toHaveProperty("output");
-      if (!result.output || !result.metadata) throw Error("No evaluation output");
+      if (!result.output || !result.metadata)
+        throw Error("No evaluation output");
       expect(JSON.parse(result.output)).toMatchObject({
         status: "completed",
         childCompleted: true,
