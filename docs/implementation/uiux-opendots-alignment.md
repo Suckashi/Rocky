@@ -183,3 +183,7 @@ Skill binary comparison follow-up (`fcf861d`): existing details/typography token
 ### Work Skill revocation notice — 2026-10-04
 
 `skill-revocation.tsx`, mounted within each main transcript Work, reuses the existing approval card and collapsed evidence language. This Rocky-specific permission notice explains catalog quarantine, conditional loaded-skill restrictions and that prior effects are not undone. No additional upstream code or assets copied; reference remains c2569bb6a13a22e565cf3eb791c62267d06babb1. Shared persisted projection is the only data source. [Evidence and four-width screenshots](evidence/2026-10-04/skill-revoke-ui.json), [320px after](evidence/2026-10-04/skill-revoke-ui/after-320.png). After-only Chinese/light fixture evidence; matched comparison and full accessibility matrix remain pending.
+
+### Local Skill discovery — 2026-10-04
+
+`skill-discovery.tsx` is mounted above folder import in the existing Skills dialog. It reuses neutral model-card forms and details disclosure; source hash stays collapsed, import and truth-based untrusted state remain explicit. No new CSS or upstream assets/code copied; fixed OpenDots reference unchanged. [Evidence and four-width after screenshots](evidence/2026-10-04/skill-discovery-ui.json), [320px after](evidence/2026-10-04/skill-discovery-ui/after-320.png). This Rocky-specific source workflow has no direct upstream equivalent. After-only Chinese/light evidence does not complete matched reference comparison or the full accessibility matrix.
