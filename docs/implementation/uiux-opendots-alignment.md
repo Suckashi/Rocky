@@ -125,3 +125,7 @@ Compared fixed upstream ResultPane.tsx and style.css effective lines3300/3432/34
 ## Markdown source editor (2a1d9208a08a6c6f1a9efc8af1ad7fac4efe7d03)
 
 Compared upstream PageDocument.tsx sourceMode usage and editor.css document-source/title rules at fixedSHA. document-editor.tsx/style.css adapt420px source min-height,18px padding,13px/1.8 monospace and40px/32px title into the existing resultpane with neutral tokens/visiblefocus. ExplicitCAS/save/compare and tab-local draft retention are Rocky adaptations; upstream autosave, secondary assistant and rich-editor persistence not imported. [Four-width screenshots and tests](documents.md). This is source-mode adaptation, not complete PageDocument/rich-editor visual parity; matched reference/before/after and document dark-English matrix remain outstanding.
+
+## Restricted HTML results (cf53d927ce311aba5c8c4f83dfff8d0468f3d768)
+
+Existing ResultPane geometry, toolbar and neutral semantic tokens host the opaque iframe in artifacts.tsx/style.css. No additional upstream code/assets copied; source remains c2569bb6a13a22e565cf3eb791c62267d06babb1. Rocky adds an explicit restriction notice, source toggle and immutable download; generated content keeps a white canvas in both themes. [Four-width after screenshots and tests](html-preview.md). Interactive scripts, navigation, embeds and external resources are excluded to preserve local permission boundaries. No new matched upstream comparison or full fidelity claim.
