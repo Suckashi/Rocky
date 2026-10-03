@@ -277,6 +277,19 @@ export class SkillRegistry {
       .get(id) as { data: string } | undefined;
     return row ? (JSON.parse(row.data) as SkillSelection) : null;
   }
+  assertToolsAllowed(work: Work) {
+    const revoked = this.store.db
+      .prepare(
+        "SELECT 1 FROM events e JOIN skill_quarantine q ON q.id=json_extract(e.data,'$.payload.data.skillId') AND q.hash=json_extract(e.data,'$.payload.data.contentHash') WHERE json_extract(e.data,'$.runId')=? AND json_extract(e.data,'$.payload.name')='rocky.skill.loaded' LIMIT 1",
+      )
+      .get(work.runId);
+    if (revoked)
+      throw new RockyError(
+        "skill_revoked",
+        "A skill loaded by this Work was quarantined; stop and start a new Work with a reviewed catalog",
+        403,
+      );
+  }
   backend(work: Work, input: unknown) {
     const command = z
       .object({
@@ -449,10 +462,26 @@ export class SkillRegistry {
             409,
           );
       }
-      if (command.action === "quarantine")
+      if (command.action === "quarantine") {
         this.store.db
           .prepare("INSERT OR IGNORE INTO skill_quarantine VALUES(?,?)")
           .run(id, command.contentHash);
+        for (const work of this.store.list()) {
+          if (!["queued", "running", "waiting_approval"].includes(work.status))
+            continue;
+          const affected = this.catalog(work.id)?.items.some(
+            (item) =>
+              item.id === id && item.contentHash === command.contentHash,
+          );
+          if (affected)
+            this.store.event(work, "rocky.skill.revoked", {
+              skillId: id,
+              contentHash: command.contentHash,
+              skillRevision: command.skillRevision,
+              reason: "owner_quarantine",
+            });
+        }
+      }
       const result: SkillSelection = {
         id,
         revision: command.expectedRevision + 1,

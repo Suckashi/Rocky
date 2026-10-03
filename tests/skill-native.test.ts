@@ -7,7 +7,13 @@ import { AIMessage } from "@langchain/core/messages";
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 
-test.each(["published", "untrusted", "quarantined", "same-name"])(
+test.each([
+  "published",
+  "untrusted",
+  "quarantined",
+  "same-name",
+  "revoke-loaded",
+])(
   "native progressive skill read: %s",
   async (mode) => {
     const root = await mkdtemp(join(tmpdir(), "rocky-skill-native-"));
@@ -21,6 +27,28 @@ test.each(["published", "untrusted", "quarantined", "same-name"])(
         const result = messages.find((m) => m.type === "tool");
         if (result) {
           observed = JSON.stringify(result);
+          if (mode === "revoke-loaded") {
+            service.skills.select(id, {
+              requestId: randomUUID(),
+              expectedRevision: 1,
+              skillRevision: 1,
+              contentHash: service.skills.selection(id)!.contentHash,
+              action: "quarantine",
+            });
+            return new AIMessage({
+              content: "",
+              tool_calls: [
+                {
+                  id: "after-revoke",
+                  name: "write_todos",
+                  args: {
+                    todos: [{ content: "MUST_NOT_EXECUTE", status: "pending" }],
+                  },
+                  type: "tool_call",
+                },
+              ],
+            });
+          }
           return new AIMessage("Skill result inspected");
         }
         initial = JSON.stringify(messages);
@@ -129,7 +157,31 @@ test.each(["published", "untrusted", "quarantined", "same-name"])(
       });
       await expect
         .poll(() => service.store.get(work.id).status, { timeout: 15000 })
-        .toBe(mode === "quarantined" ? "failed" : "completed");
+        .toBe(
+          ["quarantined", "revoke-loaded"].includes(mode)
+            ? "failed"
+            : "completed",
+        );
+      if (mode === "revoke-loaded") {
+        const events = service.store.events("0", work.id);
+        expect(
+          events.some(
+            (e) =>
+              e.payload.kind === "domain" &&
+              e.payload.name === "rocky.skill.revoked",
+          ),
+        ).toBe(true);
+        expect(
+          events.some(
+            (e) =>
+              e.payload.kind === "domain" &&
+              e.payload.data.callId === "after-revoke",
+          ),
+        ).toBe(false);
+        expect(() => service.skills.assertToolsAllowed(work)).toThrow(
+          "quarantined",
+        );
+      }
       initial = JSON.stringify(provider.requests[0]);
       expect(initial).not.toContain("PRIVATE_SKILL_BODY_MARKER");
       if (mode === "same-name") {
@@ -146,9 +198,9 @@ test.each(["published", "untrusted", "quarantined", "same-name"])(
             e.payload.name === "rocky.skill.loaded",
         );
       expect(loads).toHaveLength(
-        mode === "published" || mode === "same-name" ? 1 : 0,
+        ["published", "same-name", "revoke-loaded"].includes(mode) ? 1 : 0,
       );
-      if (mode === "published" || mode === "same-name") {
+      if (["published", "same-name", "revoke-loaded"].includes(mode)) {
         expect(initial).toContain("A discoverable fixture skill");
         expect(initial).toContain(`/skills/${id}/example-${id}/SKILL.md`);
         expect(observed).toContain("PRIVATE_SKILL_BODY_MARKER");

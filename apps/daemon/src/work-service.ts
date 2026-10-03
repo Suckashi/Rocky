@@ -676,6 +676,8 @@ export class WorkService {
         call: async (name, args, callId) => {
           abort.signal.throwIfAborted();
           const current = this.store.get(work.id);
+          this.skills.assertToolsAllowed(work);
+          if (name === "rocky_skill_check") return "ok";
           if (name === "rocky_skill_backend") {
             const result = this.skills.backend(work, args);
             this.flushOutbox();

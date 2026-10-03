@@ -116,6 +116,7 @@ export function createRockyAgent(
           throw Error("Rocky policy denied tool: " + name);
         const callId = id ?? "";
         if (!callId) throw Error("Tool call identity required");
+        if (models) await hooks.call("rocky_skill_check", {}, callId);
         const skillRead =
           !child &&
           ["ls", "read_file"].includes(name) &&
