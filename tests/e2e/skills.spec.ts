@@ -55,6 +55,21 @@ test("owner reviews all package files and selects an older immutable revision", 
   const card = ui.locator("article").filter({ hasText: name });
   await card.getByRole("button", { name: "審查此版本" }).click();
   await expect(card.locator("pre")).toContainText("BODY_REVISION_2");
+  await card.getByRole("button", { name: "比較上一版本" }).click();
+  const diff = card.getByLabel("技能檔案差異", { exact: true });
+  await expect(diff).toContainText("−BODY_REVISION_1");
+  await expect(diff).toContainText("+BODY_REVISION_2");
+  await page.setViewportSize({ width: 320, height: 844 });
+  await diff.scrollIntoViewIfNeeded();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "test-results/skill-diff-320.png",
+    fullPage: true,
+  });
   await card.getByLabel("檢視套件檔案").selectOption("scripts/example.js");
   await expect(card.locator("pre")).toContainText("SKILL_EXECUTED");
   expect(
@@ -63,7 +78,7 @@ test("owner reviews all package files and selects an older immutable revision", 
   await card.getByLabel("檢視套件檔案").selectOption("assets/binary.dat");
   await expect(card).toContainText("二進位檔案");
   await expect(card.locator("pre")).toHaveCount(0);
-  await card.getByRole("button", { name: "上一版本" }).click();
+  await card.getByRole("button", { name: "上一版本", exact: true }).click();
   await expect(card.locator("pre")).toContainText("BODY_REVISION_1");
   await card.getByLabel("我已檢視此版本內容及來源").check();
   await card.getByRole("button", { name: "信任並啟用此版本" }).click();

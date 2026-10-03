@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { parseDocument } from "yaml";
+import { replacementDiff } from "./write-diff.js";
 import { Store } from "./store.js";
 import { WorkspaceRegistry } from "./workspaces.js";
 import { validateSkillPackage } from "./skill-package.js";
@@ -161,6 +162,69 @@ export class SkillRegistry {
         .prepare("SELECT data FROM skill_heads ORDER BY id LIMIT 200")
         .all() as { data: string }[]
     ).map((row) => JSON.parse(row.data) as SkillRevision);
+  }
+  diff(id: string, from: number, to: number, path?: string) {
+    const before = this.get(id, from),
+      after = this.get(id, to);
+    const old = new Map(before.package.files.map((file) => [file.path, file]));
+    const next = new Map(after.package.files.map((file) => [file.path, file]));
+    const files = [...new Set([...old.keys(), ...next.keys()])]
+      .sort()
+      .flatMap((path) => {
+        const a = old.get(path),
+          b = next.get(path);
+        return a?.sha256 === b?.sha256
+          ? []
+          : [
+              {
+                path,
+                status: !a ? "added" : !b ? "removed" : "modified",
+                previousHash: a?.sha256 ?? null,
+                nextHash: b?.sha256 ?? null,
+                previousBytes: a?.bytes ?? 0,
+                nextBytes: b?.bytes ?? 0,
+              },
+            ];
+      });
+    let preview: ReturnType<typeof replacementDiff> | null = null;
+    let binary = false;
+    if (path !== undefined) {
+      z.string().min(1).max(512).parse(path);
+      if (!old.has(path) && !next.has(path))
+        throw new RockyError(
+          "skill_file",
+          "File not present in either revision",
+          404,
+        );
+      const decode = (file: Snapshot["files"][number] | undefined) => {
+        if (!file) return "";
+        const bytes = Buffer.from(file.contentBase64, "base64"),
+          text = bytes.toString("utf8");
+        if (!Buffer.from(text).equals(bytes) || text.includes("\0"))
+          return null;
+        if (this.store.publicEvidence(text) !== text)
+          throw new RockyError(
+            "skill_content",
+            "Protected content cannot be diffed",
+            403,
+          );
+        return text;
+      };
+      const a = decode(old.get(path)),
+        b = decode(next.get(path));
+      binary = a === null || b === null;
+      if (!binary) preview = replacementDiff(a!, b!);
+    }
+    return {
+      from,
+      to,
+      previousHash: before.revision.contentHash,
+      nextHash: after.revision.contentHash,
+      files,
+      path: path ?? null,
+      binary,
+      preview,
+    };
   }
   freeze(work: Work): SkillCatalog {
     if (!this.store.db.isTransaction)

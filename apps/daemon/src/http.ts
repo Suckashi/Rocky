@@ -276,6 +276,16 @@ export function createApp(service: WorkService) {
     c.json({ artifacts: service.artifacts.list() }),
   );
   app.get("/api/v1/skills", (c) => c.json({ skills: service.skills.list() }));
+  app.get("/api/v1/skills/:id/diff", (c) =>
+    c.json(
+      service.skills.diff(
+        c.req.param("id"),
+        Number(c.req.query("from")),
+        Number(c.req.query("to")),
+        c.req.query("path"),
+      ),
+    ),
+  );
   app.get("/api/v1/works/:id/skill-catalog", (c) =>
     c.json({ catalog: service.skills.catalog(c.req.param("id")) }),
   );

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { SkillImport } from "./skill-import.js";
+import { SkillDiff } from "./skill-diff.js";
 
 const revisionSchema = z.object({
   id: z.uuid(),
@@ -297,6 +298,14 @@ export function SkillSettings({
                   {review.content}
                 </pre>
               )}
+              <SkillDiff
+                key={`${review.revision.id}:${review.revision.revision}:${review.path}`}
+                id={review.revision.id}
+                revision={review.revision.revision}
+                path={review.path}
+                locale={locale}
+                request={request}
+              />
               <details>
                 <summary>
                   {zh ? "檔案與版本證據" : "Files and revision evidence"}
