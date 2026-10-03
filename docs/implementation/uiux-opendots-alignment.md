@@ -129,3 +129,7 @@ Compared upstream PageDocument.tsx sourceMode usage and editor.css document-sour
 ## Restricted HTML results (cf53d927ce311aba5c8c4f83dfff8d0468f3d768)
 
 Existing ResultPane geometry, toolbar and neutral semantic tokens host the opaque iframe in artifacts.tsx/style.css. No additional upstream code/assets copied; source remains c2569bb6a13a22e565cf3eb791c62267d06babb1. Rocky adds an explicit restriction notice, source toggle and immutable download; generated content keeps a white canvas in both themes. [Four-width after screenshots and tests](html-preview.md). Interactive scripts, navigation, embeds and external resources are excluded to preserve local permission boundaries. No new matched upstream comparison or full fidelity claim.
+
+## Native delivery into existing results (0f31a2a4104566b42b9a56fd689d71c599caa59e)
+
+No new presentation component/CSS; artifact_publish feeds the existing shared projection and ResultPane cards. Browser verifies actual native write/approval/publication before preview/download at four widths. [Evidence](artifact-native.md). This is a Rocky functional integration; fixed upstream reference and remaining comparison gaps unchanged.

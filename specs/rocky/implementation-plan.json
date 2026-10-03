@@ -3419,6 +3419,28 @@
             "PNG/JPEG artifact publication/preview, native artifact/document tools, file-context references and remaining T-020/V1 scope are incomplete",
             "Ubuntu/live model/release acceptance not_run; global AT26/27 and all70 acceptance statuses unchanged"
           ]
+        },
+        {
+          "commit": "0f31a2a4104566b42b9a56fd689d71c599caa59e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/artifact-native.test.ts tests/artifacts.test.ts; npx vitest run tests/artifact-native.test.ts tests/artifacts.test.ts tests/documents.test.ts tests/runtime.test.ts tests/configured-work.test.ts; ROCKY_TEST_BROWSER=installed chromium1223; npx playwright test --config playwright.production.config.ts html-preview.spec.ts; npm run check; npm run lint; npm run build; scoped npx prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/artifact-native/verification.json",
+          "testFiles": [
+            "tests/artifact-native.test.ts",
+            "tests/artifacts.test.ts",
+            "tests/e2e/html-preview.spec.ts"
+          ],
+          "limitations": [
+            "Only root configured normal Work exposes artifact_publish; source must be its own succeeded workspace_write and retain confirmed hash",
+            "Single UTF-8 confirmed file only; PNG/JPEG, bundles, document tools and file-context references remain incomplete",
+            "No external publication/share permission; local immutable copy reuses existing store and source receipt",
+            "Cancellation assertion runs before work and inside registry transaction; blob may remain orphaned if cancelled after staging, existing cleanup gap remains",
+            "Four Chinese-light widths browser-tested;320 screenshot inspected; no new matched OpenDots reference/before/after or dark-English matrix",
+            "Fixture provider with real native worker/files/SQLite/HTTP; no paid live model, Ubuntu or full AT26/27 proof"
+          ]
         }
       ],
       "blockedReason": null,

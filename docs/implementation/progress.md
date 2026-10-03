@@ -22,7 +22,7 @@
 | T-016                 | in_progress | Configured dispatch, typed media and original resource/prompt envelopes implemented; target mapping, advanced schemas, generic reconciliation remain.                               |
 | T-017                 | in_progress | Registered roots, native reads/writes, bounded diff, overlapping-root admission and exact-approved Git worktrees; shell/default coding isolation/full leases/reconciliation remain. |
 
-T-020 is in_progress: immutable snapshots, ID-only downloads, result pane, owner Markdown revision CAS/editor and restricted isolated HTML preview implemented; native artifact/document tools, images and file-context references remain open.
+T-020 is in_progress: immutable snapshots, ID-only downloads, result pane, owner Markdown revision CAS/editor and restricted isolated HTML preview implemented; native same-Work artifact publication implemented; document tools, images and file-context references remain open.
 
 Node 24.12.0 / npm 11.6.4 baseline. OpenDots MIT presentation CSS adapted with notices; no upstream history, backend, data, settings or brand assets imported. Test data is synthetic. No remote action; existing live probe evidence is separate from this fixture UI slice. See known-limitations.md for gates and follow-up.
 
@@ -447,3 +447,7 @@ Owner artifact copies, immutable document versions, exactrevision CAS, persisted
 ## Restricted HTML previews (cf53d927ce311aba5c8c4f83dfff8d0468f3d768)
 
 Static HTML now renders in an opaque sandbox with daemon-side allowlisting and deny-by-default CSP; source and original download retained. Related8 tests, browser7 flows, four widths and local canary/probe evidence pass. See [html-preview.md](html-preview.md). Global acceptance and remaining V1 gaps unchanged.
+
+## Native artifact publication (0f31a2a4104566b42b9a56fd689d71c599caa59e)
+
+Agent now delivers confirmed same-Work file snapshots through artifact_publish; active ownership/cancellation and immutable receipt checks remain daemon-controlled.11 related tests and actual browser native delivery pass. See [artifact-native.md](artifact-native.md). T-020 remains in_progress.
