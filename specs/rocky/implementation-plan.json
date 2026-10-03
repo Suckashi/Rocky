@@ -1268,8 +1268,31 @@
         "R-013",
         "R-042"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "48a6efda0f2c0b5c9ff1c675c50715cb6d09cfe0",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx vitest run tests/worker-channel.test.ts tests/contracts.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/worker/channel.json",
+          "testFiles": [
+            "tests/worker-channel.test.ts",
+            "tests/contracts.test.ts"
+          ],
+          "limitations": [
+            "Channel exercised with actual synthetic Node child; Deep Agents remains in daemon pending worker integration",
+            "Daemon-owned durable jobs and full descendant process-tree evidence pending",
+            "Native worker is not an OS sandbox; env allowlist and omitted database path do not prohibit host filesystem access",
+            "Aborting local wait does not prove external side effects stopped; ledger integration pending",
+            "T-007/T-008 remain open; T-009 starts only its independent channel layer and is not complete",
+            "Windows only; Ubuntu/browser egress gates unchanged; no live or remote actions"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [

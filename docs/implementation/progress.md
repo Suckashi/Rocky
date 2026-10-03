@@ -11,7 +11,8 @@
 | T-005       | done        | Validated DTO/event/error/IPC wire contracts and cursor-based snapshot synchronization. Worker IPC execution remains T-009.                         |
 | T-006       | done        | Domain schema v2, identity-preserving CAS, atomic events/outbox, recoverable completion projection and OS-released single writer lock.              |
 | T-007       | in_progress | Model UI/API, shared Work/evaluation routing, budgets, live probe and proxy/CA tests; profiles/cache pricing/full DNS policy pending.               |
-| T-008       | in_progress | Canonical exact operation/approval intent and session binding; full policy/ledger/reconciliation pending.                                           |
+| T-008       | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.       |
+| T-009       | in_progress | Actual child IPC channel with capability, correlation, bounded queue and cancellation; Agent/job integration pending.                               |
 | T-037       | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                    |
 | Later tasks | pending     | Product modules and confirmed-state presence remain pending.                                                                                        |
 
@@ -212,3 +213,11 @@ Implementation `1a3c131891e4896eb049d9b94d1465e90f838797` adds collapsed Operati
 Eight functional browser tests passed, including real UI to daemon to MCP receipt queries for recorded and absent receipts, reload persistence and 320px screenshots. The test harness seeds a simulated crash boundary before starting the isolated daemon; no production fault endpoint exists. Receipt files remain unchanged across queries. Typecheck, production build, lint, formatting and source guards passed. See [reconciliation UI evidence](evidence/2026-10-03/policy/reconciliation-ui.json).
 
 Only the synthetic write adapter is supported. Real workspace integration and external adapter semantics remain pending; T-008 and Goal stay active. Strict browser egress was excluded, Ubuntu remains unverified, and global AT statuses are unchanged. No live/remote action.
+
+## T-009 start: bounded run-scoped worker channel
+
+Implementation `48a6efda0f2c0b5c9ff1c675c50715cb6d09cfe0` adds a daemon-owned channel to a trusted Node entry. Each channel binds a stored running Work/run/session to a random capability, verifies strict wire schema and monotonic sequence, correlates request IDs, limits eight in-flight requests and closes on protocol/backpressure violations. Credentials and domain path are not provisioned in the child environment. Local cancellation bounds waiting even if a handler ignores its signal; uncooperative children are terminated after a grace period.
+
+Five real child lifecycle tests plus two contract tests passed on Windows. Capability forgery never reaches the handler; roundtrip returns the correlated result; flood and stubborn-child cases clean up. Typecheck, server build, lint, formatting and source guards passed. See [channel evidence](evidence/2026-10-03/worker/channel.json).
+
+T-009 is in_progress for this independent channel layer only: upstream T-007/T-008 remain open, and Deep Agents still runs in the daemon. Agent IPC integration, durable daemon-owned jobs and descendant process-tree tests remain required. This is not an OS sandbox or evidence that cancelled external effects stopped. No global acceptance promotion, live or remote action.
