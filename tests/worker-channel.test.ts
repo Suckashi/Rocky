@@ -1,5 +1,6 @@
 import { test, expect } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -119,6 +120,52 @@ test("T-009 shutdown bounds a handler that ignores cancellation", async () => {
     expect(channel.pendingCount).toBe(0);
   } finally {
     await channel.close();
+    f.store.close();
+    rmSync(f.root, { recursive: true, force: true });
+  }
+});
+
+test("T-009 forced shutdown reaps a stubborn worker and its real descendant", async () => {
+  const f = setup("stubborn-tree");
+  let childPid = 0;
+  let ready!: () => void;
+  const reported = new Promise<void>((resolve) => (ready = resolve));
+  const channel = new WorkerChannel(
+    f.store,
+    f.work.id,
+    entry,
+    async (_work, payload) => {
+      childPid = Number(payload.args.pid);
+      ready();
+      return { recorded: true };
+    },
+  );
+  const alive = (pid: number) => {
+    try {
+      process.kill(pid, 0);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  try {
+    await reported;
+    expect(Number.isSafeInteger(childPid) && childPid > 0).toBe(true);
+    expect(alive(childPid)).toBe(true);
+    await channel.close();
+    for (let attempt = 0; attempt < 30 && alive(childPid); attempt++)
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(alive(childPid)).toBe(false);
+    expect(new WorkerJobs(f.store).get(channel.jobId).status).toBe("cancelled");
+  } finally {
+    await channel.close();
+    if (childPid && alive(childPid)) {
+      if (process.platform === "win32")
+        spawnSync("taskkill.exe", ["/PID", String(childPid), "/T", "/F"], {
+          windowsHide: true,
+        });
+      else process.kill(childPid, "SIGKILL");
+    }
     f.store.close();
     rmSync(f.root, { recursive: true, force: true });
   }

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { spawn } from "node:child_process";
 import { parseIpcMessage } from "../../packages/contracts/src/ipc.js";
 let start: ReturnType<typeof parseIpcMessage> | undefined;
 let sequence = 0;
@@ -6,7 +7,10 @@ let expected = "";
 process.on("message", (wire) => {
   const message = parseIpcMessage(String(wire));
   if (message.payload.kind === "cancel") {
-    if (start?.payload.kind === "start" && start.payload.text !== "stubborn")
+    if (
+      start?.payload.kind === "start" &&
+      !["stubborn", "stubborn-tree"].includes(start.payload.text)
+    )
       process.exit(0);
     return;
   }
@@ -29,7 +33,18 @@ process.on("message", (wire) => {
         }),
       );
     };
-    if (message.payload.text === "flood")
+    if (message.payload.text === "stubborn-tree") {
+      const grandchild = spawn(
+        process.execPath,
+        ["-e", "setInterval(()=>{},1000)"],
+        {
+          stdio: "ignore",
+          windowsHide: true,
+        },
+      );
+      if (!grandchild.pid) throw Error("Synthetic grandchild failed to start");
+      send("report_tree", { pid: grandchild.pid });
+    } else if (message.payload.text === "flood")
       for (let i = 0; i < 9; i++) send("wait", {});
     else
       send(
@@ -39,6 +54,11 @@ process.on("message", (wire) => {
       );
   } else if (message.payload.kind === "tool_result") {
     if (message.requestId !== expected) process.exit(2);
+    if (
+      start?.payload.kind === "start" &&
+      start.payload.text === "stubborn-tree"
+    )
+      return;
     if (sequence === 1) {
       expected = randomUUID();
       process.send!(
