@@ -36,7 +36,12 @@ test("single writer rejects duplicate daemon and receipts survive restart", asyn
     expect(() => service.submit({ ...input, text: "changed" })).toThrow(
       "different content",
     );
-    service.stop(w.id);
+    service.stop(w.id, {
+      requestId: randomUUID(),
+      runId: w.runId,
+      executionSessionId: w.executionSessionId,
+      expectedRevision: w.revision,
+    });
     await service.close();
     service = new WorkService(root);
     expect(service.submit(input).id).toBe(w.id);

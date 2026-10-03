@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { randomBytes } from "node:crypto";
@@ -6,6 +6,17 @@ import { z } from "zod";
 import { RunAgentInputSchema, EventSchemas } from "@ag-ui/core/schemas";
 import { RockyError } from "../../../packages/contracts/src/index.js";
 import { WorkService } from "./work-service.js";
+async function readJson(c: Context): Promise<unknown> {
+  try {
+    return await c.req.json();
+  } catch {
+    throw new RockyError(
+      "invalid_json",
+      "Request body must be valid JSON",
+      400,
+    );
+  }
+}
 export function createApp(service: WorkService) {
   const app = new Hono(),
     token = randomBytes(32).toString("hex");
@@ -18,6 +29,7 @@ export function createApp(service: WorkService) {
     await next();
   });
   app.use("/api/*", async (c, next) => {
+    c.header("Cache-Control", "no-store");
     const host = c.req.header("host") ?? "";
     if (!/^(127\.0\.0\.1|localhost):(3210|3211)$/.test(host))
       return c.json(
@@ -42,6 +54,30 @@ export function createApp(service: WorkService) {
       );
     if (Number(c.req.header("content-length") ?? 0) > 65536)
       return c.json({ code: "too_large", message: "Request too large" }, 413);
+    // Enforce bytes actually received, including chunked bodies without Content-Length.
+    if (c.req.raw.body) {
+      const reader = c.req.raw.body.getReader();
+      const chunks: Uint8Array[] = [];
+      let size = 0;
+      try {
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          size += value.byteLength;
+          if (size > 65536) {
+            await reader.cancel();
+            return c.json(
+              { code: "too_large", message: "Request too large" },
+              413,
+            );
+          }
+          chunks.push(value);
+        }
+      } finally {
+        reader.releaseLock();
+      }
+      c.req.raw = new Request(c.req.raw, { body: Buffer.concat(chunks) });
+    }
     await next();
   });
   app.onError((error, c) => {
@@ -53,8 +89,18 @@ export function createApp(service: WorkService) {
           : 500;
     return c.json(
       {
-        code: error instanceof RockyError ? error.code : "invalid_request",
-        message: status === 500 ? "Internal error" : error.message,
+        code:
+          error instanceof RockyError
+            ? error.code
+            : status === 500
+              ? "internal_error"
+              : "invalid_request",
+        message:
+          error instanceof z.ZodError
+            ? "Request does not match the supported schema"
+            : status === 500
+              ? "Internal error"
+              : error.message,
       },
       status as 400,
     );
@@ -76,17 +122,17 @@ export function createApp(service: WorkService) {
     c.json(service.store.get(c.req.param("id"))),
   );
   app.post("/api/v1/conversation/messages", async (c) =>
-    c.json(service.submit(await c.req.json()), 202),
+    c.json(service.submit(await readJson(c)), 202),
   );
   app.post("/api/v1/approvals/:id/decision", async (c) => {
     const work = service.store
       .list()
       .find((w) => w.approval?.id === c.req.param("id"));
     if (!work) throw new RockyError("not_found", "Approval not found", 404);
-    return c.json(service.decide(work.id, await c.req.json()));
+    return c.json(service.decide(work.id, await readJson(c)));
   });
-  app.post("/api/v1/works/:id/stop", (c) =>
-    c.json(service.stop(c.req.param("id"))),
+  app.post("/api/v1/works/:id/stop", async (c) =>
+    c.json(service.stop(c.req.param("id"), await readJson(c))),
   );
   app.get("/api/v1/events", (c) => {
     let after = c.req.query("after") ?? c.req.header("last-event-id") ?? "0";
@@ -119,7 +165,7 @@ export function createApp(service: WorkService) {
     }),
   );
   app.post("/api/v1/copilotkit/agent/rocky/run", async (c) => {
-    const input = RunAgentInputSchema.parse(await c.req.json());
+    const input = RunAgentInputSchema.parse(await readJson(c));
     const props = z
       .object({
         mode: z.literal("fixture"),

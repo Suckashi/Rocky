@@ -26,6 +26,14 @@ export const decisionSchema = z
   })
   .strict();
 export type WorkStatus = z.infer<typeof workStatus>;
+export const stopSchema = z
+  .object({
+    requestId: z.uuid(),
+    runId: z.uuid(),
+    executionSessionId: z.uuid(),
+    expectedRevision: z.number().int().positive(),
+  })
+  .strict();
 export type Approval = {
   id: string;
   revision: number;
@@ -37,6 +45,7 @@ export type Approval = {
 export type Work = {
   id: string;
   runId: string;
+  executionSessionId: string;
   requestId: string;
   text: string;
   transport: "stdio" | "http";

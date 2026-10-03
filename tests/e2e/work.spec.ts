@@ -68,3 +68,31 @@ test("browser egress: no unconfigured destinations", async ({ page }) => {
   await page.getByRole("button", { name: "English", exact: true }).click();
   expect(external).toEqual([]);
 });
+
+test("stop from the UI expires only the selected work approval and persists after reload", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.getByText("本機已連線", { exact: true })).toBeVisible();
+  await page.getByRole("checkbox", { name: "啟用合成測試" }).check();
+  await page.getByRole("combobox").selectOption("http");
+  const title = "Stop fixture " + Date.now();
+  await page.getByRole("textbox").fill(title);
+  await page.getByRole("button", { name: "開始驗證" }).click();
+  const work = page.locator("article").filter({ hasText: title });
+  await expect(
+    work.getByRole("button", { name: "核准這次寫入" }),
+  ).toBeVisible();
+  await work.getByRole("button", { name: "停止", exact: true }).click();
+  await expect(work.getByText("已取消", { exact: true })).toBeVisible();
+  await expect(work.getByRole("button", { name: "核准這次寫入" })).toHaveCount(
+    0,
+  );
+  await page.reload();
+  await expect(
+    page
+      .locator("article")
+      .filter({ hasText: title })
+      .getByText("已取消", { exact: true }),
+  ).toBeVisible();
+});

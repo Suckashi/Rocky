@@ -62,7 +62,14 @@ export class RockyEvaluationProvider {
         return { error: current.error ?? current.status };
       await new Promise((r) => setTimeout(r, 20));
     }
-    this.service.stop(work.id);
+    const current = this.service.store.get(work.id);
+    if (["queued", "running", "waiting_approval"].includes(current.status))
+      this.service.stop(work.id, {
+        requestId: randomUUID(),
+        runId: current.runId,
+        executionSessionId: current.executionSessionId,
+        expectedRevision: current.revision,
+      });
     return { error: "Evaluation timed out" };
   }
 }

@@ -9,6 +9,7 @@ import { connectFixture } from "../../../packages/agent-runtime/src/mcp.js";
 import {
   submissionSchema,
   decisionSchema,
+  stopSchema,
   RockyError,
   type Work,
   type PublicEvent,
@@ -24,6 +25,7 @@ type Active = {
   model: Awaited<ReturnType<typeof startModelFixture>>;
   abort: AbortController;
   promise?: Promise<void>;
+  closing?: Promise<void>;
 };
 export class WorkService {
   readonly store: Store;
@@ -81,6 +83,7 @@ export class WorkService {
     const work: Work = {
       id: randomUUID(),
       runId: randomUUID(),
+      executionSessionId: randomUUID(),
       requestId: parsed.requestId,
       text: parsed.text,
       transport: parsed.transport,
@@ -114,6 +117,11 @@ export class WorkService {
         return;
       }
       const model = await startModelFixture();
+      if (abort.signal.aborted) {
+        await connection.close();
+        await model.close();
+        return;
+      }
       this.emit(work, "rocky.model.configured", {
         endpoint: model.endpoint,
         purpose: "target",
@@ -302,7 +310,7 @@ export class WorkService {
       this.update(work);
     } catch (error) {
       work = this.store.get(id);
-      if (work.status !== "cancelled") {
+      if (!active.abort.signal.aborted) {
         const unknown = this.store.db
           .prepare(
             "SELECT id FROM operations WHERE id LIKE ? AND outcome='unknown' LIMIT 1",
@@ -314,11 +322,18 @@ export class WorkService {
       }
     } finally {
       if (this.store.get(id).status !== "waiting_approval") {
-        await active.connection.close();
-        await active.model.close();
-        this.active.delete(id);
+        await this.release(id, active);
       }
     }
+  }
+  private release(id: string, active: Active) {
+    active.closing ??= Promise.all([
+      active.connection.close(),
+      active.model.close(),
+    ]).then(() => {
+      if (this.active.get(id) === active) this.active.delete(id);
+    });
+    return active.closing;
   }
   decide(id: string, input: unknown) {
     const decision = decisionSchema.parse(input),
@@ -365,23 +380,69 @@ export class WorkService {
     active.promise = this.run(id, decision.decision);
     return this.store.get(id);
   }
-  stop(id: string) {
+  stop(id: string, input: unknown) {
+    const command = stopSchema.parse(input);
+    const intent = hash({ id, ...command });
+    const prior = this.store.db
+      .prepare("SELECT intent,result FROM stop_receipts WHERE request_id=?")
+      .get(command.requestId) as { intent: string; result: string } | undefined;
+    if (prior) {
+      if (prior.intent !== intent)
+        throw new RockyError(
+          "idempotency_conflict",
+          "Stop request changed",
+          409,
+        );
+      return JSON.parse(prior.result) as Work;
+    }
+    const work = this.store.get(id);
+    if (
+      work.runId !== command.runId ||
+      work.executionSessionId !== command.executionSessionId ||
+      work.revision !== command.expectedRevision
+    )
+      throw new RockyError(
+        "stale_target",
+        "Work run, session or revision changed",
+        409,
+      );
+    if (!["queued", "running", "waiting_approval"].includes(work.status))
+      throw new RockyError("terminal_work", "Work is no longer active", 409);
+    return this.cancelWork(id, { requestId: command.requestId, intent });
+  }
+  private cancelWork(
+    id: string,
+    receipt?: { requestId: string; intent: string },
+  ) {
     const work = this.store.get(id);
     if (!["queued", "running", "waiting_approval"].includes(work.status))
       return work;
+    const unknown = this.store.db
+      .prepare(
+        "SELECT id FROM operations WHERE id LIKE ? AND outcome='unknown' LIMIT 1",
+      )
+      .get(work.runId + ":%");
+    work.status = unknown ? "blocked" : "cancelled";
+    if (unknown)
+      work.error =
+        "Stopped with an unconfirmed operation outcome; reconciliation is required.";
+    if (work.approval?.status === "pending") work.approval.status = "expired";
+    work.revision++;
+    let event: PublicEvent;
+    this.store.transaction(() => {
+      this.store.save(work);
+      event = this.store.event(work, "rocky.work.updated", { work });
+      if (receipt)
+        this.store.db
+          .prepare("INSERT INTO stop_receipts VALUES(?,?,?)")
+          .run(receipt.requestId, receipt.intent, JSON.stringify(work));
+    });
+    this.events.emit("event", event!);
     this.starting.get(id)?.abort.abort();
     this.active.get(id)?.abort.abort();
-    work.status = "cancelled";
-    if (work.approval?.status === "pending") work.approval.status = "expired";
-    this.update(work);
     const active = this.active.get(id);
     if (active && !active.promise && !this.starting.has(id)) {
-      active.promise = Promise.all([
-        active.connection.close(),
-        active.model.close(),
-      ]).then(() => {
-        this.active.delete(id);
-      });
+      active.promise = this.release(id, active);
     }
     return work;
   }
@@ -389,13 +450,12 @@ export class WorkService {
     this.stopping = true;
     for (const work of this.store.list())
       if (["queued", "running", "waiting_approval"].includes(work.status))
-        this.stop(work.id);
+        this.cancelWork(work.id);
     await Promise.all([...this.starting.values()].map((a) => a.promise));
     await Promise.all(
-      [...this.active.values()].map(async (a) => {
+      [...this.active.entries()].map(async ([id, a]) => {
         await a.promise;
-        await a.connection.close();
-        await a.model.close();
+        await this.release(id, a);
       }),
     );
     this.active.clear();

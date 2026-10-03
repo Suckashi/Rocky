@@ -289,9 +289,12 @@ function App() {
                   <button
                     className="stop"
                     onClick={() =>
-                      void request("/works/" + w.id + "/stop", {}).catch((e) =>
-                        setError(String(e)),
-                      )
+                      void request("/works/" + w.id + "/stop", {
+                        requestId: crypto.randomUUID(),
+                        runId: w.runId,
+                        executionSessionId: w.executionSessionId,
+                        expectedRevision: w.revision,
+                      }).catch((e) => setError(String(e)))
                     }
                   >
                     {t.stop}

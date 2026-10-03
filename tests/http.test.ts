@@ -42,3 +42,65 @@ test("local API validates Host, Origin and session before mutation", async () =>
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("API bounds real body bytes and returns safe JSON errors before creating work", async () => {
+  const root = mkdtempSync(join(tmpdir(), "rocky-body-"));
+  const service = new WorkService(root),
+    app = createApp(service);
+  try {
+    const session = await app.request("/api/v1/session", {
+      headers: { host: "127.0.0.1:3211" },
+    });
+    expect(session.headers.get("cache-control")).toBe("no-store");
+    const { token } = await session.json();
+    const headers = {
+      host: "127.0.0.1:3211",
+      "x-rocky-session": token,
+      "content-type": "application/json",
+    };
+    for (const path of [
+      "/api/v1/conversation/messages",
+      "/api/v1/copilotkit/agent/rocky/run",
+      "/api/v1/works/any/stop",
+    ]) {
+      const invalid = await app.request(path, {
+        method: "POST",
+        headers,
+        body: '{"secret":"private fixture",',
+      });
+      expect(invalid.status).toBe(400);
+      expect(await invalid.json()).toEqual({
+        code: "invalid_json",
+        message: "Request body must be valid JSON",
+      });
+    }
+    let cancelled = false;
+    const stream = new ReadableStream({
+      pull(controller) {
+        controller.enqueue(new Uint8Array(32769));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const raw = new Request(
+      "http://127.0.0.1:3211/api/v1/conversation/messages",
+      { method: "POST", headers, body: stream, duplex: "half" } as RequestInit,
+    );
+    const oversized = await app.request(raw);
+    expect(oversized.status).toBe(413);
+    expect((await oversized.json()).code).toBe("too_large");
+    expect(cancelled).toBe(true);
+    const extra = await app.request("/api/v1/conversation/messages", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ secret: "private fixture" }),
+    });
+    expect(extra.status).toBe(400);
+    expect(await extra.text()).not.toContain("private fixture");
+    expect(service.store.list()).toHaveLength(0);
+  } finally {
+    await service.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
