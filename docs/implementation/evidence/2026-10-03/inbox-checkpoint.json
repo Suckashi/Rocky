@@ -26,7 +26,7 @@
       "durationSeconds": 82.82
     },
     {
-      "command": "npx vitest run tests/continuous-conversation.test.ts tests/inbox.test.ts tests/context-barrier.test.ts tests/conversation-persistence.test.ts tests/operation-ledger.test.ts",
+      "command": "npx vitest run tests/continuous-conversation.test.ts tests/inbox.test.ts tests/context-barrier.test.ts tests/persistence.test.ts tests/operation-ledger.test.ts",
       "exitCode": 0,
       "result": "15 focused tests passed",
       "durationSeconds": 25.84
@@ -60,3 +60,4 @@
     "No remote actions"
   ]
 }
+
