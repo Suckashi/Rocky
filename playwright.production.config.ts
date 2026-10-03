@@ -1,0 +1,21 @@
+import { defineConfig } from "@playwright/test";
+import base from "./playwright.config.js";
+export default defineConfig({
+  testDir: "tests/e2e",
+  testMatch: "mcp-work.spec.ts",
+  workers: 1,
+  projects: [{ name: "production-path" }],
+  timeout: 30000,
+  webServer: {
+    command: "node tests/e2e/dev.mjs --production",
+    url: "http://127.0.0.1:3210/api/v1/health",
+    reuseExistingServer: false,
+    env: { ROCKY_DATA_DIR: ".rocky-e2e-production" },
+    timeout: 60000,
+  },
+  use: base.use,
+  reporter: [
+    ["list"],
+    ["json", { outputFile: "test-results/production-e2e.json" }],
+  ],
+});

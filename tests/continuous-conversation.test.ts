@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { WorkService } from "../apps/daemon/src/work-service.js";
+import { FixtureWorkService as WorkService } from "./support/fixture-work-service.js";
 import { ConversationStore } from "../apps/daemon/src/conversation-store.js";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 

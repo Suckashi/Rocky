@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import { EventSchemas } from "@ag-ui/core/schemas";
-import { WorkService } from "../apps/daemon/src/work-service.js";
+import { FixtureWorkService as WorkService } from "./support/fixture-work-service.js";
 import { createApp } from "../apps/daemon/src/http.js";
 
 test("AG-UI replay drains all owned event pages before the terminal receipt", async () => {

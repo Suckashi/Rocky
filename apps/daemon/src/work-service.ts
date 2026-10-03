@@ -46,7 +46,7 @@ const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
 type Active = {
   worker: WorkerChannel;
-  connection: Awaited<ReturnType<typeof connectFixture>>;
+  connection?: Awaited<ReturnType<typeof connectFixture>>;
   model: { close: () => Promise<void> };
   abort: AbortController;
   promise?: Promise<void>;
@@ -71,7 +71,11 @@ export class WorkService {
   private readonly reconciliations = new Set<Promise<unknown>>();
   private deliveryTimer: ReturnType<typeof setInterval>;
   deliveryError: string | null = null;
-  constructor(root: string, config?: unknown) {
+  constructor(
+    root: string,
+    config?: unknown,
+    private readonly testFixtureTools = false,
+  ) {
     this.admissionConfig = Object.freeze(
       config === undefined
         ? admissionConfigFromEnv()
@@ -306,17 +310,18 @@ export class WorkService {
       this.store.event(work, "rocky.work.updated", { work });
     });
     this.flushOutbox();
-    this.grants.issue({
-      requestId: randomUUID(),
-      workId: work.id,
-      targetHash: intentHash({
-        fixture: work.runId,
-        transport: work.transport,
-      }),
-      effect: "known_read",
-      policyRevision: 1,
-      expiresAt: null,
-    });
+    if (work.mode === "fixture" || this.testFixtureTools)
+      this.grants.issue({
+        requestId: randomUUID(),
+        workId: work.id,
+        targetHash: intentHash({
+          fixture: work.runId,
+          transport: work.transport,
+        }),
+        effect: "known_read",
+        policyRevision: 1,
+        expiresAt: null,
+      });
     this.pump();
     return work;
   }
@@ -385,11 +390,14 @@ export class WorkService {
     const cleanup: Array<() => Promise<void>> = [];
     let handedOff = false;
     try {
-      const connection = await connectFixture(
-        work.transport,
-        join(this.store.root, "synthetic-receipts", work.runId),
-      );
-      cleanup.push(() => connection.close());
+      const connection =
+        work.mode === "fixture" || this.testFixtureTools
+          ? await connectFixture(
+              work.transport,
+              join(this.store.root, "synthetic-receipts", work.runId),
+            )
+          : undefined;
+      if (connection) cleanup.push(() => connection.close());
       if (abort.signal.aborted) {
         return;
       }
@@ -533,7 +541,9 @@ export class WorkService {
         mode: work.mode,
         toolScope:
           work.mode === "configured"
-            ? "configured MCP via exact approval; sample tools remain synthetic"
+            ? this.testFixtureTools
+              ? "TEST HARNESS: configured MCP plus synthetic samples"
+              : "configured MCP via exact approval"
             : "synthetic",
       });
       const hooks: RuntimeHooks = {
@@ -562,6 +572,15 @@ export class WorkService {
         call: async (name, args, callId) => {
           abort.signal.throwIfAborted();
           const current = this.store.get(work.id);
+          if (
+            (name === "inspect_sample" || name === "write_sample") &&
+            !connection
+          )
+            throw new RockyError(
+              "synthetic_scope",
+              "Synthetic tools are unavailable in configured production",
+              403,
+            );
           if (name === "mcp_discover") {
             if (current.mode !== "configured" || current.runMode !== "normal")
               throw new RockyError(
@@ -694,7 +713,7 @@ export class WorkService {
             {
               destination: configuredTool
                 ? "mcp:" + configuredTool.identity.serverId
-                : connection.destination,
+                : connection!.destination,
             },
           );
           this.flushOutbox();
@@ -708,7 +727,7 @@ export class WorkService {
                   },
                   abort.signal,
                 )
-              : await connection.client.callTool(
+              : await connection!.client.callTool(
                   {
                     name,
                     arguments: args,
@@ -837,6 +856,7 @@ export class WorkService {
             maxInputTokens: configuredModels?.root.profile.maxInputTokens,
             steering: true,
             mode: work.mode,
+            testFixtureTools: this.testFixtureTools,
             event: (_owned, name, data) => hooks.event(name, data),
           },
         );
@@ -948,7 +968,10 @@ export class WorkService {
           raw.__interrupt__[0]?.value.actionRequests?.length !== 1
         )
           throw Error("Only one exact tool approval at a time is supported");
-        if (request.name !== "write_sample" && request.name !== "mcp_call")
+        if (
+          (request.name === "write_sample" && !active.connection) ||
+          (request.name !== "write_sample" && request.name !== "mcp_call")
+        )
           throw Error("Unsupported interrupt");
         const calls =
           raw.messages
@@ -1024,7 +1047,7 @@ export class WorkService {
   }
   private release(id: string, active: Active) {
     active.closing ??= Promise.all([
-      active.connection.close(),
+      active.connection?.close(),
       active.model.close(),
       active.worker.close(),
     ]).then(() => {

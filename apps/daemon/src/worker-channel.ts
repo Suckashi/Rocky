@@ -36,6 +36,7 @@ type AgentOptions = {
   contextBatchId?: string;
   maxInputTokens?: number;
   steering?: boolean;
+  testFixtureTools?: boolean;
   mode?: "fixture" | "configured";
   event: (work: Work, name: string, data: Record<string, unknown>) => void;
 };
@@ -184,6 +185,7 @@ export class WorkerChannel {
         ...(agentOptions?.steering ? { steering: true } : {}),
         text: this.owner.text,
         ...(agentOptions?.mode ? { mode: agentOptions.mode } : {}),
+        ...(agentOptions?.testFixtureTools ? { testFixtureTools: true } : {}),
         ...(agentOptions ? { graphPath: agentOptions.graphPath } : {}),
         ...(agentOptions?.sourceGraphThreadId
           ? { sourceGraphThreadId: agentOptions.sourceGraphThreadId }

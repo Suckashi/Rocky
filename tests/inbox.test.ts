@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { WorkService } from "../apps/daemon/src/work-service.js";
+import { FixtureWorkService as WorkService } from "./support/fixture-work-service.js";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 
 test("actual background inbox freezes its boundary and re-delivers checkpointed evidence from a failed main branch", async () => {

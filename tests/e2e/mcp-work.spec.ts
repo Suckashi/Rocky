@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { AIMessage } from "@langchain/core/messages";
 import { startAgentProvider } from "../../fixtures/models/agent-provider.js";
 import { startHttpFixture } from "../../fixtures/mcp/server.js";
-import { mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, rmSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 test("configured MCP approval is readable at four widths and executes exactly once through the real daemon", async ({
@@ -158,6 +158,18 @@ test("configured MCP approval is readable at four widths and executes exactly on
     await work.getByRole("button", { name: "核准這次操作" }).click();
     await expect(work.getByText("已完成", { exact: true })).toBeVisible();
     expect(readdirSync(root)).toHaveLength(1);
+    if (test.info().project.name === "production-path") {
+      expect(existsSync(".rocky-e2e-production/synthetic-receipts")).toBe(
+        false,
+      );
+      expect(
+        provider.requests.every(
+          (r) =>
+            !JSON.stringify(r.tools ?? []).includes("inspect_sample") &&
+            !JSON.stringify(r.tools ?? []).includes('"name":"write_sample"'),
+        ),
+      ).toBe(true);
+    }
     await page.reload();
     await expect(work.getByText("已完成", { exact: true })).toBeVisible();
     expect(readdirSync(root)).toHaveLength(1);

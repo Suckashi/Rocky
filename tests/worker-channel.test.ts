@@ -167,7 +167,7 @@ test("large daemon tool receipt resumes exact native interrupt and offloads evid
         tool_calls: [],
       };
     },
-    { graphPath, mode: "configured", event: () => {} },
+    { graphPath, mode: "configured", testFixtureTools: true, event: () => {} },
   );
   try {
     expect(await channel.invoke()).toMatchObject({

@@ -186,6 +186,7 @@ for (const provider of ["openai-compatible", "anthropic"] as const)
         },
       },
       { root: primary, child },
+      true,
     );
     const invocation = { configurable: { thread_id: runId } };
     try {

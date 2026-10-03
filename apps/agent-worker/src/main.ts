@@ -448,6 +448,7 @@ process.on("message", (wire) => {
               child: remote(true),
             }
           : undefined,
+        message.payload.testFixtureTools === true,
       );
       void invoke(message.requestId);
     } else if (message.payload.kind === "resume")

@@ -27,6 +27,7 @@ export const ipcMessageSchema = z
         contextBatchId: idSchema.optional(),
         maxInputTokens: z.number().int().positive().max(100000000).optional(),
         steering: z.boolean().optional(),
+        testFixtureTools: z.boolean().optional(),
       }),
       z.strictObject({
         kind: z.literal("resume"),

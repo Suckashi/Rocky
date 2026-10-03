@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { randomUUID } from "node:crypto";
-import { mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { AIMessage } from "@langchain/core/messages";
@@ -8,7 +8,14 @@ import { WorkService } from "../apps/daemon/src/work-service.js";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 import { startHttpFixture } from "../fixtures/mcp/server.js";
 
-test.each(["approve", "reject", "revoke", "invalid", "uncertain"] as const)(
+test.each([
+  "approve",
+  "reject",
+  "revoke",
+  "invalid",
+  "uncertain",
+  "synthetic",
+] as const)(
   "configured native worker uses discovered MCP schema and exact approval: %s",
   async (mode) => {
     const root = mkdtempSync(join(tmpdir(), "rocky-mcp-work-")),
@@ -43,6 +50,10 @@ test.each(["approve", "reject", "revoke", "invalid", "uncertain"] as const)(
               },
             };
           }
+        }
+        if (mode === "synthetic") {
+          name = "write_sample";
+          args = { value: "must not run" };
         }
         return new AIMessage({
           content: "",
@@ -105,9 +116,22 @@ test.each(["approve", "reject", "revoke", "invalid", "uncertain"] as const)(
       });
       await expect
         .poll(() => service.store.get(work.id).status, { timeout: 15000 })
-        .toBe(mode === "invalid" ? "failed" : "waiting_approval");
+        .toBe(
+          mode === "invalid" || mode === "synthetic"
+            ? "failed"
+            : "waiting_approval",
+        );
+      expect(existsSync(join(root, "synthetic-receipts"))).toBe(false);
+      expect(service.grants.list(work.id)).toEqual([]);
+      expect(
+        provider.requests.every(
+          (r) =>
+            !JSON.stringify(r.tools ?? []).includes("inspect_sample") &&
+            !JSON.stringify(r.tools ?? []).includes('"name":"write_sample"'),
+        ),
+      ).toBe(true);
       expect(readdirSync(receipts)).toEqual([]);
-      if (mode === "invalid") {
+      if (mode === "invalid" || mode === "synthetic") {
         expect(service.operations.list(work.id)).toEqual([]);
         return;
       }
