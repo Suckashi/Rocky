@@ -51,3 +51,18 @@ export const learningWorkConsentCommandSchema = z.strictObject({
   excluded: z.boolean(),
   sourceReuseAllowed: z.boolean(),
 });
+
+export const learningEpisodeCommandSchema = z.strictObject({
+  requestId: z.uuid(),
+  workId: z.uuid(),
+  expectedPolicyRevision: z.number().int().nonnegative(),
+  expectedConsentRevision: z.number().int().positive(),
+  trigger: z.literal("manual_request"),
+  goal: z.string().trim().min(1).max(2000),
+  constraints: z.array(z.string().max(2000)).max(10),
+  corrections: z.array(z.string().max(2000)).max(10),
+  verification: z.array(z.string().max(2000)).max(10),
+  failuresAndRepairs: z.array(z.string().max(2000)).max(10),
+  preconditions: z.array(z.string().max(2000)).max(10),
+  evidenceEventIds: z.array(z.uuid()).min(1).max(30),
+});

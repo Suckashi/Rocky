@@ -3,16 +3,176 @@ import {
   learningPolicyCommandSchema,
   learningWorkConsentSchema,
   learningWorkConsentCommandSchema,
+  learningEpisodeCommandSchema,
 } from "../../../packages/contracts/src/learning.js";
 import { RockyError } from "../../../packages/contracts/src/index.js";
 import { intentHash } from "./intent.js";
 import type { Store } from "./store.js";
 import type { WorkspaceRegistry } from "./workspaces.js";
+import { randomUUID } from "node:crypto";
+import {
+  completionSchema,
+  publicEventSchema,
+} from "../../../packages/contracts/src/index.js";
 export class LearningRegistry {
   constructor(
     private readonly store: Store,
     private readonly workspaces: WorkspaceRegistry,
   ) {}
+  createEpisode(input: unknown) {
+    const command = learningEpisodeCommandSchema.parse(input);
+    return this.store.transaction(() => {
+      const { work, consent, policy } = this.assertSourceAllowed(
+        command.workId,
+        "manual",
+      );
+      const hash = intentHash(command);
+      const prior = this.store.db
+        .prepare("SELECT id,intent FROM learning_episodes WHERE request_id=?")
+        .get(command.requestId) as { id: string; intent: string } | undefined;
+      if (prior) {
+        if (prior.intent !== hash)
+          throw new RockyError(
+            "idempotency_conflict",
+            "Episode request changed",
+            409,
+          );
+        return this.episode(prior.id);
+      }
+      if (
+        consent.revision !== command.expectedConsentRevision ||
+        policy.revision !== command.expectedPolicyRevision
+      )
+        throw new RockyError(
+          "learning_revision",
+          "Learning consent or policy changed",
+          409,
+        );
+      const terminalRow = this.store.db
+        .prepare("SELECT data FROM completion_messages WHERE work_id=?")
+        .get(work.id) as { data: string } | undefined;
+      if (!terminalRow)
+        throw new RockyError(
+          "learning_terminal",
+          "Durable terminal receipt is not available",
+          409,
+        );
+      const terminal = completionSchema.parse(JSON.parse(terminalRow.data));
+      if (terminal.runId !== work.runId || terminal.status !== "completed")
+        throw new RockyError(
+          "learning_terminal",
+          "Source terminal receipt does not match",
+          409,
+        );
+      const sourceKey = intentHash([
+        work.runId,
+        terminal.sequence,
+        policy.revision,
+      ]);
+      if (
+        this.store.db
+          .prepare("SELECT 1 FROM learning_episodes WHERE source_key=?")
+          .get(sourceKey)
+      )
+        throw new RockyError(
+          "learning_duplicate",
+          "An episode already exists for this run, terminal boundary and policy",
+          409,
+        );
+      const evidence = command.evidenceEventIds.map((id) => {
+        const row = this.store.db
+          .prepare(
+            "SELECT data,CAST(sequence AS TEXT) AS sequence FROM events WHERE json_extract(data,'$.id')=?",
+          )
+          .get(id) as { data: string; sequence: string } | undefined;
+        if (!row)
+          throw new RockyError(
+            "learning_evidence",
+            "Evidence event not found",
+            404,
+          );
+        const event = publicEventSchema.parse({
+          ...JSON.parse(row.data),
+          sequence: row.sequence,
+        });
+        if (
+          event.workId !== work.id ||
+          event.runId !== work.runId ||
+          BigInt(event.sequence) > BigInt(terminal.sequence) ||
+          event.payload.kind !== "domain" ||
+          ![
+            "rocky.tool.completed",
+            "rocky.tool.failed",
+            "rocky.operation.succeeded",
+            "rocky.operation.failed_no_effect",
+            "rocky.artifact.published",
+            "rocky.steering.updated",
+          ].includes(event.payload.name)
+        )
+          throw new RockyError(
+            "learning_evidence",
+            "Evidence is outside the source boundary or not an observed action",
+            403,
+          );
+        return {
+          id: event.id,
+          sequence: event.sequence,
+          name: event.payload.name,
+        };
+      });
+      if (new Set(command.evidenceEventIds).size !== evidence.length)
+        throw new RockyError(
+          "learning_evidence",
+          "Duplicate evidence references",
+          422,
+        );
+      const safe = this.store.publicEvidence({
+        goal: command.goal,
+        constraints: command.constraints,
+        corrections: command.corrections,
+        verification: command.verification,
+        failuresAndRepairs: command.failuresAndRepairs,
+        preconditions: command.preconditions,
+      });
+      const episode = {
+        id: randomUUID(),
+        workId: work.id,
+        sourceRunId: work.runId,
+        terminalBoundarySequence: terminal.sequence,
+        learningPolicyRevision: policy.revision,
+        consentRevision: consent.revision,
+        scope: work.workspaceId
+          ? { kind: "project", projectId: work.workspaceId }
+          : { kind: "user" },
+        trigger: command.trigger,
+        summary: safe,
+        evidence,
+        status: "pending_review",
+        summaryAuthority: "owner_provided_not_independently_verified",
+        createdAt: new Date().toISOString(),
+      };
+      this.store.db
+        .prepare("INSERT INTO learning_episodes VALUES(?,?,?,?,?)")
+        .run(
+          episode.id,
+          sourceKey,
+          command.requestId,
+          hash,
+          JSON.stringify(episode),
+        );
+      return episode;
+    });
+  }
+  episode(id: string) {
+    const row = this.store.db
+      .prepare("SELECT data FROM learning_episodes WHERE id=?")
+      .get(id) as { data: string } | undefined;
+    if (!row)
+      throw new RockyError("not_found", "Learning episode not found", 404);
+    const value = JSON.parse(row.data) as { workId: string };
+    this.assertSourceAllowed(value.workId, "manual");
+    return this.store.publicEvidence(value);
+  }
   workConsent(workId: string) {
     this.store.get(workId);
     const row = this.store.db

@@ -70,7 +70,7 @@ export class Store {
       const version = (
         this.db.prepare("PRAGMA user_version").get() as { user_version: number }
       ).user_version;
-      if (version > 24)
+      if (version > 25)
         throw new RockyError(
           "unsupported_store",
           "Rocky store version is newer than this application",
@@ -311,6 +311,12 @@ export class Store {
         this.transaction(() =>
           this.db.exec(
             "CREATE TABLE IF NOT EXISTS learning_work_consent(work_id TEXT PRIMARY KEY,data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS learning_work_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,result TEXT NOT NULL); PRAGMA user_version=24;",
+          ),
+        );
+      if (version < 25)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE IF NOT EXISTS learning_episodes(id TEXT PRIMARY KEY,source_key TEXT UNIQUE NOT NULL,request_id TEXT UNIQUE NOT NULL,intent TEXT NOT NULL,data TEXT NOT NULL); PRAGMA user_version=25;",
           ),
         );
     } catch (error) {
