@@ -2819,6 +2819,26 @@
             "No non-Git isolation fallback, destination governance, packaging/doctor or cleanup authorization workflow yet",
             "Ubuntu/browser/full V1 acceptance not_run; no UI screenshot or reference alignment evidence added"
           ]
+        },
+        {
+          "commit": "8b9093e672ff78be218d0d447e6ede0a3d2203fc",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/git-worktree.test.ts tests/terminate-process-tree.test.ts; npm run check; npm run lint; npm run build; npx prettier --check apps/daemon/src/git-worktree.ts apps/daemon/src/terminate-process-tree.ts tests/terminate-process-tree.test.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/git-process-supervision/verification.json",
+          "testFiles": [
+            "tests/git-worktree.test.ts",
+            "tests/terminate-process-tree.test.ts"
+          ],
+          "limitations": [
+            "Actual Windows owned parent/descendant fixture verified; Git mid-checkout timeout/crash/reconciliation matrix not run",
+            "POSIX process-group implementation typechecked only; Ubuntu not_run",
+            "Adapter still not connected to daemon approvals/ledger, native tool, registration or UI",
+            "No browser checks for this backend-only slice; previous screenshots are not new alignment evidence",
+            "All 70 global acceptance entries unchanged; V1 and T-017 incomplete"
+          ]
         }
       ],
       "blockedReason": null,

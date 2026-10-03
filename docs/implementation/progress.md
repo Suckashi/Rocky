@@ -425,3 +425,7 @@ Admission now serializes parent/child registered roots across different UUIDs be
 ## Git worktree adapter foundation (d1181200442a8e9fa4d3b2686dc8a8bfecaf5abf)
 
 Real local Git adapter and6 fixture cases pass: new branch/worktree, source dirty/untracked preservation, stale/replaced metadata, destination/filter/cancel protection and hook positive control. Type/lint/build pass. This is deliberately not exposed yet: daemon consent/ledger, process supervision, registration, native tool, background coding default and UI remain necessary. See [git-worktree-adapter.md](git-worktree-adapter.md). T-017 in_progress; full Goal active.
+
+## Git subprocess supervision (8b9093e672ff78be218d0d447e6ede0a3d2203fc)
+
+Git cancellation now terminates its owned process tree, propagates abort through preparation/verification, and bounds failure reporting when termination cannot be confirmed. Windows parent/descendant fixture verifies an unrelated process survives; six actual Git regressions also pass (7 total). Typecheck/lint/build/format/diff pass. See [evidence](evidence/2026-10-04/git-process-supervision/verification.json). Actual interrupted checkout, Ubuntu and product approval/registration/native-tool/UI integration remain unverified or unfinished. T-017 in_progress; Goal active; no remote actions.

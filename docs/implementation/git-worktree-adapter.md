@@ -15,3 +15,7 @@ Typecheck/lint/build/format/diff checks passed. Tests are local fixture evidence
 ## Next required integration
 
 Bind preparation/fingerprint and target to daemon exact approval/ledger; persist receipts/unknown before enabling capability. Supervise Git subprocess descendants and cancellation. Register only confirmed generated workspaces; map source/worktree ownership and background coding defaults without inheriting read grants. Add truthful approval/result UI with source HEAD, destination/branch and dirty-source exclusion. Handle non-Git isolation, linked-worktree source, filters, fallback/doctor availability and explicit cleanup governance. No implicit merge/tag/push/deploy. Full leases, shell, artifacts and remaining V1 modules stay open. All70 AT unchanged. No Apsis or remote actions; Goal remains active.
+
+## Process supervision update (8b9093e672ff78be218d0d447e6ede0a3d2203fc)
+
+The adapter now uses absolute Windows System32 taskkill for its owned tree, or a detached POSIX process group, with bounded termination reporting. Cancellation reaches prepare and post-dispatch verification; a failed dispatched operation still reports unknown. Windows real Node parent/descendant termination and unrelated-process survival passed, together with six Git regressions. [Actual evidence](evidence/2026-10-04/git-process-supervision/verification.json). This narrows the earlier supervision gap; it does not prove mid-checkout cancellation/crash reconciliation, Ubuntu behavior or product worktree integration. No new browser evidence.
