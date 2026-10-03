@@ -1064,6 +1064,28 @@
             "Classification and scope must be supplied by trusted daemon adapters, never model/MCP hints",
             "No browser/live/remote actions; Ubuntu/browser egress unchanged"
           ]
+        },
+        {
+          "commit": "8d3bfea22a1fab258d53b5ee3abb84bb50db3878",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx vitest run tests/operation-reconciler.test.ts tests/operation-ledger.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/policy/reconciliation.json",
+          "testFiles": [
+            "tests/operation-reconciler.test.ts",
+            "tests/operation-ledger.test.ts"
+          ],
+          "limitations": [
+            "T-008 remains in_progress: actual status-query adapters and owner API/UI not integrated",
+            "Trusted observer is a server seam, not client-submitted proof; no HTTP outcome endpoint added",
+            "Synthetic receipt file demonstrates lost-result recovery only, not external provider correctness",
+            "Work stays blocked after reconciliation; explicit new-Work retry remains later work",
+            "Persistent grants/production target resolution/audit redaction remain pending",
+            "No live/remote/browser action; existing external gates unchanged"
+          ]
         }
       ],
       "blockedReason": null,

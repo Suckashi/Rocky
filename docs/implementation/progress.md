@@ -148,3 +148,11 @@ Six final ledger/stop tests passed, including actual Store close → WorkService
 Implementation `c5f007fbab47ffd6d3d805bfd3f23bf4db7da5a9` introduces strict daemon Policy input and centralizes synthetic broker authorization. Deny-first checks bind owned Work/run/session, current scope and revocation. Target/policy changes require fresh preparation. Critical/unknown effects require exact operation/fingerprint consent. Local-new overwrite requires consent. Non-synthetic writes remain denied in evaluation/reflection regardless of approval. Model risk hints are rejected rather than trusted.
 
 Ten focused policy/native/configured tests passed; six policy/native tests passed after pinning the prepared synthetic target to its original Work snapshot. Typecheck, lint and server build passed. See [policy evidence](evidence/2026-10-03/policy/authorization.json). Persistent grants, production target resolvers, unknown reconciliation and audit redaction remain unfinished; T-008 and Goal remain active. No global acceptance or remote action claim.
+
+## T-008 continuation: observation-based reconciliation core
+
+Implementation `8d3bfea22a1fab258d53b5ee3abb84bb50db3878` adds a trusted adapter observation seam and durable reconciliation receipts (domain v6). Observations must bind exact operation/intent, carry an evidence reference and observation time, and settle only a matching unknown revision. Results/receipts/events commit atomically. Successful request replay returns the persisted receipt without another query. Unknown observations remain unknown; Work never auto-restarts.
+
+Seven reconciliation/ledger tests passed. A synthetic receipt file demonstrates result-loss recovery without tool replay; cancellation, evidence mismatch, concurrent CAS and restart idempotency are covered. Typecheck, server build, lint, format and source guards passed. See [reconciliation evidence](evidence/2026-10-03/policy/reconciliation.json).
+
+This is a core seam, not a completed user-facing reconciliation flow: real status adapters and owner API/UI are pending, alongside grants, target resolvers and redaction. No client may submit an outcome through HTTP. T-008 and Goal remain active; no live or remote action.
