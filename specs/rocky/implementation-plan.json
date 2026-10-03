@@ -1759,7 +1759,7 @@
         "R-017",
         "R-038"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "evidence": [
         {
           "commit": "bd76a3da3fef0830a2acfc6499fc3f9d5d42d2df",
@@ -1783,6 +1783,28 @@
             "No worker IPC, steering, full retry/reconciliation implementation; T-012 not complete",
             "Dependency set unchanged; clean install was not repeated this turn",
             "Strict browser egress remains failed; original P0 gate remains open"
+          ]
+        },
+        {
+          "commit": "1350956",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/steering.test.ts tests/stop.test.ts; npx playwright test tests/e2e/steering.spec.ts tests/e2e/streaming.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/steering/verification.json",
+          "testFiles": [
+            "tests/steering.test.ts",
+            "tests/stop.test.ts",
+            "tests/e2e/steering.spec.ts",
+            "tests/e2e/streaming.spec.ts"
+          ],
+          "limitations": [
+            "Windows loopback fixture only; no live/Ubuntu evidence",
+            "Root checkpoint steering implemented; pending-approval supersession, attachments, explicit ACK/restart fault matrix and reset/retry incomplete",
+            "Work element screenshots are not full viewport OpenDots comparison",
+            "T-012/T-019 remain in_progress; global AT unchanged; no remote actions"
           ]
         }
       ],
@@ -2310,6 +2332,28 @@
             "Cross-turn agent context, inbox checkpoint acknowledgement and exact steering remain incomplete",
             "Ubuntu and strict browser egress remain previously deferred; no new platform/live claim",
             "No remote actions"
+          ]
+        },
+        {
+          "commit": "1350956",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/steering.test.ts tests/stop.test.ts; npx playwright test tests/e2e/steering.spec.ts tests/e2e/streaming.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/steering/verification.json",
+          "testFiles": [
+            "tests/steering.test.ts",
+            "tests/stop.test.ts",
+            "tests/e2e/steering.spec.ts",
+            "tests/e2e/streaming.spec.ts"
+          ],
+          "limitations": [
+            "Windows loopback fixture only; no live/Ubuntu evidence",
+            "Root checkpoint steering implemented; pending-approval supersession, attachments, explicit ACK/restart fault matrix and reset/retry incomplete",
+            "Work element screenshots are not full viewport OpenDots comparison",
+            "T-012/T-019 remain in_progress; global AT unchanged; no remote actions"
           ]
         }
       ],
