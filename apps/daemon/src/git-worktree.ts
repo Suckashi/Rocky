@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { terminateProcessTree } from "./terminate-process-tree.js";
 import { lstat, realpath, access } from "node:fs/promises";
 import {
   join,
@@ -81,15 +82,31 @@ export class GitWorktree {
           env,
           shell: false,
           windowsHide: true,
+          detached: process.platform !== "win32",
           stdio: ["ignore", "pipe", "pipe"],
         },
       );
       const chunks: Buffer[] = [];
       let bytes = 0,
         failed = false;
+      let termination: Promise<void> | undefined;
+      let terminationDeadline: ReturnType<typeof setTimeout> | undefined;
       const fail = () => {
+        if (failed) return;
         failed = true;
-        child.kill();
+        terminationDeadline = setTimeout(() => {
+          reject(
+            new RockyError(
+              "git_failed",
+              "Git termination could not be confirmed",
+              409,
+            ),
+          );
+        }, 6000);
+        termination = terminateProcessTree(child).catch(() => {
+          // Failed supervision never implies the effect did not occur.
+          child.kill();
+        });
       };
       const timer = setTimeout(fail, 30000),
         abort = () => fail();
@@ -106,13 +123,16 @@ export class GitWorktree {
       });
       child.once("error", () => {
         clearTimeout(timer);
+        clearTimeout(terminationDeadline);
         signal?.removeEventListener("abort", abort);
         reject(
           new RockyError("git_unavailable", "Git process unavailable", 422),
         );
       });
-      child.once("close", (code) => {
+      child.once("close", async (code) => {
+        await termination;
         clearTimeout(timer);
+        clearTimeout(terminationDeadline);
         signal?.removeEventListener("abort", abort);
         if (failed || code !== 0)
           reject(
@@ -126,7 +146,13 @@ export class GitWorktree {
       });
     });
   }
-  async prepare(root: string, destination: string, branch: string) {
+  async prepare(
+    root: string,
+    destination: string,
+    branch: string,
+    signal?: AbortSignal,
+  ) {
+    signal?.throwIfAborted();
     if (
       !/^codex\/rocky-[a-f0-9-]{36}$/.test(branch) ||
       !isAbsolute(root) ||
@@ -164,7 +190,7 @@ export class GitWorktree {
       .digest("hex");
     const executable = await this.executable(root);
     const top = (
-      await this.run(executable, root, ["rev-parse", "--show-toplevel"])
+      await this.run(executable, root, ["rev-parse", "--show-toplevel"], signal)
     ).trim();
     if (!same(await realpath(top), root))
       throw new RockyError(
@@ -173,16 +199,21 @@ export class GitWorktree {
         403,
       );
     const head = (
-      await this.run(executable, root, ["rev-parse", "--verify", "HEAD"])
+      await this.run(
+        executable,
+        root,
+        ["rev-parse", "--verify", "HEAD"],
+        signal,
+      )
     ).trim();
     if (!/^[a-f0-9]{40,64}$/.test(head))
       throw new RockyError("git_head", "Committed Git HEAD is required", 422);
-    const config = await this.run(executable, root, [
-      "config",
-      "--includes",
-      "--null",
-      "--list",
-    ]);
+    const config = await this.run(
+      executable,
+      root,
+      ["config", "--includes", "--null", "--list"],
+      signal,
+    );
     if (/(?:^|\0)filter\./.test(config))
       throw new RockyError(
         "git_filter_unavailable",
@@ -219,6 +250,7 @@ export class GitWorktree {
       prepared.root,
       prepared.destination,
       prepared.branch,
+      signal,
     );
     if (
       fresh.repoIdentity !== prepared.repoIdentity ||
@@ -250,10 +282,12 @@ export class GitWorktree {
         signal,
       );
       const head = (
-        await this.run(prepared.executable, prepared.destination, [
-          "rev-parse",
-          "HEAD",
-        ])
+        await this.run(
+          prepared.executable,
+          prepared.destination,
+          ["rev-parse", "HEAD"],
+          signal,
+        )
       ).trim();
       const branch = (
         await this.run(prepared.executable, prepared.destination, [
