@@ -1,6 +1,7 @@
 import { fork, spawn, type ChildProcess } from "node:child_process";
 import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { parseIpcMessage } from "../../../packages/contracts/src/ipc.js";
+import { ModelTransferAssembler } from "../../../packages/contracts/src/model-transfer.js";
 import {
   RockyError,
   type Work,
@@ -36,6 +37,7 @@ export class WorkerChannel {
   private received = 0n;
   private readonly pending = new Map<string, AbortController>();
   private readonly seen = new Set<string>();
+  private readonly modelTransfer = new ModelTransferAssembler();
   private readonly jobs = new Set<Promise<void>>();
   private stopped = false;
   private completedInvocation = false;
@@ -249,6 +251,9 @@ export class WorkerChannel {
       ![
         "tool_request",
         "model_request",
+        "model_begin",
+        "model_chunk",
+        "model_commit",
         "context_read",
         "context_ack",
         "runtime_event",
@@ -291,6 +296,9 @@ export class WorkerChannel {
     if (
       message.payload.kind !== "tool_request" &&
       message.payload.kind !== "model_request" &&
+      message.payload.kind !== "model_begin" &&
+      message.payload.kind !== "model_chunk" &&
+      message.payload.kind !== "model_commit" &&
       message.payload.kind !== "context_read" &&
       message.payload.kind !== "context_ack"
     )
@@ -312,19 +320,41 @@ export class WorkerChannel {
       abort.signal.addEventListener("abort", onAbort, { once: true });
     });
     try {
+      let payload = message.payload;
+      if (
+        payload.kind === "model_begin" ||
+        payload.kind === "model_chunk" ||
+        payload.kind === "model_commit"
+      ) {
+        const request = this.modelTransfer.ingest(payload);
+        if (!request) {
+          this.send(message.requestId, {
+            kind: "tool_result",
+            result: { accepted: true },
+          });
+          return;
+        }
+        payload = request;
+      }
       const result = await Promise.race([
-        this.handler(work, message.payload, abort.signal),
+        this.handler(work, payload, abort.signal),
         cancelled,
       ]);
       abort.signal.throwIfAborted();
       this.owned();
       this.send(
         message.requestId,
-        message.payload.kind === "model_request"
+        payload.kind === "model_request"
           ? { kind: "model_result", message: result }
           : { kind: "tool_result", result },
       );
     } catch {
+      if (
+        message.payload.kind === "model_begin" ||
+        message.payload.kind === "model_chunk" ||
+        message.payload.kind === "model_commit"
+      )
+        this.modelTransfer.clear(message.payload.transferId);
       if (!this.stopped)
         this.send(message.requestId, {
           kind: "error",
@@ -340,6 +370,7 @@ export class WorkerChannel {
     }
   }
   private abortAll() {
+    this.modelTransfer.clear();
     this.stopped = true;
     for (const controller of this.pending.values()) controller.abort();
     this.invocation?.reject(

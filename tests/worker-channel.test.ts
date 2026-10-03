@@ -13,6 +13,61 @@ import { workSchema } from "../packages/contracts/src/index.js";
 const entry = fileURLToPath(
   new URL("../fixtures/worker/channel.ts", import.meta.url),
 );
+test("large native checkpoint history reaches one daemon model dispatch through real bounded child IPC", async () => {
+  const { SqliteSaver } =
+    await import("@langchain/langgraph-checkpoint-sqlite");
+  const { HumanMessage } = await import("@langchain/core/messages");
+  const { createRockyAgent } =
+    await import("../packages/agent-runtime/src/factory.js");
+  const { fromModelWire } =
+    await import("../packages/agent-runtime/src/model-wire.js");
+  const f = setup("latest instruction remains exact"),
+    source = randomUUID();
+  const graphPath = join(f.root, "graph-checkpoints.sqlite");
+  const saver = SqliteSaver.fromConnString(graphPath);
+  const messages = Array.from(
+    { length: 240 },
+    (_, index) => new HumanMessage(`${index}:` + "岩石🙂".repeat(100)),
+  );
+  await createRockyAgent(saver, {
+    event: () => {},
+    call: async () => "unused",
+  }).updateState({ configurable: { thread_id: source } }, { messages });
+  saver.db.close();
+  let calls = 0;
+  const channel = new WorkerChannel(
+    f.store,
+    f.work.id,
+    fileURLToPath(new URL("../apps/agent-worker/src/main.ts", import.meta.url)),
+    async (_work, payload) => {
+      if (payload.kind !== "model_request") throw Error("Unexpected RPC");
+      calls++;
+      expect(Buffer.byteLength(JSON.stringify(payload))).toBeGreaterThan(65536);
+      const received = fromModelWire(payload.messages);
+      expect(
+        received.filter((m) => m.type === "human").map((m) => m.content),
+      ).toEqual([...messages.map((m) => m.content), f.work.text]);
+      return { content: "complete preserved context", tool_calls: [] };
+    },
+    {
+      graphPath,
+      sourceGraphThreadId: source,
+      mode: "configured",
+      event: () => {},
+    },
+  );
+  try {
+    expect(await channel.invoke()).toMatchObject({
+      messages: [{ content: "complete preserved context" }],
+    });
+    expect(calls).toBe(1);
+    expect(channel.error).toBeNull();
+  } finally {
+    await channel.close();
+    f.store.close();
+    rmSync(f.root, { recursive: true, force: true });
+  }
+});
 function setup(text: string) {
   const root = mkdtempSync(join(tmpdir(), "rocky-worker-")),
     store = new Store(root);

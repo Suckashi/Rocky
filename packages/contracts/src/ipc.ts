@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { modelRequestSchema, modelTransferSchemas } from "./model-transfer.js";
 import {
   idSchema,
   sequenceSchema,
@@ -33,12 +34,8 @@ export const ipcMessageSchema = z
         name: z.string().min(1).max(128),
         data: z.record(z.string(), z.unknown()),
       }),
-      z.strictObject({
-        kind: z.literal("model_request"),
-        child: z.boolean(),
-        messages: z.array(z.unknown()).max(100),
-        tools: z.array(z.unknown()).max(100).optional(),
-      }),
+      modelRequestSchema,
+      ...modelTransferSchemas,
       z.strictObject({ kind: z.literal("model_result"), message: z.unknown() }),
       z.strictObject({
         kind: z.literal("context_read"),

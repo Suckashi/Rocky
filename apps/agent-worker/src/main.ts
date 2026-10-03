@@ -11,6 +11,10 @@ import { WorkerModel } from "../../../packages/agent-runtime/src/worker-model.js
 import { toModelWire } from "../../../packages/agent-runtime/src/model-wire.js";
 import { parseIpcMessage } from "../../../packages/contracts/src/ipc.js";
 import {
+  frameModelRequest,
+  type ModelRequest,
+} from "../../../packages/contracts/src/model-transfer.js";
+import {
   contextChunkSchema,
   contextReceiptSchema,
 } from "../../../packages/contracts/src/context.js";
@@ -57,7 +61,16 @@ function send(
 function rpc(
   payload: Extract<
     Message["payload"],
-    { kind: "tool_request" | "model_request" | "context_read" | "context_ack" }
+    {
+      kind:
+        | "tool_request"
+        | "model_request"
+        | "context_read"
+        | "context_ack"
+        | "model_begin"
+        | "model_chunk"
+        | "model_commit";
+    }
   >,
 ) {
   const id = randomUUID();
@@ -70,6 +83,12 @@ function rpc(
       reject(error);
     }
   });
+}
+async function modelRpc(payload: ModelRequest) {
+  if (Buffer.byteLength(JSON.stringify(payload)) < 40000) return rpc(payload);
+  let result: unknown;
+  for (const frame of frameModelRequest(payload)) result = await rpc(frame);
+  return result;
 }
 async function invoke(requestId: string, decision?: "approve" | "reject") {
   if (!agent || !owner || running) throw Error("Agent invocation unavailable");
@@ -262,7 +281,7 @@ process.on("message", (wire) => {
           messages: BaseMessage[],
           child: boolean,
         ): Promise<ChatResult> => {
-          const response = (await rpc({
+          const response = (await modelRpc({
             kind: "model_request",
             child,
             messages: toModelWire(messages),
@@ -290,7 +309,7 @@ process.on("message", (wire) => {
         new WorkerModel(
           child,
           async (isChild, messages, tools) =>
-            (await rpc({
+            (await modelRpc({
               kind: "model_request",
               child: isChild,
               messages,

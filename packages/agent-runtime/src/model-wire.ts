@@ -46,7 +46,7 @@ export function toModelWire(messages: BaseMessage[]) {
 export function fromModelWire(value: unknown): BaseMessage[] {
   return z
     .array(wireMessage)
-    .max(100)
+    .max(4096)
     .parse(value)
     .map((message) => {
       const content = message.content as BaseMessage["content"];
