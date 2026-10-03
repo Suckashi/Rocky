@@ -7,15 +7,16 @@ import {
   type RockyDocument,
 } from "../../../packages/contracts/src/documents.js";
 import { FileText, Download, ArrowLeft } from "lucide-react";
-import {
-  artifactSchema,
-  type Artifact,
-} from "../../../packages/contracts/src/artifacts.js";
+import { type Artifact } from "../../../packages/contracts/src/artifacts.js";
 export function Artifacts({
   locale,
   request,
   revision,
+  items,
+  initialArtifact,
 }: {
+  items: Artifact[];
+  initialArtifact?: Artifact;
   locale: "zh" | "en";
   revision: string;
   request: (path: string, body?: unknown) => Promise<unknown>;
@@ -39,12 +40,12 @@ export function Artifacts({
     previousEditing.current = editing?.document.id;
   }, [editing]);
   const createRequests = useRef(new Map<string, string>());
-  const [items, setItems] = useState<Artifact[]>([]),
-    [selected, setSelected] = useState<Artifact>(),
+  const [libraryBusy, setLibraryBusy] = useState(true);
+  const [selected, setSelected] = useState<Artifact>(),
     [text, setText] = useState<string>(),
     [html, setHtml] = useState<string>(),
     [showSource, setShowSource] = useState(false),
-    [busy, setBusy] = useState(true),
+    [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   useEffect(() => {
     if (selected) heading.current?.focus();
@@ -58,30 +59,34 @@ export function Artifacts({
   }, [selected]);
   useEffect(() => {
     let active = true;
-    void Promise.all([request("/artifacts"), request("/documents")])
-      .then(([value, docs]) => {
+    void request("/documents")
+      .then((docs) => {
         if (active)
           setDocuments(
             z.object({ documents: z.array(documentSchema) }).parse(docs)
               .documents,
-          );
-        if (active)
-          setItems(
-            z.object({ artifacts: z.array(artifactSchema) }).parse(value)
-              .artifacts,
           );
       })
       .catch((e) => {
         if (active) setError(String(e));
       })
       .finally(() => {
-        if (active) setBusy(false);
+        if (active) setLibraryBusy(false);
       });
     return () => {
       active = false;
-      epoch.current++;
     };
   }, [request, revision]);
+  useEffect(
+    () => () => {
+      epoch.current++;
+    },
+    [],
+  );
+  useEffect(() => {
+    if (initialArtifact) void preview(initialArtifact);
+    // A new owner selection opens the existing preview; not a new event source.
+  }, [initialArtifact]);
   async function preview(item: Artifact) {
     const current = ++epoch.current;
     setSelected(item);
@@ -157,7 +162,9 @@ export function Artifacts({
       aria-label={zh ? "成果庫" : "Artifact library"}
     >
       {error && <p role="alert">{error}</p>}
-      {busy && <p role="status">{zh ? "載入中…" : "Loading…"}</p>}
+      {(busy || libraryBusy) && (
+        <p role="status">{zh ? "載入中…" : "Loading…"}</p>
+      )}
       {selected ? (
         <>
           <button
@@ -254,7 +261,7 @@ export function Artifacts({
               ? "保存已確認寫入的檔案快照。工作區後續修改不會覆寫成果。"
               : "Saved snapshots of confirmed file writes. Later workspace edits do not overwrite results."}
           </p>
-          {!busy && !items.length && (
+          {!libraryBusy && !items.length && (
             <p>
               {zh
                 ? "尚無成果。可在工作的「操作與對帳」中保存已成功寫入的檔案。"

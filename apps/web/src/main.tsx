@@ -7,6 +7,8 @@ import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
 import { WriteProposal } from "./write-proposal.js";
+import { WorkArtifacts } from "./work-artifacts.js";
+import type { Artifact } from "../../../packages/contracts/src/artifacts.js";
 import { Artifacts } from "./artifacts.js";
 import { Workspaces } from "./workspaces.js";
 import type { Workspace } from "../../../packages/contracts/src/workspaces.js";
@@ -103,6 +105,7 @@ function App() {
     [transport, setTransport] = useState<"stdio" | "http">("stdio");
   const {
     works,
+    artifacts,
     events,
     streams,
     connected,
@@ -116,6 +119,7 @@ function App() {
   const [text, setText] = useState(""),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  const [resultRequest, setResultRequest] = useState<{ artifact: Artifact }>();
   const [maxCalls, setMaxCalls] = useState("48");
   const modelTools = useRef<HTMLDetailsElement>(null);
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace>(),
@@ -206,8 +210,11 @@ function App() {
       locale={locale}
       connected={connected}
       count={works.length}
+      resultRequest={resultRequest}
       artifacts={
         <Artifacts
+          items={artifacts}
+          initialArtifact={resultRequest?.artifact}
           locale={locale}
           request={request}
           revision={
@@ -512,6 +519,11 @@ function App() {
                       </ReactMarkdown>
                     </div>
                   )}
+                  <WorkArtifacts
+                    items={artifacts.filter((a) => a.workId === w.id)}
+                    locale={locale}
+                    onOpen={(artifact) => setResultRequest({ artifact })}
+                  />
                   {w.error && <p role="alert">{w.error}</p>}
                   <details>
                     <summary>{t.detail}</summary>

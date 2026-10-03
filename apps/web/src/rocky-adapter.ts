@@ -11,7 +11,11 @@ import {
   conversationPageSchema,
   conversationMessageSchema,
 } from "../../../packages/contracts/src/conversation.js";
-import type { z } from "zod";
+import { z } from "zod";
+import {
+  artifactSchema,
+  type Artifact,
+} from "../../../packages/contracts/src/artifacts.js";
 const historyReferenceSchema = conversationMessageSchema.pick({
   id: true,
   sequence: true,
@@ -35,6 +39,7 @@ export type RockyRequest = (path: string, body?: unknown) => Promise<unknown>;
 // One snapshot/event owner for every view. Cards never establish event sources.
 // Transport closure only changes connection state, never Work outcomes.
 export function useRockyProjection(request: RockyRequest) {
+  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [works, setWorks] = useState<Work[]>([]);
   const [events, setEvents] = useState<PublicEvent[]>([]);
   const [connected, setConnected] = useState(false);
@@ -75,6 +80,11 @@ export function useRockyProjection(request: RockyRequest) {
       .then(async (data) => {
         if (disposed) return;
         const snapshot = snapshotSchema.parse(data);
+        const library = z
+          .object({ artifacts: z.array(artifactSchema) })
+          .parse(await request("/artifacts"));
+        if (disposed) return;
+        setArtifacts(library.artifacts);
         setWorks(snapshot.works);
         setEvents(snapshot.events);
         const page = conversationPageSchema.parse(
@@ -100,6 +110,18 @@ export function useRockyProjection(request: RockyRequest) {
             const event = publicEventSchema.parse(JSON.parse(message.data));
             setEvents((old) => projectEvidence(old, event));
             setWorks((old) => projectWork(old, event));
+            if (
+              event.payload.kind === "domain" &&
+              event.payload.name === "rocky.artifact.published"
+            ) {
+              const artifact = artifactSchema.parse(
+                event.payload.data.artifact,
+              );
+              setArtifacts((old) => [
+                artifact,
+                ...old.filter((a) => a.id !== artifact.id),
+              ]);
+            }
             if (
               event.payload.kind === "domain" &&
               event.payload.name === "rocky.work.updated" &&
@@ -161,6 +183,7 @@ export function useRockyProjection(request: RockyRequest) {
   }, [works, history]);
   return {
     works: visibleWorks,
+    artifacts,
     events,
     streams,
     connected,

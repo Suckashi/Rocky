@@ -939,3 +939,62 @@ input[type="checkbox"] {
   margin-top: 16px;
   background: white;
 }
+
+/* OpenDots PageReviewCard compact delivery adaptation; source/notice in THIRD_PARTY_NOTICES.md. */
+.delivered-artifact {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--canvas);
+  margin: 12px 0;
+}
+.delivered-artifact header {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+.delivered-artifact > div {
+  padding: 18px 22px;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.delivered-artifact h3 {
+  font-size: 20px;
+  margin: 0 0 12px;
+  letter-spacing: -0.5px;
+}
+.delivered-artifact p {
+  margin: 8px 0;
+}
+.delivered-artifact footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 18px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.delivered-artifact footer button,
+.delivered-artifact footer a {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 9px 13px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--canvas);
+  font-size: 12px;
+  text-decoration: none;
+  color: var(--text);
+}
+.delivered-artifact small {
+  font-size: 11px;
+  color: var(--muted);
+}

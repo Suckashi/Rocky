@@ -20,7 +20,9 @@ export function Chrome({
   settings,
   workspaces,
   artifacts,
+  resultRequest,
 }: {
+  resultRequest?: object;
   locale: "zh" | "en";
   connected: boolean;
   count: number;
@@ -38,6 +40,12 @@ export function Chrome({
   const resultPane = useRef<HTMLElement>(null);
   const panelOpener = useRef<HTMLElement | null>(null);
   const resultWasOpen = useRef(false);
+  useEffect(() => {
+    if (!resultRequest) return;
+    panelOpener.current = document.activeElement as HTMLElement;
+    setDrawer(false);
+    setPanel("2");
+  }, [resultRequest]);
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1100px)");
     const change = () => setCompact(media.matches);
@@ -76,7 +84,8 @@ export function Chrome({
     if (panel === "2")
       resultPane.current?.querySelector<HTMLButtonElement>("button")?.focus();
     else if (resultWasOpen.current)
-      (window.innerWidth <= 700
+      (window.innerWidth <= 700 &&
+      panelOpener.current?.closest(".sidebar, .icon-rail")
         ? opener.current
         : panelOpener.current
       )?.focus();
@@ -116,7 +125,8 @@ export function Chrome({
       if (event.key === "Escape") {
         event.preventDefault();
         setPanel(null);
-        (window.innerWidth <= 700
+        (window.innerWidth <= 700 &&
+        panelOpener.current?.closest(".sidebar, .icon-rail")
           ? opener.current
           : panelOpener.current
         )?.focus();

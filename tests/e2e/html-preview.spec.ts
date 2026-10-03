@@ -130,15 +130,35 @@ test("restricted HTML artifact renders without script, storage, API or network a
       (item: { workId: string }) => item.workId === work.id,
     );
     expect(artifact).toBeTruthy();
-    await page
-      .locator(".sidebar")
-      .getByRole("button", { name: "文件與成果", exact: true })
-      .click();
-    await page
-      .locator(".artifact-card")
-      .filter({ hasText: title })
-      .getByRole("button", { name: "預覽", exact: true })
-      .click();
+    const delivery = page
+      .locator(".delivered-artifact")
+      .filter({ hasText: title });
+    await expect(delivery).toBeVisible();
+    for (const [width, height] of [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844],
+    ]) {
+      await page.setViewportSize({ width: width!, height: height! });
+      await delivery.scrollIntoViewIfNeeded();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: "test-results/artifact-card-" + width + ".png",
+      });
+    }
+    const openResult = delivery.getByRole("button", { name: "開啟成果" });
+    await openResult.click();
+    await expect(page.locator(".artifact-library h2")).toHaveText(title);
+    await page.keyboard.press("Escape");
+    await expect(openResult).toBeFocused();
+    await page.reload();
+    await expect(delivery).toBeVisible();
+    await openResult.click();
     const iframe = page.locator("iframe.html-artifact-preview");
     await expect(iframe).toHaveAttribute("sandbox", "");
     const frame = page.frameLocator("iframe.html-artifact-preview");
