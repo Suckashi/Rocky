@@ -3955,6 +3955,30 @@
             "Native memory write, ungranted-consent wait, derivative/checkpoint deletion remain incomplete",
             "Fixture provider only; Ubuntu/live/fullAT not_run; all70 globalAT unchanged"
           ]
+        },
+        {
+          "commit": "0aa4073ac3960576cbb592be22a2043b8398be59",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/memory-write.test.ts; npx vitest run tests/memory.test.ts tests/memory-native.test.ts tests/documents.test.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts memory.spec.ts; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/memory-write.json",
+          "testFiles": [
+            "tests/memory-write.test.ts",
+            "tests/memory.test.ts",
+            "tests/memory-native.test.ts",
+            "tests/documents.test.ts",
+            "tests/e2e/memory.spec.ts"
+          ],
+          "limitations": [
+            "Approval card shows proposed content/scope/privacy/revision, but update before-after diff and source-reference preview remain missing",
+            "Memory-write cancellation, restart/replay, source validation and child/evaluation denial need dedicated native write matrix beyond shared read/contract coverage",
+            "Model-created entries are mutable only through exact approvals; no autonomous write grant is provided",
+            "Registry deletion does not remove delivered model/checkpoint/approval proposal copies; derivative cleanup remains incomplete",
+            "Chinese/light four-width after screenshots only; no new matched OpenDots comparison or full theme/language/accessibility matrix",
+            "No Ubuntu/live provider/fullAT evidence; all70 global AT unchanged"
+          ]
         }
       ],
       "blockedReason": null,

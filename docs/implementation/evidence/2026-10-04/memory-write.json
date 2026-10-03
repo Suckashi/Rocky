@@ -1,0 +1,51 @@
+{
+  "commit": "0aa4073ac3960576cbb592be22a2043b8398be59",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npm run check; npm run lint; npm run build; npx vitest run tests/memory-write.test.ts; npx vitest run tests/memory.test.ts tests/memory-native.test.ts tests/documents.test.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts memory.spec.ts; scoped prettier --check; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/memory-write.json",
+  "testFiles": [
+    "tests/memory-write.test.ts",
+    "tests/memory.test.ts",
+    "tests/memory-native.test.ts",
+    "tests/documents.test.ts",
+    "tests/e2e/memory.spec.ts"
+  ],
+  "limitations": [
+    "Approval card shows proposed content/scope/privacy/revision, but update before-after diff and source-reference preview remain missing",
+    "Memory-write cancellation, restart/replay, source validation and child/evaluation denial need dedicated native write matrix beyond shared read/contract coverage",
+    "Model-created entries are mutable only through exact approvals; no autonomous write grant is provided",
+    "Registry deletion does not remove delivered model/checkpoint/approval proposal copies; derivative cleanup remains incomplete",
+    "Chinese/light four-width after screenshots only; no new matched OpenDots comparison or full theme/language/accessibility matrix",
+    "No Ubuntu/live provider/fullAT evidence; all70 global AT unchanged"
+  ],
+  "writeTests": 6,
+  "writeSeconds": 7.07,
+  "relatedTests": 15,
+  "relatedSeconds": 16.15,
+  "browserTests": 5,
+  "browserSeconds": 15.7,
+  "buildSeconds": 12.93,
+  "assertions": [
+    "native root memory_write interrupts before side effect",
+    "exact approval operation authorizes create/update; rejection leaves no row",
+    "owner locked/userEdited entries cannot be overwritten by model",
+    "owner insertion during approval race remains intact",
+    "injected after-save exception rolls back memory/index/receipt together with success transition",
+    "model source Work/run recorded; status unverified/private default; owner edit relocks",
+    "browser checks absence before approval and model provenance afterward",
+    "four widths no overflow; final320 screenshot inspected"
+  ],
+  "screenshots": [
+    "docs/implementation/evidence/2026-10-04/memory-write/after-1440.png",
+    "docs/implementation/evidence/2026-10-04/memory-write/after-1280.png",
+    "docs/implementation/evidence/2026-10-04/memory-write/after-390.png",
+    "docs/implementation/evidence/2026-10-04/memory-write/after-320.png"
+  ],
+  "notes": [
+    "build passed before final localized scope/approval-content spacing; final type/lint/browser cover final UI changes",
+    "existing large Vite chunk warning remains"
+  ]
+}

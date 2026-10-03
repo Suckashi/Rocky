@@ -161,3 +161,5 @@ Memory scope coverage (5f192c636d6444f740bb8371c7715cca5707506f) adds four-width
 Memory grant UI (e56869c3a43e6d83512925041d75b70e69d2e402) uses existing collapsed Work permissions and neutral form styles, avoiding permanent extra panels. Owner-only scope/private controls are a Rocky adaptation. [Four-width after evidence](memory-registry.md); no new upstream code or full matched reference claim.
 
 Composer memory consent (95c144678f0c591e6b990ae7b4d5b9c8b122523a) uses existing OpenDots-aligned Model/tools popover and semantic form controls, with no permanent panel. Rocky adaptation makes scope and private-to-model consent explicit. [Four-width after evidence](memory-registry.md); complete reference comparison remains pending.
+
+Memory write approval (0aa4073ac3960576cbb592be22a2043b8398be59) uses existing PageReviewCard-aligned border/header/footer and proposal spacing, with translated scope/privacy/revision and scrollable proposed text. This is a Rocky-specific exact-consent adaptation; no new upstream code copied. [Four-width after evidence](memory-registry.md). Update diff and matched reference comparison remain open.

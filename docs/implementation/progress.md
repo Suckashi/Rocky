@@ -547,3 +547,7 @@ Expanded native scope/child/cross-Work/revoked-replay/evaluation rollback covera
 ## Native memory result completeness (8cc548c9cbb0409945540581ad33299ed231824c)
 
 Added explicit native truncated/encoding/budget/untrusted metadata; full JSON fits declared token budget.14 integration and4 browser tests pass. [Evidence](memory-registry.md). No fullAT promotion; T-025 remains in_progress.
+
+## Native Memory write (0aa4073ac3960576cbb592be22a2043b8398be59)
+
+Added exact-approved root memory create/update, manual-lock protection, source Work/run provenance and atomic memory/index/receipt settlement. Approval UI reuses existing card structure.6 write tests,15 related tests and5 browser tests pass. [Report](memory-registry.md). Before/after diff, cancellation/restart write matrix and derivative cleanup remain; T-025/Goal active.

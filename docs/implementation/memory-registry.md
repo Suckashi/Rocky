@@ -139,3 +139,20 @@ Native memory_search now delivers {items,truncated,encoding,tokenBudget,untruste
 - No UI layout change/new matched OpenDots comparison in this slice
 - Native memory write, ungranted-consent wait, derivative/checkpoint deletion remain incomplete
 - Fixture provider only; Ubuntu/live/fullAT not_run; all70 globalAT unchanged
+
+## Exact-approved native memory writes (0aa4073ac3960576cbb592be22a2043b8398be59)
+
+Root memory_write creates/updates an explicitly scoped UUID/revision proposal through native Deep Agents interrupt. Daemon resolves scope, rejects manual locks/userEdited/owner source and stale revisions, then binds operation ID, Work/run/session, exact args fingerprint and memory target identity. Approved operation revalidates current memory/model configuration. Model save requires active Work, matching approved args and an existing operation transaction. Row/index/metadata receipt and succeeded operation settlement commit atomically; injected failure rolls all mutation back and records failed-known-no-effect. No direct owner API invocation by model.
+
+Model entries carry source=model, sourceWorkId/sourceRunId, locked=false/userEdited=false, status=unverified; defaultprivate true. Every subsequent model update still requires new exact owner approval. Manual edit makes source=owner and locks it, retaining original model provenance IDs. Search/UI schemas now distinguish these states. Child whitelist omits memory_write.
+
+Existing approval card shows local-memory impact, translated scope, privacy, proposed revision/content and approve/reject. Text uses existing14/22px proposal margin and240px scroll cap. No new upstream component copy.
+
+[Evidence](evidence/2026-10-04/memory-write.json):6 native write cases(approve/reject/manual lock/race/atomic rollback/update),15 related regressions,5 browser tests pass; type/lint/build/format pass. Screenshots: [1440](evidence/2026-10-04/memory-write/after-1440.png), [1280](evidence/2026-10-04/memory-write/after-1280.png), [390](evidence/2026-10-04/memory-write/after-390.png), [320](evidence/2026-10-04/memory-write/after-320.png).
+
+- Approval card shows proposed content/scope/privacy/revision, but update before-after diff and source-reference preview remain missing
+- Memory-write cancellation, restart/replay, source validation and child/evaluation denial need dedicated native write matrix beyond shared read/contract coverage
+- Model-created entries are mutable only through exact approvals; no autonomous write grant is provided
+- Registry deletion does not remove delivered model/checkpoint/approval proposal copies; derivative cleanup remains incomplete
+- Chinese/light four-width after screenshots only; no new matched OpenDots comparison or full theme/language/accessibility matrix
+- No Ubuntu/live provider/fullAT evidence; all70 global AT unchanged
