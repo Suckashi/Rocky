@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-03",
+  "commit": "0ad6624",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "mode": "fixture",
+  "browser": "Chromium148.0.7778.96 / existing1223 / DPR1 / zoom100%",
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "result": "13.94s, existing bundle warnings"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "result": "33 files / 124 tests passed",
+      "durationSeconds": 59.44
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<Chromium1223>; npx playwright test --grep-invert 'browser egress'",
+      "exitCode": 0,
+      "result": "12 functional browser tests passed",
+      "durationSeconds": 49.8
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<Chromium1223>; npx playwright test tests/e2e/streaming.spec.ts",
+      "exitCode": 0,
+      "result": "Final stronger long-prompt/history/stream scroll assertion passed; 1 test",
+      "durationSeconds": 21.7
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<Chromium1223>; npx playwright test tests/e2e/history.spec.ts tests/e2e/reconnect.spec.ts",
+      "exitCode": 0,
+      "result": "Final reconnect/history projection check: 2 passed",
+      "durationSeconds": 5.4
+    }
+  ],
+  "verified": [
+    "Latest50 persistent message records page backward, keyed by immutable IDs; 60 synthetic Work cards loaded25→50→60 without duplicate cards",
+    "Reading above bottom retains scrollTop across actual provider SSE fixture deltas; new-content action returns to bottom",
+    "1440x900,390x844,320x844 long user text/code/filename fixture has no full-page horizontal overflow; composer remains in viewport",
+    "Keyboard Enter loads history; focus stays on paging action or returns to transcript when action ends",
+    "One snapshot/SSE owner; Work events carry validated persisted history references; no per-card event source/poll",
+    "Manual reconnect merges confirmed history; stale async page responses discarded on projection generation change"
+  ],
+  "correctedFailures": [
+    "Initial standalone history fixture mixed with unrelated persisted SSE replay; isolated routed fixture SSE explicitly instead of changing formal product state",
+    "Reconnect assertion originally expected all Work cards; updated to compare actual bounded history plus active Work IDs from authoritative APIs",
+    "Attempted extra history domain events changed outbox counts; removed extra event type and added bounded history references to existing Work event. Original fault/outbox assertions pass unchanged"
+  ],
+  "screenshots": [
+    "history-page-1440.png",
+    "history-1440.png",
+    "history-320.png"
+  ],
+  "limitations": [
+    "Routed visual fixture is synthetic, not real provider/business service evidence; isolated fixture SSE closes, so screenshots honestly show offline state",
+    "Only empty-shell reference/before/after comparisons are matched evidence; these long-history shots are interaction/overflow evidence, not reference pixel-diff proof",
+    "Snapshot still supplies full Work list; UI messages page but server Work snapshot pagination/performance remains pending",
+    "Reconnection refreshes newest history cursor and retains loaded records; later paging may revisit already-loaded records, deduplicated by stable ID",
+    "Cross-turn agent context, inbox checkpoint acknowledgement and exact steering remain incomplete",
+    "Ubuntu and strict browser egress remain previously deferred; no new platform/live claim",
+    "No remote actions"
+  ]
+}

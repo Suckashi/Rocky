@@ -1923,6 +1923,30 @@
             "Local fixture only, no Ubuntu or new live service validation",
             "No remote actions"
           ]
+        },
+        {
+          "commit": "0ad6624",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; functional Playwright and focused history/stream tests",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/history-ui/verification.json",
+          "testFiles": [
+            "tests/e2e/history.spec.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/reconnect.spec.ts"
+          ],
+          "limitations": [
+            "Routed visual fixture is synthetic, not real provider/business service evidence; isolated fixture SSE closes, so screenshots honestly show offline state",
+            "Only empty-shell reference/before/after comparisons are matched evidence; these long-history shots are interaction/overflow evidence, not reference pixel-diff proof",
+            "Snapshot still supplies full Work list; UI messages page but server Work snapshot pagination/performance remains pending",
+            "Reconnection refreshes newest history cursor and retains loaded records; later paging may revisit already-loaded records, deduplicated by stable ID",
+            "Cross-turn agent context, inbox checkpoint acknowledgement and exact steering remain incomplete",
+            "Ubuntu and strict browser egress remain previously deferred; no new platform/live claim",
+            "No remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2018,6 +2042,30 @@
             "Partial streaming reconstructs from bounded recent event projection; a dedicated durable message history remains pending",
             "Redaction retains 32 characters plus maximum known credential length and incomplete URLs; short replies and structured JSON may become visible only after complete validation",
             "Strict browser egress remains host AdGuard blocked; no additional attempt or relaxed assertion",
+            "No remote actions"
+          ]
+        },
+        {
+          "commit": "0ad6624",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; functional Playwright and focused history/stream tests",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/history-ui/verification.json",
+          "testFiles": [
+            "tests/e2e/history.spec.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/reconnect.spec.ts"
+          ],
+          "limitations": [
+            "Routed visual fixture is synthetic, not real provider/business service evidence; isolated fixture SSE closes, so screenshots honestly show offline state",
+            "Only empty-shell reference/before/after comparisons are matched evidence; these long-history shots are interaction/overflow evidence, not reference pixel-diff proof",
+            "Snapshot still supplies full Work list; UI messages page but server Work snapshot pagination/performance remains pending",
+            "Reconnection refreshes newest history cursor and retains loaded records; later paging may revisit already-loaded records, deduplicated by stable ID",
+            "Cross-turn agent context, inbox checkpoint acknowledgement and exact steering remain incomplete",
+            "Ubuntu and strict browser egress remain previously deferred; no new platform/live claim",
             "No remote actions"
           ]
         }

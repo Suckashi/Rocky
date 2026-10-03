@@ -14,7 +14,7 @@
 | T-008         | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.               |
 | T-009         | done        | Durable child IPC and configured/fixture native Deep Agents workers; daemon owns model/tool RPC, shutdown and descendant cleanup.                           |
 | T-010         | done        | Durable bounded admission, main/background/evaluation slots, workspace UUID reservations, model semaphore and pinned budget/configuration.                  |
-| T-019         | in_progress | OpenDots compact shell/main chat slice, model popovers/dialog, original avatar, approvals/stop/reconcile; full tools/results/presence and streaming remain. |
+| T-019         | in_progress | OpenDots compact shell/main chat slice, model popovers/dialog, original avatar, approvals/stop/reconcile; full tools/results/presence remain. |
 | T-037         | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                            |
 | T-011 / T-018 | in_progress | Configured provider incremental SSE, common UI adapter, snapshot reconnect and numeric cursor replay; other contracts pending.                              |
 | Later tasks   | pending     | Product modules and confirmed-state presence remain pending.                                                                                                |
@@ -306,3 +306,9 @@ Windows fixture: typecheck, lint, build and all 120 tests pass (32 files, 56.09s
 Local commit f911e75 adds one durable main Conversation, separate per-Work ExecutionSession records, and immutable user/result history. Main active session follows daemon Work state; background/evaluation sessions do not replace it. Submission/history writes share domain transactions; outbox result delivery is deduplicated. New history API uses bounded numeric pagination, current public redaction and excludes evaluation data. Own Rocky schema10 upgrades to11 with source chronology; no foreign-store importer.
 
 Windows fixture: check/lint/build pass, all 124 tests pass (33 files, 57.81s); actual streaming/reconnect browser regression passes 2 tests (23.6s, existing Chromium148). Initial test cleanup/schema-version assertions were corrected; see [evidence](evidence/2026-10-03/conversation-history.json). T-011/T-013/T-018 remain in_progress: history UI paging, cross-turn model context, precise steering and checkpoint/inbox acknowledgement are unfinished. No global AT pass or remote action.
+
+## T-018/T-019: persistent history paging and scroll behavior
+
+Local commit 0ad6624 connects bounded persistent history to the shared snapshot/SSE adapter. Work events carry validated stored history references without adding event-source owners or changing outbox event counts. UI loads earlier records by stable cursor, retains already-loaded records on reconnect and keeps active Work controls visible. Reading above bottom survives actual provider fixture SSE; new-content action returns to bottom. Keyboard paging returns predictable focus.
+
+Windows fixture: all 124 tests pass, 12 functional browser tests pass (49.8s), final stronger stream-scroll test passes (21.7s) and final history/reconnect tests pass (5.4s). Typecheck/lint/build pass. Long-history fixture checked at1440/390/320px; no page overflow, composer visible. See [evidence](evidence/2026-10-03/history-ui/verification.json). UI history pages, but full Work snapshot pagination, model cross-turn context, inbox barrier and remaining product modules are unfinished. Global AT remain not_run; no remote action.

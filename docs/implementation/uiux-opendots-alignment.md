@@ -59,3 +59,9 @@ Windows x64、Node 24.12.0、npm 11.6.4、Chromium 148.0.7778.96、DPR 1、100% 
 ## 後續串流與重連切片
 
 Source 04e1e94436e98b24cd6ac72b6c802fea008c2477：增量 provider SSE、AG-UI 對應事件、共用 Rocky adapter、重連、串流停止已在 local provider fixture 驗證。新增證據 [streaming/verification.json](evidence/2026-10-03/streaming/verification.json) 與 1440／390px 串流截圖；舊切片的「尚無串流」描述只適用原 cb54e75 baseline。真實外部模型／完整 Message history 與長歷史 scroll 動態驗證仍 not_run／未完成。
+
+## Persistent history follow-up
+
+Commit 0ad6624 connects immutable conversation history to the common Rocky adapter. Earlier-history control uses the same neutral12px typography, semantic surface/border and9px secondary-action radius; it is a necessary Rocky paging adaptation. Keyboard completion focuses the transcript with a2px semantic focus outline; this accessibility difference is deliberate. Native tools report failed results separately; Work terminal states remain daemon-authoritative.
+
+History fixture shots: [page](evidence/2026-10-03/history-ui/history-page-1440.png), [desktop](evidence/2026-10-03/history-ui/history-1440.png), [320px](evidence/2026-10-03/history-ui/history-320.png). These are explicitly routed visual fixture/interaction evidence, not upstream service evidence or matched pixel comparisons. Isolated fixture SSE closes and displays the truthful offline state. Real local provider SSE separately verifies preserved upward scroll and the new-content action. Commands/counts/limitations: [verification](evidence/2026-10-03/history-ui/verification.json). The earlier reference→before→after empty-shell comparisons remain the high-fidelity geometry evidence; full populated reference comparison and outstanding panels/modules remain incomplete.
