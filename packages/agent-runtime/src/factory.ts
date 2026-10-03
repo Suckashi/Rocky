@@ -25,6 +25,7 @@ import {
   workspaceToolSchema,
   workspaceReadToolSchema,
   workspaceWriteSchema,
+  workspaceWorktreeSchema,
 } from "../../contracts/src/workspaces.js";
 import {
   scratchTools,
@@ -80,6 +81,7 @@ export function createRockyAgent(
                 ? [
                     "mcp_discover",
                     "workspace_write",
+                    "workspace_worktree",
                     "mcp_call",
                     "mcp_data",
                     "workspace_info",
@@ -211,6 +213,16 @@ export function createRockyAgent(
       },
     ),
   );
+  const workspaceWorktree = tool(
+    async (args, config) =>
+      hooks.call("workspace_worktree", args, config.toolCall?.id ?? ""),
+    {
+      name: "workspace_worktree",
+      schema: workspaceWorktreeSchema,
+      description:
+        "Propose a new local Git worktree from this registered workspace committed HEAD. Daemon chooses an exact sibling destination and branch; owner must approve. Excludes dirty/untracked source files. Returns a new registered workspace for a future Work; does not redirect this Work or grant read permission. No merge, remote access, shell, cleanup or automatic retry.",
+    },
+  );
   const workspaceWrite = tool(
     async (args, config) =>
       hooks.call("workspace_write", args, config.toolCall?.id ?? ""),
@@ -238,7 +250,14 @@ export function createRockyAgent(
     tools: [
       ...(syntheticTools ? [write] : []),
       ...(models
-        ? [discover, call, data, workspaceWrite, ...workspaceTools]
+        ? [
+            discover,
+            call,
+            data,
+            workspaceWrite,
+            workspaceWorktree,
+            ...workspaceTools,
+          ]
         : []),
     ],
     middleware: [
@@ -296,6 +315,11 @@ export function createRockyAgent(
         : {}),
       ...(models
         ? {
+            workspace_worktree: {
+              allowedDecisions: ["approve", "reject"] as (
+                "approve" | "reject"
+              )[],
+            },
             workspace_write: {
               allowedDecisions: ["approve", "reject"] as (
                 "approve" | "reject"

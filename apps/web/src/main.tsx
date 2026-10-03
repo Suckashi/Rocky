@@ -332,7 +332,11 @@ function App() {
                             ? locale === "zh"
                               ? "這將在選定工作區建立或完整取代一個檔案。"
                               : "This creates or fully replaces one file in the selected workspace."
-                            : t.impact}
+                            : w.approval.tool === "workspace_worktree"
+                              ? locale === "zh"
+                                ? "這將建立本地 Git 分支與獨立工作區，並修改來源 repository 的 Git 登記。"
+                                : "This creates a local Git branch and worktree and updates the source repository Git registration."
+                              : t.impact}
                       </p>
                       {["mcp_call", "mcp_data"].includes(w.approval.tool) ? (
                         <>
@@ -405,6 +409,35 @@ function App() {
                             </pre>
                           </details>
                         </>
+                      ) : w.approval.tool === "workspace_worktree" &&
+                        w.approval.worktreePreview ? (
+                        <>
+                          <p>
+                            {locale === "zh"
+                              ? "只複製已提交的 HEAD；未提交與未追蹤檔案不會帶入。新工作區需要另開 Work 選取，讀取權限不會自動授予。"
+                              : "Checks out committed HEAD only; excludes dirty and untracked files. Select the new workspace in a future Work with fresh read permission."}
+                          </p>
+                          <dl className="worktree-proposal">
+                            <dt>
+                              {locale === "zh" ? "目的地" : "Destination"}
+                            </dt>
+                            <dd>
+                              <code>
+                                {w.approval.worktreePreview.destination}
+                              </code>
+                            </dd>
+                            <dt>
+                              {locale === "zh" ? "本地分支" : "Local branch"}
+                            </dt>
+                            <dd>
+                              <code>{w.approval.worktreePreview.branch}</code>
+                            </dd>
+                            <dt>HEAD</dt>
+                            <dd>
+                              <code>{w.approval.worktreePreview.head}</code>
+                            </dd>
+                          </dl>
+                        </>
                       ) : w.approval.tool === "workspace_write" ? (
                         <WriteProposal
                           key={w.approval.id + ":" + w.approval.revision}
@@ -422,9 +455,12 @@ function App() {
                           className="primary"
                           onClick={() => void decide(w, "approve")}
                         >
-                          {["mcp_call", "mcp_data", "workspace_write"].includes(
-                            w.approval.tool,
-                          )
+                          {[
+                            "mcp_call",
+                            "mcp_data",
+                            "workspace_write",
+                            "workspace_worktree",
+                          ].includes(w.approval.tool)
                             ? locale === "zh"
                               ? "核准這次操作"
                               : "Approve this operation"

@@ -40,6 +40,7 @@ import { authorizeOperation } from "./policy.js";
 import { OperationReconciler } from "./operation-reconciler.js";
 import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
+import { WorkspaceWorktrees } from "./workspace-worktrees.js";
 import { WorkspaceWriter, WorkspaceWriteError } from "./workspace-writes.js";
 import { WorkspaceRegistry, workspaceRootsOverlap } from "./workspaces.js";
 import {
@@ -81,6 +82,10 @@ export class WorkService {
   readonly admissionConfig: ReturnType<typeof admissionConfigSchema.parse>;
   readonly events = new EventEmitter();
   private workspaceWriteErrors = new Map<string, string>();
+  private workspaceWorktrees = new Map<
+    string,
+    Awaited<ReturnType<WorkspaceWorktrees["prepare"]>>
+  >();
   private workspaceWrites = new Map<
     string,
     Awaited<ReturnType<WorkspaceWriter["prepare"]>>
@@ -635,13 +640,14 @@ export class WorkService {
         call: async (name, args, callId) => {
           abort.signal.throwIfAborted();
           const current = this.store.get(work.id);
-          if (name === "workspace_write") {
+          if (name === "workspace_write" || name === "workspace_worktree") {
             try {
               return await this.callWorkspaceWrite(
                 current,
                 args,
                 callId,
                 abort.signal,
+                name,
               );
             } catch (error) {
               const reason =
@@ -652,9 +658,12 @@ export class WorkService {
                         "target_changed",
                         "stale_approval",
                         "stale_workspace",
+                        "git_changed",
                       ].includes(error.code)
                     ? "File state changed; this proposal is no longer valid. Start a new Work with a fresh proposal."
-                    : "Workspace write was denied or unavailable. Review the operation receipt before retrying.";
+                    : name === "workspace_worktree"
+                      ? "Worktree creation was denied or unavailable. Review the operation receipt before retrying."
+                      : "Workspace write was denied or unavailable. Review the operation receipt before retrying.";
               this.workspaceWriteErrors.set(current.id, reason);
               throw error;
             }
@@ -1124,8 +1133,12 @@ export class WorkService {
     args: Record<string, unknown>,
     callId: string,
     signal: AbortSignal,
+    name = "workspace_write",
   ) {
-    const proposal = this.workspaceWrites.get(work.runId + ":" + callId);
+    const proposal =
+      name === "workspace_worktree"
+        ? this.workspaceWorktrees.get(work.runId + ":" + callId)
+        : this.workspaceWrites.get(work.runId + ":" + callId);
     if (!proposal || intentHash(args) !== intentHash(proposal.args))
       throw new RockyError(
         "stale_approval",
@@ -1135,7 +1148,7 @@ export class WorkService {
     let operation = this.operations.prepare(
       work,
       callId,
-      "workspace_write",
+      name,
       args,
       proposal.fingerprint,
       proposal.targetIdentity,
@@ -1147,10 +1160,14 @@ export class WorkService {
         "Prior write requires reconciliation",
         409,
       );
-    const fresh = await new WorkspaceWriter(this.workspaces).prepare(
-      work,
-      args,
-    );
+    const fresh =
+      name === "workspace_worktree"
+        ? await new WorkspaceWorktrees(this.workspaces).prepare(
+            work,
+            args,
+            signal,
+          )
+        : await new WorkspaceWriter(this.workspaces).prepare(work, args);
     signal.throwIfAborted();
     if (fresh.fingerprint !== proposal.fingerprint)
       throw new RockyError(
@@ -1213,10 +1230,16 @@ export class WorkService {
     );
     this.flushOutbox();
     try {
-      const result = await new WorkspaceWriter(this.workspaces).dispatch(
-        proposal,
-        signal,
-      );
+      const result =
+        "git" in proposal
+          ? await new WorkspaceWorktrees(this.workspaces).dispatch(
+              proposal,
+              signal,
+            )
+          : await new WorkspaceWriter(this.workspaces).dispatch(
+              proposal,
+              signal,
+            );
       const serialized = JSON.stringify(result);
       this.operations.transition(
         current,
@@ -1536,7 +1559,8 @@ export class WorkService {
           (request.name !== "write_sample" &&
             request.name !== "mcp_call" &&
             request.name !== "mcp_data" &&
-            request.name !== "workspace_write")
+            request.name !== "workspace_write" &&
+            request.name !== "workspace_worktree")
         )
           throw Error("Unsupported interrupt");
         const calls =
@@ -1549,6 +1573,19 @@ export class WorkService {
             ) ?? [];
         if (calls.length !== 1 || !calls[0]?.id)
           throw Error("Interrupted tool identity is ambiguous or missing");
+        const worktreeProposal =
+          request.name === "workspace_worktree"
+            ? await new WorkspaceWorktrees(this.workspaces).prepare(
+                work,
+                request.args,
+                active.abort.signal,
+              )
+            : undefined;
+        if (worktreeProposal)
+          this.workspaceWorktrees.set(
+            work.runId + ":" + calls[0].id,
+            worktreeProposal,
+          );
         const writeProposal =
           request.name === "workspace_write"
             ? await new WorkspaceWriter(this.workspaces).prepare(
@@ -1563,6 +1600,7 @@ export class WorkService {
             writeProposal,
           );
         const approvalFingerprint =
+          worktreeProposal?.fingerprint ??
           writeProposal?.fingerprint ??
           this.fingerprint(work, request.name, request.args);
         const operation = this.operations.prepare(
@@ -1571,7 +1609,11 @@ export class WorkService {
           request.name,
           request.args,
           approvalFingerprint,
-          ...(writeProposal ? [writeProposal.targetIdentity] : []),
+          ...(worktreeProposal
+            ? [worktreeProposal.targetIdentity]
+            : writeProposal
+              ? [writeProposal.targetIdentity]
+              : []),
           ...(request.name === "mcp_call" || request.name === "mcp_data"
             ? [
                 intentHash(
@@ -1591,6 +1633,15 @@ export class WorkService {
           operationId: operation.id,
           revision: 1,
           tool: request.name,
+          ...(worktreeProposal
+            ? {
+                worktreePreview: {
+                  destination: worktreeProposal.git.destination,
+                  branch: worktreeProposal.git.branch,
+                  head: worktreeProposal.git.head,
+                },
+              }
+            : {}),
           ...(writeProposal
             ? { targetPreview: writeProposal.target.relativePath }
             : {}),
@@ -1641,7 +1692,10 @@ export class WorkService {
           this.workspaceWriteErrors.get(id) ??
           (error instanceof Error ? error.message : "Run failed");
         if (
-          work.approval?.tool === "workspace_write" &&
+          work.approval &&
+          ["workspace_write", "workspace_worktree"].includes(
+            work.approval?.tool ?? "",
+          ) &&
           work.approval.status === "approved" &&
           this.workspaceWriteErrors.has(id) &&
           ["not_executed", "failed_known_no_effect"].includes(
@@ -1670,6 +1724,9 @@ export class WorkService {
       active.worker.close(),
     ]).then(() => {
       if (this.active.get(id) === active) {
+        for (const key of this.workspaceWorktrees.keys())
+          if (key.startsWith(this.store.get(id).runId + ":"))
+            this.workspaceWorktrees.delete(key);
         for (const key of this.workspaceWrites.keys())
           if (key.startsWith(this.store.get(id).runId + ":"))
             this.workspaceWrites.delete(key);

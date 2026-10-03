@@ -1,3 +1,4 @@
+import { worktreePreviewSchema } from "./workspaces.js";
 import { z } from "zod";
 import { EventSchemas } from "@ag-ui/core/schemas";
 import { modelBudgetSchema } from "./model-budget.js";
@@ -102,6 +103,7 @@ export const approvalSchema = z
     intentFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
     tool: z.string().min(1),
     targetPreview: z.string().min(1).max(4096).optional(),
+    worktreePreview: worktreePreviewSchema.optional(),
     args: z.record(z.string(), z.unknown()),
     status: z.enum(["pending", "approved", "rejected", "expired"]),
   })

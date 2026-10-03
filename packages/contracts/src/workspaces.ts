@@ -1,4 +1,10 @@
 import { z } from "zod";
+export const workspaceWorktreeSchema = z.strictObject({});
+export const worktreePreviewSchema = z.strictObject({
+  destination: z.string().min(1).max(4096),
+  branch: z.string().min(1).max(128),
+  head: z.string().regex(/^[a-f0-9]{40,64}$/),
+});
 export const workspaceWriteSchema = z.strictObject({
   path: z.string().min(1).max(4096),
   content: z.string().max(65536),

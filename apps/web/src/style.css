@@ -381,6 +381,20 @@ li {
 .diff-remove {
   border-left: 2px solid #a33e39;
 }
+.worktree-proposal {
+  margin: 14px 22px;
+  font-size: 13px;
+}
+.worktree-proposal dt {
+  color: var(--muted);
+}
+.worktree-proposal dd {
+  margin: 4px 0 12px;
+  overflow-wrap: anywhere;
+}
+.worktree-proposal dd code {
+  margin: 0;
+}
 .approval code {
   display: block;
   margin: 14px 22px 18px;

@@ -7,6 +7,7 @@ export default defineConfig({
     "workspaces.spec.ts",
     "workspace-read.spec.ts",
     "workspace-write.spec.ts",
+    "workspace-worktree.spec.ts",
   ],
   workers: 1,
   projects: [{ name: "production-path" }],
