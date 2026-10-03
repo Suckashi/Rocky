@@ -151,6 +151,9 @@ for (const provider of [
         ),
       ).toBe(true);
       expect(fixture.requests[2]?.body.messages).toHaveLength(3);
+      expect(fixture.requests[1]?.body.tool_choice).toEqual(
+        provider === "anthropic" ? { type: "auto" } : "auto",
+      );
       await expect.poll(() => fixture.cancelled).toBe(1);
       expect(await ctx.models.probe(command.id, input)).toEqual(result);
       expect(fixture.requests).toHaveLength(5);
@@ -172,6 +175,26 @@ for (const provider of [
       await fixture.close();
     }
   });
+
+test("T-007: auto tool selection must produce a real tool call, not a text-only false positive", async () => {
+  const fixture = await startProbeFixture({ refuseTool: true });
+  const ctx = setup();
+  try {
+    const command = save(fixture.baseUrl);
+    ctx.models.save(command);
+    const result = await ctx.models.probe(command.id, {
+      requestId: randomUUID(),
+      expectedRevision: 1,
+    });
+    expect(result.status).toBe("failed");
+    expect(result.checks.text).toBe("passed");
+    expect(result.checks.tools).toBe("failed");
+    expect(result.requests).toBe(2);
+  } finally {
+    await ctx.close();
+    await fixture.close();
+  }
+});
 
 test("T-007 AT-23: redirects never reach an unconfigured destination; invalid replies are redacted", async () => {
   const target = await startProbeFixture(),

@@ -5,7 +5,12 @@ import {
 } from "node:http";
 import type { AddressInfo } from "node:net";
 export async function startProbeFixture(
-  options: { redirect?: string; invalid?: boolean; hold?: boolean } = {},
+  options: {
+    redirect?: string;
+    invalid?: boolean;
+    hold?: boolean;
+    refuseTool?: boolean;
+  } = {},
 ) {
   const requests: {
     url: string;
@@ -68,7 +73,7 @@ export async function startProbeFixture(
       return;
     }
     res.setHeader("content-type", "application/json");
-    if (body.tool_choice) {
+    if (body.tool_choice && !options.refuseTool) {
       res.end(
         JSON.stringify(
           anthropic

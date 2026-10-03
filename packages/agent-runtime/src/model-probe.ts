@@ -123,13 +123,20 @@ export async function runModelProbe(
     const tools = anthropic
       ? [{ ...tool, input_schema: parameters }]
       : [{ type: "function", function: { ...tool, parameters } }];
+    // Probe the same automatic tool selection used by the runtime. Some reasoning
+    // providers reject forced tool_choice even though they support normal tools.
+    const toolMessages = [
+      {
+        role: "user",
+        content: `Call rocky_probe_echo once with nonce ${nonce}. After its result, reply with exactly that nonce.`,
+      },
+    ];
     const toolData: unknown = JSON.parse(
       await boundedText(
         await request({
           tools,
-          tool_choice: anthropic
-            ? { type: "tool", name: tool.name }
-            : { type: "function", function: { name: tool.name } },
+          messages: toolMessages,
+          tool_choice: anthropic ? { type: "auto" } : "auto",
         }),
       ),
     );
@@ -147,7 +154,7 @@ export async function runModelProbe(
       )
         throw Error("tool");
       roundtrip = [
-        ...messages,
+        ...toolMessages,
         { role: "assistant", content: reply.content },
         {
           role: "user",
@@ -169,7 +176,7 @@ export async function runModelProbe(
       )
         throw Error("tool");
       roundtrip = [
-        ...messages,
+        ...toolMessages,
         reply,
         { role: "tool", tool_call_id: call.id, content: nonce },
       ];
