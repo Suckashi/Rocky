@@ -38,7 +38,9 @@ test("T-007 shutdown cancels configured model I/O and retains unknown usage with
       modelSelection: { connectionId, revision: 1 },
       transport: "http",
     });
-    await expect.poll(() => fixture.requests.length).toBe(1);
+    await expect
+      .poll(() => fixture.requests.length, { timeout: 10000 })
+      .toBe(1);
     await service.close();
     closed = true;
     const reopened = new Store(root);
@@ -87,7 +89,7 @@ for (const provider of ["openai-compatible", "anthropic"] as const)
       const work = service.submit(command);
       expect(service.submit(command).id).toBe(work.id);
       await expect
-        .poll(() => service.store.get(work.id).status)
+        .poll(() => service.store.get(work.id).status, { timeout: 10000 })
         .toBe("waiting_approval");
       expect(
         service.store.db
@@ -104,8 +106,18 @@ for (const provider of ["openai-compatible", "anthropic"] as const)
         decision: "approve",
       });
       await expect
-        .poll(() => service.store.get(work.id).status)
+        .poll(() => service.store.get(work.id).status, { timeout: 10000 })
         .toBe("completed");
+      await expect
+        .poll(
+          () =>
+            (
+              service.store.db
+                .prepare("SELECT status FROM worker_jobs WHERE run_id=?")
+                .get(work.runId) as { status: string } | undefined
+            )?.status,
+        )
+        .toBe("exited");
       expect(
         service.modelBudgets.snapshot(work.runId).knownUsage.inputTokens,
       ).toBe(fixture.requests.length * 7);
@@ -173,7 +185,7 @@ test("T-007 submission rejects implicit model selection and stale configured app
     };
     const work = service.submit(input);
     await expect
-      .poll(() => service.store.get(work.id).status)
+      .poll(() => service.store.get(work.id).status, { timeout: 10000 })
       .toBe("waiting_approval");
     const waiting = service.store.get(work.id);
     service.models.save({

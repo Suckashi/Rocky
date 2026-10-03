@@ -105,7 +105,7 @@ test("T-008 revoking submitted synthetic read scope prevents actual MCP read; su
     expect(service.submit(command).id).toBe(work.id);
     expect(service.grants.list(work.id)).toHaveLength(1);
     await expect
-      .poll(() => service.store.get(work.id).status)
+      .poll(() => service.store.get(work.id).status, { timeout: 10000 })
       .toMatch(/waiting_approval|failed|completed|blocked/);
     expect(
       service.store.db

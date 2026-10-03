@@ -6,7 +6,15 @@ import type { BaseMessage } from "@langchain/core/messages";
 import type { ChatResult } from "@langchain/core/outputs";
 import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
 import { createRockyAgent } from "../../../packages/agent-runtime/src/factory.js";
+import type { RuntimeHooks } from "../../../packages/agent-runtime/src/factory.js";
+import { WorkerModel } from "../../../packages/agent-runtime/src/worker-model.js";
+import { toModelWire } from "../../../packages/agent-runtime/src/model-wire.js";
 import { parseIpcMessage } from "../../../packages/contracts/src/ipc.js";
+if (
+  (globalThis as { __rockyWorkerNetworkGuard?: boolean })
+    .__rockyWorkerNetworkGuard !== true
+)
+  throw Error("Agent worker network guard missing");
 type Message = ReturnType<typeof parseIpcMessage>;
 let owner: Message | undefined;
 let saver: SqliteSaver | undefined;
@@ -159,7 +167,7 @@ process.on("message", (wire) => {
         throw Error("Agent start requires graph path");
       owner = message;
       saver = SqliteSaver.fromConnString(message.payload.graphPath);
-      agent = createRockyAgent(saver, {
+      const hooks: RuntimeHooks = {
         event: (name, data) =>
           send(randomUUID(), { kind: "runtime_event", name, data }),
         call: async (name, args, callId) =>
@@ -178,11 +186,7 @@ process.on("message", (wire) => {
           const response = (await rpc({
             kind: "model_request",
             child,
-            messages: messages.map((m) => ({
-              type: m.type,
-              name: m.name,
-              content: m.content,
-            })),
+            messages: toModelWire(messages),
           })) as {
             content: string;
             tool_calls?: {
@@ -202,7 +206,25 @@ process.on("message", (wire) => {
             ],
           };
         },
-      });
+      };
+      const remote = (child: boolean) =>
+        new WorkerModel(
+          child,
+          async (isChild, messages, tools) =>
+            (await rpc({
+              kind: "model_request",
+              child: isChild,
+              messages,
+              tools,
+            })) as { content: string; tool_calls?: AIMessage["tool_calls"] },
+        );
+      agent = createRockyAgent(
+        saver,
+        hooks,
+        message.payload.mode === "configured"
+          ? { root: remote(false), child: remote(true) }
+          : undefined,
+      );
       void invoke(message.requestId);
     } else if (message.payload.kind === "resume")
       void invoke(message.requestId, message.payload.decision);

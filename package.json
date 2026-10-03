@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "build": "tsc -p tsconfig.build.json && vite build --config apps/web/vite.config.ts",
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-runtime-assets.mjs && vite build --config apps/web/vite.config.ts",
     "start": "node dist/apps/daemon/src/main.js",
     "check": "tsc --noEmit",
     "check:docs": "node scripts/check-docs.mjs",

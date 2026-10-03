@@ -161,7 +161,9 @@ test("T-007 actual Work path refuses the next model dispatch when its root call 
         inputTokenBound: null,
         outputTokenBound: null,
       });
-    await expect.poll(() => service.store.get(work.id).status).toBe("failed");
+    await expect
+      .poll(() => service.store.get(work.id).status, { timeout: 10000 })
+      .toBe("failed");
     expect(service.modelBudgets.snapshot(work.runId).calls).toBe(48);
     const response = await createApp(service).request(
       `/api/v1/works/${work.id}/model-usage`,
@@ -217,7 +219,9 @@ test("T-007 submission freezes custom budget across receipts, CAS and restart", 
         1,
       ),
     ).toThrow("revision changed");
-    await expect.poll(() => service.store.get(work.id).status).toBe("failed");
+    await expect
+      .poll(() => service.store.get(work.id).status, { timeout: 10000 })
+      .toBe("failed");
     expect(service.modelBudgets.snapshot(work.runId).calls).toBe(1);
     await service.close();
     closed = true;
@@ -250,7 +254,9 @@ test("T-007 submitted token cap fails closed before dispatch when no trusted bou
       transport: "http",
       modelBudget: { maxTokens: 1000 },
     });
-    await expect.poll(() => service.store.get(work.id).status).toBe("failed");
+    await expect
+      .poll(() => service.store.get(work.id).status, { timeout: 10000 })
+      .toBe("failed");
     expect(service.modelBudgets.snapshot(work.runId).calls).toBe(0);
     expect(
       service.store.db.prepare("SELECT * FROM operations").all(),

@@ -18,6 +18,7 @@ type Handler = (
 ) => Promise<unknown>;
 type AgentOptions = {
   graphPath: string;
+  mode?: "fixture" | "configured";
   event: (work: Work, name: string, data: Record<string, unknown>) => void;
 };
 
@@ -69,7 +70,12 @@ export class WorkerChannel {
     try {
       spawned = fork(entry, [], {
         execPath: process.execPath,
-        execArgv: entry.endsWith(".ts") ? ["--import", "tsx"] : [],
+        execArgv: [
+          "--import",
+          new URL("../../../scripts/worker-network-guard.mjs", import.meta.url)
+            .href,
+          ...(entry.endsWith(".ts") ? ["--import", "tsx"] : []),
+        ],
         env: Object.fromEntries(
           ["PATH", "SystemRoot", "TEMP", "TMP"].flatMap((key) =>
             process.env[key] ? [[key, process.env[key]!]] : [],
@@ -149,6 +155,7 @@ export class WorkerChannel {
       this.send(this.startRequestId, {
         kind: "start",
         text: this.owner.text,
+        ...(agentOptions?.mode ? { mode: agentOptions.mode } : {}),
         ...(agentOptions ? { graphPath: agentOptions.graphPath } : {}),
       });
     } catch (error) {

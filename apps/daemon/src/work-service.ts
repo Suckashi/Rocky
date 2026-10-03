@@ -2,14 +2,12 @@ import "../../../packages/agent-runtime/src/environment.js";
 import { createHash, randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { EventEmitter } from "node:events";
-import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
-import { Command } from "@langchain/langgraph";
-import { createRockyAgent } from "../../../packages/agent-runtime/src/factory.js";
 import type { RuntimeHooks } from "../../../packages/agent-runtime/src/factory.js";
+import { fromModelWire } from "../../../packages/agent-runtime/src/model-wire.js";
 import { WorkerChannel } from "./worker-channel.js";
 import { fileURLToPath } from "node:url";
-import type { BaseMessage } from "@langchain/core/messages";
 import type { AIMessage } from "@langchain/core/messages";
+import type { BindToolsInput } from "@langchain/core/language_models/chat_models";
 import { connectFixture } from "../../../packages/agent-runtime/src/mcp.js";
 import {
   submissionSchema,
@@ -31,10 +29,8 @@ import { WorkerJobs } from "./worker-jobs.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
-type Agent = ReturnType<typeof createRockyAgent>;
 type Active = {
-  agent?: Agent;
-  worker?: WorkerChannel;
+  worker: WorkerChannel;
   connection: Awaited<ReturnType<typeof connectFixture>>;
   model: { close: () => Promise<void> };
   abort: AbortController;
@@ -43,7 +39,6 @@ type Active = {
 };
 export class WorkService {
   readonly store: Store;
-  readonly saver: SqliteSaver;
   readonly models: ModelRegistry;
   readonly modelBudgets: ModelBudgetLedger;
   readonly operations: OperationLedger;
@@ -57,12 +52,7 @@ export class WorkService {
   deliveryError: string | null = null;
   constructor(root: string) {
     this.store = new Store(root);
-    let saver: SqliteSaver | undefined;
     try {
-      saver = SqliteSaver.fromConnString(
-        join(this.store.root, "graph-checkpoints.sqlite"),
-      );
-      this.saver = saver;
       this.models = new ModelRegistry(this.store);
       this.store.publicEvidence = (value) => this.models.redact(value);
       this.modelBudgets = new ModelBudgetLedger(this.store);
@@ -87,7 +77,6 @@ export class WorkService {
       this.deliveryTimer = setInterval(() => this.flushOutbox(), 500);
       this.deliveryTimer.unref();
     } catch (error) {
-      saver?.db.close();
       this.store.close();
       throw error;
     }
@@ -455,9 +444,8 @@ export class WorkService {
           }
         },
       };
-      let agent: Agent | undefined;
-      let worker: WorkerChannel | undefined;
-      if (work.mode === "fixture") {
+      let worker: WorkerChannel;
+      {
         const current = this.store.get(work.id);
         current.status = "running";
         this.update(current);
@@ -479,22 +467,26 @@ export class WorkService {
                 payload.args,
                 payload.logicalToolCallId,
               );
-            if (!hooks.modelRequest)
-              throw Error("Fixture model request unavailable");
-            const messages = payload.messages as BaseMessage[];
-            const result = await hooks.modelRequest(messages, payload.child);
-            const reply = result.generations[0]?.message as
-              AIMessage | undefined;
+            const messages = fromModelWire(payload.messages);
+            const reply = configuredModels
+              ? await (
+                  payload.child ? configuredModels.child : configuredModels.root
+                )
+                  .bindTools((payload.tools ?? []) as BindToolsInput[])
+                  .invoke(messages)
+              : ((await hooks.modelRequest!(messages, payload.child))
+                  .generations[0]?.message as AIMessage | undefined);
             if (!reply) throw Error("Model returned no message");
             return { content: reply.content, tool_calls: reply.tool_calls };
           },
           {
             graphPath: join(this.store.root, "graph-checkpoints.sqlite"),
+            mode: work.mode,
             event: (_owned, name, data) => hooks.event(name, data),
           },
         );
-      } else agent = createRockyAgent(this.saver, hooks, configuredModels);
-      const active = { agent, worker, connection, model, abort };
+      }
+      const active = { worker, connection, model, abort };
       this.active.set(work.id, active);
       handedOff = true;
       await this.run(work.id, undefined);
@@ -528,29 +520,7 @@ export class WorkService {
     work.status = "running";
     this.update(work);
     try {
-      const result = active.worker
-        ? await active.worker.invoke(decision)
-        : await active.agent!.invoke(
-            decision
-              ? new Command({
-                  resume: {
-                    decisions: [
-                      decision === "approve"
-                        ? { type: "approve" }
-                        : {
-                            type: "reject",
-                            message: "Owner rejected synthetic write",
-                          },
-                    ],
-                  },
-                })
-              : { messages: [{ role: "user", content: work.text }] },
-            {
-              configurable: { thread_id: work.runId },
-              signal: active.abort.signal,
-              recursionLimit: 30,
-            },
-          );
+      const result = await active.worker.invoke(decision);
       if (active.abort.signal.aborted) return;
       work = this.store.get(id);
       const raw = result as unknown as {
@@ -643,7 +613,7 @@ export class WorkService {
     active.closing ??= Promise.all([
       active.connection.close(),
       active.model.close(),
-      ...(active.worker ? [active.worker.close()] : []),
+      active.worker.close(),
     ]).then(() => {
       if (this.active.get(id) === active) this.active.delete(id);
     });
@@ -804,7 +774,6 @@ export class WorkService {
     );
     this.active.clear();
     this.flushOutbox();
-    this.saver.db.close();
     this.store.close();
   }
 }

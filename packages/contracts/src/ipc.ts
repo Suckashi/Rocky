@@ -19,6 +19,7 @@ export const ipcMessageSchema = z
       z.strictObject({
         kind: z.literal("start"),
         text: z.string().max(32768),
+        mode: z.enum(["fixture", "configured"]).optional(),
         graphPath: z.string().max(4096).optional(),
       }),
       z.strictObject({
@@ -34,6 +35,7 @@ export const ipcMessageSchema = z
         kind: z.literal("model_request"),
         child: z.boolean(),
         messages: z.array(z.unknown()).max(100),
+        tools: z.array(z.unknown()).max(100).optional(),
       }),
       z.strictObject({ kind: z.literal("model_result"), message: z.unknown() }),
       z.strictObject({ kind: z.literal("run_result"), result: z.unknown() }),
