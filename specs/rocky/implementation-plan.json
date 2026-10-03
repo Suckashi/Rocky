@@ -1412,7 +1412,7 @@
         "R-031",
         "R-037"
       ],
-      "status": "in_progress",
+      "status": "done",
       "evidence": [
         {
           "commit": "deeae5c2c04501d902560d5a2a8b54f0c967e6ab",
@@ -1452,6 +1452,26 @@
             "Per-daemon model semaphore and priority proven; no distributed or provider-enforced quota",
             "Workspace reservation, configurable bounds and full setting snapshots remain pending; T-010 in_progress",
             "Ubuntu and strict browser egress not verified; no global AT promotion"
+          ]
+        },
+        {
+          "commit": "ead307c7733284ca4642daa5164669774e152e31",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/work/complete.json",
+          "testFiles": [
+            "tests/admission.test.ts",
+            "tests/model-slots.test.ts",
+            "tests/store.test.ts"
+          ],
+          "limitations": [
+            "Opaque resource UUID is not canonical workspace isolation; T-017 remains",
+            "Ubuntu, strict browser egress and live paid model not verified; global AT unchanged",
+            "No remote action"
           ]
         }
       ],
