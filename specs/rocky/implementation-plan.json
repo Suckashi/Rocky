@@ -3741,8 +3741,33 @@
         "R-033",
         "R-036"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "e2656034210873026b265051839401ecd5fb2983",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/memory.test.ts tests/workspaces.test.ts tests/operation-ledger.test.ts tests/http.test.ts; npm run check; npm run lint; npm run build; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/memory-registry.json",
+          "testFiles": [
+            "tests/memory.test.ts",
+            "tests/workspaces.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/http.test.ts"
+          ],
+          "limitations": [
+            "T-025 partial backend only: owner management UI and browser acceptance not_run",
+            "Knowledge/document provenance references and model permission/approval/read budgets are not integrated; no native memory tool exposed",
+            "Manual source is owner, locked/userEdited always true; unverified default is not a factual truth claim",
+            "Search uses FTS5 plus substring with exact scope, up to20 results and bounded UTF8 bytes; this is not tokenizer-aware model context budgeting or full pagination",
+            "Deletion removes live row and searchable FTS row; receipt contains only hashed intent and id/revision/deleted flag. No claim of physical WAL/backup erasure or remote-provider withdrawal",
+            "Downstream Learning/Skill derivation references are not implemented; affected-skill cleanup and full AT46 remain open",
+            "Windows Node24 bundled SQLite only; Ubuntu/live/full AT36/46 not_run"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [

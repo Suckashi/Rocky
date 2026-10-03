@@ -507,3 +507,7 @@ Screenshots: [1440](evidence/2026-10-04/document-history/document-history-1440.p
 - Dirty draft blocks restore loading; no automatic merge or discard
 - Four-width Chinese light browser fixture verified; new history English/dark and fresh matched OpenDots comparison not_run
 - Native document mutation/context references, PNG/JPEG attachments and remaining V1 scope incomplete; all70 global AT unchanged
+
+## Memory registry foundation (e2656034210873026b265051839401ecd5fb2983)
+
+T-025 now in_progress: schema19 owner-managed scoped Memory, CAS, fixed manual locks, FTS/substring search, bounded results and transactional deletion implemented.16 related tests/type/lint/build pass. [Report](memory-registry.md). UI, Knowledge and native permissions/consumption remain missing; no global AT pass.

@@ -78,3 +78,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 admission wait presentation (84a5b4c27e15ebb3a79e6ad1a959473cfca66fdf): workspace/capacity reasons are now persisted and shown. Earlier absent-resource-wait presentation is superseded for admission; already-running model-slot waits remain separate/unclassified. Performance/full browser matrix still open.
 
 2026-10-04 document history (565e888edcb0fa2c0c71e34a15954bd44638fcad): previous absent-history-UI statements are superseded by revision-number browsing and explicit restore-as-new-version. Full timeline/search, blank creation and native agent/context tools remain missing.
+
+2026-10-04 Memory foundation (e2656034210873026b265051839401ecd5fb2983): previous fully-pending registry is now partial owner-only backend. UI, Knowledge sources, model read/write permission/budgets, derived-skill cleanup and AT36/46 remain open. Logical deletion is not physical backup/WAL/remote erasure. See memory-registry.md.
