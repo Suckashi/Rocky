@@ -4920,6 +4920,43 @@
             "Browser selects exact episode ID, expands stored redacted summary and verifies withdrawal disappears from API list",
             "320 screenshot inspected and no document horizontal overflow"
           ]
+        },
+        {
+          "commit": "ad167ffff0343e4fbc11b750bccf6189b2f7bed6",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/learning-review.test.ts tests/learning-episode.test.ts tests/skills.test.ts; npm run check; scoped eslint changed contracts/daemon/UI/tests; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts learning.spec.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/learning-review.json",
+          "testFiles": [
+            "tests/learning-review.test.ts",
+            "tests/learning-episode.test.ts",
+            "tests/skills.test.ts",
+            "tests/e2e/learning.spec.ts"
+          ],
+          "tests": 4,
+          "seconds": 2.31,
+          "browserTests": 2,
+          "browserSeconds": 9.5,
+          "screenshots": [
+            "docs/implementation/evidence/2026-10-04/learning-review/after-320.png"
+          ],
+          "limitations": [
+            "Approval authorizes summary use for future reflection only; no reflection dispatch/queue or skill publication implemented here",
+            "Rejected summaries remain local records until source withdrawal; dedicated edit/resubmit workflow pending",
+            "Historical review receipt replay intentionally returns original metadata even after withdrawal; it never restores content or enqueues work",
+            "Newly registered secret redaction changes the served content hash and invalidates stale review; full derivative invalidation still pending",
+            "Chinese/light Chromium148.0.7778.96 DPR1; approved320 screenshot only, complete control/theme/keyboard/reference matrix pending",
+            "No Ubuntu/live provider/global AT completion claim"
+          ],
+          "assertions": [
+            "Schema26 stores exact request review receipts; decisions require current pending status/revision/redacted view hash",
+            "Wrong hash, changed redaction and competing later decision rejected; approve/reject terminal review states persist",
+            "Source withdrawal removes summary even after approval; new decision denied, old receipt replay causes no effect",
+            "Browser approval disabled until acknowledgment, then status truthfully says approved/reflection not started",
+            "320 screenshot inspected; source evidence identifiers remain collapsed"
+          ]
         }
       ],
       "blockedReason": null,
