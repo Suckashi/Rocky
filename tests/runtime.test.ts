@@ -28,6 +28,14 @@ for (const transport of ["stdio", "http"] as const) {
           mode: "fixture",
         });
         const waiting = await waitFor(service, work.id, "waiting_approval");
+        const usage = service.modelBudgets.snapshot(work.runId);
+        expect(
+          usage.entries.some((entry) => entry.purpose === "subagent"),
+        ).toBe(true);
+        expect(usage.entries.some((entry) => entry.purpose === "target")).toBe(
+          true,
+        );
+        expect(usage.unknownUsageCalls).toBe(usage.calls);
         expect(
           service.store.db.prepare("SELECT * FROM operations").all(),
         ).toHaveLength(1);

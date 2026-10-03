@@ -145,6 +145,11 @@ export function createApp(service: WorkService) {
     }),
   );
   app.get("/api/v1/works", (c) => c.json({ works: service.store.list() }));
+  app.get("/api/v1/works/:id/model-usage", (c) =>
+    c.json(
+      service.modelBudgets.snapshot(service.store.get(c.req.param("id")).runId),
+    ),
+  );
   app.get("/api/v1/conversation/messages", (c) =>
     c.json(
       service.store.completions(

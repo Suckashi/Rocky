@@ -15,6 +15,7 @@ import {
 } from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
 import { ModelRegistry } from "./model-registry.js";
+import { ModelBudgetLedger } from "./model-budget.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -31,6 +32,7 @@ export class WorkService {
   readonly store: Store;
   readonly saver: SqliteSaver;
   readonly models: ModelRegistry;
+  readonly modelBudgets: ModelBudgetLedger;
   readonly events = new EventEmitter();
   private active = new Map<string, Active>();
   private stopping = false;
@@ -45,6 +47,7 @@ export class WorkService {
       );
       this.saver = saver;
       this.models = new ModelRegistry(this.store);
+      this.modelBudgets = new ModelBudgetLedger(this.store);
       // Never auto-replay an interrupted external action.
       for (const work of this.store.list())
         if (["running", "waiting_approval", "queued"].includes(work.status)) {
@@ -152,10 +155,20 @@ export class WorkService {
         purpose: "target",
         mode: "fixture",
       });
+      this.modelBudgets.open(work.runId);
       const agent = createRockyAgent(this.saver, {
         modelRequest: async (messages, child) => {
           abort.signal.throwIfAborted();
+          const requestId = randomUUID();
+          this.modelBudgets.reserve(work.runId, {
+            requestId,
+            purpose: child ? "subagent" : "target",
+            inputTokenBound: null,
+            outputTokenBound: null,
+          });
           const result = await model.request(messages, child);
+          // The deterministic fixture does not report model token usage. Never invent zero usage.
+          this.modelBudgets.settle(work.runId, requestId, null);
           this.emit(this.store.get(work.id), "rocky.model.completed", {
             destination: model.endpoint,
             purpose: "target",
