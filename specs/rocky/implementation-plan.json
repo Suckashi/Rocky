@@ -794,6 +794,30 @@
             "Backend-only change: no browser rerun; dependencies unchanged, no clean install repeated",
             "No remote action"
           ]
+        },
+        {
+          "commit": "89643713a878e4550694fb960bb71f2cfcda31cd",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/models/configured-work.json",
+          "testFiles": [
+            "tests/configured-work.test.ts",
+            "tests/e2e/configured-work.spec.ts"
+          ],
+          "limitations": [
+            "T-007 remains in_progress: configured evaluation selection, trusted token profiles, cache-priced usage, editable budgets and DNS/rebind evidence remain",
+            "Tools are synthetic samples only; no workspace or external-account tool capabilities added",
+            "No production credential read or live endpoint called yet; user has authorized future read-only Apsis model credential use",
+            "Incremental runtime streaming and complete conversation memory remain pending",
+            "Ubuntu and strict browser egress gates unchanged; browser egress excluded from focused suite",
+            "Existing Chromium 1223 used instead of pinned 1243",
+            "Dependencies unchanged; clean installation not repeated",
+            "No remote action or global AT promotion"
+          ]
         }
       ],
       "blockedReason": null,
