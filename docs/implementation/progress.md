@@ -172,3 +172,11 @@ Implementation `62605214b2eec7a86147be7bebc494aa5d2a6695` adds domain v7 capabil
 Six grant/ledger tests, seven native/configured regressions and a final two-test grant run passed. The latter proves revocation prevents every MCP operation dispatch, not merely successful results. Typecheck, lint and server build passed. Initial update-path issuance was caught by regression and moved to submit-only. See [grant evidence](evidence/2026-10-03/policy/grants.json).
 
 Owner management API/UI and real workspace scopes are not implemented. Target resolvers and concrete reconciliation remain pending; T-008 and Goal stay active. No live/remote actions or global acceptance promotion.
+
+## T-008 continuation: permission revocation API/UI
+
+Implementation `eb88dcbd5bd47449a5b9936b3cd2e01863d141db` exposes schema-validated Work grant listing and session-protected revocation. Domain v8 adds request receipts so retries/restarts cannot duplicate revocation. Work details lazily display the existing synthetic scope and a revoke control; no UI/API creates broader grants. Copy states revocation affects future use, not already dispatched effects.
+
+Seven functional browser tests and three focused grant tests passed. The browser exercised revoke, reload, remaining write rejection and mobile rendering; API tests verify session protection, unsupported-field rejection and persisted idempotency. Typecheck, server build, lint, formatting and source guards passed. See [grant UI evidence](evidence/2026-10-03/policy/grant-ui.json).
+
+T-008 remains in_progress for real target resolvers and concrete reconciliation integration. Strict browser egress was excluded and remains an open failure; Ubuntu unverified. Goal active; no live/remote action.

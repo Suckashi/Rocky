@@ -1132,6 +1132,28 @@
             "Work and grant creation are separate synchronous transactions; a failure between them leaves no execution authority and restart blocks Work",
             "No live/browser/remote action; external gates unchanged"
           ]
+        },
+        {
+          "commit": "eb88dcbd5bd47449a5b9936b3cd2e01863d141db",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx playwright test --grep-invert \"browser egress\"",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/policy/grant-ui.json",
+          "testFiles": [
+            "tests/grants.test.ts",
+            "tests/e2e/grants.spec.ts"
+          ],
+          "limitations": [
+            "Only synthetic Work scopes shown; no new grant/permission expansion endpoint",
+            "T-008 remains in_progress for non-synthetic target resolvers and concrete reconciliation adapter/UI",
+            "Revocation does not undo dispatched operations",
+            "Strict browser egress excluded and remains failed; Ubuntu unverified",
+            "Installed Chromium 1223 used instead of unavailable pinned 1243",
+            "No live/remote action or dependency change"
+          ]
         }
       ],
       "blockedReason": null,
