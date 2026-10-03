@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-03",
+  "commit": "0cf5d5fbd5d886f098d83229c3ba7fe71bbde21c",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "commands": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "buildSeconds": 14.88
+    },
+    {
+      "command": "npx vitest run tests/mcp-result.test.ts tests/mcp-vision-work.test.ts",
+      "exitCode": 0,
+      "tests": 15,
+      "durationSeconds": 10.46
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "files": 47,
+      "tests": 201,
+      "durationSeconds": 134.99
+    },
+    {
+      "command": "npx playwright test tests/e2e/vision-setting.spec.ts",
+      "exitCode": 0,
+      "tests": 1,
+      "durationSeconds": 4.9
+    },
+    {
+      "command": "npx playwright test --config playwright.production.config.ts",
+      "exitCode": 0,
+      "tests": 1,
+      "durationSeconds": 7.5
+    },
+    {
+      "command": "npm run check:docs",
+      "exitCode": 0
+    }
+  ],
+  "browser": {
+    "version": "Chromium 148.0.7778.96",
+    "dpr": 1,
+    "widths": [1440, 1280, 390, 320],
+    "visualInspection": [1440, 320],
+    "mode": "loopback synthetic external services; real production daemon for MCP browser"
+  },
+  "limitations": [
+    "Live vision recognition and Ubuntu not_run",
+    "Header validation is not a complete image decoder",
+    "Long-history media compaction not verified",
+    "Resources/prompts/generic reconciliation/remote jobs and later V1 modules unfinished",
+    "No new upstream fidelity comparison/dark/English/reduced-motion evidence",
+    "T-016 remains in_progress; global AT unchanged; no remote actions"
+  ]
+}

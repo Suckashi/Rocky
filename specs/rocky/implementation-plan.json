@@ -925,6 +925,28 @@
             "T-007 remains in_progress for full DNS policy integration, token profiles and cache pricing",
             "Ubuntu/browser egress unchanged; no global AT promotion or remote action"
           ]
+        },
+        {
+          "commit": "0cf5d5fbd5d886f098d83229c3ba7fe71bbde21c",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/mcp-result.test.ts tests/mcp-vision-work.test.ts; npm test; npx playwright test tests/e2e/vision-setting.spec.ts; npx playwright test --config playwright.production.config.ts; npm run check:docs",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-typed/verification.json",
+          "testFiles": [
+            "tests/mcp-result.test.ts",
+            "tests/mcp-vision-work.test.ts",
+            "tests/e2e/vision-setting.spec.ts"
+          ],
+          "limitations": [
+            "Live vision recognition and Ubuntu not_run",
+            "Header validation is not a complete image decoder",
+            "Long-history media compaction not verified",
+            "Resources/prompts/generic reconciliation/remote jobs and later V1 modules unfinished",
+            "No new upstream fidelity comparison/dark/English/reduced-motion evidence",
+            "T-016 remains in_progress; global AT unchanged; no remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -1748,6 +1770,28 @@
             "Typed results/reconciliation/resources/prompts/target mapping/schema supersession and later V1 modules incomplete",
             "Ubuntu/live integrations not_run; global AT unchanged; Goal active; no remote actions"
           ]
+        },
+        {
+          "commit": "0cf5d5fbd5d886f098d83229c3ba7fe71bbde21c",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/mcp-result.test.ts tests/mcp-vision-work.test.ts; npm test; npx playwright test tests/e2e/vision-setting.spec.ts; npx playwright test --config playwright.production.config.ts; npm run check:docs",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-typed/verification.json",
+          "testFiles": [
+            "tests/mcp-result.test.ts",
+            "tests/mcp-vision-work.test.ts",
+            "tests/e2e/vision-setting.spec.ts"
+          ],
+          "limitations": [
+            "Live vision recognition and Ubuntu not_run",
+            "Header validation is not a complete image decoder",
+            "Long-history media compaction not verified",
+            "Resources/prompts/generic reconciliation/remote jobs and later V1 modules unfinished",
+            "No new upstream fidelity comparison/dark/English/reduced-motion evidence",
+            "T-016 remains in_progress; global AT unchanged; no remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2234,6 +2278,28 @@
             "Typed results/reconciliation/resources/prompts/target mapping/schema supersession and later V1 modules incomplete",
             "Ubuntu/live integrations not_run; global AT unchanged; Goal active; no remote actions"
           ]
+        },
+        {
+          "commit": "0cf5d5fbd5d886f098d83229c3ba7fe71bbde21c",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/mcp-result.test.ts tests/mcp-vision-work.test.ts; npm test; npx playwright test tests/e2e/vision-setting.spec.ts; npx playwright test --config playwright.production.config.ts; npm run check:docs",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-typed/verification.json",
+          "testFiles": [
+            "tests/mcp-result.test.ts",
+            "tests/mcp-vision-work.test.ts",
+            "tests/e2e/vision-setting.spec.ts"
+          ],
+          "limitations": [
+            "Live vision recognition and Ubuntu not_run",
+            "Header validation is not a complete image decoder",
+            "Long-history media compaction not verified",
+            "Resources/prompts/generic reconciliation/remote jobs and later V1 modules unfinished",
+            "No new upstream fidelity comparison/dark/English/reduced-motion evidence",
+            "T-016 remains in_progress; global AT unchanged; no remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2576,6 +2642,28 @@
             "Full retry ancestry/race/rollback/power-loss matrix, model override UI, reset and later V1 modules pending",
             "Current synthetic replay guard requires actual connector/target binding in future MCP/workspace adapters",
             "T-013/T-019 in_progress; global AT unchanged; Goal active; no remote actions"
+          ]
+        },
+        {
+          "commit": "0cf5d5fbd5d886f098d83229c3ba7fe71bbde21c",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/mcp-result.test.ts tests/mcp-vision-work.test.ts; npm test; npx playwright test tests/e2e/vision-setting.spec.ts; npx playwright test --config playwright.production.config.ts; npm run check:docs",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-typed/verification.json",
+          "testFiles": [
+            "tests/mcp-result.test.ts",
+            "tests/mcp-vision-work.test.ts",
+            "tests/e2e/vision-setting.spec.ts"
+          ],
+          "limitations": [
+            "Live vision recognition and Ubuntu not_run",
+            "Header validation is not a complete image decoder",
+            "Long-history media compaction not verified",
+            "Resources/prompts/generic reconciliation/remote jobs and later V1 modules unfinished",
+            "No new upstream fidelity comparison/dark/English/reduced-motion evidence",
+            "T-016 remains in_progress; global AT unchanged; no remote actions"
           ]
         }
       ],

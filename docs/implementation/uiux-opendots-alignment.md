@@ -89,3 +89,7 @@ PageReviewCard-derived approval structure now shows actual server/tool, honest e
 ## Normal-daemon MCP browser verification (7d42223)
 
 The same reference-derived approval geometry was verified at1440/1280/390/320 using the normal application daemon, separate from the explicit synthetic test harness. Original configured-tool metadata and one actual fixture receipt remain visible; no built-in sample binding/fixture connection in production. [Normal-path screenshots and limitations](synthetic-isolation.md). This is not a new full OpenDots fidelity comparison or a live business-system claim.
+
+## Explicit model image input (0cf5d5f)
+
+Model settings now uses the existing reference-derived form/card tokens for a default-off image-input checkbox and configured/unverified capability label. No new layout system or upstream setting is introduced. Four-width actual browser checks and visually inspected desktop/320px screenshots are linked in mcp-typed-results.md. This slice does not replace the original reference/before/after comparison or complete settings acceptance.
