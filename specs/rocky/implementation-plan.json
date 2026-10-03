@@ -1313,6 +1313,33 @@
             "No fresh matched populated reference/before/after comparison",
             "Earlier AdGuard and unexplained fetch observations not cleared"
           ]
+        },
+        {
+          "commit": "53e9e2cee58c8cd18cee1cc09e275c210e879c48",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/write-diff.test.ts tests/workspace-writes.test.ts tests/workspaces.test.ts tests/workspace-work.test.ts; npx playwright test --config playwright.production.config.ts; npx playwright test --config playwright.production.config.ts tests/e2e/workspace-write.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-diff/verification.json",
+          "testFiles": [
+            "tests/write-diff.test.ts",
+            "tests/workspace-writes.test.ts",
+            "tests/workspace-work.test.ts",
+            "tests/e2e/workspace-write.spec.ts"
+          ],
+          "limitations": [
+            "Owner-readable replacement hunk, not a minimal edit script or executable patch/editor",
+            "Preview limited to UTF-8 originals <=1MiB,500 rows,65536 displayed characters,8192 per row; truncation explicit",
+            "Existing public credential redaction applies to response; no model read grant created",
+            "Review is not consent, freshness lease, OS sandbox or atomic external-process CAS",
+            "T017 shell/worktree/full leases/local-write crash reconciliation unfinished",
+            "Old approval expires rather than full superseded/new-proposal workflow; fresh Work required",
+            "Full diff dark/English/focus/reduced-motion matrix not_run; keyboard approval smoke only",
+            "No new matched populated reference/before/after comparison or full OpenDots claim",
+            "Ubuntu/live services/pinned clean browser install remain deferred"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2667,6 +2694,33 @@
             "No fresh matched populated reference/before/after comparison",
             "Earlier AdGuard and unexplained fetch observations not cleared"
           ]
+        },
+        {
+          "commit": "53e9e2cee58c8cd18cee1cc09e275c210e879c48",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/write-diff.test.ts tests/workspace-writes.test.ts tests/workspaces.test.ts tests/workspace-work.test.ts; npx playwright test --config playwright.production.config.ts; npx playwright test --config playwright.production.config.ts tests/e2e/workspace-write.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-diff/verification.json",
+          "testFiles": [
+            "tests/write-diff.test.ts",
+            "tests/workspace-writes.test.ts",
+            "tests/workspace-work.test.ts",
+            "tests/e2e/workspace-write.spec.ts"
+          ],
+          "limitations": [
+            "Owner-readable replacement hunk, not a minimal edit script or executable patch/editor",
+            "Preview limited to UTF-8 originals <=1MiB,500 rows,65536 displayed characters,8192 per row; truncation explicit",
+            "Existing public credential redaction applies to response; no model read grant created",
+            "Review is not consent, freshness lease, OS sandbox or atomic external-process CAS",
+            "T017 shell/worktree/full leases/local-write crash reconciliation unfinished",
+            "Old approval expires rather than full superseded/new-proposal workflow; fresh Work required",
+            "Full diff dark/English/focus/reduced-motion matrix not_run; keyboard approval smoke only",
+            "No new matched populated reference/before/after comparison or full OpenDots claim",
+            "Ubuntu/live services/pinned clean browser install remain deferred"
+          ]
         }
       ],
       "blockedReason": null,
@@ -3100,6 +3154,33 @@
             "Full write dark/English/focus matrix and overwrite browser flow not_run",
             "No fresh matched populated reference/before/after comparison",
             "Earlier AdGuard and unexplained fetch observations not cleared"
+          ]
+        },
+        {
+          "commit": "53e9e2cee58c8cd18cee1cc09e275c210e879c48",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/write-diff.test.ts tests/workspace-writes.test.ts tests/workspaces.test.ts tests/workspace-work.test.ts; npx playwright test --config playwright.production.config.ts; npx playwright test --config playwright.production.config.ts tests/e2e/workspace-write.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-diff/verification.json",
+          "testFiles": [
+            "tests/write-diff.test.ts",
+            "tests/workspace-writes.test.ts",
+            "tests/workspace-work.test.ts",
+            "tests/e2e/workspace-write.spec.ts"
+          ],
+          "limitations": [
+            "Owner-readable replacement hunk, not a minimal edit script or executable patch/editor",
+            "Preview limited to UTF-8 originals <=1MiB,500 rows,65536 displayed characters,8192 per row; truncation explicit",
+            "Existing public credential redaction applies to response; no model read grant created",
+            "Review is not consent, freshness lease, OS sandbox or atomic external-process CAS",
+            "T017 shell/worktree/full leases/local-write crash reconciliation unfinished",
+            "Old approval expires rather than full superseded/new-proposal workflow; fresh Work required",
+            "Full diff dark/English/focus/reduced-motion matrix not_run; keyboard approval smoke only",
+            "No new matched populated reference/before/after comparison or full OpenDots claim",
+            "Ubuntu/live services/pinned clean browser install remain deferred"
           ]
         }
       ],

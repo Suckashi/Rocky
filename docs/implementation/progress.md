@@ -413,3 +413,7 @@ Final51 files/236 tests and four normal-daemon browser flows pass; typecheck/lin
 ## Exact native workspace writes (2026-10-04)
 
 Source 7118f9dbe34576be787fbea92305b029ef5dbac2 adds root-only workspace_write with fresh exact consent, original SHA/absent-target checks, bounded replacement preview, canonical target claim, atomic publication and confirmed receipt. Stale proposals expire; rejected/cancelled operations do not write. Unknown confirmation remains unknown. Native8 and final browser5 pass; full regression/commands are recorded in workspace-native-writes.md and its evidence. T-017 remains in_progress: diff/shell/worktree/full leases/reconciliation and later modules are unfinished. Goal active; no remote actions.
+
+## Workspace difference review (53e9e2cee58c8cd18cee1cc09e275c210e879c48)
+
+Owner-session/exact-approval preview now revalidates original target, shows bounded replacement hunk with encoding notices and retains full new content. Review grants no model access or consent. Final23 focused tests, type/lint/build and four-width overwrite browser flow pass; see [workspace-diff.md](workspace-diff.md). Full diff/editor/leases/worktree/shell/reconciliation and later V1 scope still open; Goal active.

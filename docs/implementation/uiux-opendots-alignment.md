@@ -109,3 +109,7 @@ Workspace dialog selection, default-off composer scope and Work grant labels reu
 ## Exact workspace write proposal (7118f9dbe34576be787fbea92305b029ef5dbac2)
 
 Existing PageReviewCard-derived approval header/body/actions now render target, complete proposed content and collapsed original hash. Shared neutral tokens are retained; keyboard-focusable240px preview bounds long content without hiding authorization controls. This accessibility/readability difference is a Rocky adaptation. No newly copied upstream component or second state source. Four-width normal-daemon screenshots and browser checks are in [workspace-native-writes.md](workspace-native-writes.md); no fresh matched reference/before/after fidelity claim, full theme/language audit or completed diff/artifact/editor claim.
+
+## Owner workspace difference review (53e9e2cee58c8cd18cee1cc09e275c210e879c48)
+
+WriteProposal extracts the existing PageReviewCard-derived body, adds on-demand removed/added content in the existing bounded preview and encoding notices. Shared neutral tokens and original shell/actions remain; signs/side borders are an accessibility adaptation. No upstream backend, new polling or copied assets. Four-width real overwrite/preview screenshots are in [workspace-diff.md](workspace-diff.md). Scrolled controls are the comparable captured region; no new upstream full-page comparison or complete fidelity claim.
