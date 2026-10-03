@@ -778,3 +778,93 @@ input[type="checkbox"] {
   border: 1px solid var(--border);
   border-radius: 9px;
 }
+
+.artifact-library {
+  font-size: 14px;
+}
+.artifact-library button,
+.artifact-library a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.artifact-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.artifact-card div {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.artifact-card h3 {
+  font-size: 14px;
+  margin: 0 0 6px;
+}
+.artifact-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.artifact-preview {
+  max-height: 50vh;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.artifact-library details {
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+}
+
+/* OpenDots ResultPane geometry; Rocky keeps one result owner and no Dot picker. */
+.result-pane {
+  position: fixed;
+  top: 64px;
+  right: 0;
+  bottom: 0;
+  width: clamp(390px, 40vw, 660px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 15;
+}
+.result-pane .pane-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.result-open .chat-workspace {
+  margin-right: clamp(390px, 40vw, 660px);
+}
+.result-scrim {
+  position: fixed;
+  inset: 64px 0 0;
+  background: #00000030;
+  z-index: 14;
+}
+.artifact-library a {
+  color: var(--text);
+}
+@media (max-width: 1100px) {
+  .result-pane {
+    width: min(600px, 100vw);
+  }
+  .result-open .chat-workspace {
+    margin-right: 0;
+  }
+}
+@media (max-width: 700px) {
+  .result-pane {
+    width: 100%;
+  }
+}

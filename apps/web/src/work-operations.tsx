@@ -82,6 +82,29 @@ export function WorkOperations({
       setBusy(false);
     }
   }
+  async function publish(operation: Operation) {
+    setBusy(true);
+    setError("");
+    const key = "artifact:" + operation.id;
+    const requestId = commands.current.get(key) ?? crypto.randomUUID();
+    commands.current.set(key, requestId);
+    try {
+      await request(`/works/${workId}/artifacts`, {
+        requestId,
+        operationId: operation.id,
+        title: zh ? "工作成果" : "Work result",
+      });
+      setMessage(
+        zh
+          ? "成果已保存；可從「文件與成果」預覽和下載。"
+          : "Result saved. Open Documents & results to preview or download.",
+      );
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
   const outcome = (operation: Operation) => {
     if (operation.outcome === "unknown")
       return zh ? "結果未確認" : "Result unknown";
@@ -113,6 +136,15 @@ export function WorkOperations({
             <strong>{operation.tool}</strong>
             {" — "}
             <span>{outcome(operation)}</span>{" "}
+            {operation.tool === "workspace_write" &&
+              operation.outcome === "succeeded" && (
+                <button
+                  disabled={busy || loading}
+                  onClick={() => void publish(operation)}
+                >
+                  {zh ? "保存成果快照" : "Save result snapshot"}
+                </button>
+              )}
             {operation.canReconcile ? (
               <button
                 type="button"

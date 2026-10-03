@@ -7,6 +7,7 @@ import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
 import { WriteProposal } from "./write-proposal.js";
+import { Artifacts } from "./artifacts.js";
 import { Workspaces } from "./workspaces.js";
 import type { Workspace } from "../../../packages/contracts/src/workspaces.js";
 import { WorkOperations } from "./work-operations.js";
@@ -205,6 +206,19 @@ function App() {
       locale={locale}
       connected={connected}
       count={works.length}
+      artifacts={
+        <Artifacts
+          locale={locale}
+          request={request}
+          revision={
+            events.findLast(
+              (e) =>
+                e.payload.kind === "domain" &&
+                e.payload.name === "rocky.artifact.published",
+            )?.sequence ?? "0"
+          }
+        />
+      }
       workspaces={
         <Workspaces
           locale={locale}

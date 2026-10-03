@@ -223,6 +223,42 @@ export function createApp(service: WorkService) {
     c.json(service.store.get(c.req.param("id"))),
   );
   app.get("/api/v1/mcp-config", (c) => c.json(service.mcp.snapshot()));
+  app.get("/api/v1/artifacts", (c) =>
+    c.json({ artifacts: service.artifacts.list() }),
+  );
+  app.post("/api/v1/works/:id/artifacts", async (c) =>
+    c.json(
+      await service.artifacts.publish(c.req.param("id"), await readJson(c)),
+    ),
+  );
+  app.get("/api/v1/artifacts/:id", (c) =>
+    c.json(service.artifacts.get(c.req.param("id"))),
+  );
+  app.get("/api/v1/artifacts/:id/files/:fileId", async (c) => {
+    const { entry, bytes } = await service.artifacts.file(
+      c.req.param("id"),
+      c.req.param("fileId"),
+    );
+    c.header("Content-Type", "application/octet-stream");
+    c.header(
+      "Content-Disposition",
+      "attachment; filename*=UTF-8''" + encodeURIComponent(entry.name),
+    );
+    c.header("Content-Security-Policy", "default-src 'none'; sandbox");
+    return c.body(new Uint8Array(bytes));
+  });
+  app.get("/api/v1/artifacts/:id/preview", async (c) => {
+    const artifact = service.artifacts.get(c.req.param("id"));
+    const { entry, bytes } = await service.artifacts.file(
+      artifact.id,
+      artifact.entry,
+    );
+    return c.json({
+      mime: entry.mime,
+      text: bytes.toString("utf8"),
+      sha256: entry.sha256,
+    });
+  });
   app.get("/api/v1/workspaces", (c) =>
     c.json({ workspaces: service.workspaces.list() }),
   );

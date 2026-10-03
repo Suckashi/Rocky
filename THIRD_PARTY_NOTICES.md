@@ -20,7 +20,7 @@ This source-stage inventory does not replace the P8 complete bundled/distributio
 
 Source: https://github.com/CopilotKit/OpenDots/tree/c2569bb6a13a22e565cf3eb791c62267d06babb1
 
-Upstream src/client/style.css and src/client/editor.css effective compact chrome rules are adapted into apps/web/src/style.css and apps/web/src/tokens.css: selectors reduced to Rocky presentation, semantic theme tokens, mobile/focus changes. apps/web/src/chrome.tsx and main.tsx are Rocky implementations aligned to App/Chat/ChatTranscript/PageReviewCard structure, with no upstream API, persistence or polling. No upstream images, logo or mascot are used.
+Upstream src/client/style.css and src/client/editor.css effective compact chrome rules are adapted into apps/web/src/style.css and apps/web/src/tokens.css: selectors reduced to Rocky presentation, semantic theme tokens, mobile/focus changes. apps/web/src/chrome.tsx and main.tsx are Rocky implementations aligned to App/Chat/ChatTranscript/PageReviewCard structure, with no upstream API, persistence or polling. ResultPane presentation from the same source commit also informs chrome.tsx and style.css: 64px top offset, clamp(390px,40vw,660px) desktop width, 1100px overlay and 700px full-width breakpoints; Rocky adds immutable artifact cards, explicit downloads and keyboard/focus handling. No upstream images, logo or mascot are used.
 
 Copyright (c) Atai Barkai
 

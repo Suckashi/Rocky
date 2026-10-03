@@ -166,6 +166,105 @@ test("real workspace approval card: responsive preview, reject, approve and stal
             "utf8",
           ),
         ).toBe(content);
+        if (mode === "approve") {
+          await article.getByText("工作詳情", { exact: true }).click();
+          await article.getByText("操作與對帳", { exact: true }).click();
+          await article.getByRole("button", { name: "保存成果快照" }).click();
+          await expect(article).toContainText("成果已保存");
+          await writeFile(
+            join(root, "approved.md"),
+            "SOURCE_CHANGED_AFTER_PUBLICATION",
+          );
+          await page
+            .getByRole("button", { name: "開啟導覽", exact: true })
+            .click();
+          await page
+            .locator(".sidebar")
+            .getByRole("button", { name: "文件與成果", exact: true })
+            .click();
+          const library = page.locator(".artifact-library");
+          await library
+            .getByRole("button", { name: "預覽", exact: true })
+            .first()
+            .click();
+          await expect(library.getByLabel("成果內容")).toHaveText(content);
+          for (const [width, height] of [
+            [1440, 900],
+            [1280, 800],
+            [390, 844],
+            [320, 844],
+          ]) {
+            await page.setViewportSize({ width: width!, height: height! });
+            expect(
+              await page.evaluate(
+                () => document.documentElement.scrollWidth <= innerWidth,
+              ),
+            ).toBe(true);
+            await expect(
+              library.getByRole("link", { name: "下載原始檔案" }),
+            ).toBeVisible();
+            const pane = await page.locator(".result-pane").boundingBox();
+            expect(pane?.width).toBe(
+              width! > 1100
+                ? Math.min(660, Math.max(390, width! * 0.4))
+                : width!,
+            );
+            expect(pane?.y).toBe(64);
+            await page.screenshot({
+              path: `test-results/artifact-preview-${width}.png`,
+            });
+          }
+          const href = await library
+            .getByRole("link", { name: "下載原始檔案" })
+            .getAttribute("href");
+          const downloaded = await page.request.get(href!);
+          expect((await downloaded.body()).toString("utf8")).toBe(content);
+          const downloadEvent = page.waitForEvent("download");
+          await library.getByRole("link", { name: "下載原始檔案" }).click();
+          const actualDownload = await downloadEvent;
+          expect(await readFile((await actualDownload.path())!, "utf8")).toBe(
+            content,
+          );
+          await library.getByRole("button", { name: "返回成果" }).click();
+          await expect(
+            library.getByRole("button", { name: "預覽", exact: true }).first(),
+          ).toBeFocused();
+          await page.screenshot({
+            path: "test-results/artifact-library-320.png",
+          });
+          await library
+            .getByRole("button", { name: "預覽", exact: true })
+            .first()
+            .press("Enter");
+          await expect(
+            library.getByRole("heading", { name: "工作成果", exact: true }),
+          ).toBeFocused();
+          await page.setViewportSize({ width: 1440, height: 900 });
+          await page
+            .getByRole("button", { name: "English", exact: true })
+            .click();
+          await page
+            .getByRole("button", { name: "Toggle theme", exact: true })
+            .click();
+          await expect(library.getByLabel("Artifact content")).toHaveText(
+            content,
+          );
+          await page.screenshot({
+            path: "test-results/artifact-preview-1440-dark-en.png",
+          });
+          await page
+            .getByRole("button", { name: "繁體中文", exact: true })
+            .click();
+          await page
+            .getByRole("button", { name: "Toggle theme", exact: true })
+            .click();
+          await page.setViewportSize({ width: 320, height: 844 });
+          await page.keyboard.press("Escape");
+          await expect(library).not.toBeVisible();
+          await expect(
+            page.getByRole("button", { name: "開啟導覽", exact: true }),
+          ).toBeFocused();
+        }
       } else if (mode === "reject") {
         await card.getByRole("button", { name: "拒絕", exact: true }).click();
         await expect(card).not.toBeVisible();

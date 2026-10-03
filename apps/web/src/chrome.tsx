@@ -19,6 +19,7 @@ export function Chrome({
   children,
   settings,
   workspaces,
+  artifacts,
 }: {
   locale: "zh" | "en";
   connected: boolean;
@@ -27,11 +28,22 @@ export function Chrome({
   children: ReactNode;
   settings: ReactNode;
   workspaces?: ReactNode;
+  artifacts?: ReactNode;
 }) {
   const zh = locale === "zh";
   const [collapsed, setCollapsed] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const [panel, setPanel] = useState<string | null>(null);
+  const [compact, setCompact] = useState(() => window.innerWidth <= 1100);
+  const resultPane = useRef<HTMLElement>(null);
+  const panelOpener = useRef<HTMLElement | null>(null);
+  const resultWasOpen = useRef(false);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1100px)");
+    const change = () => setCompact(media.matches);
+    media.addEventListener("change", change);
+    return () => media.removeEventListener("change", change);
+  }, []);
   const opener = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const names = zh
@@ -56,9 +68,19 @@ export function Chrome({
         "Settings",
       ];
   useEffect(() => {
-    if (!panel) return;
+    if (!panel || panel === "2") return;
     dialog.current?.showModal();
     return () => dialog.current?.close();
+  }, [panel]);
+  useEffect(() => {
+    if (panel === "2")
+      resultPane.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    else if (resultWasOpen.current)
+      (window.innerWidth <= 700
+        ? opener.current
+        : panelOpener.current
+      )?.focus();
+    resultWasOpen.current = panel === "2";
   }, [panel]);
   useEffect(() => {
     if (!drawer) return;
@@ -87,6 +109,29 @@ export function Chrome({
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
   }, [drawer]);
+  useEffect(() => {
+    if (panel !== "2") return;
+    function key(event: KeyboardEvent) {
+      if (event.defaultPrevented) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setPanel(null);
+        (window.innerWidth <= 700
+          ? opener.current
+          : panelOpener.current
+        )?.focus();
+      } else if (
+        compact &&
+        event.key === "Tab" &&
+        !resultPane.current?.contains(document.activeElement)
+      ) {
+        event.preventDefault();
+        resultPane.current?.querySelector<HTMLButtonElement>("button")?.focus();
+      }
+    }
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [panel, compact]);
   function open(index: number) {
     setDrawer(false);
     if (index === 0) {
@@ -97,14 +142,16 @@ export function Chrome({
       document.getElementById("works")?.scrollIntoView();
       return;
     }
+    panelOpener.current = document.activeElement as HTMLElement;
     setPanel(String(index));
   }
   return (
     <div
-      className={`template-app app ${collapsed ? "nav-collapsed" : ""} ${drawer ? "nav-open" : ""}`}
+      className={`template-app app ${collapsed ? "nav-collapsed" : ""} ${drawer ? "nav-open" : ""} ${panel === "2" ? "result-open" : ""}`}
     >
       <div
         className="icon-rail"
+        inert={panel === "2" && compact ? true : undefined}
         aria-label={zh ? "應用程式導覽" : "Application navigation"}
       >
         <img src="/rocky/mark.svg" width="28" height="28" alt="" />
@@ -132,6 +179,7 @@ export function Chrome({
       <button
         ref={opener}
         className="mobile-menu"
+        inert={panel === "2" && compact ? true : undefined}
         aria-label={zh ? "開啟導覽" : "Open navigation"}
         aria-expanded={drawer}
         onClick={() => setDrawer(!drawer)}
@@ -150,6 +198,7 @@ export function Chrome({
       )}
       <aside
         className="sidebar"
+        inert={panel === "2" && compact ? true : undefined}
         aria-label={zh ? "主要導覽" : "Main navigation"}
       >
         <div className="wordmark">Rocky</div>
@@ -187,8 +236,16 @@ export function Chrome({
           ))}
         </div>
       </aside>
-      <main id="chat" className="workspace" tabIndex={-1}>
-        <header className="topbar" aria-hidden={panel ? true : undefined}>
+      <main
+        id="chat"
+        className="workspace"
+        tabIndex={-1}
+        inert={panel === "2" && compact ? true : undefined}
+      >
+        <header
+          className="topbar"
+          aria-hidden={panel && panel !== "2" ? true : undefined}
+        >
           <div className="breadcrumbs">
             Rocky <span>/</span> {names[0]}
           </div>
@@ -207,6 +264,61 @@ export function Chrome({
         </header>
         {children}
       </main>
+      {panel === "2" && (
+        <>
+          {compact && <div className="result-scrim" aria-hidden="true" />}
+          <aside
+            ref={resultPane}
+            className="result-pane"
+            role={compact ? "dialog" : "region"}
+            aria-modal={compact || undefined}
+            aria-label={names[2]}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.preventDefault();
+                setPanel(null);
+                (window.innerWidth <= 700
+                  ? opener.current
+                  : panelOpener.current
+                )?.focus();
+              }
+              if (compact && event.key === "Tab") {
+                const elements = Array.from(
+                  resultPane.current?.querySelectorAll<HTMLElement>(
+                    'button:not(:disabled), a[href], summary, [tabindex="0"]',
+                  ) ?? [],
+                ).filter((el) => el.getClientRects().length);
+                const first = elements[0],
+                  last = elements.at(-1);
+                if (event.shiftKey && document.activeElement === first) {
+                  event.preventDefault();
+                  last?.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                  event.preventDefault();
+                  first?.focus();
+                }
+              }
+            }}
+          >
+            <div className="pane-header">
+              <strong>{names[2]}</strong>
+              <button
+                aria-label={zh ? "關閉成果面板" : "Close result panel"}
+                onClick={() => {
+                  setPanel(null);
+                  (window.innerWidth <= 700
+                    ? opener.current
+                    : panelOpener.current
+                  )?.focus();
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div className="pane-body">{artifacts}</div>
+          </aside>
+        </>
+      )}
       <dialog
         ref={dialog}
         className="workspace-dialog"
