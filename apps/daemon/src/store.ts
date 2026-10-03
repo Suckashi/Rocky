@@ -23,7 +23,9 @@ import {
   type PublicEvent,
 } from "../../../packages/contracts/src/index.js";
 import { acquireWriterLock } from "./writer-lock.js";
+import { redactEvidence } from "./redaction.js";
 export class Store {
+  publicEvidence: (value: unknown) => unknown = redactEvidence;
   readonly db: DatabaseSync;
   readonly root: string;
   private releaseLock: () => void;
@@ -254,7 +256,7 @@ export class Store {
       workId: work.id,
       runId: work.runId,
       executionSessionId: work.executionSessionId,
-      payload: { kind: "domain", name, data },
+      payload: { kind: "domain", name, data: this.publicEvidence(data) },
     });
     this.db
       .prepare("INSERT INTO events(data) VALUES(?)")

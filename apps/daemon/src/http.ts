@@ -26,6 +26,21 @@ async function readJson(c: Context): Promise<unknown> {
 export function createApp(service: WorkService) {
   const app = new Hono(),
     token = randomBytes(32).toString("hex");
+  app.use("/api/v1/*", async (c, next) => {
+    await next();
+    if (
+      c.req.path !== "/api/v1/session" &&
+      c.res.headers.get("content-type")?.includes("application/json")
+    ) {
+      const body = service.models.redact(await c.res.clone().json());
+      const headers = new Headers(c.res.headers);
+      headers.delete("content-length");
+      c.res = new Response(JSON.stringify(body), {
+        status: c.res.status,
+        headers,
+      });
+    }
+  });
   app.use("*", async (c, next) => {
     c.header(
       "Content-Security-Policy",
@@ -195,7 +210,7 @@ export function createApp(service: WorkService) {
           after = event.sequence;
           await stream.writeSSE({
             id: event.sequence,
-            data: JSON.stringify(event),
+            data: JSON.stringify(service.models.redact(event)),
           });
         }
         await stream.sleep(150);
@@ -236,8 +251,9 @@ export function createApp(service: WorkService) {
     const work = service.submit({ requestId: input.runId, text, ...props });
     return streamSSE(c, async (stream) => {
       const send = async (event: unknown) => {
-        EventSchemas.parse(event);
-        await stream.writeSSE({ data: JSON.stringify(event) });
+        const safe = service.models.redact(event);
+        EventSchemas.parse(safe);
+        await stream.writeSSE({ data: JSON.stringify(safe) });
       };
       await send({
         type: "RUN_STARTED",

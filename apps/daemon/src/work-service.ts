@@ -51,6 +51,7 @@ export class WorkService {
       );
       this.saver = saver;
       this.models = new ModelRegistry(this.store);
+      this.store.publicEvidence = (value) => this.models.redact(value);
       this.modelBudgets = new ModelBudgetLedger(this.store);
       this.operations = new OperationLedger(this.store);
       // Never auto-replay an interrupted external action.

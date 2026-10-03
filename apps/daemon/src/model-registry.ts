@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { Store } from "./store.js";
+import { redactEvidence } from "./redaction.js";
 import { idSchema, RockyError } from "../../../packages/contracts/src/index.js";
 import {
   modelConnectionSchema,
@@ -16,6 +17,19 @@ import {
 } from "../../../packages/agent-runtime/src/configured-model.js";
 
 export class ModelRegistry {
+  redact(value: unknown) {
+    const rows = this.store.db
+      .prepare("SELECT data FROM model_connections")
+      .all() as { data: string }[];
+    const secrets = rows.flatMap((row) => {
+      const config = modelConnectionSchema.parse(JSON.parse(row.data)).config;
+      const secret = config.credentialRef
+        ? this.env[config.credentialRef]
+        : undefined;
+      return secret ? [secret] : [];
+    });
+    return redactEvidence(value, secrets);
+  }
   private active = new Map<
     string,
     { abort: AbortController; promise: Promise<ModelProbe> }
