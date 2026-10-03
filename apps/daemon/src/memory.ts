@@ -63,6 +63,7 @@ export class MemoryRegistry {
       policyRevision: 1,
       expiresAt: command.expiresAt,
       resource: "memory",
+      memory: { scope: command.scope, includePrivate: command.includePrivate },
     });
   }
   readForWork(work: Work, input: unknown) {

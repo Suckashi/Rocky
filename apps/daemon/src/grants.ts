@@ -16,8 +16,12 @@ export class GrantRegistry {
     private readonly now = () => Date.now(),
   ) {}
   issue(input: unknown) {
-    const command = issueSchema.parse(input),
-      hash = intentHash(command);
+    const command = issueSchema.parse(input);
+    const hash = intentHash(
+      Object.fromEntries(
+        Object.entries(command).filter(([key]) => key !== "memory"),
+      ),
+    );
     const prior = this.store.db
       .prepare("SELECT intent,data FROM capability_grants WHERE request_id=?")
       .get(command.requestId) as { intent: string; data: string } | undefined;

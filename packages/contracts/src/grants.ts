@@ -7,6 +7,12 @@ export const issueSchema = z.strictObject({
   policyRevision: z.number().int().positive(),
   expiresAt: z.iso.datetime().nullable(),
   resource: z.literal("memory").optional(),
+  memory: z
+    .strictObject({
+      scope: z.enum(["user", "project", "task"]),
+      includePrivate: z.boolean(),
+    })
+    .optional(),
 });
 export const grantSchema = issueSchema.extend({
   id: z.uuid(),

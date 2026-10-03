@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import {
   grantSchema,
@@ -14,6 +14,9 @@ export function WorkGrants({
   locale: "zh" | "en";
   request: (path: string, body?: unknown) => Promise<unknown>;
 }) {
+  const [scope, setScope] = useState<"user" | "project" | "task">("task");
+  const [includePrivate, setIncludePrivate] = useState(false);
+  const grantIntent = useRef({ key: "", id: "" });
   const [open, setOpen] = useState(false),
     [grants, setGrants] = useState<Grant[]>([]),
     [error, setError] = useState(""),
@@ -57,6 +60,37 @@ export function WorkGrants({
       setBusy(false);
     }
   }
+  async function issueMemory() {
+    setBusy(true);
+    setError("");
+    const key = JSON.stringify([
+      work.id,
+      work.runId,
+      work.executionSessionId,
+      scope,
+      includePrivate,
+    ]);
+    if (grantIntent.current.key !== key)
+      grantIntent.current = { key, id: crypto.randomUUID() };
+    try {
+      const grant = grantSchema.parse(
+        await request(`/works/${work.id}/memory-read-grants`, {
+          requestId: grantIntent.current.id,
+          scope,
+          includePrivate,
+        }),
+      );
+      setGrants((previous) => [
+        ...previous.filter((g) => g.id !== grant.id),
+        grant,
+      ]);
+      grantIntent.current = { key: "", id: "" };
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <details
       className="work-grants"
@@ -69,6 +103,63 @@ export function WorkGrants({
           : "Permissions apply only to this Work. Revocation blocks future use; it does not undo dispatched operations."}
       </p>
       {error && <p role="alert">{error}</p>}
+      {work.mode === "configured" &&
+        work.runMode === "normal" &&
+        ["queued", "running", "waiting_approval"].includes(work.status) && (
+          <fieldset disabled={busy}>
+            <legend>
+              {locale === "zh"
+                ? "允許此工作讀取記憶"
+                : "Allow memory reads for this Work"}
+            </legend>
+            <label>
+              {locale === "zh" ? "授權記憶範圍" : "Memory permission scope"}
+              <select
+                value={scope}
+                onChange={(e) => setScope(e.target.value as typeof scope)}
+              >
+                <option value="task">
+                  {locale === "zh" ? "此工作" : "This Work"}
+                </option>
+                {work.workspaceId && (
+                  <option value="project">
+                    {locale === "zh" ? "此工作綁定的專案" : "Bound project"}
+                  </option>
+                )}
+                <option value="user">
+                  {locale === "zh" ? "個人記憶" : "User memory"}
+                </option>
+              </select>
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={includePrivate}
+                onChange={(e) => setIncludePrivate(e.target.checked)}
+              />
+              {locale === "zh"
+                ? "包含私密記憶（可能送至此工作的模型）"
+                : "Include private memory (may be sent to this Work’s model)"}
+            </label>
+            <button
+              type="button"
+              disabled={grants.some(
+                (g) =>
+                  !g.revoked &&
+                  g.runId === work.runId &&
+                  g.executionSessionId === work.executionSessionId &&
+                  g.memory?.scope === scope &&
+                  g.memory.includePrivate === includePrivate &&
+                  (!g.expiresAt || Date.parse(g.expiresAt) > Date.now()),
+              )}
+              onClick={() => void issueMemory()}
+            >
+              {locale === "zh"
+                ? "授權讀取此範圍"
+                : "Grant reads for this scope"}
+            </button>
+          </fieldset>
+        )}
       {grants.map((grant) => (
         <div key={grant.id}>
           <span>
@@ -88,6 +179,25 @@ export function WorkGrants({
                   ? "建立新項目"
                   : "Create new items"}
           </span>{" "}
+          {grant.memory && (
+            <span>
+              {
+                {
+                  user: locale === "zh" ? "個人" : "User",
+                  project: locale === "zh" ? "專案" : "Project",
+                  task: locale === "zh" ? "此工作" : "This Work",
+                }[grant.memory.scope]
+              }{" "}
+              ·{" "}
+              {grant.memory.includePrivate
+                ? locale === "zh"
+                  ? "包含私密"
+                  : "Includes private"
+                : locale === "zh"
+                  ? "不含私密"
+                  : "Excludes private"}{" "}
+            </span>
+          )}
           {grant.revoked ? (
             <span>{locale === "zh" ? "已撤銷" : "Revoked"}</span>
           ) : (

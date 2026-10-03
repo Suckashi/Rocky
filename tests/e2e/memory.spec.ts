@@ -3,6 +3,8 @@ import { randomUUID } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { AIMessage, ToolMessage } from "@langchain/core/messages";
+import { startAgentProvider } from "../../fixtures/models/agent-provider.js";
 test("owner memory UI preserves stale drafts, persists edits and deletes search entries", async ({
   page,
 }) => {
@@ -201,5 +203,143 @@ test("memory scope isolation, private flags, error recovery and keyboard control
     await expect(dialog).not.toBeVisible();
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("owner grants private memory in Work UI and native model receives only authorized search", async ({
+  page,
+}) => {
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const marker = "Grant browser " + randomUUID();
+  const callId = randomUUID();
+  const provider = await startAgentProvider({
+    reply: async (messages) => {
+      await held;
+      const last = messages
+        .filter((m) => m instanceof ToolMessage && m.tool_call_id === callId)
+        .at(-1);
+      if (last)
+        return new AIMessage(
+          String(last.content).includes(marker)
+            ? "AUTHORIZED_MEMORY_RECEIVED"
+            : "NO_MEMORY_RECEIVED",
+        );
+      return new AIMessage({
+        content: "",
+        tool_calls: [
+          {
+            id: callId,
+            name: "memory_search",
+            args: { scope: "user", includePrivate: true, query: marker },
+            type: "tool_call",
+          },
+        ],
+      });
+    },
+  });
+  try {
+    await page.goto("/");
+    const { token } = await (await page.request.get("/api/v1/session")).json();
+    const headers = { "x-rocky-session": token };
+    const connectionId = randomUUID();
+    expect(
+      (
+        await page.request.post("/api/v1/model-connections", {
+          headers,
+          data: {
+            id: connectionId,
+            requestId: randomUUID(),
+            expectedRevision: 0,
+            config: {
+              name: "Memory browser provider",
+              provider: "openai-compatible",
+              baseUrl: provider.baseUrl,
+              modelId: "fixture",
+              contextWindowTokens: 65536,
+              maxOutputTokens: 256,
+            },
+          },
+        })
+      ).ok(),
+    ).toBe(true);
+    expect(
+      (
+        await page.request.post("/api/v1/memories", {
+          headers,
+          data: {
+            id: randomUUID(),
+            requestId: randomUUID(),
+            expectedRevision: 0,
+            scope: { kind: "user" },
+            content: marker,
+            private: true,
+          },
+        })
+      ).ok(),
+    ).toBe(true);
+    const response = await page.request.post("/api/v1/conversation/messages", {
+      headers,
+      data: {
+        requestId: randomUUID(),
+        text: marker,
+        mode: "configured",
+        modelSelection: { connectionId, revision: 1 },
+      },
+    });
+    expect(response.ok()).toBe(true);
+    const record = await response.json();
+    await page.reload();
+    const work = page.locator("article.work").filter({ hasText: marker });
+    await work.getByText("工作詳情", { exact: true }).click();
+    await work.getByText("此工作權限", { exact: true }).click();
+    const grants = work.locator(".work-grants");
+    await expect(grants.getByLabel("授權記憶範圍")).toHaveValue("task");
+    const privateControl =
+      grants.getByLabel("包含私密記憶（可能送至此工作的模型）");
+    await expect(privateControl).not.toBeChecked();
+    await grants.getByLabel("授權記憶範圍").selectOption("user");
+    await privateControl.check();
+    await grants.getByRole("button", { name: "授權讀取此範圍" }).click();
+    await expect(grants).toContainText("個人 · 包含私密");
+    await expect(
+      grants.getByRole("button", { name: "授權讀取此範圍" }),
+    ).toBeDisabled();
+    for (const [width, height] of [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844],
+    ]) {
+      await page.setViewportSize({ width: width!, height: height! });
+      await grants.scrollIntoViewIfNeeded();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: "test-results/memory-grant-" + width + ".png",
+      });
+    }
+    release();
+    await expect(work).toContainText("AUTHORIZED_MEMORY_RECEIVED");
+    await expect(
+      grants.getByRole("button", { name: "授權讀取此範圍" }),
+    ).toHaveCount(0);
+    await grants.getByRole("button", { name: "撤銷此權限" }).click();
+    await expect(grants).toContainText("已撤銷");
+    const saved = await (
+      await page.request.get("/api/v1/works/" + record.id + "/grants")
+    ).json();
+    expect(saved.grants[0]).toMatchObject({
+      revoked: true,
+      memory: { scope: "user", includePrivate: true },
+    });
+  } finally {
+    release();
+    await provider.close();
   }
 });
