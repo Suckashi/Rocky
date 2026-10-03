@@ -106,15 +106,54 @@ test("manual episodes retain bounded provenance, redact summaries, dedupe and ob
     store = new Store(root);
     learning = new LearningRegistry(store, new WorkspaceRegistry(store));
     expect(learning.episode(id)).toEqual(episode);
-    learning.saveWorkConsent(work.id, {
+    const withdraw = {
       requestId: randomUUID(),
       expectedRevision: 1,
       private: false,
       excluded: true,
       sourceReuseAllowed: false,
-    });
+    };
+    store.db.exec(
+      "CREATE TRIGGER fail_episode_withdrawal BEFORE UPDATE ON learning_episodes BEGIN SELECT RAISE(ABORT,'fixture withdrawal failure'); END",
+    );
+    expect(() => learning.saveWorkConsent(work.id, withdraw)).toThrow(
+      "fixture withdrawal failure",
+    );
+    expect(learning.workConsent(work.id).revision).toBe(1);
+    expect(learning.episode(id)).toEqual(episode);
+    store.db.exec("DROP TRIGGER fail_episode_withdrawal");
+    learning.saveWorkConsent(work.id, withdraw);
     expect(() => learning.episode(id)).toThrow("consent");
     expect(() => learning.createEpisode(command)).toThrow("consent");
+    const tombstone = JSON.parse(
+      (
+        store.db
+          .prepare("SELECT data FROM learning_episodes WHERE id=?")
+          .get(id) as { data: string }
+      ).data,
+    );
+    expect(tombstone).toMatchObject({
+      id,
+      status: "withdrawn",
+      withdrawalConsentRevision: 2,
+    });
+    expect(tombstone).not.toHaveProperty("summary");
+    expect(tombstone).not.toHaveProperty("evidence");
+    learning.saveWorkConsent(work.id, {
+      requestId: randomUUID(),
+      expectedRevision: 2,
+      private: false,
+      excluded: false,
+      sourceReuseAllowed: true,
+    });
+    expect(() => learning.episode(id)).toThrow("withdrawn");
+    expect(() => learning.createEpisode(command)).toThrow("withdrawn");
+    learning.saveWorkConsent(work.id, withdraw);
+    expect(learning.workConsent(work.id).excluded).toBe(false);
+    store.close();
+    store = new Store(root);
+    learning = new LearningRegistry(store, new WorkspaceRegistry(store));
+    expect(() => learning.episode(id)).toThrow("withdrawn");
   } finally {
     store.close();
     await rm(root, { recursive: true, force: true });

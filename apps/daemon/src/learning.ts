@@ -169,8 +169,14 @@ export class LearningRegistry {
       .get(id) as { data: string } | undefined;
     if (!row)
       throw new RockyError("not_found", "Learning episode not found", 404);
-    const value = JSON.parse(row.data) as { workId: string };
+    const value = JSON.parse(row.data) as { workId: string; status: string };
     this.assertSourceAllowed(value.workId, "manual");
+    if (value.status === "withdrawn")
+      throw new RockyError(
+        "learning_withdrawn",
+        "Learning episode was withdrawn and its summary removed",
+        410,
+      );
     return this.store.publicEvidence(value);
   }
   workConsent(workId: string) {
@@ -230,6 +236,12 @@ export class LearningRegistry {
           "INSERT INTO learning_work_consent VALUES(?,?) ON CONFLICT(work_id) DO UPDATE SET data=excluded.data",
         )
         .run(workId, JSON.stringify(result));
+      if (result.private || result.excluded || !result.sourceReuseAllowed)
+        this.store.db
+          .prepare(
+            "UPDATE learning_episodes SET data=json_set(json_remove(data,'$.summary','$.evidence'),'$.status','withdrawn','$.withdrawnAt',?,'$.withdrawalConsentRevision',?) WHERE json_extract(data,'$.workId')=? AND json_extract(data,'$.status')!='withdrawn'",
+          )
+          .run(result.updatedAt, result.revision, workId);
       this.store.db
         .prepare("INSERT INTO learning_work_receipts VALUES(?,?,?)")
         .run(command.requestId, hash, JSON.stringify(result));
