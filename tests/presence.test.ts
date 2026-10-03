@@ -78,6 +78,12 @@ test("foreground outcomes stay distinct from independent background counts and e
     work("failed", "background"),
   ];
   const i = input(bg);
+  expect(
+    deriveRockyPresence(
+      input([{ ...work("queued"), waitingFor: "workspace" }]),
+      now,
+    ),
+  ).toMatchObject({ state: "waiting_resource", moving: false });
   expect(deriveRockyPresence(i, now)).toMatchObject({
     state: "idle",
     counts: { running: 1, queued: 1, approval: 1, attention: 1 },

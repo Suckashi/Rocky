@@ -57,6 +57,8 @@ export function deriveRockyPresence(input: PresenceInput, now: number) {
   )
     state = "stale";
   if (state === "waiting_approval") state = "awaiting_approval";
+  if (state === "queued" && foreground?.waitingFor === "workspace")
+    state = "waiting_resource";
   return {
     state,
     connected: input.connected,

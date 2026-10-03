@@ -221,6 +221,7 @@ export class WorkService {
     return event;
   }
   update(work: Work) {
+    if (work.status !== "queued") delete work.waitingFor;
     work.revision++;
     this.store.transaction(() => {
       this.store.save(work, work.revision - 1);
@@ -430,28 +431,35 @@ export class WorkService {
     ] as const) {
       let count = classCount(kind);
       for (const work of this.store.list()) {
-        if (count >= limit) break;
         if (
           work.status !== "queued" ||
           occupied.has(work.id) ||
           this.admissionClass(work) !== kind
         )
           continue;
-        if (
-          this.store
-            .list()
-            .some(
-              (other) =>
-                other.id !== work.id &&
-                this.resourcesOverlap(other, work) &&
-                (["blocked"].includes(other.status) ||
-                  (occupied.has(other.id) &&
-                    ["queued", "running", "waiting_approval"].includes(
-                      other.status,
-                    ))),
-            )
-        )
-          continue;
+        const workspaceBusy = this.store
+          .list()
+          .some(
+            (other) =>
+              other.id !== work.id &&
+              this.resourcesOverlap(other, work) &&
+              (["blocked"].includes(other.status) ||
+                (occupied.has(other.id) &&
+                  ["queued", "running", "waiting_approval"].includes(
+                    other.status,
+                  ))),
+          );
+        const waitingFor = workspaceBusy
+          ? "workspace"
+          : count >= limit
+            ? "capacity"
+            : undefined;
+        if (work.waitingFor !== waitingFor) {
+          if (waitingFor) work.waitingFor = waitingFor;
+          else delete work.waitingFor;
+          this.update(work);
+        }
+        if (waitingFor) continue;
         const abort = new AbortController();
         // Reserve synchronously before any asynchronous connection or callback.
         const promise = this.start(work, abort);
@@ -1934,6 +1942,7 @@ export class WorkService {
       : reason === "wall_budget"
         ? "failed"
         : "cancelled";
+    delete work.waitingFor;
     if (unknown)
       work.error =
         "Stopped with an unconfirmed operation outcome; reconciliation is required.";

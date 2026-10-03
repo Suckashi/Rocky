@@ -68,6 +68,7 @@ test("T-010 main admission remains available with two independent background ses
       ]).size,
     ).toBe(4);
     expect(service.store.get(waiting.id).status).toBe("queued");
+    expect(service.store.get(waiting.id).waitingFor).toBe("capacity");
     expect(service.modelBudgets.snapshot(waiting.runId).calls).toBe(0);
     expect(
       service.store.db

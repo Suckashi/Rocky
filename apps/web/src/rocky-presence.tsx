@@ -6,6 +6,7 @@ const labels: Record<string, [string, string]> = {
   setup_required: ["先設定模型連線", "Set up a model connection"],
   idle: ["你想先處理哪件事？", "What would you like to work on?"],
   queued: ["已排入佇列", "Queued"],
+  waiting_resource: ["等待工作區可用", "Waiting for workspace availability"],
   running: ["正在處理工作", "Working"],
   stale: ["尚未收到新的進度", "No recent progress received"],
   awaiting_approval: [
@@ -186,9 +187,12 @@ export function RockyPresence({
                     <small>
                       {
                         (labels[
-                          work.status === "waiting_approval"
-                            ? "awaiting_approval"
-                            : work.status
+                          work.status === "queued" &&
+                          work.waitingFor === "workspace"
+                            ? "waiting_resource"
+                            : work.status === "waiting_approval"
+                              ? "awaiting_approval"
+                              : work.status
                         ] ?? labels.idle)![zh ? 0 : 1]
                       }
                     </small>

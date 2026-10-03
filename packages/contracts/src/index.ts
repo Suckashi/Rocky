@@ -128,6 +128,7 @@ export const workSchema = z
     modelBudget: modelBudgetSchema.optional(),
     runMode: z.enum(["normal", "evaluation", "unknown"]),
     status: workStatus,
+    waitingFor: z.enum(["workspace", "capacity"]).optional(),
     revision: revisionSchema,
     answer: z.string(),
     approval: approvalSchema.optional(),

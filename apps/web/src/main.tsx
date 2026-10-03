@@ -354,7 +354,15 @@ function App() {
                   <div className="work-heading">
                     <strong>{w.text}</strong>
                     <span className={"status " + w.status}>
-                      {t.status[w.status]}
+                      {w.status === "queued" && w.waitingFor
+                        ? w.waitingFor === "workspace"
+                          ? locale === "zh"
+                            ? "等待工作區可用"
+                            : "Waiting for workspace availability"
+                          : locale === "zh"
+                            ? "等待執行名額"
+                            : "Waiting for an execution slot"
+                        : t.status[w.status]}
                     </span>
                   </div>
                   {w.retryOf && (

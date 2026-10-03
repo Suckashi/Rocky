@@ -99,6 +99,7 @@ test.each(["release", "reverse", "cancel-waiter", "blocked"] as const)(
         free = submit(unrelated.id, "UNRELATED_RUN", "background");
       const unstarted = () => {
         expect(service.store.get(waiting.id).status).toBe("queued");
+        expect(service.store.get(waiting.id).waitingFor).toBe("workspace");
         expect(service.modelBudgets.snapshot(waiting.runId).calls).toBe(0);
         expect(
           service.store.db
