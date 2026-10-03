@@ -100,3 +100,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 native memory envelope (8cc548c9cbb0409945540581ad33299ed231824c): array-only/no per-call truncation limitation is resolved. Native full JSON response fits cl100k_base budget(min128), with explicit truncated flag. Provider-specific whole-prompt accounting, pagination, native writes and cleanup remain open.
 
 2026-10-04 native Memory write (0aa4073ac3960576cbb592be22a2043b8398be59): previous absent-model-write statements are historical. Exact-approved create/update now exists; manual entries protected and owner edits relock model entries. Update diff/source preview, write-specific cancel/restart/isolation coverage and deletion of derived/copied data remain pending.
+
+2026-10-04 Memory diff (0386c45882cfc2a762d5158c4d79bf07b2421724): earlier absent-before/after preview limitation is superseded by guarded content/privacy/source diff. Dedicated update/source browser matrix and historical source titles remain missing; final CAS still guards changes after preview.

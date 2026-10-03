@@ -551,3 +551,7 @@ Added explicit native truncated/encoding/budget/untrusted metadata; full JSON fi
 ## Native Memory write (0aa4073ac3960576cbb592be22a2043b8398be59)
 
 Added exact-approved root memory create/update, manual-lock protection, source Work/run provenance and atomic memory/index/receipt settlement. Approval UI reuses existing card structure.6 write tests,15 related tests and5 browser tests pass. [Report](memory-registry.md). Before/after diff, cancellation/restart write matrix and derivative cleanup remain; T-025/Goal active.
+
+## Memory approval diff (0386c45882cfc2a762d5158c4d79bf07b2421724)
+
+Added server-validated pending memory preview and UI content/privacy/source differences.6 native write tests/focused browser1 pass, four-width evidence saved; type/lint/build pass. [Report](memory-registry.md). Cancellation/restart, complete source/browser matrix and cleanup remain open; T-025 active.

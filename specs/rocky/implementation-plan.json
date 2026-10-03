@@ -3979,6 +3979,27 @@
             "Chinese/light four-width after screenshots only; no new matched OpenDots comparison or full theme/language/accessibility matrix",
             "No Ubuntu/live provider/fullAT evidence; all70 global AT unchanged"
           ]
+        },
+        {
+          "commit": "0386c45882cfc2a762d5158c4d79bf07b2421724",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/memory-write.test.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts memory.spec.ts -g \"native memory proposal\"; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/memory-diff.json",
+          "testFiles": [
+            "tests/memory-write.test.ts",
+            "tests/e2e/memory.spec.ts"
+          ],
+          "limitations": [
+            "Browser covers new-entry diff; update remove/add verified by native integration, not dedicated browser update scenario",
+            "Source-change preview shows revision links and IDs; friendly historical titles and source-specific browser matrix remain open",
+            "Preview is a fresh snapshot, not a reservation; final write CAS/locks remain authoritative if memory changes afterward",
+            "Write cancellation/restart matrix, ungranted-read waiting and derivative/checkpoint cleanup remain incomplete",
+            "Four-width Chinese/light after screenshots only; no matched OpenDots comparison or complete language/theme/accessibility matrix",
+            "All70 global AT unchanged"
+          ]
         }
       ],
       "blockedReason": null,

@@ -163,3 +163,5 @@ Memory grant UI (e56869c3a43e6d83512925041d75b70e69d2e402) uses existing collaps
 Composer memory consent (95c144678f0c591e6b990ae7b4d5b9c8b122523a) uses existing OpenDots-aligned Model/tools popover and semantic form controls, with no permanent panel. Rocky adaptation makes scope and private-to-model consent explicit. [Four-width after evidence](memory-registry.md); complete reference comparison remains pending.
 
 Memory write approval (0aa4073ac3960576cbb592be22a2043b8398be59) uses existing PageReviewCard-aligned border/header/footer and proposal spacing, with translated scope/privacy/revision and scrollable proposed text. This is a Rocky-specific exact-consent adaptation; no new upstream code copied. [Four-width after evidence](memory-registry.md). Update diff and matched reference comparison remain open.
+
+Memory diff (0386c45882cfc2a762d5158c4d79bf07b2421724) reuses established proposal-review/diff card styles, with explicit disclosure and source details.320px double padding was removed after visual inspection. [Four-width after evidence](memory-registry.md). No upstream source copy or full matched alignment claim.

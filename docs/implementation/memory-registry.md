@@ -156,3 +156,18 @@ Existing approval card shows local-memory impact, translated scope, privacy, pro
 - Registry deletion does not remove delivered model/checkpoint/approval proposal copies; derivative cleanup remains incomplete
 - Chinese/light four-width after screenshots only; no new matched OpenDots comparison or full theme/language/accessibility matrix
 - No Ubuntu/live provider/fullAT evidence; all70 global AT unchanged
+
+## Memory approval differences (0386c45882cfc2a762d5158c4d79bf07b2421724)
+
+Owner-session POST /api/v1/approvals/:id/memory-preview validates pending Work/approval ID, revision, fingerprint and memory CAS/manual lock. It returns bounded replacementDiff rows plus before/after privacy and document source references; recognized protected text is rejected. Preview never writes or grants authority. Final save still rechecks state.
+
+MemoryProposal renders an explicit load button, error state, removed/added lines, truncation warning, privacy transition and collapsed source changes. Component is keyed by approval ID/revision, invalidates async response on unmount and clears old result when reloading. Existing proposal/diff style is reused; small component spacing removes double indentation at320px.
+
+[Evidence](evidence/2026-10-04/memory-diff.json):6 write integration tests and focused browser1 pass; type/lint/build/format pass. Update test now changes actual content and checks both remove/add. Stale/finished previews reject. Screenshots: [1440](evidence/2026-10-04/memory-diff/after-1440.png), [1280](evidence/2026-10-04/memory-diff/after-1280.png), [390](evidence/2026-10-04/memory-diff/after-390.png), [320](evidence/2026-10-04/memory-diff/after-320.png).
+
+- Browser covers new-entry diff; update remove/add verified by native integration, not dedicated browser update scenario
+- Source-change preview shows revision links and IDs; friendly historical titles and source-specific browser matrix remain open
+- Preview is a fresh snapshot, not a reservation; final write CAS/locks remain authoritative if memory changes afterward
+- Write cancellation/restart matrix, ungranted-read waiting and derivative/checkpoint cleanup remain incomplete
+- Four-width Chinese/light after screenshots only; no matched OpenDots comparison or complete language/theme/accessibility matrix
+- All70 global AT unchanged
