@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { discoverSkillSources, snapshotSkillSource } from "./skill-sources.js";
 import { parseDocument } from "yaml";
 import { replacementDiff } from "./write-diff.js";
 import { Store } from "./store.js";
@@ -81,6 +84,51 @@ export class SkillRegistry {
     private store: Store,
     private workspaces: WorkspaceRegistry,
   ) {}
+  private async sourceRoot(input: unknown) {
+    const scope = importSchema.shape.scope.parse(input);
+    if (scope.kind === "user") return join(homedir(), ".agents", "skills");
+    const registered = this.workspaces.get(scope.projectId);
+    const workspace = await this.workspaces.root(
+      registered.id,
+      registered.revision,
+    );
+    return join(workspace.root, ".agents", "skills");
+  }
+  async discover(input: unknown) {
+    const command = z
+      .object({ scope: importSchema.shape.scope })
+      .strict()
+      .parse(input);
+    return discoverSkillSources(await this.sourceRoot(command.scope));
+  }
+  async sourceSnapshot(input: unknown) {
+    const command = z
+      .object({
+        scope: importSchema.shape.scope,
+        name: z.string(),
+        expectedHash: z.string().regex(/^[a-f0-9]{64}$/),
+      })
+      .strict()
+      .parse(input);
+    const root = await this.sourceRoot(command.scope);
+    const snapshot = await snapshotSkillSource(root, command.name);
+    if (snapshot.contentHash !== command.expectedHash)
+      throw new RockyError(
+        "skill_source_changed",
+        "Source changed since discovery; discover and review again",
+        409,
+      );
+    return {
+      package: snapshot.package,
+      contentHash: snapshot.contentHash,
+      scope: command.scope,
+      source: {
+        type: command.scope.kind === "user" ? "global" : "project",
+        reference: join(root, command.name),
+      },
+      state: "untrusted",
+    };
+  }
   import(input: unknown) {
     const command = importSchema.parse(input);
     const snapshot = validateSkillPackage(command.package);

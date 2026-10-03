@@ -276,6 +276,12 @@ export function createApp(service: WorkService) {
     c.json({ artifacts: service.artifacts.list() }),
   );
   app.get("/api/v1/skills", (c) => c.json({ skills: service.skills.list() }));
+  app.post("/api/v1/skills/discover", async (c) =>
+    c.json(await service.skills.discover(await readJson(c))),
+  );
+  app.post("/api/v1/skills/source-snapshot", async (c) =>
+    c.json(await service.skills.sourceSnapshot(await readJson(c))),
+  );
   app.get("/api/v1/skills/:id/diff", (c) =>
     c.json(
       service.skills.diff(
