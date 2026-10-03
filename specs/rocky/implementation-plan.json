@@ -746,6 +746,30 @@
             "No custom CA for HTTPS proxy itself; proxy auth and CIDR NO_PROXY unsupported",
             "No remote creation, visibility change, push, merge, tag or deployment"
           ]
+        },
+        {
+          "commit": "49cbd5812196df3b8f1e10987f4aa3f44f8b6509",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/models/budget.json",
+          "testFiles": [
+            "tests/model-budget.test.ts",
+            "tests/runtime.test.ts"
+          ],
+          "limitations": [
+            "T-007 remains in_progress: configured provider adapters/routing, token profiles, real provider usage and editable budget profiles still pending",
+            "Fixture token usage stays unknown; known totals do not imply zero overall usage",
+            "Configured-price micro-USD estimates are not provider invoices; remote overbilling/output overruns cannot be undone",
+            "Role sub-limits and wall time budgets remain pending",
+            "No browser rerun for this backend-only change; prior functional evidence retained",
+            "Dependencies unchanged; no clean-copy install repeated this turn",
+            "Ubuntu and strict browser egress remain open; no global AT promoted",
+            "No live/paid endpoint or remote action"
+          ]
         }
       ],
       "blockedReason": null,

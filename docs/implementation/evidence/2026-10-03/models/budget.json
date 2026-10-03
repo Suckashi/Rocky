@@ -1,0 +1,76 @@
+{
+  "commit": "49cbd5812196df3b8f1e10987f4aa3f44f8b6509",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+  "mode": "fixture",
+  "recordedAt": "2026-10-03T05:25:42.614Z",
+  "task": "T-007",
+  "status": "in_progress",
+  "commands": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "passed": 46,
+      "files": 13
+    },
+    {
+      "command": "npx vitest run tests/model-budget.test.ts",
+      "exitCode": 0,
+      "passed": 5,
+      "note": "Focused rerun after public monetary field clarification and HTTP snapshot assertion"
+    },
+    {
+      "command": "npm run test:network",
+      "exitCode": 0,
+      "networkTests": 2,
+      "evaluationCases": 4
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "warning": "Existing large bundle warning"
+    },
+    {
+      "command": "npx tsc -p tsconfig.build.json",
+      "exitCode": 0,
+      "note": "Final server compile after DTO field clarification"
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run format:check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    }
+  ],
+  "verified": [
+    "Persisted shared root call cap across native target/subagent purposes",
+    "Duplicate request dispatch fence and immutable budget configuration",
+    "Reservations survive store reopen without reset or refund",
+    "Reported settlement releases only known token capacity; unknown usage retains reservation",
+    "Explicit pricing/trusted bounds required for token or cost limits; exact integer upward rounding",
+    "Reported overrun retained and prevents subsequent dispatch",
+    "Actual Work fails before model/tool dispatch when root budget has 48 reserved requests",
+    "Validated HTTP model usage snapshot preserves unknown usage"
+  ],
+  "limitations": [
+    "T-007 remains in_progress: configured provider adapters/routing, token profiles, real provider usage and editable budget profiles still pending",
+    "Fixture token usage stays unknown; known totals do not imply zero overall usage",
+    "Configured-price micro-USD estimates are not provider invoices; remote overbilling/output overruns cannot be undone",
+    "Role sub-limits and wall time budgets remain pending",
+    "No browser rerun for this backend-only change; prior functional evidence retained",
+    "Dependencies unchanged; no clean-copy install repeated this turn",
+    "Ubuntu and strict browser egress remain open; no global AT promoted",
+    "No live/paid endpoint or remote action"
+  ]
+}
