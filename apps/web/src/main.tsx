@@ -12,6 +12,7 @@ import {
 } from "../../../packages/contracts/src/index.js";
 import { projectWork, projectEvidence } from "./projection.js";
 import { ModelSettings } from "./model-settings.js";
+import { WorkGrants } from "./work-grants.js";
 import "./style.css";
 let session = "";
 async function request(path: string, body?: unknown) {
@@ -316,6 +317,7 @@ function App() {
                 {w.error && <p role="alert">{w.error}</p>}
                 <details>
                   <summary>{t.detail}</summary>
+                  <WorkGrants work={w} locale={locale} request={request} />
                   <p>
                     {locale === "zh"
                       ? "此工作模型呼叫上限"

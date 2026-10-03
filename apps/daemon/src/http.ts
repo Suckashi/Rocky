@@ -162,6 +162,16 @@ export function createApp(service: WorkService) {
     }),
   );
   app.get("/api/v1/works", (c) => c.json({ works: service.store.list() }));
+  app.get("/api/v1/works/:id/grants", (c) => {
+    const work = service.store.get(c.req.param("id"));
+    return c.json({ grants: service.grants.list(work.id) });
+  });
+  app.post("/api/v1/works/:id/grants/:grantId/revoke", async (c) => {
+    const work = service.store.get(c.req.param("id"));
+    return c.json(
+      service.grants.revoke(work.id, c.req.param("grantId"), await readJson(c)),
+    );
+  });
   app.get("/api/v1/works/:id/model-usage", (c) =>
     c.json(
       service.modelBudgets.snapshot(service.store.get(c.req.param("id")).runId),
