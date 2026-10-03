@@ -1509,8 +1509,35 @@
         "R-048",
         "R-049"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "04e1e94436e98b24cd6ac72b6c802fea008c2477",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm test; ROCKY_TEST_BROWSER=<Chromium1223> npx playwright test --grep-invert 'browser egress'",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/streaming/verification.json",
+          "testFiles": [
+            "tests/model-stream.test.ts",
+            "tests/stream-work.test.ts",
+            "tests/agui-stream.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/reconnect.spec.ts",
+            "tests/redaction.test.ts"
+          ],
+          "limitations": [
+            "Local scripted provider fixture, not paid/live provider or Ubuntu evidence",
+            "T-011/T-018/T-019 remain in_progress; full continuous conversation/history, steering, checkpoint/inbox barrier, workspace/MCP and panels are incomplete",
+            "Partial streaming reconstructs from bounded recent event projection; a dedicated durable message history remains pending",
+            "Redaction retains 32 characters plus maximum known credential length and incomplete URLs; short replies and structured JSON may become visible only after complete validation",
+            "Strict browser egress remains host AdGuard blocked; no additional attempt or relaxed assertion",
+            "No remote actions"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
@@ -1777,8 +1804,35 @@
         "R-014",
         "R-038"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "04e1e94436e98b24cd6ac72b6c802fea008c2477",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm test; ROCKY_TEST_BROWSER=<Chromium1223> npx playwright test --grep-invert 'browser egress'",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/streaming/verification.json",
+          "testFiles": [
+            "tests/model-stream.test.ts",
+            "tests/stream-work.test.ts",
+            "tests/agui-stream.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/reconnect.spec.ts",
+            "tests/redaction.test.ts"
+          ],
+          "limitations": [
+            "Local scripted provider fixture, not paid/live provider or Ubuntu evidence",
+            "T-011/T-018/T-019 remain in_progress; full continuous conversation/history, steering, checkpoint/inbox barrier, workspace/MCP and panels are incomplete",
+            "Partial streaming reconstructs from bounded recent event projection; a dedicated durable message history remains pending",
+            "Redaction retains 32 characters plus maximum known credential length and incomplete URLs; short replies and structured JSON may become visible only after complete validation",
+            "Strict browser egress remains host AdGuard blocked; no additional attempt or relaxed assertion",
+            "No remote actions"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
@@ -1847,6 +1901,32 @@
             "Ubuntu not_run, existing strict browser egress blocked by host AdGuard; not rerun without new environment",
             "No real external service or paid model Agent validation; configured browser test uses explicitly local scripted provider",
             "No remote creation/visibility/push/merge/tag/deployment"
+          ]
+        },
+        {
+          "commit": "04e1e94436e98b24cd6ac72b6c802fea008c2477",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm test; ROCKY_TEST_BROWSER=<Chromium1223> npx playwright test --grep-invert 'browser egress'",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/streaming/verification.json",
+          "testFiles": [
+            "tests/model-stream.test.ts",
+            "tests/stream-work.test.ts",
+            "tests/agui-stream.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/reconnect.spec.ts",
+            "tests/redaction.test.ts"
+          ],
+          "limitations": [
+            "Local scripted provider fixture, not paid/live provider or Ubuntu evidence",
+            "T-011/T-018/T-019 remain in_progress; full continuous conversation/history, steering, checkpoint/inbox barrier, workspace/MCP and panels are incomplete",
+            "Partial streaming reconstructs from bounded recent event projection; a dedicated durable message history remains pending",
+            "Redaction retains 32 characters plus maximum known credential length and incomplete URLs; short replies and structured JSON may become visible only after complete validation",
+            "Strict browser egress remains host AdGuard blocked; no additional attempt or relaxed assertion",
+            "No remote actions"
           ]
         }
       ],
@@ -3690,7 +3770,7 @@
     "remoteStatus": "not_created",
     "visibility": null,
     "creationRequiresSeparateAuthorization": true,
-    "implementationCommit": "c57c7c7fea228c3b1feab2e418782b1736930eba",
+    "implementationCommit": "04e1e94436e98b24cd6ac72b6c802fea008c2477",
     "strategy": "greenfield_no_fork_no_imported_git_history"
   },
   "referenceRepositories": [

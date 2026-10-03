@@ -2,21 +2,22 @@
 
 2026-10-03, Asia/Taipei. Working local P0 fixture plus P1 contracts and original identity; not the complete Rocky product.
 
-| Task        | Status      | Actual result                                                                                                                                               |
-| ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T-001       | done        | Independent Git root and local commit, original engineering files, Apache-2.0, workspace, new CI and reference decisions. Remote uncreated.                 |
-| T-002       | blocked     | Locked dependencies, installed license inventory and Windows clean-copy no-Python validation. Ubuntu evidence unavailable.                                  |
-| T-003       | in_progress | Real CopilotKit gateway → Work → native Deep Agents task/todos/interrupt → stdio/HTTP MCP. Functional browser flow verified; upstream P0 gate open.         |
-| T-004       | blocked     | Four Promptfoo full-path cases and Node egress pass with blocked SDK telemetry recorded. Browser egress fails from host AdGuard injection.                  |
-| T-005       | done        | Validated DTO/event/error/IPC wire contracts and cursor-based snapshot synchronization. Worker IPC execution remains T-009.                                 |
-| T-006       | done        | Domain schema v2, identity-preserving CAS, atomic events/outbox, recoverable completion projection and OS-released single writer lock.                      |
-| T-007       | in_progress | Model UI/API, shared Work/evaluation routing, budgets, live probe and proxy/CA tests; profiles/cache pricing/full DNS policy pending.                       |
-| T-008       | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.               |
-| T-009       | done        | Durable child IPC and configured/fixture native Deep Agents workers; daemon owns model/tool RPC, shutdown and descendant cleanup.                           |
-| T-010       | done        | Durable bounded admission, main/background/evaluation slots, workspace UUID reservations, model semaphore and pinned budget/configuration.                  |
-| T-019       | in_progress | OpenDots compact shell/main chat slice, model popovers/dialog, original avatar, approvals/stop/reconcile; full tools/results/presence and streaming remain. |
-| T-037       | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                            |
-| Later tasks | pending     | Product modules and confirmed-state presence remain pending.                                                                                                |
+| Task          | Status      | Actual result                                                                                                                                               |
+| ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T-001         | done        | Independent Git root and local commit, original engineering files, Apache-2.0, workspace, new CI and reference decisions. Remote uncreated.                 |
+| T-002         | blocked     | Locked dependencies, installed license inventory and Windows clean-copy no-Python validation. Ubuntu evidence unavailable.                                  |
+| T-003         | in_progress | Real CopilotKit gateway → Work → native Deep Agents task/todos/interrupt → stdio/HTTP MCP. Functional browser flow verified; upstream P0 gate open.         |
+| T-004         | blocked     | Four Promptfoo full-path cases and Node egress pass with blocked SDK telemetry recorded. Browser egress fails from host AdGuard injection.                  |
+| T-005         | done        | Validated DTO/event/error/IPC wire contracts and cursor-based snapshot synchronization. Worker IPC execution remains T-009.                                 |
+| T-006         | done        | Domain schema v2, identity-preserving CAS, atomic events/outbox, recoverable completion projection and OS-released single writer lock.                      |
+| T-007         | in_progress | Model UI/API, shared Work/evaluation routing, budgets, live probe and proxy/CA tests; profiles/cache pricing/full DNS policy pending.                       |
+| T-008         | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.               |
+| T-009         | done        | Durable child IPC and configured/fixture native Deep Agents workers; daemon owns model/tool RPC, shutdown and descendant cleanup.                           |
+| T-010         | done        | Durable bounded admission, main/background/evaluation slots, workspace UUID reservations, model semaphore and pinned budget/configuration.                  |
+| T-019         | in_progress | OpenDots compact shell/main chat slice, model popovers/dialog, original avatar, approvals/stop/reconcile; full tools/results/presence and streaming remain. |
+| T-037         | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                            |
+| T-011 / T-018 | in_progress | Configured provider incremental SSE, common UI adapter, snapshot reconnect and numeric cursor replay; other contracts pending.                              |
+| Later tasks   | pending     | Product modules and confirmed-state presence remain pending.                                                                                                |
 
 Node 24.12.0 / npm 11.6.4 baseline. OpenDots MIT presentation CSS adapted with notices; no upstream history, backend, data, settings or brand assets imported. Test data is synthetic. No remote action; existing live probe evidence is separate from this fixture UI slice. See known-limitations.md for gates and follow-up.
 
@@ -285,3 +286,11 @@ T-010's local doneWhen is met and its plan status is `done`. Resource identity i
 本輪 Windows：typecheck、lint、docs DAG、build exit 0；28 files／108 tests passed；9 functional browser tests passed（排除既有 host AdGuard egress 阻塞）。實測四尺寸無全頁水平溢出，drawer Escape/focus、light/dark、模型設定、budget、核准、停止、revoke、reconcile 通過。不是 live／Ubuntu／全版 UI 驗收。
 
 未完成：真正 incremental streaming／steering／history/inbox、真 MCP/workspace、成果文件／Computer、memory/skills/Learning、backup/package。下一項：完成共用 UI adapter 與主對話 reconnect／增量 runtime delivery，按 T-011～013 契約接續；環境驗證按兩次／15分鐘上限遞延，沒有遠端動作。
+
+## 2026-10-03 — 增量串流／adapter／cursor 回歸
+
+Source 04e1e94436e98b24cd6ac72b6c802fea008c2477。OpenAI-compatible／Anthropic root SSE 真正增量輸入、工具參數完整驗證、正式終止訊號、公開文字與 reasoning 分離；daemon 持久化 streams 並映射 AG-UI TEXT_MESSAGE_*。片段不改 Work 終態，停止仍是精確 server command。
+
+新增共用 Rocky projection／commands、初始 snapshot 失敗重連、斷線 Enter 防送出、mobile dialog 焦點返回。修復 SQLite CAST sequence alias 的字典序，改按 integer column 排序；AG-UI 逐頁排完該 Work 事件才送 receipt。1,001 chunks replay、截斷兩種 provider、不調用工具、unknown usage、split credential 遮罩都有測試。
+
+Windows：31 files／117 tests、11 browser tests、check／lint／build 通過；最後 focused streaming viewport 測試 1 passed。證據 evidence/2026-10-03/streaming/verification.json。T-011／018／019 均 in_progress，AT 不變。短尾遮罩與結構化內容可能延後顯示，recent-event projection 還不是完整 Message persistence。下一項為 guarded native scratch backend／持續對話與安全 inbox；未執行 live／Ubuntu 或遠端操作。

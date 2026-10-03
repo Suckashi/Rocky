@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-03",
+  "commit": "04e1e94436e98b24cd6ac72b6c802fea008c2477",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "mode": "fixture",
+  "browser": "148.0.7778.96, existing Chromium 1223, DPR 1",
+  "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "limitations": [
+        "Existing CopilotKit bundle size warnings"
+      ]
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "result": "31 files / 117 tests passed",
+      "durationSeconds": 58.73
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<Chromium1223>; npx playwright test --grep-invert 'browser egress'",
+      "exitCode": 0,
+      "result": "11 functional browser tests passed",
+      "durationSeconds": 52.6
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<Chromium1223>; npx playwright test tests/e2e/streaming.spec.ts",
+      "exitCode": 0,
+      "result": "Focused final viewport/screenshot verification: 1 passed",
+      "durationSeconds": 21.4
+    }
+  ],
+  "evidence": [
+    "stream-partial-1440.png",
+    "stream-before-stop-1440.png",
+    "stream-before-stop-390.png",
+    "e2e-focused.json"
+  ],
+  "limitations": [
+    "Local scripted provider fixture, not paid/live provider or Ubuntu evidence",
+    "T-011/T-018/T-019 remain in_progress; full continuous conversation/history, steering, checkpoint/inbox barrier, workspace/MCP and panels are incomplete",
+    "Partial streaming reconstructs from bounded recent event projection; a dedicated durable message history remains pending",
+    "Redaction retains 32 characters plus maximum known credential length and incomplete URLs; short replies and structured JSON may become visible only after complete validation",
+    "Strict browser egress remains host AdGuard blocked; no additional attempt or relaxed assertion",
+    "No remote actions"
+  ]
+}

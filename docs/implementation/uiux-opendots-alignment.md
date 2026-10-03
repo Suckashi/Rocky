@@ -55,3 +55,7 @@ Windows x64、Node 24.12.0、npm 11.6.4、Chromium 148.0.7778.96、DPR 1、100% 
 ## 驗證
 
 實際命令、exit code 與限制記於 [verification.json](evidence/2026-10-03/uiux/verification.json)。新增 alignment.spec.ts 實測四尺寸固定 chrome、composer 可見、drawer 焦點、收合布局、dialog Escape、深色及 reduced motion。既有 functional e2e 保留核准、停止、model usage、permission revoke、reconcile 等結果斷言，只調整新導覽入口。全域 AT 不因本切片改成 passed。
+
+## 後續串流與重連切片
+
+Source 04e1e94436e98b24cd6ac72b6c802fea008c2477：增量 provider SSE、AG-UI 對應事件、共用 Rocky adapter、重連、串流停止已在 local provider fixture 驗證。新增證據 [streaming/verification.json](evidence/2026-10-03/streaming/verification.json) 與 1440／390px 串流截圖；舊切片的「尚無串流」描述只適用原 cb54e75 baseline。真實外部模型／完整 Message history 與長歷史 scroll 動態驗證仍 not_run／未完成。
