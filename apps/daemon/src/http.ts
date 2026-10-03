@@ -15,6 +15,7 @@ import {
 import { WorkService } from "./work-service.js";
 import { htmlPreview } from "./html-preview.js";
 import { modelBudgetSchema } from "../../../packages/contracts/src/model-budget.js";
+import { memoryReadSelectionSchema } from "../../../packages/contracts/src/memory.js";
 async function readJson(c: Context): Promise<unknown> {
   try {
     return await c.req.json();
@@ -431,6 +432,7 @@ export function createApp(service: WorkService) {
         workspaceId: z.uuid().optional(),
         workspaceRevision: z.number().int().positive().optional(),
         workspaceRead: z.boolean().optional(),
+        memoryRead: memoryReadSelectionSchema.optional(),
         transport: z.enum(["stdio", "http"]),
       })
       .strict()

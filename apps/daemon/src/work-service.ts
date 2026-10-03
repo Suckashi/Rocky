@@ -378,6 +378,11 @@ export class WorkService {
       this.store.add(work, intent);
       this.modelBudgets.open(work.runId, work.modelBudget);
       this.store.event(work, "rocky.work.updated", { work });
+      for (const selection of parsed.memoryRead ?? [])
+        this.memories.grantRead(work.id, {
+          requestId: randomUUID(),
+          ...selection,
+        });
       if (parsed.workspaceRead)
         this.grants.issue({
           requestId: randomUUID(),

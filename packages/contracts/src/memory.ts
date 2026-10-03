@@ -46,6 +46,18 @@ export const memorySearchSchema = z.strictObject({
   tokenBudget: z.number().int().min(2).max(16384).default(8192),
 });
 export type Memory = z.infer<typeof memorySchema>;
+export const memoryReadSelectionSchema = z
+  .array(
+    z.strictObject({
+      scope: z.enum(["user", "project", "task"]),
+      includePrivate: z.boolean(),
+    }),
+  )
+  .max(3)
+  .refine(
+    (items) => new Set(items.map((item) => item.scope)).size === items.length,
+    "Duplicate memory scope",
+  );
 export const memoryReadToolSchema = z.strictObject({
   scope: z.enum(["user", "project", "task"]),
   includePrivate: z.boolean().default(false),

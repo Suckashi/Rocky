@@ -144,6 +144,10 @@ function App() {
   }, [focusedWork]);
   const [maxCalls, setMaxCalls] = useState("48");
   const modelTools = useRef<HTMLDetailsElement>(null);
+  const [memoryScope, setMemoryScope] = useState<"off" | "user" | "project">(
+    "off",
+  );
+  const [memoryPrivate, setMemoryPrivate] = useState(false);
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace>(),
     [workspaceRead, setWorkspaceRead] = useState(false);
   const validBudget =
@@ -182,11 +186,20 @@ function App() {
       });
       setText("");
       setWorkspaceRead(false);
+      setMemoryScope("off");
+      setMemoryPrivate(false);
       await agent.runAgent({
         runId: crypto.randomUUID(),
         forwardedProps: selectedModel
           ? {
               mode: "configured",
+              ...(memoryScope !== "off"
+                ? {
+                    memoryRead: [
+                      { scope: memoryScope, includePrivate: memoryPrivate },
+                    ],
+                  }
+                : {}),
               ...(selectedWorkspace
                 ? {
                     workspaceId: selectedWorkspace.id,
@@ -259,6 +272,8 @@ function App() {
           request={request}
           onSelect={(workspace) => {
             setSelectedWorkspace(workspace);
+            setMemoryScope("off");
+            setMemoryPrivate(false);
             setWorkspaceRead(false);
           }}
         />
@@ -283,6 +298,8 @@ function App() {
             request={request}
             onSelect={(model) => {
               setSelectedModel(model);
+              setMemoryScope("off");
+              setMemoryPrivate(false);
               setEnabled(false);
             }}
           />
@@ -689,6 +706,50 @@ function App() {
                   {locale === "zh" ? "模型與工具" : "Model & tools"}
                 </summary>{" "}
                 <section id="setup" className="setup">
+                  {selectedModel && (
+                    <>
+                      <label>
+                        {locale === "zh"
+                          ? "本次工作可讀取的記憶"
+                          : "Memory available to this Work"}
+                        <select
+                          value={memoryScope}
+                          onChange={(e) => {
+                            setMemoryScope(
+                              e.target.value as typeof memoryScope,
+                            );
+                            setMemoryPrivate(false);
+                          }}
+                        >
+                          <option value="off">
+                            {locale === "zh" ? "不授權" : "No access"}
+                          </option>
+                          <option value="user">
+                            {locale === "zh" ? "個人記憶" : "User memory"}
+                          </option>
+                          {selectedWorkspace && (
+                            <option value="project">
+                              {locale === "zh"
+                                ? "所選專案記憶"
+                                : "Selected project memory"}
+                            </option>
+                          )}
+                        </select>
+                      </label>
+                      {memoryScope !== "off" && (
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={memoryPrivate}
+                            onChange={(e) => setMemoryPrivate(e.target.checked)}
+                          />
+                          {locale === "zh"
+                            ? "允許將私密記憶提供給本次模型"
+                            : "Allow private memory to be sent to this model"}
+                        </label>
+                      )}
+                    </>
+                  )}
                   {selectedWorkspace && (
                     <>
                       <span>
@@ -711,6 +772,8 @@ function App() {
                         onClick={() => {
                           setSelectedWorkspace(undefined);
                           setWorkspaceRead(false);
+                          setMemoryScope("off");
+                          setMemoryPrivate(false);
                         }}
                       >
                         {locale === "zh" ? "取消工作區選取" : "Clear workspace"}

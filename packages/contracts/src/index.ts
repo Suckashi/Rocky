@@ -1,4 +1,5 @@
 import { worktreePreviewSchema } from "./workspaces.js";
+import { memoryReadSelectionSchema } from "./memory.js";
 import { z } from "zod";
 import { EventSchemas } from "@ag-ui/core/schemas";
 import { modelBudgetSchema } from "./model-budget.js";
@@ -41,10 +42,20 @@ export const submissionSchema = z
     workspaceId: idSchema.optional(),
     workspaceRevision: revisionSchema.optional(),
     workspaceRead: z.boolean().optional(),
+    memoryRead: memoryReadSelectionSchema.optional(),
     modelSelection: modelSelectionSchema.optional(),
     modelBudget: modelBudgetSchema.optional(),
   })
   .strict()
+  .refine((value) => !value.memoryRead?.length || value.mode === "configured", {
+    message: "Memory scope requires configured mode",
+  })
+  .refine(
+    (value) =>
+      !value.memoryRead?.some((item) => item.scope === "project") ||
+      !!value.workspaceId,
+    { message: "Project memory requires a bound workspace" },
+  )
   .refine((value) => !value.workspaceRevision || !!value.workspaceId, {
     message: "Workspace revision requires an id",
   })

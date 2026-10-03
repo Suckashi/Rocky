@@ -8,7 +8,14 @@ import { WorkService } from "../apps/daemon/src/work-service.js";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 import { createApp } from "../apps/daemon/src/http.js";
 
-test.each(["granted", "denied", "revoked", "private", "escalated"])(
+test.each([
+  "granted",
+  "denied",
+  "revoked",
+  "private",
+  "escalated",
+  "submitted",
+])(
   "native memory boundary: %s",
   async (mode) => {
     const root = await mkdtemp(join(tmpdir(), "rocky-memory-native-"));
@@ -70,12 +77,16 @@ test.each(["granted", "denied", "revoked", "private", "escalated"])(
           maxOutputTokens: 256,
         },
       });
-      const work = service.submit({
+      const submission = {
         requestId: randomUUID(),
         text: "Read explicitly granted memory",
         mode: "configured",
         modelSelection: { connectionId, revision: 1 },
-      });
+        ...(mode === "submitted"
+          ? { memoryRead: [{ scope: "user", includePrivate: false }] }
+          : {}),
+      };
+      const work = service.submit(submission);
       const app = createApp(service),
         headers = {
           host: "127.0.0.1:3211",
@@ -96,7 +107,7 @@ test.each(["granted", "denied", "revoked", "private", "escalated"])(
           })
         ).status,
       ).toBe(403);
-      if (mode !== "denied") {
+      if (mode !== "denied" && mode !== "submitted") {
         const { token } = await (
           await app.request("/api/v1/session", { headers })
         ).json();
@@ -113,6 +124,12 @@ test.each(["granted", "denied", "revoked", "private", "escalated"])(
             expectedRevision: 1,
           });
       }
+      if (mode === "submitted") {
+        const before = service.grants.list(work.id);
+        expect(before).toHaveLength(1);
+        service.submit(submission);
+        expect(service.grants.list(work.id)).toEqual(before);
+      }
       release();
       await expect
         .poll(
@@ -121,7 +138,7 @@ test.each(["granted", "denied", "revoked", "private", "escalated"])(
           { timeout: 15000 },
         )
         .toBe(true);
-      if (["granted", "private"].includes(mode)) {
+      if (["granted", "private", "submitted"].includes(mode)) {
         expect(service.store.get(work.id).status).toBe("completed");
         expect(delivered).toContain("PUBLIC_MEMORY");
         if (mode === "private") expect(delivered).toContain("PRIVATE_MEMORY");

@@ -343,3 +343,122 @@ test("owner grants private memory in Work UI and native model receives only auth
     await provider.close();
   }
 });
+
+test("composer grants memory before native execution and clears one-Work selection", async ({
+  page,
+}) => {
+  const marker = "Composer memory " + randomUUID(),
+    callId = randomUUID();
+  const provider = await startAgentProvider({
+    reply: async (messages) => {
+      const result = messages.find(
+        (m) => m instanceof ToolMessage && m.tool_call_id === callId,
+      );
+      if (result)
+        return new AIMessage(
+          String(result.content).includes(marker)
+            ? "PREGRANTED_MEMORY_OK"
+            : "MISSING_MEMORY",
+        );
+      return new AIMessage({
+        content: "",
+        tool_calls: [
+          {
+            id: callId,
+            name: "memory_search",
+            args: { scope: "user", includePrivate: true, query: marker },
+            type: "tool_call",
+          },
+        ],
+      });
+    },
+  });
+  try {
+    await page.goto("/");
+    const { token } = await (await page.request.get("/api/v1/session")).json();
+    const headers = { "x-rocky-session": token },
+      connectionId = randomUUID();
+    expect(
+      (
+        await page.request.post("/api/v1/model-connections", {
+          headers,
+          data: {
+            id: connectionId,
+            requestId: randomUUID(),
+            expectedRevision: 0,
+            config: {
+              name: marker,
+              provider: "openai-compatible",
+              baseUrl: provider.baseUrl,
+              modelId: "fixture",
+              contextWindowTokens: 65536,
+              maxOutputTokens: 256,
+            },
+          },
+        })
+      ).ok(),
+    ).toBe(true);
+    expect(
+      (
+        await page.request.post("/api/v1/memories", {
+          headers,
+          data: {
+            id: randomUUID(),
+            requestId: randomUUID(),
+            expectedRevision: 0,
+            scope: { kind: "user" },
+            content: marker,
+            private: true,
+          },
+        })
+      ).ok(),
+    ).toBe(true);
+    await page
+      .getByRole("button", { name: "設定", exact: true })
+      .first()
+      .click();
+    await page.getByText("模型連線設定", { exact: true }).click();
+    await page
+      .getByRole("dialog")
+      .locator(".model-card")
+      .filter({ hasText: marker })
+      .getByRole("button", { name: "使用此模型", exact: true })
+      .click();
+    await page.keyboard.press("Escape");
+    await page.getByText("模型與工具", { exact: true }).click();
+    const scope = page.getByLabel("本次工作可讀取的記憶");
+    await expect(scope).toHaveValue("off");
+    await scope.selectOption("user");
+    await page.getByLabel("允許將私密記憶提供給本次模型").check();
+    for (const [width, height] of [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844],
+    ]) {
+      await page.setViewportSize({ width: width!, height: height! });
+      await scope.scrollIntoViewIfNeeded();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: "test-results/memory-composer-" + width + ".png",
+      });
+    }
+    await page.locator("#compose textarea").fill(marker);
+    await page.getByRole("button", { name: "傳送至模型" }).click();
+    await expect(
+      page.locator("article.work").filter({ hasText: marker }),
+    ).toContainText("PREGRANTED_MEMORY_OK");
+    await page.getByText("模型與工具", { exact: true }).click();
+    await expect(scope).toHaveValue("off");
+    await scope.selectOption("user");
+    await expect(
+      page.getByLabel("允許將私密記憶提供給本次模型"),
+    ).not.toBeChecked();
+  } finally {
+    await provider.close();
+  }
+});

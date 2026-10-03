@@ -28,6 +28,39 @@ test("fixture mode is explicit and forged permission fields are rejected", () =>
     }).success,
   ).toBe(false);
 });
+test("submission memory grants require configured mode, exact project binding and unique explicit scopes", () => {
+  const input = {
+    requestId: randomUUID(),
+    text: "read",
+    mode: "configured",
+    modelSelection: { connectionId: randomUUID(), revision: 1 },
+  };
+  expect(
+    submissionSchema.safeParse({
+      ...input,
+      memoryRead: [{ scope: "user", includePrivate: false }],
+    }).success,
+  ).toBe(true);
+  for (const memoryRead of [
+    [{ scope: "project", includePrivate: false }],
+    [{ scope: "user" }],
+    [
+      { scope: "user", includePrivate: false },
+      { scope: "user", includePrivate: true },
+    ],
+  ])
+    expect(submissionSchema.safeParse({ ...input, memoryRead }).success).toBe(
+      false,
+    );
+  expect(
+    submissionSchema.safeParse({
+      requestId: randomUUID(),
+      text: "read",
+      mode: "fixture",
+      memoryRead: [{ scope: "user", includePrivate: true }],
+    }).success,
+  ).toBe(false);
+});
 
 test("T-005 IPC wire requires run identity and rejects owner fields, unknown commands and oversized UTF-8", () => {
   const command = {
