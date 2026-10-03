@@ -417,3 +417,7 @@ Source 7118f9dbe34576be787fbea92305b029ef5dbac2 adds root-only workspace_write w
 ## Workspace difference review (53e9e2cee58c8cd18cee1cc09e275c210e879c48)
 
 Owner-session/exact-approval preview now revalidates original target, shows bounded replacement hunk with encoding notices and retains full new content. Review grants no model access or consent. Final23 focused tests, type/lint/build and four-width overwrite browser flow pass; see [workspace-diff.md](workspace-diff.md). Full diff/editor/leases/worktree/shell/reconciliation and later V1 scope still open; Goal active.
+
+## Canonical root ownership (c63be5a72f91dc78f38c261b4b8b3b8cde4a9bf3)
+
+Admission now serializes parent/child registered roots across different UUIDs before worker/model slots. Native children share root ownership; existing per-target claims remain. Related31 regressions, final5 lease cases, type/lint/build and normal-daemon browser5 pass. See [workspace-leases.md](workspace-leases.md). T-017 worktree/shell/multi-resource locks/reconciliation remain open; Goal active.

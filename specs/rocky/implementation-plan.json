@@ -1340,6 +1340,31 @@
             "No new matched populated reference/before/after comparison or full OpenDots claim",
             "Ubuntu/live services/pinned clean browser install remain deferred"
           ]
+        },
+        {
+          "commit": "c63be5a72f91dc78f38c261b4b8b3b8cde4a9bf3",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/workspace-leases.test.ts tests/admission.test.ts tests/workspace-work.test.ts tests/workspace-writes.test.ts; npx vitest run tests/workspace-leases.test.ts; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-leases/verification.json",
+          "testFiles": [
+            "tests/workspace-leases.test.ts",
+            "tests/admission.test.ts",
+            "tests/workspace-work.test.ts",
+            "tests/workspace-writes.test.ts"
+          ],
+          "limitations": [
+            "Exclusive root Work admission; no shared-read lease optimization or new lock scheduler",
+            "Known blocked owner conservatively retains root until existing lifecycle is resolved; complete local-write reconciliation/release flow unfinished",
+            "Only one registered root per Work; future multi-resource acquisition ordering not implemented",
+            "No cross-process OS lock or proof against external filesystem race/root replacement",
+            "Worktree/shell and full T017/AT31 acceptance remain unfinished",
+            "No actual power loss; restart test uses explicitly seeded crash-state fixture",
+            "Ubuntu/live integration/pinned browser install not_run; no fresh visual comparison"
+          ]
         }
       ],
       "blockedReason": null,
@@ -1653,6 +1678,31 @@
             "Opaque resource UUID is not canonical workspace isolation; T-017 remains",
             "Ubuntu, strict browser egress and live paid model not verified; global AT unchanged",
             "No remote action"
+          ]
+        },
+        {
+          "commit": "c63be5a72f91dc78f38c261b4b8b3b8cde4a9bf3",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/workspace-leases.test.ts tests/admission.test.ts tests/workspace-work.test.ts tests/workspace-writes.test.ts; npx vitest run tests/workspace-leases.test.ts; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-leases/verification.json",
+          "testFiles": [
+            "tests/workspace-leases.test.ts",
+            "tests/admission.test.ts",
+            "tests/workspace-work.test.ts",
+            "tests/workspace-writes.test.ts"
+          ],
+          "limitations": [
+            "Exclusive root Work admission; no shared-read lease optimization or new lock scheduler",
+            "Known blocked owner conservatively retains root until existing lifecycle is resolved; complete local-write reconciliation/release flow unfinished",
+            "Only one registered root per Work; future multi-resource acquisition ordering not implemented",
+            "No cross-process OS lock or proof against external filesystem race/root replacement",
+            "Worktree/shell and full T017/AT31 acceptance remain unfinished",
+            "No actual power loss; restart test uses explicitly seeded crash-state fixture",
+            "Ubuntu/live integration/pinned browser install not_run; no fresh visual comparison"
           ]
         }
       ],
@@ -2720,6 +2770,31 @@
             "Full diff dark/English/focus/reduced-motion matrix not_run; keyboard approval smoke only",
             "No new matched populated reference/before/after comparison or full OpenDots claim",
             "Ubuntu/live services/pinned clean browser install remain deferred"
+          ]
+        },
+        {
+          "commit": "c63be5a72f91dc78f38c261b4b8b3b8cde4a9bf3",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/workspace-leases.test.ts tests/admission.test.ts tests/workspace-work.test.ts tests/workspace-writes.test.ts; npx vitest run tests/workspace-leases.test.ts; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-leases/verification.json",
+          "testFiles": [
+            "tests/workspace-leases.test.ts",
+            "tests/admission.test.ts",
+            "tests/workspace-work.test.ts",
+            "tests/workspace-writes.test.ts"
+          ],
+          "limitations": [
+            "Exclusive root Work admission; no shared-read lease optimization or new lock scheduler",
+            "Known blocked owner conservatively retains root until existing lifecycle is resolved; complete local-write reconciliation/release flow unfinished",
+            "Only one registered root per Work; future multi-resource acquisition ordering not implemented",
+            "No cross-process OS lock or proof against external filesystem race/root replacement",
+            "Worktree/shell and full T017/AT31 acceptance remain unfinished",
+            "No actual power loss; restart test uses explicitly seeded crash-state fixture",
+            "Ubuntu/live integration/pinned browser install not_run; no fresh visual comparison"
           ]
         }
       ],

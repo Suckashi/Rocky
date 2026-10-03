@@ -1,0 +1,92 @@
+{
+  "date": "2026-10-04",
+  "commit": "c63be5a72f91dc78f38c261b4b8b3b8cde4a9bf3",
+  "platform": "Windows x64",
+  "mode": "fixture",
+  "daemonMode": "normal",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+  "commands": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "command": "npx vitest run tests/workspace-leases.test.ts tests/admission.test.ts tests/workspace-work.test.ts tests/workspace-writes.test.ts",
+      "exitCode": 0,
+      "tests": 31,
+      "durationSeconds": 39.92,
+      "note": "Before adding reverse-direction fixture; daemon source unchanged after that run"
+    },
+    {
+      "command": "npx vitest run tests/workspace-leases.test.ts",
+      "exitCode": 0,
+      "tests": 5,
+      "durationSeconds": 10.2,
+      "note": "Final forward/reverse/cancel/restart fixtures"
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<existing Chromium1223> npx playwright test --config playwright.production.config.ts",
+      "exitCode": 0,
+      "tests": 5,
+      "durationSeconds": 23
+    },
+    {
+      "command": "scoped prettier --check; git diff --check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:docs",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    }
+  ],
+  "checks": [
+    "parent and nested registrations block across differing workspace UUIDs",
+    "reverse child-owner/parent-waiter blocks",
+    "prefix-neighbor unrelated root continues",
+    "Windows case folding preserves overlap",
+    "waiting uses zero model calls and no worker row",
+    "completion admits queued waiter",
+    "cancelled waiter never starts",
+    "recovered blocked owner retains nested scope",
+    "existing native child read and file write regression pass"
+  ],
+  "correctedFailures": [
+    {
+      "command": "initial14 focused tests",
+      "exitCode": 1,
+      "passed": 13,
+      "failed": 1,
+      "reason": "Fixture double-closed original/recovered store; corrected lifecycle finalizer; final tests pass"
+    }
+  ],
+  "browser": {
+    "version": "148.0.7778.96",
+    "dpr": 1,
+    "note": "Existing UI regression; no frontend geometry/source changes in this slice"
+  },
+  "limitations": [
+    "Exclusive root Work admission; no shared-read lease optimization or new lock scheduler",
+    "Known blocked owner conservatively retains root until existing lifecycle is resolved; complete local-write reconciliation/release flow unfinished",
+    "Only one registered root per Work; future multi-resource acquisition ordering not implemented",
+    "No cross-process OS lock or proof against external filesystem race/root replacement",
+    "Worktree/shell and full T017/AT31 acceptance remain unfinished",
+    "No actual power loss; restart test uses explicitly seeded crash-state fixture",
+    "Ubuntu/live integration/pinned browser install not_run; no fresh visual comparison"
+  ],
+  "globalAcceptance": "70 entries unchanged not_run",
+  "remoteActions": []
+}
