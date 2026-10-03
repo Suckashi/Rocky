@@ -148,7 +148,7 @@ test("schema 19 upgrades skill tables without changing owner memories", async ()
     await service.close();
     service = new WorkService(root);
     expect(service.store.db.prepare("PRAGMA user_version").get()).toMatchObject(
-      { user_version: 26 },
+      { user_version: 27 },
     );
     expect(service.memories.get(id).content).toBe("Preserve across upgrade");
     expect(service.skills.list()).toEqual([]);

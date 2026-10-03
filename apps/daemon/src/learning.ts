@@ -191,7 +191,13 @@ export class LearningRegistry {
       return this.episode(episode.id);
     });
   }
-  episode(id: string) {
+  episode(id: string): Record<string, unknown> & {
+    id: string;
+    revision: number;
+    contentHash: string;
+    workId: string;
+    status: string;
+  } {
     const row = this.store.db
       .prepare("SELECT data FROM learning_episodes WHERE id=?")
       .get(id) as { data: string } | undefined;
@@ -221,6 +227,9 @@ export class LearningRegistry {
         terminalBoundarySequence: safe.terminalBoundarySequence,
         learningPolicyRevision: safe.learningPolicyRevision,
         consentRevision: safe.consentRevision,
+        scope: safe.scope,
+        trigger: safe.trigger,
+        summaryAuthority: safe.summaryAuthority,
         summary: safe.summary,
         evidence: safe.evidence,
       }),
@@ -342,6 +351,12 @@ export class LearningRegistry {
       this.store.db
         .prepare("INSERT INTO learning_work_receipts VALUES(?,?,?)")
         .run(command.requestId, hash, JSON.stringify(result));
+      if (result.private || result.excluded || !result.sourceReuseAllowed)
+        this.store.db
+          .prepare(
+            "UPDATE learning_reflection_outputs SET data=json_remove(json_set(data,'$.status','withdrawn'),'$.payload') WHERE json_extract(data,'$.sourceWorkId')=?",
+          )
+          .run(workId);
       return result;
     });
   }
