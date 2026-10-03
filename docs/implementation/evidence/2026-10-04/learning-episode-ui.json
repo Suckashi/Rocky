@@ -1,0 +1,33 @@
+{
+  "commit": "3ab383e168eef8f6a682d270815de3136fed5c5b",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts learning.spec.ts; npm run check; scoped eslint episode-form/work-learning/main/browser test; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/learning-episode-ui.json",
+  "testFiles": ["tests/e2e/learning.spec.ts"],
+  "browserTests": 2,
+  "browserSeconds": 7.9,
+  "screenshots": [
+    "docs/implementation/evidence/2026-10-04/learning-episode-ui/after-320.png"
+  ],
+  "repairs": [
+    "Fixture originally matched historical ToolMessage from continuous main conversation; fixed to exact unique tool call ID",
+    "New nested episode status made broad status selector ambiguous; scoped to direct Work consent status, then reran"
+  ],
+  "limitations": [
+    "Selectable evidence is limited to events currently loaded by shared projection; older event pagination/source preview endpoint pending",
+    "Saved episode preview lasts in current form; persistent episode list/review UI after reload still pending",
+    "Policy revision conflicts preserve draft; editing fields refreshes intent, dedicated stale-policy reload affordance pending",
+    "Chinese/light Chromium148.0.7778.96 DPR1;320 episode screenshot only, other four-width checks cover parent consent; full form/theme/keyboard/reference matrix pending",
+    "No reflection dispatch, candidate publication, Ubuntu/live provider/global AT claim"
+  ],
+  "assertions": [
+    "Completed normal work with saved reuse consent exposes manual episode form",
+    "Actual configured Deep Agents fixture executes write_todos; selected daemon event passes source validation",
+    "Daemon redacts summary password pattern; rendered result contains REDACTED and pending-review status",
+    "Private withdrawal hides form and GET episode returns403",
+    "320 screenshot inspected and no document horizontal overflow; raw episode ID collapsed"
+  ]
+}

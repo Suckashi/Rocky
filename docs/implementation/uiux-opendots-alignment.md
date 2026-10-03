@@ -195,3 +195,7 @@ Skill binary comparison follow-up (`fcf861d`): existing details/typography token
 ### Work Learning permissions — 2026-10-04
 
 `work-learning.tsx` uses existing transcript details/model-card controls inside Work details, collapsed by default. Data is fetched on expansion and mutations use daemon CAS; no polling or new state source. This is a necessary Rocky Learning adaptation; no upstream CSS/assets copied. [Four-width evidence](evidence/2026-10-04/work-learning-ui.json), [320px after](evidence/2026-10-04/work-learning-ui/after-320.png). Long forms scroll within transcript; composer remains outside. After-only fixture proof does not close matched OpenDots comparison or complete focus/theme/language coverage.
+
+### Manual episode summary — 2026-10-04
+
+`learning-episode-form.tsx` extends existing collapsed Work Learning controls with neutral forms and text preview. Event types have readable labels; raw record ID stays in details. No new upstream code/CSS/assets copied; this is a Rocky-specific Learning workflow. [320px after](evidence/2026-10-04/learning-episode-ui/after-320.png), [browser evidence](evidence/2026-10-04/learning-episode-ui.json). Native fixture evidence is synthetic service input, not live provider proof. No matched OpenDots comparison or full theme/form/focus matrix completed.
