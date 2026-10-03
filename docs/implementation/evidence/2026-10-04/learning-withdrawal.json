@@ -1,0 +1,28 @@
+{
+  "commit": "d40bce4108e36e4e60e92bd5ff6778c0da1bf62f",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/learning-episode.test.ts tests/learning-source.test.ts tests/learning-policy.test.ts; npm run check; npx eslint apps/daemon/src/learning.ts tests/learning-episode.test.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/learning-withdrawal.json",
+  "testFiles": [
+    "tests/learning-episode.test.ts",
+    "tests/learning-source.test.ts",
+    "tests/learning-policy.test.ts"
+  ],
+  "tests": 3,
+  "seconds": 2.27,
+  "limitations": [
+    "Removal applies to current SQLite episode rows, not secure erasure of WAL/free pages/backups or already delivered external data",
+    "Future candidates/evaluations/checkpoints need derivative revocation integration once implemented; none is claimed here",
+    "Existing historical exclusions created before this change are not proactively swept until a new exclusion command",
+    "No UI/browser/Ubuntu/live model/global AT completion evidence"
+  ],
+  "assertions": [
+    "Private/excluded/no-reuse command removes summary and evidence arrays and marks episode withdrawn in same transaction",
+    "Injected SQLite update failure rolls back consent and retains previous readable episode; retry succeeds",
+    "Reallowing source does not restore withdrawn episode; read and exact creation replay reject",
+    "Old exclusion receipt replay leaves latest consent unchanged; tombstone survives restart"
+  ]
+}
