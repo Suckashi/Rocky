@@ -1977,6 +1977,29 @@
             "Full power-loss/crash matrix, precise steering/reset/retry and later V1 modules remain unfinished; global AT unchanged",
             "No remote actions"
           ]
+        },
+        {
+          "commit": "c533a58",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/retry.test.ts tests/operation-ledger.test.ts tests/operation-reconciler.test.ts tests/context-ledger.test.ts; npx playwright test tests/e2e/retry.spec.ts tests/e2e/steering.spec.ts; npx playwright test tests/e2e/retry.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/retry/verification.json",
+          "testFiles": [
+            "tests/retry.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/operation-reconciler.test.ts",
+            "tests/e2e/retry.spec.ts",
+            "tests/e2e/steering.spec.ts"
+          ],
+          "limitations": [
+            "Windows loopback/synthetic provider/effects only; no live/Ubuntu evidence",
+            "Full retry ancestry/race/rollback/power-loss matrix, model override UI, reset and later V1 modules pending",
+            "Current synthetic replay guard requires actual connector/target binding in future MCP/workspace adapters",
+            "T-013/T-019 in_progress; global AT unchanged; Goal active; no remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2392,6 +2415,29 @@
           "limitations": [
             "Focused Windows regression only; nonexistent conversation.test.ts was not run, actual conversation-store.test.ts run explicitly",
             "No fresh build/browser or live/Ubuntu evidence; T-012/T-019 still in_progress"
+          ]
+        },
+        {
+          "commit": "c533a58",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/retry.test.ts tests/operation-ledger.test.ts tests/operation-reconciler.test.ts tests/context-ledger.test.ts; npx playwright test tests/e2e/retry.spec.ts tests/e2e/steering.spec.ts; npx playwright test tests/e2e/retry.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/retry/verification.json",
+          "testFiles": [
+            "tests/retry.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/operation-reconciler.test.ts",
+            "tests/e2e/retry.spec.ts",
+            "tests/e2e/steering.spec.ts"
+          ],
+          "limitations": [
+            "Windows loopback/synthetic provider/effects only; no live/Ubuntu evidence",
+            "Full retry ancestry/race/rollback/power-loss matrix, model override UI, reset and later V1 modules pending",
+            "Current synthetic replay guard requires actual connector/target binding in future MCP/workspace adapters",
+            "T-013/T-019 in_progress; global AT unchanged; Goal active; no remote actions"
           ]
         }
       ],
