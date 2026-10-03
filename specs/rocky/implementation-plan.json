@@ -717,8 +717,37 @@
         "R-037",
         "R-040"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "dd8f2c08d197c34cecdb449c9ef62eab7d0e3376",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/models/verification.json",
+          "testFiles": [
+            "tests/models.test.ts",
+            "tests/model-network.test.ts",
+            "tests/http.test.ts",
+            "tests/e2e/models.spec.ts"
+          ],
+          "limitations": [
+            "T-007 remains in_progress: model-purpose routing, actual usage/cost budgets and DNS/rebind evidence unfinished",
+            "Chat/evaluation still use synthetic models; no paid or production endpoint exercised",
+            "Vision and structured-output capability not_run",
+            "Ubuntu not_run; WSL remains deferred",
+            "Strict browser egress remains a known failing AdGuard gate; excluded from this focused functional run",
+            "Browser used existing Chromium 1223, not the failed pinned 1243 download",
+            "Client cancellation is not proof of provider-side cancellation or billing termination",
+            "No custom CA for HTTPS proxy itself; proxy auth and CIDR NO_PROXY unsupported",
+            "No remote creation, visibility change, push, merge, tag or deployment"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [

@@ -1,8 +1,8 @@
 {
-  "commit": "322186bdee19dc15d1c01c242e54ca7cfccde52b",
+  "commit": "dd8f2c08d197c34cecdb449c9ef62eab7d0e3376",
   "platform": "Windows x64",
   "nodeVersion": "v24.12.0",
-  "lockfileHash": "df4ff0e83669da0aaf947a7010eb6969f57841eb76b16f386e3ef3580fbd6f6a",
+  "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
   "mode": "fixture",
   "npmVersion": "11.6.4",
   "dependencies": {
@@ -23,6 +23,7 @@
     "promptfoo": "0.120.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "undici": "7.30.0",
     "zod": "4.3.6"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "5.2.0",
     "eslint": "9.39.4",
+    "node-forge": "1.4.0",
     "prettier": "3.9.9",
     "tsx": "4.23.15",
     "typescript": "5.9.3",
