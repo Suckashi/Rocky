@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: "tests/e2e",
   testMatch: [
     "skills.spec.ts",
+    "learning.spec.ts",
     "memory.spec.ts",
     "mcp-work.spec.ts",
     "workspaces.spec.ts",

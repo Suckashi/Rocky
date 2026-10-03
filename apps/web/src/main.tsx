@@ -7,6 +7,7 @@ import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
 import { MemorySettings } from "./memory-settings.js";
+import { LearningSettings } from "./learning-settings.js";
 import { SkillSettings } from "./skill-settings.js";
 import { SkillRevocation } from "./skill-revocation.js";
 import { WriteProposal } from "./write-proposal.js";
@@ -245,6 +246,7 @@ function App() {
   }
   return (
     <Chrome
+      learning={<LearningSettings locale={locale} request={request} />}
       skills={<SkillSettings locale={locale} request={request} />}
       locale={locale}
       connected={connected}
