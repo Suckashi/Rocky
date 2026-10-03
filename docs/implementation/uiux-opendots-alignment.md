@@ -187,3 +187,7 @@ Skill binary comparison follow-up (`fcf861d`): existing details/typography token
 ### Local Skill discovery — 2026-10-04
 
 `skill-discovery.tsx` is mounted above folder import in the existing Skills dialog. It reuses neutral model-card forms and details disclosure; source hash stays collapsed, import and truth-based untrusted state remain explicit. No new CSS or upstream assets/code copied; fixed OpenDots reference unchanged. [Evidence and four-width after screenshots](evidence/2026-10-04/skill-discovery-ui.json), [320px after](evidence/2026-10-04/skill-discovery-ui/after-320.png). This Rocky-specific source workflow has no direct upstream equivalent. After-only Chinese/light evidence does not complete matched reference comparison or the full accessibility matrix.
+
+### Learning policy — 2026-10-04
+
+`learning-settings.tsx` replaces sidebar panel5 placeholder using the existing Chrome dialog, neutral form/card controls and explicit saved status. No additional upstream source/CSS copied; same fixed OpenDots reference remains. Learning scope/consent are necessary Rocky-specific controls, and unimplemented reflection is visibly disclosed. [Four-width fixture evidence](evidence/2026-10-04/learning-policy-ui.json), [320px after](evidence/2026-10-04/learning-policy-ui/after-320.png). After-only evidence; full reference comparison and keyboard/theme/language coverage remain pending.

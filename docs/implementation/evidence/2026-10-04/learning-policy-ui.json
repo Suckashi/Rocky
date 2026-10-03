@@ -1,0 +1,31 @@
+{
+  "commit": "dd3719de1e49d47843de2b0d0806d563114cecec",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts learning.spec.ts; npm run check; scoped eslint web learning-settings/chrome/main and browser test/config; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/learning-policy-ui.json",
+  "testFiles": ["tests/e2e/learning.spec.ts"],
+  "browserTests": 1,
+  "browserSeconds": 4.7,
+  "screenshots": [
+    "docs/implementation/evidence/2026-10-04/learning-policy-ui/after-1440.png",
+    "docs/implementation/evidence/2026-10-04/learning-policy-ui/after-1280.png",
+    "docs/implementation/evidence/2026-10-04/learning-policy-ui/after-390.png",
+    "docs/implementation/evidence/2026-10-04/learning-policy-ui/after-320.png"
+  ],
+  "limitations": [
+    "Only policy UI connected; work consent/episode review/create UI, automatic reflection and evaluation queue remain unfinished and are explicitly stated in product UI",
+    "User-scope Chinese/light browser tested; project scopes/dark/English/full keyboard matrix pending",
+    "Four-width after-only fixture screenshots, no matched OpenDots reference comparison",
+    "No Ubuntu/live provider/global AT completion evidence"
+  ],
+  "assertions": [
+    "Sidebar Learning now shows daemon persisted mode/revision",
+    "Propose requires nonempty scope and explicit consent; successful save resets acknowledgment",
+    "Concurrent policy change causes CAS error and draft remains; explicit reload adopts latest saved state",
+    "Switch off saves empty scopes without requiring propose consent",
+    "1440x900/1280x800/390x844/320x844 no full-page horizontal overflow;320 visually inspected; Escape closes dialog"
+  ]
+}
