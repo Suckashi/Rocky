@@ -366,6 +366,56 @@ test("real workspace approval card: responsive preview, reject, approve and stal
               "utf8",
             ),
           ).toBe(draft);
+          await editor.locator(".document-history summary").click();
+          await editor.getByRole("button", { name: "讀取歷史版本" }).click();
+          await expect(editor.getByLabel("歷史版本內容")).toHaveText(content);
+          const sourceEditor = editor.getByLabel("Markdown 原始內容");
+          await sourceEditor.fill("UNSAVED_HISTORY_GUARD");
+          await expect(
+            editor.getByRole("button", { name: "載入此版本到草稿" }),
+          ).toBeDisabled();
+          await expect(sourceEditor).toHaveValue("UNSAVED_HISTORY_GUARD");
+          await sourceEditor.fill(draft);
+          for (const [width, height] of [
+            [1440, 900],
+            [1280, 800],
+            [390, 844],
+            [320, 844],
+          ]) {
+            await page.setViewportSize({ width: width!, height: height! });
+            await editor.locator(".document-history").scrollIntoViewIfNeeded();
+            expect(
+              await page.evaluate(
+                () => document.documentElement.scrollWidth <= innerWidth,
+              ),
+            ).toBe(true);
+            await page.screenshot({
+              path: "test-results/document-history-" + width + ".png",
+            });
+          }
+          await editor
+            .getByRole("button", { name: "載入此版本到草稿" })
+            .click();
+          await expect(sourceEditor).toBeFocused();
+          await expect(sourceEditor).toHaveValue(content);
+          await editor
+            .getByRole("button", { name: "儲存新版本", exact: true })
+            .click();
+          await expect(editor.getByRole("status")).toHaveText("新版本已儲存。");
+          const restored = await (
+            await page.request.get(`/api/v1/documents/${created.document.id}`)
+          ).json();
+          expect(restored.document.revision).toBe(4);
+          expect(restored.content).toBe(content);
+          expect(
+            (
+              await (
+                await page.request.get(
+                  `/api/v1/documents/${created.document.id}?revision=3`,
+                )
+              ).json()
+            ).content,
+          ).toBe(draft);
           await editor.getByRole("button", { name: "返回文件與成果" }).click();
           await expect(
             page.locator(`[data-document="${created.document.id}"]`),

@@ -34,6 +34,7 @@ export function DocumentEditor({
 }) {
   const zh = locale === "zh";
   const heading = useRef<HTMLHeadingElement>(null);
+  const source = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     heading.current?.focus();
   }, []);
@@ -50,6 +51,31 @@ export function DocumentEditor({
     [error, setError] = useState(""),
     [saved, setSaved] = useState(false);
   const receipt = useRef<{ intent: string; id: string } | undefined>(undefined);
+  const [historyRevision, setHistoryRevision] = useState("1");
+  const [historical, setHistorical] = useState<Value>();
+  const validHistory =
+    /^\d+$/.test(historyRevision) &&
+    Number(historyRevision) >= 1 &&
+    Number(historyRevision) <= draft.base.document.revision;
+  async function readHistory() {
+    if (!validHistory) return;
+    setBusy(true);
+    setError("");
+    setHistorical(undefined);
+    try {
+      setHistorical(
+        documentContentSchema.parse(
+          await request(
+            `/documents/${value.document.id}?revision=${Number(historyRevision)}`,
+          ),
+        ),
+      );
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
   function change(next: Draft) {
     keep(next);
     setDraft(next);
@@ -137,6 +163,7 @@ export function DocumentEditor({
       <label>
         {zh ? "文件標題" : "Document title"}
         <input
+          className="document-title"
           maxLength={120}
           value={draft.title}
           disabled={busy}
@@ -146,6 +173,7 @@ export function DocumentEditor({
       <label>
         {zh ? "Markdown 原始內容" : "Markdown source"}
         <textarea
+          ref={source}
           value={draft.content}
           maxLength={65536}
           disabled={busy}
@@ -168,6 +196,77 @@ export function DocumentEditor({
           {zh ? "檢視最新版本" : "Compare latest revision"}
         </button>
       </div>
+      <details className="document-history">
+        <summary>
+          {zh ? "版本紀錄與還原" : "Revision history and restore"}
+        </summary>
+        <label>
+          {zh ? "查看版本" : "View revision"}
+          <input
+            type="number"
+            min="1"
+            max={draft.base.document.revision}
+            value={historyRevision}
+            disabled={busy}
+            onChange={(event) => {
+              setHistoryRevision(event.target.value);
+              setHistorical(undefined);
+            }}
+          />
+        </label>
+        <button
+          disabled={busy || !validHistory}
+          onClick={() => void readHistory()}
+        >
+          {zh ? "讀取歷史版本" : "Load historical revision"}
+        </button>
+        {historical && (
+          <section className="document-comparison">
+            <h3>
+              {zh ? "歷史版本" : "Historical revision"}{" "}
+              {historical.document.revision}
+            </h3>
+            <p>{historical.document.title}</p>
+            <time dateTime={historical.document.updatedAt}>
+              {historical.document.updatedAt}
+            </time>
+            <pre
+              tabIndex={0}
+              aria-label={zh ? "歷史版本內容" : "Historical revision content"}
+            >
+              {historical.content}
+            </pre>
+            <a
+              href={`/api/v1/documents/${value.document.id}/download?revision=${historical.document.revision}`}
+              download
+            >
+              {zh ? "下載此版本" : "Download this revision"}
+            </a>
+            <p>
+              {dirty(draft)
+                ? zh
+                  ? "請先儲存目前草稿，再載入歷史版本。"
+                  : "Save your current draft before loading a historical revision."
+                : zh
+                  ? "載入後仍需儲存新版本；不會刪除歷史或覆寫原始成果。"
+                  : "After loading, save a new revision. History and the original artifact remain unchanged."}
+            </p>
+            <button
+              disabled={busy || dirty(draft)}
+              onClick={() => {
+                change({
+                  ...draft,
+                  title: historical.document.title,
+                  content: historical.content,
+                });
+                source.current?.focus();
+              }}
+            >
+              {zh ? "載入此版本到草稿" : "Load this revision into draft"}
+            </button>
+          </section>
+        )}
+      </details>
       {latest && (
         <section className="document-comparison">
           <h3>

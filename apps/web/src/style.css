@@ -865,7 +865,7 @@ input[type="checkbox"] {
     Menlo,
     monospace;
 }
-.document-editor input {
+.document-editor .document-title {
   font-size: 40px;
   font-weight: 630;
   letter-spacing: -1.4px;
@@ -879,7 +879,7 @@ input[type="checkbox"] {
   color: var(--text);
 }
 @media (max-width: 700px) {
-  .document-editor input {
+  .document-editor .document-title {
     font-size: 32px;
     letter-spacing: -0.8px;
   }
@@ -1073,4 +1073,12 @@ input[type="checkbox"] {
 .work:focus {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+.document-history {
+  margin-top: 16px;
+}
+.document-history input {
+  max-width: 120px;
+  font-size: 14px;
 }
