@@ -555,3 +555,5 @@ Added exact-approved root memory create/update, manual-lock protection, source W
 ## Memory approval diff (0386c45882cfc2a762d5158c4d79bf07b2421724)
 
 Added server-validated pending memory preview and UI content/privacy/source differences.6 native write tests/focused browser1 pass, four-width evidence saved; type/lint/build pass. [Report](memory-registry.md). Cancellation/restart, complete source/browser matrix and cleanup remain open; T-025 active.
+
+2026-10-04 Memory stop/reopen (`7542ad1e26976d8f68793da8c3ec0f4f31faa28d`): added actual configured Deep Agents fixture cases for pending approval stop, graceful shutdown and completed receipt reload/replay. All 9 memory-write cases pass (10.04s); typecheck, scoped lint and diff check exit 0. No product/UI changes required. Evidence: [memory-reopen.json](evidence/2026-10-04/memory-reopen.json). T-025 remains in_progress; abrupt crash recovery and write-specific source/child/evaluation coverage remain open; global AT unchanged. Next: complete outstanding Memory permission/source coverage, then Skills/Learning implementation.

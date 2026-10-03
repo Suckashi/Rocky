@@ -1,0 +1,23 @@
+{
+  "commit": "7542ad1e26976d8f68793da8c3ec0f4f31faa28d",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/memory-write.test.ts; npm run check; npx eslint tests/memory-write.test.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/memory-reopen.json",
+  "testFiles": ["tests/memory-write.test.ts"],
+  "limitations": [
+    "Graceful daemon close/reopen only; abrupt process death, power loss and crash-window recovery not_run",
+    "No new browser/UI changes or browser evidence in this slice",
+    "Source, child/evaluation write-specific matrix and derivative/checkpoint cleanup remain open",
+    "T-025 in_progress; all70 global AT unchanged; no Ubuntu or live provider claim"
+  ],
+  "tests": 9,
+  "testSeconds": 10.04,
+  "assertions": [
+    "Explicit stop and graceful shutdown expire pending approval and settle operation not_executed",
+    "Reopened store rejects stale preview/approval and contains no memory or memory receipt for cancelled proposal",
+    "Completed memory and operation ledger survive close/reopen; identical approval replay does not duplicate or modify memory receipt"
+  ]
+}
