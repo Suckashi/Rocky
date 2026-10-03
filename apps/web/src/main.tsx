@@ -7,6 +7,7 @@ import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
 import { MemorySettings } from "./memory-settings.js";
+import { SkillSettings } from "./skill-settings.js";
 import { WriteProposal } from "./write-proposal.js";
 import { MemoryProposal } from "./memory-proposal.js";
 import { WorkArtifacts } from "./work-artifacts.js";
@@ -243,6 +244,7 @@ function App() {
   }
   return (
     <Chrome
+      skills={<SkillSettings locale={locale} request={request} />}
       locale={locale}
       connected={connected}
       count={works.length}

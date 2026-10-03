@@ -3,6 +3,7 @@ import base from "./playwright.config.js";
 export default defineConfig({
   testDir: "tests/e2e",
   testMatch: [
+    "skills.spec.ts",
     "memory.spec.ts",
     "mcp-work.spec.ts",
     "workspaces.spec.ts",

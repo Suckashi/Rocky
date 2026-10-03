@@ -18,6 +18,7 @@ export function Chrome({
   actions,
   children,
   settings,
+  skills,
   workspaces,
   artifacts,
   resultRequest,
@@ -29,6 +30,7 @@ export function Chrome({
   actions: ReactNode;
   children: ReactNode;
   settings: ReactNode;
+  skills?: ReactNode;
   workspaces?: ReactNode;
   artifacts?: ReactNode;
 }) {
@@ -354,6 +356,8 @@ export function Chrome({
         <div className="pane-body">
           {panel === "7" ? (
             settings
+          ) : panel === "4" ? (
+            skills
           ) : panel === "3" ? (
             workspaces
           ) : (
