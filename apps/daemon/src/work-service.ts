@@ -131,7 +131,11 @@ export class WorkService {
         this.operations,
       );
       this.documents = new DocumentStore(this.store, this.artifacts);
-      this.memories = new MemoryRegistry(this.store, this.workspaces);
+      this.memories = new MemoryRegistry(
+        this.store,
+        this.workspaces,
+        this.documents,
+      );
       new WorkerJobs(this.store).recover();
       // Never auto-replay an interrupted external action.
       for (const work of this.store.list())

@@ -1,4 +1,9 @@
 import { z } from "zod";
+export const memorySourceSchema = z.strictObject({
+  kind: z.literal("document"),
+  id: z.uuid(),
+  revision: z.number().int().positive(),
+});
 export const memoryScopeSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("user") }),
   z.strictObject({ kind: z.literal("project"), id: z.uuid() }),
@@ -14,6 +19,7 @@ export const memorySaveSchema = z.strictObject({
     .enum(["unverified", "confirmed", "conflicted"])
     .default("unverified"),
   private: z.boolean().default(true),
+  sources: z.array(memorySourceSchema).max(16).default([]),
 });
 export const memoryDeleteSchema = z.strictObject({
   requestId: z.uuid(),
@@ -29,6 +35,7 @@ export const memorySchema = z.strictObject({
   locked: z.literal(true),
   userEdited: z.literal(true),
   source: z.literal("owner"),
+  sources: z.array(memorySourceSchema).max(16).default([]),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

@@ -10,10 +10,12 @@ import { RockyError } from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
 import { WorkspaceRegistry } from "./workspaces.js";
 import { intentHash } from "./intent.js";
+import { DocumentStore } from "./documents.js";
 export class MemoryRegistry {
   constructor(
     private store: Store,
     private workspaces: WorkspaceRegistry,
+    private documents: DocumentStore,
   ) {}
   private scope(value: unknown) {
     const scope = memoryScopeSchema.parse(value);
@@ -57,12 +59,45 @@ export class MemoryRegistry {
     return result;
   }
   save(input: unknown) {
-    const command = memorySaveSchema.parse(input),
-      intent = intentHash({ kind: "save", ...command });
+    const command = memorySaveSchema.parse(input);
+    const { sources, ...baseCommand } = command;
+    // Empty provenance does not alter already persisted owner command identities.
+    const intent = intentHash({
+      kind: "save",
+      ...baseCommand,
+      ...(sources.length ? { sources } : {}),
+    });
     return this.store.transaction(() => {
       const replay = this.receipt(command.requestId, intent);
       if (replay) return replay;
       const scope = this.scope(command.scope);
+      const seen = new Set<string>();
+      for (const source of command.sources) {
+        const key = source.id + ":" + source.revision;
+        if (seen.has(key))
+          throw new RockyError(
+            "memory_source",
+            "Duplicate source revision",
+            422,
+          );
+        seen.add(key);
+        const { document } = this.documents.get(source.id, source.revision);
+        const workspaceId =
+          command.scope.kind === "project"
+            ? command.scope.id
+            : command.scope.kind === "task"
+              ? this.store.get(command.scope.id).workspaceId
+              : undefined;
+        if (
+          command.scope.kind !== "user" &&
+          workspaceId !== document.scope.workspaceId
+        )
+          throw new RockyError(
+            "memory_source_scope",
+            "Source is outside memory scope",
+            403,
+          );
+      }
       if (
         Buffer.byteLength(command.content) > 16384 ||
         command.content.includes("\0") ||
@@ -112,6 +147,7 @@ export class MemoryRegistry {
           locked: true,
           userEdited: true,
           source: "owner",
+          sources: command.sources,
           createdAt: previous?.createdAt ?? now,
           updatedAt: now,
         });

@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { createApp } from "../apps/daemon/src/http.js";
+import { intentHash } from "../apps/daemon/src/intent.js";
 test("owner memory scopes, locks, CAS, bilingual search, atomic deletion and restart", async () => {
   const root = await mkdtemp(join(tmpdir(), "rocky-memory-"));
   let service = new WorkService(join(root, "data"));
@@ -26,6 +27,20 @@ test("owner memory scopes, locks, CAS, bilingual search, atomic deletion and res
       content: "偏好繁體中文；concise engineering reports",
     };
     const receipt = service.memories.save(command);
+    expect(
+      (
+        service.store.db
+          .prepare("SELECT intent FROM memory_receipts WHERE request_id=?")
+          .get(command.requestId) as { intent: string }
+      ).intent,
+    ).toBe(
+      intentHash({
+        kind: "save",
+        ...command,
+        private: true,
+        status: "unverified",
+      }),
+    );
     expect(service.memories.save(command)).toEqual(receipt);
     expect(service.memories.get(command.id)).toMatchObject({
       locked: true,

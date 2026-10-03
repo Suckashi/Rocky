@@ -87,6 +87,50 @@ test("document revisions: confirmed artifact source, concurrent CAS, immutable h
     const first = await service.documents.create(create);
     expect(await service.documents.create(create)).toEqual(first);
     expect(first.content).toBe(original);
+    const memoryCommand = {
+      requestId: randomUUID(),
+      id: randomUUID(),
+      expectedRevision: 0,
+      scope: { kind: "project", id: workspace.id },
+      content: "Source-backed note",
+      sources: [{ kind: "document", id: first.document.id, revision: 1 }],
+    };
+    service.memories.save(memoryCommand);
+    expect(service.memories.get(memoryCommand.id)).toMatchObject({
+      sources: memoryCommand.sources,
+      status: "unverified",
+    });
+    for (const sources of [
+      [{ kind: "document", id: first.document.id, revision: 999 }],
+      [{ kind: "document", id: randomUUID(), revision: 1 }],
+      [...memoryCommand.sources, ...memoryCommand.sources],
+    ]) {
+      expect(() =>
+        service.memories.save({
+          ...memoryCommand,
+          id: randomUUID(),
+          requestId: randomUUID(),
+          sources,
+        }),
+      ).toThrow();
+    }
+    const otherRoot = join(base, "other");
+    await mkdir(otherRoot);
+    const otherWorkspace = await service.workspaces.save({
+      id: randomUUID(),
+      requestId: randomUUID(),
+      expectedRevision: 0,
+      name: "Other",
+      root: otherRoot,
+    });
+    expect(() =>
+      service.memories.save({
+        ...memoryCommand,
+        id: randomUUID(),
+        requestId: randomUUID(),
+        scope: { kind: "project", id: otherWorkspace.id },
+      }),
+    ).toThrow("outside memory scope");
     const app = createApp(service),
       baseHeaders = {
         host: "127.0.0.1:3211",
@@ -125,6 +169,15 @@ test("document revisions: confirmed artifact source, concurrent CAS, immutable h
     const winner = replies.findIndex((r) => r.status === 200),
       second = service.documents.get(first.document.id);
     expect(second.document.revision).toBe(2);
+    expect(service.memories.get(memoryCommand.id).sources).toEqual(
+      memoryCommand.sources,
+    );
+    expect(
+      service.documents.get(
+        memoryCommand.sources[0]!.id,
+        memoryCommand.sources[0]!.revision,
+      ).content,
+    ).toBe(original);
     expect(second.content).toBe(commands[winner]!.content);
     expect(service.documents.get(first.document.id, 1)).toEqual(first);
     const fail = vi.spyOn(service.store, "event").mockImplementationOnce(() => {
@@ -220,6 +273,20 @@ test("document revisions: confirmed artifact source, concurrent CAS, immutable h
     );
     await service.close();
     service = new WorkService(data);
+    expect(service.memories.get(memoryCommand.id).sources).toEqual(
+      memoryCommand.sources,
+    );
+    service.memories.delete(memoryCommand.id, {
+      requestId: randomUUID(),
+      expectedRevision: 1,
+    });
+    expect(
+      service.memories.search({
+        scope: memoryCommand.scope,
+        query: "Source-backed",
+      }).items,
+    ).toEqual([]);
+    expect(service.documents.get(first.document.id, 1)).toEqual(first);
     expect(service.documents.get(first.document.id)).toEqual(third);
     expect(service.documents.get(first.document.id, 1)).toEqual(first);
     expect(service.documents.list()).toHaveLength(2);

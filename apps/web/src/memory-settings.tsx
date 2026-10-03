@@ -9,6 +9,10 @@ import {
   type Workspace,
 } from "../../../packages/contracts/src/workspaces.js";
 import type { Work } from "../../../packages/contracts/src/index.js";
+import {
+  documentSchema,
+  type RockyDocument,
+} from "../../../packages/contracts/src/documents.js";
 
 const searchResult = z.object({
   items: z.array(memorySchema),
@@ -25,6 +29,7 @@ export function MemorySettings({
 }) {
   const zh = locale === "zh";
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [documents, setDocuments] = useState<RockyDocument[]>([]);
   const [scopeKey, setScopeKey] = useState("user");
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<Memory[]>([]);
@@ -38,6 +43,7 @@ export function MemorySettings({
     content: string;
     status: Memory["status"];
     private: boolean;
+    sources: Memory["sources"];
   }>();
   const [deleting, setDeleting] = useState<string>();
   const intent = useRef({ key: "", requestId: "" });
@@ -54,6 +60,17 @@ export function MemorySettings({
           setWorkspaces(
             z.object({ workspaces: z.array(workspaceSchema) }).parse(value)
               .workspaces,
+          );
+      })
+      .catch((e) => {
+        if (active) setError(String(e));
+      });
+    void request("/documents")
+      .then((value) => {
+        if (active)
+          setDocuments(
+            z.object({ documents: z.array(documentSchema) }).parse(value)
+              .documents,
           );
       })
       .catch((e) => {
@@ -97,8 +114,15 @@ export function MemorySettings({
     if (!draft) return;
     setBusy(true);
     setError("");
-    const { revision, id, content, status, private: isPrivate } = draft;
-    const fields = { id, content, status, private: isPrivate };
+    const {
+      revision,
+      id,
+      content,
+      status,
+      private: isPrivate,
+      sources,
+    } = draft;
+    const fields = { id, content, status, private: isPrivate, sources };
     const body = { ...fields, expectedRevision: revision, scope: scope() };
     try {
       await request("/memories", {
@@ -205,6 +229,7 @@ export function MemorySettings({
                   content: "",
                   status: "unverified",
                   private: true,
+                  sources: [],
                 });
               }}
             >
@@ -268,6 +293,74 @@ export function MemorySettings({
                 ? "私密（不得用於 Learning）"
                 : "Private (excluded from Learning)"}
             </label>
+            <label>
+              {zh
+                ? "加入文件來源（固定修訂）"
+                : "Add document source (pinned revision)"}
+              <select
+                value=""
+                disabled={draft.sources.length >= 16}
+                onChange={(e) => {
+                  const doc = documents.find((d) => d.id === e.target.value);
+                  if (doc)
+                    setDraft({
+                      ...draft,
+                      sources: [
+                        ...draft.sources,
+                        {
+                          kind: "document",
+                          id: doc.id,
+                          revision: doc.revision,
+                        },
+                      ],
+                    });
+                }}
+              >
+                <option value="">
+                  {zh ? "選擇文件…" : "Choose document…"}
+                </option>
+                {documents
+                  .filter((d) => {
+                    const selected = scope();
+                    const workspaceId =
+                      selected.kind === "project"
+                        ? selected.id
+                        : works.find((w) => w.id === selected.id)?.workspaceId;
+                    return (
+                      (selected.kind === "user" ||
+                        d.scope.workspaceId === workspaceId) &&
+                      !draft.sources.some(
+                        (s) => s.id === d.id && s.revision === d.revision,
+                      )
+                    );
+                  })
+                  .map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.title} · r{d.revision}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            {draft.sources.map((s) => (
+              <div key={s.id + ":" + s.revision} className="actions">
+                <span>
+                  {documents.find((d) => d.id === s.id)?.title ??
+                    (zh ? "文件來源" : "Document source")}{" "}
+                  · r{s.revision}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setDraft({
+                      ...draft,
+                      sources: draft.sources.filter((x) => x !== s),
+                    })
+                  }
+                >
+                  {zh ? "移除來源" : "Remove source"}
+                </button>
+              </div>
+            ))}
             <div className="actions">
               <button type="submit">{zh ? "儲存記憶" : "Save memory"}</button>
               <button type="button" onClick={() => setDraft(undefined)}>
@@ -298,6 +391,31 @@ export function MemorySettings({
       {items.map((item) => (
         <article className="model-card" key={item.id}>
           <div className="memory-content">{item.content}</div>
+          {item.sources.length > 0 && (
+            <details>
+              <summary>
+                {zh ? "文件來源" : "Document sources"} ({item.sources.length})
+              </summary>
+              <ul>
+                {item.sources.map((s) => (
+                  <li key={s.id + ":" + s.revision}>
+                    <a
+                      href={
+                        "/api/v1/documents/" +
+                        s.id +
+                        "/download?revision=" +
+                        s.revision
+                      }
+                    >
+                      {documents.find((d) => d.id === s.id)?.title ??
+                        (zh ? "文件" : "Document")}{" "}
+                      · r{s.revision}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
           <p>
             {statuses[item.status]} ·{" "}
             {item.private

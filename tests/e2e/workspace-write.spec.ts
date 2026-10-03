@@ -428,6 +428,60 @@ test("real workspace approval card: responsive preview, reject, approve and stal
           await expect(
             page.getByRole("button", { name: "開啟導覽", exact: true }),
           ).toBeFocused();
+          await page.setViewportSize({ width: 1440, height: 900 });
+          await page
+            .getByRole("button", { name: "設定", exact: true })
+            .first()
+            .click();
+          const memory = page.locator(".memory-settings");
+          await memory.locator("summary").click();
+          await memory
+            .getByRole("button", { name: "新增記憶", exact: true })
+            .click();
+          const note = "Pinned source " + created.document.id;
+          await memory.getByLabel("記憶內容").fill(note);
+          await memory
+            .getByLabel("加入文件來源（固定修訂）")
+            .selectOption(created.document.id);
+          await memory.getByRole("button", { name: "儲存記憶" }).click();
+          const memoryCard = memory
+            .locator("article")
+            .filter({ hasText: note });
+          await expect(memoryCard).toContainText("未驗證");
+          await memoryCard.locator("summary").click();
+          const sourceLink = memoryCard.getByRole("link");
+          await expect(sourceLink).toHaveAttribute(
+            "href",
+            "/api/v1/documents/" + created.document.id + "/download?revision=4",
+          );
+          const sourceBytes = await (
+            await page.request.get((await sourceLink.getAttribute("href"))!)
+          ).body();
+          expect(sourceBytes.toString("utf8")).toBe(content);
+          await memoryCard
+            .getByRole("button", { name: "編輯", exact: true })
+            .click();
+          await memory.getByLabel("記憶內容").fill(note + " edited");
+          await memory.getByRole("button", { name: "儲存記憶" }).click();
+          await expect(sourceLink).toHaveAttribute("href", /revision=4$/);
+          for (const [width, height] of [
+            [1440, 900],
+            [1280, 800],
+            [390, 844],
+            [320, 844],
+          ]) {
+            await page.setViewportSize({ width: width!, height: height! });
+            await memoryCard.scrollIntoViewIfNeeded();
+            expect(
+              await page.evaluate(
+                () => document.documentElement.scrollWidth <= innerWidth,
+              ),
+            ).toBe(true);
+            await page.screenshot({
+              path: "test-results/memory-source-" + width + ".png",
+            });
+          }
+          await page.keyboard.press("Escape");
         }
       } else if (mode === "reject") {
         await card.getByRole("button", { name: "拒絕", exact: true }).click();
