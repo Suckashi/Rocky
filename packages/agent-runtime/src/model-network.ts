@@ -5,6 +5,7 @@ import {
   type ModelConfig,
 } from "../../contracts/src/models.js";
 import { RockyError } from "../../contracts/src/index.js";
+import { assertEvaluationEgress } from "./evaluation-egress.js";
 
 export function bypassProxy(url: URL, patterns: string): boolean {
   const host = url.hostname.toLowerCase();
@@ -85,6 +86,8 @@ export class ModelNetwork {
     } else if (credential) this.headers.authorization = `Bearer ${credential}`;
   }
   async post(body: unknown, signal: AbortSignal) {
+    // Undici's imported fetch does not pass through the global fetch wrapper.
+    assertEvaluationEgress(this.endpoint);
     try {
       const response = await fetch(this.endpoint, {
         method: "POST",

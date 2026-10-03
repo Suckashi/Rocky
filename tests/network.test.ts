@@ -1,7 +1,32 @@
 import { test, expect } from "vitest";
 import { createServer } from "node:http";
 import { ExplicitNetwork } from "../packages/agent-runtime/src/network.js";
-import { installEvaluationEgressGuard } from "../packages/agent-runtime/src/evaluation-egress.js";
+import {
+  installEvaluationEgressGuard,
+  allowEvaluationEndpoint,
+  assertEvaluationEgress,
+} from "../packages/agent-runtime/src/evaluation-egress.js";
+test("T-007 concurrent evaluation endpoint leases revoke independently and never grant sibling routes", () => {
+  const guard = installEvaluationEgressGuard();
+  const endpoint = "https://configured.example.invalid/v1/chat/completions";
+  const first = allowEvaluationEndpoint(endpoint),
+    second = allowEvaluationEndpoint(endpoint);
+  try {
+    expect(() => assertEvaluationEgress(endpoint)).not.toThrow();
+    first();
+    first();
+    expect(() => assertEvaluationEgress(endpoint)).not.toThrow();
+    expect(() =>
+      assertEvaluationEgress("https://configured.example.invalid/grader"),
+    ).toThrow("egress denied");
+    second();
+    expect(() => assertEvaluationEgress(endpoint)).toThrow("egress denied");
+  } finally {
+    first();
+    second();
+    guard.restore();
+  }
+});
 test("evaluation guard rejects unregistered endpoints before sending", async () => {
   const guard = installEvaluationEgressGuard();
   try {

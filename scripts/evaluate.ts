@@ -17,7 +17,17 @@ const { RockyEvaluationProvider } =
   await import("../packages/agent-runtime/src/evaluation-provider.js");
 const service = new WorkService(join(root, "work"));
 try {
-  const provider = new RockyEvaluationProvider(service);
+  const { modelSelectionSchema } =
+    await import("../packages/contracts/src/index.js");
+  const target = process.env.ROCKY_EVAL_MODEL_SELECTION
+    ? {
+        mode: "configured" as const,
+        modelSelection: modelSelectionSchema.parse(
+          JSON.parse(process.env.ROCKY_EVAL_MODEL_SELECTION),
+        ),
+      }
+    : { mode: "fixture" as const };
+  const provider = new RockyEvaluationProvider(service, target);
   const cases = (["stdio", "http"] as const).flatMap((transport) =>
     (["approve", "reject"] as const).map((decision) => ({
       vars: { case: JSON.stringify({ transport, decision }) },
@@ -48,7 +58,7 @@ try {
     JSON.stringify({
       stats: summary.stats,
       report: join(root, "report.json"),
-      mode: "fixture",
+      mode: target.mode,
       limitation:
         "Four development cases, not sufficient evidence for publishing a learned skill.",
     }),
@@ -61,7 +71,7 @@ try {
     JSON.stringify(
       {
         denied: egress.denied,
-        policy: "exact configured fixture endpoints only",
+        policy: "exact configured evaluation model and fixture endpoints only",
         limitation: "Process Fetch boundary; no OS sandbox claim",
       },
       null,
