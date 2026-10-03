@@ -355,12 +355,12 @@ export class WorkService {
       const selection = work.modelSelection;
       const configuredModels = selection
         ? (() => {
-            const acquire = (child: boolean) => {
+            const acquire = (child: boolean, summary = false) => {
               const lease = this.models.acquireModel(
                 selection.connectionId,
                 selection.revision,
                 {
-                  ...(!child
+                  ...(!child && !summary
                     ? {
                         onStream: (
                           requestId: string,
@@ -408,7 +408,11 @@ export class WorkService {
                   reserve: (requestId, inputTokenBound, outputTokenBound) => {
                     this.modelBudgets.reserve(work.runId, {
                       requestId,
-                      purpose: child ? "subagent" : "target",
+                      purpose: summary
+                        ? "summary"
+                        : child
+                          ? "subagent"
+                          : "target",
                       inputTokenBound,
                       outputTokenBound,
                     });
@@ -422,7 +426,11 @@ export class WorkService {
                         requestId,
                         connectionId: selection.connectionId,
                         connectionRevision: selection.revision,
-                        purpose: child ? "subagent" : "target",
+                        purpose: summary
+                          ? "summary"
+                          : child
+                            ? "subagent"
+                            : "target",
                         child,
                         usage,
                       },
@@ -434,7 +442,11 @@ export class WorkService {
               modelCleanup.push(lease.release);
               return lease.model;
             };
-            return { root: acquire(false), child: acquire(true) };
+            return {
+              root: acquire(false),
+              child: acquire(true),
+              summary: acquire(false, true),
+            };
           })()
         : undefined;
       this.emit(work, "rocky.model.configured", {
@@ -645,9 +657,11 @@ export class WorkService {
                 const messages = fromModelWire(payload.messages);
                 const reply = configuredModels
                   ? await (
-                      payload.child
-                        ? configuredModels.child
-                        : configuredModels.root
+                      payload.purpose === "summary"
+                        ? configuredModels.summary
+                        : payload.child
+                          ? configuredModels.child
+                          : configuredModels.root
                     )
                       .bindTools((payload.tools ?? []) as BindToolsInput[])
                       .invoke(messages, { signal })
@@ -664,6 +678,7 @@ export class WorkService {
               work.id,
             ).sourceGraphThreadId,
             contextBatchId: contextBatch?.id,
+            maxInputTokens: configuredModels?.root.profile.maxInputTokens,
             mode: work.mode,
             event: (_owned, name, data) => hooks.event(name, data),
           },

@@ -21,6 +21,7 @@ type AgentOptions = {
   graphPath: string;
   sourceGraphThreadId?: string;
   contextBatchId?: string;
+  maxInputTokens?: number;
   mode?: "fixture" | "configured";
   event: (work: Work, name: string, data: Record<string, unknown>) => void;
 };
@@ -166,6 +167,9 @@ export class WorkerChannel {
           : {}),
         ...(agentOptions?.contextBatchId
           ? { contextBatchId: agentOptions.contextBatchId }
+          : {}),
+        ...(agentOptions?.maxInputTokens
+          ? { maxInputTokens: agentOptions.maxInputTokens }
           : {}),
       });
     } catch (error) {

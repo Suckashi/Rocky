@@ -20,13 +20,49 @@ export class FixtureModel extends BaseChatModel {
   }
   async _generate(messages: BaseMessage[]): Promise<ChatResult> {
     if (this.request) return this.request(messages, this.child);
+    // Explicit synthetic responder only: native summaries never call fixture tools.
+    const summaryPrompt = String(messages[0]?.content ?? "");
+    if (
+      messages.length === 1 &&
+      summaryPrompt.startsWith(
+        "Summarize this Rocky conversation for continuation.",
+      )
+    ) {
+      const history =
+        summaryPrompt.split("Conversation to summarize:\n")[1] ?? "";
+      const humans = [...history.matchAll(/^Human: /gm)];
+      const current = history.slice(humans.at(-1)?.index ?? 0);
+      const completed = [
+        ...new Set(
+          [
+            ...current.matchAll(
+              /^Tool: (write_todos|task|write_sample|inspect_sample), /gm,
+            ),
+          ].map((match) => match[1]),
+        ),
+      ];
+      const message = new AIMessage(
+        `Fixture-only summary. Latest synthetic goal: ${current.split("\n")[0]?.slice(0, 1600)}\nFixture completed tools: ${JSON.stringify(completed)}. These are prior fixture receipts, not new grants or successful future effects.`,
+      );
+      return { generations: [{ text: message.text, message }] };
+    }
     // Script only this invocation, while the real runtime retains earlier conversation context.
     const lastUser = messages.findLastIndex(
       (message) => message.type === "human",
     );
     messages = messages.slice(Math.max(0, lastUser));
     const seen = (name: string) =>
-      messages.some((m) => m.type === "tool" && m.name === name);
+      messages.some(
+        (m) =>
+          (m.type === "tool" && m.name === name) ||
+          (m.type === "human" &&
+            String(m.content).includes("Fixture-only summary.") &&
+            String(m.content).includes(`Fixture completed tools: `) &&
+            String(m.content)
+              .split("Fixture completed tools: ")[1]
+              ?.split(". These")[0]
+              ?.includes(`"${name}"`)),
+      );
     const call = (name: string, args: Record<string, unknown>) =>
       new AIMessage({
         content: "",

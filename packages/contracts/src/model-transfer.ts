@@ -5,6 +5,7 @@ export const MODEL_TRANSFER_LIMIT = 2 * 1024 * 1024;
 export const modelRequestSchema = z.strictObject({
   kind: z.literal("model_request"),
   child: z.boolean(),
+  purpose: z.literal("summary").optional(),
   messages: z.array(z.unknown()).max(4096),
   tools: z.array(z.unknown()).max(100).optional(),
 });

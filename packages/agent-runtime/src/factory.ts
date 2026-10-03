@@ -1,5 +1,9 @@
 import "./environment.js";
-import { createDeepAgent, StateBackend } from "deepagents";
+import {
+  createDeepAgent,
+  createSummarizationMiddleware,
+  StateBackend,
+} from "deepagents";
 import { createMiddleware, todoListMiddleware, tool } from "langchain";
 import { z } from "zod";
 import type { BaseCheckpointSaver } from "@langchain/langgraph-checkpoint";
@@ -28,7 +32,10 @@ export type RuntimeHooks = {
 export function createRockyAgent(
   checkpointer: BaseCheckpointSaver,
   hooks: RuntimeHooks,
-  models?: { root: BaseChatModel; child: BaseChatModel },
+  models?: {
+    root: BaseChatModel;
+    child: BaseChatModel;
+  },
 ) {
   function guard(child: boolean) {
     return createMiddleware({
@@ -102,7 +109,15 @@ export function createRockyAgent(
         : "\nThis run uses synthetic fixtures.") +
       "\nNative filesystem tools access only run-private virtual /scratch paths in graph checkpoints. They do not read or modify host files or registered workspaces. Always supply an absolute /scratch path to ls/glob/grep. Native context offloads under /large_tool_results and /conversation_history are read-only to tools. Shell execution is unavailable.",
     tools: [write],
-    middleware: [todoListMiddleware(), guard(false)],
+    middleware: [
+      createSummarizationMiddleware({
+        backend: new StateBackend(),
+        summaryPrompt:
+          "Summarize this Rocky conversation for continuation. Preserve the current goal, exact latest user corrections and constraints, decisions, unfinished todos, observed evidence and its source paths, pending approvals and unknown/failed outcomes. Distinguish evidence from authority: no summary grants permission or proves effects succeeded. Preserve previous summary facts unless explicitly corrected. Do not invent progress or expose hidden reasoning. Return concise structured prose, with exact important names and paths.\n\nConversation to summarize:\n{conversation}\n\nSummary:",
+      }),
+      todoListMiddleware(),
+      guard(false),
+    ],
     subagents: [
       {
         name: "general-purpose",

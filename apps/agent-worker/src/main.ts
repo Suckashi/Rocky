@@ -110,6 +110,19 @@ async function invoke(requestId: string, decision?: "approve" | "reject") {
         {
           messages: source.checkpoint.channel_values.messages,
           files: source.checkpoint.channel_values.files ?? {},
+          todos: source.checkpoint.channel_values.todos ?? [],
+          ...(source.checkpoint.channel_values._summarizationEvent
+            ? {
+                _summarizationEvent:
+                  source.checkpoint.channel_values._summarizationEvent,
+              }
+            : {}),
+          ...(source.checkpoint.channel_values._summarizationSessionId
+            ? {
+                _summarizationSessionId:
+                  source.checkpoint.channel_values._summarizationSessionId,
+              }
+            : {}),
         },
       );
     }
@@ -305,22 +318,28 @@ process.on("message", (wire) => {
           };
         },
       };
+      const maxInputTokens = message.payload.maxInputTokens;
       const remote = (child: boolean) =>
         new WorkerModel(
           child,
-          async (isChild, messages, tools) =>
+          async (isChild, messages, tools, purpose) =>
             (await modelRpc({
               kind: "model_request",
               child: isChild,
               messages,
               tools,
+              ...(purpose === "summary" ? { purpose: "summary" as const } : {}),
             })) as { content: string; tool_calls?: AIMessage["tool_calls"] },
+          maxInputTokens,
         );
       agent = createRockyAgent(
         saver,
         hooks,
         message.payload.mode === "configured"
-          ? { root: remote(false), child: remote(true) }
+          ? {
+              root: remote(false),
+              child: remote(true),
+            }
           : undefined,
       );
       void invoke(message.requestId);

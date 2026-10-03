@@ -54,7 +54,8 @@ test("actual background inbox freezes its boundary and re-delivers checkpointed 
         provider: "openai-compatible",
         baseUrl: fixture.baseUrl,
         modelId: "inbox",
-        contextWindowTokens: 4096,
+        // This test isolates batch boundaries; native compaction has its own small-context fixture.
+        contextWindowTokens: 65536,
         maxOutputTokens: 128,
       },
     });

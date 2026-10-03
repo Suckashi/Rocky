@@ -24,6 +24,7 @@ export const ipcMessageSchema = z
         graphPath: z.string().max(4096).optional(),
         sourceGraphThreadId: idSchema.optional(),
         contextBatchId: idSchema.optional(),
+        maxInputTokens: z.number().int().positive().max(100000000).optional(),
       }),
       z.strictObject({
         kind: z.literal("resume"),
