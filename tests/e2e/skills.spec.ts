@@ -470,3 +470,86 @@ test("quarantine notification follows the affected work and survives reload", as
     await provider.close();
   }
 });
+
+test("owner discovers project skills, rejects changed source and imports untrusted snapshot", async ({
+  page,
+}) => {
+  const root = await mkdtemp(join(tmpdir(), "rocky-discovery-ui-")),
+    name = "discovered-" + randomUUID(),
+    folder = join(root, ".agents", "skills", name),
+    projectId = randomUUID();
+  await mkdir(folder, { recursive: true });
+  const original = `---\nname: ${name}\ndescription: Discover fixture\n---\nOriginal source`;
+  await writeFile(join(folder, "SKILL.md"), original);
+  try {
+    await page.goto("/");
+    const { token } = await (await page.request.get("/api/v1/session")).json();
+    expect(
+      (
+        await page.request.post("/api/v1/workspaces", {
+          headers: { "x-rocky-session": token },
+          data: {
+            requestId: randomUUID(),
+            id: projectId,
+            expectedRevision: 0,
+            name: "Discovery fixture",
+            root,
+          },
+        })
+      ).ok(),
+    ).toBe(true);
+    await page.reload();
+    await page.getByRole("button", { name: "技能", exact: true }).click();
+    const ui = page.locator(".skill-discovery");
+    await ui.locator("summary").click();
+    await ui.getByLabel("技能來源範圍").selectOption(projectId);
+    await ui.getByRole("button", { name: "探索來源", exact: true }).click();
+    await expect(ui).toContainText(name);
+    const save = ui.getByRole("button", { name: "匯入未信任快照" });
+    await expect(save).toBeDisabled();
+    await ui.getByLabel("來源匯入授權聲明").fill("MIT fixture");
+    await writeFile(join(folder, "SKILL.md"), original + " revised");
+    await save.click();
+    await expect(ui.getByRole("alert")).toContainText("Source changed");
+    await ui.getByRole("button", { name: "探索來源", exact: true }).click();
+    await save.click();
+    await expect(ui.getByRole("status")).toContainText("尚未啟用");
+    await expect(save).toBeDisabled();
+    const card = page
+      .locator(".skill-settings > article")
+      .filter({ hasText: name });
+    await card.getByRole("button", { name: "審查此版本" }).click();
+    await expect(card.locator("pre")).toContainText("Original source revised");
+    const all = await (await page.request.get("/api/v1/skills")).json();
+    const skill = all.skills.find(
+      (x: { metadata: { name: string } }) => x.metadata.name === name,
+    );
+    expect(skill.scope).toEqual({ kind: "project", projectId });
+    expect(
+      (
+        await (
+          await page.request.get(`/api/v1/skills/${skill.id}/selection`)
+        ).json()
+      ).selection,
+    ).toBeNull();
+    for (const [width, height] of [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844],
+    ]) {
+      await page.setViewportSize({ width: width!, height: height! });
+      await ui.scrollIntoViewIfNeeded();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: `test-results/skill-discovery-${width}.png`,
+      });
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
+import { SkillDiscovery } from "./skill-discovery.js";
 import { SkillImport } from "./skill-import.js";
 import { SkillDiff } from "./skill-diff.js";
 
@@ -184,6 +185,11 @@ export function SkillSettings({
   return (
     <details className="model-settings skill-settings" open>
       <summary>{zh ? "技能" : "Skills"}</summary>
+      <SkillDiscovery
+        locale={locale}
+        request={request}
+        onImported={() => void refresh()}
+      />
       <SkillImport
         key={updating ? `${updating.id}:${updating.revision}` : "new"}
         target={updating}
