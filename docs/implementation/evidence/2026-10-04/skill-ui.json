@@ -1,0 +1,33 @@
+{
+  "commit": "7e2712bba4993f3e7accf22085609ddb740a808f",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts skills.spec.ts; npm run check; scoped eslint; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/skill-ui.json",
+  "testFiles": ["tests/e2e/skills.spec.ts"],
+  "limitations": [
+    "Import still API-only; browser package selection/import, version history and all source files preview pending",
+    "Browser covers one user skill lifecycle in Chinese/light; mixed scopes, stale-CAS retry, dark/English and complete keyboard matrix pending",
+    "Review acknowledges SKILL.md/source and displays file inventory; does not prove scripts reviewed or safe to execute",
+    "Four-width after screenshots only, no new matched OpenDots reference/before/after comparison",
+    "No Ubuntu/live provider/fullAT evidence; T-026/T-027 incomplete"
+  ],
+  "browserTests": 1,
+  "browserSeconds": 3.8,
+  "browser": "Chromium148.0.7778.96 DPR1",
+  "screenshots": [
+    "docs/implementation/evidence/2026-10-04/skill-ui/after-1440.png",
+    "docs/implementation/evidence/2026-10-04/skill-ui/after-1280.png",
+    "docs/implementation/evidence/2026-10-04/skill-ui/after-390.png",
+    "docs/implementation/evidence/2026-10-04/skill-ui/after-320.png"
+  ],
+  "assertions": [
+    "Sidebar Skills opens real owner review panel instead of placeholder",
+    "Enable disabled until source/content acknowledgment; exact server revision/hash decision",
+    "Browser enable/deactivate/quarantine and persisted state revision3 verified",
+    "Four viewport widths no full-page horizontal overflow; final320 screenshot visually inspected",
+    "Existing OpenDots-aligned dialog/model-card/form/proposal styles reused without new CSS"
+  ]
+}

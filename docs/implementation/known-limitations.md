@@ -124,3 +124,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 loaded Skill revoke: earlier read-only revoke limitation is superseded by shared native tool guard and daemon RPC checks. Actual post-load write_todos denial and durable revoke event are verified. Broader child/pending-approval/in-flight coverage and user-facing revoke UI remain incomplete. Prior side effects and delivered model/history/checkpoint copies are not withdrawn; cross-ID quarantine remains open.
 
 2026-10-04 revoked pending approval: new approve decisions now fail before acceptance when a loaded skill is quarantined. Native memory_write case has actual approval/rejection evidence. This does not cover every external effect/in-flight race or add a browser revoke banner; those gaps remain.
+
+2026-10-04 Skills review UI: previous absence of all Skills UI is superseded by sidebar review/lifecycle interface. Import remains API-only; full revision navigation, file previews and broader browser matrix remain incomplete. Existing original-name cards intentionally avoid runtime UUID aliases except actual imported fixture names. No full OpenDots alignment claim.
