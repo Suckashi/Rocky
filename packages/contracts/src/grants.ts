@@ -6,6 +6,7 @@ export const issueSchema = z.strictObject({
   effect: z.enum(["known_read", "local_new"]),
   policyRevision: z.number().int().positive(),
   expiresAt: z.iso.datetime().nullable(),
+  resource: z.literal("memory").optional(),
 });
 export const grantSchema = issueSchema.extend({
   id: z.uuid(),

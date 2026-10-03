@@ -72,17 +72,21 @@ export function WorkGrants({
       {grants.map((grant) => (
         <div key={grant.id}>
           <span>
-            {grant.effect === "known_read"
+            {grant.resource === "memory"
               ? locale === "zh"
-                ? work.mode === "configured"
-                  ? "讀取綁定的工作區"
-                  : "讀取合成資料"
-                : work.mode === "configured"
-                  ? "Read bound workspace"
-                  : "Read synthetic data"
-              : locale === "zh"
-                ? "建立新項目"
-                : "Create new items"}
+                ? "讀取已授權記憶範圍"
+                : "Read granted memory scope"
+              : grant.effect === "known_read"
+                ? locale === "zh"
+                  ? work.mode === "configured"
+                    ? "讀取綁定的工作區"
+                    : "讀取合成資料"
+                  : work.mode === "configured"
+                    ? "Read bound workspace"
+                    : "Read synthetic data"
+                : locale === "zh"
+                  ? "建立新項目"
+                  : "Create new items"}
           </span>{" "}
           {grant.revoked ? (
             <span>{locale === "zh" ? "已撤銷" : "Revoked"}</span>

@@ -46,3 +46,15 @@ export const memorySearchSchema = z.strictObject({
   tokenBudget: z.number().int().min(2).max(16384).default(8192),
 });
 export type Memory = z.infer<typeof memorySchema>;
+export const memoryReadToolSchema = z.strictObject({
+  scope: z.enum(["user", "project", "task"]),
+  includePrivate: z.boolean().default(false),
+  query: z.string().trim().max(128).default(""),
+  tokenBudget: z.number().int().min(2).max(16384).default(2048),
+});
+export const memoryReadGrantSchema = z.strictObject({
+  requestId: z.uuid(),
+  scope: z.enum(["user", "project", "task"]),
+  includePrivate: z.boolean().default(false),
+  expiresAt: z.iso.datetime().nullable().default(null),
+});

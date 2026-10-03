@@ -5,12 +5,16 @@ import {
   memoryDeleteSchema,
   memorySearchSchema,
   memoryScopeSchema,
+  memoryReadToolSchema,
+  memoryReadGrantSchema,
 } from "../../../packages/contracts/src/memory.js";
 import { RockyError } from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
 import { WorkspaceRegistry } from "./workspaces.js";
 import { intentHash } from "./intent.js";
 import { DocumentStore } from "./documents.js";
+import { GrantRegistry } from "./grants.js";
+import type { Work } from "../../../packages/contracts/src/index.js";
 import { Tiktoken } from "js-tiktoken/lite";
 import cl100k from "js-tiktoken/ranks/cl100k_base";
 let memoryEncoder: Tiktoken | undefined;
@@ -24,7 +28,73 @@ export class MemoryRegistry {
     private store: Store,
     private workspaces: WorkspaceRegistry,
     private documents: DocumentStore,
+    private grants: GrantRegistry,
   ) {}
+  private readScope(work: Work, kind: "user" | "project" | "task") {
+    if (work.mode !== "configured" || work.runMode !== "normal")
+      throw new RockyError(
+        "memory_scope",
+        "Memory requires a normal configured Work",
+        403,
+      );
+    if (kind === "user") return { kind };
+    if (kind === "task") return { kind, id: work.id };
+    if (!work.workspaceId)
+      throw new RockyError("memory_scope", "Work has no project", 403);
+    return { kind, id: work.workspaceId };
+  }
+  private readTarget(scope: unknown, includePrivate: boolean) {
+    return intentHash({
+      resource: "memory",
+      scope,
+      includePrivate,
+      policyRevision: 1,
+    });
+  }
+  grantRead(workId: string, input: unknown) {
+    const command = memoryReadGrantSchema.parse(input);
+    const work = this.store.get(workId);
+    const scope = this.readScope(work, command.scope);
+    return this.grants.issue({
+      requestId: command.requestId,
+      workId,
+      targetHash: this.readTarget(scope, command.includePrivate),
+      effect: "known_read",
+      policyRevision: 1,
+      expiresAt: command.expiresAt,
+      resource: "memory",
+    });
+  }
+  readForWork(work: Work, input: unknown) {
+    const command = memoryReadToolSchema.parse(input);
+    const scope = this.readScope(work, command.scope);
+    if (
+      !this.grants.allows(
+        work,
+        this.readTarget(scope, command.includePrivate),
+        "known_read",
+        1,
+      )
+    )
+      throw new RockyError(
+        "memory_scope",
+        "This Work has no active memory read grant for this scope and privacy selection",
+        403,
+      );
+    return {
+      ...this.search(
+        {
+          scope,
+          query: command.query,
+          tokenBudget: command.tokenBudget,
+          byteBudget: 16384,
+        },
+        !command.includePrivate,
+        true,
+      ),
+      untrustedData: true,
+    };
+  }
   private scope(value: unknown) {
     const scope = memoryScopeSchema.parse(value);
     if (scope.kind === "project") this.workspaces.get(scope.id);
@@ -194,7 +264,7 @@ export class MemoryRegistry {
       });
     });
   }
-  search(input: unknown) {
+  search(input: unknown, excludePrivate = false, redact = false) {
     const command = memorySearchSchema.parse(input),
       scope = this.scope(command.scope),
       query = command.query;
@@ -202,14 +272,19 @@ export class MemoryRegistry {
       query
         ? this.store.db
             .prepare(
-              "SELECT data FROM memories WHERE scope=? AND (instr(lower(json_extract(data,'$.content')),lower(?))>0 OR id IN (SELECT id FROM memory_fts WHERE memory_fts MATCH ?)) ORDER BY rowid DESC LIMIT 21",
+              "SELECT data FROM memories WHERE scope=? AND (?=0 OR json_extract(data,'$.private')=0) AND (instr(lower(json_extract(data,'$.content')),lower(?))>0 OR id IN (SELECT id FROM memory_fts WHERE memory_fts MATCH ?)) ORDER BY rowid DESC LIMIT 21",
             )
-            .all(scope, query, '"' + query.replaceAll('"', '""') + '"')
+            .all(
+              scope,
+              Number(excludePrivate),
+              query,
+              '"' + query.replaceAll('"', '""') + '"',
+            )
         : this.store.db
             .prepare(
-              "SELECT data FROM memories WHERE scope=? ORDER BY rowid DESC LIMIT 21",
+              "SELECT data FROM memories WHERE scope=? AND (?=0 OR json_extract(data,'$.private')=0) ORDER BY rowid DESC LIMIT 21",
             )
-            .all(scope)
+            .all(scope, Number(excludePrivate))
     ) as { data: string }[];
     const items = [];
     let context = "[]";
@@ -217,7 +292,10 @@ export class MemoryRegistry {
     let bytes = 0,
       truncated = false;
     for (const row of rows) {
-      const item = memorySchema.parse(JSON.parse(row.data)),
+      const parsed = memorySchema.parse(JSON.parse(row.data));
+      const item = redact
+          ? memorySchema.parse(this.store.publicEvidence(parsed))
+          : parsed,
         size = Buffer.byteLength(item.content);
       if (items.length >= 20 || bytes + size > command.byteBudget) {
         truncated = true;

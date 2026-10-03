@@ -135,6 +135,7 @@ export class WorkService {
         this.store,
         this.workspaces,
         this.documents,
+        this.grants,
       );
       new WorkerJobs(this.store).recover();
       // Never auto-replay an interrupted external action.
@@ -666,6 +667,23 @@ export class WorkService {
         call: async (name, args, callId) => {
           abort.signal.throwIfAborted();
           const current = this.store.get(work.id);
+          if (name === "memory_search") {
+            if (
+              current.runId !== work.runId ||
+              current.executionSessionId !== work.executionSessionId
+            )
+              throw new RockyError(
+                "memory_scope",
+                "Work execution changed",
+                403,
+              );
+            if (current.modelSelection)
+              this.models.assertRunnable(
+                current.modelSelection.connectionId,
+                current.modelSelection.revision,
+              );
+            return this.memories.readForWork(current, args).context;
+          }
           if (name === "artifact_publish") {
             const command = artifactPublishToolSchema.parse(args);
             if (!callId || callId.length > 256)
