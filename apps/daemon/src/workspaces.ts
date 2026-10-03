@@ -20,6 +20,8 @@ const within = (root: string, path: string) => {
     (!isAbsolute(rel) && rel !== ".." && !rel.startsWith(".." + sep))
   );
 };
+export const workspaceRootsOverlap = (a: string, b: string) =>
+  within(a, b) || within(b, a);
 const identity = (stat: BigIntStats) =>
   intentHash({
     device: stat.dev.toString(),

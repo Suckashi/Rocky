@@ -41,7 +41,7 @@ import { OperationReconciler } from "./operation-reconciler.js";
 import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
 import { WorkspaceWriter, WorkspaceWriteError } from "./workspace-writes.js";
-import { WorkspaceRegistry } from "./workspaces.js";
+import { WorkspaceRegistry, workspaceRootsOverlap } from "./workspaces.js";
 import {
   writePreviewRequestSchema,
   writePreviewSchema,
@@ -386,6 +386,16 @@ export class WorkService {
   private admissionClass(work: Work) {
     return work.runMode === "evaluation" ? "evaluation" : (work.kind ?? "main");
   }
+  private resourcesOverlap(a: Work, b: Work) {
+    if ((a.workspaceId ?? a.id) === (b.workspaceId ?? b.id)) return true;
+    if (!a.workspaceRevision || !b.workspaceRevision) return false;
+    // Registered roots stay pinned while their Work is unfinished. Native
+    // children use the root Work's capability, never a second root lease.
+    return workspaceRootsOverlap(
+      this.workspaces.get(a.workspaceId!).root,
+      this.workspaces.get(b.workspaceId!).root,
+    );
+  }
   private pump() {
     if (this.stopping) return;
     const occupied = new Set([...this.active.keys(), ...this.starting.keys()]);
@@ -417,8 +427,7 @@ export class WorkService {
             .some(
               (other) =>
                 other.id !== work.id &&
-                (other.workspaceId ?? other.id) ===
-                  (work.workspaceId ?? work.id) &&
+                this.resourcesOverlap(other, work) &&
                 (["blocked"].includes(other.status) ||
                   (occupied.has(other.id) &&
                     ["queued", "running", "waiting_approval"].includes(
