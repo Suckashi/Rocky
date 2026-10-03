@@ -2199,6 +2199,27 @@
             "T-015/T-016 in_progress; global AT unchanged; no remote actions"
           ],
           "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec"
+        },
+        {
+          "commit": "567344cb67fd73a130f336280066e24a88294b1c",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm test; npx vitest run tests/mcp-data-work.test.ts tests/mcp-data-catalog.test.ts tests/mcp-vision-work.test.ts; npx vitest run tests/mcp-data-work.test.ts tests/contracts.test.ts; npm run build; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-data-read/verification.json",
+          "testFiles": [
+            "tests/mcp-data-work.test.ts",
+            "tests/e2e/mcp-work.spec.ts"
+          ],
+          "limitations": [
+            "Owner selection UI, generic reconciliation/jobs and later V1 modules unfinished",
+            "Full suite precedes final changes; final focused/native/browser/build checks cover them",
+            "No new upstream comparison/dark/English/reduced-motion/Ubuntu/live evidence",
+            "Original SDK top-level extension envelope, optional template parameters and advanced schemas remain gaps",
+            "T-015/T-016/T-019 in_progress; global AT unchanged; no remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2338,6 +2359,27 @@
             "T-015/T-016 in_progress; global AT unchanged; no remote actions"
           ],
           "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec"
+        },
+        {
+          "commit": "567344cb67fd73a130f336280066e24a88294b1c",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm test; npx vitest run tests/mcp-data-work.test.ts tests/mcp-data-catalog.test.ts tests/mcp-vision-work.test.ts; npx vitest run tests/mcp-data-work.test.ts tests/contracts.test.ts; npm run build; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-data-read/verification.json",
+          "testFiles": [
+            "tests/mcp-data-work.test.ts",
+            "tests/e2e/mcp-work.spec.ts"
+          ],
+          "limitations": [
+            "Owner selection UI, generic reconciliation/jobs and later V1 modules unfinished",
+            "Full suite precedes final changes; final focused/native/browser/build checks cover them",
+            "No new upstream comparison/dark/English/reduced-motion/Ubuntu/live evidence",
+            "Original SDK top-level extension envelope, optional template parameters and advanced schemas remain gaps",
+            "T-015/T-016/T-019 in_progress; global AT unchanged; no remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2702,6 +2744,27 @@
             "Resources/prompts/generic reconciliation/remote jobs and later V1 modules unfinished",
             "No new upstream fidelity comparison/dark/English/reduced-motion evidence",
             "T-016 remains in_progress; global AT unchanged; no remote actions"
+          ]
+        },
+        {
+          "commit": "567344cb67fd73a130f336280066e24a88294b1c",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm test; npx vitest run tests/mcp-data-work.test.ts tests/mcp-data-catalog.test.ts tests/mcp-vision-work.test.ts; npx vitest run tests/mcp-data-work.test.ts tests/contracts.test.ts; npm run build; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-data-read/verification.json",
+          "testFiles": [
+            "tests/mcp-data-work.test.ts",
+            "tests/e2e/mcp-work.spec.ts"
+          ],
+          "limitations": [
+            "Owner selection UI, generic reconciliation/jobs and later V1 modules unfinished",
+            "Full suite precedes final changes; final focused/native/browser/build checks cover them",
+            "No new upstream comparison/dark/English/reduced-motion/Ubuntu/live evidence",
+            "Original SDK top-level extension envelope, optional template parameters and advanced schemas remain gaps",
+            "T-015/T-016/T-019 in_progress; global AT unchanged; no remote actions"
           ]
         }
       ],

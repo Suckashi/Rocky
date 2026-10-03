@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-03",
+  "commit": "567344cb67fd73a130f336280066e24a88294b1c",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+  "commands": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "files": 49,
+      "tests": 215,
+      "durationSeconds": 149.81,
+      "scope": "Before final two media cases, operation metadata, targetPreview and UI text"
+    },
+    {
+      "command": "npx vitest run tests/mcp-data-work.test.ts tests/mcp-data-catalog.test.ts tests/mcp-vision-work.test.ts",
+      "exitCode": 0,
+      "tests": 24,
+      "durationSeconds": 25.66,
+      "scope": "After operation metadata; before final preview"
+    },
+    {
+      "command": "npx vitest run tests/mcp-data-work.test.ts tests/contracts.test.ts",
+      "exitCode": 0,
+      "tests": 11,
+      "durationSeconds": 10.47,
+      "scope": "Final target preview"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "viteSeconds": 13.97
+    },
+    {
+      "command": "npx playwright test --config playwright.production.config.ts",
+      "exitCode": 0,
+      "tests": 2,
+      "durationSeconds": 9.4
+    }
+  ],
+  "browser": {
+    "version": "Chromium 148.0.7778.96",
+    "dpr": 1,
+    "widths": [1440, 1280, 390, 320],
+    "visualInspection": [1440, 320],
+    "mode": "Normal daemon; synthetic loopback MCP/provider"
+  },
+  "limitations": [
+    "Owner selection UI, generic reconciliation/jobs and later V1 modules unfinished",
+    "Full suite precedes final changes; final focused/native/browser/build checks cover them",
+    "No new upstream comparison/dark/English/reduced-motion/Ubuntu/live evidence",
+    "Original SDK top-level extension envelope, optional template parameters and advanced schemas remain gaps",
+    "T-015/T-016/T-019 in_progress; global AT unchanged; no remote actions"
+  ]
+}

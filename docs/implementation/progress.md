@@ -394,3 +394,7 @@ Typed daemon delivery, sanitized native artifacts, explicit default-off image in
 ## Resource/prompt metadata (f9e9a22)
 
 Bounded on-demand resources/templates/prompts discovery now shares mcp_discover and daemon connection revisions. Pure data servers connect, list changes revoke old catalogs, and actual native tests prove no data execution/policy promotion. Check/lint/build and 32 focused tests passed. See mcp-data-discovery.md. T-015/T-016 remain in_progress; exact retrieval/task-data insertion/UI and generic reconciliation are still open.
+
+## Approved MCP data retrieval (567344c)
+
+Root native mcp_data now reads discovered resources/templates/prompts after exact owner approval. Prompt roles remain tool evidence; disabled images are uninspected; unknown after dispatch blocks Work. Existing approval card shows daemon-resolved target preview. Full215 before final changes, final24+11 focused tests, build and two four-width browser flows passed; see mcp-data-retrieval.md. T-015/T-016/T-019 remain in_progress; owner selection UI/reconciliation and later V1 modules remain open.

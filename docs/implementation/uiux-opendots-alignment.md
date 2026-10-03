@@ -93,3 +93,7 @@ The same reference-derived approval geometry was verified at1440/1280/390/320 us
 ## Explicit model image input (0cf5d5f)
 
 Model settings now uses the existing reference-derived form/card tokens for a default-off image-input checkbox and configured/unverified capability label. No new layout system or upstream setting is introduced. Four-width actual browser checks and visually inspected desktop/320px screenshots are linked in mcp-typed-results.md. This slice does not replace the original reference/before/after comparison or complete settings acceptance.
+
+## MCP data approval target (567344c)
+
+The existing PageReviewCard-derived card now supports mcp_data: readable action/server, daemon-resolved URI or prompt name, expandable exact arguments and shared approval actions. No new CSS/layout system. Four-width production-daemon browser checks and desktop/320px visual inspection are linked in mcp-data-retrieval.md; no new reference pixel comparison or full settings/library acceptance.
