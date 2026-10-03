@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -163,6 +163,236 @@ test.each([
           scope: "user",
         }),
       ).toThrow();
+    } finally {
+      release();
+      await service.close();
+      await provider.close();
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+  20000,
+);
+
+test.each(["project", "task", "child", "replay", "evaluation"])(
+  "native memory scope isolation: %s",
+  async (mode) => {
+    const root = await mkdtemp(join(tmpdir(), "rocky-memory-isolation-"));
+    const service = new WorkService(join(root, "data"));
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const received: string[] = [];
+    let childAttempted = false;
+    const provider = await startAgentProvider({
+      reply: async (messages) => {
+        await held;
+        const child = messages.some(
+          (m) =>
+            m.type === "human" && String(m.content) === "CHILD_MEMORY_ATTEMPT",
+        );
+        const result = messages.filter((m) => m.type === "tool").at(-1);
+        if (result) {
+          received.push(String(result.content));
+          return new AIMessage("Evidence checked");
+        }
+        if (child) childAttempted = true;
+        return new AIMessage({
+          content: "",
+          tool_calls: [
+            {
+              id: child ? "child-memory" : "root-memory",
+              name: mode === "child" && !child ? "task" : "memory_search",
+              args:
+                mode === "child" && !child
+                  ? {
+                      subagent_type: "general-purpose",
+                      description: "CHILD_MEMORY_ATTEMPT",
+                    }
+                  : {
+                      scope:
+                        mode === "project"
+                          ? "project"
+                          : mode === "task"
+                            ? "task"
+                            : "user",
+                      query: "scope-secret",
+                      includePrivate: false,
+                    },
+              type: "tool_call",
+            },
+          ],
+        });
+      },
+    });
+    try {
+      const connectionId = randomUUID();
+      service.models.save({
+        id: connectionId,
+        requestId: randomUUID(),
+        expectedRevision: 0,
+        config: {
+          name: "Isolation fixture",
+          provider: "openai-compatible",
+          baseUrl: provider.baseUrl,
+          modelId: "fixture",
+          contextWindowTokens: 65536,
+          maxOutputTokens: 256,
+        },
+      });
+      const roots = [join(root, "one"), join(root, "two")];
+      const workspaces = [];
+      for (const path of roots) {
+        await mkdir(path);
+        workspaces.push(
+          await service.workspaces.save({
+            id: randomUUID(),
+            requestId: randomUUID(),
+            expectedRevision: 0,
+            name: path,
+            root: path,
+          }),
+        );
+      }
+      const scope =
+        mode === "project" ? "project" : mode === "task" ? "task" : "user";
+      const submission = {
+        requestId: randomUUID(),
+        text: "Scope isolation",
+        mode: "configured",
+        modelSelection: { connectionId, revision: 1 },
+        memoryRead: [{ scope, includePrivate: false }],
+        ...(mode === "project"
+          ? { workspaceId: workspaces[0]!.id, workspaceRevision: 1 }
+          : {}),
+      };
+      if (mode === "evaluation") {
+        const before = service.store.list().length;
+        expect(() => service.submit(submission, "evaluation")).toThrow(
+          "normal configured Work",
+        );
+        expect(service.store.list()).toHaveLength(before);
+        expect(
+          service.store.db
+            .prepare("SELECT COUNT(*) AS n FROM capability_grants")
+            .get(),
+        ).toMatchObject({ n: 0 });
+        return;
+      }
+      const work = service.submit(submission);
+      const actualScope =
+        scope === "user"
+          ? { kind: "user" }
+          : {
+              kind: scope,
+              id: scope === "project" ? workspaces[0]!.id : work.id,
+            };
+      const otherWork =
+        mode === "task"
+          ? service.submit({
+              ...submission,
+              requestId: randomUUID(),
+              kind: "background",
+              text: "Other task without inherited memory grant",
+              memoryRead: [],
+            })
+          : undefined;
+      if (otherWork) {
+        service.memories.save({
+          id: randomUUID(),
+          requestId: randomUUID(),
+          expectedRevision: 0,
+          scope: { kind: "task", id: otherWork.id },
+          content: "scope-secret WRONG_TASK",
+          private: false,
+        });
+        expect(service.grants.list(otherWork.id)).toHaveLength(0);
+      }
+      service.memories.save({
+        id: randomUUID(),
+        requestId: randomUUID(),
+        expectedRevision: 0,
+        scope: actualScope,
+        content: "scope-secret EXPECTED_SCOPE",
+        private: false,
+      });
+      service.memories.save({
+        id: randomUUID(),
+        requestId: randomUUID(),
+        expectedRevision: 0,
+        scope: { kind: "project", id: workspaces[1]!.id },
+        content: "scope-secret WRONG_PROJECT",
+        private: false,
+      });
+      if (scope !== "user")
+        service.memories.save({
+          id: randomUUID(),
+          requestId: randomUUID(),
+          expectedRevision: 0,
+          scope: { kind: "user" },
+          content: "scope-secret WRONG_USER",
+          private: false,
+        });
+      if (mode === "replay") {
+        const grant = service.grants.list(work.id)[0]!;
+        service.grants.revoke(work.id, grant.id, {
+          requestId: randomUUID(),
+          expectedRevision: 1,
+        });
+        service.submit(submission);
+        expect(service.grants.list(work.id)).toMatchObject([
+          { id: grant.id, revoked: true },
+        ]);
+      }
+      release();
+      await expect
+        .poll(
+          () =>
+            ["completed", "failed"].includes(service.store.get(work.id).status),
+          { timeout: 15000 },
+        )
+        .toBe(true);
+      const delivered = received.join(" ");
+      expect(delivered).not.toContain("WRONG_PROJECT");
+      expect(delivered).not.toContain("WRONG_USER");
+      expect(delivered).not.toContain("WRONG_TASK");
+      if (otherWork) {
+        await expect
+          .poll(
+            () =>
+              ["completed", "failed"].includes(
+                service.store.get(otherWork.id).status,
+              ),
+            { timeout: 15000 },
+          )
+          .toBe(true);
+        expect(
+          service.store
+            .events("0", otherWork.id)
+            .some(
+              (e) =>
+                e.payload.kind === "domain" &&
+                e.payload.name === "rocky.tool.failed" &&
+                e.payload.data.name === "memory_search",
+            ),
+        ).toBe(true);
+        expect(received.join(" ")).not.toContain("WRONG_TASK");
+      }
+      if (["project", "task"].includes(mode))
+        expect(delivered).toContain("EXPECTED_SCOPE");
+      else expect(delivered).not.toContain("EXPECTED_SCOPE");
+      if (mode === "child") {
+        expect(childAttempted).toBe(true);
+        expect(
+          service.store
+            .events("0", work.id)
+            .some(
+              (e) =>
+                e.payload.kind === "domain" &&
+                e.payload.name === "rocky.subagent.started",
+            ),
+        ).toBe(true);
+      }
     } finally {
       release();
       await service.close();
