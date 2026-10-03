@@ -238,6 +238,8 @@ test("T-009 native Deep Agents fixture runs in child and resumes exact interrupt
         const message = result.generations[0]!.message as AIMessage;
         return { content: message.content, tool_calls: message.tool_calls };
       }
+      if (payload.kind !== "tool_request")
+        throw Error("Unexpected context RPC in this test");
       tools.push(payload.tool);
       return JSON.stringify({ synthetic: true, tool: payload.tool });
     },

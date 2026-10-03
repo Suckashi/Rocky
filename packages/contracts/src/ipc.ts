@@ -22,6 +22,7 @@ export const ipcMessageSchema = z
         mode: z.enum(["fixture", "configured"]).optional(),
         graphPath: z.string().max(4096).optional(),
         sourceGraphThreadId: idSchema.optional(),
+        contextBatchId: idSchema.optional(),
       }),
       z.strictObject({
         kind: z.literal("resume"),
@@ -39,6 +40,17 @@ export const ipcMessageSchema = z
         tools: z.array(z.unknown()).max(100).optional(),
       }),
       z.strictObject({ kind: z.literal("model_result"), message: z.unknown() }),
+      z.strictObject({
+        kind: z.literal("context_read"),
+        batchId: idSchema,
+        index: z.number().int().nonnegative(),
+        offset: z.number().int().nonnegative(),
+      }),
+      z.strictObject({
+        kind: z.literal("context_ack"),
+        batchId: idSchema,
+        checkpointId: idSchema,
+      }),
       z.strictObject({ kind: z.literal("run_result"), result: z.unknown() }),
       z
         .object({

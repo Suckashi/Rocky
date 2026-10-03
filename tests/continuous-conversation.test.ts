@@ -111,17 +111,61 @@ test("confirmed native checkpoint context reaches next main worker, survives res
       expectedRevision: target.revision,
     });
     const fresh = submit("What colour after cancelled turn?");
-    expect((await finish(fresh.id)).answer).toBe("missing");
+    expect((await finish(fresh.id)).answer).toBe("violet");
     expect(
       new ConversationStore(service.store).session(fresh.id)
         .sourceGraphThreadId,
-    ).toBeUndefined();
+    ).toBe(third.runId);
+    const restoredBatch = JSON.parse(
+      (
+        service.store.db
+          .prepare("SELECT data FROM context_batches WHERE work_id=?")
+          .get(fresh.id) as { data: string }
+      ).data,
+    );
+    expect(
+      restoredBatch.items.some(
+        (item: { content: string }) => item.content === "wait for owner",
+      ),
+    ).toBe(true);
+    expect(
+      restoredBatch.items.some((item: { content: string }) =>
+        item.content.includes('"status":"cancelled"'),
+      ),
+    ).toBe(true);
     expect(
       service.store.db
         .prepare("SELECT id FROM operations WHERE outcome='succeeded'")
         .all(),
     ).toHaveLength(0);
-    await finish(submit("Remember colour violet").id);
+    const warm = submit("Remember colour violet");
+    await finish(warm.id);
+    const alternate = randomUUID();
+    service.models.save({
+      requestId: randomUUID(),
+      id: alternate,
+      expectedRevision: 0,
+      config: {
+        name: "alternate configured model",
+        provider: "openai-compatible",
+        baseUrl: provider.baseUrl,
+        modelId: "alternate",
+        contextWindowTokens: 4096,
+        maxOutputTokens: 128,
+      },
+    });
+    const switched = service.submit({
+      requestId: randomUUID(),
+      text: "What colour after model switch?",
+      mode: "configured",
+      transport: "http",
+      modelSelection: { connectionId: alternate, revision: 1 },
+    });
+    expect((await finish(switched.id)).answer).toBe("violet");
+    expect(
+      new ConversationStore(service.store).session(switched.id)
+        .sourceGraphThreadId,
+    ).toBe(warm.runId);
     const changedWorkspace = service.submit({
       requestId: randomUUID(),
       text: "What colour in a different workspace?",

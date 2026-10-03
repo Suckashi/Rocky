@@ -18,6 +18,7 @@ import {
 } from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
 import { ConversationStore } from "./conversation-store.js";
+import { ContextLedger } from "./context-ledger.js";
 import { ModelRegistry } from "./model-registry.js";
 import { ModelBudgetLedger } from "./model-budget.js";
 import { intentHash } from "./intent.js";
@@ -598,6 +599,10 @@ export class WorkService {
         const current = this.store.get(work.id);
         current.status = "running";
         this.update(current);
+        const contextBatch =
+          current.runMode === "normal" && (current.kind ?? "main") === "main"
+            ? new ContextLedger(this.store).prepare(current)
+            : undefined;
         const source = import.meta.url.endsWith(".ts");
         const entry = fileURLToPath(
           new URL(
@@ -610,6 +615,22 @@ export class WorkService {
           work.id,
           entry,
           async (_owned, payload, requestSignal) => {
+            if (payload.kind === "context_read")
+              return new ContextLedger(this.store).read(
+                _owned,
+                payload.batchId,
+                payload.index,
+                payload.offset,
+              );
+            if (payload.kind === "context_ack") {
+              const receipt = await new ContextLedger(this.store).acknowledge(
+                _owned,
+                payload.batchId,
+                payload.checkpointId,
+              );
+              this.flushOutbox();
+              return receipt;
+            }
             if (payload.kind === "tool_request")
               return hooks.call(
                 payload.tool,
@@ -642,6 +663,7 @@ export class WorkService {
             sourceGraphThreadId: new ConversationStore(this.store).session(
               work.id,
             ).sourceGraphThreadId,
+            contextBatchId: contextBatch?.id,
             mode: work.mode,
             event: (_owned, name, data) => hooks.event(name, data),
           },

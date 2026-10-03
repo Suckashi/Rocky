@@ -1,7 +1,7 @@
 import "../../../packages/agent-runtime/src/environment.js";
 import { randomUUID } from "node:crypto";
 import { Command } from "@langchain/langgraph";
-import { AIMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import type { BaseMessage } from "@langchain/core/messages";
 import type { ChatResult } from "@langchain/core/outputs";
 import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
@@ -10,6 +10,10 @@ import type { RuntimeHooks } from "../../../packages/agent-runtime/src/factory.j
 import { WorkerModel } from "../../../packages/agent-runtime/src/worker-model.js";
 import { toModelWire } from "../../../packages/agent-runtime/src/model-wire.js";
 import { parseIpcMessage } from "../../../packages/contracts/src/ipc.js";
+import {
+  contextChunkSchema,
+  contextReceiptSchema,
+} from "../../../packages/contracts/src/context.js";
 if (
   (globalThis as { __rockyWorkerNetworkGuard?: boolean })
     .__rockyWorkerNetworkGuard !== true
@@ -53,7 +57,7 @@ function send(
 function rpc(
   payload: Extract<
     Message["payload"],
-    { kind: "tool_request" | "model_request" }
+    { kind: "tool_request" | "model_request" | "context_read" | "context_ack" }
   >,
 ) {
   const id = randomUUID();
@@ -89,6 +93,61 @@ async function invoke(requestId: string, decision?: "approve" | "reject") {
           files: source.checkpoint.channel_values.files ?? {},
         },
       );
+    }
+    if (
+      !decision &&
+      owner.payload.kind === "start" &&
+      owner.payload.contextBatchId
+    ) {
+      const batchId = owner.payload.contextBatchId;
+      let index = 0,
+        offset = 0,
+        content = "";
+      for (;;) {
+        const part = contextChunkSchema.parse(
+          await rpc({
+            kind: "context_read",
+            batchId,
+            index,
+            offset,
+          }),
+        );
+        if (part.done) {
+          await agent.updateState(
+            { configurable: { thread_id: owner.runId } },
+            {
+              messages: [
+                new HumanMessage({ id: part.markerId!, content: part.marker! }),
+              ],
+            },
+          );
+          const checkpoint = await saver!.getTuple({
+            configurable: { thread_id: owner.runId },
+          });
+          const checkpointId = checkpoint?.checkpoint.id;
+          if (typeof checkpointId !== "string")
+            throw Error("Context checkpoint identity missing");
+          const receipt = contextReceiptSchema.parse(
+            await rpc({ kind: "context_ack", batchId, checkpointId }),
+          );
+          if (
+            receipt.batchId !== batchId ||
+            receipt.checkpointId !== checkpointId
+          )
+            throw Error("Context checkpoint receipt mismatch");
+          break;
+        }
+        content += part.text!;
+        if (part.final) {
+          await agent.updateState(
+            { configurable: { thread_id: owner.runId } },
+            { messages: [new HumanMessage({ id: part.id!, content })] },
+          );
+          content = "";
+        }
+        index = part.nextIndex!;
+        offset = part.nextOffset!;
+      }
     }
     const result = await agent.invoke(
       decision

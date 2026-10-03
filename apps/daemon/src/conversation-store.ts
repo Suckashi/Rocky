@@ -94,19 +94,23 @@ export class ConversationStore {
       session.kind === "main" &&
       work.runMode === "normal"
     ) {
-      const earlier = this.store.list().slice(
+      const works = this.store.list();
+      const earlier = works.slice(
         0,
-        this.store.list().findIndex((item) => item.id === work.id),
+        works.findIndex((item) => item.id === work.id),
       );
       const previous = earlier.findLast(
-        (item) => item.runMode === "normal" && (item.kind ?? "main") === "main",
+        (item) =>
+          item.runMode === "normal" &&
+          (item.kind ?? "main") === "main" &&
+          item.status === "completed" &&
+          item.mode === work.mode &&
+          item.workspaceId === work.workspaceId,
       );
       if (
         previous?.status === "completed" &&
         previous.mode === work.mode &&
-        previous.workspaceId === work.workspaceId &&
-        JSON.stringify(previous.modelSelection) ===
-          JSON.stringify(work.modelSelection)
+        previous.workspaceId === work.workspaceId
       ) {
         const source = this.session(previous.id);
         session.sourceGraphThreadId = source.graphThreadId;

@@ -12,13 +12,14 @@ type Handler = (
   work: Work,
   payload: Extract<
     Message["payload"],
-    { kind: "tool_request" | "model_request" }
+    { kind: "tool_request" | "model_request" | "context_read" | "context_ack" }
   >,
   signal: AbortSignal,
 ) => Promise<unknown>;
 type AgentOptions = {
   graphPath: string;
   sourceGraphThreadId?: string;
+  contextBatchId?: string;
   mode?: "fixture" | "configured";
   event: (work: Work, name: string, data: Record<string, unknown>) => void;
 };
@@ -161,6 +162,9 @@ export class WorkerChannel {
         ...(agentOptions?.sourceGraphThreadId
           ? { sourceGraphThreadId: agentOptions.sourceGraphThreadId }
           : {}),
+        ...(agentOptions?.contextBatchId
+          ? { contextBatchId: agentOptions.contextBatchId }
+          : {}),
       });
     } catch (error) {
       void this.close();
@@ -245,6 +249,8 @@ export class WorkerChannel {
       ![
         "tool_request",
         "model_request",
+        "context_read",
+        "context_ack",
         "runtime_event",
         "run_result",
         "error",
@@ -284,7 +290,9 @@ export class WorkerChannel {
     }
     if (
       message.payload.kind !== "tool_request" &&
-      message.payload.kind !== "model_request"
+      message.payload.kind !== "model_request" &&
+      message.payload.kind !== "context_read" &&
+      message.payload.kind !== "context_ack"
     )
       throw Error("Unexpected worker message");
     if (this.pending.size >= 8 || this.seen.size >= 10000)
