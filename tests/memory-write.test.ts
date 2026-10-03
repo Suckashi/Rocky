@@ -17,6 +17,8 @@ test.each([
   "stop",
   "shutdown",
   "reopen",
+  "missing-source",
+  "invalid-content",
 ])(
   "native memory write exact approval: %s",
   async (mode) => {
@@ -46,13 +48,18 @@ test.each([
                           : 0,
                     scope: "user",
                     content:
-                      "Model proposed preference" +
+                      (mode === "invalid-content"
+                        ? "invalid\0content"
+                        : "Model proposed preference") +
                       (mode === "update" &&
                       messages.some((m) => m.type === "tool")
                         ? " updated"
                         : ""),
                     private: true,
-                    sources: [],
+                    sources:
+                      mode === "missing-source"
+                        ? [{ kind: "document", id: randomUUID(), revision: 1 }]
+                        : [],
                   },
                   type: "tool_call",
                 },
@@ -91,7 +98,20 @@ test.each([
       });
       await expect
         .poll(() => service.store.get(work.id).status, { timeout: 15000 })
-        .toBe(mode === "locked" ? "failed" : "waiting_approval");
+        .toBe(
+          ["locked", "missing-source", "invalid-content"].includes(mode)
+            ? "failed"
+            : "waiting_approval",
+        );
+      if (mode === "missing-source" || mode === "invalid-content") {
+        expect(service.store.get(work.id).approval).toBeUndefined();
+        expect(() => service.memories.get(id)).toThrow("not found");
+        expect(service.operations.list(work.id)).toHaveLength(0);
+        expect(
+          service.store.db.prepare("SELECT * FROM memory_receipts").all(),
+        ).toHaveLength(0);
+        return;
+      }
       if (mode === "locked") {
         expect(service.memories.get(id).content).toBe("OWNER_MUST_REMAIN");
         return;

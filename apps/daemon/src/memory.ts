@@ -163,6 +163,47 @@ export class MemoryRegistry {
   save(input: unknown) {
     return this.persist(input);
   }
+  private validatePayload(
+    command: Pick<
+      z.infer<typeof memorySaveSchema>,
+      "scope" | "sources" | "content"
+    >,
+  ) {
+    const seen = new Set<string>();
+    for (const source of command.sources) {
+      const key = source.id + ":" + source.revision;
+      if (seen.has(key))
+        throw new RockyError("memory_source", "Duplicate source revision", 422);
+      seen.add(key);
+      const { document } = this.documents.get(source.id, source.revision);
+      const workspaceId =
+        command.scope.kind === "project"
+          ? command.scope.id
+          : command.scope.kind === "task"
+            ? this.store.get(command.scope.id).workspaceId
+            : undefined;
+      if (
+        command.scope.kind !== "user" &&
+        workspaceId !== document.scope.workspaceId
+      )
+        throw new RockyError(
+          "memory_source_scope",
+          "Source is outside memory scope",
+          403,
+        );
+    }
+    if (
+      Buffer.byteLength(command.content) > 16384 ||
+      command.content.includes("\0") ||
+      Buffer.from(command.content).toString("utf8") !== command.content ||
+      this.store.publicEvidence(command.content) !== command.content
+    )
+      throw new RockyError(
+        "memory_content",
+        "Protected or oversized content cannot be saved",
+        422,
+      );
+  }
   modelProposal(work: Work, input: unknown, preview = false) {
     const command = memoryWriteToolSchema.parse(input);
     const scope = this.readScope(work, command.scope);
@@ -195,6 +236,7 @@ export class MemoryRegistry {
       throw new RockyError("stale_memory", "Memory revision changed", 409);
     if (previous && JSON.stringify(previous.scope) !== JSON.stringify(scope))
       throw new RockyError("memory_scope", "Memory scope cannot change", 403);
+    this.validatePayload({ ...command, scope });
     return { ...command, scope, status: "unverified" as const };
   }
   previewModel(work: Work, input: unknown) {
@@ -258,44 +300,7 @@ export class MemoryRegistry {
       const replay = this.receipt(command.requestId, intent);
       if (replay) return replay;
       const scope = this.scope(command.scope);
-      const seen = new Set<string>();
-      for (const source of command.sources) {
-        const key = source.id + ":" + source.revision;
-        if (seen.has(key))
-          throw new RockyError(
-            "memory_source",
-            "Duplicate source revision",
-            422,
-          );
-        seen.add(key);
-        const { document } = this.documents.get(source.id, source.revision);
-        const workspaceId =
-          command.scope.kind === "project"
-            ? command.scope.id
-            : command.scope.kind === "task"
-              ? this.store.get(command.scope.id).workspaceId
-              : undefined;
-        if (
-          command.scope.kind !== "user" &&
-          workspaceId !== document.scope.workspaceId
-        )
-          throw new RockyError(
-            "memory_source_scope",
-            "Source is outside memory scope",
-            403,
-          );
-      }
-      if (
-        Buffer.byteLength(command.content) > 16384 ||
-        command.content.includes("\0") ||
-        Buffer.from(command.content).toString("utf8") !== command.content ||
-        this.store.publicEvidence(command.content) !== command.content
-      )
-        throw new RockyError(
-          "memory_content",
-          "Protected or oversized content cannot be saved",
-          422,
-        );
+      this.validatePayload(command);
       const row = this.store.db
         .prepare("SELECT data FROM memories WHERE id=?")
         .get(command.id) as { data: string } | undefined;
