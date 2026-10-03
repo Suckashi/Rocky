@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { parseIpcMessage } from "../../packages/contracts/src/ipc.js";
+import { frameResult } from "../../packages/contracts/src/result-transfer.js";
 let start: ReturnType<typeof parseIpcMessage> | undefined;
 let sequence = 0;
 let expected = "";
@@ -16,6 +17,35 @@ process.on("message", (wire) => {
   }
   if (message.payload.kind === "start") {
     start = message;
+    if (
+      ["partial-run", "incomplete-run", "foreign-result"].includes(
+        message.payload.text,
+      )
+    ) {
+      const frames = frameResult({
+        kind: "run_result",
+        result: { messages: [{ content: "fixture".repeat(20000) }] },
+      });
+      const emit = (payload: unknown) =>
+        process.send!(
+          JSON.stringify({ ...message, sequence: String(++sequence), payload }),
+        );
+      emit(
+        message.payload.text === "foreign-result"
+          ? { ...frames[0]!, resultKind: "model_result" }
+          : frames[0]!,
+      );
+      if (message.payload.text === "partial-run")
+        emit({
+          kind: "run_result",
+          result: { messages: [{ content: "must not pass before commit" }] },
+        });
+      if (message.payload.text === "incomplete-run") {
+        emit(frames[1]!);
+        process.disconnect?.();
+      }
+      return;
+    }
     const send = (tool: string, args: Record<string, unknown>, bad = false) => {
       expected = randomUUID();
       process.send!(

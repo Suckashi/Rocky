@@ -8,6 +8,57 @@ import { WorkService } from "../apps/daemon/src/work-service.js";
 import { ConversationStore } from "../apps/daemon/src/conversation-store.js";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 
+test("large configured fixture answer is delivered intact into daemon Work and durable visible history", async () => {
+  const content = "Observed fixture text 岩石🙂\n".repeat(7000);
+  const provider = await startAgentProvider({
+      reply: async () => new AIMessage(content),
+    }),
+    root = mkdtempSync(join(tmpdir(), "rocky-large-answer-")),
+    service = new WorkService(root),
+    connectionId = randomUUID();
+  try {
+    service.models.save({
+      requestId: randomUUID(),
+      id: connectionId,
+      expectedRevision: 0,
+      config: {
+        name: "large transport fixture",
+        provider: "openai-compatible",
+        baseUrl: provider.baseUrl,
+        modelId: "large",
+        contextWindowTokens: 131072,
+        maxOutputTokens: 65536,
+      },
+    });
+    const work = service.submit({
+      requestId: randomUUID(),
+      text: "Return fixture evidence",
+      mode: "configured",
+      transport: "http",
+      modelSelection: { connectionId, revision: 1 },
+    });
+    await expect
+      .poll(() => service.store.get(work.id).status, { timeout: 15000 })
+      .toBe("completed");
+    expect(service.store.get(work.id).answer).toBe(content);
+    const page = new ConversationStore(service.store).page();
+    expect(
+      page.messages.find(
+        (message) => message.workId === work.id && message.role === "assistant",
+      )?.text,
+    ).toBe(content);
+    expect(provider.requests).toHaveLength(1);
+    expect(service.modelBudgets.snapshot(work.runId).calls).toBe(1);
+    expect(
+      service.store.db.prepare("SELECT COUNT(*) AS n FROM operations").get(),
+    ).toMatchObject({ n: 0 });
+  } finally {
+    await service.close();
+    await provider.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("confirmed native checkpoint context reaches next main worker, survives restart, and stays out of background/evaluation", async () => {
   const provider = await startAgentProvider({
     reply: async (messages) => {

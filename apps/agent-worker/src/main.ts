@@ -18,6 +18,11 @@ import {
   contextChunkSchema,
   contextReceiptSchema,
 } from "../../../packages/contracts/src/context.js";
+import {
+  ResultTransferAssembler,
+  frameResult,
+  type ResultPayload,
+} from "../../../packages/contracts/src/result-transfer.js";
 if (
   (globalThis as { __rockyWorkerNetworkGuard?: boolean })
     .__rockyWorkerNetworkGuard !== true
@@ -32,9 +37,14 @@ let received = 0n;
 let running = false;
 const requests = new Map<
   string,
-  { resolve: (value: unknown) => void; reject: (error: Error) => void }
+  {
+    resolve: (value: unknown) => void;
+    reject: (error: Error) => void;
+    expectedKind: "model_result" | "tool_result";
+  }
 >();
 const abort = new AbortController();
+const resultTransfer = new ResultTransferAssembler();
 function send(
   requestId: string,
   payload: Message["payload"],
@@ -75,7 +85,14 @@ function rpc(
 ) {
   const id = randomUUID();
   return new Promise<unknown>((resolve, reject) => {
-    requests.set(id, { resolve, reject });
+    requests.set(id, {
+      resolve,
+      reject,
+      expectedKind:
+        payload.kind === "model_request" || payload.kind === "model_commit"
+          ? "model_result"
+          : "tool_result",
+    });
     try {
       send(id, payload);
     } catch (error) {
@@ -89,6 +106,38 @@ async function modelRpc(payload: ModelRequest) {
   let result: unknown;
   for (const frame of frameModelRequest(payload)) result = await rpc(frame);
   return result;
+}
+async function sendRunResult(
+  requestId: string,
+  payload: Extract<ResultPayload, { kind: "run_result" }>,
+  after?: () => void,
+) {
+  if (Buffer.byteLength(JSON.stringify(payload)) < 40000) {
+    send(requestId, payload, after);
+    return;
+  }
+  for (const frame of frameResult(payload)) {
+    abort.signal.throwIfAborted();
+    if (!owner) throw Error("Worker owner missing");
+    const wire = JSON.stringify({
+      schemaVersion: 1,
+      requestId,
+      runId: owner.runId,
+      executionSessionId: owner.executionSessionId,
+      runCapability: owner.runCapability,
+      sequence: String(++sequence),
+      payload: frame,
+    });
+    parseIpcMessage(wire);
+    await new Promise<void>((resolve, reject) => {
+      if (!process.connected || !process.send) {
+        reject(Error("IPC disconnected"));
+        return;
+      }
+      process.send(wire, (error) => (error ? reject(error) : resolve()));
+    });
+  }
+  after?.();
 }
 async function invoke(requestId: string, decision?: "approve" | "reject") {
   if (!agent || !owner || running) throw Error("Agent invocation unavailable");
@@ -223,7 +272,7 @@ async function invoke(requestId: string, decision?: "approve" | "reject") {
     };
     const interrupted =
       Array.isArray(output.__interrupt__) && output.__interrupt__.length > 0;
-    send(
+    await sendRunResult(
       requestId,
       {
         kind: "run_result",
@@ -273,6 +322,24 @@ process.on("message", (wire) => {
         message.runCapability !== owner.runCapability)
     )
       throw Error("Run capability changed");
+    if (
+      message.payload.kind === "result_begin" ||
+      message.payload.kind === "result_chunk" ||
+      message.payload.kind === "result_commit"
+    ) {
+      if (
+        !requests.has(message.requestId) ||
+        (message.payload.kind === "result_begin" &&
+          message.payload.resultKind !==
+            requests.get(message.requestId)!.expectedKind)
+      )
+        throw Error("Unexpected RPC result transfer");
+      const result = resultTransfer.ingest(message.requestId, message.payload);
+      if (!result) return;
+      if (result.kind === "run_result")
+        throw Error("Unexpected RPC result kind");
+      message.payload = result;
+    }
     if (message.payload.kind === "start") {
       if (owner || !message.payload.graphPath)
         throw Error("Agent start requires graph path");
@@ -351,6 +418,10 @@ process.on("message", (wire) => {
     ) {
       const request = requests.get(message.requestId);
       if (!request) throw Error("Unknown RPC response");
+      if (resultTransfer.has(message.requestId))
+        throw Error("Incomplete RPC result transfer");
+      if (message.payload.kind !== request.expectedKind)
+        throw Error("RPC result kind changed");
       requests.delete(message.requestId);
       request.resolve(
         message.payload.kind === "tool_result"
@@ -362,16 +433,19 @@ process.on("message", (wire) => {
       if (!request) throw Error("Unknown RPC error");
       requests.delete(message.requestId);
       request.reject(new Error(message.payload.error.message));
+      resultTransfer.clear(message.requestId);
     } else if (message.payload.kind === "cancel") {
       abort.abort();
       for (const request of requests.values())
         request.reject(new Error("Agent cancelled"));
       requests.clear();
+      resultTransfer.clear();
       saver?.db.close();
       process.exit(0);
     } else throw Error("Unexpected daemon message");
   } catch {
     abort.abort();
+    resultTransfer.clear();
     process.exitCode = 1;
     process.disconnect?.();
   }

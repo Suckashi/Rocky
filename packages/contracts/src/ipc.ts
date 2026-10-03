@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { modelRequestSchema, modelTransferSchemas } from "./model-transfer.js";
+import { resultTransferSchemas } from "./result-transfer.js";
 import {
   idSchema,
   sequenceSchema,
@@ -37,6 +38,7 @@ export const ipcMessageSchema = z
       }),
       modelRequestSchema,
       ...modelTransferSchemas,
+      ...resultTransferSchemas,
       z.strictObject({ kind: z.literal("model_result"), message: z.unknown() }),
       z.strictObject({
         kind: z.literal("context_read"),

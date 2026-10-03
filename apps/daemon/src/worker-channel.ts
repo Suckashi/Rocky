@@ -3,6 +3,11 @@ import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { parseIpcMessage } from "../../../packages/contracts/src/ipc.js";
 import { ModelTransferAssembler } from "../../../packages/contracts/src/model-transfer.js";
 import {
+  ResultTransferAssembler,
+  frameResult,
+  type ResultPayload,
+} from "../../../packages/contracts/src/result-transfer.js";
+import {
   RockyError,
   type Work,
 } from "../../../packages/contracts/src/index.js";
@@ -39,6 +44,7 @@ export class WorkerChannel {
   private readonly pending = new Map<string, AbortController>();
   private readonly seen = new Set<string>();
   private readonly modelTransfer = new ModelTransferAssembler();
+  private readonly resultTransfer = new ResultTransferAssembler();
   private readonly jobs = new Set<Promise<void>>();
   private stopped = false;
   private completedInvocation = false;
@@ -105,6 +111,13 @@ export class WorkerChannel {
     }
     this.exited = new Promise((resolve) => {
       this.child.once("exit", (code, signal) => {
+        if (
+          this.agentOptions &&
+          !this.completedInvocation &&
+          !this.closing &&
+          !this.failure
+        )
+          this.failure = "Worker exited without a confirmed invocation result";
         this.abortAll();
         try {
           const status = this.failure
@@ -239,6 +252,33 @@ export class WorkerChannel {
     )
       throw Error("Worker IPC backpressure");
   }
+  private async sendResult(requestId: string, payload: ResultPayload) {
+    if (Buffer.byteLength(JSON.stringify(payload)) < 40000) {
+      this.send(requestId, payload);
+      return;
+    }
+    for (const frame of frameResult(payload)) {
+      this.owned();
+      const wire = JSON.stringify({
+        schemaVersion: 1,
+        requestId,
+        runId: this.owner.runId,
+        executionSessionId: this.owner.executionSessionId,
+        runCapability: this.capability,
+        sequence: String(++this.sequence),
+        payload: frame,
+      });
+      parseIpcMessage(wire);
+      await new Promise<void>((resolve, reject) => {
+        if (!this.child.connected) {
+          reject(Error("Worker disconnected"));
+          return;
+        }
+        // At most one frame per in-flight RPC is queued; callback provides bounded backpressure.
+        this.child.send(wire, (error) => (error ? reject(error) : resolve()));
+      });
+    }
+  }
   private async receive(wire: unknown) {
     if (typeof wire !== "string")
       throw Error("IPC wire must be a bounded string");
@@ -262,11 +302,40 @@ export class WorkerChannel {
         "context_ack",
         "runtime_event",
         "run_result",
+        "result_begin",
+        "result_chunk",
+        "result_commit",
         "error",
       ].includes(message.payload.kind)
     )
       throw Error("Invalid worker request");
     this.received = BigInt(message.sequence);
+    if (
+      message.payload.kind === "result_begin" ||
+      message.payload.kind === "result_chunk" ||
+      message.payload.kind === "result_commit"
+    ) {
+      this.owned();
+      if (
+        this.invocation?.id !== message.requestId ||
+        (message.payload.kind === "result_begin" &&
+          message.payload.resultKind !== "run_result")
+      )
+        throw Error("Unexpected invocation result transfer");
+      const result = this.resultTransfer.ingest(
+        message.requestId,
+        message.payload,
+      );
+      if (!result) return;
+      if (result.kind !== "run_result")
+        throw Error("Invalid invocation result kind");
+      message.payload = result;
+    }
+    if (message.payload.kind === "run_result") {
+      this.owned();
+      if (this.resultTransfer.has(message.requestId))
+        throw Error("Incomplete invocation result transfer");
+    }
     if (message.payload.kind === "runtime_event") {
       this.owned();
       this.agentOptions?.event(
@@ -284,9 +353,10 @@ export class WorkerChannel {
       if (!pending || pending.id !== message.requestId)
         throw Error("Unexpected Agent invocation response");
       this.invocation = undefined;
-      if (message.payload.kind === "error")
+      if (message.payload.kind === "error") {
+        this.resultTransfer.clear(message.requestId);
         pending.reject(new Error(message.payload.error.message));
-      else {
+      } else {
         const result = message.payload.result as {
           __interrupt__?: unknown[];
         } | null;
@@ -346,7 +416,7 @@ export class WorkerChannel {
       ]);
       abort.signal.throwIfAborted();
       this.owned();
-      this.send(
+      await this.sendResult(
         message.requestId,
         payload.kind === "model_request"
           ? { kind: "model_result", message: result }
@@ -375,6 +445,7 @@ export class WorkerChannel {
   }
   private abortAll() {
     this.modelTransfer.clear();
+    this.resultTransfer.clear();
     this.stopped = true;
     for (const controller of this.pending.values()) controller.abort();
     this.invocation?.reject(

@@ -88,6 +88,123 @@ function setup(text: string) {
   store.add(work, "test");
   return { root, store, work };
 }
+test("large model response and final native result cross both real child IPC directions intact", async () => {
+  const f = setup("large answer"),
+    content = "岩石🙂".repeat(40000),
+    graphPath = join(f.root, "graph-checkpoints.sqlite");
+  let calls = 0;
+  const channel = new WorkerChannel(
+    f.store,
+    f.work.id,
+    fileURLToPath(new URL("../apps/agent-worker/src/main.ts", import.meta.url)),
+    async (_work, payload) => {
+      if (payload.kind !== "model_request") throw Error("Unexpected RPC");
+      calls++;
+      return { content, tool_calls: [] };
+    },
+    { graphPath, mode: "configured", event: () => {} },
+  );
+  try {
+    const result = (await channel.invoke()) as {
+      messages: { content: string }[];
+    };
+    expect(result.messages.at(-1)?.content).toBe(content);
+    expect(calls).toBe(1);
+    expect(channel.error).toBeNull();
+    expect(f.store.get(f.work.id).status).toBe("running");
+    const { SqliteSaver } =
+      await import("@langchain/langgraph-checkpoint-sqlite");
+    const saver = SqliteSaver.fromConnString(graphPath);
+    try {
+      const cp = await saver.getTuple({
+        configurable: { thread_id: f.work.runId },
+      });
+      expect(JSON.stringify(cp?.checkpoint.channel_values.messages)).toContain(
+        content,
+      );
+    } finally {
+      saver.db.close();
+    }
+  } finally {
+    await channel.close();
+    f.store.close();
+    rmSync(f.root, { recursive: true, force: true });
+  }
+});
+test("large daemon tool receipt resumes exact native interrupt and offloads evidence without repeating the tool", async () => {
+  const f = setup("large synthetic tool evidence"),
+    evidence = "observed fixture row 岩石🙂\n".repeat(12000),
+    graphPath = join(f.root, "graph-checkpoints.sqlite");
+  let tools = 0;
+  const channel = new WorkerChannel(
+    f.store,
+    f.work.id,
+    fileURLToPath(new URL("../apps/agent-worker/src/main.ts", import.meta.url)),
+    async (_work, payload) => {
+      if (payload.kind === "tool_request") {
+        expect(payload.tool).toBe("write_sample");
+        tools++;
+        return JSON.stringify({ fixture: true, evidence });
+      }
+      if (payload.kind !== "model_request") throw Error("Unexpected RPC");
+      if (tools === 0)
+        return {
+          content: "",
+          tool_calls: [
+            {
+              id: "large-write",
+              name: "write_sample",
+              args: { value: "synthetic evidence" },
+              type: "tool_call",
+            },
+          ],
+        };
+      expect(JSON.stringify(payload.messages)).toContain(
+        "/large_tool_results/large-write.txt",
+      );
+      return {
+        content: "Observed synthetic receipt persisted; no host effect.",
+        tool_calls: [],
+      };
+    },
+    { graphPath, mode: "configured", event: () => {} },
+  );
+  try {
+    expect(await channel.invoke()).toMatchObject({
+      __interrupt__: expect.any(Array),
+    });
+    expect(tools).toBe(0);
+    expect(await channel.invoke("approve")).toMatchObject({
+      messages: [
+        { content: "Observed synthetic receipt persisted; no host effect." },
+      ],
+    });
+    expect(tools).toBe(1);
+    expect(channel.error).toBeNull();
+    const { SqliteSaver } =
+      await import("@langchain/langgraph-checkpoint-sqlite");
+    const saver = SqliteSaver.fromConnString(graphPath);
+    try {
+      const state = (await saver.getTuple({
+        configurable: { thread_id: f.work.runId },
+      }))!.checkpoint.channel_values;
+      expect(JSON.stringify(state.files)).toContain(
+        "observed fixture row 岩石🙂",
+      );
+      expect(
+        (state.files as Record<string, { content: string }>)[
+          "/large_tool_results/large-write.txt"
+        ]!.content,
+      ).toBe(JSON.stringify({ fixture: true, evidence }));
+    } finally {
+      saver.db.close();
+    }
+  } finally {
+    await channel.close();
+    f.store.close();
+    rmSync(f.root, { recursive: true, force: true });
+  }
+});
 test("T-009 real child IPC verifies ownership and correlates tool result with daemon-resolved scope", async () => {
   const f = setup("roundtrip");
   const seen: unknown[] = [];
@@ -161,6 +278,33 @@ for (const mode of ["badcap", "flood", "stubborn"] as const)
       rmSync(f.root, { recursive: true, force: true });
     }
   });
+for (const mode of ["partial-run", "incomplete-run", "foreign-result"])
+  test(
+    "incomplete or wrong-kind final result never completes native invocation: " +
+      mode,
+    async () => {
+      const f = setup(mode),
+        channel = new WorkerChannel(
+          f.store,
+          f.work.id,
+          entry,
+          async () => {
+            throw Error("No effects expected");
+          },
+          { graphPath: join(f.root, "unused.sqlite"), event: () => {} },
+        );
+      try {
+        await expect(channel.invoke()).rejects.toThrow();
+        await channel.exited;
+        expect(f.store.get(f.work.id).status).toBe("running");
+        expect(channel.error).toBeTruthy();
+      } finally {
+        await channel.close();
+        f.store.close();
+        rmSync(f.root, { recursive: true, force: true });
+      }
+    },
+  );
 
 test("T-009 shutdown bounds a handler that ignores cancellation", async () => {
   const f = setup("stubborn");
