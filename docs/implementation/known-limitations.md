@@ -26,3 +26,5 @@ Conversation/history APIs now separate visible user/result records from graph st
 History UI now uses persistent bounded pages and shared Work-event references; full Work snapshot pagination/performance remains pending. Stream/history scroll verified by local provider fixture. See history-ui/verification.json.
 
 Current status (370e855): safe native main context now survives cancellation/model changes within mode/workspace scope; an owned inbox batch is acknowledged against the actual native checkpoint with branch-aware membership. Earlier absent-context/inbox statements above are historical. Long-history compaction, large-model transport, exact steering/reset/retry and full crash recovery acceptance remain pending. See context-inbox.md and evidence/2026-10-03/inbox-checkpoint.json.
+
+2026-10-03 MCP update: lifecycle/discovery and original schema preparation exist; formal configured tool dispatch remains pending. Nonrecursive local schema refs work, but regex/recursive/external refs and unknown drafts/formats fail closed. No hard schema CPU deadline proven. See mcp-schema.md; these are implementation gaps, not external-service blockers.

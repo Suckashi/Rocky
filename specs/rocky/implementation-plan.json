@@ -2146,8 +2146,31 @@
         "R-022",
         "R-028"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "4112fb78dc9a085111aa8ee0b803c5b1f96e3046",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/mcp-schema.test.ts tests/mcp-manager.test.ts tests/mcp-registry.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-schema/verification.json",
+          "testFiles": [
+            "tests/mcp-schema.test.ts",
+            "tests/mcp-manager.test.ts",
+            "tests/mcp-registry.test.ts"
+          ],
+          "limitations": [
+            "25 focused tests passed; configured discovery/preparation only, not runtime dispatch or exact approval execution",
+            "Regex/recursive/external refs/unknown drafts or formats rejected; full compatibility and hard CPU isolation pending",
+            "Typed results/resources/prompts/discovery API/grants remain unfinished",
+            "No browser/full regression rerun; no UI change; Ubuntu/live integration not_run",
+            "T-016 in_progress; global AT unchanged; Goal active; no remote actions"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [

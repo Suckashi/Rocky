@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-03",
+  "commit": "4112fb78dc9a085111aa8ee0b803c5b1f96e3046",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "mode": "fixture",
+  "checks": [
+    {
+      "command": "npm install --save-exact ajv@8.20.0 ajv-formats@3.0.1 --offline",
+      "exitCode": 0
+    },
+    { "command": "npm run check", "exitCode": 0 },
+    { "command": "npm run lint", "exitCode": 0 },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "result": "14.01s, existing bundle-size warning"
+    },
+    {
+      "command": "npx vitest run tests/mcp-schema.test.ts tests/mcp-manager.test.ts tests/mcp-registry.test.ts",
+      "exitCode": 0,
+      "result": "3 files, 25 tests passed",
+      "durationSeconds": 6.98
+    },
+    { "command": "git diff --check", "exitCode": 0 },
+    { "command": "npm run check:docs", "exitCode": 0, "result": "38 tasks / 56 requirements / 70 acceptance entries; valid DAG" }
+  ],
+  "corrections": [
+    "Initial focused run: 19 passed / 1 failed because duplicate-ID test used an invalid URN; corrected fixture ID and reran successfully"
+  ],
+  "limitations": [
+    "Schema preparation/discovery only; no configured tool dispatch, operation approval or runtime routing proof",
+    "Regex, recursive/dynamic/external refs and unrecognized drafts/formats/keywords rejected; full schema compatibility incomplete",
+    "No hard CPU isolation/deadline for schema compiler/validation proven",
+    "Structured/image mapping, resource/prompt handling, grants/target mapping and discovery API pending",
+    "No browser or full regression rerun; no UI changes",
+    "Ubuntu and live external integration not_run",
+    "T-016 in_progress; global AT unchanged; Goal active",
+    "No remote actions or Apsis changes"
+  ]
+}

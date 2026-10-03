@@ -1,6 +1,6 @@
 # Rocky implementation progress
 
-2026-10-03, Asia/Taipei. Working local P0 fixture plus P1 contracts and original identity; not the complete Rocky product.
+2026-10-03, Asia/Taipei. Current work: OpenDots-aligned main chat, configured model/runtime conversation, steering/retry and configured MCP lifecycle/schema boundary. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
 
 | Task          | Status      | Actual result                                                                                                                                               |
 | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -18,6 +18,8 @@
 | T-037         | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                            |
 | T-011 / T-018 | in_progress | Configured provider incremental SSE, common UI adapter, snapshot reconnect and numeric cursor replay; other contracts pending.                              |
 | Later tasks   | pending     | Product modules and confirmed-state presence remain pending.                                                                                                |
+| T-014 / T-015 / T-021 | in_progress | Configured MCP registry, lifecycle/discovery and settings verified locally; full process/network/permission scope pending. |
+| T-016 | in_progress | Original input/output schema validation, revision-bound tool preparation and namespaced identity; configured dispatch/typed results/resources/prompts pending. |
 
 Node 24.12.0 / npm 11.6.4 baseline. OpenDots MIT presentation CSS adapted with notices; no upstream history, backend, data, settings or brand assets imported. Test data is synthetic. No remote action; existing live probe evidence is separate from this fixture UI slice. See known-limitations.md for gates and follow-up.
 
@@ -372,3 +374,7 @@ Windows fixture: check/lint/final build pass (13.96s);42 files/157 tests pass (1
 Commit5488911/followup4b2384c adds daemon-owned official stdio/HTTP SDK connections, persisted lifecycle command IDs/states/catalog revisions, bounded full discovery, explicit Stop/reconnect and config revocation. No tool calls are replayed or exposed outside Broker. SDK inherited env defaults are emptied unless allowed; Windows names resolve case-insensitively. Diagnostics are bounded, UTF-8 decoded, credential redacted through shutdown and incomplete EOF prefixes masked. HTTP exact endpoint/instance checks, redirect denial and response limits remain active. UI uses actual state/count/last-confirmed timestamp with Connect/Stop/Refresh and collapsed diagnostics.
 
 Windows fixture: check/lint/final build pass (14.08s);43 files/164 tests passed before two added boundary cases/final shutdown correction; latest12 focused tests plus3 EOF assertions pass.2 browser flows pass (7.3s), including actual HTTP fixture ready/reload/stop and four-width settings. Initial fixture405, Windows env case, JSX compile error, stale saved hint and shutdown stderr race were fixed; see [evidence](evidence/2026-10-03/mcp-lifecycle/verification.json) and [design](mcp-lifecycle.md). T-015/T-021 in_progress; real Broker tool routing/full schema/result validation, descendant cleanup, DNS/proxy/CA/OAuth/credential rotation and full fault matrix remain pending. Goal active, global AT unchanged; no remote action. Next: T-016 guarded original MCP schemas and Work tool execution.
+
+## Configured MCP schema boundary — 2026-10-03
+
+Source 4112fb7: original JSON schemas now gate ready discovery and daemon tool preparation; same-name tools have server-specific identities, and annotations remain unknown effects. Windows check/lint/build and 25 focused tests passed. Formal configured dispatch, exact approvals, typed results and resources/prompts remain pending; T-016 is in_progress. See [MCP schema](mcp-schema.md) and [evidence](evidence/2026-10-03/mcp-schema/verification.json). Goal stays active; no remote action.
