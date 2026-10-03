@@ -6,6 +6,8 @@ import {
 } from "../../../packages/contracts/src/index.js";
 
 import { operationSummarySchema } from "../../../packages/contracts/src/operations.js";
+import { reconciliationReceiptSchema } from "../../../packages/contracts/src/operations.js";
+import type { retrySchema } from "../../../packages/contracts/src/index.js";
 
 type Operation = {
   id: string;
@@ -18,6 +20,157 @@ type Operation = {
 };
 export class OperationLedger {
   constructor(private readonly store: Store) {}
+  retryAncestors(work: Work) {
+    const ancestors: Work[] = [],
+      seen = new Set([work.id]);
+    let id = work.retryOf;
+    while (id) {
+      if (seen.has(id) || ancestors.length >= 128)
+        throw new RockyError(
+          "retry_ancestry",
+          "Invalid or excessive retry ancestry",
+          409,
+        );
+      seen.add(id);
+      const source = this.store.get(id);
+      ancestors.push(source);
+      id = source.retryOf;
+    }
+    return ancestors;
+  }
+  private priorOperations(work: Work) {
+    return [work, ...this.retryAncestors(work)].flatMap((source) =>
+      this.list(source.id).map((summary) => ({
+        source,
+        summary,
+        operation: this.get(summary.id)!,
+      })),
+    );
+  }
+  retryReview(source: Work) {
+    const effects = this.priorOperations(source).map(
+      ({ source: owner, summary }) => {
+        const reconciled = this.store.db
+          .prepare(
+            "SELECT data FROM operation_reconciliations WHERE json_extract(data,'$.operationId')=? AND json_extract(data,'$.operationRevision')=?",
+          )
+          .get(summary.id, summary.revision) as { data: string } | undefined;
+        return {
+          ...summary,
+          workId: owner.id,
+          ...(reconciled
+            ? {
+                reconciliationReceiptId: reconciliationReceiptSchema.parse(
+                  JSON.parse(reconciled.data),
+                ).id,
+              }
+            : {}),
+        };
+      },
+    );
+    if (effects.length > 1000)
+      throw new RockyError(
+        "retry_review_capacity",
+        "Retry history exceeds review capacity",
+        422,
+      );
+    return { effects };
+  }
+  validateRetry(
+    source: Work,
+    refs: ReturnType<typeof retrySchema.parse>["effectRefs"],
+  ) {
+    const operations = this.priorOperations(source);
+    if (
+      operations.some(
+        ({ summary }) =>
+          summary.outcome === "unknown" || summary.phase === "dispatched",
+      )
+    )
+      throw new RockyError(
+        "retry_unknown_effect",
+        "Reconcile unknown prior effects before retry",
+        409,
+      );
+    const known = operations.filter(
+      ({ summary }) => summary.outcome !== "not_executed",
+    );
+    if (
+      new Set(refs.map((r) => r.operationId)).size !== refs.length ||
+      refs.length !== known.length
+    )
+      throw new RockyError(
+        "retry_effect_refs",
+        "Confirm the exact known prior effect receipts",
+        409,
+      );
+    for (const { summary } of known) {
+      const ref = refs.find((r) => r.operationId === summary.id);
+      if (!ref || ref.expectedRevision !== summary.revision)
+        throw new RockyError(
+          "retry_effect_refs",
+          "Prior effect receipt revision changed",
+          409,
+        );
+      const reconciled = this.store.db
+        .prepare(
+          "SELECT data FROM operation_reconciliations WHERE json_extract(data,'$.operationId')=? AND json_extract(data,'$.operationRevision')=?",
+        )
+        .get(summary.id, summary.revision) as { data: string } | undefined;
+      const receipt = reconciled
+        ? reconciliationReceiptSchema.parse(JSON.parse(reconciled.data))
+        : undefined;
+      if (
+        ref.reconciliationReceiptId !== receipt?.id ||
+        (receipt && receipt.outcome !== summary.outcome)
+      )
+        throw new RockyError(
+          "retry_effect_refs",
+          "Reconciliation receipt does not match the current effect",
+          409,
+        );
+    }
+  }
+  retryEvidence(work: Work) {
+    return this.retryAncestors(work).map((source) => ({
+      workId: source.id,
+      status: source.status,
+      answer: source.answer,
+      error: source.error,
+      operations: this.list(source.id).map((summary) => ({
+        ...summary,
+        result: this.get(summary.id)?.result,
+      })),
+    }));
+  }
+  private assertRetryAllowed(
+    work: Work,
+    name: string,
+    args: Record<string, unknown>,
+  ) {
+    for (const source of this.retryAncestors(work))
+      for (const summary of this.list(source.id)) {
+        if (summary.outcome === "unknown")
+          throw new RockyError(
+            "retry_unknown_effect",
+            "Prior effect requires reconciliation",
+            409,
+          );
+        if (summary.outcome !== "succeeded" || summary.tool !== name) continue;
+        const context = JSON.parse(this.get(summary.id)!.context!);
+        const argsHash =
+          context.requestArgsHash ??
+          (source.approval?.operationId === summary.id
+            ? intentHash(source.approval.args)
+            : undefined);
+        if (!argsHash || argsHash === intentHash(args))
+          throw new RockyError(
+            "retry_replay_denied",
+            "Retry cannot repeat a confirmed prior effect; use its receipt",
+            409,
+          );
+      }
+  }
   finishUndispatched(
     work: Work,
     reason: "stopped" | "restarted" | "wall_budget",
@@ -85,6 +238,7 @@ export class OperationLedger {
     fingerprint: string,
     targetIdentity: string = intentHash({ fixture: work.runId }),
   ) {
+    this.assertRetryAllowed(work, name, args);
     if (!/^[a-f0-9]{64}$/.test(targetIdentity))
       throw new RockyError(
         "target_identity",
@@ -111,6 +265,7 @@ export class OperationLedger {
       name,
       fingerprint,
       targetIdentity,
+      requestArgsHash: intentHash(args),
     });
     const hash = intentHash({ context, args });
     return this.store.transaction(() => {

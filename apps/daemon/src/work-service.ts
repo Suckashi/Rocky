@@ -13,6 +13,7 @@ import {
   submissionSchema,
   decisionSchema,
   stopSchema,
+  retrySchema,
   RockyError,
   type Work,
 } from "../../../packages/contracts/src/index.js";
@@ -192,6 +193,65 @@ export class WorkService {
         );
       return this.store.get(prior.id);
     }
+    return this.admit(parsed, intent, runMode);
+  }
+  retry(id: string, input: unknown) {
+    if (this.stopping)
+      throw new RockyError("stopping", "Daemon is stopping", 503);
+    const command = retrySchema.parse(input),
+      intent = intentHash({ retryOf: id, ...command });
+    const prior = this.store.receipt(command.requestId);
+    if (prior) {
+      if (prior.intent !== intent)
+        throw new RockyError(
+          "idempotency_conflict",
+          "Retry request changed",
+          409,
+        );
+      return this.store.get(prior.id);
+    }
+    const source = this.store.get(id);
+    if (
+      source.runId !== command.runId ||
+      source.executionSessionId !== command.executionSessionId ||
+      source.revision !== command.expectedRevision
+    )
+      throw new RockyError("stale_target", "Retry source changed", 409);
+    if (
+      ["queued", "running", "waiting_approval"].includes(source.status) ||
+      source.runMode !== "normal"
+    )
+      throw new RockyError(
+        "retry_source",
+        "Retry requires an inactive normal Work",
+        409,
+      );
+    this.operations.validateRetry(source, command.effectRefs);
+    if (command.modelSelection && source.mode !== "configured")
+      throw new RockyError(
+        "retry_model",
+        "Fixture retry cannot select a configured model",
+        422,
+      );
+    const parsed = submissionSchema.parse({
+      requestId: command.requestId,
+      text: source.text,
+      transport: source.transport,
+      mode: source.mode,
+      kind: source.kind ?? "main",
+      workspaceId: source.workspaceId,
+      modelSelection: command.modelSelection ?? source.modelSelection,
+      modelBudget: source.modelBudget,
+    });
+    return this.admit(parsed, intent, "normal", source.id, command.effectRefs);
+  }
+  private admit(
+    parsed: ReturnType<typeof submissionSchema.parse>,
+    intent: string,
+    runMode: "normal" | "evaluation",
+    retryOf?: string,
+    retryEffectRefs?: ReturnType<typeof retrySchema.parse>["effectRefs"],
+  ) {
     if (
       this.store.list().filter((w) => w.status === "queued").length >=
       this.admissionConfig.maxQueued
@@ -208,6 +268,7 @@ export class WorkService {
       executionSessionId: randomUUID(),
       requestId: parsed.requestId,
       text: parsed.text,
+      ...(retryOf ? { retryOf, retryEffectRefs } : {}),
       transport: parsed.transport,
       mode: parsed.mode,
       kind: parsed.kind,
@@ -616,7 +677,8 @@ export class WorkService {
         current.status = "running";
         this.update(current);
         const contextBatch =
-          current.runMode === "normal" && (current.kind ?? "main") === "main"
+          current.runMode === "normal" &&
+          ((current.kind ?? "main") === "main" || current.retryOf)
             ? new ContextLedger(this.store).prepare(current)
             : undefined;
         const source = import.meta.url.endsWith(".ts");

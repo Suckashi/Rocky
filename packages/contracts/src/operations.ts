@@ -28,3 +28,13 @@ export const reconciliationReceiptSchema = z.strictObject({
   observationHash: z.string().regex(/^[a-f0-9]{64}$/),
   operationRevision: z.number().int().positive(),
 });
+export const retryReviewSchema = z.strictObject({
+  effects: z
+    .array(
+      operationSummarySchema.extend({
+        workId: z.uuid(),
+        reconciliationReceiptId: z.uuid().optional(),
+      }),
+    )
+    .max(1000),
+});

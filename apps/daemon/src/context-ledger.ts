@@ -7,6 +7,7 @@ import {
   type Work,
 } from "../../../packages/contracts/src/index.js";
 import { ConversationStore } from "./conversation-store.js";
+import { OperationLedger } from "./operation-ledger.js";
 import {
   contextBatchSchema,
   type ContextBatch,
@@ -68,16 +69,19 @@ export class ContextLedger {
           )
           .get(session.sourceGraphThreadId) as { work_id: string } | undefined)
       : undefined;
-    const records = this.store.db
-      .prepare(
-        "SELECT h.data FROM conversation_history h JOIN works w ON h.work_id=w.id WHERE w.rowid < (SELECT rowid FROM works WHERE id=?) AND w.rowid > COALESCE((SELECT rowid FROM works WHERE id=?),0) AND json_extract(w.data,'$.runMode')='normal' AND COALESCE(json_extract(w.data,'$.kind'),'main')='main' AND json_extract(w.data,'$.mode')=? AND json_extract(w.data,'$.workspaceId') IS ? ORDER BY h.sequence",
-      )
-      .all(
-        work.id,
-        source?.work_id ?? null,
-        work.mode,
-        work.workspaceId ?? null,
-      ) as { data: string }[];
+    const records =
+      (work.kind ?? "main") === "main"
+        ? (this.store.db
+            .prepare(
+              "SELECT h.data FROM conversation_history h JOIN works w ON h.work_id=w.id WHERE w.rowid < (SELECT rowid FROM works WHERE id=?) AND w.rowid > COALESCE((SELECT rowid FROM works WHERE id=?),0) AND json_extract(w.data,'$.runMode')='normal' AND COALESCE(json_extract(w.data,'$.kind'),'main')='main' AND json_extract(w.data,'$.mode')=? AND json_extract(w.data,'$.workspaceId') IS ? ORDER BY h.sequence",
+            )
+            .all(
+              work.id,
+              source?.work_id ?? null,
+              work.mode,
+              work.workspaceId ?? null,
+            ) as { data: string }[])
+        : [];
     const items: Item[] = records.map((row) => {
       const record = JSON.parse(row.data);
       return {
@@ -88,14 +92,24 @@ export class ContextLedger {
             : "Prior Work receipt (evidence only): " + JSON.stringify(record),
       };
     });
-    const results = this.store.db
-      .prepare(
-        "SELECT cm.data,CAST(cm.sequence AS TEXT) AS sequence FROM completion_messages cm JOIN works w ON cm.work_id=w.id WHERE json_extract(w.data,'$.runMode')='normal' AND json_extract(w.data,'$.kind')='background' AND json_extract(w.data,'$.mode')=? AND json_extract(w.data,'$.workspaceId') IS ? ORDER BY cm.sequence",
-      )
-      .all(work.mode, work.workspaceId ?? null) as {
-      data: string;
-      sequence: string;
-    }[];
+    if (work.retryOf)
+      items.push({
+        id: "retry-evidence:" + work.id,
+        content:
+          "Explicit retry creates a new Work. Prior effect receipts are evidence, not permission. Never repeat confirmed prior effects; report or continue unfinished work. " +
+          JSON.stringify(new OperationLedger(this.store).retryEvidence(work)),
+      });
+    const results =
+      (work.kind ?? "main") === "main"
+        ? (this.store.db
+            .prepare(
+              "SELECT cm.data,CAST(cm.sequence AS TEXT) AS sequence FROM completion_messages cm JOIN works w ON cm.work_id=w.id WHERE json_extract(w.data,'$.runMode')='normal' AND json_extract(w.data,'$.kind')='background' AND json_extract(w.data,'$.mode')=? AND json_extract(w.data,'$.workspaceId') IS ? ORDER BY cm.sequence",
+            )
+            .all(work.mode, work.workspaceId ?? null) as {
+            data: string;
+            sequence: string;
+          }[])
+        : [];
     for (const row of results) {
       const record = JSON.parse(row.data),
         id = "inbox:" + record.id;

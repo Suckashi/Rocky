@@ -320,7 +320,7 @@ export class Store {
       );
     const result = this.db
       .prepare(
-        "UPDATE works SET data=? WHERE id=? AND json_extract(data,'$.revision')=? AND request_id=? AND json_extract(data,'$.runId')=? AND json_extract(data,'$.executionSessionId')=? AND json_extract(data,'$.text')=? AND json_extract(data,'$.transport')=? AND json_extract(data,'$.mode')=? AND json_extract(data,'$.kind') IS ? AND json_extract(data,'$.workspaceId') IS ? AND json_extract(data,'$.wallBudgetMs') IS ? AND json_extract(data,'$.runMode')=? AND json_extract(data,'$.modelSelection.connectionId') IS ? AND json_extract(data,'$.modelSelection.revision') IS ? AND json_extract(data,'$.modelBudget') IS ?",
+        "UPDATE works SET data=? WHERE id=? AND json_extract(data,'$.revision')=? AND request_id=? AND json_extract(data,'$.runId')=? AND json_extract(data,'$.executionSessionId')=? AND json_extract(data,'$.text')=? AND json_extract(data,'$.transport')=? AND json_extract(data,'$.mode')=? AND json_extract(data,'$.kind') IS ? AND json_extract(data,'$.workspaceId') IS ? AND json_extract(data,'$.wallBudgetMs') IS ? AND json_extract(data,'$.runMode')=? AND json_extract(data,'$.modelSelection.connectionId') IS ? AND json_extract(data,'$.modelSelection.revision') IS ? AND json_extract(data,'$.modelBudget') IS ? AND json_extract(data,'$.retryOf') IS ? AND json_extract(data,'$.retryEffectRefs') IS ?",
       )
       .run(
         JSON.stringify(workSchema.parse(work)),
@@ -339,6 +339,8 @@ export class Store {
         work.modelSelection?.connectionId ?? null,
         work.modelSelection?.revision ?? null,
         work.modelBudget ? JSON.stringify(work.modelBudget) : null,
+        work.retryOf ?? null,
+        work.retryEffectRefs ? JSON.stringify(work.retryEffectRefs) : null,
       );
     if (result.changes !== 1)
       throw new RockyError("revision_conflict", "Work revision changed", 409);

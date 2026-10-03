@@ -8,6 +8,7 @@ import { ModelSettings } from "./model-settings.js";
 import { WorkOperations } from "./work-operations.js";
 import { WorkGrants } from "./work-grants.js";
 import { WorkSteering } from "./work-steering.js";
+import { WorkRetry } from "./work-retry.js";
 import { Chrome, Transcript } from "./chrome.js";
 import ReactMarkdown from "react-markdown";
 import "./style.css";
@@ -283,6 +284,13 @@ function App() {
                       {t.status[w.status]}
                     </span>
                   </div>
+                  {w.retryOf && (
+                    <small>
+                      {locale === "zh"
+                        ? "重試工作 · 新的執行"
+                        : "Retry work · new execution"}
+                    </small>
+                  )}
                   {w.approval?.status === "pending" && (
                     <section className="approval">
                       <h2>{t.approval}</h2>
@@ -332,6 +340,13 @@ function App() {
                     <summary>{t.detail}</summary>
                     <WorkGrants work={w} locale={locale} request={request} />
                     <WorkSteering
+                      work={w}
+                      events={events}
+                      locale={locale}
+                      connected={connected}
+                      request={request}
+                    />
+                    <WorkRetry
                       work={w}
                       events={events}
                       locale={locale}

@@ -65,6 +65,15 @@ export const stopSchema = z
     expectedRevision: revisionSchema,
   })
   .strict();
+export const retryEffectRefSchema = z.strictObject({
+  operationId: z.string().min(1).max(300),
+  expectedRevision: revisionSchema,
+  reconciliationReceiptId: idSchema.optional(),
+});
+export const retrySchema = stopSchema.extend({
+  effectRefs: z.array(retryEffectRefSchema).max(100).default([]),
+  modelSelection: modelSelectionSchema.optional(),
+});
 export const approvalSchema = z
   .object({
     id: idSchema,
@@ -83,6 +92,8 @@ export const workSchema = z
     executionSessionId: idSchema,
     requestId: idSchema,
     text: z.string(),
+    retryOf: idSchema.optional(),
+    retryEffectRefs: z.array(retryEffectRefSchema).max(100).optional(),
     transport: z.enum(["stdio", "http"]),
     mode: z.enum(["fixture", "configured"]),
     kind: z.enum(["main", "background"]).optional(),

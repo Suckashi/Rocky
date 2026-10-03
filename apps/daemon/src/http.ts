@@ -237,6 +237,16 @@ export function createApp(service: WorkService) {
   app.post("/api/v1/works/:id/steer", async (c) =>
     c.json(service.steer(c.req.param("id"), await readJson(c))),
   );
+  app.post("/api/v1/works/:id/retry", async (c) =>
+    c.json(service.retry(c.req.param("id"), await readJson(c)), 202),
+  );
+  app.get("/api/v1/works/:id/retry-review", (c) =>
+    c.json(
+      service.store.publicEvidence(
+        service.operations.retryReview(service.store.get(c.req.param("id"))),
+      ),
+    ),
+  );
   app.get("/api/v1/works/:id/steering", (c) => {
     service.store.get(c.req.param("id"));
     return c.json({
