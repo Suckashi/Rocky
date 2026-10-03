@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": ".",
+    "sourceMap": true
+  },
+  "include": ["apps/daemon", "packages", "fixtures", "scripts/evaluate.ts"],
+  "exclude": ["**/*.test.ts", "apps/web"]
+}

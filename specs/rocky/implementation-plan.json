@@ -1,0 +1,2797 @@
+{
+  "schemaVersion": 2,
+  "specVersion": "2.0.0",
+  "specFile": "ROCKY_GREENFIELD_SPEC.md",
+  "createdAt": "2026-10-02",
+  "language": "zh-TW",
+  "statusLegend": [
+    "pending",
+    "in_progress",
+    "blocked",
+    "done"
+  ],
+  "evidenceModes": [
+    "static",
+    "fixture",
+    "live"
+  ],
+  "testStatusLegend": [
+    "not_run",
+    "passed",
+    "failed",
+    "skipped"
+  ],
+  "fixedDecisions": {
+    "deployment": "Local + Explicit Network",
+    "languageRuntime": "Node.js / TypeScript; no Python required for core and first-version Learning",
+    "primaryHarness": "Deep Agents JS / LangGraph",
+    "interaction": "CopilotKit OSS + AG-UI; application-owned storage",
+    "externalIntegrations": "Configured MCP only; stdio and Streamable HTTP",
+    "learning": "Restricted reflection jobs + proposal governance + Promptfoo eval + human publish",
+    "optimizer": "rocky-reflection default; Promptfoo optimize only after explicit-provider gate",
+    "platforms": [
+      "Windows x64",
+      "Ubuntu x64"
+    ],
+    "excluded": [
+      "CopilotKit Intelligence",
+      "managed connector service",
+      "Python worker",
+      "GEPA",
+      "LangMem",
+      "Mastra runtime",
+      "second Agent loop",
+      "required cloud persistence",
+      "unreviewed automatic skill publication",
+      "Apsis data migration",
+      "Apsis feature-parity gate",
+      "Apsis/OpenDots runtime compatibility",
+      "reference repository fork or imported Git history",
+      "inherited avatar gallery",
+      "automatic archive/delete/rename of Apsis"
+    ],
+    "projectName": "Rocky",
+    "repoStrategy": "New independent repository; no Apsis rename/fork/importer/feature-parity requirement",
+    "assistantIdentity": "One persistent Rocky; newly authored bot/persona/visual identity; no inherited 48-avatar gallery",
+    "botDesignStatus": "Implementation-ready design baseline, not final artwork or user-approved visual asset",
+    "codeLicense": "Apache-2.0 for original Rocky code; retain upstream notices and separately record asset rights",
+    "apiNamespace": "/api/v1",
+    "eventNamespace": "rocky.*",
+    "envNamespace": "ROCKY_*",
+    "mcpExtension": "x-rocky (version 1)",
+    "dataPolicy": "Rocky-owned fresh store; no scanning or importing Apsis/OpenDots data/config/history",
+    "runtimeNamespace": "productId=rocky; own DB, browser profiles, cache, sessions and credentials"
+  },
+  "requirements": [
+    {
+      "id": "R-001",
+      "title": "Local + Explicit Network",
+      "requirement": "全部產品資料與工作控制在本機；只連使用者明確配置或核准的目的地；不把 Strict Offline 設為產品預設。"
+    },
+    {
+      "id": "R-002",
+      "title": "不依賴商業平台",
+      "requirement": "不要求 Intelligence、managed connectors、雲端資料庫、LangSmith Cloud、Promptfoo Cloud 帳號或 license key。"
+    },
+    {
+      "id": "R-003",
+      "title": "Node-only",
+      "requirement": "支援平台的核心、Learning、安裝及一般開發不得要求 Python、uv、pip、Rust、C++ 編譯工具。自選第三方 MCP／使用者專案依賴另行揭露。"
+    },
+    {
+      "id": "R-004",
+      "title": "寬鬆開源",
+      "requirement": "採 MIT／Apache-2.0 等允許清單；逐版檢查轉依賴及複製程式碼，保留 notices；不可僅檢查根 repo 授權。"
+    },
+    {
+      "id": "R-005",
+      "title": "單一 Rocky 助手",
+      "requirement": "新建一個持續的 Rocky 與主對話；背景 Work／原生 subagents 不是新永久人格，不建立 roster 或舊 avatar gallery。"
+    },
+    {
+      "id": "R-006",
+      "title": "唯一主要 harness",
+      "requirement": "新版採 Deep Agents JS／LangGraph。普通、背景、Learning／eval 用同一套執行組裝；不並行加入 TanStack AI／Mastra／OpenClaw Agent loop。"
+    },
+    {
+      "id": "R-007",
+      "title": "開源互動層",
+      "requirement": "採 CopilotKit OSS／AG-UI，參考 OpenDots 的漸進揭露與工具卡；以 Rocky 原創介面實作，本地 persistence、授權和 queue 屬 Rocky。"
+    },
+    {
+      "id": "R-008",
+      "title": "原生規劃與子代理",
+      "requirement": "優先原生 task／todos／context／checkpointer；Rocky 只觀測與控管，不重建 planner 或第二套 subagent 引擎。"
+    },
+    {
+      "id": "R-009",
+      "title": "背景獨立",
+      "requirement": "背景工作有獨立 execution session、固定 workspace 與設定快照，返回 receipt 後主對話可繼續。"
+    },
+    {
+      "id": "R-010",
+      "title": "冪等命令",
+      "requirement": "提交、steering、核准、發佈、retry 都有穩定 requestId 與 canonical request hash；同 ID 不同內容回 409。"
+    },
+    {
+      "id": "R-011",
+      "title": "精確控制",
+      "requirement": "stop／steer 綁 workId、runId、sessionId 與版本；過期目標回 409；不得停止不相關工作。"
+    },
+    {
+      "id": "R-012",
+      "title": "斷線不取消",
+      "requirement": "HTTP／UI 訂閱結束不取消 daemon 中工作；顯式 stop／daemon shutdown 才改變執行。"
+    },
+    {
+      "id": "R-013",
+      "title": "真實事件",
+      "requirement": "所有顯示狀態來自持久化事件或可對帳快照；不虛構百分比、成功、子代理與驗證。"
+    },
+    {
+      "id": "R-014",
+      "title": "子代理可見",
+      "requirement": "顯示 assignment/status/current activity/result；預設折疊，不暴露 private reasoning 或未過濾工具秘密。"
+    },
+    {
+      "id": "R-015",
+      "title": "統一 Tool Broker",
+      "requirement": "真實 workspace、shell、browser、MCP、publish 等副作用必經同一個伺服器授權與 ledger。"
+    },
+    {
+      "id": "R-016",
+      "title": "強制重大核准",
+      "requirement": "critical／unknown 必須新核准；deny 優先；任何 auto／技能／subagent／schedule 不得繞過。"
+    },
+    {
+      "id": "R-017",
+      "title": "目標新鮮度",
+      "requirement": "核准綁定參數、設定版本、policy、環境、檔案 revision／browser snapshot；執行前重查。"
+    },
+    {
+      "id": "R-018",
+      "title": "未知效果對帳",
+      "requirement": "送出後結果不明記 unknown；不得藉 retry、重啓、checkpoint replay 或 fallback 自動重送。"
+    },
+    {
+      "id": "R-019",
+      "title": "MCP stdio＋HTTP",
+      "requirement": "由官方 SDK 管通訊；支援 stdio 與 Streamable HTTP；依鎖定 SDK 測試協定相容，不提供 Apsis config／API 相容層。"
+    },
+    {
+      "id": "R-020",
+      "title": "程序與憑證隔離",
+      "requirement": "MCP 子程序的 env、cwd、生命週期、能力與退出處理明確；不能繼承所有 API keys。"
+    },
+    {
+      "id": "R-021",
+      "title": "MCP 不可信資料",
+      "requirement": "schema、annotations、resources、prompts 與工具內容均需驗證；不能提升權限或自動執行 resource links。"
+    },
+    {
+      "id": "R-022",
+      "title": "模型連線控制",
+      "requirement": "支援明確配置的公司 OpenAI-compatible、OpenAI／Anthropic、本機相容 endpoint；不從 Apsis 匯入連線；model key 僅後端。"
+    },
+    {
+      "id": "R-023",
+      "title": "無隱藏 egress",
+      "requirement": "關閉 telemetry、update checks、預設 grader／optimizer provider；檢查 runtime、UI、worker；不靜默下載 runtime／模型。"
+    },
+    {
+      "id": "R-024",
+      "title": "區分環境與身分",
+      "requirement": "assistant、workspace、environment、browser profile、run 為不同 entity；不得以 assistantId 讓所有工作共享 cookies。"
+    },
+    {
+      "id": "R-025",
+      "title": "誠實隔離邊界",
+      "requirement": "Native mode 不是 OS sandbox；容器隔離與網路限制必須實測，不能只靠 prompt／MCP config 宣稱強制隔離。"
+    },
+    {
+      "id": "R-026",
+      "title": "Computer 安全接管",
+      "requirement": "接管指定 profile／environment、暫停其 agent 輸入、交還後重取 snapshot；不得關閉所有工作的 browser。"
+    },
+    {
+      "id": "R-027",
+      "title": "Workspace 衝突控制",
+      "requirement": "canonical paths、symlink／junction、工作區租約、檔案 target locks；同 repo 背景修改優先 worktree。"
+    },
+    {
+      "id": "R-028",
+      "title": "成果可驗證",
+      "requirement": "Artifact 指向不可變檔案快照與 hash；編輯文件用 revision CAS；只在真的產出後顯示成功。"
+    },
+    {
+      "id": "R-029",
+      "title": "來源層分離",
+      "requirement": "Conversation／graph state／Memory／Knowledge／Skills 分開；不把全部歷史當成記憶或永久指令。"
+    },
+    {
+      "id": "R-030",
+      "title": "技能凍結",
+      "requirement": "已發布技能為 immutable revision；run 固定 catalog 和載入版本；撤銷可立即限制相關後續操作。"
+    },
+    {
+      "id": "R-031",
+      "title": "Learning 非必開",
+      "requirement": "自動學習預設 off，經同意後 propose；手動 learn 可用；第一版不提供無審查自動發布。"
+    },
+    {
+      "id": "R-032",
+      "title": "Learning 只提案",
+      "requirement": "反思工作只可讀已選證據、建立 candidate；不能改 active skills、policy、MCP config、測試斷言。"
+    },
+    {
+      "id": "R-033",
+      "title": "證據與隱私",
+      "requirement": "候選具來源、條件、失敗／修正、驗證證據；秘密先遮罩；排除 learning/eval 自我回饋與 private scope。"
+    },
+    {
+      "id": "R-034",
+      "title": "評測整個工作",
+      "requirement": "Promptfoo 透過 Rocky TS provider 執行凍結 harness 與測試工具，不只評分最後回答文字。"
+    },
+    {
+      "id": "R-035",
+      "title": "防資料洩漏評測",
+      "requirement": "分 train／validation／final holdout，按 episode/project 分組；候選不能讀標準答案或改 evaluator；純文字自評不算能力證明。"
+    },
+    {
+      "id": "R-036",
+      "title": "精確版本發布",
+      "requirement": "核准 candidate hash／base revision／evaluation manifest；CAS 發布，修改即失效；可回滾與撤銷。"
+    },
+    {
+      "id": "R-037",
+      "title": "資源可控",
+      "requirement": "前景優先、背景有界、Learning 低優先；限制 model calls、tokens、wall time、工具輸出、候選數與磁碟。"
+    },
+    {
+      "id": "R-038",
+      "title": "持久化責任清楚",
+      "requirement": "graph checkpoint、domain DB、artifact files 不假裝同一 transaction；outbox、ledger、reconciliation 有故障注入測試。"
+    },
+    {
+      "id": "R-039",
+      "title": "新資料與舊專案隔離",
+      "requirement": "Rocky 使用全新 productId/schema/data namespace；不掃描、讀取、匯入或修改 Apsis／OpenDots 私有資料；一般 file/skill 明確匯入及 Rocky 自身備份另行定義。"
+    },
+    {
+      "id": "R-040",
+      "title": "Windows／Ubuntu",
+      "requirement": "核心與 Learning 必須兩平台通過；macOS／其他架構未測不可宣稱支援；不依賴 POSIX-only npm scripts。"
+    },
+    {
+      "id": "R-041",
+      "title": "小型 repository",
+      "requirement": "只追蹤 source／lockfiles／小型合成 fixtures；不提交 node_modules、data、模型、browsers、container images、eval 原始私有證據。"
+    },
+    {
+      "id": "R-042",
+      "title": "可查的進度與驗證",
+      "requirement": "每項任務有 AC、tests、evidence；pending/skipped/failed 不得寫成 done；fixture/live evidence 分開。"
+    },
+    {
+      "id": "R-043",
+      "title": "新 Repo 與安全交付",
+      "requirement": "Rocky 新建自己的 AGENTS／CONTRIBUTING／CI；不沿用參考 repo 的控制權限。首次 remote bootstrap 另需授權；之後 feature branch→PR→CI，不關保護、不擅自 merge/tag/deploy。"
+    },
+    {
+      "id": "R-044",
+      "title": "無昂貴基礎設施",
+      "requirement": "初版不要求 Redis、Postgres、K8s、遠端 worker、向量 DB、桌麵包裝或 OAuth broker。"
+    },
+    {
+      "id": "R-045",
+      "title": "排程可追蹤",
+      "requirement": "新建 timezone-aware routines；daemon 必須在線；missed runs 預設不補跑；PR follow-up 只透過已配置 MCP，涵蓋背景 context。"
+    },
+    {
+      "id": "R-046",
+      "title": "本地 UI 安全",
+      "requirement": "Loopback、Host/Origin/CSRF、分離 artifact 執行 origin、內容限制；不可將 API key 或持續管理 token 送入前端。"
+    },
+    {
+      "id": "R-047",
+      "title": "安裝能力分級",
+      "requirement": "Node 足以啟動核心及 Learning；browser binaries／container engine 是明示選配；缺少時 fail closed、不偷換 host 執行。"
+    },
+    {
+      "id": "R-048",
+      "title": "版本與預算非硬猜",
+      "requirement": "P0 固定一組可重現套件／Node patch；未知模型 context 必須配置或取得可信 profile，不假設全部 256K。"
+    },
+    {
+      "id": "R-049",
+      "title": "獨立新建",
+      "requirement": "Rocky 從新的目錄與獨立 Git root 開始；不得 rename/fork/snapshot 整個 Apsis 或 OpenDots 當骨架，不合併上游歷史、tags、branches。"
+    },
+    {
+      "id": "R-050",
+      "title": "參考而非相容義務",
+      "requirement": "只依 Rocky in-scope 需求驗收；不要求重做 Apsis 的全部功能、測試、格式或 importer；必要局部引用先記 decision/provenance/license，不把整個參考專案加為 dependency/submodule。"
+    },
+    {
+      "id": "R-051",
+      "title": "Rocky 一致命名",
+      "requirement": "產品名與 Repo 名 Rocky；package scopes 為 private @rocky/*、API /api/v1、CUSTOM events rocky.*、env ROCKY_*、MCP extension x-rocky、productId rocky；不加 apsis 相容別名或預設路徑。"
+    },
+    {
+      "id": "R-052",
+      "title": "新 Bot 視覺身份",
+      "requirement": "依 ROCKY_BOT_DESIGN_SPEC.md 新建 Rocky avatar、mark、tokens、空狀態與工具／工作介面；不繼承 Apsis/OpenDots 頭像、logo、截圖、CSS 換皮或 roster。"
+    },
+    {
+      "id": "R-053",
+      "title": "Presence 真實且可存取",
+      "requirement": "Rocky 的姿態由可驗證的 per-work 狀態推導；連線狀態與工作狀態分開；主對話閒置時仍標示背景數量；失聯不假定停止，核准不假定成功，支援 reduced motion／鍵盤／螢幕閱讀器。"
+    },
+    {
+      "id": "R-054",
+      "title": "人格不取代能力與權限",
+      "requirement": "Rocky 是溫暖直接的解題助手；不假裝電影中的真實角色、不頻繁角色扮演；persona 不能擴權、動態建立第二引擎、修改 evaluator/policy 或宣稱未驗證成功。"
+    },
+    {
+      "id": "R-055",
+      "title": "素材來源與獨立品牌",
+      "requirement": "程式與 Bot 素材分開記來源、作者、授權、hash、發布審核狀態；名稱/角色靈感不等於取得電影素材授權，不把未核實權利的素材列為 MIT/Apache。"
+    },
+    {
+      "id": "R-056",
+      "title": "不處分舊專案",
+      "requirement": "放棄 Apsis 代表停止以它為開發目標；本規格不授權刪除、封存、轉 private、rename 或修改 Apsis Repo／資料，亦不假設 Rocky 遠端已建立或名稱可用。"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T-001",
+      "phase": "P0",
+      "title": "Rocky 新 Repo 骨架與參考決策",
+      "dependsOn": [],
+      "deliverable": "確認目標為新 Rocky 目錄與獨立 Git root；建立本地骨架、AGENTS/CONTRIBUTING/SECURITY/Apache-2.0/新CI；read-only 參考 Apsis/OpenDots，產出 repository-manifest、reference-adoption、ADR-000；遠端建立／初次push另受授權。",
+      "acceptanceIds": [
+        "AT-59",
+        "AT-61",
+        "AT-69",
+        "AT-51",
+        "AT-52"
+      ],
+      "requirementIds": [
+        "R-004",
+        "R-042",
+        "R-043",
+        "R-049",
+        "R-050",
+        "R-051",
+        "R-055",
+        "R-056"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "本地 Rocky skeleton 可定位，未複製上游 .git/branches/tags/整份 app；若遠端尚未建立則記未建立，不阻擋本地開發。",
+        "reference-adoption 只列相關採用/改寫/不採用與來源理由；無保留全部Apsis功能的義務，也不改它的Repo/資料。",
+        "新工程規則與CI草稿屬Rocky；無權限的remote/bootstrap/保護設定記待辦，不偽稱已生效。"
+      ]
+    },
+    {
+      "id": "T-002",
+      "phase": "P0",
+      "title": "依賴與 Node-only spike",
+      "dependsOn": [
+        "T-001"
+      ],
+      "deliverable": "選定 Node 24.x patch、CopilotKit/AG-UI/Deep Agents/LangGraph/Promptfoo/MCP 相容組；固定 lockfile；Windows/Ubuntu 無 Python 安裝證據；驗證 SQLite native dependency。",
+      "acceptanceIds": [
+        "AT-01",
+        "AT-51"
+      ],
+      "requirementIds": [
+        "R-003",
+        "R-004",
+        "R-040",
+        "R-043",
+        "R-047",
+        "R-050",
+        "R-055"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "已鎖定可重現 dependency set 與 license inventory。",
+        "兩平台 no-Python install/build/fixture evidence 有紀錄；SQLite saver/native deps 的路徑已確認。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-003",
+      "phase": "P0",
+      "title": "本地垂直互動 spike",
+      "dependsOn": [
+        "T-002"
+      ],
+      "deliverable": "CopilotKit UI→本地 Work facade→Deep Agents 真 middleware→Node MCP fixture→tool renderer；核准與 subagent 事件；不使用 Intelligence。",
+      "acceptanceIds": [
+        "AT-02",
+        "AT-03",
+        "AT-13",
+        "AT-17",
+        "AT-54"
+      ],
+      "requirementIds": [
+        "R-001",
+        "R-002",
+        "R-006",
+        "R-007",
+        "R-008",
+        "R-014",
+        "R-016",
+        "R-022",
+        "R-023",
+        "R-038",
+        "R-044",
+        "R-049"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "最小 UI 真走 Deep Agents middleware 與受控 tool，沒有依賴 Intelligence。",
+        "能呈現原生 subagent 與一次真 interrupt/review 流程；可用中性 placeholder 驗證連線，但不可把它算正式Rocky視覺交付。",
+        "附本地可重現命令與evidence，未跑的平台／真端點明示。"
+      ]
+    },
+    {
+      "id": "T-004",
+      "phase": "P0",
+      "title": "網路與 Promptfoo provider spike",
+      "dependsOn": [
+        "T-002"
+      ],
+      "deliverable": "fixture provider 明確連線、custom TS eval provider、telemetry/update disable、suggestions/grader 路由；產出 egress manifest 與 optimize compatibility 決定。",
+      "acceptanceIds": [
+        "AT-03",
+        "AT-39",
+        "AT-55"
+      ],
+      "requirementIds": [
+        "R-001",
+        "R-022",
+        "R-023",
+        "R-033",
+        "R-034",
+        "R-035"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "Promptfoo custom TS provider 可運作，target/grader/generator 的 outbound destinations 有 trace。",
+        "optimize adapter 要麼證明可明確配置，要麼明確關閉；標準 Learning 路線不受阻。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-005",
+      "phase": "P1",
+      "title": "Contracts 與模組骨架",
+      "dependsOn": [
+        "T-003",
+        "T-004"
+      ],
+      "deliverable": "建立 Rocky schemas/IDs/errors、/api/v1、rocky.* events、ROCKY_* env、private @rocky/* workspaces；移入可用 spike，無Apsis相容alias或空殼模組。",
+      "acceptanceIds": [
+        "AT-54",
+        "AT-60"
+      ],
+      "requirementIds": [
+        "R-006",
+        "R-007",
+        "R-008",
+        "R-044",
+        "R-049",
+        "R-051"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "DTO/IPC/events/errors 有 Zod 或同等 schema 與 contract tests。",
+        "新增入口可建置啟動，沒有未做能力的空 package。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-006",
+      "phase": "P1",
+      "title": "Rocky 初始 Store／版本管理／單 writer",
+      "dependsOn": [
+        "T-005"
+      ],
+      "deliverable": "從空目錄建立 productId=rocky、初始 schemas、domain.sqlite、CAS/outbox/lock；checkpoint另存，未授權不探測上游store，不做跨產品importer。",
+      "acceptanceIds": [
+        "AT-19",
+        "AT-47",
+        "AT-57",
+        "AT-70"
+      ],
+      "requirementIds": [
+        "R-010",
+        "R-012",
+        "R-013",
+        "R-038",
+        "R-039",
+        "R-041",
+        "R-042",
+        "R-049",
+        "R-051",
+        "R-056"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "domain schema 有版本、CAS/outbox 與單 daemon lock。",
+        "本 task 的 DB transaction/recovery unit tests 通過；不提早標全部跨庫 crash cases 已通過。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-007",
+      "phase": "P1",
+      "title": "Model Registry 與 Network Client",
+      "dependsOn": [
+        "T-005"
+      ],
+      "deliverable": "model capability/explicit context/profile、server-only credential ref、proxy/CA/NO_PROXY、budget/usage；所有模型用途共用連線配置。",
+      "acceptanceIds": [
+        "AT-03",
+        "AT-22",
+        "AT-23",
+        "AT-24"
+      ],
+      "requirementIds": [
+        "R-001",
+        "R-022",
+        "R-023",
+        "R-028",
+        "R-037",
+        "R-040"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "configured provider 可 probe tools/stream，未知 context 不硬猜。",
+        "model credentials 不下放 UI；per-connection proxy/CA 行為可驗證。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-008",
+      "phase": "P1",
+      "title": "Operation Ledger 與 Policy",
+      "dependsOn": [
+        "T-006"
+      ],
+      "deliverable": "canonical intent/hash、可用授權、exact consent、target recheck、unknown reconciliation、audit redaction。",
+      "acceptanceIds": [
+        "AT-14",
+        "AT-15",
+        "AT-18"
+      ],
+      "requirementIds": [
+        "R-015",
+        "R-016",
+        "R-017",
+        "R-018",
+        "R-038"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "所有權由 server 解析，deny-first/fresh-approval/target hash 有測試。",
+        "dispatch 前後狀態持久化且能表示 unknown；remote retry 不繞 ledger。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-009",
+      "phase": "P1",
+      "title": "IPC 與 worker 生命週期",
+      "dependsOn": [
+        "T-006",
+        "T-007",
+        "T-008"
+      ],
+      "deliverable": "typed IPC、run capability、request correlation、bounded queues、abort/kill/process tree、daemon-owned jobs。",
+      "acceptanceIds": [
+        "AT-11",
+        "AT-12",
+        "AT-57"
+      ],
+      "requirementIds": [
+        "R-011",
+        "R-012",
+        "R-013",
+        "R-042"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "worker lifecycle 與 IPC correlation 可實際 roundtrip/cancel/exit。",
+        "UI detach 與 explicit stop 分離；內部 worker 不能直接 mutation domain DB。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-010",
+      "phase": "P2",
+      "title": "Work Service／冪等命令",
+      "dependsOn": [
+        "T-009"
+      ],
+      "deliverable": "main/background admission、request receipts、resource waits、fresh setting snapshots、bounded concurrency。",
+      "acceptanceIds": [
+        "AT-09",
+        "AT-10",
+        "AT-31",
+        "AT-45"
+      ],
+      "requirementIds": [
+        "R-005",
+        "R-009",
+        "R-010",
+        "R-027",
+        "R-031",
+        "R-037"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "main/background independent sessions 與冪等提交有整合測試。",
+        "resource waiter 不佔 model slot，snapshot config 不被其他工作修改。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-011",
+      "phase": "P2",
+      "title": "原生 Deep Agents adapter",
+      "dependsOn": [
+        "T-010"
+      ],
+      "deliverable": "全新公開 factory/middleware、native task/todos/context、guarded backend、native checkpointer；不先搬上游monkey patches，有必要的局部adapter須ADR與測試。",
+      "acceptanceIds": [
+        "AT-13",
+        "AT-17",
+        "AT-21",
+        "AT-54"
+      ],
+      "requirementIds": [
+        "R-006",
+        "R-007",
+        "R-008",
+        "R-014",
+        "R-016",
+        "R-038",
+        "R-044",
+        "R-048",
+        "R-049"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "原生 task/todos/context/checkpointer 在新工作路徑生效。",
+        "workspace/execute 沒有未守衛的 native tool bypass；necessary patch 有 ADR。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-012",
+      "phase": "P2",
+      "title": "Steering／interrupt／stop",
+      "dependsOn": [
+        "T-011"
+      ],
+      "deliverable": "exact target commands、durable receipts、approval resume mapping、無幽靈 user message、拒絕工具配對。",
+      "acceptanceIds": [
+        "AT-11",
+        "AT-14",
+        "AT-15",
+        "AT-17"
+      ],
+      "requirementIds": [
+        "R-008",
+        "R-011",
+        "R-015",
+        "R-016",
+        "R-017",
+        "R-038"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "approval resume/denial 的 tool pairing 正確。",
+        "stale stop/steer 得明確錯誤，received/applied/not_applied 不混淆。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-013",
+      "phase": "P2",
+      "title": "Outbox／inbox／復原",
+      "dependsOn": [
+        "T-010",
+        "T-011",
+        "T-012"
+      ],
+      "deliverable": "safe checkpoint/inbox barrier、completion message id、crash matrix、terminal retry 新工作、不確定副作用 block。",
+      "acceptanceIds": [
+        "AT-18",
+        "AT-19",
+        "AT-20",
+        "AT-57"
+      ],
+      "requirementIds": [
+        "R-009",
+        "R-010",
+        "R-012",
+        "R-013",
+        "R-018",
+        "R-038",
+        "R-042"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "fault injection 覆蓋 dispatch/result/checkpoint/outbox/inbox crash windows。",
+        "已送出未知效果不自動重播，完成訊息可去重補送。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-014",
+      "phase": "P3",
+      "title": "MCP Registry 與 config",
+      "dependsOn": [
+        "T-007",
+        "T-008",
+        "T-010"
+      ],
+      "deliverable": "建立 Rocky stdio/http discriminated config、x-rocky version 1、credential/config revision；首次 empty mcpServers，拒絕 x-apsis 等 foreign app extension，不提供舊config轉換器。",
+      "acceptanceIds": [
+        "AT-06",
+        "AT-07",
+        "AT-60"
+      ],
+      "requirementIds": [
+        "R-010",
+        "R-017",
+        "R-020",
+        "R-021",
+        "R-023",
+        "R-051"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "stdio/http config schema、atomic update、credential refs可測；x-rocky從version1開始。",
+        "foreign app extension明確拒絕，初始mcpServers為空；無Apsis converter、不掃描上游設定、不自動連線。",
+        "附實際tests/evidence與相關文件；未執行者明示。"
+      ]
+    },
+    {
+      "id": "T-015",
+      "phase": "P3",
+      "title": "MCP transport 與 Process Manager",
+      "dependsOn": [
+        "T-014"
+      ],
+      "deliverable": "官方 SDK client、stdio/HTTP factories、compat fixture、受控 env/cwd、退出與重連、工具表完整分頁。",
+      "acceptanceIds": [
+        "AT-04",
+        "AT-05",
+        "AT-06",
+        "AT-07"
+      ],
+      "requirementIds": [
+        "R-010",
+        "R-017",
+        "R-019",
+        "R-020",
+        "R-021",
+        "R-023"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "兩平台真 SDK+Node stdio fixture 與 HTTP fixture 往返成功。",
+        "斷線恢復只重新連線，程序/env/cwd 清理與工具完整分頁可驗證。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-016",
+      "phase": "P3",
+      "title": "MCP Tool Broker／按需探索",
+      "dependsOn": [
+        "T-015",
+        "T-011"
+      ],
+      "deliverable": "schema validation、namespace、annotations 不信任、structured/image 映射、resource/prompt only data、permissions。",
+      "acceptanceIds": [
+        "AT-08",
+        "AT-14",
+        "AT-22"
+      ],
+      "requirementIds": [
+        "R-015",
+        "R-016",
+        "R-021",
+        "R-022",
+        "R-028"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "schema、工具 alias、multimodal/structured results 全部走 Broker。",
+        "annotations、resource links、MCP prompts 不提升權限。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-017",
+      "phase": "P3",
+      "title": "Workspace／local tools／worktree",
+      "dependsOn": [
+        "T-008",
+        "T-010"
+      ],
+      "deliverable": "canonical path/junction、root-owned leases、target lock、atomic edits、local git worktree、受控 shell。",
+      "acceptanceIds": [
+        "AT-16",
+        "AT-31"
+      ],
+      "requirementIds": [
+        "R-009",
+        "R-017",
+        "R-027",
+        "R-037"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "canonical paths/Windows junction/new-vs-existing file races 有測試。",
+        "工作區租約與 worktree 不覆寫現有工作，cancel 清理 waiter。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-018",
+      "phase": "P4",
+      "title": "AG-UI adapter 與 replay",
+      "dependsOn": [
+        "T-012",
+        "T-013",
+        "T-016"
+      ],
+      "deliverable": "標準事件與 CUSTOM 領域事件、durable cursor、reconnect snapshot、transport detach 不 abort。",
+      "acceptanceIds": [
+        "AT-12",
+        "AT-13",
+        "AT-19"
+      ],
+      "requirementIds": [
+        "R-006",
+        "R-008",
+        "R-010",
+        "R-012",
+        "R-013",
+        "R-014",
+        "R-038"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "AG-UI adapter 使用所選 SDK schema；domain events 正式 CUSTOM 化。",
+        "event cursor/gap/snapshot/reconnect 有實際整合證據。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-019",
+      "phase": "P4",
+      "title": "Rocky 主對話與 Work Timeline",
+      "dependsOn": [
+        "T-018",
+        "T-037"
+      ],
+      "deliverable": "原創Rocky ChatShell/WorkCard/ApprovalCard/ArtifactCard；新角色與tokens、背景摘要、subagent/steering/stop、繁中英文；不保留舊48頭像/多Bot清單。",
+      "acceptanceIds": [
+        "AT-10",
+        "AT-11",
+        "AT-14",
+        "AT-49",
+        "AT-62",
+        "AT-68"
+      ],
+      "requirementIds": [
+        "R-005",
+        "R-009",
+        "R-011",
+        "R-013",
+        "R-014",
+        "R-015",
+        "R-016",
+        "R-037",
+        "R-039",
+        "R-051",
+        "R-052",
+        "R-053",
+        "R-055"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "使用真服務 fixtures 的 chat/background/subagent/approval 完整互動。",
+        "進度與結果非 mock-only，繁中英文與 keyboard/mobile behaviors 覆蓋。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-020",
+      "phase": "P4",
+      "title": "Artifacts／文件與安全 preview",
+      "dependsOn": [
+        "T-017",
+        "T-019"
+      ],
+      "deliverable": "immutable artifact manifest、download/preview、basic Markdown editor revision、file context references、來源連結。",
+      "acceptanceIds": [
+        "AT-26",
+        "AT-27"
+      ],
+      "requirementIds": [
+        "R-028",
+        "R-046"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "產物 bytes/hash/manifest 與下載對得上，文件修改 CAS。",
+        "不受信任 HTML preview 無主 origin 權限，沒有任意 host path endpoint。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-021",
+      "phase": "P4",
+      "title": "Settings／MCP／Network UI",
+      "dependsOn": [
+        "T-007",
+        "T-015",
+        "T-019"
+      ],
+      "deliverable": "Rocky 新onboarding、model/explicit-network設定、MCP diagnostics、redacted logs與未配置降級；無Apsis upgrade/import頁或憑證自動沿用。",
+      "acceptanceIds": [
+        "AT-24",
+        "AT-25",
+        "AT-58",
+        "AT-68"
+      ],
+      "requirementIds": [
+        "R-022",
+        "R-023",
+        "R-039",
+        "R-040",
+        "R-046",
+        "R-047",
+        "R-051",
+        "R-052"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "可完成 model/MCP 配置、測試、錯誤診斷與能力降級。",
+        "secrets 不出前端，mutation origin/auth 防護有證據。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-022",
+      "phase": "P5",
+      "title": "Computer adapter／environments",
+      "dependsOn": [
+        "T-017",
+        "T-021"
+      ],
+      "deliverable": "local native 與選配 isolated profiles、OpenBot minimal adapter、engine compatibility evidence、default no host fallback。",
+      "acceptanceIds": [
+        "AT-29",
+        "AT-30",
+        "AT-58"
+      ],
+      "requirementIds": [
+        "R-022",
+        "R-023",
+        "R-025",
+        "R-047"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "至少一個本機 engine 真實 smoke test 或明確 blocked，不聲稱 mock 即 production support。",
+        "Native／isolated 的能力與 enforcement level 如實顯示，service fail 不回退 host。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-023",
+      "phase": "P5",
+      "title": "Browser ownership／takeover UI",
+      "dependsOn": [
+        "T-019",
+        "T-022"
+      ],
+      "deliverable": "profile-scoped context、owner-only takeover、snapshot freshness、截圖帶時間戳、其他工作不受影響。",
+      "acceptanceIds": [
+        "AT-28",
+        "AT-30"
+      ],
+      "requirementIds": [
+        "R-023",
+        "R-024",
+        "R-025",
+        "R-026"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "雙 profile 隔離與單一接管不影響其他工作。",
+        "release 後舊 snapshot 被拒；preview 有 capture/stale 語意。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-024",
+      "phase": "P5",
+      "title": "Routines／MCP tracked work",
+      "dependsOn": [
+        "T-013",
+        "T-016",
+        "T-017"
+      ],
+      "deliverable": "timezone scheduler、dedupe/misfire、background-context PR/CI subscription、bounded follow-up、不自動 merge。",
+      "acceptanceIds": [
+        "AT-32",
+        "AT-33",
+        "AT-56"
+      ],
+      "requirementIds": [
+        "R-002",
+        "R-019",
+        "R-044",
+        "R-045"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "timezones/misfire/idempotent occurrence 有可控時鐘測試。",
+        "MCP fixture 的背景 context PR follow-up 可運作，無 dedicated connector bypass。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-025",
+      "phase": "P6",
+      "title": "Memory／Knowledge Registry",
+      "dependsOn": [
+        "T-006",
+        "T-019"
+      ],
+      "deliverable": "scopes/provenance/revision/locks、FTS、中英搜尋、刪除、user-managed memory；不加向量服務。",
+      "acceptanceIds": [
+        "AT-36",
+        "AT-46"
+      ],
+      "requirementIds": [
+        "R-029",
+        "R-033",
+        "R-036"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "Memory scope/revision/user-lock/刪除與中英搜尋整合完成。",
+        "不引入雲端或向量 DB；來源可追溯。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-026",
+      "phase": "P6",
+      "title": "Skill Registry／原生載入",
+      "dependsOn": [
+        "T-011",
+        "T-025"
+      ],
+      "deliverable": "SKILL.md metadata/index、global/project import trust、immutable packages、manifest hash、scope/capabilities、per-run catalog。",
+      "acceptanceIds": [
+        "AT-34",
+        "AT-35",
+        "AT-44"
+      ],
+      "requirementIds": [
+        "R-004",
+        "R-008",
+        "R-030",
+        "R-036"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "published/candidate scope 在 loader 層真正隔離。",
+        "原生 progressive load 與 run-frozen revisions 有實際記錄。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-027",
+      "phase": "P6",
+      "title": "Skill proposal／publish／rollback",
+      "dependsOn": [
+        "T-008",
+        "T-026"
+      ],
+      "deliverable": "candidate revisions、diff、evidence provenance、publish CAS、quarantine、security revoke；僅人可授權正式發布。",
+      "acceptanceIds": [
+        "AT-38",
+        "AT-43",
+        "AT-44"
+      ],
+      "requirementIds": [
+        "R-015",
+        "R-016",
+        "R-030",
+        "R-032",
+        "R-036"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "candidate/version/hash/Eval references 可儲存，publish/rollback CAS 有競爭測試。",
+        "publish/revoke 為 owner command，reflection 無權直接執行。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-028",
+      "phase": "P7",
+      "title": "Learning episode 與 consent",
+      "dependsOn": [
+        "T-013",
+        "T-025",
+        "T-027"
+      ],
+      "deliverable": "eligible episodes、去重/redaction、人工 opt-in、private/learning/eval exclusion、low priority queue。",
+      "acceptanceIds": [
+        "AT-37",
+        "AT-39",
+        "AT-45",
+        "AT-46"
+      ],
+      "requirementIds": [
+        "R-001",
+        "R-023",
+        "R-029",
+        "R-031",
+        "R-033",
+        "R-036",
+        "R-037"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "off/propose/manual consent、eligibility/dedupe/private exclusion 有實際測試。",
+        "episode 已遮罩、包含真實來源；反思/eval 不自我觸發迴圈。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-029",
+      "phase": "P7",
+      "title": "Learning Agent 候選生成",
+      "dependsOn": [
+        "T-028"
+      ],
+      "deliverable": "同 runtime 不同 capability；只讀 scope evidence＋proposal tools；structured candidate，局部 patch、preconditions、verification。",
+      "acceptanceIds": [
+        "AT-38",
+        "AT-39"
+      ],
+      "requirementIds": [
+        "R-001",
+        "R-015",
+        "R-016",
+        "R-023",
+        "R-032",
+        "R-033"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "受限 reflection 可以產出有效 candidate 或 no_learning。",
+        "負面測試證明 native tools/subagent/MCP 都不能寫 active registry。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-030",
+      "phase": "P7",
+      "title": "Promptfoo eval adapter",
+      "dependsOn": [
+        "T-004",
+        "T-016",
+        "T-026"
+      ],
+      "deliverable": "trusted TS provider 呼叫完整 Rocky eval run；typed data-only cases；scratch env、不帶私有帳號；report 本地保存。",
+      "acceptanceIds": [
+        "AT-01",
+        "AT-40",
+        "AT-41"
+      ],
+      "requirementIds": [
+        "R-003",
+        "R-032",
+        "R-034",
+        "R-035",
+        "R-040",
+        "R-047"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "Promptfoo provider 測完整 harness/tool/fixture state，不只最終文字。",
+        "trusted evaluator code/data-only cases 且無 Python；不在 host 偷跑生成程式。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-031",
+      "phase": "P7",
+      "title": "評測分割與發布 gate",
+      "dependsOn": [
+        "T-029",
+        "T-030"
+      ],
+      "deliverable": "train/validation/final holdout、baseline/current/candidate、hard failures、insufficient_evidence、max-candidates；optional optimize 受驗證閘門。",
+      "acceptanceIds": [
+        "AT-35",
+        "AT-39",
+        "AT-42",
+        "AT-55"
+      ],
+      "requirementIds": [
+        "R-001",
+        "R-008",
+        "R-023",
+        "R-030",
+        "R-033",
+        "R-034",
+        "R-035",
+        "R-036"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "比較組/splits/hard gates/insufficient evidence 實際生成報告。",
+        "candidate 改版使 eval 失效，final holdout 不被回饋生成器；optimize 不可用時正常降級。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-032",
+      "phase": "P7",
+      "title": "Learning Inbox 完整 UI",
+      "dependsOn": [
+        "T-019",
+        "T-027",
+        "T-031"
+      ],
+      "deliverable": "evidence/redacted excerpts、skill diff、actual eval metrics、edit→invalidate、approve exact hash、reject/quarantine/rollback。",
+      "acceptanceIds": [
+        "AT-37",
+        "AT-42",
+        "AT-43",
+        "AT-49"
+      ],
+      "requirementIds": [
+        "R-005",
+        "R-013",
+        "R-014",
+        "R-030",
+        "R-031",
+        "R-033",
+        "R-035",
+        "R-036",
+        "R-053"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "UI 可沿真 pipeline 查看證據/diff/results、approve exact hash、reject/quarantine/rollback。",
+        "未評測／失敗／資料不足狀態清楚，不能被 UI 覆寫 verdict。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-033",
+      "phase": "P8",
+      "title": "Rocky 資料隔離與自身備份還原",
+      "dependsOn": [
+        "T-013",
+        "T-020",
+        "T-024",
+        "T-025",
+        "T-032"
+      ],
+      "deliverable": "Rocky-only manifest/data root/backup/restore；foreign store rejection與negative fixtures；核對無Apsis/OpenDots importer、API aliases、上游程式執行依賴；建立 isolation-report。",
+      "acceptanceIds": [
+        "AT-47",
+        "AT-48",
+        "AT-54",
+        "AT-60",
+        "AT-61",
+        "AT-70"
+      ],
+      "requirementIds": [
+        "R-006",
+        "R-007",
+        "R-008",
+        "R-038",
+        "R-039",
+        "R-041",
+        "R-044",
+        "R-049",
+        "R-050",
+        "R-051",
+        "R-056"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "ROCKY_DATA_DIR 與預設root獨立；不讀APSIS_DATA_DIR，不掃描/匯入舊對話、cookies、keys或checkpoints。",
+        "Rocky備份manifest/hash/restore有實測；foreign product或未知非空root拒絕且不清空；一般明確skill/document匯入不作跨產品migration。",
+        "正常開機只走Rocky新實作；隔離測試使用合成資料，不碰真實Apsis檔案。"
+      ]
+    },
+    {
+      "id": "T-034",
+      "phase": "P8",
+      "title": "安裝與 packaging gates",
+      "dependsOn": [
+        "T-002",
+        "T-022",
+        "T-030",
+        "T-033"
+      ],
+      "deliverable": "npm command contract、doctor、no-python install matrix、size/SBOM/git guard、browser/container 明確 setup。",
+      "acceptanceIds": [
+        "AT-01",
+        "AT-50",
+        "AT-51",
+        "AT-58",
+        "AT-60",
+        "AT-67",
+        "AT-70"
+      ],
+      "requirementIds": [
+        "R-003",
+        "R-004",
+        "R-022",
+        "R-039",
+        "R-040",
+        "R-041",
+        "R-043",
+        "R-047",
+        "R-050",
+        "R-051",
+        "R-055",
+        "R-056"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "所有承諾 command 在兩平台存在且可運行，doctor 不更改全域環境。",
+        "package/git-size/no-python/SDK license gates 與明示選配 setup 完成。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-035",
+      "phase": "P8",
+      "title": "跨平台／安全／故障驗證",
+      "dependsOn": [
+        "T-023",
+        "T-032",
+        "T-033",
+        "T-034",
+        "T-038"
+      ],
+      "deliverable": "執行全部 AT、fault injection、network capture、UX a11y/performance；存機器與版本 manifest。",
+      "acceptanceIds": [
+        "AT-25",
+        "AT-30",
+        "AT-49",
+        "AT-52",
+        "AT-53",
+        "AT-57",
+        "AT-59",
+        "AT-60",
+        "AT-61",
+        "AT-62",
+        "AT-63",
+        "AT-64",
+        "AT-65",
+        "AT-66",
+        "AT-67",
+        "AT-68",
+        "AT-69",
+        "AT-70"
+      ],
+      "requirementIds": [
+        "R-004",
+        "R-005",
+        "R-012",
+        "R-013",
+        "R-014",
+        "R-016",
+        "R-023",
+        "R-025",
+        "R-037",
+        "R-039",
+        "R-041",
+        "R-042",
+        "R-046",
+        "R-049",
+        "R-050",
+        "R-051",
+        "R-052",
+        "R-053",
+        "R-054",
+        "R-055",
+        "R-056"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "全域 AT matrix 已逐項實際處理，fixture/live/not_run 狀態不混用。",
+        "平台/硬體/commit/lock hashes 與 security/recovery/UI reports 可追溯。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-036",
+      "phase": "P8",
+      "title": "Live 驗收與交付文件",
+      "dependsOn": [
+        "T-035"
+      ],
+      "deliverable": "使用明確授權的實際模型/MCP 完成 chat→work→artifact→skill→eval→review→reuse；記錄 missing credentials，不造假；readme雙語與release notes草稿。",
+      "acceptanceIds": [
+        "AT-03",
+        "AT-13",
+        "AT-40",
+        "AT-43",
+        "AT-52",
+        "AT-56",
+        "AT-59",
+        "AT-61",
+        "AT-67",
+        "AT-69"
+      ],
+      "requirementIds": [
+        "R-001",
+        "R-002",
+        "R-004",
+        "R-006",
+        "R-008",
+        "R-014",
+        "R-022",
+        "R-023",
+        "R-030",
+        "R-034",
+        "R-035",
+        "R-036",
+        "R-042",
+        "R-044",
+        "R-045",
+        "R-049",
+        "R-050",
+        "R-051",
+        "R-055",
+        "R-056"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "取得明確授權後才作 live 端點驗收；否則 task blockedReason 指出缺少項目。",
+        "雙語 readme/限制/發布說明草稿完成，未合併、tag 或部署；最終報告不隱藏未測事項。",
+        "附實際執行的 tests/evidence 與相關文件更新；未執行者明示，不以 placeholder 替代。"
+      ]
+    },
+    {
+      "id": "T-037",
+      "phase": "P1",
+      "title": "Rocky Bot 身份、視覺語言與素材基線",
+      "dependsOn": [
+        "T-005"
+      ],
+      "deliverable": "依 Bot Spec 建立 product identity、personaVersion、設計tokens、可編輯五向岩質角色avatar與抽象mark、light/dark及favicon；新onboarding文案；asset provenance與reference decision；不引入3D/Python。",
+      "acceptanceIds": [
+        "AT-62",
+        "AT-65",
+        "AT-66",
+        "AT-67",
+        "AT-68"
+      ],
+      "requirementIds": [
+        "R-004",
+        "R-016",
+        "R-039",
+        "R-051",
+        "R-052",
+        "R-053",
+        "R-054",
+        "R-055"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "原創角色/mark/tokens在24/32/48/96px及light/dark實際render；無上游頭像改色、電影圖或未授權擷取素材。",
+        "persona/name是表達設定、不改權限與Agent runtime；中文/英文範例與初始樣式可檢視；視覺基線不冒稱使用者已核准最終美術。",
+        "asset-manifest已記provenance/rights-status；已執行的視覺fixture/size檢查留證，未完成的發布權利審核不偽標passed。"
+      ]
+    },
+    {
+      "id": "T-038",
+      "phase": "P4",
+      "title": "Rocky Presence／人格／工作狀態整合",
+      "dependsOn": [
+        "T-019",
+        "T-037"
+      ],
+      "deliverable": "RockyAvatar/RockyPresence/PresenceAdapter＋背景counts與注意事項；connection/work state分離、stale/failure/approval/reduced-motion；persona保留同一個助手及安全邊界；fake clock與E2E。",
+      "acceptanceIds": [
+        "AT-63",
+        "AT-64",
+        "AT-65",
+        "AT-66",
+        "AT-69",
+        "AT-70"
+      ],
+      "requirementIds": [
+        "R-005",
+        "R-012",
+        "R-013",
+        "R-016",
+        "R-039",
+        "R-041",
+        "R-042",
+        "R-049",
+        "R-050",
+        "R-051",
+        "R-052",
+        "R-053",
+        "R-054",
+        "R-056"
+      ],
+      "status": "pending",
+      "evidence": [],
+      "blockedReason": null,
+      "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
+      "doneWhen": [
+        "以持久化Work/Run/Approval事件及連線freshness純函式推導presence，不新增互相競爭的工作狀態。",
+        "idle主對話＋背景工作、斷線、等待核准、取消、一次性完成回饋與重連事件去重均測試；失敗無完成動畫。",
+        "reduced-motion/hidden頁/keyboard/小尺寸/l10n與avatar bundle預算有報告；Learning「已提案/已發布」不能誤稱能力已提升。"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "AT-01",
+      "title": "空白機器 Node-only 安裝",
+      "requirementIds": [
+        "R-003",
+        "R-040",
+        "R-047"
+      ],
+      "passCondition": "Windows x64／Ubuntu x64 在 Python 不可用的驗證環境 npm ci、build、core tests、Learning fixture eval 成功；追蹤到 Python/uv/pip/node-gyp source fallback 即失敗。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-02",
+      "title": "無平台帳號啟動",
+      "requirementIds": [
+        "R-001",
+        "R-002",
+        "R-044"
+      ],
+      "passCondition": "未提供 Intelligence／Cloud 帳號可進設定頁，存本地文件，使用配置模型完成對話；狀態不以假回答代替。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-03",
+      "title": "明確連網正向測試",
+      "requirementIds": [
+        "R-001",
+        "R-022",
+        "R-023"
+      ],
+      "passCondition": "配置測試模型與 HTTP MCP 可連線；未配置網域、telemetry、grader fallback 無請求；報告列出實際 outbound destinations。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-04",
+      "title": "MCP stdio 真往返",
+      "requirementIds": [
+        "R-019",
+        "R-020"
+      ],
+      "passCondition": "Node fixture server 在兩平台可 start/list/call/cancel/stop；重啟診斷可恢復；無殘留程序。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-05",
+      "title": "MCP HTTP 真往返",
+      "requirementIds": [
+        "R-019",
+        "R-021"
+      ],
+      "passCondition": "本地 HTTP fixture 完成 SDK transport／協定相容測試；未知協定有清楚錯誤，不猜 API。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-06",
+      "title": "MCP env 與 secrets",
+      "requirementIds": [
+        "R-020",
+        "R-023"
+      ],
+      "passCondition": "server A 無法由 env 取得 B／model 的測試秘密；stderr、UI、events 與 report 不含 token；CWD 外資料不自動授權。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-07",
+      "title": "動態 schema／同名工具",
+      "requirementIds": [
+        "R-010",
+        "R-017",
+        "R-021"
+      ],
+      "passCondition": "兩個同名 tools 不衝突；schema/config revision 改變後舊核准失效；完整分頁可列完工具。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-08",
+      "title": "工具 annotations 不升權",
+      "requirementIds": [
+        "R-015",
+        "R-016",
+        "R-021"
+      ],
+      "passCondition": "偽造 readOnlyHint 的工具仍需伺服器 policy 決定；工具內容要求調高權限不生效。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-09",
+      "title": "冪等提交",
+      "requirementIds": [
+        "R-009",
+        "R-010"
+      ],
+      "passCondition": "同 requestId 重送只建立一個 Work；不同 payload 得 409；response 遺失後透過 receipt 恢復。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-10",
+      "title": "主對話與背景隔離",
+      "requirementIds": [
+        "R-005",
+        "R-009",
+        "R-037"
+      ],
+      "passCondition": "兩項獨立背景工作期間可聊天；message、model config、workspace、completion 不串線。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-11",
+      "title": "精確 stop/steer",
+      "requirementIds": [
+        "R-011"
+      ],
+      "passCondition": "過期 run/session 得 409；停止主對話不停止背景；steering receipt 可分 accepted/applied/not_applied。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-12",
+      "title": "斷線重連",
+      "requirementIds": [
+        "R-012",
+        "R-013"
+      ],
+      "passCondition": "UI 關閉工作繼續；Last-Event-ID 重連不重複文字、不漏已持久化事件；gap 正確取 snapshot。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-13",
+      "title": "原生 task 與計畫",
+      "requirementIds": [
+        "R-006",
+        "R-008",
+        "R-014"
+      ],
+      "passCondition": "使用真的 Deep Agents task/write_todos middleware 路徑及可控模型 fixture；UI 顯示各子代理事件，沒有平行 planner。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-14",
+      "title": "核准全路徑",
+      "requirementIds": [
+        "R-015",
+        "R-016"
+      ],
+      "passCondition": "foreground/background/subagent/schedule 都無法在 critical 未核准時執行；front-end forged approved 不有效。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-15",
+      "title": "核准指紋失效",
+      "requirementIds": [
+        "R-017"
+      ],
+      "passCondition": "核准後更換 args、file revision、policy、MCP endpoint 或 browser target，執行中止並產生新核准。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-16",
+      "title": "檔案 TOCTOU 與 junction",
+      "requirementIds": [
+        "R-017",
+        "R-027"
+      ],
+      "passCondition": "兩子代理同建檔不得都視為不存在；symlink/junction/traversal 越界被阻擋；外部程序 race 限制如實記錄。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-17",
+      "title": "graph interrupt 與配對",
+      "requirementIds": [
+        "R-008",
+        "R-016",
+        "R-038"
+      ],
+      "passCondition": "核准等待有 checkpoint；拒絕後 tool-call/result 有有效配對；re-entry 不執行已成功 ledger 操作。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-18",
+      "title": "副作用送出後 crash",
+      "requirementIds": [
+        "R-018",
+        "R-038"
+      ],
+      "passCondition": "fixture 遠端已收請求但本地無結果時 kill worker；重啟記 unknown，不再呼叫該寫入。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-19",
+      "title": "回報 crash window",
+      "requirementIds": [
+        "R-010",
+        "R-013",
+        "R-038"
+      ],
+      "passCondition": "Work 完成與 UI transcript 分批提交故障後，outbox 對帳最終恰有一筆可見完成訊息；重播事件不重送工具。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-20",
+      "title": "背景 inbox cursor",
+      "requirementIds": [
+        "R-009",
+        "R-038"
+      ],
+      "passCondition": "結果晚於主 run inbox snapshot 到達時留給下一回合；已有 checkpoint/歷史分頁也不遺失。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-21",
+      "title": "Compaction 保真",
+      "requirementIds": [
+        "R-008",
+        "R-048"
+      ],
+      "passCondition": "長工具輸出、三次壓縮、切小 context、摘要失敗均測試；保留目標/修正/todos/證據與有效 checkpoint。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-22",
+      "title": "來源與模型內容映射",
+      "requirementIds": [
+        "R-022",
+        "R-028"
+      ],
+      "passCondition": "text/image/structured MCP result 與 tool pairing 不被無條件 stringify；不支援 vision 的模型收到明確能力錯誤。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-23",
+      "title": "模型斷線與預算",
+      "requirementIds": [
+        "R-022",
+        "R-037"
+      ],
+      "passCondition": "429／timeout／partial streaming 後有明確狀態；不切未配置 provider；使用量含摘要/子代理/learning。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-24",
+      "title": "企業 proxy 與 TLS",
+      "requirementIds": [
+        "R-022",
+        "R-023",
+        "R-040"
+      ],
+      "passCondition": "每連線 proxy/NO_PROXY/CA 測試不修改全域 npm 設定；TLS 拒絕錯誤憑證，不設 rejectUnauthorized=false。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-25",
+      "title": "本地 API origin",
+      "requirementIds": [
+        "R-046"
+      ],
+      "passCondition": "跨站 Origin、錯誤 Host、CSRF mutation、未授權 network client 被拒；token 不出現在 URL/history/log。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-26",
+      "title": "Artifact 預覽隔離",
+      "requirementIds": [
+        "R-028",
+        "R-046"
+      ],
+      "passCondition": "HTML/JS artifact 無法讀主 UI cookies/storage/API；預覽預設禁外網；下載 bytes 與 manifest hash 相同。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-27",
+      "title": "文件 CAS",
+      "requirementIds": [
+        "R-028"
+      ],
+      "passCondition": "人與 agent 同時修改文件，stale expectedRevision 得 409 且保留草稿；沒有靜默最後寫入勝出。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-28",
+      "title": "Computer profiles",
+      "requirementIds": [
+        "R-024",
+        "R-026"
+      ],
+      "passCondition": "A/B profile cookies 與未授權檔案隔離；接管 A 不重建 B；交還後舊 snapshotId 的操作被拒。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-29",
+      "title": "Computer 故障不降級",
+      "requirementIds": [
+        "R-025",
+        "R-047"
+      ],
+      "passCondition": "container service 不可用時明確停用，不改用 host shell／host files。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-30",
+      "title": "環境／網路宣告真實",
+      "requirementIds": [
+        "R-023",
+        "R-025"
+      ],
+      "passCondition": "Native 顯示非 sandbox；isolated 標示的 egress 限制以 allow/deny 包括 DNS/redirect/private IP 實測，未驗證不得顯示 enforced。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-31",
+      "title": "工作區租約與 deadlock",
+      "requirementIds": [
+        "R-009",
+        "R-027",
+        "R-037"
+      ],
+      "passCondition": "重疊 workspace 等待不佔 execution slot；parent 不持鎖同步等待 durable child；native children 的 file locks 不死鎖。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-32",
+      "title": "Routine 時區與重啟",
+      "requirementIds": [
+        "R-045"
+      ],
+      "passCondition": "以假 clock 驗證 timezone/DST/missed run；停止 daemon 不聲稱仍在跑；同 schedule tick 不重複建立工作。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-33",
+      "title": "背景 PR follow-up",
+      "requirementIds": [
+        "R-019",
+        "R-045"
+      ],
+      "passCondition": "fixture MCP 登記的背景 PR 也被追蹤；事件 fingerprint 去重；不直接呼叫 GitHub／Azure 專屬 API。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-34",
+      "title": "技能匯入／版本",
+      "requirementIds": [
+        "R-004",
+        "R-030"
+      ],
+      "passCondition": "global/project 手動匯入不自動覆寫；來源/license/hash 可見；未信任 scripts 不執行。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-35",
+      "title": "技能原生載入",
+      "requirementIds": [
+        "R-008",
+        "R-030"
+      ],
+      "passCondition": "published catalog 按 scope 過濾；原生 progressive loading 記錄 revision；未載入不宣稱使用。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-36",
+      "title": "Memory scope/鎖定",
+      "requirementIds": [
+        "R-029"
+      ],
+      "passCondition": "不同專案與 private scope 不串資料；人工鎖定 memory 不被 agent 覆寫；FTS 中英搜尋與刪除更新生效。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-37",
+      "title": "Learning eligibility",
+      "requirementIds": [
+        "R-031",
+        "R-033"
+      ],
+      "passCondition": "off 不自動學習；propose 只對合格完成 episode 觸發；incognito、learning/eval 自己產出的 runs 排除。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-38",
+      "title": "Learning 權限負面測試",
+      "requirementIds": [
+        "R-015",
+        "R-016",
+        "R-032"
+      ],
+      "passCondition": "反思 agent 嘗試用內建 files/shell/MCP/公開 publish 修改 active skills／policy 均被拒；不是只有 prompt 禁止。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-39",
+      "title": "證據遮罩與 endpoint",
+      "requirementIds": [
+        "R-001",
+        "R-023",
+        "R-033"
+      ],
+      "passCondition": "秘密從外送 episode 移除；target/grader/generator endpoint 全部與設定吻合；模型不能讀 final holdout。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-40",
+      "title": "完整 agent 評測",
+      "requirementIds": [
+        "R-034",
+        "R-035"
+      ],
+      "passCondition": "candidate/no-skill/current 三組走相同 harness/模型/環境；檢查工具、檔案、測試結果，不只是回答包含成功。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-41",
+      "title": "Evaluator 不可注入",
+      "requirementIds": [
+        "R-032",
+        "R-035"
+      ],
+      "passCondition": "模型生成 JS/YAML hook／file provider 路徑不可載入執行；only application-trusted TS provider + data-only cases。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-42",
+      "title": "候選評測結論",
+      "requirementIds": [
+        "R-035",
+        "R-036"
+      ],
+      "passCondition": "無足夠資料顯示 insufficient_evidence；安全 hard-fail 阻擋 publish；validation 作選擇後 final holdout 未回饋給 generator。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-43",
+      "title": "技能 CAS 與回滾",
+      "requirementIds": [
+        "R-030",
+        "R-036"
+      ],
+      "passCondition": "同 base revision 兩候選只能一個發布；修改候選需重評；回滾指標原子更新，保留歷史。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-44",
+      "title": "生效版本凍結／撤銷",
+      "requirementIds": [
+        "R-030",
+        "R-036"
+      ],
+      "passCondition": "正常發布不漂移進行中 run；security revoke 阻擋新工具與新載入，保留已發生副作用證據。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-45",
+      "title": "學習資源預算",
+      "requirementIds": [
+        "R-031",
+        "R-037"
+      ],
+      "passCondition": "learning 優先序低、不饑餓前景；到達候選/calls/tokens/wall/disk 上限即停止並保存原因。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-46",
+      "title": "技能反學習與隱私刪除",
+      "requirementIds": [
+        "R-029",
+        "R-033",
+        "R-036"
+      ],
+      "passCondition": "刪除 episode 後標記衍生技能 affected；清理 indexes/caches/active references；不假稱遠端 provider 已刪除。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-47",
+      "title": "全新資料啟動／不探測舊專案",
+      "requirementIds": [
+        "R-039",
+        "R-049",
+        "R-056"
+      ],
+      "passCondition": "在帶 synthetic Apsis/OpenDots store、APSIS_DATA_DIR 與 browser cookies 的測試 home 啟動 Rocky；Rocky 不讀寫／列舉舊路徑，只建立自己空白資料；ROCKY_DATA_DIR 指向 foreign product manifest 或未知非空資料夾時拒絕，不轉換或清空。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-48",
+      "title": "Rocky 自身備份還原",
+      "requirementIds": [
+        "R-038",
+        "R-039"
+      ],
+      "passCondition": "停止或 quiesce 後完整 backup，還原至 Rocky 的新空目錄；productId、hash、schema、對話與 artifact 正確；外部未知動作與過期 grants 不回放，不涉及 Apsis importer。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-49",
+      "title": "語系／無障礙",
+      "requirementIds": [
+        "R-005",
+        "R-013",
+        "R-014",
+        "R-053"
+      ],
+      "passCondition": "繁中／英文、鍵盤、focus、reduced motion、320px mobile、scroll anchoring 通過；核准突出、細節折疊；Rocky avatar 與相邻文字不重複朗讀或以動畫單獨表示狀態。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-50",
+      "title": "安裝包與 Git guard",
+      "requirementIds": [
+        "R-003",
+        "R-041",
+        "R-047"
+      ],
+      "passCondition": "執行資料不入 tarball/git；新增大 blob gate 正常；小型合成 fixtures/lockfile 被保留。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-51",
+      "title": "供應鏈、引用與新 Repo CI",
+      "requirementIds": [
+        "R-004",
+        "R-043",
+        "R-050",
+        "R-055"
+      ],
+      "passCondition": "license/SBOM/secret/dependency scans 及原創/引用素材清單通過；複製的局部檔案有固定来源與原授權；新建 Rocky CI 且不得假稱繼承 Apsis ruleset，未授權不改遠端保護。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-52",
+      "title": "證據誠實性",
+      "requirementIds": [
+        "R-042"
+      ],
+      "passCondition": "每個完成任務有 test/evidence；未跑平台/live 不標 passed；live gate 缺少時不宣稱完成產品驗收。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-53",
+      "title": "受控資源與效能",
+      "requirementIds": [
+        "R-013",
+        "R-037"
+      ],
+      "passCondition": "在記錄的測試硬體量測 UI、event lag、startup、heap/disk；相對門檻與完整觀測記錄，不憑空聲稱快。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-54",
+      "title": "單一 Rocky 執行路徑",
+      "requirementIds": [
+        "R-006",
+        "R-007",
+        "R-008",
+        "R-044",
+        "R-049"
+      ],
+      "passCondition": "從乾淨 Rocky checkout 安裝建置只進入 Rocky Work→Deep Agents→Broker；無 Apsis/OpenDots app 依賴、旁邊 repo 路徑、第二 BuiltInAgent loop、legacy router 或空殼模組。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-55",
+      "title": "Promptfoo optimize 可選閘門",
+      "requirementIds": [
+        "R-023",
+        "R-034",
+        "R-035"
+      ],
+      "passCondition": "證明候選生成與 grader 明確配置且無預設 egress 後才開 optimize adapter；未通過仍以 Learning Agent + Promptfoo eval 完整運作。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-56",
+      "title": "無額外入站平台",
+      "requirementIds": [
+        "R-002",
+        "R-044",
+        "R-045"
+      ],
+      "passCondition": "無 Slack/voice/cloud channel 必要服務；MCP 是外部整合唯一產品通道；core 使用本地 daemon。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-57",
+      "title": "乾擾與冷啟動觀測",
+      "requirementIds": [
+        "R-012",
+        "R-013",
+        "R-042"
+      ],
+      "passCondition": "worker crash、disk full、DB busy、journal failure 有明確事件，不能顯示 completed；第二 daemon 無法同開同 data dir。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-58",
+      "title": "未配置能力的使用體驗",
+      "requirementIds": [
+        "R-022",
+        "R-047"
+      ],
+      "passCondition": "無 browser/container/model 時各自顯示 setup_required；其他本地功能不全站失效；不生成假工具結果。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-59",
+      "title": "新 Repo 身分與歷史",
+      "requirementIds": [
+        "R-049",
+        "R-056"
+      ],
+      "passCondition": "本地 Git root 為獨立 Rocky；第一批 commits 由新專案生成，不含 Apsis/OpenDots history/tags；remote 若已授權建立須記實際 ID/URL，未建立標未建立；不因此更動舊 repo。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-60",
+      "title": "命名與無相容別名",
+      "requirementIds": [
+        "R-051"
+      ],
+      "passCondition": "機器掃描所有 first-party runtime/config/storage/cookie/cache/event/package 名稱，使用 rocky/ROCKY_/@rocky 與 /api/v1；Apsis/OpenDots 只在明示 reference/notices/negative fixture 允許清單；無 inherited /api/v2,/api/v3 或 x-apsis adapter。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-61",
+      "title": "無上游依賴與 parity 義務",
+      "requirementIds": [
+        "R-049",
+        "R-050"
+      ],
+      "passCondition": "reference-adoption.md 對每個採用 pattern 說明理由/測試；package/scripts/CI 不 clone 或啟動 Apsis/OpenDots，不要求對上游全部功能 parity，也無舊資料 migration job。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-62",
+      "title": "新 Rocky 素材交付",
+      "requirementIds": [
+        "R-052",
+        "R-055"
+      ],
+      "passCondition": "已實作的主 avatar、單色 mark、favicon、light/dark 版本與可編輯 source 有 asset-manifest；無舊48-avatar或電影/參考 repo 圖片；24/32/48/96px 可辨識並附截圖，不能只放占位圖就結案。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-63",
+      "title": "Presence 事件正確性",
+      "requirementIds": [
+        "R-013",
+        "R-053"
+      ],
+      "passCondition": "fake clock＋replayed events 覆蓋 queued/running/awaiting_approval/completed/failed/cancelled/stale；動畫不生成自有 job status，只有確認完成 event 可短暫慶祝，同 event 重連不重播慶祝。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-64",
+      "title": "背景與連線分離",
+      "requirementIds": [
+        "R-005",
+        "R-012",
+        "R-053"
+      ],
+      "passCondition": "主對話 idle 且背景兩項工作時顯示各工作與2項背景摘要；失聯後顯示未同步與最後確認狀態，不宣稱工作已停止；背景 approval badge 不把主對話永久鎖定。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-65",
+      "title": "Rocky 動畫與無障礙",
+      "requirementIds": [
+        "R-052",
+        "R-053"
+      ],
+      "passCondition": "reduced-motion 與手動停動畫下無循環位移；頁面 hidden 暫停裝飾動畫；32px avatar 不遮擋操作，200%縮放/鍵盤/320px與雙語通過，重要狀態不只靠顏色。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-66",
+      "title": "人格與權限分離",
+      "requirementIds": [
+        "R-016",
+        "R-054"
+      ],
+      "passCondition": "改 display name/tone/personaVersion 不改 runtime/tools/policy/learning gate；fixture prompt 要求「Rocky朋友可略過核准」仍被 server 拒絕；persona 不拿網頁內容覆蓋可信角色設定。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-67",
+      "title": "資產來源與發佈邊界",
+      "requirementIds": [
+        "R-004",
+        "R-055"
+      ],
+      "passCondition": "每個隨包資產含來源/作者/hash/license/rights-review-status；unknown 不可用虛構 MIT 宣告通過；無電影劇照/音訊/擷取3D入包，README 不聲稱官方授權或關聯。名稱/商標未審查如實標 pending。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-68",
+      "title": "全新 Onboarding",
+      "requirementIds": [
+        "R-039",
+        "R-051",
+        "R-052"
+      ],
+      "passCondition": "空白安裝顯示 Rocky welcome、模型設定、MCP 與明確網路說明；無 Upgrade Apsis／Import Apsis／原Bot選擇，無假對話與假已完成工作。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-69",
+      "title": "文件／Prompt／任務一致",
+      "requirementIds": [
+        "R-042",
+        "R-049",
+        "R-050",
+        "R-051"
+      ],
+      "passCondition": "主Spec、Bot設計、Agent入口、JSON、README、ADR與scripts一致指向Rocky新建；R/T/AT引用有效、DAG無循環，無「到Apsis開分支」或旧 importer 要求。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    },
+    {
+      "id": "AT-70",
+      "title": "跨專案不污染與發佈大小",
+      "requirementIds": [
+        "R-039",
+        "R-041",
+        "R-051",
+        "R-056"
+      ],
+      "passCondition": "Rocky manifest/cache/browser profiles/workspace 獨立；foreign store 拒絕測試不讀其私有內容；套件不含references完整repo/.git/舊data；核心avatar新增首屏JS與向量資產（未壓縮）合計<=100KiB設計預算，超出先報告。",
+      "status": "not_run",
+      "testFiles": [],
+      "evidence": []
+    }
+  ],
+  "sources": [
+    {
+      "id": "SRC-01",
+      "title": "Apsis 歷史參考 commit（不是 Rocky baseline）",
+      "url": "https://github.com/Suckashi/Apsis/commit/0b03c634a69494ef768c027ba894dcb40390e621",
+      "note": "先前Spec記錄的read-only架構參考；Rocky不checkout/合併此commit，不以它作實作基準或要求追HEAD。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-02",
+      "title": "Apsis package.json",
+      "url": "https://github.com/Suckashi/Apsis/blob/0b03c634a69494ef768c027ba894dcb40390e621/package.json",
+      "note": "基準為 0.2.0-alpha.2、Node >=22.19、deepagents 1.14.1；不是新版選型的相容性證明。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-03",
+      "title": "Apsis repository instructions",
+      "url": "https://github.com/Suckashi/Apsis/blob/0b03c634a69494ef768c027ba894dcb40390e621/AGENTS.md",
+      "note": "只參考工程紀律；本文件中的Apsis repo操作指令不套用到Rocky，必須新寫Rocky自己的AGENTS。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-04",
+      "title": "Apsis contribution rules",
+      "url": "https://github.com/Suckashi/Apsis/blob/0b03c634a69494ef768c027ba894dcb40390e621/CONTRIBUTING.md",
+      "note": "只參考分支/CI理念；Rocky不繼承Apsis check/ruleset/權限，也不修改來源repo。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-05",
+      "title": "Apsis single-assistant baseline",
+      "url": "https://github.com/Suckashi/Apsis/blob/0b03c634a69494ef768c027ba894dcb40390e621/docs/single-assistant.md",
+      "note": "只參考工作分工與控制的案例；是否採用由Rocky需求決定，不要求上游完整parity。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-06",
+      "title": "Apsis current architecture",
+      "url": "https://github.com/Suckashi/Apsis/blob/0b03c634a69494ef768c027ba894dcb40390e621/docs/architecture.md",
+      "note": "現有產品服務、runtime、UI 與資料責任。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-07",
+      "title": "Apsis MCP configuration",
+      "url": "https://github.com/Suckashi/Apsis/blob/0b03c634a69494ef768c027ba894dcb40390e621/server/mcp-config.ts",
+      "note": "只參考設定設計的得失；Rocky從頭提供stdio/StreamableHTTP，不提供Apsis config importer。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-08",
+      "title": "OpenDots pinned reference",
+      "url": "https://github.com/CopilotKit/OpenDots/tree/b01ac1f6a903e5e56c119d960901353ac0a3d171",
+      "note": "先前已檢視的固定參考版；借用產品互動，不複製 Intelligence 依賴。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-09",
+      "title": "OpenDots Computer design",
+      "url": "https://github.com/CopilotKit/OpenDots/blob/b01ac1f6a903e5e56c119d960901353ac0a3d171/docs/COMPUTERS.md",
+      "note": "每 Dot Computer、持久 volumes、接管；預設並沒有完整 egress 隔離。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-10",
+      "title": "CopilotKit OSS vs Intelligence",
+      "url": "https://docs.copilotkit.ai/concepts/oss-vs-enterprise",
+      "note": "OSS SDK／Runtime 可配應用自管 persistence；不要將 Intelligence 視為 MIT 後端。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-11",
+      "title": "CopilotKit telemetry",
+      "url": "https://docs.copilotkit.ai/telemetry",
+      "note": "COPILOTKIT_TELEMETRY_DISABLED=true；仍需實測所有程序與瀏覽器連線。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-12",
+      "title": "AG-UI events",
+      "url": "https://docs.ag-ui.com/concepts/events",
+      "note": "使用標準訊息／工具／狀態事件；自訂領域訊息需透過正式 CUSTOM 擴充。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-13",
+      "title": "Deep Agents JavaScript",
+      "url": "https://github.com/langchain-ai/deepagentsjs",
+      "note": "採 JavaScript／TypeScript harness；固定套件版後驗證原生 planning、subagents、backend、streaming。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-14",
+      "title": "Deep Agents customization",
+      "url": "https://docs.langchain.com/oss/javascript/deepagents/customization",
+      "note": "只使用公開擴充點；不得混用 Python 範例或假設最新版 API 等於基準安裝版。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-15",
+      "title": "Deep Agents skills",
+      "url": "https://docs.langchain.com/oss/javascript/deepagents/skills",
+      "note": "原生技能支援作為優先整合點；應用仍負責核准、版本與發佈。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-16",
+      "title": "Deep Agents human-in-the-loop",
+      "url": "https://docs.langchain.com/oss/javascript/deepagents/human-in-the-loop",
+      "note": "原生 interrupt 與 checkpointer 能力；不等於遠端副作用 exactly-once。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-17",
+      "title": "LangGraph interrupts",
+      "url": "https://docs.langchain.com/oss/javascript/langgraph/interrupts",
+      "note": "恢復語意與節點重入必須測試；任何副作用不可只依賴 graph 自動保證。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-18",
+      "title": "LangGraph checkpointers",
+      "url": "https://docs.langchain.com/oss/javascript/langgraph/checkpointers",
+      "note": "SqliteSaver 與 BaseCheckpointSaver；原生 persistence 不能取代產品 ledger。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-19",
+      "title": "MCP TypeScript SDK",
+      "url": "https://github.com/modelcontextprotocol/typescript-sdk",
+      "note": "依鎖定版公開型別驗證client/stdio/HTTP；本文不保證目前main、v1/v2 API或發布狀態，P0核對。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-20",
+      "title": "MCP tools specification",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "note": "annotations 不可直接信任；工具具命名衝突、分頁、structured content 與 schema 邊界。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-21",
+      "title": "OpenClaw Skill Workshop",
+      "url": "https://docs.openclaw.ai/tools/skill-workshop",
+      "note": "上版列出的治理參考入口，這次未重驗可用性；若失效或API不符，依本Spec實作本地proposal/review，不以虛構SDK或參考網站可用性阻擋開發。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-22",
+      "title": "OpenClaw self-learning settings",
+      "url": "https://docs.openclaw.ai/tools/skill-workshop/configuration",
+      "note": "上版列出的治理參考入口，這次未重驗可用性；若失效或API不符，依本Spec實作本地proposal/review，不以虛構SDK或參考網站可用性阻擋開發。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-23",
+      "title": "OpenClaw proposal boundaries",
+      "url": "https://docs.openclaw.ai/tools/skill-workshop/proposals",
+      "note": "上版列出的治理參考入口，這次未重驗可用性；若失效或API不符，依本Spec實作本地proposal/review，不以虛構SDK或參考網站可用性阻擋開發。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-24",
+      "title": "Promptfoo license",
+      "url": "https://github.com/promptfoo/promptfoo/blob/main/LICENSE",
+      "note": "根目錄 MIT；實際安裝版本、轉依賴與引用檔案仍要個別稽核。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-25",
+      "title": "Promptfoo custom JavaScript providers",
+      "url": "https://www.promptfoo.dev/docs/providers/custom-api/",
+      "note": "可用 JS／TS provider 呼叫 Rocky 的整個評測 execution path。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-26",
+      "title": "Promptfoo prompt optimization",
+      "url": "https://www.promptfoo.dev/docs/usage/prompt-optimization/",
+      "note": "一次優化一個 prompt/provider；suggestions provider 與 target 不一定相同。validation split 不是最終未碰過的 test set。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-27",
+      "title": "Promptfoo telemetry and update checks",
+      "url": "https://www.promptfoo.dev/docs/configuration/telemetry/",
+      "note": "PROMPTFOO_DISABLE_TELEMETRY=1、PROMPTFOO_DISABLE_UPDATE=1。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-28",
+      "title": "Node.js releases",
+      "url": "https://nodejs.org/en/about/previous-releases",
+      "note": "本次查詢 Node 24 為 LTS；新版鎖定 24.x 的已驗證 patch，而非追最新 major。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-29",
+      "title": "GitHub file/repository size guidance",
+      "url": "https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github",
+      "note": "GitHub 對 >50 MiB 檔案警告，>100 MiB 阻擋；本 Spec 另設更保守的專案門檻。",
+      "verificationStatus": "inherited_reference_not_revalidated_in_this_revision"
+    },
+    {
+      "id": "SRC-30",
+      "title": "Rocky 角色靈感：作者 Andy Weir 訪談",
+      "url": "https://www.sciencefriday.com/segments/project-hail-mary-rocky-the-alien/",
+      "note": "本次讀取作者訪談：角色有五條具關節的肢體；只供創作靈感，不提供電影美術授權，不支援任何產品能力聲明。",
+      "verificationStatus": "web_search_result_read_2026-10-02"
+    },
+    {
+      "id": "SRC-31",
+      "title": "Project Hail Mary 官方 Rocky 內容",
+      "url": "https://www.primevideo.com/detail/0T3LEGW88E9VO91F05RU1FRUQE",
+      "note": "官方內容確認Rocky與Project Hail Mary的關聯；不複製音訊/片段/劇照進產品，不因引用即視為素材授權。",
+      "verificationStatus": "web_search_result_read_2026-10-02"
+    }
+  ],
+  "evidenceRecordSchema": {
+    "commit": "string",
+    "platform": "string",
+    "nodeVersion": "string",
+    "lockfileHash": "string",
+    "mode": "static|fixture|live",
+    "command": "string",
+    "exitCode": "integer|null",
+    "reportPath": "string",
+    "testFiles": "string[]",
+    "limitations": "string[]"
+  },
+  "designSpecFile": "ROCKY_BOT_DESIGN_SPEC.md",
+  "supersedes": {
+    "document": "Apsis 2.0 Rebuild Spec",
+    "version": "1.0.0",
+    "scope": "取代舊重構計畫；不是 Rocky 產品版本、release 或現有實作聲明"
+  },
+  "targetRepository": {
+    "name": "Rocky",
+    "ownerCandidate": "Suckashi",
+    "remoteUrl": null,
+    "remoteStatus": "not_created_or_verified_by_this_spec",
+    "visibility": null,
+    "creationRequiresSeparateAuthorization": true,
+    "implementationCommit": null,
+    "strategy": "greenfield_no_fork_no_imported_git_history"
+  },
+  "referenceRepositories": [
+    {
+      "name": "Suckashi/Apsis",
+      "referenceCommit": "0b03c634a69494ef768c027ba894dcb40390e621",
+      "role": "read-only architectural and behavior reference; not implementation baseline"
+    },
+    {
+      "name": "CopilotKit/OpenDots",
+      "referenceCommit": "b01ac1f6a903e5e56c119d960901353ac0a3d171",
+      "role": "read-only interaction and computer reference; not product scaffold"
+    }
+  ]
+}

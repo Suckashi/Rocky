@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+.rocky*/
+.playwright/
+test-results/
+playwright-report/
+.env
+.env.*
+!.env.example
+runtime-data/
+private-eval-data/
+learning-runs/
+*.log
+*.sqlite
+*.sqlite-*
