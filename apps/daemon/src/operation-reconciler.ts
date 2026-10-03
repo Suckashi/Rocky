@@ -4,11 +4,10 @@ import { Store } from "./store.js";
 import { OperationLedger } from "./operation-ledger.js";
 import { intentHash } from "./intent.js";
 import { RockyError } from "../../../packages/contracts/src/index.js";
-const commandSchema = z.strictObject({
-  requestId: z.uuid(),
-  operationId: z.string().min(1).max(300),
-  expectedRevision: z.number().int().positive(),
-});
+import {
+  reconciliationCommandSchema as commandSchema,
+  reconciliationReceiptSchema,
+} from "../../../packages/contracts/src/operations.js";
 const observationSchema = z
   .strictObject({
     operationId: z.string(),
@@ -46,7 +45,7 @@ export class OperationReconciler {
           "Reconciliation request changed",
           409,
         );
-      return JSON.parse(prior.data);
+      return reconciliationReceiptSchema.parse(JSON.parse(prior.data));
     }
     const work = this.store.get(workId),
       ledger = new OperationLedger(this.store),
@@ -94,7 +93,7 @@ export class OperationReconciler {
       current.executionSessionId !== work.executionSessionId
     )
       throw new RockyError("operation_owner", "Operation owner changed", 409);
-    const receipt = {
+    const receipt = reconciliationReceiptSchema.parse({
       id: randomUUID(),
       requestId: command.requestId,
       operationId: operation.id,
@@ -103,7 +102,7 @@ export class OperationReconciler {
       observedAt: observation.observedAt,
       observationHash: intentHash(observation),
       operationRevision: operation.revision + 1,
-    };
+    });
     return this.store.transaction(() => {
       const change = this.store.db
         .prepare(

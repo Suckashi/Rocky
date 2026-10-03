@@ -19,6 +19,8 @@ import { ModelBudgetLedger } from "./model-budget.js";
 import { intentHash } from "./intent.js";
 import { OperationLedger } from "./operation-ledger.js";
 import { authorizeOperation } from "./policy.js";
+import { OperationReconciler } from "./operation-reconciler.js";
+import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
@@ -42,6 +44,8 @@ export class WorkService {
   readonly events = new EventEmitter();
   private active = new Map<string, Active>();
   private stopping = false;
+  private readonly reconciliationAbort = new AbortController();
+  private readonly reconciliations = new Set<Promise<unknown>>();
   private deliveryTimer: ReturnType<typeof setInterval>;
   deliveryError: string | null = null;
   constructor(root: string) {
@@ -78,6 +82,55 @@ export class WorkService {
       saver?.db.close();
       this.store.close();
       throw error;
+    }
+  }
+  async reconcileOperation(
+    workId: string,
+    input: unknown,
+    signal: AbortSignal,
+  ) {
+    if (this.stopping)
+      throw new RockyError("stopping", "Daemon is stopping", 503);
+    const work = this.store.get(workId);
+    const pending = new OperationReconciler(this.store).reconcile(
+      workId,
+      input,
+      async (id, querySignal) => {
+        const operation = this.operations.get(id)!;
+        const context = JSON.parse(operation.context!);
+        if (context.name !== "write_sample")
+          throw new RockyError(
+            "reconciliation_unsupported",
+            "No status adapter for this operation",
+            409,
+          );
+        const connection = await connectFixture(
+          work.transport,
+          join(this.store.root, "synthetic-receipts", work.runId),
+        );
+        try {
+          return await observeFixtureOperation(
+            connection,
+            operation,
+            querySignal,
+          );
+        } finally {
+          await connection.close();
+        }
+      },
+      AbortSignal.any([
+        signal,
+        this.reconciliationAbort.signal,
+        AbortSignal.timeout(15000),
+      ]),
+    );
+    this.reconciliations.add(pending);
+    try {
+      const receipt = await pending;
+      this.flushOutbox();
+      return receipt;
+    } finally {
+      this.reconciliations.delete(pending);
     }
   }
   private flushOutbox() {
@@ -175,7 +228,10 @@ export class WorkService {
     const cleanup: Array<() => Promise<void>> = [];
     let handedOff = false;
     try {
-      const connection = await connectFixture(work.transport);
+      const connection = await connectFixture(
+        work.transport,
+        join(this.store.root, "synthetic-receipts", work.runId),
+      );
       cleanup.push(() => connection.close());
       if (abort.signal.aborted) {
         return;
@@ -355,7 +411,16 @@ export class WorkService {
             this.flushOutbox();
             try {
               const result = await connection.client.callTool(
-                { name, arguments: args },
+                {
+                  name,
+                  arguments: args,
+                  _meta: {
+                    "rocky/operation": {
+                      operationId: operation.id,
+                      intentHash: operation.args_hash,
+                    },
+                  },
+                },
                 undefined,
                 { signal: abort.signal, timeout: 10000 },
               );
@@ -677,6 +742,8 @@ export class WorkService {
   async close() {
     this.stopping = true;
     clearInterval(this.deliveryTimer);
+    this.reconciliationAbort.abort();
+    await Promise.allSettled([...this.reconciliations]);
     for (const work of this.store.list())
       if (["queued", "running", "waiting_approval"].includes(work.status))
         this.cancelWork(work.id);

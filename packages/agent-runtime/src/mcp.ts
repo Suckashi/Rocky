@@ -4,9 +4,13 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { fileURLToPath } from "node:url";
 import { startHttpFixture } from "../../../fixtures/mcp/server.js";
 import { allowFixtureEndpoint } from "./evaluation-egress.js";
-export async function connectFixture(kind: "stdio" | "http") {
+export async function connectFixture(
+  kind: "stdio" | "http",
+  receiptRoot?: string,
+) {
   const client = new Client({ name: "rocky-fixture-client", version: "1.0.0" });
-  const http = kind === "http" ? await startHttpFixture() : undefined;
+  const http =
+    kind === "http" ? await startHttpFixture(receiptRoot) : undefined;
   const revoke = http ? allowFixtureEndpoint(http.url.href) : () => {};
   const source = import.meta.url.endsWith(".ts");
   const transport = http
@@ -22,11 +26,14 @@ export async function connectFixture(kind: "stdio" | "http") {
             ),
           ),
         ],
-        env: Object.fromEntries(
-          ["PATH", "SystemRoot", "TEMP", "TMP"].flatMap((k) =>
-            process.env[k] ? [[k, process.env[k]!]] : [],
+        env: {
+          ...(receiptRoot ? { ROCKY_FIXTURE_RECEIPTS: receiptRoot } : {}),
+          ...Object.fromEntries(
+            ["PATH", "SystemRoot", "TEMP", "TMP"].flatMap((k) =>
+              process.env[k] ? [[k, process.env[k]!]] : [],
+            ),
           ),
-        ),
+        },
         stderr: "pipe",
       });
   try {

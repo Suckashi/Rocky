@@ -1,14 +1,55 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import {
+  McpServer,
+  ResourceTemplate,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
 import { z } from "zod";
-export function fixtureServer() {
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { createHash, randomUUID } from "node:crypto";
+const receiptMeta = z.strictObject({
+  operationId: z.string().min(1).max(300),
+  intentHash: z.string().regex(/^[a-f0-9]{64}$/),
+});
+export function fixtureServer(receiptRoot?: string) {
+  if (receiptRoot) mkdirSync(receiptRoot, { recursive: true });
   const server = new McpServer({
     name: "rocky-synthetic-tools",
     version: "1.0.0",
   });
+  server.registerResource(
+    "operation-receipt",
+    new ResourceTemplate("rocky-fixture://receipts/{key}", { list: undefined }),
+    {},
+    async (uri, variables) => {
+      const key = z
+        .string()
+        .regex(/^[a-f0-9]{64}$/)
+        .parse(variables.key);
+      let receipt: unknown = null;
+      if (receiptRoot) {
+        try {
+          receipt = JSON.parse(
+            readFileSync(join(receiptRoot, key + ".json"), "utf8"),
+          );
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+        }
+      }
+      return {
+        contents: [
+          {
+            uri: uri.href,
+            mimeType: "application/json",
+            text: JSON.stringify({ receipt }),
+          },
+        ],
+      };
+    },
+  );
   server.registerTool(
     "inspect_sample",
     {
@@ -30,25 +71,44 @@ export function fixtureServer() {
       description: "Synthetic external write; requires exact owner approval",
       inputSchema: { value: z.string() },
     },
-    async ({ value }) => ({
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify({ saved: value, effect: "synthetic-only" }),
-        },
-      ],
-    }),
+    async ({ value }, extra) => {
+      const result = {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify({ saved: value, effect: "synthetic-only" }),
+          },
+        ],
+      };
+      if (receiptRoot) {
+        const meta = receiptMeta.parse(extra._meta?.["rocky/operation"]);
+        const key = createHash("sha256").update(meta.operationId).digest("hex");
+        // The exclusive durable receipt IS this fixture's synthetic effect.
+        // A duplicate dispatch fails instead of overwriting or replaying it.
+        writeFileSync(
+          join(receiptRoot, key + ".json"),
+          JSON.stringify({
+            ...meta,
+            result: JSON.stringify(result),
+            evidenceRef: randomUUID(),
+            observedAt: new Date().toISOString(),
+          }),
+          { flag: "wx", flush: true },
+        );
+      }
+      return result;
+    },
   );
   return server;
 }
-export async function startHttpFixture() {
+export async function startHttpFixture(receiptRoot?: string) {
   const active = new Set<StreamableHTTPServerTransport>();
   const http = createServer(async (req, res) => {
     if (req.url !== "/mcp" || req.method !== "POST") {
       res.writeHead(404).end();
       return;
     }
-    const server = fixtureServer();
+    const server = fixtureServer(receiptRoot);
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
@@ -82,5 +142,7 @@ if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
-  await fixtureServer().connect(new StdioServerTransport());
+  await fixtureServer(process.env.ROCKY_FIXTURE_RECEIPTS).connect(
+    new StdioServerTransport(),
+  );
 }

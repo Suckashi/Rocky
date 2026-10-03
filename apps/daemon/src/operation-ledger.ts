@@ -5,6 +5,8 @@ import {
   type Work,
 } from "../../../packages/contracts/src/index.js";
 
+import { operationSummarySchema } from "../../../packages/contracts/src/operations.js";
+
 type Operation = {
   id: string;
   args_hash: string;
@@ -48,6 +50,26 @@ export class OperationLedger {
       }
       after();
       return pending.length;
+    });
+  }
+  list(workId: string) {
+    const work = this.store.get(workId);
+    const rows = this.store.db
+      .prepare(
+        "SELECT * FROM operations WHERE json_extract(context,'$.workId')=? AND json_extract(context,'$.runId')=? AND json_extract(context,'$.executionSessionId')=? ORDER BY rowid",
+      )
+      .all(work.id, work.runId, work.executionSessionId) as Operation[];
+    return rows.map((row) => {
+      const context = JSON.parse(row.context!);
+      return operationSummarySchema.parse({
+        id: row.id,
+        revision: row.revision,
+        tool: context.name,
+        phase: row.phase,
+        outcome: row.outcome,
+        canReconcile:
+          row.outcome === "unknown" && context.name === "write_sample",
+      });
     });
   }
   get(id: string): Operation | undefined {

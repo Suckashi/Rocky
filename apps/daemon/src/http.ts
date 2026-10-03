@@ -162,6 +162,18 @@ export function createApp(service: WorkService) {
     }),
   );
   app.get("/api/v1/works", (c) => c.json({ works: service.store.list() }));
+  app.get("/api/v1/works/:id/operations", (c) =>
+    c.json({ operations: service.operations.list(c.req.param("id")) }),
+  );
+  app.post("/api/v1/works/:id/reconcile", async (c) =>
+    c.json(
+      await service.reconcileOperation(
+        c.req.param("id"),
+        await readJson(c),
+        c.req.raw.signal,
+      ),
+    ),
+  );
   app.get("/api/v1/works/:id/grants", (c) => {
     const work = service.store.get(c.req.param("id"));
     return c.json({ grants: service.grants.list(work.id) });
