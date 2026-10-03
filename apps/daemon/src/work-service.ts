@@ -319,8 +319,29 @@ export class WorkService {
       const fixtureModel =
         work.mode === "fixture" ? await startModelFixture() : undefined;
       if (fixtureModel) modelCleanup.push(() => fixtureModel.close());
+      let streamRequestId = "",
+        pendingText = "";
+      let streamTimer: NodeJS.Timeout | undefined;
+      let streamProjectionError: unknown;
+      let redactStream = this.models.streamRedactor();
+      const flushStream = (final = false) => {
+        clearTimeout(streamTimer);
+        streamTimer = undefined;
+        const text = redactStream(pendingText, final);
+        pendingText = "";
+        const current = this.store.get(work.id);
+        if (abort.signal.aborted || current.status !== "running") return;
+        for (let offset = 0; offset < text.length; offset += 8192)
+          this.emit(current, "rocky.model.stream", {
+            requestId: streamRequestId,
+            phase: "delta",
+            delta: text.slice(offset, offset + 8192),
+          });
+      };
       const model = {
         close: async () => {
+          clearTimeout(streamTimer);
+          pendingText = "";
           await Promise.all(modelCleanup.map((close) => close()));
         },
       };
@@ -337,6 +358,51 @@ export class WorkService {
                 selection.connectionId,
                 selection.revision,
                 {
+                  ...(!child
+                    ? {
+                        onStream: (
+                          requestId: string,
+                          phase: "start" | "delta" | "end",
+                          delta?: string,
+                        ) => {
+                          if (streamProjectionError)
+                            throw streamProjectionError;
+                          const current = this.store.get(work.id);
+                          if (
+                            abort.signal.aborted ||
+                            current.status !== "running"
+                          )
+                            return;
+                          if (phase === "delta" && delta) {
+                            if (requestId !== streamRequestId)
+                              throw Error("Stream request identity changed");
+                            pendingText += delta;
+                            if (pendingText.length >= 1024) flushStream();
+                            else if (!streamTimer) {
+                              streamTimer = setTimeout(() => {
+                                try {
+                                  flushStream();
+                                } catch (error) {
+                                  streamProjectionError = error;
+                                }
+                              }, 50);
+                              streamTimer.unref();
+                            }
+                          } else {
+                            if (phase === "end") flushStream(true);
+                            if (phase === "start") {
+                              streamRequestId = requestId;
+                              pendingText = "";
+                              redactStream = this.models.streamRedactor();
+                            }
+                            this.emit(current, "rocky.model.stream", {
+                              requestId,
+                              phase,
+                            });
+                          }
+                        },
+                      }
+                    : {}),
                   reserve: (requestId, inputTokenBound, outputTokenBound) => {
                     this.modelBudgets.reserve(work.runId, {
                       requestId,

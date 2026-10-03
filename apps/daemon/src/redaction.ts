@@ -1,6 +1,32 @@
 const secretKey =
   /^(?:authorization|proxy[-_]?authorization|cookie|set[-_]?cookie|api[-_]?key|access[-_]?token|refresh[-_]?token|password|secret|client[-_]?secret)$/i;
 const marker = "[REDACTED]";
+/** Hold a tail across deltas so configured credentials cannot leak when split by SSE frames. */
+export function createTextStreamRedactor(secrets: readonly string[]) {
+  const window = 32 + Math.max(0, ...secrets.map((secret) => secret.length));
+  let raw = "",
+    emitted = "";
+  return (text: string, final = false) => {
+    raw += text;
+    if (raw.length > 1048576) throw Error("Stream text limit");
+    // Structured text must be whole before field redaction/serialization is stable.
+    if (!final && /^[\s]*[\[{]/.test(raw)) return "";
+    let length = final ? raw.length : Math.max(0, raw.length - window);
+    const pendingUrl = /https?:\/\/\S*$/i.exec(raw);
+    if (!final && pendingUrl) length = Math.min(length, pendingUrl.index);
+    // Cut in original text coordinates, never inside a complete credential match.
+    for (const secret of secrets.filter(Boolean)) {
+      const start = raw.lastIndexOf(secret, length);
+      if (start >= 0 && start < length && start + secret.length > length)
+        length = start;
+    }
+    const safe = String(redactEvidence(raw.slice(0, length), secrets));
+    if (!safe.startsWith(emitted)) throw Error("Unstable stream redaction");
+    const next = safe.slice(emitted.length);
+    emitted += next;
+    return next;
+  };
+}
 export function redactEvidence(
   value: unknown,
   secrets: readonly string[] = [],

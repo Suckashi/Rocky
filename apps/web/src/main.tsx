@@ -1,16 +1,9 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { CopilotKitProvider, useAgent } from "@copilotkit/react-core/v2";
-import type {
-  Work,
-  PublicEvent,
-} from "../../../packages/contracts/src/index.js";
-import {
-  API_PREFIX,
-  publicEventSchema,
-  snapshotSchema,
-} from "../../../packages/contracts/src/index.js";
-import { projectWork, projectEvidence } from "./projection.js";
+import type { Work } from "../../../packages/contracts/src/index.js";
+import { API_PREFIX } from "../../../packages/contracts/src/index.js";
+import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { WorkOperations } from "./work-operations.js";
 import { WorkGrants } from "./work-grants.js";
@@ -30,6 +23,7 @@ async function request(path: string, body?: unknown) {
   if (!response.ok) throw Error(data.message ?? "Request failed");
   return data;
 }
+const commands = workCommands(request);
 const labels = {
   zh: {
     chat: "對話",
@@ -100,11 +94,10 @@ function App() {
     [theme, setTheme] = useState("light"),
     [enabled, setEnabled] = useState(false),
     [transport, setTransport] = useState<"stdio" | "http">("stdio");
-  const [works, setWorks] = useState<Work[]>([]),
-    [events, setEvents] = useState<PublicEvent[]>([]),
-    [text, setText] = useState(""),
+  const { works, events, streams, connected, connectionError, reconnect } =
+    useRockyProjection(request);
+  const [text, setText] = useState(""),
     [error, setError] = useState(""),
-    [connected, setConnected] = useState(false),
     [busy, setBusy] = useState(false);
   const [maxCalls, setMaxCalls] = useState("48");
   const validBudget =
@@ -121,43 +114,16 @@ function App() {
     document.documentElement.lang = locale === "zh" ? "zh-Hant" : "en";
     document.documentElement.dataset.theme = theme;
   }, [locale, theme]);
-  useEffect(() => {
-    let disposed = false;
-    let stream: EventSource | undefined;
-    void request("/snapshot")
-      .then((d) => {
-        if (disposed) return;
-        const snapshot = snapshotSchema.parse(d);
-        setWorks(snapshot.works);
-        setEvents(snapshot.events);
-        stream = new EventSource(
-          API_PREFIX + "/events?after=" + snapshot.cursor,
-        );
-        stream.onopen = () => setConnected(true);
-        stream.onerror = () => setConnected(false);
-        stream.onmessage = (e) => {
-          try {
-            const event = publicEventSchema.parse(JSON.parse(e.data));
-            setEvents((old) => projectEvidence(old, event));
-            setWorks((old) => projectWork(old, event));
-          } catch {
-            setConnected(false);
-            setError("Invalid server event; reload to resynchronize.");
-            stream?.close();
-          }
-        };
-      })
-      .catch((e) => {
-        if (!disposed) setError(String(e));
-      });
-    return () => {
-      disposed = true;
-      stream?.close();
-    };
-  }, []);
   async function send(e: FormEvent) {
     e.preventDefault();
-    if (!text.trim() || (!enabled && !selectedModel) || busy || !validBudget)
+    if (
+      !text.trim() ||
+      (!enabled && !selectedModel) ||
+      busy ||
+      !validBudget ||
+      !isReady ||
+      !connected
+    )
       return;
     setError("");
     setBusy(true);
@@ -194,24 +160,14 @@ function App() {
   }
   async function decide(w: Work, decision: "approve" | "reject") {
     try {
-      await request("/approvals/" + w.approval!.id + "/decision", {
-        requestId: crypto.randomUUID(),
-        expectedRevision: w.approval!.revision,
-        intentFingerprint: w.approval!.intentFingerprint,
-        decision,
-      });
+      await commands.decide(w, decision);
     } catch (e) {
       setError(String(e));
     }
   }
   async function stopWork(w: Work) {
     try {
-      await request("/works/" + w.id + "/stop", {
-        requestId: crypto.randomUUID(),
-        runId: w.runId,
-        executionSessionId: w.executionSessionId,
-        expectedRevision: w.revision,
-      });
+      await commands.stop(w);
     } catch (e) {
       setError(String(e));
     }
@@ -268,7 +224,11 @@ function App() {
               </p>
             </div>
             <Transcript
-              revision={works.map((w) => `${w.id}:${w.revision}`).join("|")}
+              revision={
+                works.map((w) => `${w.id}:${w.revision}`).join("|") +
+                ":" +
+                (events.at(-1)?.sequence ?? "0")
+              }
             >
               {!works.length && <p className="empty">{t.empty}</p>}
               {works.map((w) => (
@@ -299,8 +259,16 @@ function App() {
                       </div>
                     </section>
                   )}
-                  {w.answer && (
+                  {(w.answer ||
+                    (w.status === "running" && streams[w.id]?.text)) && (
                     <div className="answer">
+                      {!w.answer && (
+                        <small className="stream-label">
+                          {locale === "zh"
+                            ? "回覆片段 · 工作尚未完成"
+                            : "Response fragment · work is not complete"}
+                        </small>
+                      )}
                       <ReactMarkdown
                         components={{
                           img: ({ alt }) => <span>{alt}</span>,
@@ -311,7 +279,7 @@ function App() {
                           ),
                         }}
                       >
-                        {w.answer}
+                        {w.answer || streams[w.id]?.text || ""}
                       </ReactMarkdown>
                     </div>
                   )}
@@ -372,12 +340,7 @@ function App() {
                     <button
                       className="stop"
                       onClick={() =>
-                        void request("/works/" + w.id + "/stop", {
-                          requestId: crypto.randomUUID(),
-                          runId: w.runId,
-                          executionSessionId: w.executionSessionId,
-                          expectedRevision: w.revision,
-                        }).catch((e) => setError(String(e)))
+                        void commands.stop(w).catch((e) => setError(String(e)))
                       }
                     >
                       {t.stop}
@@ -395,6 +358,14 @@ function App() {
                   : `Using ${selectedModel.name}: messages go to this model and may incur charges. Tools operate only on synthetic samples.`}{" "}
                 <button onClick={() => setSelectedModel(null)}>
                   {locale === "zh" ? "取消選取" : "Clear selection"}
+                </button>
+              </p>
+            )}
+            {(!connected || connectionError) && (
+              <p className="connection-error" role="status">
+                {connectionError || t.offline}{" "}
+                <button onClick={reconnect}>
+                  {locale === "zh" ? "重新連線" : "Reconnect"}
                 </button>
               </p>
             )}

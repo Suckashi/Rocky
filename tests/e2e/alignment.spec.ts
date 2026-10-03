@@ -44,6 +44,12 @@ test("OpenDots geometry, responsive navigation and keyboard focus", async ({
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "開啟導覽" }).click();
+  await page.getByRole("button", { name: "設定", exact: true }).last().click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "開啟導覽" })).toBeFocused();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.getByRole("button", { name: "Toggle theme" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");

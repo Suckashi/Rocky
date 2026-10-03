@@ -24,9 +24,15 @@ import {
 } from "../../contracts/src/model-budget.js";
 import { RockyError } from "../../contracts/src/index.js";
 import { ModelNetwork } from "./model-network.js";
+import { readModelStream } from "./model-stream.js";
 
 type Options = BaseChatModelCallOptions & { tools?: ToolDefinition[] };
 export type ModelAccounting = {
+  onStream?: (
+    requestId: string,
+    phase: "start" | "delta" | "end",
+    delta?: string,
+  ) => void;
   reserve: (
     requestId: string,
     inputTokenBound: number | null,
@@ -246,6 +252,12 @@ export class ConfiguredModel extends BaseChatModel<Options> {
     const body: Record<string, unknown> = {
       model: this.config.modelId,
       max_tokens: this.config.maxOutputTokens,
+      ...(this.accounting.onStream
+        ? {
+            stream: true,
+            ...(!anthropic ? { stream_options: { include_usage: true } } : {}),
+          }
+        : {}),
       messages: wire,
       ...(anthropic && system.length ? { system: system.join("\n\n") } : {}),
       ...(tools.length
@@ -296,27 +308,38 @@ export class ConfiguredModel extends BaseChatModel<Options> {
     );
     try {
       const response = await this.network.post(body, signal);
-      const reader = response.body!.getReader();
-      const chunks: Uint8Array[] = [];
-      let bytes = 0;
-      try {
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          bytes += value.byteLength;
-          if (bytes > 1048576)
-            throw new RockyError(
-              "model_response_limit",
-              "Model response exceeds its byte limit",
-              502,
-            );
-          chunks.push(value);
+      let data: unknown;
+      if (this.accounting.onStream) {
+        if (response.headers.get("content-type")?.includes("text/event-stream"))
+          this.accounting.onStream(requestId, "start");
+        data = await readModelStream(
+          response,
+          anthropic ? "anthropic" : "openai",
+          (delta) => this.accounting.onStream?.(requestId, "delta", delta),
+        );
+      } else {
+        const reader = response.body!.getReader();
+        const chunks: Uint8Array[] = [];
+        let bytes = 0;
+        try {
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            bytes += value.byteLength;
+            if (bytes > 1048576)
+              throw new RockyError(
+                "model_response_limit",
+                "Model response exceeds its byte limit",
+                502,
+              );
+            chunks.push(value);
+          }
+        } finally {
+          await reader.cancel().catch(() => {});
+          reader.releaseLock();
         }
-      } finally {
-        await reader.cancel().catch(() => {});
-        reader.releaseLock();
+        data = JSON.parse(Buffer.concat(chunks).toString("utf8"));
       }
-      const data: unknown = JSON.parse(Buffer.concat(chunks).toString("utf8"));
       const usage = providerUsage(data, this.config.provider);
       this.accounting.settle(requestId, usage);
       let content: string;
@@ -395,6 +418,7 @@ export class ConfiguredModel extends BaseChatModel<Options> {
             }
           : {}),
       });
+      this.accounting.onStream?.(requestId, "end");
       return { generations: [{ text: content, message }] };
     } catch (error) {
       if (error instanceof RockyError) throw error;

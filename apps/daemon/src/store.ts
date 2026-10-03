@@ -302,15 +302,20 @@ export class Store {
       sequence,
     });
   }
-  events(after = "0"): PublicEvent[] {
+  events(after = "0", workId?: string): PublicEvent[] {
     if (!sequenceSchema.safeParse(after).success)
       throw new RockyError("invalid_cursor", "Invalid cursor");
     return (
       this.db
         .prepare(
-          "SELECT CAST(sequence AS TEXT) AS sequence,data FROM events WHERE sequence>? ORDER BY sequence LIMIT 1000",
+          workId === undefined
+            ? "SELECT CAST(sequence AS TEXT) AS sequence,data FROM events WHERE sequence>? ORDER BY events.sequence LIMIT 1000"
+            : "SELECT CAST(sequence AS TEXT) AS sequence,data FROM events WHERE sequence>? AND json_extract(data,'$.workId')=? ORDER BY events.sequence LIMIT 1000",
         )
-        .all(after) as { sequence: string; data: string }[]
+        .all(...(workId === undefined ? [after] : [after, workId])) as {
+        sequence: string;
+        data: string;
+      }[]
     ).map((r) =>
       publicEventSchema.parse({ ...JSON.parse(r.data), sequence: r.sequence }),
     );
@@ -319,7 +324,7 @@ export class Store {
     return (
       this.db
         .prepare(
-          "SELECT CAST(sequence AS TEXT) AS sequence, data FROM events WHERE json_extract(data, '$.workId')=? ORDER BY sequence",
+          "SELECT CAST(sequence AS TEXT) AS sequence, data FROM events WHERE json_extract(data, '$.workId')=? ORDER BY events.sequence",
         )
         .all(workId) as { sequence: string; data: string }[]
     ).map((row) =>
@@ -338,7 +343,7 @@ export class Store {
         .get() as { cursor: string };
       const rows = this.db
         .prepare(
-          "SELECT CAST(sequence AS TEXT) AS sequence,data FROM (SELECT sequence,data FROM events ORDER BY sequence DESC LIMIT 500) ORDER BY sequence",
+          "SELECT CAST(sequence AS TEXT) AS sequence,data FROM (SELECT sequence,data FROM events ORDER BY sequence DESC LIMIT 500) AS recent ORDER BY recent.sequence",
         )
         .all() as { sequence: string; data: string }[];
       return snapshotSchema.parse({

@@ -3,7 +3,32 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { redactEvidence } from "../apps/daemon/src/redaction.js";
+import {
+  redactEvidence,
+  createTextStreamRedactor,
+} from "../apps/daemon/src/redaction.js";
+
+test("stream redaction holds split configured credentials and preserves incremental public text", () => {
+  const secret = "synthetic-credential-not-real";
+  const redact = createTextStreamRedactor([secret]);
+  const raw =
+    "Public introduction. ".repeat(8) +
+    secret +
+    " More public content. ".repeat(8);
+  let visible = "";
+  for (const char of raw) {
+    visible += redact(char);
+    expect(visible).not.toContain(secret);
+    expect(visible).not.toContain("synthetic-credential");
+  }
+  expect(visible.length).toBeGreaterThan(0);
+  visible += redact("", true);
+  expect(visible).toBe(String(redactEvidence(raw, [secret])));
+  const json = createTextStreamRedactor([secret]);
+  expect(json('{"password":"')).toBe("");
+  expect(json(secret + '"}')).toBe("");
+  expect(json("", true)).not.toContain(secret);
+});
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { createApp } from "../apps/daemon/src/http.js";
 

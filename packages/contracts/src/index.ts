@@ -113,6 +113,24 @@ export const domainPayloadSchema = z
   .strict()
   .superRefine((payload, ctx) => {
     if (
+      payload.name === "rocky.model.stream" &&
+      !z
+        .strictObject({
+          requestId: idSchema,
+          phase: z.enum(["start", "delta", "end"]),
+          delta: z.string().min(1).max(8192).optional(),
+        })
+        .refine(
+          (value) => (value.phase === "delta") === (value.delta !== undefined),
+        )
+        .safeParse(payload.data).success
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Invalid model stream projection",
+        path: ["data"],
+      });
+    if (
       payload.name === "rocky.work.updated" &&
       !z.object({ work: workSchema }).strict().safeParse(payload.data).success
     )

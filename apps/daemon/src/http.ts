@@ -284,21 +284,61 @@ export function createApp(service: WorkService) {
       });
       let after = "0",
         done = false;
+      let streamMessageId = "",
+        streamText = "",
+        messageOpen = false;
       stream.onAbort(() => {
         done = true;
       });
       while (!done) {
-        for (const event of service.store.events(after)) {
+        const batch = service.store.events(after, work.id);
+        for (const event of batch) {
           after = event.sequence;
           if (event.workId !== work.id) continue;
-          if (event.payload.kind === "domain")
+          if (event.payload.kind === "domain") {
             await send({
               type: "CUSTOM",
               name: event.payload.name,
               value: event,
             });
-          else await send(event.payload.event);
+            if (event.payload.name === "rocky.model.stream") {
+              const { requestId, phase, delta } = event.payload.data;
+              if (phase === "start" && typeof requestId === "string") {
+                if (messageOpen)
+                  await send({
+                    type: "TEXT_MESSAGE_END",
+                    messageId: streamMessageId,
+                  });
+                streamMessageId = "model-stream:" + requestId;
+                streamText = "";
+                messageOpen = true;
+                await send({
+                  type: "TEXT_MESSAGE_START",
+                  messageId: streamMessageId,
+                  role: "assistant",
+                });
+              } else if (
+                phase === "delta" &&
+                messageOpen &&
+                typeof delta === "string"
+              ) {
+                streamText += delta;
+                await send({
+                  type: "TEXT_MESSAGE_CONTENT",
+                  messageId: streamMessageId,
+                  delta,
+                });
+              } else if (phase === "end" && messageOpen) {
+                await send({
+                  type: "TEXT_MESSAGE_END",
+                  messageId: streamMessageId,
+                });
+                messageOpen = false;
+              }
+            }
+          } else await send(event.payload.event);
         }
+        if (batch.length === 1000) continue; // Drain persisted pages before terminal receipts.
         const current = service.store.get(work.id);
         if (
           [
@@ -309,7 +349,14 @@ export function createApp(service: WorkService) {
             "blocked",
           ].includes(current.status)
         ) {
-          if (current.answer) {
+          if (messageOpen) {
+            await send({
+              type: "TEXT_MESSAGE_END",
+              messageId: streamMessageId,
+            });
+            messageOpen = false;
+          }
+          if (current.answer && current.answer !== streamText) {
             const messageId = "work-result:" + work.id;
             await send({
               type: "TEXT_MESSAGE_START",

@@ -208,7 +208,10 @@ export function Chrome({
       <dialog
         ref={dialog}
         className="workspace-dialog"
-        onClose={() => setPanel(null)}
+        onClose={() => {
+          setPanel(null);
+          if (window.innerWidth <= 700) opener.current?.focus();
+        }}
         onCancel={() => setPanel(null)}
       >
         <div className="pane-header">

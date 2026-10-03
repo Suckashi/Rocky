@@ -21,7 +21,13 @@ const wireMessage = z.object({
     )
     .optional(),
 });
-export async function startAgentProvider(options: { hold?: boolean } = {}) {
+export async function startAgentProvider(
+  options: {
+    hold?: boolean;
+    streamDelayMs?: number;
+    truncateStream?: boolean;
+  } = {},
+) {
   const requests: Record<string, unknown>[] = [];
   const server = createServer((req, res) => {
     void (async () => {
@@ -32,6 +38,7 @@ export async function startAgentProvider(options: { hold?: boolean } = {}) {
           model: z.string(),
           messages: z.array(wireMessage),
           tools: z.array(z.record(z.string(), z.unknown())).optional(),
+          stream: z.boolean().optional(),
         })
         .parse(JSON.parse(raw));
       requests.push(body);
@@ -88,6 +95,111 @@ export async function startAgentProvider(options: { hold?: boolean } = {}) {
       const generated = await new FixtureModel(child)._generate(messages);
       const message = generated.generations[0]!.message as AIMessage;
       const calls = message.tool_calls ?? [];
+      if (body.stream) {
+        res.setHeader("content-type", "text/event-stream");
+        const send = async (data: unknown) => {
+          if (res.destroyed) return;
+          res.write(
+            `data: ${typeof data === "string" ? data : JSON.stringify(data)}\n\n`,
+          );
+          if (options.streamDelayMs)
+            await new Promise((r) => setTimeout(r, options.streamDelayMs));
+        };
+        const text = String(message.content);
+        const pieces = text
+          ? [
+              text.slice(0, Math.ceil(text.length / 2)),
+              text.slice(Math.ceil(text.length / 2)),
+            ].filter(Boolean)
+          : [];
+        if (anthropic) {
+          await send({
+            type: "message_start",
+            message: {
+              role: "assistant",
+              usage: { input_tokens: 7, output_tokens: 0 },
+            },
+          });
+          let index = 0;
+          if (pieces.length) {
+            await send({
+              type: "content_block_start",
+              index,
+              content_block: { type: "text", text: "" },
+            });
+            for (const piece of pieces)
+              await send({
+                type: "content_block_delta",
+                index,
+                delta: { type: "text_delta", text: piece },
+              });
+            await send({ type: "content_block_stop", index: index++ });
+          }
+          for (const call of calls) {
+            await send({
+              type: "content_block_start",
+              index,
+              content_block: {
+                type: "tool_use",
+                id: call.id,
+                name: call.name,
+                input: {},
+              },
+            });
+            await send({
+              type: "content_block_delta",
+              index,
+              delta: {
+                type: "input_json_delta",
+                partial_json: JSON.stringify(call.args),
+              },
+            });
+            await send({ type: "content_block_stop", index: index++ });
+          }
+          await send({
+            type: "message_delta",
+            delta: { stop_reason: calls.length ? "tool_use" : "end_turn" },
+            usage: { output_tokens: 3 },
+          });
+          if (!options.truncateStream) await send({ type: "message_stop" });
+        } else {
+          const sendChoice = (
+            delta: unknown,
+            finish_reason: string | null = null,
+          ) => send({ choices: [{ index: 0, delta, finish_reason }] });
+          for (const content of pieces) await sendChoice({ content });
+          for (const [index, call] of calls.entries()) {
+            const args = JSON.stringify(call.args),
+              midpoint = Math.ceil(args.length / 2);
+            await sendChoice({
+              tool_calls: [
+                {
+                  index,
+                  id: call.id,
+                  type: "function",
+                  function: {
+                    name: call.name,
+                    arguments: args.slice(0, midpoint),
+                  },
+                },
+              ],
+            });
+            await sendChoice({
+              tool_calls: [
+                { index, function: { arguments: args.slice(midpoint) } },
+              ],
+            });
+          }
+          await sendChoice({}, calls.length ? "tool_calls" : "stop");
+          await send({
+            choices: [],
+            usage: { prompt_tokens: 7, completion_tokens: 3 },
+          });
+          if (!options.truncateStream) await send("[DONE]");
+        }
+        res.end();
+        return;
+      }
       res.setHeader("content-type", "application/json");
       res.end(
         JSON.stringify(
