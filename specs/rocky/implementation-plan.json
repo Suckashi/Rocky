@@ -2088,8 +2088,35 @@
         "R-021",
         "R-023"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "5488911",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/mcp-manager.test.ts tests/mcp-registry.test.ts; npx vitest run tests/mcp-registry.test.ts; $env:ROCKY_TEST_BROWSER=Join-Path $env:LOCALAPPDATA 'ms-playwright/chromium-1223/chrome-win64/chrome.exe'; npx playwright test tests/e2e/mcp-lifecycle.spec.ts tests/e2e/mcp-settings.spec.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-lifecycle/verification.json",
+          "testFiles": [
+            "tests/mcp-manager.test.ts",
+            "tests/mcp-registry.test.ts",
+            "tests/e2e/mcp-lifecycle.spec.ts",
+            "tests/e2e/mcp-settings.spec.ts"
+          ],
+          "limitations": [
+            "Windows local SDK/provider fixtures only; no Ubuntu/live business MCP evidence",
+            "No conversation Broker tool routing or original schema/result validation; T-016 pending",
+            "No actual MCP effect/call/cancel/reconciliation proof in this lifecycle slice",
+            "Direct child cleanup verified; arbitrary descendant trees and full notification/restart/race matrix not verified",
+            "DNS/proxy/CA/OAuth interaction/credential rotation and structured settings forms incomplete",
+            "HTTP/stdio response limits enforced; dedicated oversized HTTP-body test still pending",
+            "No new reference/before/after comparison; MCP lifecycle dark/English/reduced-motion checks not_run",
+            "T-015/T-021 in_progress; global AT unchanged; Goal active; no remote actions"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
@@ -2547,6 +2574,32 @@
             "SDK lifecycle/discovery/schema/network/credential revocation/runtime routing remain unfinished",
             "Functional advanced JSON editor; structured per-server form and full settings UX incomplete",
             "T-014/T-021 in_progress; global AT unchanged; Goal active; no remote actions"
+          ]
+        },
+        {
+          "commit": "5488911",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/mcp-manager.test.ts tests/mcp-registry.test.ts; npx vitest run tests/mcp-registry.test.ts; $env:ROCKY_TEST_BROWSER=Join-Path $env:LOCALAPPDATA 'ms-playwright/chromium-1223/chrome-win64/chrome.exe'; npx playwright test tests/e2e/mcp-lifecycle.spec.ts tests/e2e/mcp-settings.spec.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-lifecycle/verification.json",
+          "testFiles": [
+            "tests/mcp-manager.test.ts",
+            "tests/mcp-registry.test.ts",
+            "tests/e2e/mcp-lifecycle.spec.ts",
+            "tests/e2e/mcp-settings.spec.ts"
+          ],
+          "limitations": [
+            "Windows local SDK/provider fixtures only; no Ubuntu/live business MCP evidence",
+            "No conversation Broker tool routing or original schema/result validation; T-016 pending",
+            "No actual MCP effect/call/cancel/reconciliation proof in this lifecycle slice",
+            "Direct child cleanup verified; arbitrary descendant trees and full notification/restart/race matrix not verified",
+            "DNS/proxy/CA/OAuth interaction/credential rotation and structured settings forms incomplete",
+            "HTTP/stdio response limits enforced; dedicated oversized HTTP-body test still pending",
+            "No new reference/before/after comparison; MCP lifecycle dark/English/reduced-motion checks not_run",
+            "T-015/T-021 in_progress; global AT unchanged; Goal active; no remote actions"
           ]
         }
       ],
