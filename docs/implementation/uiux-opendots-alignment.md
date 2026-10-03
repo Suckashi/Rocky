@@ -113,3 +113,7 @@ Existing PageReviewCard-derived approval header/body/actions now render target, 
 ## Owner workspace difference review (53e9e2cee58c8cd18cee1cc09e275c210e879c48)
 
 WriteProposal extracts the existing PageReviewCard-derived body, adds on-demand removed/added content in the existing bounded preview and encoding notices. Shared neutral tokens and original shell/actions remain; signs/side borders are an accessibility adaptation. No upstream backend, new polling or copied assets. Four-width real overwrite/preview screenshots are in [workspace-diff.md](workspace-diff.md). Scrolled controls are the comparable captured region; no new upstream full-page comparison or complete fidelity claim.
+
+## Worktree approval adaptation (682b5c3fd2c2d6fc3765c4efed4cefa6d19cf7e0)
+
+OpenDots reference remains c2569bb6a13a22e565cf3eb791c62267d06babb1. Existing PageReview-derived approval shell now displays daemon-prepared destination, branch, source HEAD, source Git metadata impact and committed-only/no-inherited-read scope. Existing card typography/tokens/action row retained, with compact definition rows in main.tsx/style.css; no new upstream asset/code copy or independent polling. Normal-daemon fixture browser checks four widths, reject/approve, reduced-motion keyboard Enter and scrolled mobile action visibility. [Screenshots and evidence](workspace-worktrees.md). This is a necessary Rocky permission adaptation; no equivalent upstream worktree-specific screenshot is claimed. New matched reference/before/after, English/dark matrix and full visual acceptance remain open.

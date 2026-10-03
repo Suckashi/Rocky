@@ -2839,6 +2839,28 @@
             "No browser checks for this backend-only slice; previous screenshots are not new alignment evidence",
             "All 70 global acceptance entries unchanged; V1 and T-017 incomplete"
           ]
+        },
+        {
+          "commit": "682b5c3fd2c2d6fc3765c4efed4cefa6d19cf7e0",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/workspace-worktrees.test.ts tests/workspace-writes.test.ts tests/git-worktree.test.ts tests/terminate-process-tree.test.ts tests/workspace-leases.test.ts tests/contracts.test.ts; npx vitest run tests/workspace-worktrees.test.ts; ROCKY_TEST_BROWSER=installed chromium1223; npx playwright test --config playwright.production.config.ts; npm run check; npm run lint; npm run build; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-worktrees/verification.json",
+          "testFiles": [
+            "tests/workspace-worktrees.test.ts",
+            "tests/e2e/workspace-worktree.spec.ts"
+          ],
+          "limitations": [
+            "Explicit root-only worktree tool implemented; background coding default/routing is not implemented",
+            "Current Work retains source workspace and read scope; generated root must be selected for a future Work",
+            "Main Git repository sources only; linked worktree sources, non-Git isolation and configured filters unsupported",
+            "No automatic cleanup, branch deletion, merge, remote access or replay; full unknown reconciliation UI remains pending",
+            "Windows fixture integration and Chromium148 evidence only; Ubuntu/live provider/full power-loss or hostile filesystem race proof not_run",
+            "Worktree-specific dark/English matrix and fresh matching upstream comparison not_run; existing OpenDots-derived approval structure reused",
+            "New workspace source linkage is in the immutable operation receipt; richer managed workspace metadata/library display remains pending"
+          ]
         }
       ],
       "blockedReason": null,

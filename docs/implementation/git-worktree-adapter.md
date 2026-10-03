@@ -19,3 +19,7 @@ Bind preparation/fingerprint and target to daemon exact approval/ledger; persist
 ## Process supervision update (8b9093e672ff78be218d0d447e6ede0a3d2203fc)
 
 The adapter now uses absolute Windows System32 taskkill for its owned tree, or a detached POSIX process group, with bounded termination reporting. Cancellation reaches prepare and post-dispatch verification; a failed dispatched operation still reports unknown. Windows real Node parent/descendant termination and unrelated-process survival passed, together with six Git regressions. [Actual evidence](evidence/2026-10-04/git-process-supervision/verification.json). This narrows the earlier supervision gap; it does not prove mid-checkout cancellation/crash reconciliation, Ubuntu behavior or product worktree integration. No new browser evidence.
+
+## Product integration (682b5c3fd2c2d6fc3765c4efed4cefa6d19cf7e0)
+
+The adapter is now exposed only through root-native exact-approved workspace_worktree, daemon ledger and confirmed registration. Prior unexposed-adapter notes describe the earlier slice. See [product integration](workspace-worktrees.md) for evidence and remaining defaults/cleanup/reconciliation gaps.
