@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createApp } from "../apps/daemon/src/http.js";
 import { WorkService } from "../apps/daemon/src/work-service.js";
+import { randomUUID } from "node:crypto";
+import { snapshotSchema } from "../packages/contracts/src/index.js";
 test("local API validates Host, Origin and session before mutation", async () => {
   const root = mkdtempSync(join(tmpdir(), "rocky-http-")),
     service = new WorkService(root),
@@ -38,6 +40,62 @@ test("local API validates Host, Origin and session before mutation", async () =>
     expect((await r.json()).agents.rocky).toBeDefined();
     expect(service.store.list()).toHaveLength(0);
   } finally {
+    await service.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("snapshot and SSE use persisted cursors; reconnect header wins over the initial query", async () => {
+  const root = mkdtempSync(join(tmpdir(), "rocky-sse-")),
+    service = new WorkService(root),
+    app = createApp(service);
+  const headers = { host: "127.0.0.1:3211" };
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  try {
+    const work = {
+      id: randomUUID(),
+      runId: randomUUID(),
+      executionSessionId: randomUUID(),
+      requestId: randomUUID(),
+      text: "SSE fixture",
+      mode: "fixture" as const,
+      transport: "http" as const,
+      runMode: "normal" as const,
+      status: "queued" as const,
+      revision: 1,
+      answer: "",
+      createdAt: new Date().toISOString(),
+    };
+    service.store.add(work, "synthetic");
+    service.store.event(work, "rocky.work.updated", { work });
+    const snapshot = snapshotSchema.parse(
+      await (await app.request("/api/v1/snapshot", { headers })).json(),
+    );
+    const last = service.store.event(work, "rocky.tool.completed", {
+      name: "synthetic",
+    });
+    const response = await app.request("/api/v1/events?after=0", {
+      headers: { ...headers, "last-event-id": snapshot.cursor },
+    });
+    reader = response.body!.getReader();
+    let text = "";
+    while (!text.includes("data:")) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      text += new TextDecoder().decode(chunk.value);
+    }
+    expect(text).toContain('"sequence":"' + last.sequence + '"');
+    expect(text).not.toContain('"sequence":"' + snapshot.cursor + '"');
+    await reader.cancel();
+    reader = undefined;
+    expect(
+      (await app.request("/api/v1/events?after=NaN", { headers })).status,
+    ).toBe(400);
+    expect(
+      (await app.request("/api/v1/snapshot?after=-1", { headers })).status,
+    ).toBe(400);
+  } finally {
+    await reader?.cancel();
     await service.close();
     rmSync(root, { recursive: true, force: true });
   }

@@ -20,7 +20,7 @@
     "check": "tsc --noEmit",
     "check:docs": "node scripts/check-docs.mjs",
     "test": "vitest run",
-    "test:contract": "vitest run tests/contracts.test.ts",
+    "test:contract": "vitest run tests/contracts.test.ts tests/projection.test.ts tests/http.test.ts",
     "test:network": "vitest run tests/network.test.ts && node --import ./scripts/network-audit.mjs --import tsx scripts/evaluate.ts",
     "test:learning": "node --import tsx scripts/evaluate.ts",
     "test:e2e": "playwright test",

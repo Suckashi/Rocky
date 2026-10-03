@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "productId": "rocky",
+  "visualVersion": "1.0.0",
+  "userApprovedFinalArtwork": false,
+  "assets": [
+    {
+      "id": "rocky-avatar-v1",
+      "path": "assets/rocky/avatar.svg",
+      "sha256": "fbd7b39641dfa09c6accd39b0748ad485e41dbf2ed25d03cc00821fdf029c2f3",
+      "creator": "Rocky project / Codex-assisted original vector authoring",
+      "method": "authored-svg",
+      "sourceRefs": [
+        "specs/rocky/ROCKY_BOT_DESIGN_SPEC.md"
+      ],
+      "license": "Apache-2.0",
+      "rightsReview": "pending",
+      "reviewEvidence": "Original geometric source; no third-party media copied. Name/character/trademark distribution review has not been performed."
+    },
+    {
+      "id": "rocky-mark-v1",
+      "path": "assets/rocky/mark.svg",
+      "sha256": "e15140d3f0d01f76ced2f0e583a5e3a3a5106fe5ac2794c0038e75c223013dba",
+      "creator": "Rocky project / Codex-assisted original vector authoring",
+      "method": "authored-svg",
+      "sourceRefs": [
+        "specs/rocky/ROCKY_BOT_DESIGN_SPEC.md"
+      ],
+      "license": "Apache-2.0",
+      "rightsReview": "pending",
+      "reviewEvidence": "Original geometric source; no third-party media copied. Name/character/trademark distribution review has not been performed."
+    },
+    {
+      "id": "rocky-mark-monochrome-v1",
+      "path": "assets/rocky/mark-monochrome.svg",
+      "sha256": "d7a599670bd21093bcd93f459a6e282fb6dc2c211ef6ad7cfa22cfc0a505b9db",
+      "creator": "Rocky project / Codex-assisted original vector authoring",
+      "method": "authored-svg",
+      "sourceRefs": [
+        "specs/rocky/ROCKY_BOT_DESIGN_SPEC.md"
+      ],
+      "license": "Apache-2.0",
+      "rightsReview": "pending",
+      "reviewEvidence": "Original geometric source; no third-party media copied. Name/character/trademark distribution review has not been performed."
+    },
+    {
+      "id": "rocky-favicon-v1",
+      "path": "assets/rocky/favicon.svg",
+      "sha256": "e15140d3f0d01f76ced2f0e583a5e3a3a5106fe5ac2794c0038e75c223013dba",
+      "creator": "Rocky project / Codex-assisted original vector authoring",
+      "method": "authored-svg",
+      "sourceRefs": [
+        "specs/rocky/ROCKY_BOT_DESIGN_SPEC.md"
+      ],
+      "license": "Apache-2.0",
+      "rightsReview": "pending",
+      "reviewEvidence": "Original geometric source; no third-party media copied. Name/character/trademark distribution review has not been performed."
+    }
+  ],
+  "bytes": 2200
+}

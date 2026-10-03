@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Rocky</title><desc id="desc">An original faceted stone form with five broad articulated limbs and amber seams.</desc>
+  <defs><g id="limb"><path d="M55 46 48 30 55 12 67 8 77 19 80 32 72 46Z" fill="#77736d" stroke="#343b42" stroke-width="2" stroke-linejoin="round"/><path d="m55 12 12-4 10 11-14 7-15 4Z" fill="#aaa398"/><path d="m63 26 14-7 3 13-8 14-8-7Z" fill="#595c5b"/><path d="m51 31 12-5 13 6" fill="none" stroke="#e8af5c" stroke-width="2.5" stroke-linecap="round"/></g></defs>
+  <g id="five-limbs"><use href="#limb"/><use href="#limb" transform="rotate(72 64 64)"/><use href="#limb" transform="rotate(144 64 64)"/><use href="#limb" transform="rotate(216 64 64)"/><use href="#limb" transform="rotate(288 64 64)"/></g>
+  <g id="stone-core"><path d="m64 33 30 22-11 34H45L34 55Z" fill="#77736d" stroke="#343b42" stroke-width="2.5" stroke-linejoin="round"/><path d="m64 33 10 29-40-7Z" fill="#bbb2a3"/><path d="m64 33 30 22-20 7Z" fill="#938b7e"/><path d="m34 55 40 7-29 27Z" fill="#8e887e"/><path d="m74 62 20-7-11 34H45Z" fill="#555b5b"/><path d="m64 40 8 22-19 18" fill="none" stroke="#e8af5c" stroke-width="2.5" stroke-linecap="round"/></g>
+</svg>

@@ -43,11 +43,15 @@ export class RockyEvaluationProvider {
             decision: input.decision,
             writes: evidence.filter(
               (e) =>
-                e.name === "rocky.operation.succeeded" &&
-                e.data.name === "write_sample",
+                e.payload.kind === "domain" &&
+                e.payload.name === "rocky.operation.succeeded" &&
+                e.payload.kind === "domain" &&
+                e.payload.data.name === "write_sample",
             ).length,
             childCompleted: evidence.some(
-              (e) => e.name === "rocky.subagent.completed",
+              (e) =>
+                e.payload.kind === "domain" &&
+                e.payload.name === "rocky.subagent.completed",
             ),
             answer: current.answer,
           }),

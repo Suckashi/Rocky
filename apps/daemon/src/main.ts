@@ -4,8 +4,12 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import { createApp } from "./http.js";
 import { WorkService } from "./work-service.js";
+import { environmentSchema } from "../../../packages/contracts/src/index.js";
+const environment = environmentSchema.parse({
+  ROCKY_DATA_DIR: process.env.ROCKY_DATA_DIR,
+});
 const root =
-  process.env.ROCKY_DATA_DIR ??
+  environment.ROCKY_DATA_DIR ??
   (process.platform === "win32"
     ? process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, "Rocky")
     : join(

@@ -6,6 +6,7 @@ import type { BaseCheckpointSaver } from "@langchain/langgraph-checkpoint";
 import { FixtureModel } from "../../../fixtures/models/model.js";
 import type { BaseMessage } from "@langchain/core/messages";
 import type { ChatResult } from "@langchain/core/outputs";
+import { ROCKY_PERSONA } from "./persona.js";
 export type RuntimeHooks = {
   event: (name: string, data: Record<string, unknown>) => void;
   call: (
@@ -69,8 +70,7 @@ export function createRockyAgent(
     name: "rocky",
     model: new FixtureModel(false, hooks.modelRequest),
     checkpointer,
-    systemPrompt:
-      "You are Rocky, a patient engineering partner. Report observed evidence. Persona never grants permission. This run uses synthetic fixtures.",
+    systemPrompt: ROCKY_PERSONA + "\nThis run uses synthetic fixtures.",
     tools: [write],
     middleware: [todoListMiddleware(), guard(false)],
     subagents: [

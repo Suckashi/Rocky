@@ -4,7 +4,11 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { RunAgentInputSchema, EventSchemas } from "@ag-ui/core/schemas";
-import { RockyError } from "../../../packages/contracts/src/index.js";
+import {
+  RockyError,
+  errorSchema,
+  sequenceSchema,
+} from "../../../packages/contracts/src/index.js";
 import { WorkService } from "./work-service.js";
 async function readJson(c: Context): Promise<unknown> {
   try {
@@ -88,7 +92,7 @@ export function createApp(service: WorkService) {
           ? 400
           : 500;
     return c.json(
-      {
+      errorSchema.parse({
         code:
           error instanceof RockyError
             ? error.code
@@ -101,11 +105,12 @@ export function createApp(service: WorkService) {
             : status === 500
               ? "Internal error"
               : error.message,
-      },
+      }),
       status as 400,
     );
   });
   app.get("/api/v1/session", (c) => c.json({ token }));
+  app.get("/api/v1/assistant", (c) => c.json(service.store.assistant()));
   app.get("/api/v1/health", (c) =>
     c.json({ productId: "rocky", status: "ready", mode: "fixture-capable" }),
   );
@@ -118,6 +123,11 @@ export function createApp(service: WorkService) {
     }),
   );
   app.get("/api/v1/works", (c) => c.json({ works: service.store.list() }));
+  app.get("/api/v1/snapshot", (c) => {
+    if (c.req.query("after") !== undefined)
+      sequenceSchema.parse(c.req.query("after"));
+    return c.json(service.store.snapshot());
+  });
   app.get("/api/v1/works/:id", (c) =>
     c.json(service.store.get(c.req.param("id"))),
   );
@@ -135,7 +145,7 @@ export function createApp(service: WorkService) {
     c.json(service.stop(c.req.param("id"), await readJson(c))),
   );
   app.get("/api/v1/events", (c) => {
-    let after = c.req.query("after") ?? c.req.header("last-event-id") ?? "0";
+    let after = c.req.header("last-event-id") ?? c.req.query("after") ?? "0";
     service.store.events(after); // validate before committing SSE headers
     return streamSSE(c, async (stream) => {
       await stream.write(": rocky connected\n\n");
@@ -204,7 +214,13 @@ export function createApp(service: WorkService) {
         for (const event of service.store.events(after)) {
           after = event.sequence;
           if (event.workId !== work.id) continue;
-          await send({ type: "CUSTOM", name: event.name, value: event });
+          if (event.payload.kind === "domain")
+            await send({
+              type: "CUSTOM",
+              name: event.payload.name,
+              value: event,
+            });
+          else await send(event.payload.event);
         }
         const current = service.store.get(work.id);
         if (

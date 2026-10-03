@@ -12,7 +12,15 @@ import {
 import { resolve, join } from "node:path";
 import { randomUUID } from "node:crypto";
 import {
+  assistantSchema,
+  ROCKY_IDENTITY,
+} from "../../../packages/contracts/src/assistant.js";
+import {
   RockyError,
+  workSchema,
+  publicEventSchema,
+  sequenceSchema,
+  snapshotSchema,
   type Work,
   type PublicEvent,
 } from "../../../packages/contracts/src/index.js";
@@ -72,12 +80,69 @@ export class Store {
       writeFileSync(this.lock, String(process.pid));
     }
     this.db = new DatabaseSync(join(this.root, "domain.sqlite"));
-    this.db.exec(
-      "PRAGMA journal_mode=WAL; CREATE TABLE IF NOT EXISTS works(id TEXT PRIMARY KEY, request_id TEXT UNIQUE, intent TEXT NOT NULL, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS events(sequence INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS operations(id TEXT PRIMARY KEY, args_hash TEXT NOT NULL, outcome TEXT NOT NULL, result TEXT); CREATE TABLE IF NOT EXISTS decisions(request_id TEXT PRIMARY KEY, intent TEXT NOT NULL, work_id TEXT NOT NULL);",
-    );
-    this.db.exec(
-      "CREATE TABLE IF NOT EXISTS stop_receipts(request_id TEXT PRIMARY KEY, intent TEXT NOT NULL, result TEXT NOT NULL)",
-    );
+    try {
+      const version = (
+        this.db.prepare("PRAGMA user_version").get() as { user_version: number }
+      ).user_version;
+      if (version > 1)
+        throw new RockyError(
+          "unsupported_store",
+          "Rocky store version is newer than this application",
+          409,
+        );
+      this.db.exec(
+        "PRAGMA journal_mode=WAL; CREATE TABLE IF NOT EXISTS works(id TEXT PRIMARY KEY, request_id TEXT UNIQUE, intent TEXT NOT NULL, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS events(sequence INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS operations(id TEXT PRIMARY KEY, args_hash TEXT NOT NULL, outcome TEXT NOT NULL, result TEXT); CREATE TABLE IF NOT EXISTS decisions(request_id TEXT PRIMARY KEY, intent TEXT NOT NULL, work_id TEXT NOT NULL);",
+      );
+      this.db.exec(
+        "CREATE TABLE IF NOT EXISTS stop_receipts(request_id TEXT PRIMARY KEY, intent TEXT NOT NULL, result TEXT NOT NULL)",
+      );
+      this.db.exec(
+        "CREATE TABLE IF NOT EXISTS product_identity(key TEXT PRIMARY KEY, id TEXT NOT NULL)",
+      );
+      this.db
+        .prepare("INSERT OR IGNORE INTO product_identity VALUES('assistant',?)")
+        .run(randomUUID());
+      if (version === 0)
+        this.transaction(() => {
+          // Upgrade only this product's P0 projection format, never a foreign store.
+          for (const row of this.db
+            .prepare("SELECT id,data FROM works")
+            .all() as { id: string; data: string }[]) {
+            const work = JSON.parse(row.data);
+            work.executionSessionId ??= work.runId;
+            work.runMode ??= "unknown";
+            this.save(workSchema.parse(work));
+          }
+          for (const row of this.db
+            .prepare(
+              "SELECT CAST(sequence AS TEXT) AS sequence,data FROM events",
+            )
+            .all() as { sequence: string; data: string }[]) {
+            const old = JSON.parse(row.data);
+            if (!old.payload) {
+              const { name, data, ...envelope } = old;
+              if (name === "rocky.work.updated") {
+                data.work.executionSessionId ??= data.work.runId;
+                data.work.runMode ??= "unknown";
+              }
+              const event = publicEventSchema.parse({
+                ...envelope,
+                sequence: row.sequence,
+                payload: { kind: "domain", name, data },
+              });
+              this.db
+                .prepare("UPDATE events SET data=? WHERE sequence=?")
+                .run(JSON.stringify(event), row.sequence);
+            }
+          }
+          this.db.exec("PRAGMA user_version=1");
+        });
+    } catch (error) {
+      this.db.close();
+      closeSync(this.lock);
+      unlinkSync(lockPath);
+      throw error;
+    }
   }
   transaction<T>(fn: () => T): T {
     this.db.exec("BEGIN IMMEDIATE");
@@ -95,13 +160,13 @@ export class Store {
       this.db.prepare("SELECT data FROM works ORDER BY rowid").all() as {
         data: string;
       }[]
-    ).map((r) => JSON.parse(r.data));
+    ).map((r) => workSchema.parse(JSON.parse(r.data)));
   }
   get(id: string): Work {
     const row = this.db.prepare("SELECT data FROM works WHERE id=?").get(id) as
       { data: string } | undefined;
     if (!row) throw new RockyError("not_found", "Work not found", 404);
-    return JSON.parse(row.data);
+    return workSchema.parse(JSON.parse(row.data));
   }
   receipt(requestId: string) {
     return this.db
@@ -112,30 +177,41 @@ export class Store {
   add(work: Work, intent: string) {
     this.db
       .prepare("INSERT INTO works VALUES(?,?,?,?)")
-      .run(work.id, work.requestId, intent, JSON.stringify(work));
+      .run(
+        work.id,
+        work.requestId,
+        intent,
+        JSON.stringify(workSchema.parse(work)),
+      );
   }
   save(work: Work) {
     this.db
       .prepare("UPDATE works SET data=? WHERE id=?")
-      .run(JSON.stringify(work), work.id);
+      .run(JSON.stringify(workSchema.parse(work)), work.id);
   }
   event(work: Work, name: string, data: Record<string, unknown>) {
-    const base = {
+    const base = publicEventSchema.omit({ sequence: true }).parse({
       schemaVersion: 1 as const,
       id: randomUUID(),
       timestamp: new Date().toISOString(),
       workId: work.id,
       runId: work.runId,
-      name,
-      data,
-    };
-    const r = this.db
+      executionSessionId: work.executionSessionId,
+      payload: { kind: "domain", name, data },
+    });
+    this.db
       .prepare("INSERT INTO events(data) VALUES(?)")
       .run(JSON.stringify(base));
-    return { ...base, sequence: String(r.lastInsertRowid) };
+    const { sequence } = this.db
+      .prepare("SELECT CAST(last_insert_rowid() AS TEXT) AS sequence")
+      .get() as { sequence: string };
+    return publicEventSchema.parse({
+      ...base,
+      sequence,
+    });
   }
   events(after = "0"): PublicEvent[] {
-    if (!/^\d+$/.test(after))
+    if (!sequenceSchema.safeParse(after).success)
       throw new RockyError("invalid_cursor", "Invalid cursor");
     return (
       this.db
@@ -143,7 +219,9 @@ export class Store {
           "SELECT CAST(sequence AS TEXT) AS sequence,data FROM events WHERE sequence>? ORDER BY sequence LIMIT 1000",
         )
         .all(after) as { sequence: string; data: string }[]
-    ).map((r) => ({ ...JSON.parse(r.data), sequence: r.sequence }));
+    ).map((r) =>
+      publicEventSchema.parse({ ...JSON.parse(r.data), sequence: r.sequence }),
+    );
   }
   eventsForWork(workId: string): PublicEvent[] {
     return (
@@ -152,7 +230,41 @@ export class Store {
           "SELECT CAST(sequence AS TEXT) AS sequence, data FROM events WHERE json_extract(data, '$.workId')=? ORDER BY sequence",
         )
         .all(workId) as { sequence: string; data: string }[]
-    ).map((row) => ({ ...JSON.parse(row.data), sequence: row.sequence }));
+    ).map((row) =>
+      publicEventSchema.parse({
+        ...JSON.parse(row.data),
+        sequence: row.sequence,
+      }),
+    );
+  }
+  snapshot() {
+    return this.transaction(() => {
+      const { cursor } = this.db
+        .prepare(
+          "SELECT CAST(COALESCE(MAX(sequence),0) AS TEXT) AS cursor FROM events",
+        )
+        .get() as { cursor: string };
+      const rows = this.db
+        .prepare(
+          "SELECT CAST(sequence AS TEXT) AS sequence,data FROM (SELECT sequence,data FROM events ORDER BY sequence DESC LIMIT 500) ORDER BY sequence",
+        )
+        .all() as { sequence: string; data: string }[];
+      return snapshotSchema.parse({
+        schemaVersion: 1,
+        cursor,
+        works: this.list(),
+        events: rows.map((row) => ({
+          ...JSON.parse(row.data),
+          sequence: row.sequence,
+        })),
+      });
+    });
+  }
+  assistant() {
+    const row = this.db
+      .prepare("SELECT id FROM product_identity WHERE key='assistant'")
+      .get() as { id: string };
+    return assistantSchema.parse({ id: row.id, ...ROCKY_IDENTITY });
   }
   close() {
     this.db.close();

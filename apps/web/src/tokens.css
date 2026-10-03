@@ -1,0 +1,28 @@
+:root {
+  --canvas: #15181c;
+  --surface: #20252b;
+  --raised: #2a3038;
+  --text: #f4f1e9;
+  --muted: #b8c0c8;
+  --border: #3b4652;
+  --accent: #e8af5c;
+  --accent-text: #201a10;
+  --rock-base: #77736d;
+  --success: #8fc6a8;
+  --error: #f0a4a4;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --canvas: #f6f4ef;
+  --surface: #ffffff;
+  --raised: #ece9e1;
+  --text: #1c232a;
+  --muted: #505a65;
+  --border: #b8bec4;
+  --accent: #8f5314;
+  --accent-text: #ffffff;
+  --rock-base: #716a61;
+  --success: #286346;
+  --error: #a63131;
+  color-scheme: light;
+}

@@ -1,4 +1,20 @@
 import { z } from "zod";
+import { EventSchemas } from "@ag-ui/core/schemas";
+export const API_PREFIX = "/api/v1";
+export const idSchema = z.uuid();
+export const revisionSchema = z.number().int().positive();
+export const sequenceSchema = z
+  .string()
+  .max(19)
+  .regex(/^(0|[1-9][0-9]*)$/)
+  .refine(
+    (value) =>
+      value.length <= 19 &&
+      /^(0|[1-9][0-9]*)$/.test(value) &&
+      BigInt(value) <= 9223372036854775807n,
+    "Sequence exceeds storage range",
+  );
+export const timestampSchema = z.iso.datetime();
 export const workStatus = z.enum([
   "queued",
   "running",
@@ -11,7 +27,7 @@ export const workStatus = z.enum([
 ]);
 export const submissionSchema = z
   .object({
-    requestId: z.uuid(),
+    requestId: idSchema,
     text: z.string().trim().min(1).max(8000),
     transport: z.enum(["stdio", "http"]).default("stdio"),
     mode: z.literal("fixture"),
@@ -19,55 +35,126 @@ export const submissionSchema = z
   .strict();
 export const decisionSchema = z
   .object({
-    requestId: z.uuid(),
-    expectedRevision: z.number().int().positive(),
+    requestId: idSchema,
+    expectedRevision: revisionSchema,
     intentFingerprint: z.string(),
     decision: z.enum(["approve", "reject"]),
   })
   .strict();
-export type WorkStatus = z.infer<typeof workStatus>;
 export const stopSchema = z
   .object({
-    requestId: z.uuid(),
-    runId: z.uuid(),
-    executionSessionId: z.uuid(),
-    expectedRevision: z.number().int().positive(),
+    requestId: idSchema,
+    runId: idSchema,
+    executionSessionId: idSchema,
+    expectedRevision: revisionSchema,
   })
   .strict();
-export type Approval = {
-  id: string;
-  revision: number;
-  intentFingerprint: string;
-  tool: string;
-  args: Record<string, unknown>;
-  status: "pending" | "approved" | "rejected" | "expired";
-};
-export type Work = {
-  id: string;
-  runId: string;
-  executionSessionId: string;
-  requestId: string;
-  text: string;
-  transport: "stdio" | "http";
-  mode: "fixture";
-  runMode: "normal" | "evaluation";
-  status: WorkStatus;
-  revision: number;
-  answer: string;
-  approval?: Approval;
-  error?: string;
-  createdAt: string;
-};
-export type PublicEvent = {
-  schemaVersion: 1;
-  id: string;
-  sequence: string;
-  timestamp: string;
-  workId: string;
-  runId: string;
-  name: string;
-  data: Record<string, unknown>;
-};
+export const approvalSchema = z
+  .object({
+    id: idSchema,
+    revision: revisionSchema,
+    intentFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+    tool: z.string().min(1),
+    args: z.record(z.string(), z.unknown()),
+    status: z.enum(["pending", "approved", "rejected", "expired"]),
+  })
+  .strict();
+export const workSchema = z
+  .object({
+    id: idSchema,
+    runId: idSchema,
+    executionSessionId: idSchema,
+    requestId: idSchema,
+    text: z.string(),
+    transport: z.enum(["stdio", "http"]),
+    mode: z.literal("fixture"),
+    runMode: z.enum(["normal", "evaluation", "unknown"]),
+    status: workStatus,
+    revision: revisionSchema,
+    answer: z.string(),
+    approval: approvalSchema.optional(),
+    error: z.string().optional(),
+    createdAt: timestampSchema,
+  })
+  .strict();
+export const domainPayloadSchema = z
+  .object({
+    kind: z.literal("domain"),
+    name: z.string().regex(/^rocky\.[a-z][a-z0-9]*(?:\.[a-z][a-z0-9_]*)+$/),
+    data: z.record(z.string(), z.unknown()),
+  })
+  .strict()
+  .superRefine((payload, ctx) => {
+    if (
+      payload.name === "rocky.work.updated" &&
+      !z.object({ work: workSchema }).strict().safeParse(payload.data).success
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Invalid work projection",
+        path: ["data"],
+      });
+    if (
+      payload.name === "rocky.approval.required" &&
+      !z.object({ approval: approvalSchema }).strict().safeParse(payload.data)
+        .success
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Invalid approval projection",
+        path: ["data"],
+      });
+  });
+export const publicEventSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    id: idSchema,
+    sequence: sequenceSchema,
+    timestamp: timestampSchema,
+    workId: idSchema.optional(),
+    runId: idSchema.optional(),
+    segmentId: idSchema.optional(),
+    executionSessionId: idSchema.optional(),
+    subagentId: z.string().min(1).optional(),
+    payload: z.union([
+      domainPayloadSchema,
+      z
+        .object({
+          kind: z.literal("agui"),
+          event: z.custom<ReturnType<typeof EventSchemas.parse>>(
+            (value) => EventSchemas.safeParse(value).success,
+            "Invalid official AG-UI event",
+          ),
+        })
+        .strict(),
+    ]),
+  })
+  .strict();
+export const snapshotSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    cursor: sequenceSchema,
+    works: z.array(workSchema),
+    events: z.array(publicEventSchema),
+  })
+  .strict();
+export const errorSchema = z
+  .object({
+    code: z.string().regex(/^[a-z][a-z0-9_]*$/),
+    message: z.string(),
+    retryable: z.boolean().optional(),
+    requestId: idSchema.optional(),
+    details: z.record(z.string(), z.unknown()).optional(),
+  })
+  .strict();
+export const environmentSchema = z
+  .object({ ROCKY_DATA_DIR: z.string().trim().min(1).optional() })
+  .strict();
+export type WorkStatus = z.infer<typeof workStatus>;
+export type Approval = z.infer<typeof approvalSchema>;
+export type Work = z.infer<typeof workSchema>;
+export type PublicEvent = z.infer<typeof publicEventSchema>;
+export type Snapshot = z.infer<typeof snapshotSchema>;
 export class RockyError extends Error {
   constructor(
     public code: string,

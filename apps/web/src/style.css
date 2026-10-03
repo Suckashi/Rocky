@@ -1,3 +1,4 @@
+@import "./tokens.css";
 * {
   box-sizing: border-box;
 }
@@ -11,26 +12,6 @@ html {
   line-height: 1.6;
   background: var(--canvas);
   color: var(--text);
-  --canvas: #15181c;
-  --surface: #20252b;
-  --raised: #2a3038;
-  --text: #f4f1e9;
-  --muted: #b8c0c8;
-  --border: #3b4652;
-  --accent: #e8af5c;
-  --accent-text: #201a10;
-  color-scheme: dark;
-}
-html[data-theme="light"] {
-  --canvas: #f6f4ef;
-  --surface: #fff;
-  --raised: #ece9e1;
-  --text: #1c232a;
-  --muted: #505a65;
-  --border: #b8bec4;
-  --accent: #8f5314;
-  --accent-text: #fff;
-  color-scheme: light;
 }
 body {
   margin: 0;
@@ -88,15 +69,10 @@ aside {
   text-decoration: none;
   color: var(--text);
 }
-.neutral-mark {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--accent);
-  border-radius: 10px;
-  color: var(--accent);
-  font-size: 20px;
+.rocky-avatar {
+  display: block;
+  margin-bottom: 16px;
+  flex-shrink: 0;
 }
 nav {
   display: grid;
@@ -152,7 +128,7 @@ header button {
 .connection:before {
   content: "";
   display: inline-block;
-  background: #8fc6a8;
+  background: var(--success);
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -333,7 +309,7 @@ footer {
   margin-top: 10px;
 }
 .error {
-  color: #f0a4a4;
+  color: var(--error);
   font-size: 13px;
 }
 @media (max-width: 700px) {

@@ -5,10 +5,16 @@ import type {
   Work,
   PublicEvent,
 } from "../../../packages/contracts/src/index.js";
+import {
+  API_PREFIX,
+  publicEventSchema,
+  snapshotSchema,
+} from "../../../packages/contracts/src/index.js";
+import { projectWork, projectEvidence } from "./projection.js";
 import "./style.css";
 let session = "";
 async function request(path: string, body?: unknown) {
-  const response = await fetch("/api/v1" + path, {
+  const response = await fetch(API_PREFIX + path, {
     method: body ? "POST" : "GET",
     headers: body
       ? { "content-type": "application/json", "x-rocky-session": session }
@@ -26,7 +32,7 @@ const labels = {
     setup: "本地連線",
     title: "一起把問題做完。",
     intro:
-      "先用合成資料驗證工作流程。真實模型連線尚未開放；這裡不會呼叫付費端點。",
+      "我是 Rocky，一起用可核對的步驟把工作做完。目前可先體驗合成測試流程；真實模型連線尚未開放，不會呼叫付費端點。",
     fixture: "啟用合成測試",
     placeholder: "描述想驗證的流程…",
     send: "開始驗證",
@@ -37,7 +43,7 @@ const labels = {
     empty: "尚無工作。你的第一項驗證會出現在這裡。",
     offline: "連線中斷；顯示最後確認狀態",
     online: "本機已連線",
-    foot: "Node · Deep Agents · MCP｜P0 合成驗證",
+    foot: "Node · Deep Agents · MCP｜合成驗證",
     approval: "這個操作需要你的核准",
     impact: "只寫入合成 MCP 範例，不修改你的檔案。",
     status: {
@@ -57,7 +63,7 @@ const labels = {
     setup: "Local connection",
     title: "Let’s work through it.",
     intro:
-      "Verify the workflow with synthetic data. Live model configuration is not available yet; no paid endpoints are called.",
+      "I’m Rocky. Let’s work through clear steps and verifiable results. Try the synthetic workflow for now; live model setup is not available and no paid endpoints are called.",
     fixture: "Enable synthetic fixture",
     placeholder: "Describe a workflow to verify…",
     send: "Run verification",
@@ -68,7 +74,7 @@ const labels = {
     empty: "No work yet. Your first verification will appear here.",
     offline: "Disconnected; showing last confirmed state",
     online: "Connected locally",
-    foot: "Node · Deep Agents · MCP | P0 fixture",
+    foot: "Node · Deep Agents · MCP | Synthetic fixture",
     approval: "This action needs your approval",
     impact: "Writes only to the synthetic MCP sample, never your files.",
     status: {
@@ -102,33 +108,36 @@ function App() {
   }, [locale, theme]);
   useEffect(() => {
     let disposed = false;
-    void request("/works")
+    let stream: EventSource | undefined;
+    void request("/snapshot")
       .then((d) => {
-        if (!disposed) setWorks(d.works);
+        if (disposed) return;
+        const snapshot = snapshotSchema.parse(d);
+        setWorks(snapshot.works);
+        setEvents(snapshot.events);
+        stream = new EventSource(
+          API_PREFIX + "/events?after=" + snapshot.cursor,
+        );
+        stream.onopen = () => setConnected(true);
+        stream.onerror = () => setConnected(false);
+        stream.onmessage = (e) => {
+          try {
+            const event = publicEventSchema.parse(JSON.parse(e.data));
+            setEvents((old) => projectEvidence(old, event));
+            setWorks((old) => projectWork(old, event));
+          } catch {
+            setConnected(false);
+            setError("Invalid server event; reload to resynchronize.");
+            stream?.close();
+          }
+        };
       })
-      .catch((e) => setError(String(e)));
-    const stream = new EventSource("/api/v1/events");
-    stream.onopen = () => setConnected(true);
-    stream.onerror = () => setConnected(false);
-    stream.onmessage = (e) => {
-      const event = JSON.parse(e.data) as PublicEvent;
-      setEvents((old) =>
-        old.some((x) => x.id === event.id) ? old : [...old.slice(-499), event],
-      );
-      if (event.name === "rocky.work.updated") {
-        const work = event.data.work as Work;
-        setWorks((old) => {
-          const found = old.find((x) => x.id === work.id);
-          if (found && found.revision >= work.revision) return old;
-          return found
-            ? old.map((x) => (x.id === work.id ? work : x))
-            : [...old, work];
-        });
-      }
-    };
+      .catch((e) => {
+        if (!disposed) setError(String(e));
+      });
     return () => {
       disposed = true;
-      stream.close();
+      stream?.close();
     };
   }, []);
   async function send(e: FormEvent) {
@@ -169,9 +178,7 @@ function App() {
     <div className="shell">
       <aside>
         <a className="brand" href="/" aria-label="Rocky home">
-          <span className="neutral-mark" aria-hidden>
-            R
-          </span>
+          <img src="/rocky/mark.svg" width="32" height="32" alt="" />
           Rocky
         </a>
         <nav>
@@ -187,7 +194,7 @@ function App() {
         <div className="sidebar-note">
           LOCAL + EXPLICIT NETWORK
           <br />
-          P0 · Development
+          Development · Fixture
         </div>
       </aside>
       <main id="chat">
@@ -209,6 +216,13 @@ function App() {
         </header>
         <section className="conversation">
           <div className="welcome">
+            <img
+              className="rocky-avatar"
+              src="/rocky/avatar.svg"
+              width="96"
+              height="96"
+              alt="Rocky"
+            />
             <span className="eyebrow">ROCKY / ENGINEERING PARTNER</span>
             <h1>{t.title}</h1>
             <p>{t.intro}</p>
@@ -269,15 +283,25 @@ function App() {
                     {events
                       .filter(
                         (e) =>
-                          e.workId === w.id && e.name !== "rocky.work.updated",
+                          e.workId === w.id &&
+                          e.payload.kind === "domain" &&
+                          e.payload.name !== "rocky.work.updated",
                       )
                       .map((e) => (
                         <li key={e.id}>
-                          <span>{e.name.replace("rocky.", "")}</span>{" "}
-                          <small>{String(e.data.name ?? "")}</small>
+                          <span>
+                            {e.payload.kind === "domain"
+                              ? e.payload.name.replace("rocky.", "")
+                              : e.payload.event.type}
+                          </span>{" "}
+                          <small>
+                            {e.payload.kind === "domain"
+                              ? String(e.payload.data.name ?? "")
+                              : ""}
+                          </small>
                           <details>
                             <summary>Evidence</summary>
-                            <pre>{JSON.stringify(e.data, null, 2)}</pre>
+                            <pre>{JSON.stringify(e.payload, null, 2)}</pre>
                           </details>
                         </li>
                       ))}
