@@ -672,6 +672,8 @@ export class WorkService {
         call: async (name, args, callId) => {
           abort.signal.throwIfAborted();
           const current = this.store.get(work.id);
+          if (name === "memory_write")
+            return this.callMemoryWrite(current, args, callId, abort.signal);
           if (name === "memory_search") {
             if (
               current.runId !== work.runId ||
@@ -1228,6 +1230,109 @@ export class WorkService {
       ...replacementDiff(before, proposal.args.content),
     });
   }
+  private callMemoryWrite(
+    work: Work,
+    args: Record<string, unknown>,
+    callId: string,
+    signal: AbortSignal,
+  ) {
+    signal.throwIfAborted();
+    if (work.modelSelection)
+      this.models.assertRunnable(
+        work.modelSelection.connectionId,
+        work.modelSelection.revision,
+      );
+    const target = intentHash({ memoryId: args.id });
+    const fingerprint = this.fingerprint(work, "memory_write", args);
+    let operation = this.operations.prepare(
+      work,
+      callId,
+      "memory_write",
+      args,
+      fingerprint,
+      target,
+    );
+    if (operation.outcome === "succeeded") return operation.result!;
+    const proposal = this.memories.modelProposal(work, args);
+    if (operation.phase !== "prepared")
+      throw new RockyError(
+        "memory_replay",
+        "Memory operation requires reconciliation",
+        409,
+      );
+    const owner = {
+      workId: work.id,
+      runId: work.runId,
+      executionSessionId: work.executionSessionId,
+    };
+    authorizeOperation({
+      owner,
+      resolvedOwner: owner,
+      mode: work.runMode,
+      effect: "critical",
+      configurationAllowed: true,
+      resourceAllowed: true,
+      revoked: false,
+      preparedTargetHash: target,
+      currentTargetHash: target,
+      policyRevision: 1,
+      preparedPolicyRevision: 1,
+      operationId: operation.id,
+      intentFingerprint: fingerprint,
+      synthetic: false,
+      allowLocalNew: false,
+      targetExists: proposal.expectedRevision > 0,
+      approval: work.approval
+        ? {
+            status: work.approval.status,
+            operationId: work.approval.operationId,
+            intentFingerprint: work.approval.intentFingerprint,
+          }
+        : null,
+    });
+    operation = this.operations.transition(
+      work,
+      operation,
+      "authorized",
+      "not_executed",
+    );
+    operation = this.operations.transition(
+      work,
+      operation,
+      "dispatched",
+      "unknown",
+    );
+    const receipt = {
+      id: proposal.id,
+      revision: proposal.expectedRevision + 1,
+      deleted: false,
+    };
+    try {
+      this.operations.transition(
+        work,
+        operation,
+        "settled",
+        "succeeded",
+        JSON.stringify(receipt),
+        { receipt },
+        () => {
+          signal.throwIfAborted();
+          this.memories.saveModel(work, args, work.approval!.id);
+        },
+      );
+      this.flushOutbox();
+      return JSON.stringify(receipt);
+    } catch (error) {
+      this.operations.transition(
+        work,
+        operation,
+        "settled",
+        "failed_known_no_effect",
+      );
+      this.flushOutbox();
+      throw error;
+    }
+  }
   private async callWorkspaceWrite(
     work: Work,
     args: Record<string, unknown>,
@@ -1660,6 +1765,7 @@ export class WorkService {
             request.name !== "mcp_call" &&
             request.name !== "mcp_data" &&
             request.name !== "workspace_write" &&
+            request.name !== "memory_write" &&
             request.name !== "workspace_worktree")
         )
           throw Error("Unsupported interrupt");
@@ -1673,6 +1779,8 @@ export class WorkService {
             ) ?? [];
         if (calls.length !== 1 || !calls[0]?.id)
           throw Error("Interrupted tool identity is ambiguous or missing");
+        if (request.name === "memory_write")
+          this.memories.modelProposal(work, request.args);
         const worktreeProposal =
           request.name === "workspace_worktree"
             ? await new WorkspaceWorktrees(this.workspaces).prepare(
@@ -1709,11 +1817,13 @@ export class WorkService {
           request.name,
           request.args,
           approvalFingerprint,
-          ...(worktreeProposal
-            ? [worktreeProposal.targetIdentity]
-            : writeProposal
-              ? [writeProposal.targetIdentity]
-              : []),
+          ...(request.name === "memory_write"
+            ? [intentHash({ memoryId: request.args.id })]
+            : worktreeProposal
+              ? [worktreeProposal.targetIdentity]
+              : writeProposal
+                ? [writeProposal.targetIdentity]
+                : []),
           ...(request.name === "mcp_call" || request.name === "mcp_data"
             ? [
                 intentHash(

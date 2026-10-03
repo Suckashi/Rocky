@@ -533,6 +533,9 @@ li {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.memory-content.approval-proposal {
+  overflow: auto;
+}
 .mcp-settings form {
   display: grid;
   gap: 10px;

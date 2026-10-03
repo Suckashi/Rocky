@@ -399,21 +399,54 @@ function App() {
                     <section className="approval">
                       <h2>{t.approval}</h2>
                       <p>
-                        {["mcp_call", "mcp_data"].includes(w.approval.tool)
+                        {w.approval.tool === "memory_write"
                           ? locale === "zh"
-                            ? "這將呼叫你配置的外部 MCP 伺服器，可能改變外部資料。"
-                            : "This calls your configured MCP server and may change external data."
-                          : w.approval.tool === "workspace_write"
+                            ? "這將建立或更新本地記憶，並保留未驗證狀態。人工鎖定的記憶不可由模型覆寫。"
+                            : "This creates or updates local memory as unverified. Models cannot overwrite owner-locked memory."
+                          : ["mcp_call", "mcp_data"].includes(w.approval.tool)
                             ? locale === "zh"
-                              ? "這將在選定工作區建立或完整取代一個檔案。"
-                              : "This creates or fully replaces one file in the selected workspace."
-                            : w.approval.tool === "workspace_worktree"
+                              ? "這將呼叫你配置的外部 MCP 伺服器，可能改變外部資料。"
+                              : "This calls your configured MCP server and may change external data."
+                            : w.approval.tool === "workspace_write"
                               ? locale === "zh"
-                                ? "這將建立本地 Git 分支與獨立工作區，並修改來源 repository 的 Git 登記。"
-                                : "This creates a local Git branch and worktree and updates the source repository Git registration."
-                              : t.impact}
+                                ? "這將在選定工作區建立或完整取代一個檔案。"
+                                : "This creates or fully replaces one file in the selected workspace."
+                              : w.approval.tool === "workspace_worktree"
+                                ? locale === "zh"
+                                  ? "這將建立本地 Git 分支與獨立工作區，並修改來源 repository 的 Git 登記。"
+                                  : "This creates a local Git branch and worktree and updates the source repository Git registration."
+                                : t.impact}
                       </p>
-                      {["mcp_call", "mcp_data"].includes(w.approval.tool) ? (
+                      {w.approval.tool === "memory_write" ? (
+                        <>
+                          <p>
+                            {locale === "zh" ? "範圍：" : "Scope: "}
+                            {
+                              (
+                                {
+                                  user: locale === "zh" ? "個人" : "User",
+                                  project: locale === "zh" ? "專案" : "Project",
+                                  task:
+                                    locale === "zh" ? "此工作" : "This Work",
+                                } as Record<string, string>
+                              )[String(w.approval.args.scope)]
+                            }{" "}
+                            ·{" "}
+                            {w.approval.args.private !== false
+                              ? locale === "zh"
+                                ? "私密"
+                                : "Private"
+                              : locale === "zh"
+                                ? "非私密"
+                                : "Not private"}{" "}
+                            · r{Number(w.approval.args.expectedRevision)} → r
+                            {Number(w.approval.args.expectedRevision) + 1}
+                          </p>
+                          <div className="memory-content approval-proposal">
+                            {String(w.approval.args.content)}
+                          </div>
+                        </>
+                      ) : ["mcp_call", "mcp_data"].includes(w.approval.tool) ? (
                         <>
                           <p>
                             <strong>
@@ -535,6 +568,7 @@ function App() {
                             "mcp_data",
                             "workspace_write",
                             "workspace_worktree",
+                            "memory_write",
                           ].includes(w.approval.tool)
                             ? locale === "zh"
                               ? "核准這次操作"

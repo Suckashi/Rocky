@@ -7,6 +7,7 @@ import {
   memoryScopeSchema,
   memoryReadToolSchema,
   memoryReadGrantSchema,
+  memoryWriteToolSchema,
 } from "../../../packages/contracts/src/memory.js";
 import { RockyError } from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
@@ -158,6 +159,65 @@ export class MemoryRegistry {
     return result;
   }
   save(input: unknown) {
+    return this.persist(input);
+  }
+  modelProposal(work: Work, input: unknown) {
+    const command = memoryWriteToolSchema.parse(input);
+    const scope = this.readScope(work, command.scope);
+    const current = this.store.get(work.id);
+    if (
+      current.runId !== work.runId ||
+      current.executionSessionId !== work.executionSessionId ||
+      current.status !== "running"
+    )
+      throw new RockyError(
+        "memory_scope",
+        "Memory write requires this active Work",
+        403,
+      );
+    const row = this.store.db
+      .prepare("SELECT data FROM memories WHERE id=?")
+      .get(command.id) as { data: string } | undefined;
+    const previous = row ? memorySchema.parse(JSON.parse(row.data)) : undefined;
+    if (
+      previous &&
+      (previous.locked || previous.userEdited || previous.source === "owner")
+    )
+      throw new RockyError(
+        "memory_locked",
+        "Model cannot overwrite owner-managed memory",
+        403,
+      );
+    if ((previous?.revision ?? 0) !== command.expectedRevision)
+      throw new RockyError("stale_memory", "Memory revision changed", 409);
+    if (previous && JSON.stringify(previous.scope) !== JSON.stringify(scope))
+      throw new RockyError("memory_scope", "Memory scope cannot change", 403);
+    return { ...command, scope, status: "unverified" as const };
+  }
+  saveModel(work: Work, input: unknown, requestId: string) {
+    if (!this.store.db.isTransaction)
+      throw new RockyError(
+        "memory_transaction",
+        "Model write requires an atomic operation transaction",
+        500,
+      );
+    const current = this.store.get(work.id);
+    if (
+      current.approval?.tool !== "memory_write" ||
+      current.approval.status !== "approved" ||
+      intentHash(current.approval.args) !== intentHash(input)
+    )
+      throw new RockyError(
+        "memory_approval",
+        "Exact memory write approval required",
+        403,
+      );
+    return this.persist(
+      { ...this.modelProposal(work, input), requestId },
+      work,
+    );
+  }
+  private persist(input: unknown, model?: Work) {
     const command = memorySaveSchema.parse(input);
     const { sources, ...baseCommand } = command;
     // Empty provenance does not alter already persisted owner command identities.
@@ -166,7 +226,7 @@ export class MemoryRegistry {
       ...baseCommand,
       ...(sources.length ? { sources } : {}),
     });
-    return this.store.transaction(() => {
+    const persist = () => {
       const replay = this.receipt(command.requestId, intent);
       if (replay) return replay;
       const scope = this.scope(command.scope);
@@ -243,9 +303,17 @@ export class MemoryRegistry {
           status: command.status,
           private: command.private,
           revision: command.expectedRevision + 1,
-          locked: true,
-          userEdited: true,
-          source: "owner",
+          locked: !model,
+          userEdited: !model,
+          source: model ? "model" : "owner",
+          ...(model
+            ? { sourceWorkId: model.id, sourceRunId: model.runId }
+            : previous?.sourceWorkId
+              ? {
+                  sourceWorkId: previous.sourceWorkId,
+                  sourceRunId: previous.sourceRunId,
+                }
+              : {}),
           sources: command.sources,
           createdAt: previous?.createdAt ?? now,
           updatedAt: now,
@@ -264,7 +332,8 @@ export class MemoryRegistry {
         revision: memory.revision,
         deleted: false,
       });
-    });
+    };
+    return model ? persist() : this.store.transaction(persist);
   }
   delete(id: string, input: unknown) {
     z.uuid().parse(id);

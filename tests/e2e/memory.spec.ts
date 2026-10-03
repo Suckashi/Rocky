@@ -462,3 +462,121 @@ test("composer grants memory before native execution and clears one-Work selecti
     await provider.close();
   }
 });
+
+test("native memory proposal is visible before exact approval and persists model provenance", async ({
+  page,
+}) => {
+  const id = randomUUID(),
+    callId = randomUUID(),
+    marker = "Memory proposal " + randomUUID();
+  const provider = await startAgentProvider({
+    reply: async (messages) =>
+      messages.some(
+        (m) => m instanceof ToolMessage && m.tool_call_id === callId,
+      )
+        ? new AIMessage("MEMORY_WRITE_RECEIPT_SEEN")
+        : new AIMessage({
+            content: "",
+            tool_calls: [
+              {
+                id: callId,
+                name: "memory_write",
+                args: {
+                  id,
+                  expectedRevision: 0,
+                  scope: "user",
+                  content: marker,
+                  private: true,
+                  sources: [],
+                },
+                type: "tool_call",
+              },
+            ],
+          }),
+  });
+  try {
+    await page.goto("/");
+    const { token } = await (await page.request.get("/api/v1/session")).json();
+    const headers = { "x-rocky-session": token },
+      connectionId = randomUUID();
+    expect(
+      (
+        await page.request.post("/api/v1/model-connections", {
+          headers,
+          data: {
+            id: connectionId,
+            requestId: randomUUID(),
+            expectedRevision: 0,
+            config: {
+              name: marker,
+              provider: "openai-compatible",
+              baseUrl: provider.baseUrl,
+              modelId: "fixture",
+              contextWindowTokens: 65536,
+              maxOutputTokens: 256,
+            },
+          },
+        })
+      ).ok(),
+    ).toBe(true);
+    expect(
+      (
+        await page.request.post("/api/v1/conversation/messages", {
+          headers,
+          data: {
+            requestId: randomUUID(),
+            text: marker,
+            mode: "configured",
+            modelSelection: { connectionId, revision: 1 },
+          },
+        })
+      ).ok(),
+    ).toBe(true);
+    await page.reload();
+    const work = page.locator("article.work").filter({ hasText: marker }),
+      approval = work.locator(".approval");
+    await expect(approval).toContainText("本地記憶");
+    await expect(approval).toContainText(marker);
+    const search = async () =>
+      (
+        await (
+          await page.request.post("/api/v1/memories/search", {
+            headers,
+            data: { scope: { kind: "user" }, query: marker },
+          })
+        ).json()
+      ).items;
+    expect(await search()).toEqual([]);
+    for (const [width, height] of [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844],
+    ]) {
+      await page.setViewportSize({ width: width!, height: height! });
+      await approval.scrollIntoViewIfNeeded();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: "test-results/memory-write-" + width + ".png",
+      });
+    }
+    await approval.getByRole("button", { name: "核准這次操作" }).click();
+    await expect(work).toContainText("MEMORY_WRITE_RECEIPT_SEEN");
+    expect(await search()).toMatchObject([
+      {
+        id,
+        source: "model",
+        locked: false,
+        userEdited: false,
+        status: "unverified",
+        private: true,
+      },
+    ]);
+  } finally {
+    await provider.close();
+  }
+});

@@ -32,9 +32,11 @@ export const memorySchema = z.strictObject({
   status: z.enum(["unverified", "confirmed", "conflicted"]),
   private: z.boolean(),
   revision: z.number().int().positive(),
-  locked: z.literal(true),
-  userEdited: z.literal(true),
-  source: z.literal("owner"),
+  locked: z.boolean(),
+  userEdited: z.boolean(),
+  source: z.enum(["owner", "model"]),
+  sourceWorkId: z.uuid().optional(),
+  sourceRunId: z.uuid().optional(),
   sources: z.array(memorySourceSchema).max(16).default([]),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
@@ -69,4 +71,12 @@ export const memoryReadGrantSchema = z.strictObject({
   scope: z.enum(["user", "project", "task"]),
   includePrivate: z.boolean().default(false),
   expiresAt: z.iso.datetime().nullable().default(null),
+});
+export const memoryWriteToolSchema = z.strictObject({
+  id: z.uuid(),
+  expectedRevision: z.number().int().nonnegative(),
+  scope: z.enum(["user", "project", "task"]),
+  content: z.string().trim().min(1).max(4096),
+  private: z.boolean().default(true),
+  sources: z.array(memorySourceSchema).max(16).default([]),
 });

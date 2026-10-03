@@ -425,7 +425,15 @@ export function MemorySettings({
               : zh
                 ? "非私密"
                 : "Not private"}{" "}
-            · {zh ? "手動鎖定" : "Owner locked"} · r{item.revision}
+            ·{" "}
+            {item.locked
+              ? zh
+                ? "手動鎖定"
+                : "Owner locked"
+              : zh
+                ? "模型建議"
+                : "Model proposed"}{" "}
+            · r{item.revision}
           </p>
           <div className="actions">
             <button
