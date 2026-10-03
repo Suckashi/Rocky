@@ -1631,6 +1631,29 @@
             "Full Work snapshot pagination and later V1 modules remain unfinished",
             "No remote actions"
           ]
+        },
+        {
+          "commit": "a2d2ef1",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; focused worker/transfer tests; Playwright streaming",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/model-transfer.json",
+          "testFiles": [
+            "tests/worker-channel.test.ts",
+            "tests/model-transfer.test.ts",
+            "tests/e2e/streaming.spec.ts"
+          ],
+          "limitations": [
+            "Native long-history compaction and repeated-compaction/failure acceptance remain pending",
+            "2MiB total model request / 4096-message bound fails explicitly; it is not silent truncation or unlimited context",
+            "Large model responses/tool results still use existing IPC and need separate bounded transport",
+            "Local scripted provider and actual child/native checkpoint only; no paid live provider or Ubuntu evidence",
+            "No new upstream visual comparison; browser regression covers current streaming/stop/read-history behavior",
+            "No remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -4032,7 +4055,7 @@
     "remoteStatus": "not_created",
     "visibility": null,
     "creationRequiresSeparateAuthorization": true,
-    "implementationCommit": "04e1e94436e98b24cd6ac72b6c802fea008c2477",
+    "implementationCommit": "a2d2ef1",
     "strategy": "greenfield_no_fork_no_imported_git_history"
   },
   "referenceRepositories": [

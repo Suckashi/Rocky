@@ -13,3 +13,5 @@ Consumption is relative to completed source ancestry. Each batch records its own
 Tests cover held-main/late-background delivery, failure after context save, actual native checkpoint proof, cursor/owner rejection, Unicode chunks, domain-write fault rollback, cancellation preservation and model/workspace isolation. See [recorded commands](evidence/2026-10-03/inbox-checkpoint.json). No live service or Ubuntu evidence is claimed.
 
 Remaining: long-history native compaction, larger model request transport, precise steering/reset/retry, full crash matrix and public inbox inspection commands. Batch storage and Work snapshots are not yet final long-history performance implementations. These remain product defects or missing functionality, not deferred external verification.
+
+Transport update (a2d2ef1): model requests now use validated bounded framing when the payload is large; up to2MiB/4096 messages without silent truncation. Frame envelope remains64KiB and dispatch/accounting remains one daemon call. Model responses and tool results still need separate large-payload handling; native compaction acceptance remains pending. See evidence/2026-10-03/model-transfer.json.
