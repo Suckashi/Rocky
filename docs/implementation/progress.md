@@ -12,7 +12,7 @@
 | T-006       | done        | Domain schema v2, identity-preserving CAS, atomic events/outbox, recoverable completion projection and OS-released single writer lock.              |
 | T-007       | in_progress | Model UI/API, shared Work/evaluation routing, budgets, live probe and proxy/CA tests; profiles/cache pricing/full DNS policy pending.               |
 | T-008       | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.       |
-| T-009       | in_progress | Actual child IPC channel with capability, correlation, bounded queue and cancellation; Agent/job integration pending.                               |
+| T-009       | in_progress | Durable child IPC and process tree tests; native fixture Agent runs in worker via daemon model/tool RPC. Configured Agent pending.                  |
 | T-037       | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                    |
 | Later tasks | pending     | Product modules and confirmed-state presence remain pending.                                                                                        |
 
@@ -235,3 +235,11 @@ T-009 remains in_progress: the Deep Agents runtime still runs in the daemon, and
 Implementation `bfbfbe111fd07ed5f5858d6bfdd3d7c75fd355bb` extends the synthetic worker to spawn a persistent Node descendant and tests shutdown of the worker process tree. The test confirms the descendant PID is alive before cancellation and absent afterward; it also has its own leak cleanup for failures. Seven worker tests passed, plus typecheck, server build, lint, formatting and source guards. See [process tree evidence](evidence/2026-10-03/worker/process-tree.json).
 
 This Windows test covers one real descendant, not every process-tree shape or Ubuntu. It does not prove an already dispatched external effect stopped. T-009 remains in_progress until native Agent execution and daemon IPC integration are complete; no global AT promotion, live model or remote action.
+
+## T-009 continuation: native fixture Agent in child process
+
+Implementation `f752774e4950d4664cae93e0b84b63be09e48647` moves the synthetic Work's Deep Agents root and native child into an agent-worker process using its own graph saver connection. The daemon retains model budget reservations, MCP calls, policy, approvals, operation ledger and Work state. Versioned bounded IPC carries model/tool requests, runtime events, invocation results and exact approve/reject resume. The child serializes public message fields explicitly; normal terminal results close the child, while approval interrupts keep it available for resume. No second planner or model loop was introduced.
+
+The full Windows suite passed: 95 tests in 25 files. Eleven focused runtime/worker tests exercised native child evidence, approval, resume, stop and process exit; eight functional browser tests passed. Three network tests and four full-Agent fixture evaluation cases passed, as did typecheck, production build, lint, formatting and source guards. See [fixture Agent worker evidence](evidence/2026-10-03/worker/fixture-agent.json).
+
+T-009 remains in_progress because configured Work still creates its Agent in the daemon. The current Node network audit instruments the parent process only; direct worker egress is not proven absent. Native worker code is trusted but not OS-sandboxed. Strict browser egress and Ubuntu remain open; no global AT promotion, live model or remote action.

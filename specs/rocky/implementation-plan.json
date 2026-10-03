@@ -1332,6 +1332,29 @@
             "Deep Agents still runs in daemon; T-009 remains in_progress",
             "Strict browser egress and global AT statuses unchanged; no live or remote action"
           ]
+        },
+        {
+          "commit": "f752774e4950d4664cae93e0b84b63be09e48647",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/worker/fixture-agent.json",
+          "testFiles": [
+            "tests/worker-channel.test.ts",
+            "tests/runtime.test.ts",
+            "tests/stop.test.ts",
+            "tests/configured-work.test.ts"
+          ],
+          "limitations": [
+            "Only synthetic Work uses Agent worker; configured Work still runs Agent in daemon",
+            "Worker has trusted code and graph checkpoint path, but no OS filesystem or packet sandbox",
+            "Node network audit instruments the parent process, not the spawned Agent worker; hidden worker egress not proven absent",
+            "The browser egress case remains excluded due to local AdGuard injection; Ubuntu not run",
+            "T-009 remains in_progress; no global AT promotion, live model or remote action"
+          ]
         }
       ],
       "blockedReason": null,
