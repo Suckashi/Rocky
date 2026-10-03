@@ -88,3 +88,94 @@ test("Learning UI requires scoped consent, preserves stale drafts and turns poli
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
 });
+
+test("work Learning consent defaults excluded, saves review consent and withdraws", async ({
+  page,
+}) => {
+  const { AIMessage } = await import("@langchain/core/messages");
+  const { startAgentProvider } =
+    await import("../../fixtures/models/agent-provider.js");
+  const provider = await startAgentProvider({
+    reply: () => new AIMessage("Finished local consent fixture"),
+  });
+  try {
+    await page.goto("/");
+    const { token } = await (await page.request.get("/api/v1/session")).json();
+    const headers = { "x-rocky-session": token },
+      connectionId = randomUUID(),
+      marker = "Work consent " + randomUUID();
+    expect(
+      (
+        await page.request.post("/api/v1/model-connections", {
+          headers,
+          data: {
+            id: connectionId,
+            requestId: randomUUID(),
+            expectedRevision: 0,
+            config: {
+              name: "Consent fixture",
+              provider: "openai-compatible",
+              baseUrl: provider.baseUrl,
+              modelId: "fixture",
+              contextWindowTokens: 65536,
+              maxOutputTokens: 256,
+            },
+          },
+        })
+      ).ok(),
+    ).toBe(true);
+    const response = await page.request.post("/api/v1/conversation/messages", {
+      headers,
+      data: {
+        requestId: randomUUID(),
+        text: marker,
+        mode: "configured",
+        modelSelection: { connectionId, revision: 1 },
+      },
+    });
+    expect(response.ok()).toBe(true);
+    const created = await response.json();
+    await page.reload();
+    const work = page.locator("article.work").filter({ hasText: marker });
+    await work.locator(":scope > details > summary").click();
+    const ui = work.locator(".work-learning");
+    await ui.locator("summary").click();
+    await expect(ui.getByRole("status")).toContainText("排除學習");
+    await expect(ui.getByLabel("排除此工作學習")).toBeChecked();
+    await expect(ui.getByLabel("我確認來源條款允許重用")).not.toBeChecked();
+    await ui.getByLabel("排除此工作學習").uncheck();
+    await ui.getByLabel("我確認來源條款允許重用").check();
+    await ui.getByRole("button", { name: "保存此工作學習權限" }).click();
+    await expect(ui.getByRole("status")).toContainText("允許來源審查");
+    await ui.getByLabel("私人來源，不用於學習").check();
+    await ui.getByRole("button", { name: "保存此工作學習權限" }).click();
+    await expect(ui.getByRole("status")).toContainText("排除學習");
+    const saved = await (
+      await page.request.get(`/api/v1/works/${created.id}/learning-consent`)
+    ).json();
+    expect(saved).toMatchObject({ private: true, revision: 2 });
+    for (const [width, height] of [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844],
+    ]) {
+      await page.setViewportSize({ width: width!, height: height! });
+      await ui.scrollIntoViewIfNeeded();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: `test-results/work-learning-${width}.png`,
+      });
+    }
+    await page.reload();
+    await work.locator(":scope > details > summary").click();
+    await ui.locator("summary").click();
+    await expect(ui.getByLabel("私人來源，不用於學習")).toBeChecked();
+  } finally {
+    await provider.close();
+  }
+});

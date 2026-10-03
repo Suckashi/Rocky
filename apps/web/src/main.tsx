@@ -18,6 +18,7 @@ import { Artifacts } from "./artifacts.js";
 import { Workspaces } from "./workspaces.js";
 import type { Workspace } from "../../../packages/contracts/src/workspaces.js";
 import { WorkOperations } from "./work-operations.js";
+import { WorkLearning } from "./work-learning.js";
 import { WorkGrants } from "./work-grants.js";
 import { WorkSteering } from "./work-steering.js";
 import { WorkRetry } from "./work-retry.js";
@@ -627,6 +628,7 @@ function App() {
                   <details>
                     <summary>{t.detail}</summary>
                     <WorkGrants work={w} locale={locale} request={request} />
+                    <WorkLearning work={w} locale={locale} request={request} />
                     <WorkSteering
                       work={w}
                       events={events}
