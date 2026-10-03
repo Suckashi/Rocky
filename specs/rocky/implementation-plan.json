@@ -2033,8 +2033,31 @@
         "R-023",
         "R-051"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "c9d8d4e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/mcp-registry.test.ts tests/operation-ledger.test.ts; npx playwright test tests/e2e/mcp-settings.spec.ts tests/e2e/steering.spec.ts; npx vitest run tests/mcp-registry.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-registry/verification.json",
+          "testFiles": [
+            "tests/mcp-registry.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/e2e/mcp-settings.spec.ts",
+            "tests/e2e/steering.spec.ts"
+          ],
+          "limitations": [
+            "Windows registry/launchSpec only; no configured MCP process/HTTP/tool call or Ubuntu/live proof",
+            "SDK lifecycle/discovery/schema/network/credential revocation/runtime routing remain unfinished",
+            "Functional advanced JSON editor; structured per-server form and full settings UX incomplete",
+            "T-014/T-021 in_progress; global AT unchanged; Goal active; no remote actions"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
@@ -2502,8 +2525,31 @@
         "R-051",
         "R-052"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "c9d8d4e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/mcp-registry.test.ts tests/operation-ledger.test.ts; npx playwright test tests/e2e/mcp-settings.spec.ts tests/e2e/steering.spec.ts; npx vitest run tests/mcp-registry.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-registry/verification.json",
+          "testFiles": [
+            "tests/mcp-registry.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/e2e/mcp-settings.spec.ts",
+            "tests/e2e/steering.spec.ts"
+          ],
+          "limitations": [
+            "Windows registry/launchSpec only; no configured MCP process/HTTP/tool call or Ubuntu/live proof",
+            "SDK lifecycle/discovery/schema/network/credential revocation/runtime routing remain unfinished",
+            "Functional advanced JSON editor; structured per-server form and full settings UX incomplete",
+            "T-014/T-021 in_progress; global AT unchanged; Goal active; no remote actions"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [

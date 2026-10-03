@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-03",
+  "commit": "c9d8d4e",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "mode": "fixture",
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "result": "Final13.96s after scoped textarea fix; existing bundle warning"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "result": "42 files / 157 tests passed",
+      "durationSeconds": 106.43
+    },
+    {
+      "command": "npx vitest run tests/mcp-registry.test.ts tests/operation-ledger.test.ts",
+      "exitCode": 0,
+      "result": "8 passed",
+      "durationSeconds": 1.84
+    },
+    {
+      "command": "$env:ROCKY_TEST_BROWSER=Join-Path $env:LOCALAPPDATA 'ms-playwright/chromium-1223/chrome-win64/chrome.exe'; npx playwright test tests/e2e/mcp-settings.spec.ts tests/e2e/steering.spec.ts",
+      "exitCode": 0,
+      "result": "2 passed after textarea scope fix",
+      "durationSeconds": 10.1
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "command": "npx vitest run tests/mcp-registry.test.ts",
+      "exitCode": 0,
+      "result": "3 passed after additional unavailable/stale reference assertions",
+      "durationSeconds": 0.997,
+      "source": "01788a6"
+    }
+  ],
+  "browser": {
+    "name": "Chromium",
+    "version": "148.0.7778.96",
+    "deviceScaleFactor": 1,
+    "zoom": "100%",
+    "language": "zh-TW",
+    "theme": "light",
+    "viewports": [
+      "1440x900",
+      "1280x800",
+      "390x844",
+      "320x844"
+    ]
+  },
+  "screenshots": [
+    "settings-1440.png",
+    "settings-1280.png",
+    "settings-390.png",
+    "settings-320.png"
+  ],
+  "verified": [
+    "Initial empty MCP registry and disabled defaults; strict Rocky transport/extension schema",
+    "Atomic full configuration/receipt replacement, stale revision and changed idempotency rejection, restart receipt persistence",
+    "Injected receipt-write failure rolls back both config and revision",
+    "Daemon launchSpec builds only configured environment/path/reference values; disabled and plaintext known credentials rejected",
+    "Referenced current/retired secrets redacted from ordinary evidence; resolved secrets absent from saved config",
+    "Owner-session API mutation, foreign input rejection preserves existing configuration",
+    "Actual browser save/reload, four viewport focus and page overflow checks; steering regression after scoped textarea fix"
+  ],
+  "corrections": [
+    "Initial browser selector matched unrelated historical Work alerts; scoped to settings dialog",
+    "Initial screenshot revealed composer textarea style affecting JSON editor; scoped composer layout and added token-based full-width config editor, browser rerun passed"
+  ],
+  "limitations": [
+    "Registry/launch-spec seam only; no configured external MCP process/HTTP connection/tool call in this slice",
+    "SDK lifecycle/diagnostics/discovery/schema validation, true network/proxy/CA/OAuth, credential versions/revocation and runtime routing pending",
+    "Advanced JSON editor is functional; structured per-server form and final settings UX remain incomplete",
+    "No new reference/before/after comparison; MCP-specific dark/English/reduced-motion checks not_run",
+    "Windows fixture only; no Ubuntu/live service evidence; T-014/T-021 in_progress; global AT unchanged; Goal active",
+    "No remote actions"
+  ]
+}
