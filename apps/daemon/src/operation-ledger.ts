@@ -18,6 +18,13 @@ type Operation = {
   context: string | null;
   revision: number;
 };
+function effectArgsHash(name: string, args: Record<string, unknown>) {
+  if (name !== "mcp_call") return intentHash(args);
+  const effect = { ...args };
+  delete effect.registryRevision;
+  // Reconnecting/discovery revision changes cannot authorize repeating a known effect.
+  return intentHash(effect);
+}
 export class OperationLedger {
   constructor(private readonly store: Store) {}
   retryAncestors(work: Work) {
@@ -161,9 +168,9 @@ export class OperationLedger {
         const argsHash =
           context.requestArgsHash ??
           (source.approval?.operationId === summary.id
-            ? intentHash(source.approval.args)
+            ? effectArgsHash(name, source.approval.args)
             : undefined);
-        if (!argsHash || argsHash === intentHash(args))
+        if (!argsHash || argsHash === effectArgsHash(name, args))
           throw new RockyError(
             "retry_replay_denied",
             "Retry cannot repeat a confirmed prior effect; use its receipt",
@@ -265,7 +272,7 @@ export class OperationLedger {
       name,
       fingerprint,
       targetIdentity,
-      requestArgsHash: intentHash(args),
+      requestArgsHash: effectArgsHash(name, args),
     });
     const hash = intentHash({ context, args });
     return this.store.transaction(() => {

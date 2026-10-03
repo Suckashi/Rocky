@@ -24,6 +24,10 @@ import { SteeringStore } from "./steering.js";
 import { ModelRegistry } from "./model-registry.js";
 import { McpRegistry } from "./mcp-registry.js";
 import { McpManager } from "./mcp-manager.js";
+import {
+  mcpCallSchema,
+  mcpDiscoverSchema,
+} from "../../../packages/contracts/src/mcp-runtime.js";
 import { ModelBudgetLedger } from "./model-budget.js";
 import { intentHash } from "./intent.js";
 import { OperationLedger } from "./operation-ledger.js";
@@ -527,7 +531,10 @@ export class WorkService {
           : { modelSelection: selection }),
         purpose: "target",
         mode: work.mode,
-        toolScope: "synthetic",
+        toolScope:
+          work.mode === "configured"
+            ? "configured MCP via exact approval; sample tools remain synthetic"
+            : "synthetic",
       });
       const hooks: RuntimeHooks = {
         modelRequest: fixtureModel
@@ -555,6 +562,48 @@ export class WorkService {
         call: async (name, args, callId) => {
           abort.signal.throwIfAborted();
           const current = this.store.get(work.id);
+          if (name === "mcp_discover") {
+            if (current.mode !== "configured" || current.runMode !== "normal")
+              throw new RockyError(
+                "mcp_scope",
+                "Configured MCP discovery is unavailable in this mode",
+                403,
+              );
+            const query = mcpDiscoverSchema.parse(args);
+            if (!query.serverId)
+              return JSON.stringify({
+                servers: this.mcpManager
+                  .list()
+                  .filter((s) => s.status === "ready")
+                  .map((s) => ({
+                    serverId: s.serverId,
+                    registryRevision: s.registryRevision,
+                    toolsCount: s.toolsCount,
+                  })),
+              });
+            if (!query.registryRevision)
+              throw new RockyError(
+                "mcp_revision_required",
+                "Select the exact discovered registry revision",
+                400,
+              );
+            const tools = this.mcpManager.catalog(
+              query.serverId,
+              query.registryRevision,
+            );
+            return JSON.stringify({
+              serverId: query.serverId,
+              registryRevision: query.registryRevision,
+              tools: tools.slice(query.offset, query.offset + 5),
+              nextOffset:
+                query.offset + 5 < tools.length ? query.offset + 5 : null,
+              untrustedData: true,
+            });
+          }
+          const configuredTool =
+            name === "mcp_call"
+              ? this.configuredTool(current, args)
+              : undefined;
           if (current.modelSelection)
             this.models.assertRunnable(
               current.modelSelection.connectionId,
@@ -566,6 +615,7 @@ export class WorkService {
             name,
             args,
             this.fingerprint(current, name, args),
+            ...(configuredTool ? [intentHash(configuredTool.identity)] : []),
           );
           if (operation.outcome === "succeeded") return operation.result!;
           if (operation.phase !== "prepared")
@@ -579,10 +629,12 @@ export class WorkService {
             runId: current.runId,
             executionSessionId: current.executionSessionId,
           };
-          const targetHash = intentHash({
-            fixture: current.runId,
-            transport: current.transport,
-          });
+          const targetHash = configuredTool
+            ? intentHash(configuredTool.identity)
+            : intentHash({
+                fixture: current.runId,
+                transport: current.transport,
+              });
           authorizeOperation({
             owner: {
               workId: work.id,
@@ -596,22 +648,26 @@ export class WorkService {
                 ? "known_read"
                 : name === "write_sample"
                   ? "critical"
-                  : "denied",
+                  : configuredTool
+                    ? "unknown"
+                    : "denied",
             configurationAllowed: true,
             resourceAllowed:
               name !== "inspect_sample" ||
               this.grants.allows(current, targetHash, "known_read", 1),
             revoked: false,
-            preparedTargetHash: intentHash({
-              fixture: work.runId,
-              transport: work.transport,
-            }),
+            preparedTargetHash: configuredTool
+              ? targetHash
+              : intentHash({
+                  fixture: work.runId,
+                  transport: work.transport,
+                }),
             currentTargetHash: targetHash,
             policyRevision: 1,
             preparedPolicyRevision: 1,
             operationId: operation.id,
             intentFingerprint: this.fingerprint(current, name, args),
-            synthetic: true,
+            synthetic: !configuredTool,
             allowLocalNew: false,
             targetExists: true,
             approval: current.approval
@@ -635,25 +691,41 @@ export class WorkService {
             "dispatched",
             "unknown",
             null,
-            { destination: connection.destination },
+            {
+              destination: configuredTool
+                ? "mcp:" + configuredTool.identity.serverId
+                : connection.destination,
+            },
           );
           this.flushOutbox();
           try {
-            const result = await connection.client.callTool(
-              {
-                name,
-                arguments: args,
-                _meta: {
-                  "rocky/operation": {
+            const result = configuredTool
+              ? await this.mcpManager.dispatchTool(
+                  configuredTool,
+                  {
                     operationId: operation.id,
                     intentHash: operation.args_hash,
                   },
-                },
-              },
-              undefined,
-              { signal: abort.signal, timeout: 10000 },
-            );
-            if (result.isError) throw Error("MCP fixture returned an error");
+                  abort.signal,
+                )
+              : await connection.client.callTool(
+                  {
+                    name,
+                    arguments: args,
+                    _meta: {
+                      "rocky/operation": {
+                        operationId: operation.id,
+                        intentHash: operation.args_hash,
+                      },
+                    },
+                  },
+                  undefined,
+                  { signal: abort.signal, timeout: 10000 },
+                );
+            if (result.isError)
+              throw Error(
+                "MCP tool returned an error; effects are unconfirmed",
+              );
             const serialized = JSON.stringify(result);
             operation = this.operations.transition(
               current,
@@ -800,8 +872,30 @@ export class WorkService {
       transport: work.transport,
       policyRevision: 1,
       fixtureSchemaRevision: 1,
+      ...(tool === "mcp_call"
+        ? {
+            mcpIdentity: this.configuredTool(work, args).identity,
+            mcpConfigHash: this.mcp.snapshot().hash,
+            workspaceId: work.workspaceId ?? null,
+          }
+        : {}),
       ...(work.modelSelection ? { modelSelection: work.modelSelection } : {}),
     });
+  }
+  private configuredTool(work: Work, args: Record<string, unknown>) {
+    if (work.mode !== "configured" || work.runMode !== "normal")
+      throw new RockyError(
+        "mcp_scope",
+        "Configured MCP execution is unavailable in this mode",
+        403,
+      );
+    const call = mcpCallSchema.parse(args);
+    return this.mcpManager.prepareTool(
+      call.serverId,
+      call.registryRevision,
+      call.toolName,
+      call.arguments,
+    );
   }
   private async run(id: string, decision?: "approve" | "reject") {
     const active = this.active.get(id)!;
@@ -849,7 +943,12 @@ export class WorkService {
       };
       const request = raw.__interrupt__?.[0]?.value.actionRequests?.[0];
       if (request) {
-        if (request.name !== "write_sample")
+        if (
+          raw.__interrupt__?.length !== 1 ||
+          raw.__interrupt__[0]?.value.actionRequests?.length !== 1
+        )
+          throw Error("Only one exact tool approval at a time is supported");
+        if (request.name !== "write_sample" && request.name !== "mcp_call")
           throw Error("Unsupported interrupt");
         const calls =
           raw.messages
@@ -867,6 +966,9 @@ export class WorkService {
           request.name,
           request.args,
           this.fingerprint(work, request.name, request.args),
+          ...(request.name === "mcp_call"
+            ? [intentHash(this.configuredTool(work, request.args).identity)]
+            : []),
         );
         work.status = "waiting_approval";
         work.approval = {
@@ -969,6 +1071,17 @@ export class WorkService {
       this.models.assertRunnable(
         work.modelSelection.connectionId,
         work.modelSelection.revision,
+      );
+    if (
+      decision.decision === "approve" &&
+      work.approval.tool === "mcp_call" &&
+      this.fingerprint(work, "mcp_call", work.approval.args) !==
+        work.approval.intentFingerprint
+    )
+      throw new RockyError(
+        "stale_approval",
+        "MCP approval identity changed",
+        409,
       );
     work.approval.status =
       decision.decision === "approve" ? "approved" : "rejected";

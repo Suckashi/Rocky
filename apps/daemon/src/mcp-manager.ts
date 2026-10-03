@@ -515,6 +515,52 @@ export class McpManager {
       args: validated.data,
     };
   }
+  /** Internal daemon adapter; caller must persist authorization/dispatch before invoking. */
+  async dispatchTool(
+    prepared: ReturnType<McpManager["prepareTool"]>,
+    operation: { operationId: string; intentHash: string },
+    signal: AbortSignal,
+  ) {
+    const { serverId, registryRevision, toolName } = prepared.identity;
+    const current = this.prepareTool(
+      serverId,
+      registryRevision,
+      toolName,
+      prepared.args,
+    );
+    if (intentHash(current.identity) !== intentHash(prepared.identity))
+      throw new RockyError(
+        "mcp_schema_changed",
+        "MCP tool identity changed",
+        409,
+      );
+    signal.throwIfAborted();
+    const connection = this.active.get(serverId)!;
+    this.assertCurrent(serverId, connection);
+    const spec = this.registry.launchSpec(
+      serverId,
+      current.identity.configRevision,
+    );
+    const result = await connection.client.callTool(
+      {
+        name: toolName,
+        arguments: current.args as Record<string, unknown>,
+        _meta: { "rocky/operation": operation },
+      },
+      undefined,
+      {
+        signal: AbortSignal.any([signal, connection.abort.signal]),
+        timeout: spec.toolTimeoutMs,
+      },
+    );
+    if (Buffer.byteLength(JSON.stringify(result)) > 2097152)
+      throw new RockyError(
+        "mcp_result_limit",
+        "MCP result exceeds the delivery limit",
+        422,
+      );
+    return result;
+  }
   async close() {
     this.closed = true;
     this.unsubscribe();

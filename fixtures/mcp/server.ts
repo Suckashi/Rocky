@@ -14,7 +14,7 @@ const receiptMeta = z.strictObject({
   operationId: z.string().min(1).max(300),
   intentHash: z.string().regex(/^[a-f0-9]{64}$/),
 });
-export function fixtureServer(receiptRoot?: string) {
+export function fixtureServer(receiptRoot?: string, failAfterEffect = false) {
   if (receiptRoot) mkdirSync(receiptRoot, { recursive: true });
   const server = new McpServer({
     name: "rocky-synthetic-tools",
@@ -96,12 +96,15 @@ export function fixtureServer(receiptRoot?: string) {
           { flag: "wx", flush: true },
         );
       }
-      return result;
+      return failAfterEffect ? { ...result, isError: true } : result;
     },
   );
   return server;
 }
-export async function startHttpFixture(receiptRoot?: string) {
+export async function startHttpFixture(
+  receiptRoot?: string,
+  failAfterEffect = false,
+) {
   const active = new Set<StreamableHTTPServerTransport>();
   const http = createServer(async (req, res) => {
     if (req.url !== "/mcp") {
@@ -112,7 +115,7 @@ export async function startHttpFixture(receiptRoot?: string) {
       res.writeHead(405).end();
       return;
     }
-    const server = fixtureServer(receiptRoot);
+    const server = fixtureServer(receiptRoot, failAfterEffect);
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });

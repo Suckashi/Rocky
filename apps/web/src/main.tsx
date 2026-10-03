@@ -34,7 +34,7 @@ const labels = {
     setup: "本地連線",
     title: "一起把問題做完。",
     intro:
-      "我是 Rocky，一起用可核對的步驟把工作做完。你可以選擇自己的模型，或體驗合成流程；目前工具僅操作合成範例。",
+      "我是 Rocky，一起用可核對的步驟把工作做完。選擇自己的模型與 MCP 工具；外部操作會先請你核准。也可以啟用合成測試流程。",
     fixture: "啟用合成測試",
     placeholder: "描述想驗證的流程…",
     send: "開始驗證",
@@ -65,7 +65,7 @@ const labels = {
     setup: "Local connection",
     title: "Let’s work through it.",
     intro:
-      "I’m Rocky. Let’s work through clear steps and verifiable results. Select your own model or try the synthetic workflow; tools currently operate only on synthetic samples.",
+      "I’m Rocky. Let’s work through clear steps and verifiable results. Select your model and MCP tools; external calls ask for your approval. A synthetic test workflow is also available.",
     fixture: "Enable synthetic fixture",
     placeholder: "Describe a workflow to verify…",
     send: "Run verification",
@@ -298,10 +298,44 @@ function App() {
                   {w.approval?.status === "pending" && (
                     <section className="approval">
                       <h2>{t.approval}</h2>
-                      <p>{t.impact}</p>
-                      <code>
-                        {w.approval.tool}({JSON.stringify(w.approval.args)})
-                      </code>
+                      <p>
+                        {w.approval.tool === "mcp_call"
+                          ? locale === "zh"
+                            ? "這將呼叫你配置的外部 MCP 伺服器，可能改變外部資料。"
+                            : "This calls your configured MCP server and may change external data."
+                          : t.impact}
+                      </p>
+                      {w.approval.tool === "mcp_call" ? (
+                        <>
+                          <p>
+                            <strong>{String(w.approval.args.toolName)}</strong>{" "}
+                            · {String(w.approval.args.serverId)}
+                          </p>
+                          <p>
+                            {locale === "zh"
+                              ? "外部工具的效果尚未確認。核准只適用這次顯示的精確參數；拒絕不會送出呼叫。"
+                              : "External effects are unconfirmed. Approval applies only to these exact arguments; rejection sends no call."}
+                          </p>
+                          <details>
+                            <summary>
+                              {locale === "zh"
+                                ? "檢查待執行參數"
+                                : "Review exact arguments"}
+                            </summary>
+                            <pre>
+                              {JSON.stringify(
+                                w.approval.args.arguments,
+                                null,
+                                2,
+                              )}
+                            </pre>
+                          </details>
+                        </>
+                      ) : (
+                        <code>
+                          {w.approval.tool}({JSON.stringify(w.approval.args)})
+                        </code>
+                      )}
                       <div className="actions">
                         <button
                           className="primary"
@@ -424,8 +458,8 @@ function App() {
             {selectedModel && (
               <p role="status">
                 {locale === "zh"
-                  ? `使用 ${selectedModel.name}：訊息會送至此模型，可能產生費用。工具只操作合成範例。`
-                  : `Using ${selectedModel.name}: messages go to this model and may incur charges. Tools operate only on synthetic samples.`}{" "}
+                  ? `使用 ${selectedModel.name}：訊息會送至此模型，可能產生費用。配置的 MCP 操作需先核准。`
+                  : `Using ${selectedModel.name}: messages go to this model and may incur charges. Configured MCP calls require approval.`}{" "}
                 <button onClick={() => setSelectedModel(null)}>
                   {locale === "zh" ? "取消選取" : "Clear selection"}
                 </button>

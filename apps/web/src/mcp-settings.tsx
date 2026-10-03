@@ -74,8 +74,8 @@ export function McpSettings({
       </summary>
       <p>
         {locale === "zh"
-          ? "只使用自行配置的 MCP。保存不會啟動程序或連線。就緒表示協定連線與工具探索完成，不代表工作成功；對話工具路由尚未接上。"
-          : "Saving does not start configured MCP servers. Ready means protocol connection and tool discovery, not Work success. Conversation tool routing is not connected yet."}
+          ? "只使用自行配置的 MCP。保存不會啟動程序或連線。就緒表示協定連線與工具探索完成，不代表工作成功。正式模型可按需探索工具；每次外部呼叫都需精確核准。"
+          : "Saving does not start configured MCP servers. Ready means protocol connection and tool discovery, not Work success. Configured models can discover tools on demand; each external call requires exact approval."}
       </p>
       {open && (
         <>

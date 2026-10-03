@@ -26,6 +26,51 @@ function setup() {
   store.add(work, "test");
   return { root, store, work, ledger: new OperationLedger(store) };
 }
+test("configured MCP reconnect revision cannot bypass confirmed-effect retry protection, while distinct server targets remain distinct", () => {
+  const { root, store, work, ledger } = setup();
+  try {
+    const args = {
+      serverId: "one",
+      registryRevision: 1,
+      toolName: "write",
+      arguments: { value: "same" },
+    };
+    let op = ledger.prepare(work, "one", "mcp_call", args, "first");
+    op = ledger.transition(work, op, "authorized", "not_executed");
+    op = ledger.transition(work, op, "dispatched", "unknown");
+    ledger.transition(work, op, "settled", "succeeded", "receipt");
+    const retry = workSchema.parse({
+      ...work,
+      id: randomUUID(),
+      runId: randomUUID(),
+      executionSessionId: randomUUID(),
+      requestId: randomUUID(),
+      retryOf: work.id,
+    });
+    store.add(retry, "test");
+    expect(() =>
+      ledger.prepare(
+        retry,
+        "repeat",
+        "mcp_call",
+        { ...args, registryRevision: 2 },
+        "second",
+      ),
+    ).toThrow("confirmed prior effect");
+    expect(
+      ledger.prepare(
+        retry,
+        "different",
+        "mcp_call",
+        { ...args, serverId: "two" },
+        "second",
+      ).phase,
+    ).toBe("prepared");
+  } finally {
+    store.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 test("T-008 durable stages, exact intent, CAS and unknown never reset on restart", () => {
   const { root, store, work, ledger } = setup();
   let closed = false;
