@@ -770,6 +770,30 @@
             "Ubuntu and strict browser egress remain open; no global AT promoted",
             "No live/paid endpoint or remote action"
           ]
+        },
+        {
+          "commit": "1060dd99538d13ef8249db1950e9cdf8d7a22ed5",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/models/configured-adapter.json",
+          "testFiles": [
+            "tests/configured-model.test.ts",
+            "fixtures/models/agent-provider.ts"
+          ],
+          "limitations": [
+            "T-007 in_progress: configured Work/UI/evaluation selection remains unfinished; runtimeAvailable stays false",
+            "No production or paid endpoint exercised; fixtures report deterministic usage for adapter verification",
+            "Native factory integration uses synthetic tools and MemorySaver; full daemon configured Work path not yet verified",
+            "Incremental runtime streaming, vision, structured output, explicit tool-choice and cache-priced usage not implemented",
+            "Trusted tokenizer/profile integration and editable budget configuration remain pending",
+            "Existing Ubuntu and strict browser egress gates remain open; no global AT promoted",
+            "Backend-only change: no browser rerun; dependencies unchanged, no clean install repeated",
+            "No remote action"
+          ]
         }
       ],
       "blockedReason": null,
