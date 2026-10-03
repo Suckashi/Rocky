@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-03",
+  "commit": "d3f595b",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "mode": "fixture",
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "result": "15.32s; existing bundle warning"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "result": "39 files / 147 tests passed",
+      "durationSeconds": 94.15
+    },
+    {
+      "command": "npx vitest run tests/result-transfer.test.ts tests/worker-channel.test.ts",
+      "exitCode": 0,
+      "result": "17 focused tests passed",
+      "durationSeconds": 8.71
+    },
+    {
+      "command": "npx vitest run tests/continuous-conversation.test.ts",
+      "exitCode": 0,
+      "result": "3 tests including actual configured large answer/history delivery",
+      "durationSeconds": 13.48
+    },
+    {
+      "command": "$env:ROCKY_TEST_BROWSER=Join-Path $env:LOCALAPPDATA 'ms-playwright/chromium-1223/chrome-win64/chrome.exe'; npx playwright test tests/e2e/streaming.spec.ts tests/e2e/configured-work.spec.ts --grep-invert 'browser egress'",
+      "exitCode": 0,
+      "result": "2 passed",
+      "durationSeconds": 27.6
+    }
+  ],
+  "verified": [
+    "Large Unicode model response and final native result cross both actual child IPC directions intact",
+    "Large synthetic tool receipt waits for exact native interrupt approval, executes once and persists full native offload evidence",
+    "Configured provider fixture large answer reaches authoritative Work and immutable visible history; one budget/provider call",
+    "Receiver checks request identity, kind, sequence, bytes and digest before delivery; complete JSON only",
+    "Missing commit, wrong final kind and direct-result bypass reject invocation; no Work success from process exit0",
+    "Per-transfer/aggregate/capacity/expiry/Unicode tests pass; cancellation clears buffers"
+  ],
+  "corrections": [
+    "Initial tool evidence test assumed old array file format; assertion corrected to actual native v2 string content",
+    "Initial fault fixture had a TypeScript optional disconnect error; corrected before final check/build",
+    "Missing-commit fixture exposed Agent worker job recording exit0 as normal exit without result; now interrupted, final focused/full checks pass"
+  ],
+  "limitations": [
+    "Windows loopback/synthetic provider and tool receipts only; no paid/live provider, external effect or Ubuntu evidence",
+    "2MiB per result,8 simultaneous transfers and8MiB aggregate are explicit limits; oversized results fail rather than truncate",
+    "Large tool arguments/interrupt descriptions remain bounded separately; public snapshot/history payload/performance policies pending",
+    "No new OpenDots visual comparison; current configured/stream/stop browser regression only",
+    "Full power-loss/crash matrix, precise steering/reset/retry and later V1 modules remain unfinished; global AT unchanged",
+    "No remote actions"
+  ]
+}

@@ -11,7 +11,7 @@
 - The executor has a child-process/IPC worker boundary (not an OS sandbox), bounded admission and resource reservation. Owned inbox/checkpoint delivery and native context compaction have local fixture evidence; exact steering/reset/retry and full recovery acceptance remain pending. T-006 now has a domain outbox, deduplicated completion results and completion-result pagination. Do not expose it beyond loopback.
 - No remote repository, visibility configuration, first push, protections, merge, tag or deployment has been performed.
 
-Current runtime evidence: native-compaction.md, context-inbox.md and their recorded commands. Long model requests now use bounded framing; large model responses/tool results, exact steering/reset/retry, child compaction and full recovery remain pending.
+Current runtime evidence: native-compaction.md, context-inbox.md and their recorded commands. Long model requests and model/tool/final results now use bounded framing (2MiB per transfer); public snapshot/history payload/performance, oversized arguments, exact steering/reset/retry, child compaction and full recovery remain pending.
 
 Historical slice notes below describe their source commits; later updates supersede absent-context/inbox statements.
 

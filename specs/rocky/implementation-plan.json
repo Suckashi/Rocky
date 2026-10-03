@@ -1381,6 +1381,31 @@
             "Ubuntu and strict browser egress not verified; global AT statuses unchanged",
             "No live paid model, remote repository action, merge, tag or deployment"
           ]
+        },
+        {
+          "commit": "d3f595b",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; focused result/worker/continuous tests; selected Playwright",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/result-transfer.json",
+          "testFiles": [
+            "tests/result-transfer.test.ts",
+            "tests/worker-channel.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/configured-work.spec.ts"
+          ],
+          "limitations": [
+            "Windows loopback/synthetic provider and tool receipts only; no paid/live provider, external effect or Ubuntu evidence",
+            "2MiB per result,8 simultaneous transfers and8MiB aggregate are explicit limits; oversized results fail rather than truncate",
+            "Large tool arguments/interrupt descriptions remain bounded separately; public snapshot/history payload/performance policies pending",
+            "No new OpenDots visual comparison; current configured/stream/stop browser regression only",
+            "Full power-loss/crash matrix, precise steering/reset/retry and later V1 modules remain unfinished; global AT unchanged",
+            "No remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -1677,6 +1702,31 @@
             "No new OpenDots pixel comparison; existing UI flows were regression-tested",
             "T-011 stays in_progress; all global AT remain not_run; no remote actions"
           ]
+        },
+        {
+          "commit": "d3f595b",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; focused result/worker/continuous tests; selected Playwright",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/result-transfer.json",
+          "testFiles": [
+            "tests/result-transfer.test.ts",
+            "tests/worker-channel.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/configured-work.spec.ts"
+          ],
+          "limitations": [
+            "Windows loopback/synthetic provider and tool receipts only; no paid/live provider, external effect or Ubuntu evidence",
+            "2MiB per result,8 simultaneous transfers and8MiB aggregate are explicit limits; oversized results fail rather than truncate",
+            "Large tool arguments/interrupt descriptions remain bounded separately; public snapshot/history payload/performance policies pending",
+            "No new OpenDots visual comparison; current configured/stream/stop browser regression only",
+            "Full power-loss/crash matrix, precise steering/reset/retry and later V1 modules remain unfinished; global AT unchanged",
+            "No remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -1859,6 +1909,31 @@
             "Precise steering, retry/reset commands and full crash matrix remain pending; T-011/T-013 stay in_progress",
             "Local scripted provider only; no live paid provider, Ubuntu or strict browser egress claim",
             "Full Work snapshot pagination and later V1 modules remain unfinished",
+            "No remote actions"
+          ]
+        },
+        {
+          "commit": "d3f595b",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; focused result/worker/continuous tests; selected Playwright",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/result-transfer.json",
+          "testFiles": [
+            "tests/result-transfer.test.ts",
+            "tests/worker-channel.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/configured-work.spec.ts"
+          ],
+          "limitations": [
+            "Windows loopback/synthetic provider and tool receipts only; no paid/live provider, external effect or Ubuntu evidence",
+            "2MiB per result,8 simultaneous transfers and8MiB aggregate are explicit limits; oversized results fail rather than truncate",
+            "Large tool arguments/interrupt descriptions remain bounded separately; public snapshot/history payload/performance policies pending",
+            "No new OpenDots visual comparison; current configured/stream/stop browser regression only",
+            "Full power-loss/crash matrix, precise steering/reset/retry and later V1 modules remain unfinished; global AT unchanged",
             "No remote actions"
           ]
         }
@@ -4078,7 +4153,7 @@
     "remoteStatus": "not_created",
     "visibility": null,
     "creationRequiresSeparateAuthorization": true,
-    "implementationCommit": "7a6a98e",
+    "implementationCommit": "d3f595b",
     "strategy": "greenfield_no_fork_no_imported_git_history"
   },
   "referenceRepositories": [
