@@ -818,6 +818,27 @@
             "Dependencies unchanged; clean installation not repeated",
             "No remote action or global AT promotion"
           ]
+        },
+        {
+          "commit": "d75904027005d764bc373cab0e2cb31406aac86e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "live",
+          "command": "node --import tsx .rocky-live/probe.mjs",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/models/live-probe.json",
+          "testFiles": [
+            "tests/models.test.ts"
+          ],
+          "limitations": [
+            "T-007 remains in_progress: configured evaluation, token profiles, editable budgets, cache pricing and DNS policy evidence remain",
+            "Context remains unknown; no live Work/native Agent executed",
+            "Cancellation proves local transport cancellation only, not provider billing termination",
+            "No raw provider errors, credentials or full source settings stored in tracked evidence",
+            "Ubuntu and strict browser egress remain open; no global acceptance promoted",
+            "No dependency change, browser rerun or remote action"
+          ]
         }
       ],
       "blockedReason": null,
