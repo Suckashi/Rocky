@@ -27,7 +27,7 @@ The current Agent fixture/evaluation path now reserves a durable shared root bud
 
 The configured model adapter parses ordinary OpenAI-compatible/Anthropic usage and runs through the same native Agent factory and daemon Work path. The UI and CopilotKit facade pass only a connection ID/revision; credentials remain in the daemon. Registry leases pin revisions and abort on configuration changes. Older pending approvals cannot write after that revision changes. Completed work preserves its original model selection, and replaying a submission ID never creates another run. See [adapter contract](../adr/009-configured-model-adapter.md).
 
-Still pending within T-007: trusted tokenizer profiles, cache-priced usage, editable budgets and expanded DNS/rebind policy evidence. Vision/structured-output capability is unverified. One authorized live endpoint passed the protocol probe; full live Work, Ubuntu and HTTPS proxy custom trust remain unverified. Do not interpret local protocol fixtures as live-provider certification or full AT acceptance.
+Still pending within T-007: trusted tokenizer profiles, cache-priced usage and expanded DNS/rebind policy evidence. Vision/structured-output capability is unverified. One authorized live endpoint passed the protocol probe; full live Work, Ubuntu and HTTPS proxy custom trust remain unverified. Do not interpret local protocol fixtures as live-provider certification or full AT acceptance.
 
 ## Configured evaluation
 
@@ -41,4 +41,6 @@ The configured endpoint is allowed only for the duration of each evaluation call
 
 Work submission and CopilotKit forwarded properties accept optional `modelBudget`, with `maxCalls` (default 48), nullable `maxTokens`, nullable `maxMicroUsd`, and explicit input/output micro-USD-per-million pricing when money is capped. The daemon validates and persists this budget atomically with Work creation. The same root budget includes native children. Submission retries cannot change the budget, and Work CAS updates cannot replace it. Existing persisted Works without an explicit budget retain the default.
 
-Trusted evaluation configuration accepts the same budget. The runner reads `ROCKY_EVAL_MODEL_BUDGET` as JSON, for example `{"maxCalls":12}`. This is a per-Work cap, not an aggregate campaign cap. UI budget controls and campaign budgets are still pending. Token/cost caps require trusted bounds; without a configured trusted tokenizer they fail before dispatch rather than guessing. Prices are owner-supplied estimates, not provider invoices.
+Trusted evaluation configuration accepts the same budget. The runner reads `ROCKY_EVAL_MODEL_BUDGET` as JSON, for example `{"maxCalls":12}`. This is a per-Work cap, not an aggregate campaign cap. The composer exposes the call cap in collapsed Work budget controls; campaign budgets remain pending. Token/cost caps require trusted bounds; without a configured trusted tokenizer they fail before dispatch rather than guessing. Prices are owner-supplied estimates, not provider invoices.
+
+The composer defaults to 48 model calls per new Work, adjustable from 1 to 10000. Invalid values disable send. Existing Work details show the original pinned cap even if the composer value is changed. This control does not claim a money or token cap; those remain API-only and require trusted bounds.

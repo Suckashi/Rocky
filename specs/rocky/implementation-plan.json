@@ -881,6 +881,27 @@
             "No live request, browser rerun, dependency change or remote action this turn",
             "Ubuntu/browser egress remain open and no global AT promoted"
           ]
+        },
+        {
+          "commit": "692d7c57f71a7ecf16c33e71f8ae3164fcb65447",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx playwright test --grep-invert \"browser egress\"",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/models/budget-ui.json",
+          "testFiles": [
+            "tests/e2e/budget.spec.ts"
+          ],
+          "limitations": [
+            "UI exposes call count only, not token/currency caps without trusted bounds",
+            "T-007 remains in_progress for trusted token profiles, cache pricing and DNS policy evidence",
+            "Strict browser egress excluded and remains failed; Ubuntu unverified",
+            "Browser used installed Chromium 1223 rather than unavailable pinned 1243",
+            "Existing Vite bundle-size warning remains",
+            "No live/remote action or dependency change; core suite not repeated for UI-only changes"
+          ]
         }
       ],
       "blockedReason": null,

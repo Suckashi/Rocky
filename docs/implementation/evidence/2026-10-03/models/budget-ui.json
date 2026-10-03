@@ -1,0 +1,53 @@
+{
+  "commit": "692d7c57f71a7ecf16c33e71f8ae3164fcb65447",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+  "mode": "fixture",
+  "command": "npx playwright test --grep-invert \"browser egress\"",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-03/models/budget-ui.json",
+  "testFiles": ["tests/e2e/budget.spec.ts"],
+  "limitations": [
+    "UI exposes call count only, not token/currency caps without trusted bounds",
+    "T-007 remains in_progress for trusted token profiles, cache pricing and DNS policy evidence",
+    "Strict browser egress excluded and remains failed; Ubuntu unverified",
+    "Browser used installed Chromium 1223 rather than unavailable pinned 1243",
+    "Existing Vite bundle-size warning remains",
+    "No live/remote action or dependency change; core suite not repeated for UI-only changes"
+  ],
+  "recordedAt": "2026-10-03T05:54:15.572Z",
+  "task": "T-007",
+  "browserTests": 6,
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run format:check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    }
+  ],
+  "coverage": [
+    "Invalid limit disables send",
+    "Custom cap travels through CopilotKit and persists",
+    "One model call then budget failure shown",
+    "Reload preserves submitted limit after composer value changes",
+    "320px no horizontal overflow",
+    "Traditional Chinese dark and English light rendered inspection"
+  ],
+  "screenshots": ["work-budget-mobile.png", "work-budget-en-light.png"]
+}

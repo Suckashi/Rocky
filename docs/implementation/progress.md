@@ -99,3 +99,11 @@ Implementation `27f28439f8c819da509da73fb465eb484f725af9` exposes optional per-W
 All 61 core tests passed, along with typecheck, lint, server build and source guards. A real Promptfoo negative run with maxCalls=1 stopped all four cases before their second model call; read-only database inspection confirmed four immutable budgets of 1 and one recorded call per Work. The expected command exit was 1, not a passing evaluation claim. See [Work budget evidence](evidence/2026-10-03/models/work-budgets.json).
 
 T-007 stays in_progress: budget UI, token profiles, cache pricing and DNS policy evidence remain. Missing trusted bounds safely prevent token/cost-capped dispatch. No live or remote action this turn; Goal active and external gates unchanged.
+
+## Goal continuation: composer call budget
+
+Implementation `692d7c57f71a7ecf16c33e71f8ae3164fcb65447` adds collapsed per-Work model-call controls with 1–10000 validation and explicit shared-child semantics. Both configured and fixture CopilotKit submissions forward the budget. Work details retain the pinned original cap. UI copy distinguishes call counts from money/token caps.
+
+Six functional browser tests passed, including new cap exhaustion, persisted daemon budget, reload and 320px checks. Traditional Chinese dark and English light screenshots were visually inspected. Typecheck, lint, build, final formatting and source guards passed. See [budget UI evidence](evidence/2026-10-03/models/budget-ui.json). A pre-existing test formatting issue was corrected; no runtime change resulted.
+
+T-007 remains in_progress for token profiles, cache pricing and DNS policy evidence. Known strict browser egress failure was excluded and remains open; Ubuntu unverified. No live or remote actions. Goal active.
