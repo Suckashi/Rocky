@@ -215,6 +215,22 @@ export class McpRegistry {
     this.rememberSecrets(this.snapshot().config);
     return createTextStreamRedactor([...this.observedSecrets]);
   }
+  redactDiagnosticTail(text: string) {
+    // EOF may arrive after only a credential prefix. The streaming redactor held
+    // that suffix; conservatively mask it before persisting final diagnostics.
+    let longest = 0;
+    for (const secret of this.observedSecrets)
+      for (
+        let length = Math.min(secret.length - 1, text.length);
+        length > longest;
+        length--
+      )
+        if (text.endsWith(secret.slice(0, length))) {
+          longest = length;
+          break;
+        }
+    return longest ? text.slice(0, -longest) + "[REDACTED]" : text;
+  }
   containsSecret(value: unknown) {
     this.rememberSecrets(this.snapshot().config);
     const raw = JSON.stringify(value);

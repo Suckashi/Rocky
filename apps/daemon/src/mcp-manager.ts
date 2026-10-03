@@ -295,7 +295,7 @@ export class McpManager {
       connection.stderrRedact = this.registry.streamRedactor();
       connection.stderrDecoder = new StringDecoder("utf8");
       transport.stderr?.on("data", (chunk: Buffer) => {
-        if (this.active.get(id) !== connection || connection.closing) return;
+        if (this.active.get(id) !== connection) return;
         connection.stderrBytes += chunk.byteLength;
         if (connection.stderrBytes > 65536) {
           void this.closeConnection(
@@ -311,7 +311,7 @@ export class McpManager {
         );
         if (safe) state.diagnostics.push(safe.slice(-8192));
         state.diagnostics = state.diagnostics.slice(-16);
-        this.saveState(state);
+        if (!connection.closing) this.saveState(state);
       });
     }
     client.setNotificationHandler(
@@ -425,7 +425,9 @@ export class McpManager {
         true,
       );
       if (tail) {
-        connection.state.diagnostics.push(tail.slice(-8192));
+        connection.state.diagnostics.push(
+          this.registry.redactDiagnosticTail(tail).slice(-8192),
+        );
         connection.state.diagnostics = connection.state.diagnostics.slice(-16);
       }
       connection.state.status = status;
