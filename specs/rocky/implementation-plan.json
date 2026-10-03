@@ -954,8 +954,30 @@
         "R-018",
         "R-038"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "1b2f623c72d84ae89916124d935082b00b1cf778",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx vitest run tests/intent.test.ts tests/runtime.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/policy/intent.json",
+          "testFiles": [
+            "tests/intent.test.ts",
+            "tests/runtime.test.ts",
+            "tests/configured-work.test.ts"
+          ],
+          "limitations": [
+            "T-008 in_progress: generic operation phases, owned target recheck, grants, reconciliation and redaction pending",
+            "Integrated only with existing synthetic MCP tool boundary; not a production tool broker",
+            "Existing interrupted work remains blocked on restart; no old approval or mutation replay",
+            "No live calls, remote actions, browser changes or global AT promotion"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
