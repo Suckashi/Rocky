@@ -81,3 +81,7 @@ McpSettings uses the existing reference-aligned WorkspaceDialog, typography/bord
 ## Actual MCP lifecycle controls (5488911/4b2384c)
 
 Settings now shows authoritative connection status, discovered count and last-confirmed time; Connect/Stop/Refresh and diagnostics use existing reference-aligned cards/buttons/dialog. Ready describes protocol/discovery only and does not imply Work success. Saved-not-connected notice clears on connection request. [1440 ready](evidence/2026-10-03/mcp-lifecycle/ready-1440.png), [390 ready](evidence/2026-10-03/mcp-lifecycle/ready-390.png), [commands](evidence/2026-10-03/mcp-lifecycle/verification.json). Actual local HTTP fixture connect/reload/stop and four-width settings checks pass. These do not replace the original reference/before/after comparison. Structured per-server forms and dark/English/reduced-motion lifecycle checks remain incomplete.
+
+## Configured MCP exact approval (2d8cdf3 / ce42900)
+
+PageReviewCard-derived approval structure now shows actual server/tool, honest external-data impact, collapsible exact arguments and a generic operation approval button. Composer/settings no longer claim configured tools are synthetic-only. Actual native/daemon browser flow at1440/1280/390/320 has no full-page overflow, one receipt and no reload dispatch; see [screenshots and limits](mcp-runtime.md). No new upstream reference comparison or full tool/result UI acceptance.

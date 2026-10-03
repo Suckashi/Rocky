@@ -2169,6 +2169,29 @@
             "No browser/full regression rerun; no UI change; Ubuntu/live integration not_run",
             "T-016 in_progress; global AT unchanged; Goal active; no remote actions"
           ]
+        },
+        {
+          "commit": "2d8cdf330f58f8b835f8818209ef0c5235b46de5",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm test; npm run build; npx vitest run tests/mcp-work.test.ts tests/operation-ledger.test.ts tests/retry.test.ts tests/mcp-manager.test.ts tests/mcp-schema.test.ts; npx playwright test tests/e2e/mcp-work.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-runtime/verification.json",
+          "testFiles": [
+            "tests/mcp-work.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/e2e/mcp-work.spec.ts"
+          ],
+          "limitations": [
+            "Full183 tests before last boundary tests/UI text; final36 focused tests and four-width browser passed",
+            "Configured native discovery/call with exact approval/daemon ledger; unknown after error blocks retry",
+            "Typed results/offloads/resources/prompts/generic reconciliation/target mapping/schema supersession pending",
+            "Inherited synthetic sample exposure in configured graph still requires production cleanup",
+            "Loopback fixtures only; Ubuntu/live integration not_run; no new fidelity comparison",
+            "T-016 remains in_progress; global AT unchanged; no remote actions"
+          ]
         }
       ],
       "blockedReason": null,

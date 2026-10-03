@@ -378,3 +378,7 @@ Windows fixture: check/lint/final build pass (14.08s);43 files/164 tests passed 
 ## Configured MCP schema boundary — 2026-10-03
 
 Source 4112fb7: original JSON schemas now gate ready discovery and daemon tool preparation; same-name tools have server-specific identities, and annotations remain unknown effects. Windows check/lint/build and 25 focused tests passed. Formal configured dispatch, exact approvals, typed results and resources/prompts remain pending; T-016 is in_progress. See [MCP schema](mcp-schema.md) and [evidence](evidence/2026-10-03/mcp-schema/verification.json). Goal stays active; no remote action.
+
+## Configured MCP native runtime — 2026-10-03
+
+Source 2d8cdf3 / ce42900: one native mcp_discover/mcp_call strategy now routes exact approved calls through the daemon operation ledger. Four-width browser verifies one actual fixture receipt and no reload replay; error after effect stays unknown and blocks retry. Full183 tests preceded final boundaries/text; latest36 focused tests and final browser passed. T-016 remains in_progress. Next remove inherited sample tools from configured production, then typed results and generic reconciliation. See [MCP runtime](mcp-runtime.md) and [verification](evidence/2026-10-03/mcp-runtime/verification.json). Goal active; no remote actions.
