@@ -1,0 +1,48 @@
+{
+  "task": "T-009",
+  "sourceCommit": "5cb4dbb306156a77ff3f002c8902460eebedb0d3",
+  "platform": "Windows x64",
+  "node": "v24.12.0",
+  "npm": "11.6.4",
+  "lockfileSha256": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+  "result": "local implementation complete",
+  "checks": [
+    { "command": "npm test", "exitCode": 0, "result": "96 tests in 26 files" },
+    { "command": "npm run check", "exitCode": 0 },
+    { "command": "npm run build", "exitCode": 0 },
+    { "command": "npm run lint", "exitCode": 0 },
+    { "command": "npm run format:check", "exitCode": 0 },
+    { "command": "npm run check:docs", "exitCode": 0 },
+    { "command": "npm run check:secrets", "exitCode": 0 },
+    {
+      "command": "npm run test:network",
+      "exitCode": 0,
+      "result": "3 network tests and 4 fixture Agent evaluation cases"
+    },
+    {
+      "command": "npx playwright test --grep-invert 'browser egress'",
+      "exitCode": 0,
+      "result": "8 browser tests with installed Chromium 1223"
+    },
+    {
+      "command": "npm run test:no-python",
+      "exitCode": 0,
+      "result": "clean copy npm ci/check/build/test/learning all exit 0; forbidden tool attempts 0"
+    }
+  ],
+  "proof": [
+    "Configured OpenAI-compatible and Anthropic Work use the same Agent worker as fixture Work; model credentials, provider requests, budgets and MCP effects stay in daemon.",
+    "Configured Work tests assert daemon-owned worker job exits after native child, approval and resume.",
+    "Worker preload rejects direct fetch, TCP, TLS, HTTP and UDP Node APIs; dedicated subprocess test checks denials.",
+    "Worker channel tests cover capability and sequence ownership, bounded queues, abort, descendant cleanup, interrupt/resume and restart recovery.",
+    "Browser reload while approval waits leaves Work available; explicit UI stop expires approval and persists."
+  ],
+  "limitations": [
+    "Node API egress guard is not an OS packet or filesystem sandbox; native modules and untrusted child code are outside this claim.",
+    "Parent diagnostics_channel network audit does not inspect worker packets; worker-side denial is verified at the patched Node APIs.",
+    "Ubuntu was not run. Strict browser egress case remains excluded because local AdGuard injection causes its known failure.",
+    "The Node-only clean copy is Windows evidence, not a pristine Ubuntu machine.",
+    "T-007 and T-008 broader deliverables remain in progress; global acceptance IDs remain not_run.",
+    "No live paid model, remote repo, push, merge, tag or deployment was performed."
+  ]
+}

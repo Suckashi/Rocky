@@ -1268,7 +1268,7 @@
         "R-013",
         "R-042"
       ],
-      "status": "in_progress",
+      "status": "done",
       "evidence": [
         {
           "commit": "48a6efda0f2c0b5c9ff1c675c50715cb6d09cfe0",
@@ -1354,6 +1354,31 @@
             "Node network audit instruments the parent process, not the spawned Agent worker; hidden worker egress not proven absent",
             "The browser egress case remains excluded due to local AdGuard injection; Ubuntu not run",
             "T-009 remains in_progress; no global AT promotion, live model or remote action"
+          ]
+        },
+        {
+          "commit": "5cb4dbb306156a77ff3f002c8902460eebedb0d3",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test && npm run test:network && npm run test:no-python",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/worker/configured-agent.json",
+          "testFiles": [
+            "tests/worker-channel.test.ts",
+            "tests/worker-network-guard.test.ts",
+            "tests/configured-work.test.ts",
+            "tests/runtime.test.ts",
+            "tests/stop.test.ts",
+            "tests/e2e/configured-work.spec.ts",
+            "tests/e2e/work.spec.ts"
+          ],
+          "limitations": [
+            "Local T-009 lifecycle and IPC doneWhen met; T-007/T-008 broader deliverables remain open",
+            "Node worker egress guard denies common Node network APIs but is not an OS packet/filesystem sandbox",
+            "Ubuntu and strict browser egress not verified; global AT statuses unchanged",
+            "No live paid model, remote repository action, merge, tag or deployment"
           ]
         }
       ],
