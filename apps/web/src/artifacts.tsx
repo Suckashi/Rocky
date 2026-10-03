@@ -42,6 +42,8 @@ export function Artifacts({
   const [items, setItems] = useState<Artifact[]>([]),
     [selected, setSelected] = useState<Artifact>(),
     [text, setText] = useState<string>(),
+    [html, setHtml] = useState<string>(),
+    [showSource, setShowSource] = useState(false),
     [busy, setBusy] = useState(true),
     [error, setError] = useState("");
   useEffect(() => {
@@ -84,13 +86,18 @@ export function Artifacts({
     const current = ++epoch.current;
     setSelected(item);
     setText(undefined);
+    setHtml(undefined);
+    setShowSource(false);
     setError("");
     setBusy(true);
     try {
       const value = z
-        .object({ text: z.string() })
+        .object({ text: z.string(), renderedHtml: z.string().optional() })
         .parse(await request(`/artifacts/${item.id}/preview`));
-      if (current === epoch.current) setText(value.text);
+      if (current === epoch.current) {
+        setText(value.text);
+        setHtml(value.renderedHtml);
+      }
     } catch (e) {
       if (current === epoch.current) setError(String(e));
     } finally {
@@ -168,9 +175,13 @@ export function Artifacts({
             {selected.title}
           </h2>
           <p>
-            {zh
-              ? "不可變快照 · 原始文字預覽（不執行 HTML 或腳本）"
-              : "Immutable snapshot · source text preview (HTML and scripts do not execute)"}
+            {html
+              ? zh
+                ? "不可變快照 · 受限 HTML 預覽"
+                : "Immutable snapshot · restricted HTML preview"
+              : zh
+                ? "不可變快照 · 原始文字預覽"
+                : "Immutable snapshot · source text preview"}
           </p>
           <a
             href={`/api/v1/artifacts/${selected.id}/files/${selected.entry}`}
@@ -186,7 +197,34 @@ export function Artifacts({
               {zh ? "建立可編輯副本" : "Create editable copy"}
             </button>
           )}
-          {text !== undefined && (
+          {html && (
+            <>
+              <p>
+                {zh
+                  ? "受限 HTML 預覽：停用腳本、導覽及外部資源。原始檔案未改寫。"
+                  : "Restricted HTML preview: scripts, navigation and external resources are disabled. The original file is unchanged."}
+              </p>
+              <button onClick={() => setShowSource(!showSource)}>
+                {showSource
+                  ? zh
+                    ? "顯示 HTML 預覽"
+                    : "Show HTML preview"
+                  : zh
+                    ? "顯示原始碼"
+                    : "Show source"}
+              </button>
+              {!showSource && (
+                <iframe
+                  title={zh ? "HTML 成果預覽" : "HTML artifact preview"}
+                  className="html-artifact-preview"
+                  sandbox=""
+                  referrerPolicy="no-referrer"
+                  srcDoc={html}
+                />
+              )}
+            </>
+          )}
+          {text !== undefined && (!html || showSource) && (
             <pre
               className="artifact-preview"
               tabIndex={0}

@@ -928,3 +928,14 @@ input[type="checkbox"] {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.html-artifact-preview {
+  display: block;
+  width: 100%;
+  height: 55vh;
+  min-height: 320px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 16px;
+  background: white;
+}

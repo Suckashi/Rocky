@@ -12,6 +12,7 @@ Dependencies and exact versions/licenses are inventoried in docs/implementation/
 - khroma 2.1.0: MIT, copyright 2019-present Fabio Spampinato, Andrew Maney.
 - xmlhttprequest-ssl 2.1.2: MIT, copyright 2010 passive.ly LLC.
 - url-template 2.0.8: BSD-3-Clause, copyright 2012-2014 Bram Stein.
+- parse5 7.3.0: MIT, copyright 2013-2019 Ivan Nikulin. Used unmodified as the daemon-side HTML parser for restricted artifact previews; its installed package retains the full MIT license.
 - caniuse-lite 1.0.30001814: browser compatibility data, CC-BY-4.0; upstream https://github.com/browserslist/caniuse-lite, derived from https://caniuse.com. Data is unmodified; its package includes the full attribution license.
 
 This source-stage inventory does not replace the P8 complete bundled/distribution notice review. No film imagery, upstream avatars, remote fonts or generated brand assets are included.

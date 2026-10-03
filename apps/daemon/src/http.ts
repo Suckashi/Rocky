@@ -13,6 +13,7 @@ import {
   modelSelectionSchema,
 } from "../../../packages/contracts/src/index.js";
 import { WorkService } from "./work-service.js";
+import { htmlPreview } from "./html-preview.js";
 import { modelBudgetSchema } from "../../../packages/contracts/src/model-budget.js";
 async function readJson(c: Context): Promise<unknown> {
   try {
@@ -296,6 +297,9 @@ export function createApp(service: WorkService) {
     return c.json({
       mime: entry.mime,
       text: bytes.toString("utf8"),
+      ...(entry.mime === "text/html"
+        ? { renderedHtml: htmlPreview(bytes.toString("utf8")).html }
+        : {}),
       sha256: entry.sha256,
     });
   });
