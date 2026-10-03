@@ -153,3 +153,5 @@ Admission wait presentation (84a5b4c27e15ebb3a79e6ad1a959473cfca66fdf) changes e
 Document history (565e888edcb0fa2c0c71e34a15954bd44638fcad) reuses existing resultpane, document comparison and neutral form system. History starts collapsed; source title retains OpenDots-derived40/32px size while revision selector uses standard14px control. No new upstream component copied. [Four-width evidence](documents.md). Matched reference comparison and complete language/theme matrix remain open.
 
 Owner Memory UI (d666feff90f5c07f917c01c0773aa62466e99496) is a Rocky-specific settings adaptation using existing collapsed settings, neutral cards/forms, semantic tokens and dialog scroll ownership. No new upstream source copied. [Four-width after evidence](memory-registry.md); new matched reference comparison, English/dark and complete keyboard matrix not_run.
+
+Memory source controls (6256a1653ab36448851b8c62c4eb8423549a10e0) extend the existing neutral settings form and collapsed evidence pattern with pinned document revision links. No new upstream code copied. [Four-width after screenshots](memory-registry.md); full matched reference comparison remains pending.

@@ -1,0 +1,43 @@
+{
+  "commit": "6256a1653ab36448851b8c62c4eb8423549a10e0",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npm run check; npm run lint; npm run build; npx vitest run tests/memory.test.ts tests/documents.test.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts workspace-write.spec.ts memory.spec.ts; scoped prettier --check; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/memory-sources.json",
+  "testFiles": [
+    "tests/memory.test.ts",
+    "tests/documents.test.ts",
+    "tests/e2e/workspace-write.spec.ts",
+    "tests/e2e/memory.spec.ts"
+  ],
+  "limitations": [
+    "T-025 remains in_progress; native model retrieval/write permission, token-aware budgets and broader Knowledge source ingestion are not implemented",
+    "Only local Rocky document revisions are supported; no remote fetching or arbitrary source URL input",
+    "Owner source picker lists up to200 current document heads; older revisions remain pinned but direct older-revision selection and source document preview integration are pending",
+    "Four-width Chinese/light browser after screenshots only; no new matched OpenDots reference, English/dark or full keyboard matrix",
+    "Document references are evidence links, not factual verification; unverified status remains default",
+    "Memory deletion removes its embedded references, not source documents; derived-skill invalidation and physical backup/WAL erasure remain open; all70 global AT unchanged"
+  ],
+  "unitTests": 2,
+  "unitSeconds": 2.92,
+  "browserTests": 2,
+  "browserSeconds": 15.5,
+  "browser": "Chromium148.0.7778.96 DPR1",
+  "buildSeconds": 13.01,
+  "assertions": [
+    "missing/duplicate/cross-project sources rejected",
+    "document revision changes do not move pinned memory source",
+    "metadata idempotency remains stable for empty provenance",
+    "references persist across daemon restart; memory deletion preserves source document",
+    "browser owner selects source, edits memory without losing source, downloads exact revision",
+    "four viewport document overflow checks; final320 screenshot visually inspected"
+  ],
+  "screenshots": [
+    "docs/implementation/evidence/2026-10-04/memory-sources/after-1440.png",
+    "docs/implementation/evidence/2026-10-04/memory-sources/after-1280.png",
+    "docs/implementation/evidence/2026-10-04/memory-sources/after-390.png",
+    "docs/implementation/evidence/2026-10-04/memory-sources/after-320.png"
+  ]
+}

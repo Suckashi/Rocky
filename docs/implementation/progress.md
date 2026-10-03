@@ -515,3 +515,7 @@ T-025 now in_progress: schema19 owner-managed scoped Memory, CAS, fixed manual l
 ## Owner Memory UI (d666feff90f5c07f917c01c0773aa62466e99496)
 
 T-025 remains in_progress. Owner local scoped search/create/edit/delete UI now exists; browser validates stale revision preserves draft, explicit save, reload and deletion. Type/lint/build plus backend1/browser1 pass. [Evidence and remaining scope](memory-registry.md). Four-width after screenshots saved; no full alignment/globalAT claim. Next: Knowledge source references and native permission-bound consumption.
+
+## Memory document provenance (6256a1653ab36448851b8c62c4eb8423549a10e0)
+
+T-025 partial source layer now pins validated local document revisions, checks workspace scope and exposes owner source selection/removal/download. Backend2 and browser2 tests pass, four-width after evidence captured. [Report](memory-registry.md). Native permission-bound retrieval, token budgets, broader Knowledge ingestion and fullAT remain open; Goal active.

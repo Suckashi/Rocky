@@ -36,3 +36,18 @@ Collapsed Memory settings now provide user/project/task scope selectors, bounded
 - Drafts survive command failures but are not persisted across closing settings or reload
 - Search is capped at20 entries/16384 UTF8 bytes with truncation; no pagination or token-aware context budget
 - Learning/derived-skill cleanup and physical backup/WAL erasure are not implemented; all70 global AT unchanged
+
+## Pinned document provenance (6256a1653ab36448851b8c62c4eb8423549a10e0)
+
+Owner memories may now reference up to16 exact local document ID/revision pairs. The daemon verifies actual immutable document content through DocumentStore, rejects duplicate/missing revisions and cross-project/task-workspace references. User scope allows explicit owner selection across registered documents. References never change automatically when a document head advances. No auto-confirmation, network request or model authority is introduced. Empty provenance retains existing command intent hashes.
+
+The editor selects a current document head, displays pinned revision and allows removal; editing retains references. Cards collapse source links and download exact revisions through the existing safe document route. Existing Memory settings forms/tokens are reused; no new upstream code.
+
+[Evidence](evidence/2026-10-04/memory-sources.json):2 backend integration tests/2 browser tests, check/lint/build pass. Build ran before final empty-source hash normalization; final type/integration/lint checks cover normalization. Existing Vite chunk warning remains. Screenshots: [1440](evidence/2026-10-04/memory-sources/after-1440.png), [1280](evidence/2026-10-04/memory-sources/after-1280.png), [390](evidence/2026-10-04/memory-sources/after-390.png), [320](evidence/2026-10-04/memory-sources/after-320.png).
+
+- T-025 remains in_progress; native model retrieval/write permission, token-aware budgets and broader Knowledge source ingestion are not implemented
+- Only local Rocky document revisions are supported; no remote fetching or arbitrary source URL input
+- Owner source picker lists up to200 current document heads; older revisions remain pinned but direct older-revision selection and source document preview integration are pending
+- Four-width Chinese/light browser after screenshots only; no new matched OpenDots reference, English/dark or full keyboard matrix
+- Document references are evidence links, not factual verification; unverified status remains default
+- Memory deletion removes its embedded references, not source documents; derived-skill invalidation and physical backup/WAL erasure remain open; all70 global AT unchanged
