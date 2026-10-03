@@ -200,7 +200,7 @@ test("T-008 own v4 operation migration preserves success and unknown without inv
         context: null,
       });
       expect(upgraded.db.prepare("PRAGMA user_version").get()).toMatchObject({
-        user_version: 8,
+        user_version: 9,
       });
     } finally {
       upgraded.close();
@@ -259,6 +259,100 @@ test("T-008 restart settles only undispatched owned operations and cleanup rolls
       expect(recovered.operations.get(dispatched.id)).toEqual(dispatched);
     } finally {
       await recovered.close();
+    }
+  } finally {
+    if (!closed) store.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("T-008 canonical target claim survives restart, blocks another Work and releases only on known reconciliation", async () => {
+  const { OperationReconciler } =
+    await import("../apps/daemon/src/operation-reconciler.js");
+  const { intentHash } = await import("../apps/daemon/src/intent.js");
+  const { root, store, work, ledger } = setup();
+  let closed = false;
+  try {
+    const other = {
+      ...work,
+      id: randomUUID(),
+      runId: randomUUID(),
+      executionSessionId: randomUUID(),
+      requestId: randomUUID(),
+    };
+    store.add(other, "other");
+    const target = intentHash({ canonicalTarget: "synthetic-shared-target" });
+    const a = ledger.prepare(work, "a", "write_sample", {}, "f", target),
+      b = ledger.prepare(other, "b", "write_sample", {}, "f", target);
+    expect(store.db.prepare("SELECT * FROM target_claims").all()).toHaveLength(
+      0,
+    );
+    const first = ledger.transition(
+      work,
+      ledger.transition(work, a, "authorized", "not_executed"),
+      "dispatched",
+      "unknown",
+    );
+    const second = ledger.transition(other, b, "authorized", "not_executed");
+    expect(() =>
+      ledger.transition(other, second, "dispatched", "unknown"),
+    ).toThrow("unreconciled");
+    expect(ledger.get(second.id)).toEqual(second);
+    store.close();
+    closed = true;
+    const reopened = new Store(root),
+      restored = new OperationLedger(reopened),
+      reconciler = new OperationReconciler(reopened);
+    try {
+      expect(() =>
+        restored.transition(other, second, "dispatched", "unknown"),
+      ).toThrow("unreconciled");
+      const observation = {
+        operationId: first.id,
+        intentHash: first.args_hash,
+        outcome: "unknown" as const,
+        result: null,
+        evidenceRef: randomUUID(),
+        observedAt: new Date().toISOString(),
+      };
+      const receipt = await reconciler.reconcile(
+        work.id,
+        {
+          requestId: randomUUID(),
+          operationId: first.id,
+          expectedRevision: first.revision,
+        },
+        async () => observation,
+        AbortSignal.timeout(2000),
+      );
+      expect(
+        reopened.db.prepare("SELECT * FROM target_claims").all(),
+      ).toHaveLength(1);
+      await reconciler.reconcile(
+        work.id,
+        {
+          requestId: randomUUID(),
+          operationId: first.id,
+          expectedRevision: receipt.operationRevision,
+        },
+        async () => ({ ...observation, outcome: "failed_known_no_effect" }),
+        AbortSignal.timeout(2000),
+      );
+      expect(
+        reopened.db.prepare("SELECT * FROM target_claims").all(),
+      ).toHaveLength(0);
+      const dispatched = restored.transition(
+        other,
+        second,
+        "dispatched",
+        "unknown",
+      );
+      restored.transition(other, dispatched, "settled", "succeeded", "{}");
+      expect(
+        reopened.db.prepare("SELECT * FROM target_claims").all(),
+      ).toHaveLength(0);
+    } finally {
+      reopened.close();
     }
   } finally {
     if (!closed) store.close();

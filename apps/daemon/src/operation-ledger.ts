@@ -61,7 +61,14 @@ export class OperationLedger {
     name: string,
     args: Record<string, unknown>,
     fingerprint: string,
+    targetIdentity: string = intentHash({ fixture: work.runId }),
   ) {
+    if (!/^[a-f0-9]{64}$/.test(targetIdentity))
+      throw new RockyError(
+        "target_identity",
+        "Canonical target identity required",
+        400,
+      );
     const owned = this.store.get(work.id);
     if (
       owned.runId !== work.runId ||
@@ -81,6 +88,7 @@ export class OperationLedger {
       executionSessionId: work.executionSessionId,
       name,
       fingerprint,
+      targetIdentity,
     });
     const hash = intentHash({ context, args });
     return this.store.transaction(() => {
@@ -151,6 +159,23 @@ export class OperationLedger {
         409,
       );
     return this.store.transaction(() => {
+      if (phase === "dispatched") {
+        if (!context.targetIdentity)
+          throw new RockyError(
+            "target_identity",
+            "Operation has no canonical target identity",
+            409,
+          );
+        const claimed = this.store.db
+          .prepare("INSERT OR IGNORE INTO target_claims VALUES(?,?)")
+          .run(context.targetIdentity, operation.id);
+        if (claimed.changes !== 1)
+          throw new RockyError(
+            "target_busy",
+            "Target has an active or unreconciled operation",
+            409,
+          );
+      }
       const changed = this.store.db
         .prepare(
           "UPDATE operations SET phase=?,outcome=?,result=?,revision=revision+1 WHERE id=? AND revision=? AND phase=? AND args_hash=? AND context=?",
@@ -171,6 +196,10 @@ export class OperationLedger {
           "Operation revision changed",
           409,
         );
+      if (phase === "settled" && outcome !== "unknown")
+        this.store.db
+          .prepare("DELETE FROM target_claims WHERE operation_id=?")
+          .run(operation.id);
       this.store.event(
         owned,
         "rocky.operation." + (phase === "settled" ? outcome : phase),

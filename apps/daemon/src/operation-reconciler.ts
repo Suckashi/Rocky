@@ -122,6 +122,10 @@ export class OperationReconciler {
           "Operation changed while observing",
           409,
         );
+      if (observation.outcome !== "unknown")
+        this.store.db
+          .prepare("DELETE FROM target_claims WHERE operation_id=?")
+          .run(operation.id);
       this.store.db
         .prepare("INSERT INTO operation_reconciliations VALUES(?,?,?)")
         .run(command.requestId, intent, JSON.stringify(receipt));
