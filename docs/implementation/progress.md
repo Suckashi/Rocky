@@ -1,6 +1,6 @@
 # Rocky implementation progress
 
-2026-10-04, Asia/Taipei. Current work: OpenDots-aligned main chat, configured native conversation/MCP tools and data, and registered workspaces with explicitly granted native root/child reads, exact-approved root writes and Git worktree creation, plus immutable artifacts and a responsive result pane. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
+2026-10-04, Asia/Taipei. Current work: OpenDots-aligned main chat, configured native conversation/MCP tools and data, and registered workspaces with explicitly granted native root/child reads, exact-approved root writes and Git worktree creation, plus immutable artifacts, a responsive result pane and owner Markdown revision editing. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
 
 | Task                  | Status      | Actual result                                                                                                                                                                       |
 | --------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -22,7 +22,7 @@
 | T-016                 | in_progress | Configured dispatch, typed media and original resource/prompt envelopes implemented; target mapping, advanced schemas, generic reconciliation remain.                               |
 | T-017                 | in_progress | Registered roots, native reads/writes, bounded diff, overlapping-root admission and exact-approved Git worktrees; shell/default coding isolation/full leases/reconciliation remain. |
 
-T-020 is now in_progress: confirmed-write snapshots, ID-only downloads and result pane implemented; Markdown revisions, images and rendered isolated HTML remain open.
+T-020 is in_progress: immutable snapshots, ID-only downloads, result pane and owner Markdown revision CAS/editor implemented; native document tools, images and rendered isolated HTML remain open.
 
 Node 24.12.0 / npm 11.6.4 baseline. OpenDots MIT presentation CSS adapted with notices; no upstream history, backend, data, settings or brand assets imported. Test data is synthetic. No remote action; existing live probe evidence is separate from this fixture UI slice. See known-limitations.md for gates and follow-up.
 
@@ -439,3 +439,7 @@ Root-only native tool now reaches exact daemon consent/ledger, actual committed 
 ## Immutable artifacts and OpenDots result pane (0a677c28fd8306b28c8ba9a1b1d58a425477d56b)
 
 Confirmed workspace writes can now be saved as immutable hash-verified snapshots, previewed and downloaded from a real right-side results pane. SQL registry/events publish atomically after verified blob storage. Related22 pass; full264pass/1old-schema-assertion failure, corrected by focused4pass (no full rerun); browser6 plus final enriched artifact flow1 pass. Four-width measurements and light/dark-English screenshots in [artifacts.md](artifacts.md). T-020 now in_progress; Markdown CAS/editor, images, rendered isolated HTML, native publication/context references and full comparison remain gaps. Goal active; no remote actions.
+
+## Markdown document revisions (2a1d9208a08a6c6f1a9efc8af1ad7fac4efe7d03)
+
+Owner artifact copies, immutable document versions, exactrevision CAS, persisted receipts and revision downloads now exist. Source editor retains draft on409 and panelclose; owner explicitly compares/rebases before saving. Related17 plus finalUTF8 test pass; browser6 and finalsource-style flow1 pass. See [documents.md](documents.md). Native agent document tools, durable draft recovery, full history UI, images/HTML preview and full reference comparison remain unfinished; T-020/Goal active.

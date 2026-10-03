@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-04",
+  "commit": "2a1d9208a08a6c6f1a9efc8af1ad7fac4efe7d03",
+  "platform": "Windows x64",
+  "mode": "fixture",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "referenceCommit": "c2569bb6a13a22e565cf3eb791c62267d06babb1",
+  "commands": [
+    {
+      "command": "npx vitest run tests/documents.test.ts tests/http.test.ts tests/artifacts.test.ts tests/workspaces.test.ts tests/operation-ledger.test.ts",
+      "exitCode": 0,
+      "tests": 17,
+      "testFiles": 5,
+      "durationSeconds": 6.68
+    },
+    {
+      "command": "npx vitest run tests/documents.test.ts",
+      "exitCode": 0,
+      "tests": 1,
+      "durationSeconds": 2.13,
+      "reason": "Final UTF-8 roundtrip and lone-surrogate rejection"
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=installed chromium1223; npx playwright test --config playwright.production.config.ts",
+      "exitCode": 0,
+      "tests": 6,
+      "durationSeconds": 31.2
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=installed chromium1223; npx playwright test --config playwright.production.config.ts workspace-write.spec.ts",
+      "exitCode": 0,
+      "tests": 1,
+      "durationSeconds": 14.3,
+      "reason": "Final OpenDots source420px sizing and title styles"
+    },
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "command": "scoped prettier --check",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "checks": [
+    "SQLite18 document heads, immutable versions/content hashes and durable idempotency receipts",
+    "Create from actual native-write artifact; original BOM/CRLF/unsupported syntax/Unicode retained",
+    "Two same-revision owner HTTP writes return200 and409; no last-write-wins",
+    "Event failure rolls back document head/version/receipt atomically",
+    "Historical receipts return original saved revision even after later edits",
+    "Historical revision download equals original bytes; current edit never changes source artifact",
+    "Restart retains document head/history; changed idempotency intent rejected",
+    "Actual64KiB document HTTP save allowed; oversizedUTF8 and malformed surrogate rejected; other API body caps unchanged",
+    "Browser creates editable copy, closes/reopens unsaved draft, receives409 after competingHTTP edit and keeps draft",
+    "Browser compares latest revision, explicitly rebases original draft and savesrevision3",
+    "Saved revision download and keyboard return focus verified",
+    "Four viewport no-horizontal-overflow and source min-height420px assertions;1440/320 screenshots manually inspected"
+  ],
+  "correctedFailures": [
+    {
+      "command": "Initial typecheck",
+      "exitCode": 1,
+      "reason": "React useRef required explicit undefined initializer"
+    },
+    {
+      "command": "Expanded document size test",
+      "exitCode": 1,
+      "reason": "Generic intent serialization cap was reached before content validation; validate decoded text and bind intent to SHA256 instead of entire content"
+    },
+    {
+      "command": "Typecheck after UTF8 validation",
+      "exitCode": 1,
+      "reason": "String.isWellFormed not declared by current target; replaced with bounded Buffer UTF8 roundtrip"
+    }
+  ],
+  "screenshots": [
+    "document-conflict-1440.png",
+    "document-conflict-1280.png",
+    "document-conflict-390.png",
+    "document-conflict-320.png"
+  ],
+  "warnings": [
+    "SQLite experimental",
+    "Vite large chunks",
+    "Startup proxy refusal before daemon ready"
+  ],
+  "limitations": [
+    "Owner document creation from Markdown/plain-text artifact and owner revision edits only; native agent document mutation/context-reference tools remain unimplemented",
+    "AT-27 full human/agent concurrency is not claimed: two concurrent owner HTTP writers plus browser/HTTP competing edits verified",
+    "Draft cache is browser-tab memory, survives panel close but not process crash/reload; beforeunload warning installed, actual browser-close prompt matrix not_run",
+    "Editor is lossless source text for unsupported Markdown syntax; textarea editing uses LF and UI discloses this; original artifact/revisions retain original bytes",
+    "Recognized protected content/title is rejected instead of silently loading redacted text into an editable document; not a universal secret classifier",
+    "List capped at200; revision history API/download exists but full revision-history browsing, blank-document creation and navigation remain pending",
+    "Four-width Chinese light editor/conflict checks only; document-specific English/dark/reload failure matrix and fresh reference/before/after comparison not_run",
+    "PNG/JPEG and rendered isolated HTML preview, native artifact publication, generic bundle support and remaining T-020/V1 scope unfinished",
+    "Ubuntu/live model and release acceptance not_run; no remote actions"
+  ],
+  "globalAcceptance": "All70 not_run unchanged; T-020 remains in_progress",
+  "remoteActions": []
+}
