@@ -276,6 +276,9 @@ export function createApp(service: WorkService) {
     c.json({ artifacts: service.artifacts.list() }),
   );
   app.get("/api/v1/skills", (c) => c.json({ skills: service.skills.list() }));
+  app.get("/api/v1/works/:id/skill-catalog", (c) =>
+    c.json({ catalog: service.skills.catalog(c.req.param("id")) }),
+  );
   app.get("/api/v1/skills/:id/selection", (c) =>
     c.json({ selection: service.skills.selection(c.req.param("id")) }),
   );

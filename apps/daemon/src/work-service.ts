@@ -379,6 +379,7 @@ export class WorkService {
     };
     this.store.transaction(() => {
       this.store.add(work, intent);
+      this.skills.freeze(work);
       this.modelBudgets.open(work.runId, work.modelBudget);
       this.store.event(work, "rocky.work.updated", { work });
       for (const selection of parsed.memoryRead ?? [])

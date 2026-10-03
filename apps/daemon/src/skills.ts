@@ -4,6 +4,7 @@ import { WorkspaceRegistry } from "./workspaces.js";
 import { validateSkillPackage } from "./skill-package.js";
 import { intentHash } from "./intent.js";
 import { RockyError } from "../../../packages/contracts/src/index.js";
+import type { Work } from "../../../packages/contracts/src/index.js";
 
 const importSchema = z
   .object({
@@ -41,6 +42,20 @@ type SkillSelection = {
   contentHash: string;
   state: "published" | "inactive" | "quarantined";
   updatedAt: string;
+};
+type CatalogItem = {
+  id: string;
+  revision: number;
+  contentHash: string;
+  name: string;
+  description: string;
+  scope: SkillRevision["scope"];
+};
+type SkillCatalog = {
+  workId: string;
+  runId: string;
+  items: CatalogItem[];
+  version: string;
 };
 type SkillRevision = {
   id: string;
@@ -140,6 +155,114 @@ export class SkillRegistry {
         .prepare("SELECT data FROM skill_heads ORDER BY id LIMIT 200")
         .all() as { data: string }[]
     ).map((row) => JSON.parse(row.data) as SkillRevision);
+  }
+  freeze(work: Work): SkillCatalog {
+    if (!this.store.db.isTransaction)
+      throw new RockyError(
+        "skill_transaction",
+        "Catalog freeze requires admission transaction",
+        500,
+      );
+    const existing = this.catalog(work.id);
+    if (existing) {
+      if (existing.runId !== work.runId)
+        throw new RockyError(
+          "skill_catalog",
+          "Catalog belongs to another run",
+          409,
+        );
+      return existing;
+    }
+    const items: CatalogItem[] = [];
+    if (work.mode === "configured" && work.runMode === "normal") {
+      const rows = this.store.db
+        .prepare("SELECT data FROM skill_selections ORDER BY id")
+        .all() as { data: string }[];
+      for (const row of rows) {
+        const selected = JSON.parse(row.data) as SkillSelection;
+        if (selected.state !== "published") continue;
+        const revision = this.revision(selected.id, selected.skillRevision);
+        if (
+          revision.scope.kind === "project" &&
+          revision.scope.projectId !== work.workspaceId
+        )
+          continue;
+        if (
+          this.store.db
+            .prepare("SELECT 1 FROM skill_quarantine WHERE id=? AND hash=?")
+            .get(selected.id, selected.contentHash)
+        )
+          continue;
+        if (revision.contentHash !== selected.contentHash)
+          throw new RockyError(
+            "skill_integrity",
+            "Selected skill hash changed",
+            409,
+          );
+        this.get(selected.id, selected.skillRevision);
+        items.push({
+          id: selected.id,
+          revision: selected.skillRevision,
+          contentHash: selected.contentHash,
+          name: revision.metadata.name,
+          description: revision.metadata.description,
+          scope: revision.scope,
+        });
+      }
+    }
+    const catalog: SkillCatalog = {
+      workId: work.id,
+      runId: work.runId,
+      items,
+      version: intentHash(items),
+    };
+    this.store.db
+      .prepare("INSERT INTO skill_catalogs VALUES(?,?)")
+      .run(work.id, JSON.stringify(catalog));
+    return catalog;
+  }
+  catalog(workId: string): SkillCatalog | null {
+    z.uuid().parse(workId);
+    const row = this.store.db
+      .prepare("SELECT data FROM skill_catalogs WHERE work_id=?")
+      .get(workId) as { data: string } | undefined;
+    return row ? (JSON.parse(row.data) as SkillCatalog) : null;
+  }
+  readForWork(work: Work, skillId: string) {
+    const current = this.store.get(work.id);
+    const catalog = this.catalog(work.id);
+    if (
+      current.runId !== work.runId ||
+      current.executionSessionId !== work.executionSessionId ||
+      current.status !== "running" ||
+      catalog?.runId !== work.runId
+    )
+      throw new RockyError(
+        "skill_scope",
+        "Skill read requires this running Work",
+        403,
+      );
+    const item = catalog.items.find((item) => item.id === skillId);
+    if (!item)
+      throw new RockyError(
+        "skill_scope",
+        "Skill is outside the frozen catalog",
+        403,
+      );
+    if (
+      this.store.db
+        .prepare("SELECT 1 FROM skill_quarantine WHERE id=? AND hash=?")
+        .get(item.id, item.contentHash)
+    )
+      throw new RockyError(
+        "skill_quarantined",
+        "Skill revision was quarantined",
+        403,
+      );
+    const result = this.get(item.id, item.revision);
+    if (result.revision.contentHash !== item.contentHash)
+      throw new RockyError("skill_integrity", "Frozen skill hash changed", 409);
+    return result;
   }
   selection(id: string): SkillSelection | null {
     z.uuid().parse(id);
