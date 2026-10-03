@@ -390,3 +390,7 @@ Source7d42223 removes built-in sample tools, fixture MCP startup and sample gran
 ## Typed MCP evidence (0cf5d5f)
 
 Typed daemon delivery, sanitized native artifacts, explicit default-off image input, Anthropic/OpenAI-compatible media adapters and native large-result offload preservation are implemented. See mcp-typed-results.md and its dated evidence. T-007/T-011/T-016/T-019 remain in_progress; full MCP scope and V1 are incomplete. Next: generic reconciliation/resources and real workspace tooling; live vision/Ubuntu and long-history media remain unverified.
+
+## Resource/prompt metadata (f9e9a22)
+
+Bounded on-demand resources/templates/prompts discovery now shares mcp_discover and daemon connection revisions. Pure data servers connect, list changes revoke old catalogs, and actual native tests prove no data execution/policy promotion. Check/lint/build and 32 focused tests passed. See mcp-data-discovery.md. T-015/T-016 remain in_progress; exact retrieval/task-data insertion/UI and generic reconciliation are still open.

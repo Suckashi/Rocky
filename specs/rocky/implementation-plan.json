@@ -2180,6 +2180,25 @@
             "No new reference/before/after comparison; MCP lifecycle dark/English/reduced-motion checks not_run",
             "T-015/T-021 in_progress; global AT unchanged; Goal active; no remote actions"
           ]
+        },
+        {
+          "commit": "f9e9a22a101f8b3443619aac2fd996cf6150239a",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/mcp-data-catalog.test.ts tests/mcp-manager.test.ts tests/mcp-work.test.ts tests/mcp-vision-work.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-data-discovery/verification.json",
+          "testFiles": [
+            "tests/mcp-data-catalog.test.ts"
+          ],
+          "limitations": [
+            "Metadata only; exact resource read and prompt task-data retrieval not implemented",
+            "No UI change; browser/full suite/Ubuntu/live not_run this slice",
+            "Generic reconciliation/remote jobs/target grants and later V1 modules incomplete",
+            "T-015/T-016 in_progress; global AT unchanged; no remote actions"
+          ],
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec"
         }
       ],
       "blockedReason": null,
@@ -2300,6 +2319,25 @@
             "No new upstream fidelity comparison/dark/English/reduced-motion evidence",
             "T-016 remains in_progress; global AT unchanged; no remote actions"
           ]
+        },
+        {
+          "commit": "f9e9a22a101f8b3443619aac2fd996cf6150239a",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/mcp-data-catalog.test.ts tests/mcp-manager.test.ts tests/mcp-work.test.ts tests/mcp-vision-work.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-data-discovery/verification.json",
+          "testFiles": [
+            "tests/mcp-data-catalog.test.ts"
+          ],
+          "limitations": [
+            "Metadata only; exact resource read and prompt task-data retrieval not implemented",
+            "No UI change; browser/full suite/Ubuntu/live not_run this slice",
+            "Generic reconciliation/remote jobs/target grants and later V1 modules incomplete",
+            "T-015/T-016 in_progress; global AT unchanged; no remote actions"
+          ],
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec"
         }
       ],
       "blockedReason": null,
