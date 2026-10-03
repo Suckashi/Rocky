@@ -4,6 +4,101 @@ import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+test("owner reviews all package files and selects an older immutable revision", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const { token } = await (await page.request.get("/api/v1/session")).json(),
+    id = randomUUID(),
+    name = "history-" + id;
+  for (const expectedRevision of [0, 1]) {
+    const response = await page.request.post("/api/v1/skills/import", {
+      headers: { "x-rocky-session": token },
+      data: {
+        requestId: randomUUID(),
+        id,
+        expectedRevision,
+        scope: { kind: "user" },
+        source: {
+          type: "manual",
+          reference: "fixture/history",
+          license: "MIT",
+        },
+        package: {
+          directoryName: name,
+          files: [
+            {
+              path: "SKILL.md",
+              contentBase64: Buffer.from(
+                `---\nname: ${name}\ndescription: Historical package\n---\nBODY_REVISION_${expectedRevision + 1}`,
+              ).toString("base64"),
+            },
+            {
+              path: "scripts/example.js",
+              contentBase64: Buffer.from(
+                "globalThis.SKILL_EXECUTED = true; // review only",
+              ).toString("base64"),
+            },
+            {
+              path: "assets/binary.dat",
+              contentBase64: Buffer.from([0, 255, 128]).toString("base64"),
+            },
+          ],
+        },
+      },
+    });
+    expect(response.ok()).toBe(true);
+  }
+  await page.getByRole("button", { name: "技能", exact: true }).click();
+  const ui = page.locator(".skill-settings");
+  await ui.getByRole("button", { name: "載入／重新整理技能" }).click();
+  const card = ui.locator("article").filter({ hasText: name });
+  await card.getByRole("button", { name: "審查此版本" }).click();
+  await expect(card.locator("pre")).toContainText("BODY_REVISION_2");
+  await card.getByLabel("檢視套件檔案").selectOption("scripts/example.js");
+  await expect(card.locator("pre")).toContainText("SKILL_EXECUTED");
+  expect(
+    await page.evaluate(() => Reflect.get(globalThis, "SKILL_EXECUTED")),
+  ).toBeUndefined();
+  await card.getByLabel("檢視套件檔案").selectOption("assets/binary.dat");
+  await expect(card).toContainText("二進位檔案");
+  await expect(card.locator("pre")).toHaveCount(0);
+  await card.getByRole("button", { name: "上一版本" }).click();
+  await expect(card.locator("pre")).toContainText("BODY_REVISION_1");
+  await card.getByLabel("我已檢視此版本內容及來源").check();
+  await card.getByRole("button", { name: "信任並啟用此版本" }).click();
+  const selection = await (
+    await page.request.get(`/api/v1/skills/${id}/selection`)
+  ).json();
+  expect(selection.selection).toMatchObject({
+    skillRevision: 1,
+    state: "published",
+  });
+  await card.getByRole("button", { name: "下一版本" }).click();
+  await expect(card.locator("pre")).toContainText("BODY_REVISION_2");
+  await expect(card.getByLabel("我已檢視此版本內容及來源")).not.toBeChecked();
+  await expect(card).toContainText("目前選擇 r1");
+  await card.getByLabel("檢視套件檔案").selectOption("scripts/example.js");
+  for (const [width, height] of [
+    [1440, 900],
+    [1280, 800],
+    [390, 844],
+    [320, 844],
+  ]) {
+    await page.setViewportSize({ width: width!, height: height! });
+    await card.scrollIntoViewIfNeeded();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: `test-results/skill-files-${width}.png`,
+      fullPage: true,
+    });
+  }
+});
+
 test("owner imports a real local folder as untrusted snapshot", async ({
   page,
 }) => {

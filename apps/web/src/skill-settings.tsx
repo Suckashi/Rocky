@@ -29,6 +29,16 @@ const selectionSchema = z.object({
 });
 type Revision = z.infer<typeof revisionSchema>;
 type Selection = z.infer<typeof selectionSchema>;
+function previewText(base64: string): string | null {
+  try {
+    const text = new TextDecoder("utf-8", { fatal: true }).decode(
+      Uint8Array.from(atob(base64), (c) => c.charCodeAt(0)),
+    );
+    return text.includes("\0") ? null : text;
+  } catch {
+    return null;
+  }
+}
 export function SkillSettings({
   locale,
   request,
@@ -44,7 +54,9 @@ export function SkillSettings({
   const [review, setReview] = useState<{
     revision: Revision;
     selection: Selection | null;
-    content: string;
+    content: string | null;
+    files: { path: string; contentBase64: string }[];
+    path: string;
   }>();
   const [trusted, setTrusted] = useState(false);
   const epoch = useRef(0),
@@ -101,11 +113,15 @@ export function SkillSettings({
         .parse(selected).selection;
       const source = detail.package.files.find((f) => f.path === "SKILL.md");
       if (!source) throw Error("SKILL.md missing");
-      const content = new TextDecoder("utf-8", { fatal: true }).decode(
-        Uint8Array.from(atob(source.contentBase64), (c) => c.charCodeAt(0)),
-      );
+      const content = previewText(source.contentBase64);
       if (generation === epoch.current)
-        setReview({ revision: detail.revision, selection, content });
+        setReview({
+          revision: detail.revision,
+          selection,
+          content,
+          files: detail.package.files,
+          path: "SKILL.md",
+        });
     } catch (e) {
       if (generation === epoch.current) setError(String(e));
     } finally {
@@ -210,15 +226,63 @@ export function SkillSettings({
                   ? ` · ${zh ? "目前選擇" : "Current selection"} r${review.selection.skillRevision}`
                   : ""}
               </p>
+              <div className="actions">
+                <button
+                  disabled={busy || review.revision.revision <= 1}
+                  onClick={() => void open(item, review.revision.revision - 1)}
+                >
+                  {zh ? "上一版本" : "Previous revision"}
+                </button>
+                <button
+                  disabled={busy || review.revision.revision >= item.revision}
+                  onClick={() => void open(item, review.revision.revision + 1)}
+                >
+                  {zh ? "下一版本" : "Next revision"}
+                </button>
+              </div>
               <p>
                 {zh ? "來源" : "Source"}：{review.revision.source.reference}
                 <br />
                 {zh ? "授權聲明" : "Declared license"}：
                 {review.revision.source.license}
               </p>
-              <pre className="memory-content approval-proposal">
-                {review.content}
-              </pre>
+              <label>
+                {zh ? "檢視套件檔案" : "Review package file"}
+                <select
+                  disabled={busy}
+                  value={review.path}
+                  onChange={(e) => {
+                    const file = review.files.find(
+                      (file) => file.path === e.target.value,
+                    );
+                    if (file) {
+                      setTrusted(false);
+                      setReview({
+                        ...review,
+                        path: file.path,
+                        content: previewText(file.contentBase64),
+                      });
+                    }
+                  }}
+                >
+                  {review.files.map((file) => (
+                    <option key={file.path} value={file.path}>
+                      {file.path}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {review.content === null ? (
+                <p role="status">
+                  {zh
+                    ? "二進位檔案：僅顯示下方大小與雜湊，不在頁面執行。"
+                    : "Binary file: size and hash below; not executed in this page."}
+                </p>
+              ) : (
+                <pre className="memory-content approval-proposal">
+                  {review.content}
+                </pre>
+              )}
               <details>
                 <summary>
                   {zh ? "檔案與版本證據" : "Files and revision evidence"}
@@ -227,6 +291,8 @@ export function SkillSettings({
                 {review.revision.files.map((file) => (
                   <p key={file.path}>
                     {file.path} · {file.bytes} B
+                    <br />
+                    {file.sha256}
                   </p>
                 ))}
               </details>
