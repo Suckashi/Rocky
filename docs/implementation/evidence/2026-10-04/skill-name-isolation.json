@@ -1,0 +1,25 @@
+{
+  "commit": "214a6cb189d1c98fb650cbd907596d43c6ab2203",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/skill-native.test.ts; npm run check; npx eslint apps/daemon/src/skills.ts tests/skill-native.test.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/skill-name-isolation.json",
+  "testFiles": ["tests/skill-native.test.ts"],
+  "limitations": [
+    "New same-name integration case covers two user-scope skill IDs; mixed user/project native discovery matrix remains pending",
+    "Runtime qualified names include full UUID and may be verbose to the model; product UI should retain original display name",
+    "Metadata view normalization does not rewrite package bytes or certify skill trust/license",
+    "Full revoke/active Work notices, physical materialization and Skills UI remain incomplete",
+    "No new browser/Ubuntu/live provider/fullAT evidence"
+  ],
+  "tests": 4,
+  "testSeconds": 5.04,
+  "assertions": [
+    "Native sources use deterministic original-name-prefix plus full registry UUID (at most64 characters)",
+    "Upstream native name deduplication retains both same-name skills in actual initial provider request",
+    "Discovery downloads expose normalized metadata only, not instruction body",
+    "Ordinary native read retrieves original body from hash-pinned package; untrusted/quarantine denial regression passes"
+  ]
+}

@@ -4195,6 +4195,25 @@
             "No Skills import/review UI or filesystem discovery yet; no new browser screenshots",
             "No live provider/Ubuntu/fullAT claim; T-026/T-027 in_progress"
           ]
+        },
+        {
+          "commit": "214a6cb189d1c98fb650cbd907596d43c6ab2203",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/skill-native.test.ts; npm run check; npx eslint apps/daemon/src/skills.ts tests/skill-native.test.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-name-isolation.json",
+          "testFiles": [
+            "tests/skill-native.test.ts"
+          ],
+          "limitations": [
+            "New same-name integration case covers two user-scope skill IDs; mixed user/project native discovery matrix remains pending",
+            "Runtime qualified names include full UUID and may be verbose to the model; product UI should retain original display name",
+            "Metadata view normalization does not rewrite package bytes or certify skill trust/license",
+            "Full revoke/active Work notices, physical materialization and Skills UI remain incomplete",
+            "No new browser/Ubuntu/live provider/fullAT evidence"
+          ]
         }
       ],
       "blockedReason": null,
