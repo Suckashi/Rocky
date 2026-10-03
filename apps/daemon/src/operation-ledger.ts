@@ -19,7 +19,7 @@ type Operation = {
   revision: number;
 };
 function effectArgsHash(name: string, args: Record<string, unknown>) {
-  if (name !== "mcp_call") return intentHash(args);
+  if (name !== "mcp_call" && name !== "mcp_data") return intentHash(args);
   const effect = { ...args };
   delete effect.registryRevision;
   // Reconnecting/discovery revision changes cannot authorize repeating a known effect.

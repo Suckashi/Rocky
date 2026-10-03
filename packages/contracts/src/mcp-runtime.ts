@@ -37,3 +37,23 @@ export const mcpCallSchema = z.strictObject({
   toolName: z.string().min(1).max(256),
   arguments: z.record(z.string(), z.unknown()),
 });
+export const mcpDataSchema = z.strictObject({
+  serverId: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/),
+  registryRevision: z.number().int().positive(),
+  target: z.discriminatedUnion("kind", [
+    z.strictObject({
+      kind: z.literal("resource"),
+      uri: z.string().min(1).max(4096),
+    }),
+    z.strictObject({
+      kind: z.literal("resource_template"),
+      uriTemplate: z.string().min(1).max(4096),
+      variables: z.record(z.string().min(1).max(64), z.string().max(4096)),
+    }),
+    z.strictObject({
+      kind: z.literal("prompt"),
+      name: z.string().min(1).max(256),
+      arguments: z.record(z.string().min(1).max(64), z.string().max(4096)),
+    }),
+  ]),
+});

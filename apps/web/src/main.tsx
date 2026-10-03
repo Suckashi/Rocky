@@ -299,18 +299,62 @@ function App() {
                     <section className="approval">
                       <h2>{t.approval}</h2>
                       <p>
-                        {w.approval.tool === "mcp_call"
+                        {["mcp_call", "mcp_data"].includes(w.approval.tool)
                           ? locale === "zh"
                             ? "這將呼叫你配置的外部 MCP 伺服器，可能改變外部資料。"
                             : "This calls your configured MCP server and may change external data."
                           : t.impact}
                       </p>
-                      {w.approval.tool === "mcp_call" ? (
+                      {["mcp_call", "mcp_data"].includes(w.approval.tool) ? (
                         <>
                           <p>
-                            <strong>{String(w.approval.args.toolName)}</strong>{" "}
+                            <strong>
+                              {String(
+                                w.approval.tool === "mcp_data"
+                                  ? (
+                                      w.approval.args.target as {
+                                        kind?: string;
+                                      }
+                                    )?.kind === "prompt"
+                                    ? locale === "zh"
+                                      ? "取得 MCP prompt"
+                                      : "Get MCP prompt"
+                                    : locale === "zh"
+                                      ? "讀取 MCP 資源"
+                                      : "Read MCP resource"
+                                  : w.approval.args.toolName,
+                              )}
+                            </strong>{" "}
                             · {String(w.approval.args.serverId)}
                           </p>
+                          {w.approval.tool === "mcp_data" && (
+                            <p>
+                              <code>
+                                {String(
+                                  w.approval.targetPreview ??
+                                    (
+                                      w.approval.args.target as Record<
+                                        string,
+                                        unknown
+                                      >
+                                    )?.uri ??
+                                    (
+                                      w.approval.args.target as Record<
+                                        string,
+                                        unknown
+                                      >
+                                    )?.uriTemplate ??
+                                    (
+                                      w.approval.args.target as Record<
+                                        string,
+                                        unknown
+                                      >
+                                    )?.name ??
+                                    "",
+                                )}
+                              </code>
+                            </p>
+                          )}
                           <p>
                             {locale === "zh"
                               ? "外部工具的效果尚未確認。核准只適用這次顯示的精確參數；拒絕不會送出呼叫。"
@@ -324,7 +368,8 @@ function App() {
                             </summary>
                             <pre>
                               {JSON.stringify(
-                                w.approval.args.arguments,
+                                w.approval.args.arguments ??
+                                  w.approval.args.target,
                                 null,
                                 2,
                               )}
@@ -341,7 +386,7 @@ function App() {
                           className="primary"
                           onClick={() => void decide(w, "approve")}
                         >
-                          {w.approval.tool === "mcp_call"
+                          {["mcp_call", "mcp_data"].includes(w.approval.tool)
                             ? locale === "zh"
                               ? "核准這次操作"
                               : "Approve this operation"

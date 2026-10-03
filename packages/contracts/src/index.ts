@@ -81,6 +81,7 @@ export const approvalSchema = z
     revision: revisionSchema,
     intentFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
     tool: z.string().min(1),
+    targetPreview: z.string().min(1).max(4096).optional(),
     args: z.record(z.string(), z.unknown()),
     status: z.enum(["pending", "approved", "rejected", "expired"]),
   })

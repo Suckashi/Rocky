@@ -656,8 +656,8 @@ export class WorkService {
             });
           }
           const configuredTool =
-            name === "mcp_call"
-              ? this.configuredTool(current, args)
+            name === "mcp_call" || name === "mcp_data"
+              ? this.configuredTool(current, args, name)
               : undefined;
           if (current.modelSelection)
             this.models.assertRunnable(
@@ -758,14 +758,23 @@ export class WorkService {
           this.flushOutbox();
           try {
             const result = configuredTool
-              ? await this.mcpManager.dispatchTool(
-                  configuredTool,
-                  {
-                    operationId: operation.id,
-                    intentHash: operation.args_hash,
-                  },
-                  abort.signal,
-                )
+              ? "request" in configuredTool
+                ? await this.mcpManager.dispatchData(
+                    configuredTool,
+                    {
+                      operationId: operation.id,
+                      intentHash: operation.args_hash,
+                    },
+                    abort.signal,
+                  )
+                : await this.mcpManager.dispatchTool(
+                    configuredTool,
+                    {
+                      operationId: operation.id,
+                      intentHash: operation.args_hash,
+                    },
+                    abort.signal,
+                  )
               : await connection!.client.callTool(
                   {
                     name,
@@ -935,9 +944,9 @@ export class WorkService {
       transport: work.transport,
       policyRevision: 1,
       fixtureSchemaRevision: 1,
-      ...(tool === "mcp_call"
+      ...(tool === "mcp_call" || tool === "mcp_data"
         ? {
-            mcpIdentity: this.configuredTool(work, args).identity,
+            mcpIdentity: this.configuredTool(work, args, tool).identity,
             mcpConfigHash: this.mcp.snapshot().hash,
             workspaceId: work.workspaceId ?? null,
           }
@@ -945,13 +954,18 @@ export class WorkService {
       ...(work.modelSelection ? { modelSelection: work.modelSelection } : {}),
     });
   }
-  private configuredTool(work: Work, args: Record<string, unknown>) {
+  private configuredTool(
+    work: Work,
+    args: Record<string, unknown>,
+    name = "mcp_call",
+  ) {
     if (work.mode !== "configured" || work.runMode !== "normal")
       throw new RockyError(
         "mcp_scope",
         "Configured MCP execution is unavailable in this mode",
         403,
       );
+    if (name === "mcp_data") return this.mcpManager.prepareData(args);
     const call = mcpCallSchema.parse(args);
     return this.mcpManager.prepareTool(
       call.serverId,
@@ -961,7 +975,9 @@ export class WorkService {
     );
   }
   private deliverMcp(
-    prepared: ReturnType<McpManager["prepareTool"]>,
+    prepared:
+      | ReturnType<McpManager["prepareTool"]>
+      | ReturnType<McpManager["prepareData"]>,
     result: unknown,
   ) {
     const { serverId, configRevision, registryRevision, toolName, schemaHash } =
@@ -1033,7 +1049,9 @@ export class WorkService {
           throw Error("Only one exact tool approval at a time is supported");
         if (
           (request.name === "write_sample" && !active.connection) ||
-          (request.name !== "write_sample" && request.name !== "mcp_call")
+          (request.name !== "write_sample" &&
+            request.name !== "mcp_call" &&
+            request.name !== "mcp_data")
         )
           throw Error("Unsupported interrupt");
         const calls =
@@ -1052,16 +1070,34 @@ export class WorkService {
           request.name,
           request.args,
           this.fingerprint(work, request.name, request.args),
-          ...(request.name === "mcp_call"
-            ? [intentHash(this.configuredTool(work, request.args).identity)]
+          ...(request.name === "mcp_call" || request.name === "mcp_data"
+            ? [
+                intentHash(
+                  this.configuredTool(work, request.args, request.name)
+                    .identity,
+                ),
+              ]
             : []),
         );
         work.status = "waiting_approval";
+        const dataPreview =
+          request.name === "mcp_data"
+            ? this.mcpManager.prepareData(request.args)
+            : undefined;
         work.approval = {
           id: randomUUID(),
           operationId: operation.id,
           revision: 1,
           tool: request.name,
+          ...(dataPreview
+            ? {
+                targetPreview:
+                  dataPreview.uri ??
+                  (dataPreview.request.target.kind === "prompt"
+                    ? dataPreview.request.target.name
+                    : "MCP data"),
+              }
+            : {}),
           args: request.args,
           intentFingerprint: this.fingerprint(work, request.name, request.args),
           status: "pending",
@@ -1160,8 +1196,8 @@ export class WorkService {
       );
     if (
       decision.decision === "approve" &&
-      work.approval.tool === "mcp_call" &&
-      this.fingerprint(work, "mcp_call", work.approval.args) !==
+      ["mcp_call", "mcp_data"].includes(work.approval.tool) &&
+      this.fingerprint(work, work.approval.tool, work.approval.args) !==
         work.approval.intentFingerprint
     )
       throw new RockyError(

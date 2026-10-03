@@ -16,7 +16,7 @@ export function mcpOffloadMiddleware() {
       for (const message of state.messages) {
         if (
           !(message instanceof ToolMessage) ||
-          message.name !== "mcp_call" ||
+          !["mcp_call", "mcp_data"].includes(message.name ?? "") ||
           typeof message.content !== "string" ||
           !message.artifact
         )
