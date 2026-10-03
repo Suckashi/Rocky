@@ -519,3 +519,7 @@ T-025 remains in_progress. Owner local scoped search/create/edit/delete UI now e
 ## Memory document provenance (6256a1653ab36448851b8c62c4eb8423549a10e0)
 
 T-025 partial source layer now pins validated local document revisions, checks workspace scope and exposes owner source selection/removal/download. Backend2 and browser2 tests pass, four-width after evidence captured. [Report](memory-registry.md). Native permission-bound retrieval, token budgets, broader Knowledge ingestion and fullAT remain open; Goal active.
+
+## Memory context budget (c2962d6ee69b0fa93142f24bbd4c8a70a79f4a98)
+
+Added explicit cl100k_base tokenBudget over serialized records, including provenance and metadata, with returned encoding/count and truncation. Direct pinned pure-JS dependency; local ranks only. Related2/finalMemory1/browser1 tests and type/lint/build/licenses pass. [Evidence](memory-registry.md). Model permission/consumption and provider-specific full-prompt accounting remain open; T-025/Goal active.

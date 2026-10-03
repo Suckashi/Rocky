@@ -3810,6 +3810,27 @@
             "Document references are evidence links, not factual verification; unverified status remains default",
             "Memory deletion removes its embedded references, not source documents; derived-skill invalidation and physical backup/WAL erasure remain open; all70 global AT unchanged"
           ]
+        },
+        {
+          "commit": "c2962d6ee69b0fa93142f24bbd4c8a70a79f4a98",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm run check:licenses; npx vitest run tests/memory.test.ts tests/documents.test.ts; npx vitest run tests/memory.test.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts memory.spec.ts; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/memory-token-budget.json",
+          "testFiles": [
+            "tests/memory.test.ts",
+            "tests/documents.test.ts",
+            "tests/e2e/memory.spec.ts"
+          ],
+          "limitations": [
+            "cl100k_base local context measurement is not arbitrary provider/model billing usage or full prompt accounting",
+            "Native model memory permission and consumption integration remain unimplemented; T-025 in_progress",
+            "Search still caps20 entries/21 candidates and UTF8 content bytes; no pagination",
+            "No UI layout changed; browser regression only, no new reference comparison or complete language/theme matrix",
+            "Ubuntu and fullAT36/46 remain not_run; all70 global AT unchanged"
+          ]
         }
       ],
       "blockedReason": null,

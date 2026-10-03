@@ -51,3 +51,17 @@ The editor selects a current document head, displays pinned revision and allows 
 - Four-width Chinese/light browser after screenshots only; no new matched OpenDots reference, English/dark or full keyboard matrix
 - Document references are evidence links, not factual verification; unverified status remains default
 - Memory deletion removes its embedded references, not source documents; derived-skill invalidation and physical backup/WAL erasure remain open; all70 global AT unchanged
+
+## Explicit context token budget (c2962d6ee69b0fa93142f24bbd4c8a70a79f4a98)
+
+Search now accepts tokenBudget2..16384 (default8192) alongside existing byteBudget. It returns context (serialized full selected entries), contextTokens, tokenBudget and encoding=cl100k_base. IDs, revisions, locks, privacy, timestamps and document sources count toward this context. Whole entries are omitted with truncated=true when they do not fit; content is not silently cut. Empty context remains valid.
+
+Pure JS js-tiktoken1.0.21 is now a direct pinned dependency, with bundled cl100k_base ranks loaded locally and no CDN/Python/native compiler fallback. User special-token spellings are treated as ordinary text. This is an explicit deterministic retrieval encoding, not a claim to match every configured model or provider billing. Future native runtime integration must reserve its surrounding prompt/tool framing separately. License source: https://raw.githubusercontent.com/dqbd/tiktoken/main/LICENSE.
+
+[Evidence](evidence/2026-10-04/memory-token-budget.json): related2 tests pass, final expandedMemory1 pass, browser1 pass; check/lint/build/licenses/format pass. Exact threshold, metadata overhead, multilingual/emoji/special strings and HTTP output counts checked. No layout changes or fresh visual alignment claim.
+
+- cl100k_base local context measurement is not arbitrary provider/model billing usage or full prompt accounting
+- Native model memory permission and consumption integration remain unimplemented; T-025 in_progress
+- Search still caps20 entries/21 candidates and UTF8 content bytes; no pagination
+- No UI layout changed; browser regression only, no new reference comparison or complete language/theme matrix
+- Ubuntu and fullAT36/46 remain not_run; all70 global AT unchanged
