@@ -1806,6 +1806,25 @@
             "Work element screenshots are not full viewport OpenDots comparison",
             "T-012/T-019 remain in_progress; global AT unchanged; no remote actions"
           ]
+        },
+        {
+          "commit": "8427b41",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npx vitest run tests/steering.test.ts; npx vitest run tests/store.test.ts tests/projection.test.ts tests/conversation.test.ts; npx vitest run tests/conversation-store.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/steering/verification.json",
+          "testFiles": [
+            "tests/steering.test.ts",
+            "tests/store.test.ts",
+            "tests/projection.test.ts",
+            "tests/conversation-store.test.ts"
+          ],
+          "limitations": [
+            "Focused Windows regression only; nonexistent conversation.test.ts was not run, actual conversation-store.test.ts run explicitly",
+            "No fresh build/browser or live/Ubuntu evidence; T-012/T-019 still in_progress"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2354,6 +2373,25 @@
             "Root checkpoint steering implemented; pending-approval supersession, attachments, explicit ACK/restart fault matrix and reset/retry incomplete",
             "Work element screenshots are not full viewport OpenDots comparison",
             "T-012/T-019 remain in_progress; global AT unchanged; no remote actions"
+          ]
+        },
+        {
+          "commit": "8427b41",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npx vitest run tests/steering.test.ts; npx vitest run tests/store.test.ts tests/projection.test.ts tests/conversation.test.ts; npx vitest run tests/conversation-store.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/steering/verification.json",
+          "testFiles": [
+            "tests/steering.test.ts",
+            "tests/store.test.ts",
+            "tests/projection.test.ts",
+            "tests/conversation-store.test.ts"
+          ],
+          "limitations": [
+            "Focused Windows regression only; nonexistent conversation.test.ts was not run, actual conversation-store.test.ts run explicitly",
+            "No fresh build/browser or live/Ubuntu evidence; T-012/T-019 still in_progress"
           ]
         }
       ],
