@@ -1,0 +1,35 @@
+{
+  "commit": "ae716c303237cd2a0bd3ff3c0b5e236d329f529d",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/skill-catalog.test.ts tests/skills.test.ts tests/skill-selection.test.ts tests/admission.test.ts; npm run check; scoped eslint; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/skill-catalog.json",
+  "testFiles": [
+    "tests/skill-catalog.test.ts",
+    "tests/skills.test.ts",
+    "tests/skill-selection.test.ts",
+    "tests/admission.test.ts"
+  ],
+  "limitations": [
+    "Catalog reader boundary tested directly against persisted Work fixtures; actual native progressive loading and load event recording still absent",
+    "Admission transaction now freezes catalogs; imported same-name skills retain distinct IDs, but runtime path/name collision mapping remains pending",
+    "Existing Works without a catalog stay without one; no retroactive activation/backfill",
+    "Evaluation and nonconfigured catalogs intentionally empty; controlled evaluation candidate catalogs pending",
+    "Quarantine denies future registry reads, not yet wired to all native tool calls or active Work notifications",
+    "No new browser, Ubuntu/live model or full AT evidence; T-026/T-027 remain in_progress"
+  ],
+  "tests": 14,
+  "testSeconds": 18.04,
+  "notes": [
+    "Initial typecheck failed on inferred randomUUID helper parameter; explicit string annotation fixed it; final typecheck exit0"
+  ],
+  "assertions": [
+    "Scope-filtered published-only catalogs atomically persisted with Work admission",
+    "New publication affects new catalog only; older catalog points at immutable old revision",
+    "Evaluation catalog empty and cross-scope read denied",
+    "Quarantine and execution-session mismatch deny registry read; catalog and quarantine survive Store reopen",
+    "Existing admission lifecycle suite remains green"
+  ]
+}
