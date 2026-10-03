@@ -4273,6 +4273,25 @@
             "License/source are explicit owner declarations, not verified upstream licensing",
             "Chinese/light Chromium evidence only; dark/English/accessibility/error-retry matrix and matched OpenDots comparison pending"
           ]
+        },
+        {
+          "commit": "6f08d5068e5e5a801a069f034347e4b65e748e81",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts skills.spec.ts; npm run check; npx eslint apps/web/src/skill-settings.tsx tests/e2e/skills.spec.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-files.json",
+          "testFiles": [
+            "tests/e2e/skills.spec.ts"
+          ],
+          "limitations": [
+            "Binary files show inventory/hash only; binary preview/download UI remains absent",
+            "Version navigation is previous/next plus current selection, not a chronological audit/diff browser",
+            "Existing-skill folder update UI and automatic discovery remain pending",
+            "Chinese/light Chromium after screenshots only; complete language/theme/keyboard matrix and matched reference comparison pending",
+            "No live provider/Ubuntu/fullAT completion claim"
+          ]
         }
       ],
       "blockedReason": null,
@@ -4384,6 +4403,25 @@
             "Review acknowledges SKILL.md/source and displays file inventory; does not prove scripts reviewed or safe to execute",
             "Four-width after screenshots only, no new matched OpenDots reference/before/after comparison",
             "No Ubuntu/live provider/fullAT evidence; T-026/T-027 incomplete"
+          ]
+        },
+        {
+          "commit": "6f08d5068e5e5a801a069f034347e4b65e748e81",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts skills.spec.ts; npm run check; npx eslint apps/web/src/skill-settings.tsx tests/e2e/skills.spec.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-files.json",
+          "testFiles": [
+            "tests/e2e/skills.spec.ts"
+          ],
+          "limitations": [
+            "Binary files show inventory/hash only; binary preview/download UI remains absent",
+            "Version navigation is previous/next plus current selection, not a chronological audit/diff browser",
+            "Existing-skill folder update UI and automatic discovery remain pending",
+            "Chinese/light Chromium after screenshots only; complete language/theme/keyboard matrix and matched reference comparison pending",
+            "No live provider/Ubuntu/fullAT completion claim"
           ]
         }
       ],

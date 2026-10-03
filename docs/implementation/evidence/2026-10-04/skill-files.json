@@ -1,0 +1,32 @@
+{
+  "commit": "6f08d5068e5e5a801a069f034347e4b65e748e81",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts skills.spec.ts; npm run check; npx eslint apps/web/src/skill-settings.tsx tests/e2e/skills.spec.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/skill-files.json",
+  "testFiles": ["tests/e2e/skills.spec.ts"],
+  "limitations": [
+    "Binary files show inventory/hash only; binary preview/download UI remains absent",
+    "Version navigation is previous/next plus current selection, not a chronological audit/diff browser",
+    "Existing-skill folder update UI and automatic discovery remain pending",
+    "Chinese/light Chromium after screenshots only; complete language/theme/keyboard matrix and matched reference comparison pending",
+    "No live provider/Ubuntu/fullAT completion claim"
+  ],
+  "browserTests": 3,
+  "browserSeconds": 6.4,
+  "screenshots": [
+    "docs/implementation/evidence/2026-10-04/skill-files/after-1440.png",
+    "docs/implementation/evidence/2026-10-04/skill-files/after-1280.png",
+    "docs/implementation/evidence/2026-10-04/skill-files/after-390.png",
+    "docs/implementation/evidence/2026-10-04/skill-files/after-320.png"
+  ],
+  "assertions": [
+    "Package file selector displays original UTF8 reference/script content as escaped preformatted text",
+    "Binary invalidUTF8/NUL bytes are not rendered or executed; inventory includes per-file SHA256",
+    "Previous revision selection invokes exact immutable revision endpoint; owner can enable old revision while latest remains2",
+    "Changing reviewed file/version clears trust checkbox; script global mutation absent",
+    "Four widths no page overflow;320 screenshot inspected; existing import/lifecycle tests remain green"
+  ]
+}

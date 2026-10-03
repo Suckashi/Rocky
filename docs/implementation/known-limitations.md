@@ -128,3 +128,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 Skills review UI: previous absence of all Skills UI is superseded by sidebar review/lifecycle interface. Import remains API-only; full revision navigation, file previews and broader browser matrix remain incomplete. Existing original-name cards intentionally avoid runtime UUID aliases except actual imported fixture names. No full OpenDots alignment claim.
 
 2026-10-04 Skill folder import: API-only import limitation is superseded for new packages via browser directory picker. Existing-skill update UI, automatic global/project discovery, filesystem symlink inspection and full file/history review remain incomplete. Browser imports retain selected bytes without asserting original filesystem topology.
+
+2026-10-04 Skill package/history review: earlier SKILL.md-only preview and no historical navigation limitations are superseded by text-file selection, binary metadata and previous/next immutable revision controls. Chronological audit/diff UI, binary download and existing-skill folder updates remain incomplete; browser tests do not establish external script safety.
