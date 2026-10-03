@@ -96,7 +96,7 @@ test("work Learning consent defaults excluded, saves review consent and withdraw
   const { startAgentProvider } =
     await import("../../fixtures/models/agent-provider.js");
   const provider = await startAgentProvider({
-    reply: () => new AIMessage("Finished local consent fixture"),
+    reply: async () => new AIMessage("Finished local consent fixture"),
   });
   try {
     await page.goto("/");
