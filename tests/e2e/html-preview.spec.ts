@@ -111,6 +111,13 @@ test("restricted HTML artifact renders without script, storage, API or network a
             .status,
       )
       .toBe("waiting_approval");
+    await expect(page.locator(".rocky-presence")).toHaveAttribute(
+      "data-presence",
+      "awaiting_approval",
+    );
+    await expect(page.locator(".rocky-presence .rocky-avatar")).not.toHaveClass(
+      /presence-moving/,
+    );
     await page
       .locator("article.work")
       .filter({ hasText: "HTML_PREVIEW_FIXTURE" })
@@ -158,6 +165,22 @@ test("restricted HTML artifact renders without script, storage, API or network a
     await expect(openResult).toBeFocused();
     await page.reload();
     await expect(delivery).toBeVisible();
+    await expect(page.locator(".rocky-presence")).toHaveAttribute(
+      "data-presence",
+      "completed",
+    );
+    const motion = page.getByRole("button", { name: /角色動畫/ });
+    await motion.focus();
+    if ((await motion.getAttribute("aria-pressed")) === "true")
+      await page.keyboard.press("Enter");
+    await expect(motion).toHaveAttribute("aria-pressed", "false");
+    await page.reload();
+    await expect(motion).toHaveAttribute("aria-pressed", "false");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(page.locator(".rocky-presence .rocky-avatar")).toHaveCSS(
+      "animation-name",
+      "none",
+    );
     await openResult.click();
     const iframe = page.locator("iframe.html-artifact-preview");
     await expect(iframe).toHaveAttribute("sandbox", "");

@@ -16,6 +16,7 @@ import { WorkOperations } from "./work-operations.js";
 import { WorkGrants } from "./work-grants.js";
 import { WorkSteering } from "./work-steering.js";
 import { WorkRetry } from "./work-retry.js";
+import { RockyPresence } from "./rocky-presence.js";
 import { Chrome, Transcript } from "./chrome.js";
 import ReactMarkdown from "react-markdown";
 import "./style.css";
@@ -105,6 +106,7 @@ function App() {
     [transport, setTransport] = useState<"stdio" | "http">("stdio");
   const {
     works,
+    presenceWorks,
     artifacts,
     artifactError,
     artifactLoading,
@@ -274,25 +276,13 @@ function App() {
       <section className="chat-workspace">
         <div className={works.length ? "live-chat" : "new-conversation"}>
           <section className="conversation">
-            <div
-              className={works.length ? "chat-persona" : "empty-chat-persona"}
-            >
-              <img
-                className="rocky-avatar"
-                src="/rocky/avatar.svg"
-                width="68"
-                height="68"
-                alt="Rocky"
-              />
-              <h1>{works.length ? "Rocky" : t.title}</h1>
-              <p>
-                {works.length
-                  ? locale === "zh"
-                    ? "一位持續助手 · 真實工作狀態"
-                    : "One continuous assistant · confirmed work state"
-                  : t.intro}
-              </p>
-            </div>
+            <RockyPresence
+              works={presenceWorks}
+              events={events}
+              connected={connected}
+              configured={!!selectedModel || enabled}
+              locale={locale}
+            />
             <Transcript
               revision={
                 `${works.at(-1)?.id ?? ""}:${works.at(-1)?.revision ?? 0}` +

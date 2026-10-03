@@ -214,6 +214,7 @@ export function useRockyProjection(request: RockyRequest) {
   }, [works, history]);
   return {
     works: visibleWorks,
+    presenceWorks: works,
     artifacts,
     artifactError,
     artifactLoading,
