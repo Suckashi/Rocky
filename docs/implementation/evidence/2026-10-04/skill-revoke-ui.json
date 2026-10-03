@@ -1,0 +1,31 @@
+{
+  "commit": "1fbc4c7d1698fb3ae32e710f8d223f0bc347ff8f",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npm run check; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts skills.spec.ts; npx eslint apps/web/src/skill-revocation.tsx apps/web/src/main.tsx tests/e2e/skills.spec.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/skill-revoke-ui.json",
+  "testFiles": ["tests/e2e/skills.spec.ts"],
+  "limitations": [
+    "Browser scenario revokes a frozen catalog entry before body load; loaded-skill pending-approval denial remains covered by separate native tests, not this browser flow",
+    "Notification is based on available persisted projection events; older paginated history event availability remains to verify",
+    "Chinese/light Chromium148.0.7778.96 DPR1; dark/English and complete keyboard matrix pending",
+    "Four-width after-only fixture screenshots; matched OpenDots comparison still pending",
+    "No Ubuntu/live provider/fullAT completion claim"
+  ],
+  "browserTests": 4,
+  "browserSeconds": 11.9,
+  "screenshots": [
+    "docs/implementation/evidence/2026-10-04/skill-revoke-ui/after-1440.png",
+    "docs/implementation/evidence/2026-10-04/skill-revoke-ui/after-1280.png",
+    "docs/implementation/evidence/2026-10-04/skill-revoke-ui/after-390.png",
+    "docs/implementation/evidence/2026-10-04/skill-revoke-ui/after-320.png"
+  ],
+  "assertions": [
+    "Real owner selection command emits daemon revocation event; UI notice appears without reload",
+    "Notice matches work ID and run ID, persists after reload, evidence collapsed again",
+    "No fabricated UI event injection; held local provider used solely in test",
+    "1440x900/1280x800/390x844/320x844 no full-page horizontal overflow;320 screenshot inspected"
+  ]
+}
