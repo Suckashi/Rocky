@@ -14,7 +14,13 @@ export function Artifacts({
   revision,
   items,
   initialArtifact,
+  loadError,
+  loading,
+  onRetry,
 }: {
+  loadError: string;
+  loading: boolean;
+  onRetry: () => void;
   items: Artifact[];
   initialArtifact?: Artifact;
   locale: "zh" | "en";
@@ -162,7 +168,17 @@ export function Artifacts({
       aria-label={zh ? "成果庫" : "Artifact library"}
     >
       {error && <p role="alert">{error}</p>}
-      {(busy || libraryBusy) && (
+      {loadError && (
+        <p role="alert">
+          {zh
+            ? "成果清單載入失敗，保留最後已知資料。"
+            : "Results failed to load; last known data retained."}{" "}
+          <button disabled={loading} onClick={onRetry}>
+            {zh ? "重試成果清單" : "Retry results"}
+          </button>
+        </p>
+      )}
+      {(busy || libraryBusy || loading) && (
         <p role="status">{zh ? "載入中…" : "Loading…"}</p>
       )}
       {selected ? (
@@ -261,7 +277,7 @@ export function Artifacts({
               ? "保存已確認寫入的檔案快照。工作區後續修改不會覆寫成果。"
               : "Saved snapshots of confirmed file writes. Later workspace edits do not overwrite results."}
           </p>
-          {!libraryBusy && !items.length && (
+          {!libraryBusy && !loading && !loadError && !items.length && (
             <p>
               {zh
                 ? "尚無成果。可在工作的「操作與對帳」中保存已成功寫入的檔案。"

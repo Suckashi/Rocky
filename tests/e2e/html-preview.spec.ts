@@ -245,6 +245,31 @@ test("restricted HTML artifact renders without script, storage, API or network a
     await library.getByRole("button", { name: "顯示 HTML 預覽" }).focus();
     await page.keyboard.press("Escape");
     await expect(library).not.toBeVisible();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.route("**/api/v1/artifacts", (route) =>
+      route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "Fixture library outage" }),
+      }),
+    );
+    await page.reload();
+    await expect(page.getByText("本機已連線", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "重試成果清單" }),
+    ).toBeVisible();
+    await expect(
+      page
+        .locator("article.work")
+        .filter({ hasText: "HTML_PREVIEW_FIXTURE" })
+        .first(),
+    ).toBeAttached();
+    await page.unroute("**/api/v1/artifacts");
+    await page.getByRole("button", { name: "重試成果清單" }).click();
+    await expect(delivery).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "重試成果清單" }),
+    ).toHaveCount(0);
   } finally {
     await provider.close();
     await new Promise<void>((resolve) => canary.close(() => resolve()));

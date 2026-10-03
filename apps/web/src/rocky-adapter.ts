@@ -40,6 +40,13 @@ export type RockyRequest = (path: string, body?: unknown) => Promise<unknown>;
 // Transport closure only changes connection state, never Work outcomes.
 export function useRockyProjection(request: RockyRequest) {
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+  const [artifactError, setArtifactError] = useState("");
+  const [artifactLoading, setArtifactLoading] = useState(true);
+  const [artifactAttempt, setArtifactAttempt] = useState(0);
+  const reloadArtifacts = useCallback(
+    () => setArtifactAttempt((old) => old + 1),
+    [],
+  );
   const [works, setWorks] = useState<Work[]>([]);
   const [events, setEvents] = useState<PublicEvent[]>([]);
   const [connected, setConnected] = useState(false);
@@ -71,6 +78,35 @@ export function useRockyProjection(request: RockyRequest) {
   }, [request, historyCursor, historyLoading]);
   const reconnect = useCallback(() => setAttempt((old) => old + 1), []);
   useEffect(() => {
+    let active = true;
+    setArtifactLoading(true);
+    setArtifactError("");
+    void request("/artifacts")
+      .then((value) => {
+        const incoming = z
+          .object({ artifacts: z.array(artifactSchema) })
+          .parse(value).artifacts;
+        if (active)
+          setArtifacts((old) => [
+            ...new Map(
+              [...incoming, ...old].map((item) => [item.id, item]),
+            ).values(),
+          ]);
+      })
+      .catch((error) => {
+        if (active)
+          setArtifactError(
+            error instanceof Error ? error.message : String(error),
+          );
+      })
+      .finally(() => {
+        if (active) setArtifactLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [request, attempt, artifactAttempt]);
+  useEffect(() => {
     generation.current++;
     setHistoryLoading(false);
     let disposed = false;
@@ -80,11 +116,6 @@ export function useRockyProjection(request: RockyRequest) {
       .then(async (data) => {
         if (disposed) return;
         const snapshot = snapshotSchema.parse(data);
-        const library = z
-          .object({ artifacts: z.array(artifactSchema) })
-          .parse(await request("/artifacts"));
-        if (disposed) return;
-        setArtifacts(library.artifacts);
         setWorks(snapshot.works);
         setEvents(snapshot.events);
         const page = conversationPageSchema.parse(
@@ -184,6 +215,9 @@ export function useRockyProjection(request: RockyRequest) {
   return {
     works: visibleWorks,
     artifacts,
+    artifactError,
+    artifactLoading,
+    reloadArtifacts,
     events,
     streams,
     connected,

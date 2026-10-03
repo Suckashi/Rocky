@@ -106,6 +106,9 @@ function App() {
   const {
     works,
     artifacts,
+    artifactError,
+    artifactLoading,
+    reloadArtifacts,
     events,
     streams,
     connected,
@@ -214,6 +217,9 @@ function App() {
       artifacts={
         <Artifacts
           items={artifacts}
+          loadError={artifactError}
+          loading={artifactLoading}
+          onRetry={reloadArtifacts}
           initialArtifact={resultRequest?.artifact}
           locale={locale}
           request={request}
@@ -621,6 +627,16 @@ function App() {
                 {connectionError || t.offline}{" "}
                 <button onClick={reconnect}>
                   {locale === "zh" ? "重新連線" : "Reconnect"}
+                </button>
+              </p>
+            )}
+            {artifactError && (
+              <p role="alert">
+                {locale === "zh"
+                  ? "成果清單載入失敗；對話仍可使用。"
+                  : "Results failed to load; conversation is still available."}{" "}
+                <button disabled={artifactLoading} onClick={reloadArtifacts}>
+                  {locale === "zh" ? "重試成果清單" : "Retry results"}
                 </button>
               </p>
             )}
