@@ -1260,6 +1260,34 @@
             "Installed Chromium 1223 override used; pinned browser 1243 download remains unavailable",
             "T-008 in_progress; global AT unchanged; no live or remote actions"
           ]
+        },
+        {
+          "commit": "fcca9adee85b1b3cdb2a61e2d45e2e9e7ee9592e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm test; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-native-reads/verification.json",
+          "testFiles": [
+            "tests/workspace-work.test.ts",
+            "tests/conversation-store.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/admission.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/e2e/workspace-read.spec.ts"
+          ],
+          "limitations": [
+            "T017 writes/diff/shell/worktree/full leases and locks unfinished",
+            "Read scope fixed at submission; retry regrant UI unfinished",
+            "Known path/redaction filters not complete secret classifier",
+            "Snapshot/recheck not OS sandbox or race-free proof",
+            "Ubuntu/live integrations/pinned browser install not_run",
+            "Complete native-read dark/English/focus/reduced-motion matrix not_run",
+            "No new reference/before/after populated comparison",
+            "One concurrent Failed-to-fetch browser observation; cause unproven despite isolated/final passes"
+          ]
         }
       ],
       "blockedReason": null,
@@ -1427,6 +1455,34 @@
             "No new OpenDots visual comparison; current configured/stream/stop browser regression only",
             "Full power-loss/crash matrix, precise steering/reset/retry and later V1 modules remain unfinished; global AT unchanged",
             "No remote actions"
+          ]
+        },
+        {
+          "commit": "fcca9adee85b1b3cdb2a61e2d45e2e9e7ee9592e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm test; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-native-reads/verification.json",
+          "testFiles": [
+            "tests/workspace-work.test.ts",
+            "tests/conversation-store.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/admission.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/e2e/workspace-read.spec.ts"
+          ],
+          "limitations": [
+            "T017 writes/diff/shell/worktree/full leases and locks unfinished",
+            "Read scope fixed at submission; retry regrant UI unfinished",
+            "Known path/redaction filters not complete secret classifier",
+            "Snapshot/recheck not OS sandbox or race-free proof",
+            "Ubuntu/live integrations/pinned browser install not_run",
+            "Complete native-read dark/English/focus/reduced-motion matrix not_run",
+            "No new reference/before/after populated comparison",
+            "One concurrent Failed-to-fetch browser observation; cause unproven despite isolated/final passes"
           ]
         }
       ],
@@ -1791,6 +1847,34 @@
             "Resources/prompts/generic reconciliation/remote jobs and later V1 modules unfinished",
             "No new upstream fidelity comparison/dark/English/reduced-motion evidence",
             "T-016 remains in_progress; global AT unchanged; no remote actions"
+          ]
+        },
+        {
+          "commit": "fcca9adee85b1b3cdb2a61e2d45e2e9e7ee9592e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm test; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-native-reads/verification.json",
+          "testFiles": [
+            "tests/workspace-work.test.ts",
+            "tests/conversation-store.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/admission.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/e2e/workspace-read.spec.ts"
+          ],
+          "limitations": [
+            "T017 writes/diff/shell/worktree/full leases and locks unfinished",
+            "Read scope fixed at submission; retry regrant UI unfinished",
+            "Known path/redaction filters not complete secret classifier",
+            "Snapshot/recheck not OS sandbox or race-free proof",
+            "Ubuntu/live integrations/pinned browser install not_run",
+            "Complete native-read dark/English/focus/reduced-motion matrix not_run",
+            "No new reference/before/after populated comparison",
+            "One concurrent Failed-to-fetch browser observation; cause unproven despite isolated/final passes"
           ]
         }
       ],
@@ -2455,6 +2539,34 @@
             "complete keyboard/theme/locale audit not_run",
             "existing browser not clean pinned install evidence"
           ]
+        },
+        {
+          "commit": "fcca9adee85b1b3cdb2a61e2d45e2e9e7ee9592e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm test; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-native-reads/verification.json",
+          "testFiles": [
+            "tests/workspace-work.test.ts",
+            "tests/conversation-store.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/admission.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/e2e/workspace-read.spec.ts"
+          ],
+          "limitations": [
+            "T017 writes/diff/shell/worktree/full leases and locks unfinished",
+            "Read scope fixed at submission; retry regrant UI unfinished",
+            "Known path/redaction filters not complete secret classifier",
+            "Snapshot/recheck not OS sandbox or race-free proof",
+            "Ubuntu/live integrations/pinned browser install not_run",
+            "Complete native-read dark/English/focus/reduced-motion matrix not_run",
+            "No new reference/before/after populated comparison",
+            "One concurrent Failed-to-fetch browser observation; cause unproven despite isolated/final passes"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2835,6 +2947,34 @@
             "Ubuntu and live service not_run",
             "complete keyboard/theme/locale audit not_run",
             "existing browser not clean pinned install evidence"
+          ]
+        },
+        {
+          "commit": "fcca9adee85b1b3cdb2a61e2d45e2e9e7ee9592e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm test; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-native-reads/verification.json",
+          "testFiles": [
+            "tests/workspace-work.test.ts",
+            "tests/conversation-store.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/admission.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/e2e/workspace-read.spec.ts"
+          ],
+          "limitations": [
+            "T017 writes/diff/shell/worktree/full leases and locks unfinished",
+            "Read scope fixed at submission; retry regrant UI unfinished",
+            "Known path/redaction filters not complete secret classifier",
+            "Snapshot/recheck not OS sandbox or race-free proof",
+            "Ubuntu/live integrations/pinned browser install not_run",
+            "Complete native-read dark/English/focus/reduced-motion matrix not_run",
+            "No new reference/before/after populated comparison",
+            "One concurrent Failed-to-fetch browser observation; cause unproven despite isolated/final passes"
           ]
         }
       ],

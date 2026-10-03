@@ -1,6 +1,6 @@
 # Rocky implementation progress
 
-2026-10-04, Asia/Taipei. Current work: OpenDots-aligned main chat, configured native conversation/MCP tools and data, and registered workspace owner preview. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
+2026-10-04, Asia/Taipei. Current work: OpenDots-aligned main chat, configured native conversation/MCP tools and data, and registered workspaces with explicitly granted native root/child reads. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
 
 | Task                  | Status      | Actual result                                                                                                                                         |
 | --------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -20,7 +20,7 @@
 | Later tasks           | pending     | Product modules and confirmed-state presence remain pending.                                                                                          |
 | T-014 / T-015 / T-021 | in_progress | Configured MCP registry, lifecycle/discovery and settings verified locally; full process/network/permission scope pending.                            |
 | T-016                 | in_progress | Configured dispatch, typed media and original resource/prompt envelopes implemented; target mapping, advanced schemas, generic reconciliation remain. |
-| T-017                 | in_progress | Canonical root registration/CAS/receipts and actual owner file preview; assistant tools, writes/shell/worktree/locks remain.                          |
+| T-017                 | in_progress | Canonical registration/owner preview and explicit native root/child reads with revision/context isolation; writes/shell/worktree/full locks remain.   |
 
 Node 24.12.0 / npm 11.6.4 baseline. OpenDots MIT presentation CSS adapted with notices; no upstream history, backend, data, settings or brand assets imported. Test data is synthetic. No remote action; existing live probe evidence is separate from this fixture UI slice. See known-limitations.md for gates and follow-up.
 
@@ -403,3 +403,9 @@ Root native mcp_data now reads discovered resources/templates/prompts after exac
 ## Original MCP data envelopes (5505c4a)
 
 Daemon ledger and sanitized checkpoint retain original SDK resources/prompts, including extensions/metadata, without binary duplication in worker delivery. Mapper alone creates model task data; native offload retains dataKind. Full220, focused27, build and two four-width normal-daemon browser checks passed. See mcp-data-envelopes.md. T-016 stays in_progress. Next: T-017 real workspace registration and guarded file operations.
+
+## Native workspace read continuation (2026-10-04)
+
+Source fcca9ad adds immutable registered revision/read intent, atomic per-Work grant, daemon-owned root/child file tools, Unicode/hash-checked pages and scoped checkpoint/history/inbox. Sending resets the next read grant. Read interruption is no-effect, while MCP remains unknown. Native graph-step headroom now derives from the unchanged daemon model-call budget.
+
+Final51 files/236 tests and four normal-daemon browser flows pass; typecheck/lint/build/docs/source/format checks pass. One concurrent Failed-to-fetch browser observation remains unexplained despite isolated/final passes. Full acceptance, native-read theme/focus matrix, Ubuntu/live services and writes/diff/shell/worktree/full locks remain unfinished. See [workspace-native-reads.md](workspace-native-reads.md) and its dated evidence. No remote action; Goal remains active.
