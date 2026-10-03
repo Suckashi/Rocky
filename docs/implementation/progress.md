@@ -164,3 +164,11 @@ Implementation `9f91549695deb8131a5fbfa056b4e5fde68b0fec` masks recognized crede
 All 77 tests across 22 files passed, plus typecheck, server build, lint and formatting. Tests inject synthetic credentials into tool evidence and Work text, verify persisted events and public projections, and explicitly show that private Work storage is not a scrubbed export. See [redaction evidence](evidence/2026-10-03/policy/redaction.json).
 
 This is not universal DLP or complete private-data retention handling. Old unavailable secret values, private checkpoints/results and diagnostics require later lifecycle/export work. T-008 remains in_progress for grants, actual target resolvers and concrete reconciliation integration. Goal active; no live/remote actions.
+
+## T-008 continuation: durable scoped grants
+
+Implementation `62605214b2eec7a86147be7bebc494aa5d2a6695` adds domain v7 capability grants. Daemon-issued known_read/local_new scopes bind Work/run/session, canonical target, policy revision and optional expiry. Critical/unknown cannot be granted. Revocation is CAS-protected and persistent; issuance replay never revives a revoked scope. New explicitly submitted synthetic Work receives one read scope, checked at actual broker dispatch.
+
+Six grant/ledger tests, seven native/configured regressions and a final two-test grant run passed. The latter proves revocation prevents every MCP operation dispatch, not merely successful results. Typecheck, lint and server build passed. Initial update-path issuance was caught by regression and moved to submit-only. See [grant evidence](evidence/2026-10-03/policy/grants.json).
+
+Owner management API/UI and real workspace scopes are not implemented. Target resolvers and concrete reconciliation remain pending; T-008 and Goal stay active. No live/remote actions or global acceptance promotion.
