@@ -25,6 +25,23 @@ const importSchema = z
   })
   .strict();
 type Snapshot = ReturnType<typeof validateSkillPackage>;
+const selectionSchema = z
+  .object({
+    requestId: z.uuid(),
+    expectedRevision: z.number().int().nonnegative(),
+    skillRevision: z.number().int().positive(),
+    contentHash: z.string().regex(/^[a-f0-9]{64}$/),
+    action: z.enum(["publish", "deactivate", "quarantine"]),
+  })
+  .strict();
+type SkillSelection = {
+  id: string;
+  revision: number;
+  skillRevision: number;
+  contentHash: string;
+  state: "published" | "inactive" | "quarantined";
+  updatedAt: string;
+};
 type SkillRevision = {
   id: string;
   revision: number;
@@ -124,7 +141,102 @@ export class SkillRegistry {
         .all() as { data: string }[]
     ).map((row) => JSON.parse(row.data) as SkillRevision);
   }
-  get(id: string, revision: number) {
+  selection(id: string): SkillSelection | null {
+    z.uuid().parse(id);
+    const row = this.store.db
+      .prepare("SELECT data FROM skill_selections WHERE id=?")
+      .get(id) as { data: string } | undefined;
+    return row ? (JSON.parse(row.data) as SkillSelection) : null;
+  }
+  select(id: string, input: unknown) {
+    z.uuid().parse(id);
+    const command = selectionSchema.parse(input);
+    const intent = intentHash({ id, ...command });
+    return this.store.transaction(() => {
+      const prior = this.store.db
+        .prepare(
+          "SELECT intent,result FROM skill_selection_receipts WHERE request_id=?",
+        )
+        .get(command.requestId) as
+        { intent: string; result: string } | undefined;
+      if (prior) {
+        if (prior.intent !== intent)
+          throw new RockyError(
+            "idempotency_conflict",
+            "Skill selection changed",
+            409,
+          );
+        return JSON.parse(prior.result) as SkillSelection;
+      }
+      const current = this.selection(id);
+      if ((current?.revision ?? 0) !== command.expectedRevision)
+        throw new RockyError(
+          "stale_skill_selection",
+          "Skill selection revision changed",
+          409,
+        );
+      const revision =
+        command.action === "publish"
+          ? this.get(id, command.skillRevision).revision
+          : this.revision(id, command.skillRevision);
+      if (revision.contentHash !== command.contentHash)
+        throw new RockyError(
+          "stale_skill_hash",
+          "Reviewed skill hash does not match",
+          409,
+        );
+      if (
+        command.action !== "publish" &&
+        current &&
+        (current.skillRevision !== command.skillRevision ||
+          current.contentHash !== command.contentHash)
+      )
+        throw new RockyError(
+          "stale_skill_selection",
+          "Deactivate or quarantine must target the current selection",
+          409,
+        );
+      if (command.action === "publish") {
+        const blocked = this.store.db
+          .prepare("SELECT 1 FROM skill_quarantine WHERE id=? AND hash=?")
+          .get(id, command.contentHash);
+        if (blocked)
+          throw new RockyError(
+            "skill_quarantined",
+            "Quarantined package cannot be published",
+            409,
+          );
+      }
+      if (command.action === "quarantine")
+        this.store.db
+          .prepare("INSERT OR IGNORE INTO skill_quarantine VALUES(?,?)")
+          .run(id, command.contentHash);
+      const result: SkillSelection = {
+        id,
+        revision: command.expectedRevision + 1,
+        skillRevision: command.skillRevision,
+        contentHash: command.contentHash,
+        state:
+          command.action === "publish"
+            ? "published"
+            : command.action === "deactivate"
+              ? "inactive"
+              : "quarantined",
+        updatedAt: new Date().toISOString(),
+      };
+      const data = JSON.stringify(result);
+      this.store.db
+        .prepare(
+          "INSERT INTO skill_selections VALUES(?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data",
+        )
+        .run(id, data);
+      this.store.db
+        .prepare("INSERT INTO skill_selection_receipts VALUES(?,?,?)")
+        .run(command.requestId, intent, data);
+      return result;
+    });
+  }
+  private revision(id: string, revision: number) {
     z.uuid().parse(id);
     z.number().int().positive().parse(revision);
     const row = this.store.db
@@ -132,7 +244,10 @@ export class SkillRegistry {
       .get(id, revision) as { data: string } | undefined;
     if (!row)
       throw new RockyError("skill_missing", "Skill revision not found", 404);
-    const record = JSON.parse(row.data) as SkillRevision;
+    return JSON.parse(row.data) as SkillRevision;
+  }
+  get(id: string, revision: number) {
+    const record = this.revision(id, revision);
     const stored = this.store.db
       .prepare("SELECT data FROM skill_packages WHERE hash=?")
       .get(record.contentHash) as { data: string } | undefined;

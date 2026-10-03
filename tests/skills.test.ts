@@ -143,12 +143,12 @@ test("schema 19 upgrades skill tables without changing owner memories", async ()
     });
     // Reconstruct the previous schema in this isolated test database only.
     service.store.db.exec(
-      "DROP TABLE skill_heads; DROP TABLE skill_revisions; DROP TABLE skill_packages; DROP TABLE skill_import_receipts; PRAGMA user_version=19;",
+      "DROP TABLE skill_heads; DROP TABLE skill_revisions; DROP TABLE skill_packages; DROP TABLE skill_import_receipts; DROP TABLE skill_selections; DROP TABLE skill_selection_receipts; DROP TABLE skill_quarantine; PRAGMA user_version=19;",
     );
     await service.close();
     service = new WorkService(root);
     expect(service.store.db.prepare("PRAGMA user_version").get()).toMatchObject(
-      { user_version: 20 },
+      { user_version: 21 },
     );
     expect(service.memories.get(id).content).toBe("Preserve across upgrade");
     expect(service.skills.list()).toEqual([]);
