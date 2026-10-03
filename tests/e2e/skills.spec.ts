@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -41,7 +41,12 @@ test("owner reviews all package files and selects an older immutable revision", 
             },
             {
               path: "assets/binary.dat",
-              contentBase64: Buffer.from([0, 255, 128]).toString("base64"),
+              contentBase64: Buffer.from([
+                0,
+                255,
+                128,
+                expectedRevision,
+              ]).toString("base64"),
             },
           ],
         },
@@ -78,6 +83,27 @@ test("owner reviews all package files and selects an older immutable revision", 
   await card.getByLabel("檢視套件檔案").selectOption("assets/binary.dat");
   await expect(card).toContainText("二進位檔案");
   await expect(card.locator("pre")).toHaveCount(0);
+  await card.getByRole("button", { name: "比較上一版本" }).click();
+  await expect(card).toContainText("二進位檔案不提供文字差異");
+  const binaryEvidence = card.locator(".skill-diff-evidence");
+  await binaryEvidence.locator("summary").click();
+  for (const version of [0, 1]) {
+    await expect(binaryEvidence).toContainText(
+      createHash("sha256")
+        .update(Buffer.from([0, 255, 128, version]))
+        .digest("hex"),
+    );
+  }
+  await binaryEvidence.scrollIntoViewIfNeeded();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "test-results/skill-binary-diff-320.png",
+    fullPage: true,
+  });
   await card.getByRole("button", { name: "上一版本", exact: true }).click();
   await expect(card.locator("pre")).toContainText("BODY_REVISION_1");
   await card.getByLabel("我已檢視此版本內容及來源").check();

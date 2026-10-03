@@ -8,6 +8,8 @@ const schema = z.object({
       status: z.enum(["added", "removed", "modified"]),
       previousBytes: z.number(),
       nextBytes: z.number(),
+      previousHash: z.string().nullable(),
+      nextHash: z.string().nullable(),
     }),
   ),
   binary: z.boolean(),
@@ -65,6 +67,7 @@ export function SkillDiff({
     }
   }
   if (revision <= 1) return null;
+  const selected = value?.files.find((file) => file.path === value.path);
   return (
     <div className="skill-diff">
       <button disabled={busy} onClick={() => void load()}>
@@ -100,8 +103,8 @@ export function SkillDiff({
           {value.binary ? (
             <p>
               {zh
-                ? "二進位變更；請比較版本證據中的大小與雜湊。"
-                : "Binary change; compare size and hashes in revision evidence."}
+                ? "二進位檔案不提供文字差異。"
+                : "Text diff unavailable for binary files."}
             </p>
           ) : (
             value.preview && (
@@ -131,6 +134,29 @@ export function SkillDiff({
                 </pre>
               </>
             )
+          )}
+          {selected && (
+            <details className="skill-diff-evidence">
+              <summary>
+                {zh ? "檔案比較證據" : "File comparison evidence"}
+              </summary>
+              <p>
+                r{revision - 1} · {selected.previousBytes} B
+              </p>
+              <p>
+                SHA-256:{" "}
+                <code>
+                  {selected.previousHash ?? (zh ? "不存在" : "Absent")}
+                </code>
+              </p>
+              <p>
+                r{revision} · {selected.nextBytes} B
+              </p>
+              <p>
+                SHA-256:{" "}
+                <code>{selected.nextHash ?? (zh ? "不存在" : "Absent")}</code>
+              </p>
+            </details>
           )}
         </>
       )}
