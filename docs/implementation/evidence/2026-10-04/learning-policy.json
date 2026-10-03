@@ -1,0 +1,24 @@
+{
+  "commit": "de2a97c6e19df692f75f5647e07e8a99cf7deae2",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/learning-policy.test.ts tests/skills.test.ts; npm run check; scoped eslint contracts/learning, daemon learning/store/work-service/http and tests; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/learning-policy.json",
+  "testFiles": ["tests/learning-policy.test.ts", "tests/skills.test.ts"],
+  "tests": 3,
+  "seconds": 2.03,
+  "limitations": [
+    "Policy persistence only: episode eligibility/redaction/dedupe/manual opt-in, reflection dispatch and low-priority queue remain unfinished",
+    "Saving propose records consent but does not start automatic Learning yet; no Learning UI in this slice",
+    "Budget/provider selection, privacy scope enforcement at episode admission and revocation of queued episodes remain pending",
+    "No browser/Ubuntu/live model/global AT completion evidence; T-028 in_progress"
+  ],
+  "assertions": [
+    "Schema23 migration preserves Skill data; Learning defaults off without writes",
+    "Owner session required; propose requires explicit consent and nonempty known scopes; duplicate scopes and auto rejected",
+    "Revision CAS rejects stale commands; durable exact receipt replay does not restore earlier policy",
+    "Disabled policy persists across service restart"
+  ]
+}
