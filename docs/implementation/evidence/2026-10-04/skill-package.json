@@ -1,0 +1,27 @@
+{
+  "commit": "3a98912b933680d4433549b8fdbf7b56dc7749f9",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/skill-package.test.ts; npm run check; npx eslint apps/daemon/src/skill-package.ts tests/skill-package.test.ts; npm run check:licenses; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/skill-package.json",
+  "testFiles": ["tests/skill-package.test.ts"],
+  "limitations": [
+    "Data-only validator foundation, not yet wired to HTTP, filesystem import, registry, trust UI or runtime discovery",
+    "ASCII skill names currently supported; broader Unicode names and native loader interoperability remain to verify",
+    "128 files, 1MiB per file, 4MiB package and 16KiB frontmatter are Rocky bounded import limits; YAML aliases/custom tags rejected",
+    "Hash validation is not authorization, script sandboxing, secret review or immutable persistence",
+    "No new browser/Ubuntu/live evidence; global AT unchanged"
+  ],
+  "tests": 18,
+  "testSeconds": 0.338,
+  "source": "https://agentskills.io/specification",
+  "assertions": [
+    "Standard YAML name/description metadata, folded description, license and metadata map",
+    "Binary assets preserved; sorted path/size/SHA256 manifest produces deterministic package hash",
+    "Traversal, absolute paths, NTFS streams, device names, case collisions and file/directory conflicts rejected",
+    "Invalid UTF8, duplicate YAML keys, unknown tags, aliases, malformed base64 and size limits rejected",
+    "allowed-tools retained as untrusted metadata without constructing grants"
+  ]
+}
