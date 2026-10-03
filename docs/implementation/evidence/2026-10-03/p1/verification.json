@@ -1,0 +1,168 @@
+{
+  "commit": "5f7620209fd4421caf90df84f96d4b8de2bc88c1",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "df4ff0e83669da0aaf947a7010eb6969f57841eb76b16f386e3ef3580fbd6f6a",
+  "mode": "fixture",
+  "recordedAt": "2026-10-03T04:36:41.393Z",
+  "tasks": ["T-005", "T-037"],
+  "requirementIds": [
+    "R-006",
+    "R-007",
+    "R-008",
+    "R-044",
+    "R-049",
+    "R-051",
+    "R-004",
+    "R-016",
+    "R-039",
+    "R-052",
+    "R-053",
+    "R-054",
+    "R-055"
+  ],
+  "acceptanceContributions": [
+    "AT-54",
+    "AT-60",
+    "AT-62",
+    "AT-65",
+    "AT-66",
+    "AT-67",
+    "AT-68"
+  ],
+  "authorization": "User explicitly requested continuing feature implementation if environment blockers cannot be resolved. P0 remains open.",
+  "commands": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "passed": 23,
+      "files": 9
+    },
+    {
+      "command": "npm run test:contract",
+      "exitCode": 0,
+      "passed": 9
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run format:check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "warning": "Existing large client bundle warning remains"
+    },
+    {
+      "command": "npm run test:network",
+      "exitCode": 0,
+      "networkTests": 2,
+      "evaluationCases": 4
+    },
+    {
+      "command": "npm run test:e2e with ROCKY_TEST_BROWSER=Chromium 1223",
+      "exitCode": 1,
+      "stats": {
+        "startTime": "2026-10-03T04:33:54.480Z",
+        "duration": 9527.961,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "passed": [
+        "Original identity render matrix, keyboard theme control, zh/en, 320px, 200% zoom, reduced-motion",
+        "Native task/MCP/approval/reload/mobile",
+        "Exact stop/reload"
+      ],
+      "failed": ["Strict browser egress: local.adguard.org host injection"]
+    },
+    {
+      "command": "wsl --list --quiet; discover docker/podman",
+      "exitCode": null,
+      "result": "WSL is not installed; no Docker/Podman command found. No Ubuntu execution available."
+    }
+  ],
+  "testFiles": [
+    "tests/contracts.test.ts",
+    "tests/projection.test.ts",
+    "tests/http.test.ts",
+    "tests/identity.test.ts",
+    "tests/runtime.test.ts",
+    "tests/e2e/identity.spec.ts",
+    "tests/e2e/work.spec.ts"
+  ],
+  "visualReview": {
+    "matrix": "rocky-identity-matrix.png",
+    "mobile": "identity-mobile.png",
+    "zoom": "identity-zoom.png",
+    "result": "Inspected actual renders: five-limb silhouette and facets retained, small mark simplified; no final user-artwork approval claimed."
+  },
+  "assets": {
+    "manifest": "assets/rocky/asset-manifest.json",
+    "vectorBytes": 2200,
+    "conservativeIncrementalSourceBytes": 15678,
+    "rightsReview": "pending",
+    "timings": {
+      "cold": [
+        {
+          "asset": "/rocky/favicon.svg",
+          "duration": 5,
+          "transferSize": 643,
+          "decodedBodySize": 343
+        },
+        {
+          "asset": "/rocky/mark.svg",
+          "duration": 2.9000000953674316,
+          "transferSize": 643,
+          "decodedBodySize": 343
+        },
+        {
+          "asset": "/rocky/avatar.svg",
+          "duration": 2.9000000953674316,
+          "transferSize": 1579,
+          "decodedBodySize": 1279
+        }
+      ],
+      "warm": [
+        {
+          "asset": "/rocky/favicon.svg",
+          "duration": 2.4000000953674316,
+          "transferSize": 300,
+          "decodedBodySize": 343
+        },
+        {
+          "asset": "/rocky/mark.svg",
+          "duration": 2.200000047683716,
+          "transferSize": 300,
+          "decodedBodySize": 0
+        },
+        {
+          "asset": "/rocky/avatar.svg",
+          "duration": 2.200000047683716,
+          "transferSize": 300,
+          "decodedBodySize": 0
+        }
+      ],
+      "limitation": "Local fixture browser measurements; not a low-end-device benchmark."
+    }
+  },
+  "limitations": [
+    "Ubuntu not_run; P0 not complete",
+    "Strict browser egress remains failed; no exception or security software change",
+    "IPC schema is implemented but worker process/broker/backpressure are T-009 and not implemented",
+    "Snapshot recent evidence is bounded to 500; full history/outbox/retention are later work",
+    "Avatar is static; T-038 presence is pending",
+    "Source budget and local resource timings do not establish low-end-device performance or full app bundle budget",
+    "Live model endpoints, learned skills, deployment and remote repository not_run",
+    "No dependency changes; clean no-Python install was not repeated in this turn",
+    "Brand distribution rights review and final artwork approval remain pending"
+  ]
+}

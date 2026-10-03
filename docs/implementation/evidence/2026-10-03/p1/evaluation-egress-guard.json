@@ -1,0 +1,10 @@
+{
+  "denied": [
+    {
+      "destination": "https://r.promptfoo.app/",
+      "reason": "not configured for this evaluation"
+    }
+  ],
+  "policy": "exact configured fixture endpoints only",
+  "limitation": "Process Fetch boundary; no OS sandbox claim"
+}
