@@ -149,3 +149,5 @@ Presence feedback (05f77122594122b0be2eb3c9fb2933b4dc00af68) adds600ms2% scale o
 Background presence navigation (1f1dac70310d3253147d79aa7bccf1aefee459d0) uses an initially collapsed summary and bounded neutral list, matching the established progressive disclosure and semantic theme system. Keyboard Enter closes the list and focuses exact Work. No new upstream source copied. [Tests/screenshots](presence.md). Full matched comparison remains open.
 
 Admission wait presentation (84a5b4c27e15ebb3a79e6ad1a959473cfca66fdf) changes existing presence/Work label text using daemon waitingFor detail. No new panel, layout or upstream code. [Four-width header evidence](presence.md); no full reference comparison claim.
+
+Document history (565e888edcb0fa2c0c71e34a15954bd44638fcad) reuses existing resultpane, document comparison and neutral form system. History starts collapsed; source title retains OpenDots-derived40/32px size while revision selector uses standard14px control. No new upstream component copied. [Four-width evidence](documents.md). Matched reference comparison and complete language/theme matrix remain open.

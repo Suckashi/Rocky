@@ -76,3 +76,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 background navigation (1f1dac70310d3253147d79aa7bccf1aefee459d0): previous missing-attention-navigation statements are historical. Exact Work focus/reveal exists, tested across four widths. Full archive/search, resource-wait detail and performance/full platform matrix remain open.
 
 2026-10-04 admission wait presentation (84a5b4c27e15ebb3a79e6ad1a959473cfca66fdf): workspace/capacity reasons are now persisted and shown. Earlier absent-resource-wait presentation is superseded for admission; already-running model-slot waits remain separate/unclassified. Performance/full browser matrix still open.
+
+2026-10-04 document history (565e888edcb0fa2c0c71e34a15954bd44638fcad): previous absent-history-UI statements are superseded by revision-number browsing and explicit restore-as-new-version. Full timeline/search, blank creation and native agent/context tools remain missing.

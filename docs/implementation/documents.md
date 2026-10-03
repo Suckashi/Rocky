@@ -33,3 +33,17 @@ Screenshots: [1440](evidence/2026-10-04/documents/document-conflict-1440.png), [
 - Ubuntu/live model and release acceptance not_run; no remote actions
 
 All70 global AT unchanged. Goal active; no Apsis modification or remote action.
+
+## History and explicit restore (565e888edcb0fa2c0c71e34a15954bd44638fcad)
+
+Editor now exposes initially collapsed revision selection, immutable content/title/time preview and historical download. Loading a version is disabled while current draft is dirty. On clean draft, owner can load historical content/title and then Save through existing expectedRevision CAS; restores append a new revision and do not erase earlier versions or source artifact. Source focus returns after loading. No new backend endpoint or persistence format.
+
+Real native write→artifact→document browser flow verifies version1 view, unsaved-draft guard, restore as revision4, unchanged revision3 and original artifact. Four-width checks and final browser1 pass12.4s; document integration1, type/lint/build/format/diff pass. Visual review found the historical number field inherited title typography; title styling is now scoped to document-title and numeric field uses standard14px form type. [Verification](evidence/2026-10-04/document-history/verification.json).
+
+Screenshots: [1440](evidence/2026-10-04/document-history/document-history-1440.png), [1280](evidence/2026-10-04/document-history/document-history-1280.png), [390](evidence/2026-10-04/document-history/document-history-390.png), [320](evidence/2026-10-04/document-history/document-history-320.png). Final320 inspected.
+
+- History navigation selects revision number up to current loaded base; metadata timeline/search and blank-document creation remain pending
+- Restore loads historical title/content into a clean draft then uses existing CAS Save to append a revision; it never rewinds the head or deletes history
+- Dirty draft blocks restore loading; no automatic merge or discard
+- Four-width Chinese light browser fixture verified; new history English/dark and fresh matched OpenDots comparison not_run
+- Native document mutation/context references, PNG/JPEG attachments and remaining V1 scope incomplete; all70 global AT unchanged
