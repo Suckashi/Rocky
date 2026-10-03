@@ -200,7 +200,7 @@ test("T-008 own v4 operation migration preserves success and unknown without inv
         context: null,
       });
       expect(upgraded.db.prepare("PRAGMA user_version").get()).toMatchObject({
-        user_version: 6,
+        user_version: 7,
       });
     } finally {
       upgraded.close();

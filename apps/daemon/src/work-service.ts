@@ -19,6 +19,7 @@ import { ModelBudgetLedger } from "./model-budget.js";
 import { intentHash } from "./intent.js";
 import { OperationLedger } from "./operation-ledger.js";
 import { authorizeOperation } from "./policy.js";
+import { GrantRegistry } from "./grants.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -37,6 +38,7 @@ export class WorkService {
   readonly models: ModelRegistry;
   readonly modelBudgets: ModelBudgetLedger;
   readonly operations: OperationLedger;
+  readonly grants: GrantRegistry;
   readonly events = new EventEmitter();
   private active = new Map<string, Active>();
   private stopping = false;
@@ -54,6 +56,7 @@ export class WorkService {
       this.store.publicEvidence = (value) => this.models.redact(value);
       this.modelBudgets = new ModelBudgetLedger(this.store);
       this.operations = new OperationLedger(this.store);
+      this.grants = new GrantRegistry(this.store);
       // Never auto-replay an interrupted external action.
       for (const work of this.store.list())
         if (["running", "waiting_approval", "queued"].includes(work.status)) {
@@ -146,6 +149,17 @@ export class WorkService {
       this.store.event(work, "rocky.work.updated", { work });
     });
     this.flushOutbox();
+    this.grants.issue({
+      requestId: randomUUID(),
+      workId: work.id,
+      targetHash: intentHash({
+        fixture: work.runId,
+        transport: work.transport,
+      }),
+      effect: "known_read",
+      policyRevision: 1,
+      expiresAt: null,
+    });
     const abort = new AbortController();
     // Reserve before the first asynchronous connection, so stop and capacity checks are exact.
     const promise = this.start(work, abort);
@@ -299,7 +313,9 @@ export class WorkService {
                     ? "critical"
                     : "denied",
               configurationAllowed: true,
-              resourceAllowed: true,
+              resourceAllowed:
+                name !== "inspect_sample" ||
+                this.grants.allows(current, targetHash, "known_read", 1),
               revoked: false,
               preparedTargetHash: intentHash({
                 fixture: work.runId,
