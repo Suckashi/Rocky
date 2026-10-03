@@ -543,3 +543,7 @@ Pre-submit memory scope/private selections now pass through CopilotKit and atomi
 ## Memory isolation evidence (a0b070cdac06fc788a046364aad81438e1346ff8)
 
 Expanded native scope/child/cross-Work/revoked-replay/evaluation rollback coverage;11 actual daemon/Deep Agents fixture tests pass. Type/lint pass. [Report](memory-registry.md). Existing claims of fully missing native project/task/child coverage are historical; complete retry/expiry/restart and write/cleanup semantics remain open. T-025/Goal active.
+
+## Native memory result completeness (8cc548c9cbb0409945540581ad33299ed231824c)
+
+Added explicit native truncated/encoding/budget/untrusted metadata; full JSON fits declared token budget.14 integration and4 browser tests pass. [Evidence](memory-registry.md). No fullAT promotion; T-025 remains in_progress.

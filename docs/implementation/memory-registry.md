@@ -127,3 +127,15 @@ Composer Model/tools popover defaults to no memory access, offers user/selected-
 - No new UI/build evidence needed for test-only change; browser matrix unchanged
 - Model remember/update, durable ungranted-consent wait, derived-skill invalidation and delivered-checkpoint cleanup remain incomplete
 - Expiry races, daemon restart/retry matrix and fullAT36/46 remain open; all70 global AT unchanged
+
+## Bounded native result envelope (8cc548c9cbb0409945540581ad33299ed231824c)
+
+Native memory_search now delivers {items,truncated,encoding,tokenBudget,untrustedData}. It counts the complete serialized JSON, including metadata, against cl100k_base budget and removes whole records until it fits. Native minimum128 reserves metadata space; owner registry search remains2 minimum. Tool description explicitly distinguishes truncated results from absence and suggests narrower query/higher budget. No new authority or exposure added.
+
+[Evidence](evidence/2026-10-04/memory-tool-envelope.json):14 integration tests and4 browser tests pass; type/lint/build/format pass. Actual native delivered strings are independently encoded, budget128 produces empty/truncated=true and no-match produces empty/truncated=false. Earlier array-only/missing-flag notes are historical.
+
+- cl100k_base counts full serialized tool reply, not arbitrary provider tokenizer or complete prompt framing/billing
+- Native result can omit whole entries and caps20; no cursor pagination
+- No UI layout change/new matched OpenDots comparison in this slice
+- Native memory write, ungranted-consent wait, derivative/checkpoint deletion remain incomplete
+- Fixture provider only; Ubuntu/live/fullAT not_run; all70 globalAT unchanged

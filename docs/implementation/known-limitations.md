@@ -96,3 +96,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 composer memory consent (95c144678f0c591e6b990ae7b4d5b9c8b122523a): previous lack of pre-submit selection is superseded for user/selected-project memory. Atomic admission grants remove the UI race when explicitly preselected. Ungranted calls still fail rather than enter a durable consent wait; full native write/isolation/deletion requirements remain incomplete.
 
 2026-10-04 Memory isolation (a0b070cdac06fc788a046364aad81438e1346ff8): native project/task/child/cross-Work grant isolation, revoked submission replay and evaluation rollback now have actual integration evidence. Broader expiry/retry/restart matrix, native writes and derived/checkpoint cleanup remain unimplemented or unverified. No fullAT pass.
+
+2026-10-04 native memory envelope (8cc548c9cbb0409945540581ad33299ed231824c): array-only/no per-call truncation limitation is resolved. Native full JSON response fits cl100k_base budget(min128), with explicit truncated flag. Provider-specific whole-prompt accounting, pagination, native writes and cleanup remain open.

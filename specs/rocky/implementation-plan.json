@@ -3934,6 +3934,27 @@
             "Model remember/update, durable ungranted-consent wait, derived-skill invalidation and delivered-checkpoint cleanup remain incomplete",
             "Expiry races, daemon restart/retry matrix and fullAT36/46 remain open; all70 global AT unchanged"
           ]
+        },
+        {
+          "commit": "8cc548c9cbb0409945540581ad33299ed231824c",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/memory-native.test.ts tests/memory.test.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts memory.spec.ts; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/memory-tool-envelope.json",
+          "testFiles": [
+            "tests/memory-native.test.ts",
+            "tests/memory.test.ts",
+            "tests/e2e/memory.spec.ts"
+          ],
+          "limitations": [
+            "cl100k_base counts full serialized tool reply, not arbitrary provider tokenizer or complete prompt framing/billing",
+            "Native result can omit whole entries and caps20; no cursor pagination",
+            "No UI layout change/new matched OpenDots comparison in this slice",
+            "Native memory write, ungranted-consent wait, derivative/checkpoint deletion remain incomplete",
+            "Fixture provider only; Ubuntu/live/fullAT not_run; all70 globalAT unchanged"
+          ]
         }
       ],
       "blockedReason": null,
