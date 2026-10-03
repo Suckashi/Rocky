@@ -1,0 +1,32 @@
+{
+  "commit": "1f1dac70310d3253147d79aa7bccf1aefee459d0",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "ROCKY_TEST_BROWSER=installed chromium1223; npx playwright test --config playwright.production.config.ts background-presence.spec.ts; npx playwright test --config playwright.production.config.ts; npm run check; npm run lint; npm run build; scoped prettier --check; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/background-presence/verification.json",
+  "testFiles": ["tests/e2e/background-presence.spec.ts"],
+  "limitations": [
+    "Background list covers running/queued/approval/attention records, not a full searchable completed-work archive",
+    "Navigation reveals the selected normal Work from existing snapshot; no second conversation or new backend state",
+    "Resource-wait detail, complete hidden-tab/English/dark/24px matrix and performance/bundle measurement remain pending",
+    "Four-width Windows Chromium synthetic provider failure with real daemon Work; Ubuntu/live provider/full global AT not_run",
+    "No fresh matched upstream reference/before/after visual comparison"
+  ],
+  "tests": {
+    "focused": 1,
+    "focusedSeconds": 5.1,
+    "productionPath": 8,
+    "productionSeconds": 44.2
+  },
+  "browser": "Chromium148.0.7778.96 DPR1",
+  "viewports": ["1440x900", "1280x800", "390x844", "320x844"],
+  "inspected": ["320"],
+  "assertions": [
+    "real failed background Work restored after reload",
+    "summary preserves independent foreground status",
+    "keyboard Enter reveals/focuses exact Work and collapses summary",
+    "all four widths have no full-page horizontal overflow"
+  ]
+}

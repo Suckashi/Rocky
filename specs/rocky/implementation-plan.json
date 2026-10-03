@@ -4282,6 +4282,25 @@
             "Focused Chromium Windows fixture browser only; no full suite rerun, Ubuntu/live or matched upstream visual evidence",
             "Last-confirmed sync is local receipt time, not proof of new Work progress; heartbeat still excluded from progress"
           ]
+        },
+        {
+          "commit": "1f1dac70310d3253147d79aa7bccf1aefee459d0",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "ROCKY_TEST_BROWSER=installed chromium1223; npx playwright test --config playwright.production.config.ts background-presence.spec.ts; npx playwright test --config playwright.production.config.ts; npm run check; npm run lint; npm run build; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/background-presence/verification.json",
+          "testFiles": [
+            "tests/e2e/background-presence.spec.ts"
+          ],
+          "limitations": [
+            "Background list covers running/queued/approval/attention records, not a full searchable completed-work archive",
+            "Navigation reveals the selected normal Work from existing snapshot; no second conversation or new backend state",
+            "Resource-wait detail, complete hidden-tab/English/dark/24px matrix and performance/bundle measurement remain pending",
+            "Four-width Windows Chromium synthetic provider failure with real daemon Work; Ubuntu/live provider/full global AT not_run",
+            "No fresh matched upstream reference/before/after visual comparison"
+          ]
         }
       ],
       "blockedReason": null,

@@ -27,3 +27,13 @@ All70 global AT remain not_run. Goal active; no remote actions.
 Snapshot cursor seeds the event watermark; completed Run identities seed suppression. Fresh matching main normal completed Work events can trigger one600ms2% scale response. Replayed/older events, repeated completed-run updates, background/evaluation work and unsuccessful states do not. Suppressed motion is consumed, not queued for later. Last-confirmed sync records receipt of validated snapshot/event independently from progress evidence. Browser offline closes the stream and preserves last state/time; online resnapshots.
 
 7 pure/projection tests and focused browser1 pass. Browser observed new completion animation count1, history reload0, offline timestamp with unchanged Work status and online reconnect0. Initial offline test exposed delayed SSE error; browser network events now handle it. Type/lint/build/format/diff pass. [Evidence](evidence/2026-10-04/presence-feedback.json). Completion/freshness gaps in the earlier section are superseded; remaining background/resource/performance/full-platform scope stays open.
+
+## Background navigation (1f1dac70310d3253147d79aa7bccf1aefee459d0)
+
+Background counts now expand a bounded list of actual running/queued/approval/attention records. Keyboard/pointer selection reveals the exact normal Work from existing projection, focuses its article and scrolls the transcript to it. Selection closes the summary; foreground presence is unchanged. Historical background records excluded from initial visible history can be revealed without creating another conversation or mutating domain state. No polling/event source added.
+
+Focused browser1 and full production-path8 pass (44.2s). A real daemon background Work fails against an explicit failing fixture provider; reload, four widths, keyboard navigation, correct failure label and unchanged foreground are verified. Type/lint/build/format/diff pass. [Verification](evidence/2026-10-04/background-presence/verification.json).
+
+Screenshots: [1440](evidence/2026-10-04/background-presence/background-presence-1440.png), [1280](evidence/2026-10-04/background-presence/background-presence-1280.png), [390](evidence/2026-10-04/background-presence/background-presence-390.png), [320](evidence/2026-10-04/background-presence/background-presence-320.png).320 inspected. These are functional after captures, not full upstream comparison.
+
+T-038 remains in_progress for resource waiting, performance and remaining browser matrix. All70 global AT unchanged.
