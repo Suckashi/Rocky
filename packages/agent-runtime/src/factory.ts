@@ -8,7 +8,11 @@ import type { BaseMessage } from "@langchain/core/messages";
 import type { ChatResult } from "@langchain/core/outputs";
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { ROCKY_PERSONA } from "./persona.js";
-import { scratchTools, validateScratchCall } from "./scratch-policy.js";
+import {
+  scratchTools,
+  validateScratchCall,
+  scratchToolFailed,
+} from "./scratch-policy.js";
 export type RuntimeHooks = {
   event: (name: string, data: Record<string, unknown>) => void;
   call: (
@@ -45,9 +49,23 @@ export function createRockyAgent(
           name === "task" ? "rocky.subagent.started" : "rocky.tool.started",
           { name, callId, args: publicArgs, child },
         );
-        const result = await handler(request);
+        let result;
+        try {
+          result = await handler(request);
+        } catch (error) {
+          hooks.event(
+            name === "task" ? "rocky.subagent.failed" : "rocky.tool.failed",
+            { name, callId, child },
+          );
+          throw error;
+        }
+        const failed = scratchTools.includes(name) && scratchToolFailed(result);
         hooks.event(
-          name === "task" ? "rocky.subagent.completed" : "rocky.tool.completed",
+          name === "task"
+            ? "rocky.subagent.completed"
+            : failed
+              ? "rocky.tool.failed"
+              : "rocky.tool.completed",
           { name, callId, child },
         );
         return result;

@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { ConversationStore } from "./conversation-store.js";
 import { streamSSE } from "hono/streaming";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { randomBytes } from "node:crypto";
@@ -188,6 +189,20 @@ export function createApp(service: WorkService) {
     c.json(
       service.modelBudgets.snapshot(service.store.get(c.req.param("id")).runId),
     ),
+  );
+  app.get("/api/v1/conversation", (c) =>
+    c.json(new ConversationStore(service.store).main()),
+  );
+  app.get("/api/v1/conversation/history", (c) =>
+    c.json(
+      new ConversationStore(service.store).page(
+        c.req.query("before"),
+        c.req.query("limit") === undefined ? 50 : Number(c.req.query("limit")),
+      ),
+    ),
+  );
+  app.get("/api/v1/works/:id/execution-session", (c) =>
+    c.json(new ConversationStore(service.store).session(c.req.param("id"))),
   );
   app.get("/api/v1/conversation/messages", (c) =>
     c.json(

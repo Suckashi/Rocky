@@ -9,6 +9,22 @@ export const scratchTools = [
   "grep",
 ];
 
+export function scratchToolFailed(value: unknown): boolean {
+  if (Array.isArray(value)) return value.some(scratchToolFailed);
+  if (typeof value === "string") return /^Error(?:\b|:)/i.test(value);
+  if (!value || typeof value !== "object") return false;
+  const result = value as Record<string, unknown>;
+  if (result.status === "error") return true;
+  if (result.type === "text" && typeof result.text === "string")
+    return scratchToolFailed(result.text);
+  if (result.content !== undefined) return scratchToolFailed(result.content);
+  if (result.update && typeof result.update === "object")
+    return scratchToolFailed(
+      (result.update as Record<string, unknown>).messages,
+    );
+  return false;
+}
+
 export function validateScratchCall(
   name: string,
   args: Record<string, unknown>,

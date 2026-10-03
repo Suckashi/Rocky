@@ -49,7 +49,7 @@ test("native scratch writes/edits/read survive checkpoints and stay isolated by 
   const agent = createRockyAgent(
     saver,
     {
-      event: (_name, data) => events.push(data),
+      event: (name, data) => events.push({ ...data, event: name }),
       call: async () => {
         throw Error("No MCP effect expected");
       },
@@ -81,6 +81,7 @@ test("native scratch writes/edits/read survive checkpoints and stay isolated by 
   expect(String(other.messages.at(-1)?.content)).toMatch(
     /not found|does not exist/i,
   );
+  expect(events.at(-1)?.event).toBe("rocky.tool.failed");
 });
 
 test("scratch scope denies traversal, host paths, context edits and oversized tool IPC", () => {

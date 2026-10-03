@@ -24,6 +24,7 @@ import {
 } from "../../../packages/contracts/src/index.js";
 import { acquireWriterLock } from "./writer-lock.js";
 import { redactEvidence } from "./redaction.js";
+import { ConversationStore } from "./conversation-store.js";
 export class Store {
   publicEvidence: (value: unknown) => unknown = redactEvidence;
   readonly db: DatabaseSync;
@@ -67,7 +68,7 @@ export class Store {
       const version = (
         this.db.prepare("PRAGMA user_version").get() as { user_version: number }
       ).user_version;
-      if (version > 10)
+      if (version > 11)
         throw new RockyError(
           "unsupported_store",
           "Rocky store version is newer than this application",
@@ -185,6 +186,55 @@ export class Store {
             "CREATE TABLE IF NOT EXISTS worker_jobs(id TEXT PRIMARY KEY,work_id TEXT NOT NULL,run_id TEXT NOT NULL,execution_session_id TEXT NOT NULL,status TEXT NOT NULL,pid INTEGER,started_at TEXT NOT NULL,ended_at TEXT,exit_code INTEGER,error TEXT); CREATE UNIQUE INDEX IF NOT EXISTS worker_jobs_one_active_run ON worker_jobs(run_id) WHERE status IN ('starting','running'); PRAGMA user_version=10",
           );
         });
+      if (version < 11)
+        this.transaction(() => {
+          const conversations = new ConversationStore(this);
+          conversations.initialize();
+          const history: {
+            work: Work;
+            source: "submission" | "work_result";
+            text: string;
+            createdAt: string;
+          }[] = [];
+          for (const work of this.list()) {
+            conversations.register(work, false);
+            conversations.update(work);
+            history.push({
+              work,
+              source: "submission",
+              text: work.text,
+              createdAt: work.createdAt,
+            });
+          }
+          for (const row of this.db
+            .prepare("SELECT data FROM completion_messages ORDER BY sequence")
+            .all() as { data: string }[]) {
+            const completion = completionSchema.parse(JSON.parse(row.data));
+            history.push({
+              work: this.get(completion.workId),
+              source: "work_result",
+              text: completion.text,
+              createdAt: completion.createdAt,
+            });
+          }
+          history.sort(
+            (a, b) =>
+              a.createdAt.localeCompare(b.createdAt) ||
+              (a.source === b.source
+                ? a.work.id.localeCompare(b.work.id)
+                : a.source === "submission"
+                  ? -1
+                  : 1),
+          );
+          for (const entry of history)
+            conversations.message(
+              entry.work,
+              entry.source,
+              entry.text,
+              entry.createdAt,
+            );
+          this.db.exec("PRAGMA user_version=11");
+        });
     } catch (error) {
       database?.close();
       this.releaseLock();
@@ -230,7 +280,9 @@ export class Store {
       .get(requestId) as
       { id: string; intent: string; data: string } | undefined;
   }
-  add(work: Work, intent: string) {
+  add(work: Work, intent: string): void {
+    if (!this.inTransaction)
+      return this.transaction(() => this.add(work, intent));
     this.db
       .prepare("INSERT INTO works VALUES(?,?,?,?)")
       .run(
@@ -239,8 +291,11 @@ export class Store {
         intent,
         JSON.stringify(workSchema.parse(work)),
       );
+    new ConversationStore(this).register(work);
   }
-  save(work: Work, expectedRevision: number) {
+  save(work: Work, expectedRevision: number): void {
+    if (!this.inTransaction)
+      return this.transaction(() => this.save(work, expectedRevision));
     if (
       !Number.isSafeInteger(expectedRevision) ||
       expectedRevision < 1 ||
@@ -275,6 +330,7 @@ export class Store {
       );
     if (result.changes !== 1)
       throw new RockyError("revision_conflict", "Work revision changed", 409);
+    new ConversationStore(this).update(work);
   }
   event(work: Work, name: string, data: Record<string, unknown>): PublicEvent {
     if (!this.inTransaction)
@@ -417,6 +473,12 @@ export class Store {
                 "INSERT OR IGNORE INTO completion_messages VALUES(?,?,?,?)",
               )
               .run(message.id, work.id, row.sequence, JSON.stringify(message));
+            new ConversationStore(this).message(
+              work,
+              "work_result",
+              message.text,
+              message.createdAt,
+            );
           }
         }
         this.db
