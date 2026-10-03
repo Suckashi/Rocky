@@ -1,0 +1,33 @@
+{
+  "commit": "d94eef47590201ced022c9f8ed184b2b059fb142",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/reflection-authority.test.ts tests/learning-review.test.ts tests/learning-episode.test.ts tests/skills.test.ts; npm run check; scoped eslint reflection/learning/store/tests; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/reflection-authority.json",
+  "testFiles": [
+    "tests/reflection-authority.test.ts",
+    "tests/learning-review.test.ts",
+    "tests/learning-episode.test.ts",
+    "tests/skills.test.ts"
+  ],
+  "tests": 5,
+  "seconds": 2.92,
+  "limitations": [
+    "Authority class and persistent drafts are not yet wired to worker run/session identity, model/tool budgets or low-priority scheduling",
+    "Allowed skills currently derive from source Work frozen catalog; explicit additional owner-approved skill references pending",
+    "Draft outputs are structured data only; SKILL.md materialization, proposal revisions, static/evaluation pipeline and review UI pending",
+    "Scope/trigger/summary-authority now included in served episode hash; previously reviewed older-hash episodes fail closed and require a fresh review workflow, not automatic approval migration",
+    "Withdrawal removes current-row payloads only; WAL/backup and future checkpoint cleanup pending",
+    "No new browser/Ubuntu/live provider/global AT evidence"
+  ],
+  "assertions": [
+    "Reflection requires exact current approved episode revision/hash and matching reviewedHash",
+    "Skill reads/typed patches restricted to frozen source catalog and quarantine checked per call",
+    "Proposal evidence references restricted to approved episode; protected output content rejected",
+    "Create/patch/no-learning outputs persist with stable binding+tool-call receipts and no published registry changes",
+    "Changed payload under same call identity rejected; source withdrawal blocks replay and removes derived output payloads",
+    "Learning consent/review/episode and Skill migration regression pass"
+  ]
+}
