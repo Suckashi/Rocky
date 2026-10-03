@@ -368,8 +368,23 @@
         "R-055",
         "R-056"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "done",
+      "evidence": [
+        {
+          "commit": "322186bdee19dc15d1c01c242e54ca7cfccde52b",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "df4ff0e83669da0aaf947a7010eb6969f57841eb76b16f386e3ef3580fbd6f6a",
+          "mode": "static",
+          "command": "git rev-parse --show-toplevel; git rev-list --max-parents=0 HEAD; git remote -v",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "No remote repository or branch protection created."
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
@@ -399,9 +414,26 @@
         "R-050",
         "R-055"
       ],
-      "status": "pending",
-      "evidence": [],
-      "blockedReason": null,
+      "status": "blocked",
+      "evidence": [
+        {
+          "commit": "322186bdee19dc15d1c01c242e54ca7cfccde52b",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "df4ff0e83669da0aaf947a7010eb6969f57841eb76b16f386e3ef3580fbd6f6a",
+          "mode": "fixture",
+          "command": "npx --yes --package npm@11.6.4 npm run test:no-python",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/verification.json",
+          "testFiles": [
+            "scripts/no-python.mjs"
+          ],
+          "limitations": [
+            "Ubuntu x64 no-Python install/build/fixture evidence unavailable."
+          ]
+        }
+      ],
+      "blockedReason": "Ubuntu x64 no-Python install/build/fixture evidence unavailable.",
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
         "已鎖定可重現 dependency set 與 license inventory。",
@@ -438,9 +470,27 @@
         "R-044",
         "R-049"
       ],
-      "status": "pending",
-      "evidence": [],
-      "blockedReason": null,
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "322186bdee19dc15d1c01c242e54ca7cfccde52b",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "df4ff0e83669da0aaf947a7010eb6969f57841eb76b16f386e3ef3580fbd6f6a",
+          "mode": "fixture",
+          "command": "npm test; npm run test:e2e",
+          "exitCode": 1,
+          "reportPath": "docs/implementation/evidence/2026-10-03/verification.json",
+          "testFiles": [
+            "tests/runtime.test.ts",
+            "tests/e2e/work.spec.ts"
+          ],
+          "limitations": [
+            "Local fixture flow passed; T-002 platform gate remains open."
+          ]
+        }
+      ],
+      "blockedReason": "Local fixture flow passed; T-002 platform gate remains open.",
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
         "最小 UI 真走 Deep Agents middleware 與受控 tool，沒有依賴 Intelligence。",
@@ -469,9 +519,28 @@
         "R-034",
         "R-035"
       ],
-      "status": "pending",
-      "evidence": [],
-      "blockedReason": null,
+      "status": "blocked",
+      "evidence": [
+        {
+          "commit": "322186bdee19dc15d1c01c242e54ca7cfccde52b",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "df4ff0e83669da0aaf947a7010eb6969f57841eb76b16f386e3ef3580fbd6f6a",
+          "mode": "fixture",
+          "command": "npm run test:network; npm run test:e2e",
+          "exitCode": 1,
+          "reportPath": "docs/implementation/evidence/2026-10-03/verification.json",
+          "testFiles": [
+            "tests/network.test.ts",
+            "scripts/evaluate.ts",
+            "tests/e2e/work.spec.ts"
+          ],
+          "limitations": [
+            "Strict browser egress fails because host AdGuard injects an unconfigured request; clean-browser evidence required."
+          ]
+        }
+      ],
+      "blockedReason": "Strict browser egress fails because host AdGuard injects an unconfigured request; clean-browser evidence required.",
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
         "Promptfoo custom TS provider 可運作，target/grader/generator 的 outbound destinations 有 trace。",
@@ -2776,10 +2845,10 @@
     "name": "Rocky",
     "ownerCandidate": "Suckashi",
     "remoteUrl": null,
-    "remoteStatus": "not_created_or_verified_by_this_spec",
+    "remoteStatus": "not_created",
     "visibility": null,
     "creationRequiresSeparateAuthorization": true,
-    "implementationCommit": null,
+    "implementationCommit": "322186bdee19dc15d1c01c242e54ca7cfccde52b",
     "strategy": "greenfield_no_fork_no_imported_git_history"
   },
   "referenceRepositories": [

@@ -1,0 +1,73 @@
+{
+  "commit": "322186bdee19dc15d1c01c242e54ca7cfccde52b",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "df4ff0e83669da0aaf947a7010eb6969f57841eb76b16f386e3ef3580fbd6f6a",
+  "mode": "fixture",
+  "npmVersion": "11.6.4",
+  "recordedAt": "2026-10-03T03:35:37.756Z",
+  "noPython": {
+    "command": "npx --yes --package npm@11.6.4 npm run test:no-python",
+    "exitCode": 0,
+    "steps": [
+      {
+        "command": "npm ci",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run check",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run build",
+        "exitCode": 0
+      },
+      {
+        "command": "npm test",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run test:learning",
+        "exitCode": 0
+      }
+    ],
+    "forbiddenToolAttempts": [],
+    "limitations": [
+      "Constrained-PATH clean-copy install on this host; not an Ubuntu or pristine-machine result.",
+      "Temporary evidence retained for inspection."
+    ]
+  },
+  "core": {
+    "passed": 11,
+    "files": 6
+  },
+  "promptfoo": {
+    "passed": 4,
+    "failed": 0,
+    "sharedFactory": true
+  },
+  "browser": {
+    "command": "npm run test:e2e with ROCKY_TEST_BROWSER=Chromium 1223",
+    "exitCode": 1,
+    "stats": {
+      "startTime": "2026-10-03T03:33:42.146Z",
+      "duration": 5825.402,
+      "expected": 1,
+      "skipped": 0,
+      "unexpected": 1,
+      "flaky": 0
+    },
+    "functional": "passed",
+    "egress": "failed: host AdGuard injects http://local.adguard.org/",
+    "limitations": [
+      "Requested Playwright Chromium 1243 download timed out; existing Chromium 1223 used.",
+      "No security software setting changed."
+    ]
+  },
+  "ubuntu": {
+    "status": "not_run",
+    "reason": "No Ubuntu, WSL or container runtime available"
+  },
+  "liveEndpoints": "not_run",
+  "remoteOperations": "not_run"
+}

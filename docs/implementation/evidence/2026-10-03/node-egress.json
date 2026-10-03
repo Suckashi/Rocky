@@ -1,0 +1,174 @@
+{
+  "requests": [
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55319",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55319",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55319",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55319",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55319",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55319",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55322",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55322",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55322",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55322",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55322",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55322",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55325",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55325",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55325",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55328",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55328",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55328",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55325",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55328",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55328",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55325",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55328",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55331",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55331",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55331",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55334",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55334",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55334",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55331",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55334",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55334",
+      "purpose": "observed"
+    },
+    {
+      "transport": "undici",
+      "destination": "http://127.0.0.1:55334",
+      "purpose": "observed"
+    }
+  ],
+  "unexpected": [],
+  "limitations": [
+    "HTTP/Undici diagnostics only; not packet-level OS enforcement.",
+    "Browser egress is tested separately; fixtures launch no arbitrary executables."
+  ]
+}
