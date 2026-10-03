@@ -92,3 +92,15 @@ Owner-session POST /api/v1/works/:id/memory-read-grants accepts requestId, scope
 - No model remember/update implemented; manual locks remain unchanged
 - Delivered model/checkpoint copies are not removed by registry deletion; derivative/reference cleanup and withdrawal semantics remain incomplete
 - No live external model, Ubuntu or fullAT36/46 evidence; all70 global AT unchanged
+
+## Owner Work grant UI (e56869c3a43e6d83512925041d75b70e69d2e402)
+
+Existing collapsed Work permissions now offers scope selection(task default, bound project when present, user) and separate private checkbox(defaultoff), with model disclosure. Button calls the owner-session daemon endpoint. Confirmed grants show scope/privacy metadata and retain existing revoke CAS. Same intent keeps request ID on error; successful grants disable duplicate issuance while active. Terminal Work cannot issue from UI. Metadata is display-only and excluded from historical grant intent hashing; targetHash remains authority.
+
+[Evidence](evidence/2026-10-04/memory-grant-ui.json):8 native/grant tests,3 browser tests and final focused1 pass. Browser grants private user memory while configured provider is held, releases it and checks actual native model output, then revokes and checks persisted state. Initial fixture incorrectly matched earlier conversation tools; corrected to exact unique toolCall ID. Type/lint/build pass, known chunk warning remains. Screenshots: [1440](evidence/2026-10-04/memory-grant-ui/after-1440.png), [1280](evidence/2026-10-04/memory-grant-ui/after-1280.png), [390](evidence/2026-10-04/memory-grant-ui/after-390.png), [320](evidence/2026-10-04/memory-grant-ui/after-320.png).
+
+- Grant UI applies to already-created active normal configured Work; composer pre-grants and durable wait-for-memory-permission flow remain pending
+- Legacy grants without display metadata retain generic memory label; authorization hash and run/session checks unchanged
+- Native project/task/child/cross-Work full matrix remains open; owner native writes not implemented
+- Chinese light four-width after screenshots only; English/dark grant-specific matrix and matched OpenDots reference not_run
+- Model/checkpoint copies already delivered are not removed by registry deletion; all70 global AT unchanged

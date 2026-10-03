@@ -531,3 +531,7 @@ Added actual browser user/project isolation, draft scope lock, status/privacy sa
 ## Native Memory read (21aba71c424901edad1d920774bc58f93628e880)
 
 Root memory_search now uses explicit owner scope/privacy grants, active execution checks, current redaction and bounded context. Owner HTTP issuance exists; no native writes.9 related tests and3 browser regressions pass. [Evidence](memory-registry.md). Next: scope/privacy grant UI, native project/task/child isolation coverage and complete deletion/derived cleanup. T-025 remains in_progress.
+
+## Memory grant UI (e56869c3a43e6d83512925041d75b70e69d2e402)
+
+Owner can now grant active Work scoped memory reads with explicit private option and revoke confirmed grants through existing Work permissions.8 native/grant tests,3 browser tests and final focused1 pass; four-width evidence. [Report](memory-registry.md). Pre-submit consent/waiting flow and full isolation matrix remain missing; T-025/Goal active.

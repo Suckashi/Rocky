@@ -90,3 +90,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 Memory scope verification (5f192c636d6444f740bb8371c7715cca5707506f): prior completely-unverified English/dark and project-scope notes are partially superseded. User/project selector, English/dark long-content widths and basic Enter/Escape actions now tested. Task scope/full Tab order and full visual/reference matrix remain open.
 
 2026-10-04 native Memory search (21aba71c424901edad1d920774bc58f93628e880): previous no-native-read statements are historical. Root grant-bound read now works with owner API; grant issuance UI and full scope/child/cross-Work matrix remain pending. Native writes and removal of already-delivered checkpoint/provider copies are not implemented.
+
+2026-10-04 Memory grants UI (e56869c3a43e6d83512925041d75b70e69d2e402): previous API-only grant limitation is superseded for active Work; collapsed permissions now exposes scopes/private and revocation. Pre-submit grant selection or durable memory-consent wait remain missing, so a fast ungranted tool call may fail before owner opens permissions. Full isolation/withdrawal/native-write scope remains open.

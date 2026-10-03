@@ -3874,6 +3874,27 @@
             "Delivered model/checkpoint copies are not removed by registry deletion; derivative/reference cleanup and withdrawal semantics remain incomplete",
             "No live external model, Ubuntu or fullAT36/46 evidence; all70 global AT unchanged"
           ]
+        },
+        {
+          "commit": "e56869c3a43e6d83512925041d75b70e69d2e402",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/memory-native.test.ts tests/grants.test.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts memory.spec.ts; focused owner-grant rerun; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/memory-grant-ui.json",
+          "testFiles": [
+            "tests/memory-native.test.ts",
+            "tests/grants.test.ts",
+            "tests/e2e/memory.spec.ts"
+          ],
+          "limitations": [
+            "Grant UI applies to already-created active normal configured Work; composer pre-grants and durable wait-for-memory-permission flow remain pending",
+            "Legacy grants without display metadata retain generic memory label; authorization hash and run/session checks unchanged",
+            "Native project/task/child/cross-Work full matrix remains open; owner native writes not implemented",
+            "Chinese light four-width after screenshots only; English/dark grant-specific matrix and matched OpenDots reference not_run",
+            "Model/checkpoint copies already delivered are not removed by registry deletion; all70 global AT unchanged"
+          ]
         }
       ],
       "blockedReason": null,

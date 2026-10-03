@@ -157,3 +157,5 @@ Owner Memory UI (d666feff90f5c07f917c01c0773aa62466e99496) is a Rocky-specific s
 Memory source controls (6256a1653ab36448851b8c62c4eb8423549a10e0) extend the existing neutral settings form and collapsed evidence pattern with pinned document revision links. No new upstream code copied. [Four-width after screenshots](memory-registry.md); full matched reference comparison remains pending.
 
 Memory scope coverage (5f192c636d6444f740bb8371c7715cca5707506f) adds four-width English/dark long-text evidence and basic keyboard/error-retry verification in the existing settings dialog. No new layout or upstream code. [Evidence](memory-registry.md). These after screenshots do not replace matched reference comparison.
+
+Memory grant UI (e56869c3a43e6d83512925041d75b70e69d2e402) uses existing collapsed Work permissions and neutral form styles, avoiding permanent extra panels. Owner-only scope/private controls are a Rocky adaptation. [Four-width after evidence](memory-registry.md); no new upstream code or full matched reference claim.
