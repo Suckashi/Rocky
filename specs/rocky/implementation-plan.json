@@ -4254,6 +4254,25 @@
             "Four-width after screenshots only, no new matched OpenDots reference/before/after comparison",
             "No Ubuntu/live provider/fullAT evidence; T-026/T-027 incomplete"
           ]
+        },
+        {
+          "commit": "bf1cbf1b91305775569ac399718de3d287a485aa",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts skills.spec.ts; npm run check; scoped eslint; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-import.json",
+          "testFiles": [
+            "tests/e2e/skills.spec.ts"
+          ],
+          "limitations": [
+            "Folder selection creates new skill IDs only; updating existing skill via folder UI and full version history remain pending",
+            "Project scope selector implemented but dedicated project import browser matrix pending",
+            "Browser-selected file bytes are snapshots; automatic global/project directory discovery and filesystem symlink inspection remain separate unfinished work",
+            "License/source are explicit owner declarations, not verified upstream licensing",
+            "Chinese/light Chromium evidence only; dark/English/accessibility/error-retry matrix and matched OpenDots comparison pending"
+          ]
         }
       ],
       "blockedReason": null,
