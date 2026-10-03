@@ -5,6 +5,7 @@ import type { Work } from "../../../packages/contracts/src/index.js";
 import { API_PREFIX } from "../../../packages/contracts/src/index.js";
 import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
+import { McpSettings } from "./mcp-settings.js";
 import { WorkOperations } from "./work-operations.js";
 import { WorkGrants } from "./work-grants.js";
 import { WorkSteering } from "./work-steering.js";
@@ -203,14 +204,17 @@ function App() {
         </>
       }
       settings={
-        <ModelSettings
-          locale={locale}
-          request={request}
-          onSelect={(model) => {
-            setSelectedModel(model);
-            setEnabled(false);
-          }}
-        />
+        <>
+          <ModelSettings
+            locale={locale}
+            request={request}
+            onSelect={(model) => {
+              setSelectedModel(model);
+              setEnabled(false);
+            }}
+          />
+          <McpSettings locale={locale} request={request} />
+        </>
       }
     >
       <section className="chat-workspace">

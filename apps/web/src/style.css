@@ -452,7 +452,7 @@ li {
   align-items: flex-end;
   gap: 9px;
 }
-textarea {
+#compose textarea {
   flex: 1;
   min-width: 0;
   border: 0;
@@ -519,6 +519,26 @@ textarea {
 }
 .model-settings {
   font-size: 13px;
+}
+.mcp-settings form {
+  display: grid;
+  gap: 10px;
+}
+.mcp-settings textarea {
+  width: 100%;
+  min-height: 240px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--canvas);
+  color: var(--ink);
+  font:
+    12px/1.5 ui-monospace,
+    monospace;
+  resize: vertical;
+}
+.mcp-settings form button {
+  justify-self: start;
 }
 fieldset {
   border: 0;

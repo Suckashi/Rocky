@@ -32,9 +32,10 @@ export function createApp(service: WorkService) {
     await next();
     if (
       c.req.path !== "/api/v1/session" &&
+      !(c.req.path === "/api/v1/mcp-config" && c.res.ok) &&
       c.res.headers.get("content-type")?.includes("application/json")
     ) {
-      const body = service.models.redact(await c.res.clone().json());
+      const body = service.store.publicEvidence(await c.res.clone().json());
       const headers = new Headers(c.res.headers);
       headers.delete("content-length");
       c.res = new Response(JSON.stringify(body), {
@@ -220,6 +221,10 @@ export function createApp(service: WorkService) {
   });
   app.get("/api/v1/works/:id", (c) =>
     c.json(service.store.get(c.req.param("id"))),
+  );
+  app.get("/api/v1/mcp-config", (c) => c.json(service.mcp.snapshot()));
+  app.post("/api/v1/mcp-config", async (c) =>
+    c.json(service.mcp.save(await readJson(c))),
   );
   app.post("/api/v1/conversation/messages", async (c) =>
     c.json(service.submit(await readJson(c)), 202),
