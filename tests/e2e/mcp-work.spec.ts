@@ -155,7 +155,7 @@ test("configured MCP approval is readable at four widths and executes exactly on
       ).toBe(true);
       await page.screenshot({ path: `test-results/mcp-approval-${width}.png` });
     }
-    await work.getByRole("button", { name: "核准這次寫入" }).click();
+    await work.getByRole("button", { name: "核准這次操作" }).click();
     await expect(work.getByText("已完成", { exact: true })).toBeVisible();
     expect(readdirSync(root)).toHaveLength(1);
     await page.reload();

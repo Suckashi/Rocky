@@ -341,7 +341,11 @@ function App() {
                           className="primary"
                           onClick={() => void decide(w, "approve")}
                         >
-                          {t.approve}
+                          {w.approval.tool === "mcp_call"
+                            ? locale === "zh"
+                              ? "核准這次操作"
+                              : "Approve this operation"
+                            : t.approve}
                         </button>
                         <button onClick={() => void decide(w, "reject")}>
                           {t.reject}
