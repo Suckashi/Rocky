@@ -214,7 +214,9 @@ function App() {
             events.findLast(
               (e) =>
                 e.payload.kind === "domain" &&
-                e.payload.name === "rocky.artifact.published",
+                ["rocky.artifact.published", "rocky.document.updated"].includes(
+                  e.payload.name,
+                ),
             )?.sequence ?? "0"
           }
         />

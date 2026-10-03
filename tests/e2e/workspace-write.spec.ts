@@ -259,6 +259,120 @@ test("real workspace approval card: responsive preview, reject, approve and stal
             .getByRole("button", { name: "Toggle theme", exact: true })
             .click();
           await page.setViewportSize({ width: 320, height: 844 });
+          const createdResponse = page.waitForResponse(
+            (response) =>
+              response.request().method() === "POST" &&
+              response.url().endsWith("/api/v1/documents"),
+          );
+          await library.getByRole("button", { name: "建立可編輯副本" }).click();
+          const created = await (await createdResponse).json();
+          const editor = page.getByRole("region", {
+            name: "Markdown 文件編輯器",
+          });
+          await expect(editor.getByLabel("Markdown 原始內容")).toHaveValue(
+            content,
+          );
+          const draft =
+            "# My unsaved draft\n\n```custom-language\nKEEP_RAW_SYNTAX\n```";
+          await editor.getByLabel("Markdown 原始內容").fill(draft);
+          await page.keyboard.press("Escape");
+          await page
+            .getByRole("button", { name: "開啟導覽", exact: true })
+            .click();
+          await page
+            .locator(".sidebar")
+            .getByRole("button", { name: "文件與成果", exact: true })
+            .click();
+          await page
+            .locator(".artifact-library")
+            .getByRole("button", { name: "編輯", exact: true })
+            .first()
+            .click();
+          await expect(editor.getByLabel("Markdown 原始內容")).toHaveValue(
+            draft,
+          );
+          const external = await page.request.post(
+            `/api/v1/documents/${created.document.id}`,
+            {
+              headers,
+              data: {
+                requestId: randomUUID(),
+                expectedRevision: 1,
+                title: "Concurrent server edit",
+                content: "SERVER_REVISION_TWO",
+              },
+            },
+          );
+          expect(external.ok()).toBe(true);
+          await editor
+            .getByRole("button", { name: "儲存新版本", exact: true })
+            .click();
+          await expect(editor.getByRole("alert")).toContainText(
+            "Document changed",
+          );
+          await expect(editor.getByLabel("Markdown 原始內容")).toHaveValue(
+            draft,
+          );
+          await editor
+            .getByRole("button", { name: "檢視最新版本", exact: true })
+            .click();
+          await expect(editor.locator(".document-comparison")).toContainText(
+            "SERVER_REVISION_TWO",
+          );
+          for (const [width, height] of [
+            [1440, 900],
+            [1280, 800],
+            [390, 844],
+            [320, 844],
+          ]) {
+            await page.setViewportSize({ width: width!, height: height! });
+            expect(
+              await page.evaluate(
+                () => document.documentElement.scrollWidth <= innerWidth,
+              ),
+            ).toBe(true);
+            await page.locator(".result-pane .pane-body").evaluate((el) => {
+              el.scrollTop = 0;
+            });
+            expect(
+              await editor
+                .getByLabel("Markdown 原始內容")
+                .evaluate((el) => getComputedStyle(el).minHeight),
+            ).toBe("420px");
+            await page.screenshot({
+              path: `test-results/document-conflict-${width}.png`,
+            });
+          }
+          await editor
+            .getByRole("button", {
+              name: "以此版本為基準保留草稿",
+              exact: true,
+            })
+            .click();
+          await editor
+            .getByRole("button", { name: "儲存新版本", exact: true })
+            .click();
+          await expect(editor.getByRole("status")).toHaveText("新版本已儲存。");
+          const persisted = await (
+            await page.request.get(`/api/v1/documents/${created.document.id}`)
+          ).json();
+          expect(persisted.document.revision).toBe(3);
+          expect(persisted.content).toBe(draft);
+          const revisionLink = await editor
+            .getByRole("link", { name: "下載已儲存版本" })
+            .getAttribute("href");
+          expect(
+            (await (await page.request.get(revisionLink!)).body()).toString(
+              "utf8",
+            ),
+          ).toBe(draft);
+          await editor.getByRole("button", { name: "返回文件與成果" }).click();
+          await expect(
+            page.locator(`[data-document="${created.document.id}"]`),
+          ).toBeFocused();
+          expect(
+            (await (await page.request.get(href!)).body()).toString("utf8"),
+          ).toBe(content);
           await page.keyboard.press("Escape");
           await expect(library).not.toBeVisible();
           await expect(

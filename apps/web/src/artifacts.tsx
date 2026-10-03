@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
+import { DocumentEditor } from "./document-editor.js";
+import {
+  documentSchema,
+  documentContentSchema,
+  type RockyDocument,
+} from "../../../packages/contracts/src/documents.js";
 import { FileText, Download, ArrowLeft } from "lucide-react";
 import {
   artifactSchema,
@@ -19,6 +25,20 @@ export function Artifacts({
   const library = useRef<HTMLElement>(null),
     heading = useRef<HTMLHeadingElement>(null),
     previousSelection = useRef<string | undefined>(undefined);
+  const [documents, setDocuments] = useState<RockyDocument[]>([]);
+  const [editing, setEditing] =
+    useState<z.infer<typeof documentContentSchema>>();
+  const previousEditing = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!editing && previousEditing.current)
+      library.current
+        ?.querySelector<HTMLButtonElement>(
+          `[data-document="${previousEditing.current}"]`,
+        )
+        ?.focus();
+    previousEditing.current = editing?.document.id;
+  }, [editing]);
+  const createRequests = useRef(new Map<string, string>());
   const [items, setItems] = useState<Artifact[]>([]),
     [selected, setSelected] = useState<Artifact>(),
     [text, setText] = useState<string>(),
@@ -36,8 +56,13 @@ export function Artifacts({
   }, [selected]);
   useEffect(() => {
     let active = true;
-    void request("/artifacts")
-      .then((value) => {
+    void Promise.all([request("/artifacts"), request("/documents")])
+      .then(([value, docs]) => {
+        if (active)
+          setDocuments(
+            z.object({ documents: z.array(documentSchema) }).parse(docs)
+              .documents,
+          );
         if (active)
           setItems(
             z.object({ artifacts: z.array(artifactSchema) }).parse(value)
@@ -72,6 +97,52 @@ export function Artifacts({
       if (current === epoch.current) setBusy(false);
     }
   }
+  async function editDocument(id: string) {
+    setBusy(true);
+    setError("");
+    try {
+      setEditing(
+        documentContentSchema.parse(await request(`/documents/${id}`)),
+      );
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function createDocument() {
+    if (!selected) return;
+    setBusy(true);
+    setError("");
+    const requestId =
+      createRequests.current.get(selected.id) ?? crypto.randomUUID();
+    createRequests.current.set(selected.id, requestId);
+    try {
+      const value = documentContentSchema.parse(
+        await request("/documents", { requestId, artifactId: selected.id }),
+      );
+      setDocuments((old) => [
+        value.document,
+        ...old.filter((d) => d.id !== value.document.id),
+      ]);
+      setEditing(value);
+      setSelected(undefined);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (editing)
+    return (
+      <DocumentEditor
+        key={editing.document.id}
+        value={editing}
+        locale={locale}
+        request={request}
+        onBack={() => setEditing(undefined)}
+      />
+    );
   return (
     <section
       className="artifact-library"
@@ -108,6 +179,13 @@ export function Artifacts({
             <Download size={16} />
             {zh ? "下載原始檔案" : "Download original file"}
           </a>
+          {["text/plain", "text/markdown"].includes(
+            selected.files[0]?.mime ?? "",
+          ) && (
+            <button disabled={busy} onClick={() => void createDocument()}>
+              {zh ? "建立可編輯副本" : "Create editable copy"}
+            </button>
+          )}
           {text !== undefined && (
             <pre
               className="artifact-preview"
@@ -145,6 +223,24 @@ export function Artifacts({
                 : "No results yet. Save a successful write from a Work’s Operations and reconciliation."}
             </p>
           )}
+          {documents.map((document) => (
+            <article className="artifact-card" key={document.id}>
+              <FileText size={20} />
+              <div>
+                <h3>{document.title}</h3>
+                <p>
+                  {zh ? "文件版本" : "Document revision"} {document.revision}
+                </p>
+              </div>
+              <button
+                disabled={busy}
+                data-document={document.id}
+                onClick={() => void editDocument(document.id)}
+              >
+                {zh ? "編輯" : "Edit"}
+              </button>
+            </article>
+          ))}
           {items.map((item) => (
             <article className="artifact-card" key={item.id}>
               <FileText size={20} />

@@ -76,7 +76,13 @@ export function createApp(service: WorkService) {
         { code: "session_required", message: "Local session required" },
         403,
       );
-    if (Number(c.req.header("content-length") ?? 0) > 65536)
+    // Document text still has a 64KiB decoded-byte cap; allow bounded JSON escaping.
+    const bodyLimit = /^\/api\/v1\/documents(?:\/[a-f0-9-]{36})?$/i.test(
+      c.req.path,
+    )
+      ? 524288
+      : 65536;
+    if (Number(c.req.header("content-length") ?? 0) > bodyLimit)
       return c.json({ code: "too_large", message: "Request too large" }, 413);
     // Enforce bytes actually received, including chunked bodies without Content-Length.
     if (c.req.raw.body) {
@@ -88,7 +94,7 @@ export function createApp(service: WorkService) {
           const { done, value } = await reader.read();
           if (done) break;
           size += value.byteLength;
-          if (size > 65536) {
+          if (size > bodyLimit) {
             await reader.cancel();
             return c.json(
               { code: "too_large", message: "Request too large" },
@@ -223,6 +229,40 @@ export function createApp(service: WorkService) {
     c.json(service.store.get(c.req.param("id"))),
   );
   app.get("/api/v1/mcp-config", (c) => c.json(service.mcp.snapshot()));
+  app.get("/api/v1/documents", (c) =>
+    c.json({ documents: service.documents.list() }),
+  );
+  app.post("/api/v1/documents", async (c) =>
+    c.json(await service.documents.create(await readJson(c))),
+  );
+  app.get("/api/v1/documents/:id", (c) =>
+    c.json(
+      service.documents.get(
+        c.req.param("id"),
+        c.req.query("revision") === undefined
+          ? undefined
+          : Number(c.req.query("revision")),
+      ),
+    ),
+  );
+  app.post("/api/v1/documents/:id", async (c) =>
+    c.json(service.documents.save(c.req.param("id"), await readJson(c))),
+  );
+  app.get("/api/v1/documents/:id/download", (c) => {
+    const value = service.documents.get(
+      c.req.param("id"),
+      c.req.query("revision") === undefined
+        ? undefined
+        : Number(c.req.query("revision")),
+    );
+    c.header("Content-Type", "application/octet-stream");
+    c.header(
+      "Content-Disposition",
+      `attachment; filename="document-${value.document.id}-r${value.document.revision}.md"`,
+    );
+    c.header("Content-Security-Policy", "default-src 'none'; sandbox");
+    return c.body(new Uint8Array(Buffer.from(value.content, "utf8")));
+  });
   app.get("/api/v1/artifacts", (c) =>
     c.json({ artifacts: service.artifacts.list() }),
   );
