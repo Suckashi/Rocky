@@ -15,3 +15,5 @@ Current local implementation includes canonical DTO/event contracts, cursor snap
 Conversation/history APIs now separate visible user/result records from graph state and per-Work execution sessions. History is immutable, bounded-paginated and excludes evaluation; UI history paging is connected; agent cross-turn context/inbox-checkpoint consumption remains pending. See conversation-history.json.
 
 History UI now uses persistent bounded pages and shared Work-event references; full Work snapshot pagination/performance remains pending. Stream/history scroll verified by local provider fixture. See history-ui/verification.json.
+
+Confirmed immediately prior main checkpoint context can now cross turns/restart within matching model/mode/workspace. Each next run copies messages/files through official updateState into a new thread; no pending tasks or effects are copied. Sync durability is explicit. This is incomplete across cancellation/model/scope changes and does not acknowledge completion inbox. See native-context-copy.md.

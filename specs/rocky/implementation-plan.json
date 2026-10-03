@@ -1580,6 +1580,32 @@
             "Local fixture only, no Ubuntu or new live service validation",
             "No remote actions"
           ]
+        },
+        {
+          "commit": "7287653",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; focused continuous conversation and selected Playwright",
+          "exitCode": 1,
+          "reportPath": "docs/implementation/evidence/2026-10-03/continuous-context.json",
+          "testFiles": [
+            "tests/continuous-conversation.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/work.spec.ts",
+            "tests/e2e/configured-work.spec.ts"
+          ],
+          "limitations": [
+            "This source selection covers immediately prior completed main Work with matching mode/model revision/workspace; cancelled/failed/blocked turns, model changes and workspace switches start fresh context",
+            "Context preservation across cancelled turns/model changes, explicit user reset and safe visible-history rebuild remain pending",
+            "Inbox snapshot/checkpoint acknowledgement and steering remain pending; no T-011/T-013 completion or global AT pass",
+            "Long-history compaction, 100-message/64KiB model IPC pressure and three-compaction failure scenarios are not verified",
+            "Local scripted provider only, no paid/live provider or Ubuntu claim",
+            "Browser command accidentally included known blocked strict egress case; failure retained, assertion unchanged, no further attempt",
+            "Build/full suite preceded the final prompt wording clarification and added workspace assertion; final typecheck/targeted native-worker tests exercised them",
+            "No remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -1711,6 +1737,32 @@
             "Native scratch failed tool results now emit tool.failed, not tool.completed; Work outcome stays daemon-authoritative",
             "Evaluation results excluded from new visible history; pre-existing completion-result endpoint remains separate",
             "Local fixture only, no Ubuntu or new live service validation",
+            "No remote actions"
+          ]
+        },
+        {
+          "commit": "7287653",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; focused continuous conversation and selected Playwright",
+          "exitCode": 1,
+          "reportPath": "docs/implementation/evidence/2026-10-03/continuous-context.json",
+          "testFiles": [
+            "tests/continuous-conversation.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/work.spec.ts",
+            "tests/e2e/configured-work.spec.ts"
+          ],
+          "limitations": [
+            "This source selection covers immediately prior completed main Work with matching mode/model revision/workspace; cancelled/failed/blocked turns, model changes and workspace switches start fresh context",
+            "Context preservation across cancelled turns/model changes, explicit user reset and safe visible-history rebuild remain pending",
+            "Inbox snapshot/checkpoint acknowledgement and steering remain pending; no T-011/T-013 completion or global AT pass",
+            "Long-history compaction, 100-message/64KiB model IPC pressure and three-compaction failure scenarios are not verified",
+            "Local scripted provider only, no paid/live provider or Ubuntu claim",
+            "Browser command accidentally included known blocked strict egress case; failure retained, assertion unchanged, no further attempt",
+            "Build/full suite preceded the final prompt wording clarification and added workspace assertion; final typecheck/targeted native-worker tests exercised them",
             "No remote actions"
           ]
         }

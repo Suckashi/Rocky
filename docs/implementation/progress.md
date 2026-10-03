@@ -316,3 +316,9 @@ Windows fixture: all 124 tests pass, 12 functional browser tests pass (49.8s), f
 ## Canonical conversation view
 
 Commit702ca02 completes the GET/conversation bounded visible-history/cursor and active-session DTO. Active session comes from daemon domain state and missing referenced data fails closed. Windows fixture: typecheck/lint and8 targeted conversation/HTTP tests pass; final4 active-session/cursor assertions pass. See [evidence](evidence/2026-10-03/conversation-view.json). No new browser/build/platform claim; cross-turn graph context and inbox consumption still need implementation. Goal remains active.
+
+## T-011: confirmed native context across main turns
+
+Commit7287653 selects the immediately prior completed main checkpoint only within the same model revision/mode/workspace. Official public updateState copies messages/files into a new owned thread, without copying pending tasks/interrupts/effects. Sync checkpoint durability is enabled; background/evaluation remain independent. Default chat stops inventing a workspace UUID.
+
+Actual Windows fixture tests prove model recollection after next turn/restart, scope isolation, fresh approval and unchanged old operation rows. Typecheck/lint/build and126 tests pass; four browser functional checks pass, while the selected command also ran the known AdGuard egress case and exited1. Final stronger workspace assertions pass. See [evidence](evidence/2026-10-03/continuous-context.json) and [design](native-context-copy.md). Cancelled turns/model changes still reset model context, and safe rebuild, long-history compaction, steering and inbox acknowledgement remain pending. T-011/T-013 stay in_progress; no global AT pass or remote action.
