@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { CompletionFeedback } from "./presence-feedback.js";
 import type { PresenceInput } from "./presence.js";
 import { deriveRockyPresence } from "./presence.js";
 const labels: Record<string, [string, string]> = {
@@ -26,7 +27,11 @@ export function RockyPresence({
   connected,
   configured,
   locale,
+  completion,
+  lastConfirmedAt,
 }: {
+  completion?: CompletionFeedback;
+  lastConfirmedAt?: string;
   works: PresenceInput["works"];
   events: PresenceInput["events"];
   connected: boolean;
@@ -77,11 +82,47 @@ export function RockyPresence({
     },
     now,
   );
+  const [celebrating, setCelebrating] = useState(false);
+  const consumed = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    setCelebrating(false);
+    if (!completion || consumed.current === completion.id) return;
+    consumed.current = completion.id;
+    if (
+      !connected ||
+      !enabled ||
+      reduced ||
+      hidden ||
+      model.state !== "completed" ||
+      model.foregroundId !== completion.workId ||
+      Date.now() - completion.receivedAt > 1000
+    )
+      return;
+    setCelebrating(true);
+    const timer = setTimeout(() => setCelebrating(false), 600);
+    return () => clearTimeout(timer);
+  }, [
+    completion,
+    connected,
+    enabled,
+    reduced,
+    hidden,
+    model.state,
+    model.foregroundId,
+  ]);
   const count = model.counts;
   return (
     <div className="rocky-presence" data-presence={model.state}>
       <img
-        className={"rocky-avatar" + (model.moving ? " presence-moving" : "")}
+        key={celebrating ? completion?.id : "static"}
+        className={
+          "rocky-avatar" +
+          (model.moving
+            ? " presence-moving"
+            : celebrating
+              ? " presence-completed"
+              : "")
+        }
         src="/rocky/avatar.svg"
         width="50"
         height="50"
@@ -96,6 +137,16 @@ export function RockyPresence({
           : ""}
         {(labels[model.state] ?? labels.idle)![zh ? 0 : 1]}
       </p>
+      {!connected && lastConfirmedAt && (
+        <p>
+          {zh ? "最後確認同步" : "Last confirmed sync"}:{" "}
+          <time dateTime={lastConfirmedAt}>
+            {new Date(lastConfirmedAt).toLocaleTimeString(
+              zh ? "zh-TW" : "en-US",
+            )}
+          </time>
+        </p>
+      )}
       {Object.values(count).some(Boolean) && (
         <p>
           {zh ? "背景工作" : "Background work"}: {zh ? "執行" : "Running"}{" "}

@@ -1,3 +1,4 @@
+import { projectCompletion } from "../apps/web/src/presence-feedback.js";
 import { test, expect } from "vitest";
 import { randomUUID } from "node:crypto";
 import type { Work, PublicEvent } from "../packages/contracts/src/index.js";
@@ -105,4 +106,59 @@ test("foreground outcomes stay distinct from independent background counts and e
       now,
     ).state,
   ).toBe("setup_required");
+});
+
+test("completion feedback excludes history, replay, late catch-up, background and unsuccessful states", () => {
+  const w = work("completed");
+  const e = {
+    ...event(w, "rocky.work.updated"),
+    sequence: "12",
+    payload: {
+      kind: "domain" as const,
+      name: "rocky.work.updated",
+      data: { work: w },
+    },
+  };
+  expect(projectCompletion(e, "11", now).completion).toMatchObject({
+    id: e.id,
+    workId: w.id,
+  });
+  expect(projectCompletion(e, "12", now).completion).toBeUndefined();
+  expect(
+    projectCompletion(
+      { ...e, sequence: "13", id: randomUUID() },
+      "12",
+      now,
+      new Set([w.runId]),
+    ).completion,
+  ).toBeUndefined();
+  expect(projectCompletion(e, "13", now).watermark).toBe("13");
+  expect(projectCompletion(e, "11", now + 5001).completion).toBeUndefined();
+  for (const status of [
+    "failed",
+    "cancelled",
+    "interrupted",
+    "blocked",
+    "running",
+  ] as const)
+    expect(
+      projectCompletion(
+        { ...e, payload: { ...e.payload, data: { work: { ...w, status } } } },
+        "11",
+        now,
+      ).completion,
+    ).toBeUndefined();
+  expect(
+    projectCompletion(
+      {
+        ...e,
+        payload: { ...e.payload, data: { work: { ...w, kind: "background" } } },
+      },
+      "11",
+      now,
+    ).completion,
+  ).toBeUndefined();
+  expect(
+    projectCompletion({ ...e, runId: randomUUID() }, "11", now).completion,
+  ).toBeUndefined();
 });

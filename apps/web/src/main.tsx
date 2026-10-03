@@ -107,6 +107,8 @@ function App() {
   const {
     works,
     presenceWorks,
+    completion,
+    lastConfirmedAt,
     artifacts,
     artifactError,
     artifactLoading,
@@ -278,6 +280,8 @@ function App() {
           <section className="conversation">
             <RockyPresence
               works={presenceWorks}
+              completion={completion}
+              lastConfirmedAt={lastConfirmedAt}
               events={events}
               connected={connected}
               configured={!!selectedModel || enabled}

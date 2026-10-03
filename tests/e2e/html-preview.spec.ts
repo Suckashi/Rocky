@@ -51,6 +51,14 @@ test("restricted HTML artifact renders without script, storage, API or network a
             }),
   });
   try {
+    await page.addInitScript(() => {
+      const state = window as typeof window & { completionAnimations: number };
+      state.completionAnimations = 0;
+      document.addEventListener("animationstart", (event) => {
+        if ((event as AnimationEvent).animationName === "rocky-completed")
+          state.completionAnimations++;
+      });
+    });
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/");
     const { token } = await (await page.request.get("/api/v1/session")).json(),
@@ -115,6 +123,10 @@ test("restricted HTML artifact renders without script, storage, API or network a
       "data-presence",
       "awaiting_approval",
     );
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    const enabledMotion = page.getByRole("button", { name: /角色動畫/ });
+    if ((await enabledMotion.getAttribute("aria-pressed")) === "false")
+      await enabledMotion.click();
     await expect(page.locator(".rocky-presence .rocky-avatar")).not.toHaveClass(
       /presence-moving/,
     );
@@ -130,6 +142,15 @@ test("restricted HTML artifact renders without script, storage, API or network a
             .status,
       )
       .toBe("completed");
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (window as typeof window & { completionAnimations: number })
+              .completionAnimations,
+        ),
+      )
+      .toBe(1);
     const { artifacts } = await (
       await page.request.get("/api/v1/artifacts")
     ).json();
@@ -165,6 +186,13 @@ test("restricted HTML artifact renders without script, storage, API or network a
     await expect(openResult).toBeFocused();
     await page.reload();
     await expect(delivery).toBeVisible();
+    expect(
+      await page.evaluate(
+        () =>
+          (window as typeof window & { completionAnimations: number })
+            .completionAnimations,
+      ),
+    ).toBe(0);
     await expect(page.locator(".rocky-presence")).toHaveAttribute(
       "data-presence",
       "completed",
@@ -293,6 +321,25 @@ test("restricted HTML artifact renders without script, storage, API or network a
     await expect(
       page.getByRole("button", { name: "重試成果清單" }),
     ).toHaveCount(0);
+    await page.context().setOffline(true);
+    await expect(page.locator(".rocky-presence")).toContainText("連線中斷");
+    await expect(page.locator(".rocky-presence time")).toHaveAttribute(
+      "datetime",
+      /T/,
+    );
+    await expect(page.locator(".rocky-presence")).toHaveAttribute(
+      "data-presence",
+      "completed",
+    );
+    await page.context().setOffline(false);
+    await expect(page.getByText("本機已連線", { exact: true })).toBeVisible();
+    expect(
+      await page.evaluate(
+        () =>
+          (window as typeof window & { completionAnimations: number })
+            .completionAnimations,
+      ),
+    ).toBe(0);
   } finally {
     await provider.close();
     await new Promise<void>((resolve) => canary.close(() => resolve()));

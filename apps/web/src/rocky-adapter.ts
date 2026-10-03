@@ -6,6 +6,10 @@ import {
   type Work,
   type PublicEvent,
 } from "../../../packages/contracts/src/index.js";
+import {
+  projectCompletion,
+  type CompletionFeedback,
+} from "./presence-feedback.js";
 import { projectEvidence, projectWork } from "./projection.js";
 import {
   conversationPageSchema,
@@ -39,6 +43,10 @@ export type RockyRequest = (path: string, body?: unknown) => Promise<unknown>;
 // One snapshot/event owner for every view. Cards never establish event sources.
 // Transport closure only changes connection state, never Work outcomes.
 export function useRockyProjection(request: RockyRequest) {
+  const [completion, setCompletion] = useState<CompletionFeedback>();
+  const [lastConfirmedAt, setLastConfirmedAt] = useState<string>();
+  const completionWatermark = useRef("0");
+  const completedRuns = useRef(new Set<string>());
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [artifactError, setArtifactError] = useState("");
   const [artifactLoading, setArtifactLoading] = useState(true);
@@ -111,11 +119,24 @@ export function useRockyProjection(request: RockyRequest) {
     setHistoryLoading(false);
     let disposed = false;
     let stream: EventSource | undefined;
+    const offline = () => {
+      setConnected(false);
+      stream?.close();
+    };
+    const online = () => setAttempt((old) => old + 1);
+    window.addEventListener("offline", offline);
+    window.addEventListener("online", online);
     setConnected(false);
     void request("/snapshot")
       .then(async (data) => {
         if (disposed) return;
         const snapshot = snapshotSchema.parse(data);
+        completionWatermark.current = snapshot.cursor;
+        for (const work of snapshot.works)
+          if (work.status === "completed")
+            completedRuns.current.add(work.runId);
+        setCompletion(undefined);
+        setLastConfirmedAt(new Date().toISOString());
         setWorks(snapshot.works);
         setEvents(snapshot.events);
         const page = conversationPageSchema.parse(
@@ -126,11 +147,12 @@ export function useRockyProjection(request: RockyRequest) {
         setHistoryCursor(page.nextCursor);
         setHistoryError("");
         setConnectionError("");
+        if (!navigator.onLine) return;
         stream = new EventSource(
           API_PREFIX + "/events?after=" + snapshot.cursor,
         );
         stream.onopen = () => {
-          if (!disposed) setConnected(true);
+          if (!disposed) setConnected(navigator.onLine);
         };
         stream.onerror = () => {
           if (!disposed) setConnected(false);
@@ -139,6 +161,18 @@ export function useRockyProjection(request: RockyRequest) {
           if (disposed) return;
           try {
             const event = publicEventSchema.parse(JSON.parse(message.data));
+            const feedback = projectCompletion(
+              event,
+              completionWatermark.current,
+              Date.now(),
+              completedRuns.current,
+            );
+            completionWatermark.current = feedback.watermark;
+            if (feedback.completion) {
+              if (event.runId) completedRuns.current.add(event.runId);
+              setCompletion(feedback.completion);
+            }
+            setLastConfirmedAt(new Date().toISOString());
             setEvents((old) => projectEvidence(old, event));
             setWorks((old) => projectWork(old, event));
             if (
@@ -181,6 +215,8 @@ export function useRockyProjection(request: RockyRequest) {
     return () => {
       generation.current++;
       disposed = true;
+      window.removeEventListener("offline", offline);
+      window.removeEventListener("online", online);
       stream?.close();
     };
   }, [request, attempt]);
@@ -215,6 +251,8 @@ export function useRockyProjection(request: RockyRequest) {
   return {
     works: visibleWorks,
     presenceWorks: works,
+    completion,
+    lastConfirmedAt,
     artifacts,
     artifactError,
     artifactLoading,
