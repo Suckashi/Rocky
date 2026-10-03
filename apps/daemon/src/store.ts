@@ -67,7 +67,7 @@ export class Store {
       const version = (
         this.db.prepare("PRAGMA user_version").get() as { user_version: number }
       ).user_version;
-      if (version > 9)
+      if (version > 10)
         throw new RockyError(
           "unsupported_store",
           "Rocky store version is newer than this application",
@@ -177,6 +177,12 @@ export class Store {
         this.transaction(() => {
           this.db.exec(
             "CREATE TABLE IF NOT EXISTS target_claims(target_identity TEXT PRIMARY KEY,operation_id TEXT UNIQUE NOT NULL); PRAGMA user_version=9",
+          );
+        });
+      if (version < 10)
+        this.transaction(() => {
+          this.db.exec(
+            "CREATE TABLE IF NOT EXISTS worker_jobs(id TEXT PRIMARY KEY,work_id TEXT NOT NULL,run_id TEXT NOT NULL,execution_session_id TEXT NOT NULL,status TEXT NOT NULL,pid INTEGER,started_at TEXT NOT NULL,ended_at TEXT,exit_code INTEGER,error TEXT); CREATE UNIQUE INDEX IF NOT EXISTS worker_jobs_one_active_run ON worker_jobs(run_id) WHERE status IN ('starting','running'); PRAGMA user_version=10",
           );
         });
     } catch (error) {

@@ -6,6 +6,7 @@ import {
   type Work,
 } from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
+import { WorkerJobs } from "./worker-jobs.js";
 type Message = ReturnType<typeof parseIpcMessage>;
 type Handler = (
   work: Work,
@@ -30,6 +31,8 @@ export class WorkerChannel {
   private failure: string | null = null;
   private closing?: Promise<void>;
   private readonly owner: Work;
+  private readonly jobRegistry: WorkerJobs;
+  readonly jobId: string;
   constructor(
     private readonly store: Store,
     workId: string,
@@ -43,27 +46,75 @@ export class WorkerChannel {
         "Worker needs a running owned Work",
         409,
       );
-    this.child = fork(entry, [], {
-      execPath: process.execPath,
-      execArgv: entry.endsWith(".ts") ? ["--import", "tsx"] : [],
-      env: Object.fromEntries(
-        ["PATH", "SystemRoot", "TEMP", "TMP"].flatMap((key) =>
-          process.env[key] ? [[key, process.env[key]!]] : [],
+    this.jobRegistry = new WorkerJobs(store);
+    this.jobId = this.jobRegistry.begin(this.owner).id;
+    let spawned: ChildProcess | undefined;
+    try {
+      spawned = fork(entry, [], {
+        execPath: process.execPath,
+        execArgv: entry.endsWith(".ts") ? ["--import", "tsx"] : [],
+        env: Object.fromEntries(
+          ["PATH", "SystemRoot", "TEMP", "TMP"].flatMap((key) =>
+            process.env[key] ? [[key, process.env[key]!]] : [],
+          ),
         ),
-      ),
-      stdio: ["ignore", "ignore", "ignore", "ipc"],
-      windowsHide: true,
-      detached: process.platform !== "win32",
-      serialization: "json",
-    });
+        stdio: ["ignore", "ignore", "ignore", "ipc"],
+        windowsHide: true,
+        detached: process.platform !== "win32",
+        serialization: "json",
+      });
+      this.child = spawned;
+      this.jobRegistry.attach(this.jobId, this.child.pid!);
+    } catch (error) {
+      spawned?.kill();
+      this.jobRegistry.finish(
+        this.jobId,
+        "interrupted",
+        null,
+        "Worker failed to start",
+      );
+      throw error;
+    }
     this.exited = new Promise((resolve) => {
       this.child.once("exit", (code, signal) => {
         this.abortAll();
+        try {
+          const status = this.failure
+            ? "interrupted"
+            : this.closing
+              ? "cancelled"
+              : code === 0
+                ? "exited"
+                : "interrupted";
+          this.jobRegistry.finish(
+            this.jobId,
+            status,
+            code,
+            this.failure ??
+              (status === "interrupted"
+                ? signal
+                  ? "Worker exited by signal"
+                  : "Worker exited without a confirmed result"
+                : null),
+          );
+        } catch {
+          this.failure = "Worker outcome could not be persisted";
+        }
         resolve({ code, signal });
       });
       this.child.once("error", () => {
         this.failure = "Worker process error";
         this.abortAll();
+        try {
+          this.jobRegistry.finish(
+            this.jobId,
+            "interrupted",
+            null,
+            this.failure,
+          );
+        } catch {
+          this.failure = "Worker outcome could not be persisted";
+        }
         resolve({ code: null, signal: null });
       });
     });

@@ -22,6 +22,7 @@ import { authorizeOperation } from "./policy.js";
 import { OperationReconciler } from "./operation-reconciler.js";
 import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
+import { WorkerJobs } from "./worker-jobs.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -61,6 +62,7 @@ export class WorkService {
       this.modelBudgets = new ModelBudgetLedger(this.store);
       this.operations = new OperationLedger(this.store);
       this.grants = new GrantRegistry(this.store);
+      new WorkerJobs(this.store).recover();
       // Never auto-replay an interrupted external action.
       for (const work of this.store.list())
         if (["running", "waiting_approval", "queued"].includes(work.status)) {

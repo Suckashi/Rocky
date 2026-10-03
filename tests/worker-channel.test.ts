@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 import { Store } from "../apps/daemon/src/store.js";
 import { WorkerChannel } from "../apps/daemon/src/worker-channel.js";
+import { WorkerJobs } from "../apps/daemon/src/worker-jobs.js";
 import { workSchema } from "../packages/contracts/src/index.js";
 const entry = fileURLToPath(
   new URL("../fixtures/worker/channel.ts", import.meta.url),
@@ -51,6 +52,11 @@ test("T-009 real child IPC verifies ownership and correlates tool result with da
       args: { result: { checked: true } },
     });
     expect(channel.error).toBeNull();
+    expect(new WorkerJobs(f.store).get(channel.jobId)).toMatchObject({
+      status: "exited",
+      exit_code: 0,
+    });
+    expect(f.store.get(f.work.id).status).toBe("running");
   } finally {
     await channel.close();
     f.store.close();
@@ -88,6 +94,9 @@ for (const mode of ["badcap", "flood", "stubborn"] as const)
       if (mode === "badcap") expect(calls).toBe(0);
       if (mode === "flood") expect(calls).toBeLessThanOrEqual(8);
       if (mode !== "stubborn") expect(channel.error).toContain("violation");
+      expect(new WorkerJobs(f.store).get(channel.jobId).status).toBe(
+        mode === "stubborn" ? "cancelled" : "interrupted",
+      );
     } finally {
       await channel.close();
       expect(channel.pendingCount).toBe(0);
@@ -111,6 +120,46 @@ test("T-009 shutdown bounds a handler that ignores cancellation", async () => {
   } finally {
     await channel.close();
     f.store.close();
+    rmSync(f.root, { recursive: true, force: true });
+  }
+});
+
+test("T-009 restart marks an unfinished worker interrupted without completing its Work or respawning", async () => {
+  const { WorkService } = await import("../apps/daemon/src/work-service.js");
+  const f = setup("recovery");
+  const jobs = new WorkerJobs(f.store);
+  const pending = jobs.begin(f.work);
+  expect(() => jobs.begin(f.work)).toThrow("already has an active worker");
+  jobs.attach(pending.id, 12345);
+  f.store.close();
+  const service = new WorkService(f.root);
+  try {
+    expect(new WorkerJobs(service.store).get(pending.id)).toMatchObject({
+      status: "interrupted",
+      error: "Daemon restarted before worker outcome was recorded",
+    });
+    expect(service.store.get(f.work.id).status).toBe("blocked");
+    expect(
+      service.store
+        .events("0")
+        .filter(
+          (e) =>
+            e.payload.kind === "domain" &&
+            e.payload.name === "rocky.worker.interrupted",
+        ),
+    ).toHaveLength(1);
+    expect(new WorkerJobs(service.store).recover()).toBe(0);
+    expect(
+      service.store
+        .events("0")
+        .filter(
+          (e) =>
+            e.payload.kind === "domain" &&
+            e.payload.name === "rocky.worker.interrupted",
+        ),
+    ).toHaveLength(1);
+  } finally {
+    await service.close();
     rmSync(f.root, { recursive: true, force: true });
   }
 });
