@@ -1,25 +1,26 @@
 # Rocky implementation progress
 
-2026-10-03, Asia/Taipei. Current work: OpenDots-aligned main chat, configured model/runtime conversation, steering/retry and configured MCP lifecycle/schema boundary. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
+2026-10-04, Asia/Taipei. Current work: OpenDots-aligned main chat, configured native conversation/MCP tools and data, and registered workspace owner preview. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
 
-| Task                  | Status      | Actual result                                                                                                                                                  |
-| --------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T-001                 | done        | Independent Git root and local commit, original engineering files, Apache-2.0, workspace, new CI and reference decisions. Remote uncreated.                    |
-| T-002                 | blocked     | Locked dependencies, installed license inventory and Windows clean-copy no-Python validation. Ubuntu evidence unavailable.                                     |
-| T-003                 | in_progress | Real CopilotKit gateway → Work → native Deep Agents task/todos/interrupt → stdio/HTTP MCP. Functional browser flow verified; upstream P0 gate open.            |
-| T-004                 | blocked     | Four Promptfoo full-path cases and Node egress pass with blocked SDK telemetry recorded. Browser egress fails from host AdGuard injection.                     |
-| T-005                 | done        | Validated DTO/event/error/IPC wire contracts and cursor-based snapshot synchronization. Worker IPC execution remains T-009.                                    |
-| T-006                 | done        | Domain schema v2, identity-preserving CAS, atomic events/outbox, recoverable completion projection and OS-released single writer lock.                         |
-| T-007                 | in_progress | Model UI/API, shared Work/evaluation routing, budgets, live probe and proxy/CA tests; profiles/cache pricing/full DNS policy pending.                          |
-| T-008                 | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.                  |
-| T-009                 | done        | Durable child IPC and configured/fixture native Deep Agents workers; daemon owns model/tool RPC, shutdown and descendant cleanup.                              |
-| T-010                 | done        | Durable bounded admission, main/background/evaluation slots, workspace UUID reservations, model semaphore and pinned budget/configuration.                     |
-| T-019                 | in_progress | OpenDots compact shell/main chat slice, model popovers/dialog, original avatar, approvals/stop/reconcile; full tools/results/presence remain.                  |
-| T-037                 | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                               |
-| T-011 / T-018         | in_progress | Configured provider incremental SSE, common UI adapter, snapshot reconnect and numeric cursor replay; other contracts pending.                                 |
-| Later tasks           | pending     | Product modules and confirmed-state presence remain pending.                                                                                                   |
-| T-014 / T-015 / T-021 | in_progress | Configured MCP registry, lifecycle/discovery and settings verified locally; full process/network/permission scope pending.                                     |
-| T-016                 | in_progress | Original input/output schema validation, revision-bound tool preparation and namespaced identity; configured dispatch/typed results/resources/prompts pending. |
+| Task                  | Status      | Actual result                                                                                                                                         |
+| --------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T-001                 | done        | Independent Git root and local commit, original engineering files, Apache-2.0, workspace, new CI and reference decisions. Remote uncreated.           |
+| T-002                 | blocked     | Locked dependencies, installed license inventory and Windows clean-copy no-Python validation. Ubuntu evidence unavailable.                            |
+| T-003                 | in_progress | Real CopilotKit gateway → Work → native Deep Agents task/todos/interrupt → stdio/HTTP MCP. Functional browser flow verified; upstream P0 gate open.   |
+| T-004                 | blocked     | Four Promptfoo full-path cases and Node egress pass with blocked SDK telemetry recorded. Browser egress fails from host AdGuard injection.            |
+| T-005                 | done        | Validated DTO/event/error/IPC wire contracts and cursor-based snapshot synchronization. Worker IPC execution remains T-009.                           |
+| T-006                 | done        | Domain schema v2, identity-preserving CAS, atomic events/outbox, recoverable completion projection and OS-released single writer lock.                |
+| T-007                 | in_progress | Model UI/API, shared Work/evaluation routing, budgets, live probe and proxy/CA tests; profiles/cache pricing/full DNS policy pending.                 |
+| T-008                 | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.         |
+| T-009                 | done        | Durable child IPC and configured/fixture native Deep Agents workers; daemon owns model/tool RPC, shutdown and descendant cleanup.                     |
+| T-010                 | done        | Durable bounded admission, main/background/evaluation slots, workspace UUID reservations, model semaphore and pinned budget/configuration.            |
+| T-019                 | in_progress | OpenDots compact shell/main chat slice, model popovers/dialog, original avatar, approvals/stop/reconcile; full tools/results/presence remain.         |
+| T-037                 | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                      |
+| T-011 / T-018         | in_progress | Configured provider incremental SSE, common UI adapter, snapshot reconnect and numeric cursor replay; other contracts pending.                        |
+| Later tasks           | pending     | Product modules and confirmed-state presence remain pending.                                                                                          |
+| T-014 / T-015 / T-021 | in_progress | Configured MCP registry, lifecycle/discovery and settings verified locally; full process/network/permission scope pending.                            |
+| T-016                 | in_progress | Configured dispatch, typed media and original resource/prompt envelopes implemented; target mapping, advanced schemas, generic reconciliation remain. |
+| T-017                 | in_progress | Canonical root registration/CAS/receipts and actual owner file preview; assistant tools, writes/shell/worktree/locks remain.                          |
 
 Node 24.12.0 / npm 11.6.4 baseline. OpenDots MIT presentation CSS adapted with notices; no upstream history, backend, data, settings or brand assets imported. Test data is synthetic. No remote action; existing live probe evidence is separate from this fixture UI slice. See known-limitations.md for gates and follow-up.
 

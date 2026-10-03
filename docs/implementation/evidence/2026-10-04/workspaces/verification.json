@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-04",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "commit": "67013c59a1ccac505a4660949c9956112dd7b683",
+  "mode": "fixture",
+  "daemonMode": "normal except separately marked earlier fixture run",
+  "referenceCommit": "c2569bb6a13a22e565cf3eb791c62267d06babb1",
+  "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+  "commands": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "files": 50,
+      "tests": 223,
+      "note": "First three workspace tests; fourth added and verified in subsequent focused run"
+    },
+    {
+      "command": "npx vitest run tests/workspaces.test.ts tests/file-target.test.ts tests/operation-ledger.test.ts",
+      "exitCode": 0,
+      "files": 3,
+      "tests": 13
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<existing Chromium1223> npx playwright test --config playwright.production.config.ts",
+      "exitCode": 0,
+      "tests": 3
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<existing Chromium1223> npx playwright test --config playwright.production.config.ts tests/e2e/workspaces.spec.ts",
+      "exitCode": 0,
+      "tests": 1,
+      "note": "Final English and keyboard checks"
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<existing Chromium1223> npx playwright test tests/e2e/workspaces.spec.ts",
+      "exitCode": 0,
+      "tests": 1,
+      "note": "Earlier explicit fixture-daemon run"
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:docs",
+      "exitCode": 0
+    },
+    {
+      "command": "scoped prettier --check and git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "browser": {
+    "version": "148.0.7778.96",
+    "dpr": 1,
+    "zoom": 1,
+    "viewports": [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844]
+    ],
+    "themeLocale": "light zh four widths; dark zh/en320",
+    "checks": [
+      "actual owner registration/read",
+      "binary error",
+      "hidden sensitive file",
+      "traversal403",
+      "long filename/text/code",
+      "no page/dialog horizontal overflow",
+      "Escape focus return",
+      "preview keyboard focus",
+      "reduced motion smoke"
+    ],
+    "visualInspection": ["1440 form/preview", "320 form/dark"],
+    "fullFidelityComparison": "not_run in this slice; previous reference/before/after shell comparison retained"
+  },
+  "limitations": [
+    "owner read only; no assistant host access",
+    "writes/shell/worktree/locks/admission revision binding missing",
+    "snapshot/recheck not OS sandbox or race-free transaction",
+    "Ubuntu and live service not_run",
+    "complete keyboard/theme/locale audit not_run",
+    "existing browser not clean pinned install evidence"
+  ],
+  "remoteActions": [],
+  "globalAcceptance": "unchanged not_run"
+}

@@ -97,3 +97,7 @@ Model settings now uses the existing reference-derived form/card tokens for a de
 ## MCP data approval target (567344c)
 
 The existing PageReviewCard-derived card now supports mcp_data: readable action/server, daemon-resolved URI or prompt name, expandable exact arguments and shared approval actions. No new CSS/layout system. Four-width production-daemon browser checks and desktop/320px visual inspection are linked in mcp-data-retrieval.md; no new reference pixel comparison or full settings/library acceptance.
+
+## Registered owner workspace preview (67013c5)
+
+WorkspaceDialog-derived neutral dialog/forms now host Rocky local registration, actual directory browsing and UTF-8 source preview. Shared tokens, card borders/radii, compact16px icons, truncated file rows and existing responsive dialog geometry are reused; keyboard-focusable bounded source scrolling is an accessibility/owner-preview adaptation. There is no upstream cloud workspace persistence or per-card polling. Four-width normal-daemon browser checks, dark/English320px and actual screenshot inspection are recorded in [workspaces.md](workspaces.md). The original inline form and oversized filename control were corrected. No fresh reference/before/after or full SpaceLibrary fidelity claim; assistant workspace tools, result pane, immutable artifacts and remaining modules are unfinished.

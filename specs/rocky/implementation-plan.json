@@ -2430,8 +2430,33 @@
         "R-027",
         "R-037"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "67013c59a1ccac505a4660949c9956112dd7b683",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm test; npx vitest run tests/workspaces.test.ts tests/file-target.test.ts tests/operation-ledger.test.ts; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspaces/verification.json",
+          "testFiles": [
+            "tests/workspaces.test.ts",
+            "tests/file-target.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/e2e/workspaces.spec.ts"
+          ],
+          "limitations": [
+            "owner read only; no assistant host access",
+            "writes/shell/worktree/locks/admission revision binding missing",
+            "snapshot/recheck not OS sandbox or race-free transaction",
+            "Ubuntu and live service not_run",
+            "complete keyboard/theme/locale audit not_run",
+            "existing browser not clean pinned install evidence"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
@@ -2786,6 +2811,30 @@
             "No new upstream comparison/dark/English/reduced-motion/Ubuntu/live evidence",
             "Original SDK top-level extension envelope, optional template parameters and advanced schemas remain gaps",
             "T-015/T-016/T-019 in_progress; global AT unchanged; no remote actions"
+          ]
+        },
+        {
+          "commit": "67013c59a1ccac505a4660949c9956112dd7b683",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm test; npx vitest run tests/workspaces.test.ts tests/file-target.test.ts tests/operation-ledger.test.ts; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspaces/verification.json",
+          "testFiles": [
+            "tests/workspaces.test.ts",
+            "tests/file-target.test.ts",
+            "tests/operation-ledger.test.ts",
+            "tests/e2e/workspaces.spec.ts"
+          ],
+          "limitations": [
+            "owner read only; no assistant host access",
+            "writes/shell/worktree/locks/admission revision binding missing",
+            "snapshot/recheck not OS sandbox or race-free transaction",
+            "Ubuntu and live service not_run",
+            "complete keyboard/theme/locale audit not_run",
+            "existing browser not clean pinned install evidence"
           ]
         }
       ],
