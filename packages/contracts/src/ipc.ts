@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { reflectionBindingSchema } from "./reflection.js";
 import { modelRequestSchema, modelTransferSchemas } from "./model-transfer.js";
 import { resultTransferSchemas } from "./result-transfer.js";
 import {
@@ -20,6 +21,7 @@ export const ipcMessageSchema = z
     payload: z.discriminatedUnion("kind", [
       z.strictObject({
         kind: z.literal("start"),
+        reflection: reflectionBindingSchema.optional(),
         graphStepLimit: z.number().int().min(64).max(160064).optional(),
         text: z.string().max(32768),
         mode: z.enum(["fixture", "configured"]).optional(),
@@ -83,7 +85,25 @@ export const ipcMessageSchema = z
       z.object({ kind: z.literal("error"), error: errorSchema }).strict(),
     ]),
   })
-  .strict();
+  .strict()
+  .superRefine((message, ctx) => {
+    const p = message.payload;
+    if (
+      p.kind === "start" &&
+      p.reflection &&
+      (p.mode !== "configured" ||
+        p.testFixtureTools ||
+        p.sourceGraphThreadId ||
+        p.contextBatchId ||
+        p.steering ||
+        p.imageInputs)
+    )
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "Reflection start cannot inherit normal context, steering, images or fixture tools",
+      });
+  });
 
 export function parseIpcMessage(wire: string) {
   if (wire.length > 65536 || new TextEncoder().encode(wire).byteLength > 65536)

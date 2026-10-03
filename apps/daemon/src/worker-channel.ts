@@ -31,6 +31,7 @@ type Handler = (
   signal: AbortSignal,
 ) => Promise<unknown>;
 type AgentOptions = {
+  reflection?: Extract<Message["payload"], { kind: "start" }>["reflection"];
   graphPath: string;
   sourceGraphThreadId?: string;
   contextBatchId?: string;
@@ -78,6 +79,20 @@ export class WorkerChannel {
     private readonly handler: Handler,
     agentOptions?: AgentOptions,
   ) {
+    if (
+      agentOptions?.reflection &&
+      (agentOptions.mode !== "configured" ||
+        agentOptions.testFixtureTools ||
+        agentOptions.sourceGraphThreadId ||
+        agentOptions.contextBatchId ||
+        agentOptions.steering ||
+        agentOptions.imageInputs)
+    )
+      throw new RockyError(
+        "reflection_start",
+        "Reflection cannot inherit normal context or tools",
+        422,
+      );
     this.agentOptions = agentOptions;
     this.owner = store.get(workId);
     if (this.owner.status !== "running")
@@ -183,6 +198,9 @@ export class WorkerChannel {
     try {
       this.send(this.startRequestId, {
         kind: "start",
+        ...(agentOptions?.reflection
+          ? { reflection: agentOptions.reflection }
+          : {}),
         graphStepLimit: 64 + 16 * (this.owner.modelBudget?.maxCalls ?? 48),
         ...(agentOptions?.steering ? { steering: true } : {}),
         text: this.owner.text,

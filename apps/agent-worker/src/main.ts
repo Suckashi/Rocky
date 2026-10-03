@@ -447,7 +447,7 @@ process.on("message", async (wire) => {
           imageInputs,
         );
       const skillSources =
-        message.payload.mode === "configured"
+        message.payload.mode === "configured" && !message.payload.reflection
           ? z
               .array(z.string())
               .parse(
@@ -473,6 +473,7 @@ process.on("message", async (wire) => {
           : undefined,
         message.payload.testFixtureTools === true,
         skillSources,
+        message.payload.reflection,
       );
       void invoke(message.requestId);
     } else if (message.payload.kind === "resume")
