@@ -265,3 +265,68 @@ test("work Learning consent defaults excluded, saves review consent and withdraw
     await provider.close();
   }
 });
+
+test("explicit UI fixture renders renewed-review state and sends the new exact hash", async ({
+  page,
+}) => {
+  const id = randomUUID(),
+    hash = "b".repeat(64);
+  let state = "needs_review";
+  const item = {
+    id,
+    workId: randomUUID(),
+    createdAt: "2026-10-04T00:00:00Z",
+    revision: 2,
+    contentHash: hash,
+    status: state,
+    summary: {
+      goal: "Changed redacted summary fixture",
+      constraints: [],
+      corrections: [],
+      verification: ["UI fixture only"],
+      failuresAndRepairs: [],
+      preconditions: [],
+    },
+    evidence: [],
+  };
+  await page.route("**/api/v1/learning/episodes", (route) =>
+    route.fulfill({
+      json: { items: [{ ...item, status: state }], nextCursor: null },
+    }),
+  );
+  await page.route(
+    `**/api/v1/learning/episodes/${id}/review`,
+    async (route) => {
+      expect(route.request().postDataJSON()).toMatchObject({
+        expectedRevision: 2,
+        contentHash: hash,
+        decision: "approve",
+      });
+      state = "approved";
+      await route.fulfill({
+        json: { id, revision: 3, status: state, reviewedHash: hash },
+      });
+    },
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: "Learning", exact: true }).click();
+  const ui = page.locator(".learning-episodes");
+  await ui.locator(":scope > summary").click();
+  await ui.getByRole("button", { name: "載入／重新整理摘要" }).click();
+  const card = ui.locator("article");
+  await expect(card).toContainText("需要重新審查");
+  await card.getByText("檢視摘要內容", { exact: true }).click();
+  const approve = card.getByRole("button", { name: "核准這份摘要" });
+  await expect(approve).toBeDisabled();
+  await card.getByLabel("我已審查這份摘要及來源").check();
+  await page.setViewportSize({ width: 320, height: 844 });
+  await approve.scrollIntoViewIfNeeded();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({ path: "test-results/learning-rereview-320.png" });
+  await approve.click();
+  await expect(card).toContainText("已核准摘要");
+});

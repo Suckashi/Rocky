@@ -216,23 +216,28 @@ export class LearningRegistry {
         410,
       );
     const safe = this.store.publicEvidence(value) as typeof value;
+    const contentHash = intentHash({
+      id,
+      workId: safe.workId,
+      sourceRunId: safe.sourceRunId,
+      terminalBoundarySequence: safe.terminalBoundarySequence,
+      learningPolicyRevision: safe.learningPolicyRevision,
+      consentRevision: safe.consentRevision,
+      scope: safe.scope,
+      trigger: safe.trigger,
+      summaryAuthority: safe.summaryAuthority,
+      summary: safe.summary,
+      evidence: safe.evidence,
+    });
     return {
       ...safe,
       id,
       revision: safe.revision ?? 1,
-      contentHash: intentHash({
-        id,
-        workId: safe.workId,
-        sourceRunId: safe.sourceRunId,
-        terminalBoundarySequence: safe.terminalBoundarySequence,
-        learningPolicyRevision: safe.learningPolicyRevision,
-        consentRevision: safe.consentRevision,
-        scope: safe.scope,
-        trigger: safe.trigger,
-        summaryAuthority: safe.summaryAuthority,
-        summary: safe.summary,
-        evidence: safe.evidence,
-      }),
+      contentHash,
+      status:
+        safe.status === "approved" && safe.reviewedHash !== contentHash
+          ? "needs_review"
+          : safe.status,
     };
   }
   reviewEpisode(id: string, input: unknown) {
@@ -258,7 +263,7 @@ export class LearningRegistry {
       if (
         view.revision !== command.expectedRevision ||
         view.contentHash !== command.contentHash ||
-        view.status !== "pending_review"
+        !["pending_review", "needs_review"].includes(view.status)
       )
         throw new RockyError(
           "learning_review_stale",

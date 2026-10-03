@@ -86,6 +86,36 @@ test("episode review binds redacted view hash, source consent and durable decisi
       }),
     ).toThrow("changed");
     expect(learning.episode(id).status).toBe("approved");
+    store.publicEvidence = (value) =>
+      JSON.parse(
+        JSON.stringify(value).replaceAll("Review marker", "[REDACTED]"),
+      );
+    const changed = learning.episode(id);
+    expect(changed.status).toBe("needs_review");
+    expect(learning.episodes().items).toContainEqual(changed);
+    expect(() =>
+      learning.reviewEpisode(id, {
+        ...command,
+        requestId: randomUUID(),
+        expectedRevision: 2,
+      }),
+    ).toThrow("changed");
+    expect(learning.reviewEpisode(id, command)).toEqual(receipt);
+    expect(learning.episode(id).status).toBe("needs_review");
+    const renewed = learning.reviewEpisode(id, {
+      requestId: randomUUID(),
+      expectedRevision: changed.revision,
+      contentHash: changed.contentHash,
+      decision: "approve",
+    });
+    expect(renewed).toMatchObject({
+      status: "approved",
+      revision: 3,
+      reviewedHash: changed.contentHash,
+    });
+    expect(learning.episode(id).status).toBe("approved");
+    store.publicEvidence = originalRedactor;
+
     const rejectedId = randomUUID();
     const raw = JSON.parse(
       (
@@ -94,20 +124,18 @@ test("episode review binds redacted view hash, source consent and durable decisi
           .get(id) as { data: string }
       ).data,
     );
-    store.db
-      .prepare("INSERT INTO learning_episodes VALUES(?,?,?,?,?)")
-      .run(
-        rejectedId,
-        randomUUID(),
-        randomUUID(),
-        "review fixture",
-        JSON.stringify({
-          ...raw,
-          id: rejectedId,
-          revision: 1,
-          status: "pending_review",
-        }),
-      );
+    store.db.prepare("INSERT INTO learning_episodes VALUES(?,?,?,?,?)").run(
+      rejectedId,
+      randomUUID(),
+      randomUUID(),
+      "review fixture",
+      JSON.stringify({
+        ...raw,
+        id: rejectedId,
+        revision: 1,
+        status: "pending_review",
+      }),
+    );
     const rejectView = learning.episode(rejectedId);
     const rejected = learning.reviewEpisode(rejectedId, {
       requestId: randomUUID(),

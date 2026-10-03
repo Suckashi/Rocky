@@ -8,7 +8,12 @@ const schema = z.object({
       contentHash: z.string(),
       workId: z.uuid(),
       createdAt: z.string(),
-      status: z.enum(["pending_review", "approved", "rejected"]),
+      status: z.enum([
+        "pending_review",
+        "needs_review",
+        "approved",
+        "rejected",
+      ]),
       summary: z.object({
         goal: z.string(),
         constraints: z.array(z.string()),
@@ -114,17 +119,21 @@ export function LearningEpisodes({
         <article key={item.id} className="model-card">
           <strong>{item.summary.goal}</strong>
           <p>
-            {item.status === "approved"
+            {item.status === "needs_review"
               ? zh
-                ? "已核准摘要，尚未反思"
-                : "Summary approved, reflection not started"
-              : item.status === "rejected"
+                ? "內容已變更，需要重新審查"
+                : "Content changed; review required again"
+              : item.status === "approved"
                 ? zh
-                  ? "已拒絕"
-                  : "Rejected"
-                : zh
-                  ? "待審查"
-                  : "Pending review"}{" "}
+                  ? "已核准摘要，尚未反思"
+                  : "Summary approved, reflection not started"
+                : item.status === "rejected"
+                  ? zh
+                    ? "已拒絕"
+                    : "Rejected"
+                  : zh
+                    ? "待審查"
+                    : "Pending review"}{" "}
             · {item.createdAt}
           </p>
           <details>
@@ -171,7 +180,7 @@ export function LearningEpisodes({
                 </p>
               ))}
             </details>
-            {item.status === "pending_review" && (
+            {["pending_review", "needs_review"].includes(item.status) && (
               <>
                 <p>
                   {zh
