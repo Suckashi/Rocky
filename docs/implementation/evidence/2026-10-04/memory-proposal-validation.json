@@ -1,0 +1,28 @@
+{
+  "commit": "ab6b57fd9b6763d68ab85e829fd8542e74fb54f0",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/memory-write.test.ts tests/memory.test.ts tests/documents.test.ts; npm run check; npx eslint apps/daemon/src/memory.ts tests/memory-write.test.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/memory-proposal-validation.json",
+  "testFiles": [
+    "tests/memory-write.test.ts",
+    "tests/memory.test.ts",
+    "tests/documents.test.ts"
+  ],
+  "limitations": [
+    "Missing-source and NUL-content rejection exercised through configured native runtime; valid model-source/browser matrix remains incomplete",
+    "Shared document-source owner tests cover immutable revisions, duplicate sources and scope validation; not a claim of complete native write source coverage",
+    "No browser/UI changes or new screenshot evidence",
+    "T-025 in_progress; all70 global AT unchanged; no Ubuntu/live provider evidence"
+  ],
+  "tests": 13,
+  "testSeconds": 14.81,
+  "assertions": [
+    "Model proposal, preview and persistence share source revision/scope/duplicate and content validation",
+    "Invalid native proposal fails before approval card or prepared operation exists",
+    "No memory row or receipt created for missing document source or NUL content",
+    "Owner source/receipt behavior remains covered by document and memory regression tests"
+  ]
+}
