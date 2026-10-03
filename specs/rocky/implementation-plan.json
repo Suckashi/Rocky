@@ -1197,6 +1197,26 @@
             "Concrete remote status adapters and owner reconciliation UI remain pending",
             "Ubuntu and strict browser egress unverified; no live or remote action; global AT unchanged"
           ]
+        },
+        {
+          "commit": "25d006ae666c6ec44eb54ad079a6b12c91b59951",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx vitest run tests/operation-reconciler.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/policy/mcp-reconciliation.json",
+          "testFiles": [
+            "tests/operation-reconciler.test.ts"
+          ],
+          "limitations": [
+            "Synthetic receipt creation is the fixture effect; this is not proof for arbitrary external MCP side effects",
+            "Real remote status adapters and owner reconciliation UI remain pending",
+            "Receipt absence stays unknown; no automatic Work restart or retry",
+            "No browser UI change tested this turn; Ubuntu and strict browser egress remain open",
+            "T-008 in_progress and global acceptance unchanged; no live or remote action"
+          ]
         }
       ],
       "blockedReason": null,

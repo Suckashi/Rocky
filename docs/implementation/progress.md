@@ -196,3 +196,11 @@ Implementation `3af73a864efeedca6009a590e3b239c40fd9a82e` adds domain v9 canonic
 Full Windows regression passed: 84 tests across 24 files, including restart, cross-Work exclusion, unknown observation retention and known-result release. Typecheck, server build, lint, formatting and source guards passed. See [target claim evidence](evidence/2026-10-03/policy/target-claims.json).
 
 These are daemon database claims, not OS locks. Synthetic broker identity is scoped per run; shared target exclusion uses an explicit synthetic identity in tests. Real workspace integration and concrete reconciliation API/UI remain pending. Historical records without target identity are not assigned inferred claims. T-008 and Goal remain active; no live/remote action or global acceptance promotion.
+
+## T-008 continuation: MCP receipt reconciliation API
+
+Implementation `25d006ae666c6ec44eb54ad079a6b12c91b59951` connects WorkService to a concrete synthetic MCP status adapter. Fixture writes create exclusive durable receipts bound to daemon operation identity/intent; receipt creation is the synthetic effect itself. MCP resource reads recover those receipts across stdio/HTTP process restart. Missing receipts remain unknown. The daemon-only observer validates binding; callers cannot supply outcomes. Work operation listing and session-protected reconciliation endpoints now have schema-validated summaries/receipts. Reconciliation never resumes a blocked Work automatically. Shutdown aborts and drains pending reconciliation queries.
+
+87 tests across 24 files passed before the API addition; 15 focused tests passed afterward, followed by a final six-test reconciliation run exercising session denial, client-outcome rejection and real HTTP routes. Both MCP transports recovered deliberately discarded replies after restart without rewriting receipts. Three network tests and four full-Agent fixture evaluations passed. Typecheck, server build, lint, formatting and source guards passed. See [MCP reconciliation evidence](evidence/2026-10-03/policy/mcp-reconciliation.json).
+
+This proves the synthetic adapter, not arbitrary external MCP status semantics. Owner reconciliation UI and real workspace adapters remain pending. T-008 and Goal remain active; Ubuntu/strict browser egress remain unverified and no global AT status changed. No live model or remote repository action.
