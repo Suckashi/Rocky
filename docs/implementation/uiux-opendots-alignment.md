@@ -137,3 +137,5 @@ No new presentation component/CSS; artifact_publish feeds the existing shared pr
 ## Conversation delivery cards (e1e3b62f68e5af31340af3df860cb73645c091b4)
 
 WorkArtifacts adapts fixed upstream PageReviewCard/style.css3707+ geometry:16px radius,14/18px header/footer,18/22px body,20px title,9px action radius. Neutral theme tokens replace hardcoded review colors; controls open/download confirmed Rocky snapshots. Existing resultpane/focus and shared event projection retained. [Four-width after screenshots/tests](artifact-cards.md). No matched reference/before/after claim or global completion.
+
+Artifact failure recovery (9feaf7920138db6a9729071765697a741daac678) adds truthful load/retry states within existing typography/buttons. No layout/token or upstream source change; focused browser503/recovery evidence in artifact-load-recovery.json. No additional visual parity claim.

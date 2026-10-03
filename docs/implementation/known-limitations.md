@@ -66,3 +66,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 native artifact delivery (0f31a2a4104566b42b9a56fd689d71c599caa59e): prior missing-all-native-publication statements are historical. Root normal Work can publish its own confirmed single-file write. Other-source/binary/bundle publication, document tools/context refs and remaining V1 scope are incomplete. See artifact-native.md.
 
 2026-10-04 artifact cards (e1e3b62f68e5af31340af3df860cb73645c091b4): results no longer require finding the sidebar library first. Shared collection restores latest200 artifacts and applies publication events. Full pagination, independent degraded library loading and matched visual/theme matrix remain gaps. See artifact-cards.md.
+
+2026-10-04 artifact recovery (9feaf7920138db6a9729071765697a741daac678): previous library-bootstrap dependency is resolved. Fault/retry tested independently of main conversation connection. Latest200 initial list/pagination and broader remaining product/visual scope still open.

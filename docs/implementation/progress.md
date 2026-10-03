@@ -455,3 +455,7 @@ Agent now delivers confirmed same-Work file snapshots through artifact_publish; 
 ## Conversation result delivery (e1e3b62f68e5af31340af3df860cb73645c091b4)
 
 Native and owner-published artifacts now appear in the originating Work with direct open/download controls and shared event projection. Four-width browser/reload/focus checks and all7 production-path flows pass. See [artifact-cards.md](artifact-cards.md); fullV1 and visual comparison remain incomplete.
+
+## Independent artifact load recovery (9feaf7920138db6a9729071765697a741daac678)
+
+Shared adapter loads artifact metadata independently of conversation bootstrap; late responses merge immutable records with streamed publications. Failure retains last known cards and shows a retry state in chat/library. Retry affects only metadata loading, not the event stream. Browser injects503, confirms conversation connected/Work visible, removes fault and retries to recover the delivered card. Focused browser1 passed8.9s; type/lint/build/format/diff pass. [Evidence](evidence/2026-10-04/artifact-load-recovery.json). Prior bootstrap dependency limitation is resolved. No new full-suite/theme/reference comparison claim.
