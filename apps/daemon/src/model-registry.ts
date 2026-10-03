@@ -10,6 +10,10 @@ import {
   type ModelProbe,
 } from "../../../packages/contracts/src/models.js";
 import { runModelProbe } from "../../../packages/agent-runtime/src/model-probe.js";
+import {
+  ConfiguredModel,
+  type ModelAccounting,
+} from "../../../packages/agent-runtime/src/configured-model.js";
 
 export class ModelRegistry {
   private active = new Map<
@@ -17,6 +21,65 @@ export class ModelRegistry {
     { abort: AbortController; promise: Promise<ModelProbe> }
   >();
   private closed = false;
+  private leases = new Set<{
+    connectionId: string;
+    revision: number;
+    abort: AbortController;
+    model: ConfiguredModel;
+  }>();
+  acquireModel(
+    id: string,
+    revision: number,
+    accounting: ModelAccounting,
+    signal: AbortSignal,
+  ) {
+    if (this.closed)
+      throw new RockyError("shutting_down", "Daemon is shutting down", 503);
+    const connection = this.get(id);
+    if (connection.revision !== revision)
+      throw new RockyError(
+        "revision_conflict",
+        "Model connection changed",
+        409,
+      );
+    if (
+      connection.config.contextWindowTokens === null ||
+      connection.config.contextWindowTokens <= connection.config.maxOutputTokens
+    )
+      throw new RockyError(
+        "context_required",
+        "Configure a context window with room for input before running an Agent",
+        422,
+      );
+    const abort = new AbortController();
+    const model = new ConfiguredModel(
+      connection.config,
+      {
+        ...accounting,
+        reserve: (...args) => {
+          if (this.closed || this.get(id).revision !== revision)
+            throw new RockyError(
+              "model_revoked",
+              "Model connection revision is no longer active",
+              409,
+            );
+          accounting.reserve(...args);
+        },
+      },
+      AbortSignal.any([abort.signal, signal]),
+      this.env,
+    );
+    const lease = { connectionId: id, revision, abort, model };
+    this.leases.add(lease);
+    return {
+      model,
+      release: async () => {
+        abort.abort();
+        this.leases.delete(lease);
+        await model.close();
+      },
+    };
+  }
   constructor(
     private readonly store: Store,
     private readonly env: NodeJS.ProcessEnv = process.env,
@@ -125,6 +188,12 @@ export class ModelRegistry {
       if (probe.revision !== this.get(command.id).revision)
         this.active.get(row.id)?.abort.abort();
     }
+    for (const lease of this.leases)
+      if (
+        lease.connectionId === command.id &&
+        lease.revision !== this.get(command.id).revision
+      )
+        lease.abort.abort();
     return this.public(saved);
   }
   private record(probe: ModelProbe) {
@@ -215,6 +284,10 @@ export class ModelRegistry {
   }
   async close() {
     this.closed = true;
+    const leases = [...this.leases];
+    this.leases.clear();
+    for (const lease of leases) lease.abort.abort();
+    await Promise.allSettled(leases.map((lease) => lease.model.close()));
     const running = [...this.active.values()];
     for (const entry of running) entry.abort.abort();
     await Promise.allSettled(running.map((entry) => entry.promise));

@@ -100,7 +100,7 @@ export class ModelNetwork {
           response.status >= 300 && response.status < 400
             ? "redirect_denied"
             : "provider_rejected",
-          "Configured endpoint rejected the probe",
+          "Configured endpoint rejected the request",
           502,
         );
       }
@@ -109,7 +109,7 @@ export class ModelNetwork {
       if (error instanceof RockyError) throw error;
       // SDK errors may embed URLs, headers or response bodies. Keep them server-private.
       throw new RockyError(
-        signal.aborted ? "probe_cancelled" : "connection_failed",
+        signal.aborted ? "request_cancelled" : "connection_failed",
         "Configured endpoint request did not complete",
         502,
       );

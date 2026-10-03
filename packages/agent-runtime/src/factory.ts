@@ -6,6 +6,7 @@ import type { BaseCheckpointSaver } from "@langchain/langgraph-checkpoint";
 import { FixtureModel } from "../../../fixtures/models/model.js";
 import type { BaseMessage } from "@langchain/core/messages";
 import type { ChatResult } from "@langchain/core/outputs";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { ROCKY_PERSONA } from "./persona.js";
 export type RuntimeHooks = {
   event: (name: string, data: Record<string, unknown>) => void;
@@ -22,6 +23,7 @@ export type RuntimeHooks = {
 export function createRockyAgent(
   checkpointer: BaseCheckpointSaver,
   hooks: RuntimeHooks,
+  models?: { root: BaseChatModel; child: BaseChatModel },
 ) {
   function guard(child: boolean) {
     return createMiddleware({
@@ -68,7 +70,7 @@ export function createRockyAgent(
   );
   return createDeepAgent({
     name: "rocky",
-    model: new FixtureModel(false, hooks.modelRequest),
+    model: models?.root ?? new FixtureModel(false, hooks.modelRequest),
     checkpointer,
     systemPrompt: ROCKY_PERSONA + "\nThis run uses synthetic fixtures.",
     tools: [write],
@@ -77,7 +79,7 @@ export function createRockyAgent(
       {
         name: "general-purpose",
         description: "Inspect synthetic samples only",
-        model: new FixtureModel(true, hooks.modelRequest),
+        model: models?.child ?? new FixtureModel(true, hooks.modelRequest),
         systemPrompt: "Report only observed synthetic sample evidence.",
         tools: [read],
         middleware: [guard(true)],
