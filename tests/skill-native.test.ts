@@ -7,12 +7,13 @@ import { AIMessage } from "@langchain/core/messages";
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 
-test.each(["published", "untrusted", "quarantined"])(
+test.each(["published", "untrusted", "quarantined", "same-name"])(
   "native progressive skill read: %s",
   async (mode) => {
     const root = await mkdtemp(join(tmpdir(), "rocky-skill-native-"));
     const service = new WorkService(root),
-      id = randomUUID();
+      id = randomUUID(),
+      secondId = randomUUID();
     let observed = "",
       initial = "";
     const provider = await startAgentProvider({
@@ -37,7 +38,7 @@ test.each(["published", "untrusted", "quarantined"])(
             {
               id: "read-skill",
               name: "read_file",
-              args: { file_path: `/skills/${id}/example/SKILL.md` },
+              args: { file_path: `/skills/${id}/example-${id}/SKILL.md` },
               type: "tool_call",
             },
           ],
@@ -75,6 +76,37 @@ test.each(["published", "untrusted", "quarantined"])(
           contentHash: revision.contentHash,
           action: "publish",
         });
+      if (mode === "same-name") {
+        const other = service.skills.import({
+          requestId: randomUUID(),
+          id: secondId,
+          expectedRevision: 0,
+          scope: { kind: "user" },
+          source: {
+            type: "manual",
+            reference: "fixture/other",
+            license: "MIT",
+          },
+          package: {
+            directoryName: "example",
+            files: [
+              {
+                path: "SKILL.md",
+                contentBase64: Buffer.from(
+                  "---\nname: example\ndescription: Another same-name skill\n---\nOTHER_SKILL_BODY",
+                ).toString("base64"),
+              },
+            ],
+          },
+        });
+        service.skills.select(secondId, {
+          requestId: randomUUID(),
+          expectedRevision: 0,
+          skillRevision: 1,
+          contentHash: other.contentHash,
+          action: "publish",
+        });
+      }
       const connectionId = randomUUID();
       service.models.save({
         id: connectionId,
@@ -100,6 +132,12 @@ test.each(["published", "untrusted", "quarantined"])(
         .toBe(mode === "quarantined" ? "failed" : "completed");
       initial = JSON.stringify(provider.requests[0]);
       expect(initial).not.toContain("PRIVATE_SKILL_BODY_MARKER");
+      if (mode === "same-name") {
+        expect(initial).toContain(
+          `/skills/${secondId}/example-${secondId}/SKILL.md`,
+        );
+        expect(initial).not.toContain("OTHER_SKILL_BODY");
+      }
       const loads = service.store
         .events("0", work.id)
         .filter(
@@ -107,10 +145,12 @@ test.each(["published", "untrusted", "quarantined"])(
             e.payload.kind === "domain" &&
             e.payload.name === "rocky.skill.loaded",
         );
-      expect(loads).toHaveLength(mode === "published" ? 1 : 0);
-      if (mode === "published") {
+      expect(loads).toHaveLength(
+        mode === "published" || mode === "same-name" ? 1 : 0,
+      );
+      if (mode === "published" || mode === "same-name") {
         expect(initial).toContain("A discoverable fixture skill");
-        expect(initial).toContain(`/skills/${id}/example/SKILL.md`);
+        expect(initial).toContain(`/skills/${id}/example-${id}/SKILL.md`);
         expect(observed).toContain("PRIVATE_SKILL_BODY_MARKER");
         expect(loads[0]?.payload).toMatchObject({
           data: {

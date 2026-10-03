@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseDocument } from "yaml";
 import { Store } from "./store.js";
 import { WorkspaceRegistry } from "./workspaces.js";
 import { validateSkillPackage } from "./skill-package.js";
@@ -26,6 +27,11 @@ const importSchema = z
   })
   .strict();
 type Snapshot = ReturnType<typeof validateSkillPackage>;
+// Native middleware deduplicates by name. Preserve the portable package and
+// qualify only its runtime metadata view with the registry identity (max64).
+function runtimeName(name: string, id: string) {
+  return `${name.slice(0, 27).replace(/-+$/, "")}-${id}`;
+}
 const selectionSchema = z
   .object({
     requestId: z.uuid(),
@@ -294,7 +300,7 @@ export class SkillRegistry {
     const catalog = this.catalog(work.id);
     if (command.operation === "sources")
       return (catalog?.items ?? []).map(
-        (item) => `/skills/${item.id}/${item.name}/`,
+        (item) => `/skills/${item.id}/${runtimeName(item.name, item.id)}/`,
       );
     const path = command.path ?? "";
     if (
@@ -309,7 +315,7 @@ export class SkillRegistry {
     if (!id || !name)
       throw new RockyError("skill_path", "Skill identity path required", 403);
     const result = this.readForWork(work, id);
-    if (name !== result.revision.metadata.name)
+    if (name !== runtimeName(result.revision.metadata.name, id))
       throw new RockyError(
         "skill_path",
         "Skill path does not match catalog",
@@ -346,6 +352,32 @@ export class SkillRegistry {
         "Protected skill content cannot be delivered",
         403,
       );
+    if (command.metadata) {
+      if (relative !== "SKILL.md")
+        throw new RockyError(
+          "skill_path",
+          "Metadata discovery only reads SKILL.md",
+          403,
+        );
+      const match = /^(?:\uFEFF)?---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(
+        text,
+      );
+      if (!match)
+        throw new RockyError(
+          "skill_integrity",
+          "Skill frontmatter missing",
+          409,
+        );
+      const document = parseDocument(match[1]!);
+      document.set("name", name);
+      // Discovery needs metadata only. Body reads retain original exact bytes.
+      return {
+        contentBase64: Buffer.from(`---\n${document.toString()}---\n`).toString(
+          "base64",
+        ),
+        createdAt: result.revision.createdAt,
+      };
+    }
     if (!command.metadata)
       this.store.event(current, "rocky.skill.loaded", {
         skillId: id,
