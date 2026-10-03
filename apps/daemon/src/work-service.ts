@@ -41,6 +41,7 @@ import { OperationReconciler } from "./operation-reconciler.js";
 import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
 import { DocumentStore } from "./documents.js";
+import { LearningRegistry } from "./learning.js";
 import { SkillRegistry } from "./skills.js";
 import { MemoryRegistry } from "./memory.js";
 import { ArtifactStore } from "./artifacts.js";
@@ -86,6 +87,7 @@ export class WorkService {
   readonly artifacts: ArtifactStore;
   readonly memories: MemoryRegistry;
   readonly skills: SkillRegistry;
+  readonly learning: LearningRegistry;
   readonly documents: DocumentStore;
   readonly modelSlots: ModelSlots;
   readonly admissionConfig: ReturnType<typeof admissionConfigSchema.parse>;
@@ -133,6 +135,7 @@ export class WorkService {
         this.operations,
       );
       this.skills = new SkillRegistry(this.store, this.workspaces);
+      this.learning = new LearningRegistry(this.store, this.workspaces);
       this.documents = new DocumentStore(this.store, this.artifacts);
       this.memories = new MemoryRegistry(
         this.store,

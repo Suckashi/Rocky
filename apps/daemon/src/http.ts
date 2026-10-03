@@ -275,6 +275,10 @@ export function createApp(service: WorkService) {
   app.get("/api/v1/artifacts", (c) =>
     c.json({ artifacts: service.artifacts.list() }),
   );
+  app.get("/api/v1/learning/policy", (c) => c.json(service.learning.policy()));
+  app.post("/api/v1/learning/policy", async (c) =>
+    c.json(service.learning.savePolicy(await readJson(c))),
+  );
   app.get("/api/v1/skills", (c) => c.json({ skills: service.skills.list() }));
   app.post("/api/v1/skills/discover", async (c) =>
     c.json(await service.skills.discover(await readJson(c))),

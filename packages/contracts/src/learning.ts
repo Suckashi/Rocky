@@ -1,0 +1,37 @@
+import { z } from "zod";
+export const learningScopeSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("user") }),
+  z.strictObject({ kind: z.literal("project"), projectId: z.uuid() }),
+]);
+export const learningPolicySchema = z.strictObject({
+  revision: z.number().int().nonnegative(),
+  mode: z.enum(["off", "propose"]),
+  scopes: z.array(learningScopeSchema).max(100),
+  updatedAt: z.string().datetime().nullable(),
+});
+export const learningPolicyCommandSchema = z
+  .strictObject({
+    requestId: z.uuid(),
+    expectedRevision: z.number().int().nonnegative(),
+    mode: z.enum(["off", "propose"]),
+    scopes: z.array(learningScopeSchema).max(100),
+    consent: z.literal(true).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.mode === "propose" && (!value.consent || !value.scopes.length))
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "Propose requires explicit owner consent and at least one scope",
+      });
+    if (value.mode === "off" && value.scopes.length)
+      ctx.addIssue({
+        code: "custom",
+        message: "Off policy must have no allowed scopes",
+      });
+    const keys = value.scopes.map((scope) =>
+      scope.kind === "user" ? "user" : scope.projectId,
+    );
+    if (new Set(keys).size !== keys.length)
+      ctx.addIssue({ code: "custom", message: "Duplicate Learning scope" });
+  });
