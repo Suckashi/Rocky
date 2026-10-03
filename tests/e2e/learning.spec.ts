@@ -194,6 +194,26 @@ test("work Learning consent defaults excluded, saves review consent and withdraw
       ),
     ).toBe(true);
     await page.screenshot({ path: "test-results/learning-episode-320.png" });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.getByRole("button", { name: "Learning", exact: true }).click();
+    const library = page.locator(".learning-episodes");
+    await library.locator(":scope > summary").click();
+    await library.getByRole("button", { name: "載入／重新整理摘要" }).click();
+    const episodeCard = library
+      .locator("article")
+      .filter({ hasText: episodeId! });
+    await expect(episodeCard).toHaveCount(1);
+    await episodeCard.getByText("檢視摘要內容", { exact: true }).click();
+    await expect(episodeCard).toContainText("Observed plan update");
+    await page.setViewportSize({ width: 320, height: 844 });
+    await episodeCard.scrollIntoViewIfNeeded();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({ path: "test-results/learning-library-320.png" });
+    await page.keyboard.press("Escape");
     await ui.getByLabel("私人來源，不用於學習").check();
     await ui.getByRole("button", { name: "保存此工作學習權限" }).click();
     await expect(ui.locator(':scope > [role="status"]')).toContainText(
@@ -204,6 +224,11 @@ test("work Learning consent defaults excluded, saves review consent and withdraw
         await page.request.get(`/api/v1/learning/episodes/${episodeId}`)
       ).status(),
     ).toBe(403);
+    expect(
+      (
+        await (await page.request.get("/api/v1/learning/episodes")).json()
+      ).items.some((item: { id: string }) => item.id === episodeId),
+    ).toBe(false);
     const saved = await (
       await page.request.get(`/api/v1/works/${created.id}/learning-consent`)
     ).json();

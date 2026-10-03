@@ -102,6 +102,30 @@ test("manual episodes retain bounded provenance, redact summaries, dedupe and ob
       ).data,
     );
     expect(raw).not.toContain("fixture-secret");
+    expect(learning.episodes().items).toEqual([episode]);
+    expect(() => learning.episodes("-1")).toThrow("cursor");
+    for (let i = 0; i < 21; i++) {
+      const copy = {
+        ...z.object({}).passthrough().parse(episode),
+        id: randomUUID(),
+      };
+      store.db
+        .prepare("INSERT INTO learning_episodes VALUES(?,?,?,?,?)")
+        .run(
+          copy.id,
+          randomUUID(),
+          randomUUID(),
+          "pagination fixture",
+          JSON.stringify(copy),
+        );
+    }
+    const firstPage = learning.episodes();
+    expect(firstPage.items).toHaveLength(20);
+    expect(firstPage.nextCursor).not.toBeNull();
+    const lastPage = learning.episodes(firstPage.nextCursor!);
+    expect(lastPage.items).toHaveLength(2);
+    expect(lastPage.nextCursor).toBeNull();
+
     store.close();
     store = new Store(root);
     learning = new LearningRegistry(store, new WorkspaceRegistry(store));
@@ -137,6 +161,7 @@ test("manual episodes retain bounded provenance, redact summaries, dedupe and ob
       status: "withdrawn",
       withdrawalConsentRevision: 2,
     });
+    expect(learning.episodes().items).toEqual([]);
     expect(tombstone).not.toHaveProperty("summary");
     expect(tombstone).not.toHaveProperty("evidence");
     learning.saveWorkConsent(work.id, {

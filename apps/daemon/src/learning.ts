@@ -19,6 +19,33 @@ export class LearningRegistry {
     private readonly store: Store,
     private readonly workspaces: WorkspaceRegistry,
   ) {}
+  episodes(before?: string) {
+    if (
+      before !== undefined &&
+      (!/^[1-9][0-9]{0,18}$/.test(before) ||
+        BigInt(before) > 9223372036854775807n)
+    )
+      throw new RockyError("learning_cursor", "Invalid episode cursor", 422);
+    const rows = this.store.db
+      .prepare(
+        "SELECT id,CAST(rowid AS TEXT) AS cursor FROM learning_episodes WHERE (? IS NULL OR rowid < CAST(? AS INTEGER)) ORDER BY rowid DESC LIMIT 21",
+      )
+      .all(before ?? null, before ?? null) as { id: string; cursor: string }[];
+    const page = rows.slice(0, 20),
+      items: unknown[] = [];
+    for (const row of page) {
+      try {
+        items.push(this.episode(row.id));
+      } catch (error) {
+        if (
+          !(error instanceof RockyError) ||
+          ![403, 410].includes(error.status)
+        )
+          throw error;
+      }
+    }
+    return { items, nextCursor: rows.length > 20 ? page.at(-1)!.cursor : null };
+  }
   createEpisode(input: unknown) {
     const command = learningEpisodeCommandSchema.parse(input);
     return this.store.transaction(() => {

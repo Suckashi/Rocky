@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { LearningEpisodes } from "./learning-episodes.js";
 import { z } from "zod";
 import { learningPolicySchema } from "../../../packages/contracts/src/learning.js";
 export function LearningSettings({
@@ -179,6 +180,7 @@ export function LearningSettings({
           {zh ? "保存學習政策" : "Save Learning policy"}
         </button>
       </fieldset>
+      <LearningEpisodes locale={locale} request={request} />
     </section>
   );
 }

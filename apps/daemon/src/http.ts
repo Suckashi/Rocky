@@ -283,6 +283,9 @@ export function createApp(service: WorkService) {
       service.learning.saveWorkConsent(c.req.param("id"), await readJson(c)),
     ),
   );
+  app.get("/api/v1/learning/episodes", (c) =>
+    c.json(service.learning.episodes(c.req.query("before"))),
+  );
   app.post("/api/v1/learning/episodes", async (c) =>
     c.json(service.learning.createEpisode(await readJson(c))),
   );
