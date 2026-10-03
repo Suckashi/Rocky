@@ -180,3 +180,11 @@ Implementation `eb88dcbd5bd47449a5b9936b3cd2e01863d141db` exposes schema-validat
 Seven functional browser tests and three focused grant tests passed. The browser exercised revoke, reload, remaining write rejection and mobile rendering; API tests verify session protection, unsupported-field rejection and persisted idempotency. Typecheck, server build, lint, formatting and source guards passed. See [grant UI evidence](evidence/2026-10-03/policy/grant-ui.json).
 
 T-008 remains in_progress for real target resolvers and concrete reconciliation integration. Strict browser egress was excluded and remains an open failure; Ubuntu unverified. Goal active; no live/remote action.
+
+## T-008 continuation: canonical file target resolver
+
+Implementation `50b00b8f2d612c0b79afdd9d654b929d5635ac2e` adds a bounded regular-file/missing-leaf resolver for trusted owner-selected roots. Snapshots bind canonical path, root/parent/file identity, metadata and content digest. Open-file identity is checked before content reads and again afterward. Explicit recheck rejects changed contents or newly occupied paths. Traversal, alternate streams/device names and symlink/junction/hard-link targets are refused conservatively.
+
+Three real filesystem fixture tests passed on Windows, including junction creation/replacement and hard links. Typecheck, server build, lint, formatting and source guards passed. See [file target evidence](evidence/2026-10-03/policy/file-target.json).
+
+This core is not yet a workspace registration/write flow, and does not eliminate external OS races after checking. Target leases/adapter integration and concrete reconciliation remain pending. T-008 and Goal stay active; no foreign repository or private data touched.

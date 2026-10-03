@@ -1,0 +1,53 @@
+{
+  "commit": "50b00b8f2d612c0b79afdd9d654b929d5635ac2e",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+  "mode": "fixture",
+  "command": "npx vitest run tests/file-target.test.ts",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-03/policy/file-target.json",
+  "testFiles": ["tests/file-target.test.ts"],
+  "limitations": [
+    "Resolver requires a trusted owner-selected root; workspace registration/broker integration remains pending",
+    "Only regular files or missing leaves in existing parents; content snapshot bounded to 8MiB",
+    "Rejects links conservatively; no claim to support every Windows UNC/reparse configuration",
+    "Snapshot/recheck cannot eliminate later external OS races; target leases/write adapter remain pending",
+    "Only Windows local synthetic temp files tested; Ubuntu not run",
+    "T-008 remains in_progress; no live/remote action or global AT promotion"
+  ],
+  "recordedAt": "2026-10-03T06:36:52.724Z",
+  "task": "T-008",
+  "passed": 3,
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npx tsc -p tsconfig.build.json",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run format:check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    }
+  ],
+  "coverage": [
+    "Canonical relative target and root/parent/file identity snapshots",
+    "Content digest detects same-size overwrite with restored mtime",
+    "Missing-file snapshot changes when another actor creates target",
+    "Traversal, absolute, ADS/device/trailing-dot aliases denied",
+    "Actual Windows junction and hard-link rejection",
+    "Parent replacement after prepare denied",
+    "Portable slash/backslash paths map consistently"
+  ]
+}
