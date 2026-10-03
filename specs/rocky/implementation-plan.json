@@ -1606,6 +1606,31 @@
             "Build/full suite preceded the final prompt wording clarification and added workspace assertion; final typecheck/targeted native-worker tests exercised them",
             "No remote actions"
           ]
+        },
+        {
+          "commit": "370e855",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; focused context/inbox tests; selected Playwright excluding deferred egress",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/inbox-checkpoint.json",
+          "testFiles": [
+            "tests/continuous-conversation.test.ts",
+            "tests/context-barrier.test.ts",
+            "tests/inbox.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/work.spec.ts",
+            "tests/e2e/configured-work.spec.ts"
+          ],
+          "limitations": [
+            "Long-history compaction and bounded large-model transport remain pending",
+            "Precise steering, retry/reset commands and full crash matrix remain pending; T-011/T-013 stay in_progress",
+            "Local scripted provider only; no live paid provider, Ubuntu or strict browser egress claim",
+            "Full Work snapshot pagination and later V1 modules remain unfinished",
+            "No remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -1763,6 +1788,31 @@
             "Local scripted provider only, no paid/live provider or Ubuntu claim",
             "Browser command accidentally included known blocked strict egress case; failure retained, assertion unchanged, no further attempt",
             "Build/full suite preceded the final prompt wording clarification and added workspace assertion; final typecheck/targeted native-worker tests exercised them",
+            "No remote actions"
+          ]
+        },
+        {
+          "commit": "370e855",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; focused context/inbox tests; selected Playwright excluding deferred egress",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/inbox-checkpoint.json",
+          "testFiles": [
+            "tests/continuous-conversation.test.ts",
+            "tests/context-barrier.test.ts",
+            "tests/inbox.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/work.spec.ts",
+            "tests/e2e/configured-work.spec.ts"
+          ],
+          "limitations": [
+            "Long-history compaction and bounded large-model transport remain pending",
+            "Precise steering, retry/reset commands and full crash matrix remain pending; T-011/T-013 stay in_progress",
+            "Local scripted provider only; no live paid provider, Ubuntu or strict browser egress claim",
+            "Full Work snapshot pagination and later V1 modules remain unfinished",
             "No remote actions"
           ]
         }

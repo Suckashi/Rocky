@@ -20,3 +20,5 @@ Next: continue the authorized OpenDots UI / T-011–013 conversation runtime sli
 Conversation/history APIs now separate visible user/result records from graph state and per-Work execution sessions. History is immutable, bounded-paginated and excludes evaluation; UI history paging is connected; agent cross-turn context/inbox-checkpoint consumption remains pending. See conversation-history.json.
 
 History UI now uses persistent bounded pages and shared Work-event references; full Work snapshot pagination/performance remains pending. Stream/history scroll verified by local provider fixture. See history-ui/verification.json.
+
+Current status (370e855): safe native main context now survives cancellation/model changes within mode/workspace scope; an owned inbox batch is acknowledged against the actual native checkpoint with branch-aware membership. Earlier absent-context/inbox statements above are historical. Long-history compaction, large-model transport, exact steering/reset/retry and full crash recovery acceptance remain pending. See context-inbox.md and evidence/2026-10-03/inbox-checkpoint.json.
