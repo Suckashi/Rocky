@@ -3895,6 +3895,27 @@
             "Chinese light four-width after screenshots only; English/dark grant-specific matrix and matched OpenDots reference not_run",
             "Model/checkpoint copies already delivered are not removed by registry deletion; all70 global AT unchanged"
           ]
+        },
+        {
+          "commit": "95c144678f0c591e6b990ae7b4d5b9c8b122523a",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/memory-native.test.ts tests/contracts.test.ts; final npx vitest run tests/contracts.test.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts memory.spec.ts -g \"composer grants\"; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/memory-composer.json",
+          "testFiles": [
+            "tests/memory-native.test.ts",
+            "tests/contracts.test.ts",
+            "tests/e2e/memory.spec.ts"
+          ],
+          "limitations": [
+            "Composer currently selects one scope(user or selected project); API supports up to3 unique scopes including current task",
+            "No durable wait/resume for an ungranted memory call; it is still denied",
+            "Model remember/update and full project/task/child/cross-Work validation matrix remain open",
+            "Four-width Chinese/light after screenshots only; full reference comparison and grant-specific English/dark matrix not_run",
+            "Deletion cannot recall provider/checkpoint copies already delivered; all70 global AT unchanged"
+          ]
         }
       ],
       "blockedReason": null,

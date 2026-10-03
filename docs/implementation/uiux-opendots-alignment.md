@@ -159,3 +159,5 @@ Memory source controls (6256a1653ab36448851b8c62c4eb8423549a10e0) extend the exi
 Memory scope coverage (5f192c636d6444f740bb8371c7715cca5707506f) adds four-width English/dark long-text evidence and basic keyboard/error-retry verification in the existing settings dialog. No new layout or upstream code. [Evidence](memory-registry.md). These after screenshots do not replace matched reference comparison.
 
 Memory grant UI (e56869c3a43e6d83512925041d75b70e69d2e402) uses existing collapsed Work permissions and neutral form styles, avoiding permanent extra panels. Owner-only scope/private controls are a Rocky adaptation. [Four-width after evidence](memory-registry.md); no new upstream code or full matched reference claim.
+
+Composer memory consent (95c144678f0c591e6b990ae7b4d5b9c8b122523a) uses existing OpenDots-aligned Model/tools popover and semantic form controls, with no permanent panel. Rocky adaptation makes scope and private-to-model consent explicit. [Four-width after evidence](memory-registry.md); complete reference comparison remains pending.

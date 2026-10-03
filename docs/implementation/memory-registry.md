@@ -104,3 +104,17 @@ Existing collapsed Work permissions now offers scope selection(task default, bou
 - Native project/task/child/cross-Work full matrix remains open; owner native writes not implemented
 - Chinese light four-width after screenshots only; English/dark grant-specific matrix and matched OpenDots reference not_run
 - Model/checkpoint copies already delivered are not removed by registry deletion; all70 global AT unchanged
+
+## Pre-submit memory consent (95c144678f0c591e6b990ae7b4d5b9c8b122523a)
+
+Submission accepts optional memoryRead selections with explicit includePrivate; configured-only, unique scopes, project requires exact registered workspace binding. CopilotKit forwarded props uses the same schema. WorkService creates grants inside the Work admission transaction before dispatch. Submission replay returns existing Work without adding grants; retry-as-new-Work does not copy old grants.
+
+Composer Model/tools popover defaults to no memory access, offers user/selected-project scope and explicit private-to-model checkbox. Options clear after submission and selected model/workspace changes. Existing active-Work grant controls remain available. No second runtime, implicit data injection or permanent extra panel.
+
+[Evidence](evidence/2026-10-04/memory-composer.json):6 native cases plus2 initial contract tests passed; final expanded3 contract tests passed. Browser sends real CopilotKit request to normal daemon/native runtime without held provider, observes private memory in actual tool output and reset selection. Type/lint/build/format pass. Screenshots: [1440](evidence/2026-10-04/memory-composer/after-1440.png), [1280](evidence/2026-10-04/memory-composer/after-1280.png), [390](evidence/2026-10-04/memory-composer/after-390.png), [320](evidence/2026-10-04/memory-composer/after-320.png).
+
+- Composer currently selects one scope(user or selected project); API supports up to3 unique scopes including current task
+- No durable wait/resume for an ungranted memory call; it is still denied
+- Model remember/update and full project/task/child/cross-Work validation matrix remain open
+- Four-width Chinese/light after screenshots only; full reference comparison and grant-specific English/dark matrix not_run
+- Deletion cannot recall provider/checkpoint copies already delivered; all70 global AT unchanged

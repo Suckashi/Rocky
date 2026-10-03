@@ -535,3 +535,7 @@ Root memory_search now uses explicit owner scope/privacy grants, active executio
 ## Memory grant UI (e56869c3a43e6d83512925041d75b70e69d2e402)
 
 Owner can now grant active Work scoped memory reads with explicit private option and revoke confirmed grants through existing Work permissions.8 native/grant tests,3 browser tests and final focused1 pass; four-width evidence. [Report](memory-registry.md). Pre-submit consent/waiting flow and full isolation matrix remain missing; T-025/Goal active.
+
+## Composer memory consent (95c144678f0c591e6b990ae7b4d5b9c8b122523a)
+
+Pre-submit memory scope/private selections now pass through CopilotKit and atomic daemon admission before native execution. UI resets consent per Work/target. Native6 plus final contract3 tests and focused browser1 pass; type/lint/build pass. [Evidence and screenshots](memory-registry.md). Ungranted-call waiting, native writes and full scope matrix remain open; T-025/Goal active.
