@@ -4310,6 +4310,37 @@
             "No automatic discovery, version diff/audit presentation or matched OpenDots comparison in this slice",
             "No Ubuntu/live provider/fullAT claim"
           ]
+        },
+        {
+          "commit": "4c87963793402e5ef75f911abfa56294e62fa7a5",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/skill-diff.test.ts; npm run check; scoped eslint; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts skills.spec.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-diff.json",
+          "testFiles": [
+            "tests/skill-diff.test.ts",
+            "tests/e2e/skills.spec.ts"
+          ],
+          "limitations": [
+            "Adjacent version comparison only; arbitrary base and audit timeline remain pending",
+            "Binary sizes and hashes returned by API; UI hashes still require separate revision evidence",
+            "Chinese/light Chromium 148.0.7778.96 DPR1; full theme/language/focus and matched OpenDots comparison pending",
+            "No Ubuntu/live provider/global AT completion claim; T-026/T-027 remain in_progress"
+          ],
+          "unitTests": 1,
+          "unitSeconds": 1.14,
+          "browserTests": 3,
+          "browserSeconds": 6.8,
+          "screenshots": [
+            "docs/implementation/evidence/2026-10-04/skill-diff/after-320.png"
+          ],
+          "assertions": [
+            "Added/removed/modified files, binary detection, bounded truncated text, invalid revision/path rejection",
+            "Browser previous/new body diff and 320px no page overflow"
+          ],
+          "repair": "Initial browser run 1 failed/2 passed due to ambiguous previous-revision button selector; exact selector repaired, final run all passed"
         }
       ],
       "blockedReason": null,
@@ -4441,6 +4472,37 @@
             "Chinese/light Chromium after screenshots only; complete language/theme/keyboard matrix and matched reference comparison pending",
             "No live provider/Ubuntu/fullAT completion claim"
           ]
+        },
+        {
+          "commit": "4c87963793402e5ef75f911abfa56294e62fa7a5",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/skill-diff.test.ts; npm run check; scoped eslint; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts skills.spec.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-diff.json",
+          "testFiles": [
+            "tests/skill-diff.test.ts",
+            "tests/e2e/skills.spec.ts"
+          ],
+          "limitations": [
+            "Adjacent version comparison only; arbitrary base and audit timeline remain pending",
+            "Binary sizes and hashes returned by API; UI hashes still require separate revision evidence",
+            "Chinese/light Chromium 148.0.7778.96 DPR1; full theme/language/focus and matched OpenDots comparison pending",
+            "No Ubuntu/live provider/global AT completion claim; T-026/T-027 remain in_progress"
+          ],
+          "unitTests": 1,
+          "unitSeconds": 1.14,
+          "browserTests": 3,
+          "browserSeconds": 6.8,
+          "screenshots": [
+            "docs/implementation/evidence/2026-10-04/skill-diff/after-320.png"
+          ],
+          "assertions": [
+            "Added/removed/modified files, binary detection, bounded truncated text, invalid revision/path rejection",
+            "Browser previous/new body diff and 320px no page overflow"
+          ],
+          "repair": "Initial browser run 1 failed/2 passed due to ambiguous previous-revision button selector; exact selector repaired, final run all passed"
         }
       ],
       "blockedReason": null,

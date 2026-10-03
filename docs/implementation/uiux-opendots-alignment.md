@@ -173,3 +173,7 @@ Skill folder import (bf1cbf1b91305775569ac399718de3d287a485aa) adds a collapsed 
 Skill file/history review (6f08d5068e5e5a801a069f034347e4b65e748e81) extends the existing dialog with compact previous/next buttons and a file select, retaining original names and collapsed hashes. Existing neutral form/proposal styles reused; no new CSS. [Four-width after evidence](evidence/2026-10-04/skill-files.json),320 inspected. Matched reference comparison remains pending.
 
 Skill update (0ad24f8d7be0d5495aae684c2a227c88f0c72e70) reuses the same folder form with a target/version summary, disabled scope and cancel action. Picker focus is browser-verified; no additional CSS. [320px evidence](evidence/2026-10-04/skill-update.json). Matched reference comparison remains pending.
+
+### Skill version diff — 2026-10-04
+
+`skill-diff.tsx` reuses the existing neutral button/details and diff-preview language for a Rocky-specific Skills adaptation. It compares immutable revisions through the daemon, with collapsed changed-file inventory and explicit binary/truncation states. No additional upstream code/assets copied; reference remains c2569bb6a13a22e565cf3eb791c62267d06babb1. [320px after](evidence/2026-10-04/skill-diff/after-320.png), [test evidence](evidence/2026-10-04/skill-diff.json). This is after-only fixture evidence, not matched reference/before/after proof. Full alignment and accessibility matrix remain incomplete.
