@@ -1,0 +1,70 @@
+{
+  "commit": "af4c3030a5845e76f098be8e76ecba9eb029634d",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+  "mode": "fixture",
+  "command": "npx vitest run tests/network.test.ts tests/evaluation.test.ts",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-03/models/configured-evaluation.json",
+  "testFiles": ["tests/evaluation.test.ts", "tests/network.test.ts"],
+  "limitations": [
+    "T-007 remains in_progress for token profiles, editable budgets, cache pricing and DNS policy evidence",
+    "Configured evaluation tested with local HTTP provider fixtures; no live calls this turn",
+    "Evaluation tools remain synthetic samples; automatic approval is restricted to write_sample",
+    "Fetch/ModelNetwork checks are process boundaries, not OS sandbox enforcement",
+    "Promptfoo summary zero tokens is not usage evidence; Work ledger remains authoritative",
+    "Ubuntu and strict browser egress remain open; no global acceptance promoted",
+    "Backend-only change; no browser or dependency-install rerun; no remote action"
+  ],
+  "recordedAt": "2026-10-03T05:49:07.036Z",
+  "task": "T-007",
+  "commands": [
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "passed": 58,
+      "files": 16,
+      "note": "Before adding independent endpoint-lease regression"
+    },
+    {
+      "command": "npx vitest run tests/network.test.ts tests/evaluation.test.ts",
+      "exitCode": 0,
+      "passed": 5
+    },
+    {
+      "command": "npm run test:network",
+      "exitCode": 0,
+      "networkTests": 2,
+      "fullAgentCases": 4
+    },
+    {
+      "command": "npm run check",
+      "exitCode": 0,
+      "note": "Initial check found optional result fields in test; corrected with explicit output/metadata guard and rerun passed"
+    },
+    {
+      "command": "npx tsc -p tsconfig.build.json",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run format:check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    }
+  ],
+  "coverage": [
+    "Configured selection from trusted suite only; prompt cannot add selection",
+    "Native child, approval and rejection through same evaluation Work and budget",
+    "Selection revision invalidation rejects before dispatch",
+    "Undici model I/O passes active evaluation guard; revoked endpoint sends zero requests",
+    "Concurrent endpoint leases are reference-counted and sibling routes remain denied"
+  ]
+}

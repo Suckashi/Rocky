@@ -83,3 +83,11 @@ Implementation `d75904027005d764bc373cab0e2cb31406aac86e` fixes capability probi
 The live five-request probe passed text, tools, streaming and client cancellation. Ten live requests total include the original two-request failed probe and three bounded diagnostics. Every request specified at most 128 output tokens. The source Apsis settings were read only and confirmed unchanged; credentials stayed in process memory. No full configuration, credential or private response was added to Rocky. Context remains explicitly unknown, so no live Work was executed. See [live probe evidence](evidence/2026-10-03/models/live-probe.json).
 
 All 10 focused model tests, typecheck, lint and source guards passed. No dependencies or UI changed. T-007 remains in_progress for its documented integration gaps; Ubuntu/browser egress and global acceptance status are unchanged. Goal remains active.
+
+## Goal continuation: configured evaluation routing
+
+Implementation `af4c3030a5845e76f098be8e76ecba9eb029634d` connects trusted configured-model selection to the same evaluation Work, native Agent, approval and budget paths. Case text cannot override selection. Undici model requests now check the installed evaluation egress guard; reference-counted endpoint leases revoke at completion and do not grant sibling routes. Returned metadata includes pinned selection and actual Work usage.
+
+The full suite passed 58 tests before the added lease regression; focused final evaluation/network tests passed 5 tests. Four full Agent Promptfoo fixture cases passed. Typecheck (after correcting test optional-field narrowing), server build, lint, formatting and source guards passed. See [configured evaluation evidence](evidence/2026-10-03/models/configured-evaluation.json). No live calls, dependency changes or UI changes this turn.
+
+T-007 remains in_progress for trusted token profiles, cache pricing, editable budgets and DNS policy evidence. Evaluation still operates synthetic tools; live protocol evidence from the previous turn is not full live Agent evidence. Ubuntu, browser egress and global acceptance are unchanged. Goal stays active.

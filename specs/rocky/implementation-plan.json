@@ -839,6 +839,29 @@
             "Ubuntu and strict browser egress remain open; no global acceptance promoted",
             "No dependency change, browser rerun or remote action"
           ]
+        },
+        {
+          "commit": "af4c3030a5845e76f098be8e76ecba9eb029634d",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx vitest run tests/network.test.ts tests/evaluation.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/models/configured-evaluation.json",
+          "testFiles": [
+            "tests/evaluation.test.ts",
+            "tests/network.test.ts"
+          ],
+          "limitations": [
+            "T-007 remains in_progress for token profiles, editable budgets, cache pricing and DNS policy evidence",
+            "Configured evaluation tested with local HTTP provider fixtures; no live calls this turn",
+            "Evaluation tools remain synthetic samples; automatic approval is restricted to write_sample",
+            "Fetch/ModelNetwork checks are process boundaries, not OS sandbox enforcement",
+            "Promptfoo summary zero tokens is not usage evidence; Work ledger remains authoritative",
+            "Ubuntu and strict browser egress remain open; no global acceptance promoted",
+            "Backend-only change; no browser or dependency-install rerun; no remote action"
+          ]
         }
       ],
       "blockedReason": null,
