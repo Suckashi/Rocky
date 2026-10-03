@@ -1,0 +1,51 @@
+{
+  "commit": "65e58958f620db27208afd64cac1977f075341bb",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+  "mode": "fixture",
+  "command": "npx vitest run tests/runtime.test.ts tests/configured-work.test.ts tests/operation-ledger.test.ts tests/stop.test.ts",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-03/policy/prepared-approval.json",
+  "testFiles": [
+    "tests/runtime.test.ts",
+    "tests/operation-ledger.test.ts",
+    "tests/configured-work.test.ts",
+    "tests/stop.test.ts"
+  ],
+  "limitations": [
+    "T-008 in_progress: generic grants, canonical target revision recheck, unknown reconciliation and audit redaction remain",
+    "Only one unambiguous native write_sample interrupt supported; ambiguous/missing call identity is refused",
+    "Stop/restart can leave prepared not_executed records pending historical review; they are not dispatch authority",
+    "Backend-only change; no browser, live endpoint or remote action"
+  ],
+  "recordedAt": "2026-10-03T06:06:03.991Z",
+  "task": "T-008",
+  "passed": 12,
+  "finalFocused": {
+    "command": "npx vitest run tests/runtime.test.ts tests/operation-ledger.test.ts",
+    "exitCode": 0,
+    "passed": 6
+  },
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npx tsc -p tsconfig.build.json",
+      "exitCode": 0
+    }
+  ],
+  "coverage": [
+    "Persist prepared/not_executed using native call ID before publishing approval",
+    "Approval pins operationId and dispatch checks it",
+    "Successful resume settles same prepared record without duplicate operation",
+    "Reject atomically settles not_executed with decision receipt and Work event",
+    "Injected receipt failure rolls back settlement and event"
+  ]
+}

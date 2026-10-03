@@ -128,3 +128,11 @@ Implementation `ed6642bfcef19a2f2fa5259b872a5bdde65fd3cb` upgrades Rocky domain 
 68 tests across 19 files and four full Agent evaluation cases passed. A final six-test ledger/native suite passed after preserving existing destination/result event evidence. Typecheck, server build, lint, format and source guards passed. Migration tests preserve v4 success/unknown with null historical context instead of invented ownership. See [ledger evidence](evidence/2026-10-03/policy/ledger.json).
 
 T-008 remains in_progress: preparation before native approval, generic grants/target revisions, reconciliation and audit redaction are still pending. The ledger currently guards synthetic adapters. No new live/remote action or global acceptance claim; Goal active.
+
+## T-008 continuation: prepared operation before approval
+
+Implementation `65e58958f620db27208afd64cac1977f075341bb` resolves the native interrupted write call identity, persists its prepared/not_executed record and binds operationId into the approval. Resume must match that operation; no duplicate write record is created. Owner rejection atomically settles not_executed with the decision receipt and updated Work. Missing/ambiguous native identities fail closed.
+
+Twelve focused native/configured/ledger/stop tests passed. Final six-test native/ledger verification includes rejection settlement and injected receipt failure rollback. Typecheck, lint and server build passed. See [prepared approval evidence](evidence/2026-10-03/policy/prepared-approval.json).
+
+T-008 remains in_progress for generic grants, target recheck, unknown reconciliation and redaction. Stop/restart cleanup of unused prepared records remains pending; not_executed records do not authorize dispatch. Goal active; no global acceptance or remote action claim.
