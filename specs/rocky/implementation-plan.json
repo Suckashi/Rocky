@@ -2796,6 +2796,29 @@
             "No actual power loss; restart test uses explicitly seeded crash-state fixture",
             "Ubuntu/live integration/pinned browser install not_run; no fresh visual comparison"
           ]
+        },
+        {
+          "commit": "d1181200442a8e9fa4d3b2686dc8a8bfecaf5abf",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npx vitest run tests/git-worktree.test.ts; npm run check; npm run lint; npm run build",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/git-worktree-adapter/verification.json",
+          "testFiles": [
+            "tests/git-worktree.test.ts"
+          ],
+          "limitations": [
+            "Adapter only: not wired to daemon operation ledger/approval, native tool, background coding default or UI yet",
+            "Caller must provide canonical registered root and bind exact prepared intent; no product authorization inferred from adapter",
+            "Main Git directory only; linked-worktree sources and nested registration roots not supported yet",
+            "Repository filters rejected; broad filter-neutralization/checkout compatibility pending",
+            "No timed-out Git descendant cleanup proof or mid-dispatch crash/reconciliation matrix",
+            "Git configuration includes are read for fingerprint/filter refusal; not OS sandbox or full external-process race proof",
+            "No non-Git isolation fallback, destination governance, packaging/doctor or cleanup authorization workflow yet",
+            "Ubuntu/browser/full V1 acceptance not_run; no UI screenshot or reference alignment evidence added"
+          ]
         }
       ],
       "blockedReason": null,

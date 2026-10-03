@@ -421,3 +421,7 @@ Owner-session/exact-approval preview now revalidates original target, shows boun
 ## Canonical root ownership (c63be5a72f91dc78f38c261b4b8b3b8cde4a9bf3)
 
 Admission now serializes parent/child registered roots across different UUIDs before worker/model slots. Native children share root ownership; existing per-target claims remain. Related31 regressions, final5 lease cases, type/lint/build and normal-daemon browser5 pass. See [workspace-leases.md](workspace-leases.md). T-017 worktree/shell/multi-resource locks/reconciliation remain open; Goal active.
+
+## Git worktree adapter foundation (d1181200442a8e9fa4d3b2686dc8a8bfecaf5abf)
+
+Real local Git adapter and6 fixture cases pass: new branch/worktree, source dirty/untracked preservation, stale/replaced metadata, destination/filter/cancel protection and hook positive control. Type/lint/build pass. This is deliberately not exposed yet: daemon consent/ledger, process supervision, registration, native tool, background coding default and UI remain necessary. See [git-worktree-adapter.md](git-worktree-adapter.md). T-017 in_progress; full Goal active.

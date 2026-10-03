@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-04",
+  "commit": "d1181200442a8e9fa4d3b2686dc8a8bfecaf5abf",
+  "platform": "Windows x64",
+  "mode": "fixture",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "gitVersion": "2.52.0.windows.1",
+  "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+  "commands": [
+    {
+      "command": "git status --short; git --version",
+      "exitCode": 0
+    },
+    {
+      "command": "npx vitest run tests/git-worktree.test.ts",
+      "exitCode": 0,
+      "tests": 6,
+      "durationSeconds": 3.2
+    },
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "command": "scoped prettier --check; git diff --check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:docs",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    }
+  ],
+  "checks": [
+    "actual new sibling worktree and owned codex branch",
+    "committed HEAD in worktree with source dirty/untracked contents preserved",
+    "source main branch unchanged and no remote configured",
+    "hook prevented and positive control proves fixture hook executable",
+    "stale HEAD denied",
+    "same-HEAD replaced Git directory denied using inode/birth identity",
+    "existing target owner file preserved",
+    "repository filters denied",
+    "pre-dispatch cancellation denied",
+    "repeating create denied; no cleanup/reset/force/replay"
+  ],
+  "correctedFailures": [
+    {
+      "command": "initial Git fixture5",
+      "exitCode": 1,
+      "failed": 5,
+      "reason": "Empty Git template correctly omitted hooks directory; fixture explicitly creates it before installing hook"
+    }
+  ],
+  "limitations": [
+    "Adapter only: not wired to daemon operation ledger/approval, native tool, background coding default or UI yet",
+    "Caller must provide canonical registered root and bind exact prepared intent; no product authorization inferred from adapter",
+    "Main Git directory only; linked-worktree sources and nested registration roots not supported yet",
+    "Repository filters rejected; broad filter-neutralization/checkout compatibility pending",
+    "No timed-out Git descendant cleanup proof or mid-dispatch crash/reconciliation matrix",
+    "Git configuration includes are read for fingerprint/filter refusal; not OS sandbox or full external-process race proof",
+    "No non-Git isolation fallback, destination governance, packaging/doctor or cleanup authorization workflow yet",
+    "Ubuntu/browser/full V1 acceptance not_run; no UI screenshot or reference alignment evidence added"
+  ],
+  "globalAcceptance": "70 entries unchanged not_run",
+  "remoteActions": []
+}
