@@ -17,6 +17,7 @@ import { Store } from "./store.js";
 import { ModelRegistry } from "./model-registry.js";
 import { ModelBudgetLedger } from "./model-budget.js";
 import { intentHash } from "./intent.js";
+import { OperationLedger } from "./operation-ledger.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -34,6 +35,7 @@ export class WorkService {
   readonly saver: SqliteSaver;
   readonly models: ModelRegistry;
   readonly modelBudgets: ModelBudgetLedger;
+  readonly operations: OperationLedger;
   readonly events = new EventEmitter();
   private active = new Map<string, Active>();
   private stopping = false;
@@ -49,6 +51,7 @@ export class WorkService {
       this.saver = saver;
       this.models = new ModelRegistry(this.store);
       this.modelBudgets = new ModelBudgetLedger(this.store);
+      this.operations = new OperationLedger(this.store);
       // Never auto-replay an interrupted external action.
       for (const work of this.store.list())
         if (["running", "waiting_approval", "queued"].includes(work.status)) {
@@ -252,27 +255,20 @@ export class WorkService {
                 current.modelSelection.connectionId,
                 current.modelSelection.revision,
               );
-            const identity = work.runId + ":" + callId,
-              argsHash = intentHash({ name, args });
-            const existing = this.store.db
-              .prepare("SELECT * FROM operations WHERE id=?")
-              .get(identity) as
-              | { args_hash: string; outcome: string; result: string }
-              | undefined;
-            if (existing) {
-              if (existing.args_hash !== argsHash)
-                throw new RockyError(
-                  "operation_conflict",
-                  "Operation arguments changed",
-                  409,
-                );
-              if (existing.outcome === "succeeded") return existing.result;
+            let operation = this.operations.prepare(
+              current,
+              callId,
+              name,
+              args,
+              this.fingerprint(current, name, args),
+            );
+            if (operation.outcome === "succeeded") return operation.result!;
+            if (operation.phase !== "prepared")
               throw new RockyError(
                 "unknown_effect",
                 "Prior operation outcome requires reconciliation",
                 409,
               );
-            }
             if (name === "write_sample") {
               const approval = current.approval;
               if (
@@ -291,16 +287,21 @@ export class WorkService {
                 "Tool is not in fixture scope",
                 403,
               );
-            this.store.transaction(() => {
-              this.store.db
-                .prepare("INSERT INTO operations VALUES(?,?,?,NULL)")
-                .run(identity, argsHash, "unknown");
-              this.store.event(current, "rocky.operation.dispatched", {
-                operationId: identity,
-                name,
-                destination: connection.destination,
-              });
-            });
+            operation = this.operations.transition(
+              current,
+              operation,
+              "authorized",
+              "not_executed",
+            );
+            abort.signal.throwIfAborted();
+            operation = this.operations.transition(
+              current,
+              operation,
+              "dispatched",
+              "unknown",
+              null,
+              { destination: connection.destination },
+            );
             this.flushOutbox();
             try {
               const result = await connection.client.callTool(
@@ -310,25 +311,25 @@ export class WorkService {
               );
               if (result.isError) throw Error("MCP fixture returned an error");
               const serialized = JSON.stringify(result);
-              this.store.transaction(() => {
-                this.store.db
-                  .prepare(
-                    "UPDATE operations SET outcome=?, result=? WHERE id=?",
-                  )
-                  .run("succeeded", serialized, identity);
-                this.store.event(current, "rocky.operation.succeeded", {
-                  operationId: identity,
-                  name,
-                  result,
-                });
-              });
+              operation = this.operations.transition(
+                current,
+                operation,
+                "settled",
+                "succeeded",
+                serialized,
+                { result },
+              );
               this.flushOutbox();
               return serialized;
             } catch (error) {
-              this.emit(current, "rocky.operation.unknown", {
-                operationId: identity,
-                name,
-              });
+              if (operation.phase === "dispatched")
+                this.operations.transition(
+                  current,
+                  operation,
+                  "settled",
+                  "unknown",
+                );
+              this.flushOutbox();
               throw error;
             }
           },

@@ -93,7 +93,9 @@ test("stopping with a dispatched unknown effect requires reconciliation", async 
     const current = await waiting(service, w.id);
     // Synthetic persisted dispatch/result-loss boundary; never a real external effect.
     service.store.db
-      .prepare("INSERT INTO operations VALUES(?,?,?,NULL)")
+      .prepare(
+        "INSERT INTO operations(id,args_hash,outcome,result) VALUES(?,?,?,NULL)",
+      )
       .run(w.runId + ":lost-result", "synthetic", "unknown");
     const result = service.stop(w.id, command(current));
     expect(result.status).toBe("blocked");

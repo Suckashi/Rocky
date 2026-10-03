@@ -154,7 +154,9 @@ test("T-006 an outbox write failure rolls back the operation ledger and its even
     expect(() =>
       store.transaction(() => {
         store.db
-          .prepare("INSERT INTO operations VALUES(?,?,?,NULL)")
+          .prepare(
+            "INSERT INTO operations(id,args_hash,outcome,result) VALUES(?,?,?,NULL)",
+          )
           .run(current.runId + ":synthetic", "synthetic-hash", "unknown");
         store.event(current, "rocky.operation.dispatched", {
           name: "synthetic",
