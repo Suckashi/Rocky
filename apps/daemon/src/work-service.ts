@@ -61,7 +61,7 @@ export class WorkService {
       new WorkerJobs(this.store).recover();
       // Never auto-replay an interrupted external action.
       for (const work of this.store.list())
-        if (["running", "waiting_approval", "queued"].includes(work.status)) {
+        if (["running", "waiting_approval"].includes(work.status)) {
           work.status = "blocked";
           work.error =
             "Daemon restarted; review prior effects before starting a new work.";
@@ -76,6 +76,9 @@ export class WorkService {
       this.flushOutbox();
       this.deliveryTimer = setInterval(() => this.flushOutbox(), 500);
       this.deliveryTimer.unref();
+      // A queued Work has no dispatched Agent or tool to replay. Re-admit only
+      // that durable command; interrupted executions remain blocked above.
+      this.pump();
     } catch (error) {
       this.store.close();
       throw error;
@@ -168,8 +171,8 @@ export class WorkService {
         );
       return this.store.get(prior.id);
     }
-    if (new Set([...this.active.keys(), ...this.starting.keys()]).size >= 3)
-      throw new RockyError("capacity", "Fixture capacity reached", 429);
+    if (this.store.list().filter((w) => w.status === "queued").length >= 64)
+      throw new RockyError("capacity", "Work admission queue is full", 429);
     if (parsed.modelSelection)
       this.models.assertRunnable(
         parsed.modelSelection.connectionId,
@@ -183,6 +186,7 @@ export class WorkService {
       text: parsed.text,
       transport: parsed.transport,
       mode: parsed.mode,
+      kind: parsed.kind,
       ...(parsed.modelBudget ? { modelBudget: parsed.modelBudget } : {}),
       ...(parsed.modelSelection
         ? { modelSelection: parsed.modelSelection }
@@ -210,17 +214,54 @@ export class WorkService {
       policyRevision: 1,
       expiresAt: null,
     });
-    const abort = new AbortController();
-    // Reserve before the first asynchronous connection, so stop and capacity checks are exact.
-    const promise = this.start(work, abort);
-    this.starting.set(work.id, { abort, promise });
-    void promise.finally(() => this.starting.delete(work.id));
+    this.pump();
     return work;
   }
   private starting = new Map<
     string,
     { abort: AbortController; promise: Promise<void> }
   >();
+  private admissionClass(work: Work) {
+    return work.runMode === "evaluation" ? "evaluation" : (work.kind ?? "main");
+  }
+  private pump() {
+    if (this.stopping) return;
+    const occupied = new Set([...this.active.keys(), ...this.starting.keys()]);
+    const classCount = (kind: "main" | "background" | "evaluation") =>
+      [...occupied].filter((id) => {
+        const work = this.store.get(id);
+        return (
+          this.admissionClass(work) === kind &&
+          ["queued", "running", "waiting_approval"].includes(work.status)
+        );
+      }).length;
+    for (const [kind, limit] of [
+      ["main", 1],
+      ["background", 2],
+      ["evaluation", 1],
+    ] as const) {
+      let count = classCount(kind);
+      for (const work of this.store.list()) {
+        if (count >= limit) break;
+        if (
+          work.status !== "queued" ||
+          occupied.has(work.id) ||
+          this.admissionClass(work) !== kind
+        )
+          continue;
+        const abort = new AbortController();
+        // Reserve synchronously before any asynchronous connection or callback.
+        const promise = this.start(work, abort);
+        this.starting.set(work.id, { abort, promise });
+        occupied.add(work.id);
+        count++;
+        void promise.finally(() => {
+          this.starting.delete(work.id);
+          this.pump();
+        });
+      }
+    }
+  }
   private async start(work: Work, abort: AbortController) {
     const cleanup: Array<() => Promise<void>> = [];
     let handedOff = false;
@@ -615,7 +656,10 @@ export class WorkService {
       active.model.close(),
       active.worker.close(),
     ]).then(() => {
-      if (this.active.get(id) === active) this.active.delete(id);
+      if (this.active.get(id) === active) {
+        this.active.delete(id);
+        this.pump();
+      }
     });
     return active.closing;
   }
@@ -754,6 +798,7 @@ export class WorkService {
     if (active && !active.promise && !this.starting.has(id)) {
       active.promise = this.release(id, active);
     }
+    this.pump();
     return work;
   }
   async close() {

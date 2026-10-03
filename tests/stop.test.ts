@@ -35,6 +35,7 @@ test("stale stop cannot cancel another run/session or a newer revision; receipt 
     const b = service.submit({
       requestId: randomUUID(),
       text: "Second fixture",
+      kind: "background",
       mode: "fixture",
       transport: "http",
     });
