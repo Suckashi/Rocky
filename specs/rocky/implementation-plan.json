@@ -1043,6 +1043,27 @@
             "Recovery still blocks interrupted Work and never auto-replays tools",
             "No browser/live/remote action; existing Ubuntu/browser egress gates unchanged"
           ]
+        },
+        {
+          "commit": "c5f007fbab47ffd6d3d805bfd3f23bf4db7da5a9",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx vitest run tests/policy.test.ts tests/runtime.test.ts tests/configured-work.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/policy/authorization.json",
+          "testFiles": [
+            "tests/policy.test.ts",
+            "tests/runtime.test.ts",
+            "tests/configured-work.test.ts"
+          ],
+          "limitations": [
+            "T-008 in_progress: persistent grants, non-synthetic target resolvers, unknown reconciliation and audit redaction remain",
+            "Only current synthetic tools are wired; generic policy tests are not production workspace/MCP evidence",
+            "Classification and scope must be supplied by trusted daemon adapters, never model/MCP hints",
+            "No browser/live/remote actions; Ubuntu/browser egress unchanged"
+          ]
         }
       ],
       "blockedReason": null,

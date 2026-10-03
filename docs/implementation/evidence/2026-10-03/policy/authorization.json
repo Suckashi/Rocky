@@ -1,0 +1,52 @@
+{
+  "commit": "c5f007fbab47ffd6d3d805bfd3f23bf4db7da5a9",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+  "mode": "fixture",
+  "command": "npx vitest run tests/policy.test.ts tests/runtime.test.ts tests/configured-work.test.ts",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-03/policy/authorization.json",
+  "testFiles": [
+    "tests/policy.test.ts",
+    "tests/runtime.test.ts",
+    "tests/configured-work.test.ts"
+  ],
+  "limitations": [
+    "T-008 in_progress: persistent grants, non-synthetic target resolvers, unknown reconciliation and audit redaction remain",
+    "Only current synthetic tools are wired; generic policy tests are not production workspace/MCP evidence",
+    "Classification and scope must be supplied by trusted daemon adapters, never model/MCP hints",
+    "No browser/live/remote actions; Ubuntu/browser egress unchanged"
+  ],
+  "recordedAt": "2026-10-03T06:12:40.299Z",
+  "task": "T-008",
+  "passed": 10,
+  "finalFocused": {
+    "command": "npx vitest run tests/policy.test.ts tests/runtime.test.ts",
+    "exitCode": 0,
+    "passed": 6
+  },
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npx tsc -p tsconfig.build.json",
+      "exitCode": 0
+    }
+  ],
+  "coverage": [
+    "Deny first on owner/scope/revocation regardless of approval",
+    "Reject extra model risk hints",
+    "Exact operation/fingerprint/status required for critical and unknown",
+    "Changed target or policy requires fresh preparation",
+    "Local-new cannot overwrite existing target without exact consent",
+    "Evaluation/reflection cannot authorize production writes",
+    "Synthetic Work broker calls same policy before ledger authorization"
+  ]
+}

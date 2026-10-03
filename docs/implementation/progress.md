@@ -142,3 +142,9 @@ T-008 remains in_progress for generic grants, target recheck, unknown reconcilia
 Implementation `0fc06a483967c637b6f128b0d946dc61e47bc1d5` atomically settles only matching Work/run/session undispatched prepared/authorized records as not_executed during stop or restart recovery. Work projection, event and stop receipt remain in the same transaction. Dispatched unknown records are preserved, interrupted Work remains blocked, and no adapter is replayed.
 
 Six final ledger/stop tests passed, including actual Store close → WorkService recovery and injected Work commit failure rollback. Eleven preceding ledger/stop/persistence regressions passed. Typecheck, lint and server build passed. See [undispatched recovery evidence](evidence/2026-10-03/policy/undispatched-recovery.json). T-008 continues with grants, target recheck, evidence-based unknown reconciliation and audit redaction. Goal active; external gates unchanged.
+
+## T-008 continuation: daemon authorization policy
+
+Implementation `c5f007fbab47ffd6d3d805bfd3f23bf4db7da5a9` introduces strict daemon Policy input and centralizes synthetic broker authorization. Deny-first checks bind owned Work/run/session, current scope and revocation. Target/policy changes require fresh preparation. Critical/unknown effects require exact operation/fingerprint consent. Local-new overwrite requires consent. Non-synthetic writes remain denied in evaluation/reflection regardless of approval. Model risk hints are rejected rather than trusted.
+
+Ten focused policy/native/configured tests passed; six policy/native tests passed after pinning the prepared synthetic target to its original Work snapshot. Typecheck, lint and server build passed. See [policy evidence](evidence/2026-10-03/policy/authorization.json). Persistent grants, production target resolvers, unknown reconciliation and audit redaction remain unfinished; T-008 and Goal remain active. No global acceptance or remote action claim.
