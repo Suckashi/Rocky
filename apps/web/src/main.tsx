@@ -11,6 +11,7 @@ import {
   snapshotSchema,
 } from "../../../packages/contracts/src/index.js";
 import { projectWork, projectEvidence } from "./projection.js";
+import { ModelSettings } from "./model-settings.js";
 import "./style.css";
 let session = "";
 async function request(path: string, body?: unknown) {
@@ -32,7 +33,7 @@ const labels = {
     setup: "本地連線",
     title: "一起把問題做完。",
     intro:
-      "我是 Rocky，一起用可核對的步驟把工作做完。目前可先體驗合成測試流程；真實模型連線尚未開放，不會呼叫付費端點。",
+      "我是 Rocky，一起用可核對的步驟把工作做完。聊天目前使用合成模型；你也可以在下方設定並測試自己的模型連線。",
     fixture: "啟用合成測試",
     placeholder: "描述想驗證的流程…",
     send: "開始驗證",
@@ -63,7 +64,7 @@ const labels = {
     setup: "Local connection",
     title: "Let’s work through it.",
     intro:
-      "I’m Rocky. Let’s work through clear steps and verifiable results. Try the synthetic workflow for now; live model setup is not available and no paid endpoints are called.",
+      "I’m Rocky. Let’s work through clear steps and verifiable results. Chat uses a synthetic model for now; you can configure and test your own model connections below.",
     fixture: "Enable synthetic fixture",
     placeholder: "Describe a workflow to verify…",
     send: "Run verification",
@@ -245,6 +246,7 @@ function App() {
               <option value="http">MCP · Streamable HTTP</option>
             </select>
           </section>
+          <ModelSettings locale={locale} request={request} />
           <div id="works" className="works">
             {!works.length && <p className="empty">{t.empty}</p>}
             {works.map((w) => (

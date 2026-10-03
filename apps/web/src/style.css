@@ -371,3 +371,40 @@ footer {
     font-size: 10px;
   }
 }
+.model-settings {
+  margin: 16px 0;
+}
+.model-settings p,
+.model-card {
+  overflow-wrap: anywhere;
+}
+.model-form {
+  display: block;
+}
+.model-form fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+.model-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
+.model-form input,
+.model-form select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  font: inherit;
+}
+.model-card {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.model-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

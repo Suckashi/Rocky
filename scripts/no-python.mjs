@@ -73,6 +73,13 @@ const env = {
   PROMPTFOO_DISABLE_UPDATE: "1",
 };
 const steps = [];
+const npmVersion = spawnSync(
+  process.execPath,
+  [process.env.npm_execpath, "--version"],
+  { cwd: project, env, encoding: "utf8" },
+);
+if (npmVersion.status !== 0)
+  throw Error("Could not verify the npm executable used by this check");
 for (const args of [
   ["ci"],
   ["run", "check"],
@@ -111,7 +118,8 @@ writeFileSync(
       platform: process.platform,
       arch: process.arch,
       node: process.version,
-      npm: process.env.npm_config_user_agent,
+      npm: npmVersion.stdout.trim(),
+      inheritedUserAgent: process.env.npm_config_user_agent,
       scratch,
       mode: "fixture",
       steps,

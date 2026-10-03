@@ -111,6 +111,15 @@ export function createApp(service: WorkService) {
   });
   app.get("/api/v1/session", (c) => c.json({ token }));
   app.get("/api/v1/assistant", (c) => c.json(service.store.assistant()));
+  app.get("/api/v1/model-connections", (c) =>
+    c.json({ connections: service.models.list() }),
+  );
+  app.post("/api/v1/model-connections", async (c) =>
+    c.json(service.models.save(await readJson(c))),
+  );
+  app.post("/api/v1/model-connections/:id/probe", async (c) =>
+    c.json(await service.models.probe(c.req.param("id"), await readJson(c))),
+  );
   app.get("/api/v1/health", (c) =>
     c.json({
       productId: "rocky",
@@ -124,7 +133,12 @@ export function createApp(service: WorkService) {
   );
   app.get("/api/v1/capabilities", (c) =>
     c.json({
-      model: { configured: false, verified: false },
+      model: {
+        configured: service.models.list().length > 0,
+        verified: false,
+        runtimeAvailable: false,
+        connectionProbing: true,
+      },
       fixture: { available: true },
       learning: { mode: "off" },
       remote: { created: false },

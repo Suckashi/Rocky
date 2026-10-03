@@ -14,6 +14,7 @@ import {
   type Work,
 } from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
+import { ModelRegistry } from "./model-registry.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -29,6 +30,7 @@ type Active = {
 export class WorkService {
   readonly store: Store;
   readonly saver: SqliteSaver;
+  readonly models: ModelRegistry;
   readonly events = new EventEmitter();
   private active = new Map<string, Active>();
   private stopping = false;
@@ -42,6 +44,7 @@ export class WorkService {
         join(this.store.root, "graph-checkpoints.sqlite"),
       );
       this.saver = saver;
+      this.models = new ModelRegistry(this.store);
       // Never auto-replay an interrupted external action.
       for (const work of this.store.list())
         if (["running", "waiting_approval", "queued"].includes(work.status)) {
@@ -479,6 +482,7 @@ export class WorkService {
   async close() {
     this.stopping = true;
     clearInterval(this.deliveryTimer);
+    await this.models.close();
     for (const work of this.store.list())
       if (["queued", "running", "waiting_approval"].includes(work.status))
         this.cancelWork(work.id);

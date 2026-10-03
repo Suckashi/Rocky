@@ -65,7 +65,7 @@ export class Store {
       const version = (
         this.db.prepare("PRAGMA user_version").get() as { user_version: number }
       ).user_version;
-      if (version > 2)
+      if (version > 3)
         throw new RockyError(
           "unsupported_store",
           "Rocky store version is newer than this application",
@@ -127,6 +127,12 @@ export class Store {
           );
           this.db.exec(
             "INSERT OR IGNORE INTO outbox(event_id,sequence) SELECT json_extract(data,'$.id'),sequence FROM events; PRAGMA user_version=2",
+          );
+        });
+      if (version < 3)
+        this.transaction(() => {
+          this.db.exec(
+            "CREATE TABLE IF NOT EXISTS model_connections(id TEXT PRIMARY KEY, revision INTEGER NOT NULL, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS model_receipts(request_id TEXT PRIMARY KEY, intent TEXT NOT NULL, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS model_probes(id TEXT PRIMARY KEY, connection_id TEXT NOT NULL, data TEXT NOT NULL); PRAGMA user_version=3",
           );
         });
     } catch (error) {

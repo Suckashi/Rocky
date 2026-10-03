@@ -6,6 +6,87 @@ import { createApp } from "../apps/daemon/src/http.js";
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { randomUUID } from "node:crypto";
 import { snapshotSchema } from "../packages/contracts/src/index.js";
+test("T-007 model API requires local session, rejects raw keys and preserves unknown context", async () => {
+  const root = mkdtempSync(join(tmpdir(), "rocky-http-models-"));
+  const service = new WorkService(root),
+    app = createApp(service);
+  const headers: Record<string, string> = {
+    host: "127.0.0.1:3211",
+    "content-type": "application/json",
+  };
+  const input = {
+    requestId: randomUUID(),
+    id: randomUUID(),
+    expectedRevision: 0,
+    config: {
+      name: "API fixture",
+      provider: "openai-compatible",
+      baseUrl: "http://127.0.0.1:1/v1",
+      modelId: "fixture",
+      maxOutputTokens: 128,
+    },
+  };
+  try {
+    expect(
+      (
+        await app.request("/api/v1/model-connections", {
+          method: "POST",
+          headers,
+          body: JSON.stringify(input),
+        })
+      ).status,
+    ).toBe(403);
+    const session = await (
+      await app.request("/api/v1/session", { headers })
+    ).json();
+    headers["x-rocky-session"] = session.token;
+    expect(
+      (
+        await app.request("/api/v1/model-connections", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            ...input,
+            config: { ...input.config, apiKey: "synthetic-key-not-supported" },
+          }),
+        })
+      ).status,
+    ).toBe(400);
+    const response = await app.request("/api/v1/model-connections", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(input),
+    });
+    expect(response.status).toBe(200);
+    const dto = await response.json();
+    expect(dto.config.contextWindowTokens).toBeNull();
+    expect(dto.config.credentialRef).toBeUndefined();
+    expect(
+      (
+        await app.request(`/api/v1/model-connections/${input.id}/probe`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            requestId: randomUUID(),
+            expectedRevision: 2,
+          }),
+        })
+      ).status,
+    ).toBe(409);
+    const capabilities = await (
+      await app.request("/api/v1/capabilities", { headers })
+    ).json();
+    expect(capabilities.model).toEqual({
+      configured: true,
+      verified: false,
+      runtimeAvailable: false,
+      connectionProbing: true,
+    });
+  } finally {
+    await service.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 test("local API validates Host, Origin and session before mutation", async () => {
   const root = mkdtempSync(join(tmpdir(), "rocky-http-")),
     service = new WorkService(root),
