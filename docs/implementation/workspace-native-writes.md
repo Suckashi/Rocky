@@ -1,0 +1,25 @@
+# Exact native workspace writes
+
+2026-10-04, Windows x64, Node24.12.0/npm11.6.4. Source 7118f9dbe34576be787fbea92305b029ef5dbac2. Normal daemon with scripted loopback model fixtures and disposable real files; no live model or Ubuntu evidence. T-017/T-008/T-019 remain in_progress.
+
+Configured root runtime now offers workspace_write for a bound registered root/revision. Ephemeral children receive no write tool, and their policy guard rejects attempts. A write requires fresh exact daemon approval even when no read grant exists. Registration and a frontend approved flag alone authorize nothing. expectedHash is the original SHA256 for replacement; null means the target must be absent. The proposal contains complete UTF-8 replacement text, bounded to64KiB/noNUL and existing64KiB canonical JSON/IPC limits (escaping/metadata can reduce the accepted content size).
+
+WorkspaceWriter prepares a canonical snapshot with root/parent/file identities and content hash; its fingerprint binds Work/run/session, model selection, policy, exact arguments and target snapshot. Native interruption retains that snapshot in the active daemon and persists the operation fingerprint. After approval the daemon recomputes the snapshot and validates exact consent before claiming the canonical target and marking dispatched. Changing the target expires the approval, fails the Work with a clear daemon-owned reason and requires a fresh Work/proposal. Decision replay does not repeat publication. Read permission is not silently added.
+
+Publication writes a sibling exclusive temporary file, syncs/closes it, rechecks the root/target, then renames for replacement or uses an atomic no-replace hard link for new files. Known mode bits are retained for replacements; new files use0600. Confirmation rereads/hash-checks the published file and returns a persisted operation receipt with previous/new hashes, size and created flag. Cancellation before publication leaves no target change. Confirmation or cleanup failure retains unknown and prevents automatic retry; a tool/stream ending does not imply success. Canonical target claims survive unknown outcomes. Windows ACL equivalence, directory durability and crash/reconciliation recovery are not proven.
+
+The PageReviewCard-derived existing approval component now shows readable file target/impact and expanded complete new content, with collapsed original hash and shared approve/reject actions. A keyboard-focusable240px bounded preview prevents large proposals burying controls. This is a Rocky safety/readability adaptation using existing neutral tokens, not another layout system. No original file bytes or raw IDs are the primary view; diff/editor/immutable-artifact delivery remain gaps.
+
+## Actual verification
+
+Commands and initial corrected failures are in [verification.json](evidence/2026-10-04/workspace-native-writes/verification.json). Source/type/lint/build checks and actual native/daemon/browser tests are recorded there; screenshots use fixture provider text and actual filesystem effects.
+
+Four-width normal-daemon browser coverage:1440×900,1280×800,390×844,320×844; no whole-page overflow, complete text preview, visible approval controls, keyboard Enter approval with reduced motion, reject without file creation, stale proposal preserving externally created bytes. Desktop/320 captures inspected. Full write dark/English/focus matrix, overwrite browser flow and matched populated OpenDots reference/before/after remain not_run. Existing upstream reference SHA is c2569bb6a13a22e565cf3eb791c62267d06babb1; this slice reuses the already adapted card, not newly copied upstream code.
+
+[1440](evidence/2026-10-04/workspace-native-writes/workspace-write-1440.png), [1280](evidence/2026-10-04/workspace-native-writes/workspace-write-1280.png), [390](evidence/2026-10-04/workspace-native-writes/workspace-write-390.png), [320](evidence/2026-10-04/workspace-native-writes/workspace-write-320.png).
+
+## Remaining boundaries
+
+Snapshot/recheck plus atomic publication is not atomic compare-and-swap against a hostile external process, an OS sandbox or proof against every filesystem race. Sensitive-path/redaction filters are not a complete secret classifier. No shell, diff editor, worktree, complete shared-read/exclusive-write leases, workspace unregister, immutable artifacts or generic local-write reconciliation yet. No publication across filesystem and SQLite in one transaction; a crash between effects and receipt remains unknown. Active proposal memory is discarded on shutdown; restart never replays writes. No power-loss/ACL/full concurrency proof, live external integration, Ubuntu or pinned clean browser install. Existing AdGuard and unexplained earlier fetch observations remain separate. All global AT states unchanged; no Apsis or remote action. Goal remains active.
+
+Final full regression:52 files/244 tests passed before the final expiry-revision-only change. Final native8, type/lint/build and focused browser1 passed after that change; preceding complete browser5 passed after bounded preview. These are separate evidence scopes.

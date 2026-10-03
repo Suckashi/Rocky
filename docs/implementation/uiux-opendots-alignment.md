@@ -105,3 +105,7 @@ WorkspaceDialog-derived neutral dialog/forms now host Rocky local registration, 
 ## Explicit native workspace read scope (fcca9ad)
 
 Workspace dialog selection, default-off composer scope and Work grant labels reuse existing neutral OpenDots-derived form/popover tokens. Sending closes the model/tools popover and resets next-Work scope; Escape returns focus to its summary. Native root/child reads use daemon authority, not UI flags. Four-width actual normal-daemon browser checks and inspected desktop/320 captures are in [workspace-native-reads.md](workspace-native-reads.md). No new CSS or upstream backend; no new matched reference/before/after comparison. Complete result/library/Computer and full theme/language/focus matrices remain gaps.
+
+## Exact workspace write proposal (7118f9dbe34576be787fbea92305b029ef5dbac2)
+
+Existing PageReviewCard-derived approval header/body/actions now render target, complete proposed content and collapsed original hash. Shared neutral tokens are retained; keyboard-focusable240px preview bounds long content without hiding authorization controls. This accessibility/readability difference is a Rocky adaptation. No newly copied upstream component or second state source. Four-width normal-daemon screenshots and browser checks are in [workspace-native-writes.md](workspace-native-writes.md); no fresh matched reference/before/after fidelity claim, full theme/language audit or completed diff/artifact/editor claim.

@@ -1288,6 +1288,31 @@
             "No new reference/before/after populated comparison",
             "One concurrent Failed-to-fetch browser observation; cause unproven despite isolated/final passes"
           ]
+        },
+        {
+          "commit": "7118f9dbe34576be787fbea92305b029ef5dbac2",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/workspace-writes.test.ts; npx playwright test --config playwright.production.config.ts; npx playwright test --config playwright.production.config.ts tests/e2e/workspace-write.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-native-writes/verification.json",
+          "testFiles": [
+            "tests/workspace-writes.test.ts",
+            "tests/e2e/workspace-write.spec.ts"
+          ],
+          "limitations": [
+            "T017 diff/shell/worktree/full leases and locks/local-write reconciliation unfinished",
+            "Snapshot/recheck is not OS sandbox or atomic CAS against external process races",
+            "Filesystem effect and SQLite receipt do not share one transaction; crash outcome unknown",
+            "Windows ACL/power-loss/full concurrency matrix not_run",
+            "Known sensitive path/redaction filters not complete secret classifier",
+            "Ubuntu/live services/pinned clean browser install not_run",
+            "Full write dark/English/focus matrix and overwrite browser flow not_run",
+            "No fresh matched populated reference/before/after comparison",
+            "Earlier AdGuard and unexplained fetch observations not cleared"
+          ]
         }
       ],
       "blockedReason": null,
@@ -1483,6 +1508,31 @@
             "Complete native-read dark/English/focus/reduced-motion matrix not_run",
             "No new reference/before/after populated comparison",
             "One concurrent Failed-to-fetch browser observation; cause unproven despite isolated/final passes"
+          ]
+        },
+        {
+          "commit": "7118f9dbe34576be787fbea92305b029ef5dbac2",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/workspace-writes.test.ts; npx playwright test --config playwright.production.config.ts; npx playwright test --config playwright.production.config.ts tests/e2e/workspace-write.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-native-writes/verification.json",
+          "testFiles": [
+            "tests/workspace-writes.test.ts",
+            "tests/e2e/workspace-write.spec.ts"
+          ],
+          "limitations": [
+            "T017 diff/shell/worktree/full leases and locks/local-write reconciliation unfinished",
+            "Snapshot/recheck is not OS sandbox or atomic CAS against external process races",
+            "Filesystem effect and SQLite receipt do not share one transaction; crash outcome unknown",
+            "Windows ACL/power-loss/full concurrency matrix not_run",
+            "Known sensitive path/redaction filters not complete secret classifier",
+            "Ubuntu/live services/pinned clean browser install not_run",
+            "Full write dark/English/focus matrix and overwrite browser flow not_run",
+            "No fresh matched populated reference/before/after comparison",
+            "Earlier AdGuard and unexplained fetch observations not cleared"
           ]
         }
       ],
@@ -1875,6 +1925,31 @@
             "Complete native-read dark/English/focus/reduced-motion matrix not_run",
             "No new reference/before/after populated comparison",
             "One concurrent Failed-to-fetch browser observation; cause unproven despite isolated/final passes"
+          ]
+        },
+        {
+          "commit": "7118f9dbe34576be787fbea92305b029ef5dbac2",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/workspace-writes.test.ts; npx playwright test --config playwright.production.config.ts; npx playwright test --config playwright.production.config.ts tests/e2e/workspace-write.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-native-writes/verification.json",
+          "testFiles": [
+            "tests/workspace-writes.test.ts",
+            "tests/e2e/workspace-write.spec.ts"
+          ],
+          "limitations": [
+            "T017 diff/shell/worktree/full leases and locks/local-write reconciliation unfinished",
+            "Snapshot/recheck is not OS sandbox or atomic CAS against external process races",
+            "Filesystem effect and SQLite receipt do not share one transaction; crash outcome unknown",
+            "Windows ACL/power-loss/full concurrency matrix not_run",
+            "Known sensitive path/redaction filters not complete secret classifier",
+            "Ubuntu/live services/pinned clean browser install not_run",
+            "Full write dark/English/focus matrix and overwrite browser flow not_run",
+            "No fresh matched populated reference/before/after comparison",
+            "Earlier AdGuard and unexplained fetch observations not cleared"
           ]
         }
       ],
@@ -2567,6 +2642,31 @@
             "No new reference/before/after populated comparison",
             "One concurrent Failed-to-fetch browser observation; cause unproven despite isolated/final passes"
           ]
+        },
+        {
+          "commit": "7118f9dbe34576be787fbea92305b029ef5dbac2",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/workspace-writes.test.ts; npx playwright test --config playwright.production.config.ts; npx playwright test --config playwright.production.config.ts tests/e2e/workspace-write.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-native-writes/verification.json",
+          "testFiles": [
+            "tests/workspace-writes.test.ts",
+            "tests/e2e/workspace-write.spec.ts"
+          ],
+          "limitations": [
+            "T017 diff/shell/worktree/full leases and locks/local-write reconciliation unfinished",
+            "Snapshot/recheck is not OS sandbox or atomic CAS against external process races",
+            "Filesystem effect and SQLite receipt do not share one transaction; crash outcome unknown",
+            "Windows ACL/power-loss/full concurrency matrix not_run",
+            "Known sensitive path/redaction filters not complete secret classifier",
+            "Ubuntu/live services/pinned clean browser install not_run",
+            "Full write dark/English/focus matrix and overwrite browser flow not_run",
+            "No fresh matched populated reference/before/after comparison",
+            "Earlier AdGuard and unexplained fetch observations not cleared"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2975,6 +3075,31 @@
             "Complete native-read dark/English/focus/reduced-motion matrix not_run",
             "No new reference/before/after populated comparison",
             "One concurrent Failed-to-fetch browser observation; cause unproven despite isolated/final passes"
+          ]
+        },
+        {
+          "commit": "7118f9dbe34576be787fbea92305b029ef5dbac2",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; npx vitest run tests/workspace-writes.test.ts; npx playwright test --config playwright.production.config.ts; npx playwright test --config playwright.production.config.ts tests/e2e/workspace-write.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/workspace-native-writes/verification.json",
+          "testFiles": [
+            "tests/workspace-writes.test.ts",
+            "tests/e2e/workspace-write.spec.ts"
+          ],
+          "limitations": [
+            "T017 diff/shell/worktree/full leases and locks/local-write reconciliation unfinished",
+            "Snapshot/recheck is not OS sandbox or atomic CAS against external process races",
+            "Filesystem effect and SQLite receipt do not share one transaction; crash outcome unknown",
+            "Windows ACL/power-loss/full concurrency matrix not_run",
+            "Known sensitive path/redaction filters not complete secret classifier",
+            "Ubuntu/live services/pinned clean browser install not_run",
+            "Full write dark/English/focus matrix and overwrite browser flow not_run",
+            "No fresh matched populated reference/before/after comparison",
+            "Earlier AdGuard and unexplained fetch observations not cleared"
           ]
         }
       ],

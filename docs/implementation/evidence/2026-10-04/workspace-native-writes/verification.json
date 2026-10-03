@@ -1,0 +1,129 @@
+{
+  "date": "2026-10-04",
+  "platform": "Windows x64",
+  "mode": "fixture",
+  "daemonMode": "normal",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "commit": "7118f9dbe34576be787fbea92305b029ef5dbac2",
+  "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+  "referenceCommit": "c2569bb6a13a22e565cf3eb791c62267d06babb1",
+  "commands": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "note": "Final build after expiry revision correction; SQLite experimental and large Vite chunk warnings"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "files": 52,
+      "tests": 244,
+      "durationSeconds": 165.14,
+      "note": "Before final expiry revision increment only; final focused native8 rerun after that change"
+    },
+    {
+      "command": "npx vitest run tests/workspace-writes.test.ts",
+      "exitCode": 0,
+      "tests": 8,
+      "durationSeconds": 8.1,
+      "note": "Final source, includes expiry revision assertion and post-publication unknown fault injection"
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<existing Chromium1223> npx playwright test --config playwright.production.config.ts",
+      "exitCode": 0,
+      "tests": 5,
+      "durationSeconds": 20.4,
+      "note": "After bounded preview, before final expiry revision increment"
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<existing Chromium1223> npx playwright test --config playwright.production.config.ts tests/e2e/workspace-write.spec.ts",
+      "exitCode": 0,
+      "tests": 1,
+      "durationSeconds": 8.1,
+      "note": "Final source after expiry revision increment"
+    },
+    {
+      "command": "scoped prettier --check; git diff --check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:docs",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    }
+  ],
+  "browser": {
+    "version": "148.0.7778.96",
+    "dpr": 1,
+    "zoom": 1,
+    "locale": "zh",
+    "viewports": [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844]
+    ],
+    "checks": [
+      "no global horizontal overflow",
+      "full proposed text/visible controls",
+      "reject without file creation",
+      "keyboard Enter approval/reduced motion",
+      "actual filesystem contents match proposal",
+      "stale external file preserved"
+    ],
+    "visuallyInspected": [1440, 320],
+    "fixtureDisclosure": "Scripted loopback model plus disposable actual filesystem; normal daemon/runtime, not upstream live UI or real external service"
+  },
+  "correctedFailures": [
+    {
+      "command": "initial native8",
+      "exitCode": 1,
+      "passed": 4,
+      "failed": 4,
+      "reasons": [
+        "write hook insertion missed correct location",
+        "stop fixture lacked required run/session",
+        "fixture Work modelSelection undefined in canonical fingerprint"
+      ]
+    },
+    {
+      "command": "initial browser write",
+      "exitCode": 1,
+      "reasons": ["stale file safely denied but worker error generic"]
+    },
+    {
+      "command": "first full browser5",
+      "exitCode": 1,
+      "passed": 4,
+      "failed": 1,
+      "reasons": [
+        "daemon reason capture insertion missed collapsed formatted hook; corrected exact replacement, final full/focused passes"
+      ]
+    }
+  ],
+  "limitations": [
+    "T017 diff/shell/worktree/full leases and locks/local-write reconciliation unfinished",
+    "Snapshot/recheck is not OS sandbox or atomic CAS against external process races",
+    "Filesystem effect and SQLite receipt do not share one transaction; crash outcome unknown",
+    "Windows ACL/power-loss/full concurrency matrix not_run",
+    "Known sensitive path/redaction filters not complete secret classifier",
+    "Ubuntu/live services/pinned clean browser install not_run",
+    "Full write dark/English/focus matrix and overwrite browser flow not_run",
+    "No fresh matched populated reference/before/after comparison",
+    "Earlier AdGuard and unexplained fetch observations not cleared"
+  ],
+  "globalAcceptance": "70 entries unchanged not_run",
+  "remoteActions": []
+}

@@ -1,26 +1,26 @@
 # Rocky implementation progress
 
-2026-10-04, Asia/Taipei. Current work: OpenDots-aligned main chat, configured native conversation/MCP tools and data, and registered workspaces with explicitly granted native root/child reads. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
+2026-10-04, Asia/Taipei. Current work: OpenDots-aligned main chat, configured native conversation/MCP tools and data, and registered workspaces with explicitly granted native root/child reads and exact-approved root writes. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
 
-| Task                  | Status      | Actual result                                                                                                                                         |
-| --------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T-001                 | done        | Independent Git root and local commit, original engineering files, Apache-2.0, workspace, new CI and reference decisions. Remote uncreated.           |
-| T-002                 | blocked     | Locked dependencies, installed license inventory and Windows clean-copy no-Python validation. Ubuntu evidence unavailable.                            |
-| T-003                 | in_progress | Real CopilotKit gateway → Work → native Deep Agents task/todos/interrupt → stdio/HTTP MCP. Functional browser flow verified; upstream P0 gate open.   |
-| T-004                 | blocked     | Four Promptfoo full-path cases and Node egress pass with blocked SDK telemetry recorded. Browser egress fails from host AdGuard injection.            |
-| T-005                 | done        | Validated DTO/event/error/IPC wire contracts and cursor-based snapshot synchronization. Worker IPC execution remains T-009.                           |
-| T-006                 | done        | Domain schema v2, identity-preserving CAS, atomic events/outbox, recoverable completion projection and OS-released single writer lock.                |
-| T-007                 | in_progress | Model UI/API, shared Work/evaluation routing, budgets, live probe and proxy/CA tests; profiles/cache pricing/full DNS policy pending.                 |
-| T-008                 | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.         |
-| T-009                 | done        | Durable child IPC and configured/fixture native Deep Agents workers; daemon owns model/tool RPC, shutdown and descendant cleanup.                     |
-| T-010                 | done        | Durable bounded admission, main/background/evaluation slots, workspace UUID reservations, model semaphore and pinned budget/configuration.            |
-| T-019                 | in_progress | OpenDots compact shell/main chat slice, model popovers/dialog, original avatar, approvals/stop/reconcile; full tools/results/presence remain.         |
-| T-037                 | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                      |
-| T-011 / T-018         | in_progress | Configured provider incremental SSE, common UI adapter, snapshot reconnect and numeric cursor replay; other contracts pending.                        |
-| Later tasks           | pending     | Product modules and confirmed-state presence remain pending.                                                                                          |
-| T-014 / T-015 / T-021 | in_progress | Configured MCP registry, lifecycle/discovery and settings verified locally; full process/network/permission scope pending.                            |
-| T-016                 | in_progress | Configured dispatch, typed media and original resource/prompt envelopes implemented; target mapping, advanced schemas, generic reconciliation remain. |
-| T-017                 | in_progress | Canonical registration/owner preview and explicit native root/child reads with revision/context isolation; writes/shell/worktree/full locks remain.   |
+| Task                  | Status      | Actual result                                                                                                                                                               |
+| --------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T-001                 | done        | Independent Git root and local commit, original engineering files, Apache-2.0, workspace, new CI and reference decisions. Remote uncreated.                                 |
+| T-002                 | blocked     | Locked dependencies, installed license inventory and Windows clean-copy no-Python validation. Ubuntu evidence unavailable.                                                  |
+| T-003                 | in_progress | Real CopilotKit gateway → Work → native Deep Agents task/todos/interrupt → stdio/HTTP MCP. Functional browser flow verified; upstream P0 gate open.                         |
+| T-004                 | blocked     | Four Promptfoo full-path cases and Node egress pass with blocked SDK telemetry recorded. Browser egress fails from host AdGuard injection.                                  |
+| T-005                 | done        | Validated DTO/event/error/IPC wire contracts and cursor-based snapshot synchronization. Worker IPC execution remains T-009.                                                 |
+| T-006                 | done        | Domain schema v2, identity-preserving CAS, atomic events/outbox, recoverable completion projection and OS-released single writer lock.                                      |
+| T-007                 | in_progress | Model UI/API, shared Work/evaluation routing, budgets, live probe and proxy/CA tests; profiles/cache pricing/full DNS policy pending.                                       |
+| T-008                 | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.                               |
+| T-009                 | done        | Durable child IPC and configured/fixture native Deep Agents workers; daemon owns model/tool RPC, shutdown and descendant cleanup.                                           |
+| T-010                 | done        | Durable bounded admission, main/background/evaluation slots, workspace UUID reservations, model semaphore and pinned budget/configuration.                                  |
+| T-019                 | in_progress | OpenDots compact shell/main chat slice, model popovers/dialog, original avatar, approvals/stop/reconcile; full tools/results/presence remain.                               |
+| T-037                 | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                                            |
+| T-011 / T-018         | in_progress | Configured provider incremental SSE, common UI adapter, snapshot reconnect and numeric cursor replay; other contracts pending.                                              |
+| Later tasks           | pending     | Product modules and confirmed-state presence remain pending.                                                                                                                |
+| T-014 / T-015 / T-021 | in_progress | Configured MCP registry, lifecycle/discovery and settings verified locally; full process/network/permission scope pending.                                                  |
+| T-016                 | in_progress | Configured dispatch, typed media and original resource/prompt envelopes implemented; target mapping, advanced schemas, generic reconciliation remain.                       |
+| T-017                 | in_progress | Canonical registration/owner preview and explicit native root/child reads with revision/context isolation; exact root writes added; diff/shell/worktree/full leases remain. |
 
 Node 24.12.0 / npm 11.6.4 baseline. OpenDots MIT presentation CSS adapted with notices; no upstream history, backend, data, settings or brand assets imported. Test data is synthetic. No remote action; existing live probe evidence is separate from this fixture UI slice. See known-limitations.md for gates and follow-up.
 
@@ -409,3 +409,7 @@ Daemon ledger and sanitized checkpoint retain original SDK resources/prompts, in
 Source fcca9ad adds immutable registered revision/read intent, atomic per-Work grant, daemon-owned root/child file tools, Unicode/hash-checked pages and scoped checkpoint/history/inbox. Sending resets the next read grant. Read interruption is no-effect, while MCP remains unknown. Native graph-step headroom now derives from the unchanged daemon model-call budget.
 
 Final51 files/236 tests and four normal-daemon browser flows pass; typecheck/lint/build/docs/source/format checks pass. One concurrent Failed-to-fetch browser observation remains unexplained despite isolated/final passes. Full acceptance, native-read theme/focus matrix, Ubuntu/live services and writes/diff/shell/worktree/full locks remain unfinished. See [workspace-native-reads.md](workspace-native-reads.md) and its dated evidence. No remote action; Goal remains active.
+
+## Exact native workspace writes (2026-10-04)
+
+Source 7118f9dbe34576be787fbea92305b029ef5dbac2 adds root-only workspace_write with fresh exact consent, original SHA/absent-target checks, bounded replacement preview, canonical target claim, atomic publication and confirmed receipt. Stale proposals expire; rejected/cancelled operations do not write. Unknown confirmation remains unknown. Native8 and final browser5 pass; full regression/commands are recorded in workspace-native-writes.md and its evidence. T-017 remains in_progress: diff/shell/worktree/full leases/reconciliation and later modules are unfinished. Goal active; no remote actions.
