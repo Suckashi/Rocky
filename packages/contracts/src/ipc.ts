@@ -16,7 +16,27 @@ export const ipcMessageSchema = z
     runCapability: z.string().regex(/^[a-f0-9]{64}$/),
     sequence: sequenceSchema,
     payload: z.discriminatedUnion("kind", [
-      z.strictObject({ kind: z.literal("start"), text: z.string().max(32768) }),
+      z.strictObject({
+        kind: z.literal("start"),
+        text: z.string().max(32768),
+        graphPath: z.string().max(4096).optional(),
+      }),
+      z.strictObject({
+        kind: z.literal("resume"),
+        decision: z.enum(["approve", "reject"]),
+      }),
+      z.strictObject({
+        kind: z.literal("runtime_event"),
+        name: z.string().min(1).max(128),
+        data: z.record(z.string(), z.unknown()),
+      }),
+      z.strictObject({
+        kind: z.literal("model_request"),
+        child: z.boolean(),
+        messages: z.array(z.unknown()).max(100),
+      }),
+      z.strictObject({ kind: z.literal("model_result"), message: z.unknown() }),
+      z.strictObject({ kind: z.literal("run_result"), result: z.unknown() }),
       z
         .object({
           kind: z.literal("tool_request"),

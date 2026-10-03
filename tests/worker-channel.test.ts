@@ -8,6 +8,7 @@ import { randomUUID } from "node:crypto";
 import { Store } from "../apps/daemon/src/store.js";
 import { WorkerChannel } from "../apps/daemon/src/worker-channel.js";
 import { WorkerJobs } from "../apps/daemon/src/worker-jobs.js";
+import type { AIMessage } from "@langchain/core/messages";
 import { workSchema } from "../packages/contracts/src/index.js";
 const entry = fileURLToPath(
   new URL("../fixtures/worker/channel.ts", import.meta.url),
@@ -135,6 +136,8 @@ test("T-009 forced shutdown reaps a stubborn worker and its real descendant", as
     f.work.id,
     entry,
     async (_work, payload) => {
+      if (payload.kind !== "tool_request")
+        throw Error("Unexpected model request");
       childPid = Number(payload.args.pid);
       ready();
       return { recorded: true };
@@ -207,6 +210,57 @@ test("T-009 restart marks an unfinished worker interrupted without completing it
     ).toHaveLength(1);
   } finally {
     await service.close();
+    rmSync(f.root, { recursive: true, force: true });
+  }
+});
+
+test("T-009 native Deep Agents fixture runs in child and resumes exact interrupt through daemon RPC", async () => {
+  const { FixtureModel } = await import("../fixtures/models/model.js");
+  const agentEntry = fileURLToPath(
+    new URL("../apps/agent-worker/src/main.ts", import.meta.url),
+  );
+  const f = setup("native worker fixture");
+  const tools: string[] = [];
+  const events: string[] = [];
+  let modelCalls = 0;
+  const channel = new WorkerChannel(
+    f.store,
+    f.work.id,
+    agentEntry,
+    async (_work, payload) => {
+      if (payload.kind === "model_request") {
+        modelCalls++;
+        const result = await new FixtureModel(payload.child)._generate(
+          payload.messages as Parameters<
+            InstanceType<typeof FixtureModel>["_generate"]
+          >[0],
+        );
+        const message = result.generations[0]!.message as AIMessage;
+        return { content: message.content, tool_calls: message.tool_calls };
+      }
+      tools.push(payload.tool);
+      return JSON.stringify({ synthetic: true, tool: payload.tool });
+    },
+    {
+      graphPath: join(f.root, "graph-checkpoints.sqlite"),
+      event: (_work, name) => events.push(name),
+    },
+  );
+  try {
+    const first = (await channel.invoke()) as { __interrupt__?: unknown[] };
+    expect(first.__interrupt__).toHaveLength(1);
+    expect(tools).toContain("inspect_sample");
+    expect(tools).not.toContain("write_sample");
+    expect(events).toContain("rocky.subagent.started");
+    const resumed = (await channel.invoke("approve")) as {
+      messages?: { content: unknown }[];
+    };
+    expect(tools.filter((tool) => tool === "write_sample")).toHaveLength(1);
+    expect(resumed.messages?.at(-1)?.content).toContain("合成流程");
+    expect(modelCalls).toBeGreaterThanOrEqual(4);
+  } finally {
+    await channel.close();
+    f.store.close();
     rmSync(f.root, { recursive: true, force: true });
   }
 });

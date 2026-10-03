@@ -5,6 +5,11 @@ import { EventEmitter } from "node:events";
 import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
 import { Command } from "@langchain/langgraph";
 import { createRockyAgent } from "../../../packages/agent-runtime/src/factory.js";
+import type { RuntimeHooks } from "../../../packages/agent-runtime/src/factory.js";
+import { WorkerChannel } from "./worker-channel.js";
+import { fileURLToPath } from "node:url";
+import type { BaseMessage } from "@langchain/core/messages";
+import type { AIMessage } from "@langchain/core/messages";
 import { connectFixture } from "../../../packages/agent-runtime/src/mcp.js";
 import {
   submissionSchema,
@@ -28,7 +33,8 @@ const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
 type Agent = ReturnType<typeof createRockyAgent>;
 type Active = {
-  agent: Agent;
+  agent?: Agent;
+  worker?: WorkerChannel;
   connection: Awaited<ReturnType<typeof connectFixture>>;
   model: { close: () => Promise<void> };
   abort: AbortController;
@@ -300,160 +306,195 @@ export class WorkService {
         mode: work.mode,
         toolScope: "synthetic",
       });
-      const agent = createRockyAgent(
-        this.saver,
-        {
-          modelRequest: fixtureModel
-            ? async (messages, child) => {
-                abort.signal.throwIfAborted();
-                const requestId = randomUUID();
-                this.modelBudgets.reserve(work.runId, {
-                  requestId,
-                  purpose: child ? "subagent" : "target",
-                  inputTokenBound: null,
-                  outputTokenBound: null,
-                });
-                const result = await fixtureModel.request(messages, child);
-                // The deterministic fixture does not report model token usage. Never invent zero usage.
-                this.modelBudgets.settle(work.runId, requestId, null);
-                this.emit(this.store.get(work.id), "rocky.model.completed", {
-                  destination: fixtureModel.endpoint,
-                  purpose: "target",
-                  child,
-                });
-                return result;
-              }
-            : undefined,
-          event: (name, data) => this.emit(this.store.get(work.id), name, data),
-          call: async (name, args, callId) => {
-            abort.signal.throwIfAborted();
-            const current = this.store.get(work.id);
-            if (current.modelSelection)
-              this.models.assertRunnable(
-                current.modelSelection.connectionId,
-                current.modelSelection.revision,
-              );
-            let operation = this.operations.prepare(
-              current,
-              callId,
-              name,
-              args,
-              this.fingerprint(current, name, args),
+      const hooks: RuntimeHooks = {
+        modelRequest: fixtureModel
+          ? async (messages, child) => {
+              abort.signal.throwIfAborted();
+              const requestId = randomUUID();
+              this.modelBudgets.reserve(work.runId, {
+                requestId,
+                purpose: child ? "subagent" : "target",
+                inputTokenBound: null,
+                outputTokenBound: null,
+              });
+              const result = await fixtureModel.request(messages, child);
+              // The deterministic fixture does not report model token usage. Never invent zero usage.
+              this.modelBudgets.settle(work.runId, requestId, null);
+              this.emit(this.store.get(work.id), "rocky.model.completed", {
+                destination: fixtureModel.endpoint,
+                purpose: "target",
+                child,
+              });
+              return result;
+            }
+          : undefined,
+        event: (name, data) => this.emit(this.store.get(work.id), name, data),
+        call: async (name, args, callId) => {
+          abort.signal.throwIfAborted();
+          const current = this.store.get(work.id);
+          if (current.modelSelection)
+            this.models.assertRunnable(
+              current.modelSelection.connectionId,
+              current.modelSelection.revision,
             );
-            if (operation.outcome === "succeeded") return operation.result!;
-            if (operation.phase !== "prepared")
-              throw new RockyError(
-                "unknown_effect",
-                "Prior operation outcome requires reconciliation",
-                409,
-              );
-            const owner = {
-              workId: current.id,
-              runId: current.runId,
-              executionSessionId: current.executionSessionId,
-            };
-            const targetHash = intentHash({
-              fixture: current.runId,
-              transport: current.transport,
-            });
-            authorizeOperation({
-              owner: {
-                workId: work.id,
-                runId: work.runId,
-                executionSessionId: work.executionSessionId,
-              },
-              resolvedOwner: owner,
-              mode: current.runMode,
-              effect:
-                name === "inspect_sample"
-                  ? "known_read"
-                  : name === "write_sample"
-                    ? "critical"
-                    : "denied",
-              configurationAllowed: true,
-              resourceAllowed:
-                name !== "inspect_sample" ||
-                this.grants.allows(current, targetHash, "known_read", 1),
-              revoked: false,
-              preparedTargetHash: intentHash({
-                fixture: work.runId,
-                transport: work.transport,
-              }),
-              currentTargetHash: targetHash,
-              policyRevision: 1,
-              preparedPolicyRevision: 1,
-              operationId: operation.id,
-              intentFingerprint: this.fingerprint(current, name, args),
-              synthetic: true,
-              allowLocalNew: false,
-              targetExists: true,
-              approval: current.approval
-                ? {
-                    status: current.approval.status,
-                    operationId: current.approval.operationId,
-                    intentFingerprint: current.approval.intentFingerprint,
-                  }
-                : null,
-            });
-            operation = this.operations.transition(
-              current,
-              operation,
-              "authorized",
-              "not_executed",
+          let operation = this.operations.prepare(
+            current,
+            callId,
+            name,
+            args,
+            this.fingerprint(current, name, args),
+          );
+          if (operation.outcome === "succeeded") return operation.result!;
+          if (operation.phase !== "prepared")
+            throw new RockyError(
+              "unknown_effect",
+              "Prior operation outcome requires reconciliation",
+              409,
             );
-            abort.signal.throwIfAborted();
-            operation = this.operations.transition(
-              current,
-              operation,
-              "dispatched",
-              "unknown",
-              null,
-              { destination: connection.destination },
-            );
-            this.flushOutbox();
-            try {
-              const result = await connection.client.callTool(
-                {
-                  name,
-                  arguments: args,
-                  _meta: {
-                    "rocky/operation": {
-                      operationId: operation.id,
-                      intentHash: operation.args_hash,
-                    },
+          const owner = {
+            workId: current.id,
+            runId: current.runId,
+            executionSessionId: current.executionSessionId,
+          };
+          const targetHash = intentHash({
+            fixture: current.runId,
+            transport: current.transport,
+          });
+          authorizeOperation({
+            owner: {
+              workId: work.id,
+              runId: work.runId,
+              executionSessionId: work.executionSessionId,
+            },
+            resolvedOwner: owner,
+            mode: current.runMode,
+            effect:
+              name === "inspect_sample"
+                ? "known_read"
+                : name === "write_sample"
+                  ? "critical"
+                  : "denied",
+            configurationAllowed: true,
+            resourceAllowed:
+              name !== "inspect_sample" ||
+              this.grants.allows(current, targetHash, "known_read", 1),
+            revoked: false,
+            preparedTargetHash: intentHash({
+              fixture: work.runId,
+              transport: work.transport,
+            }),
+            currentTargetHash: targetHash,
+            policyRevision: 1,
+            preparedPolicyRevision: 1,
+            operationId: operation.id,
+            intentFingerprint: this.fingerprint(current, name, args),
+            synthetic: true,
+            allowLocalNew: false,
+            targetExists: true,
+            approval: current.approval
+              ? {
+                  status: current.approval.status,
+                  operationId: current.approval.operationId,
+                  intentFingerprint: current.approval.intentFingerprint,
+                }
+              : null,
+          });
+          operation = this.operations.transition(
+            current,
+            operation,
+            "authorized",
+            "not_executed",
+          );
+          abort.signal.throwIfAborted();
+          operation = this.operations.transition(
+            current,
+            operation,
+            "dispatched",
+            "unknown",
+            null,
+            { destination: connection.destination },
+          );
+          this.flushOutbox();
+          try {
+            const result = await connection.client.callTool(
+              {
+                name,
+                arguments: args,
+                _meta: {
+                  "rocky/operation": {
+                    operationId: operation.id,
+                    intentHash: operation.args_hash,
                   },
                 },
-                undefined,
-                { signal: abort.signal, timeout: 10000 },
-              );
-              if (result.isError) throw Error("MCP fixture returned an error");
-              const serialized = JSON.stringify(result);
-              operation = this.operations.transition(
+              },
+              undefined,
+              { signal: abort.signal, timeout: 10000 },
+            );
+            if (result.isError) throw Error("MCP fixture returned an error");
+            const serialized = JSON.stringify(result);
+            operation = this.operations.transition(
+              current,
+              operation,
+              "settled",
+              "succeeded",
+              serialized,
+              { result },
+            );
+            this.flushOutbox();
+            return serialized;
+          } catch (error) {
+            if (operation.phase === "dispatched")
+              this.operations.transition(
                 current,
                 operation,
                 "settled",
-                "succeeded",
-                serialized,
-                { result },
+                "unknown",
               );
-              this.flushOutbox();
-              return serialized;
-            } catch (error) {
-              if (operation.phase === "dispatched")
-                this.operations.transition(
-                  current,
-                  operation,
-                  "settled",
-                  "unknown",
-                );
-              this.flushOutbox();
-              throw error;
-            }
-          },
+            this.flushOutbox();
+            throw error;
+          }
         },
-        configuredModels,
-      );
-      const active = { agent, connection, model, abort };
+      };
+      let agent: Agent | undefined;
+      let worker: WorkerChannel | undefined;
+      if (work.mode === "fixture") {
+        const current = this.store.get(work.id);
+        current.status = "running";
+        this.update(current);
+        const source = import.meta.url.endsWith(".ts");
+        const entry = fileURLToPath(
+          new URL(
+            "../../agent-worker/src/main." + (source ? "ts" : "js"),
+            import.meta.url,
+          ),
+        );
+        worker = new WorkerChannel(
+          this.store,
+          work.id,
+          entry,
+          async (_owned, payload) => {
+            if (payload.kind === "tool_request")
+              return hooks.call(
+                payload.tool,
+                payload.args,
+                payload.logicalToolCallId,
+              );
+            if (!hooks.modelRequest)
+              throw Error("Fixture model request unavailable");
+            const messages = payload.messages as BaseMessage[];
+            const result = await hooks.modelRequest(messages, payload.child);
+            const reply = result.generations[0]?.message as
+              AIMessage | undefined;
+            if (!reply) throw Error("Model returned no message");
+            return { content: reply.content, tool_calls: reply.tool_calls };
+          },
+          {
+            graphPath: join(this.store.root, "graph-checkpoints.sqlite"),
+            event: (_owned, name, data) => hooks.event(name, data),
+          },
+        );
+      } else agent = createRockyAgent(this.saver, hooks, configuredModels);
+      const active = { agent, worker, connection, model, abort };
       this.active.set(work.id, active);
       handedOff = true;
       await this.run(work.id, undefined);
@@ -487,27 +528,29 @@ export class WorkService {
     work.status = "running";
     this.update(work);
     try {
-      const result = await active.agent.invoke(
-        decision
-          ? new Command({
-              resume: {
-                decisions: [
-                  decision === "approve"
-                    ? { type: "approve" }
-                    : {
-                        type: "reject",
-                        message: "Owner rejected synthetic write",
-                      },
-                ],
-              },
-            })
-          : { messages: [{ role: "user", content: work.text }] },
-        {
-          configurable: { thread_id: work.runId },
-          signal: active.abort.signal,
-          recursionLimit: 30,
-        },
-      );
+      const result = active.worker
+        ? await active.worker.invoke(decision)
+        : await active.agent!.invoke(
+            decision
+              ? new Command({
+                  resume: {
+                    decisions: [
+                      decision === "approve"
+                        ? { type: "approve" }
+                        : {
+                            type: "reject",
+                            message: "Owner rejected synthetic write",
+                          },
+                    ],
+                  },
+                })
+              : { messages: [{ role: "user", content: work.text }] },
+            {
+              configurable: { thread_id: work.runId },
+              signal: active.abort.signal,
+              recursionLimit: 30,
+            },
+          );
       if (active.abort.signal.aborted) return;
       work = this.store.get(id);
       const raw = result as unknown as {
@@ -600,6 +643,7 @@ export class WorkService {
     active.closing ??= Promise.all([
       active.connection.close(),
       active.model.close(),
+      ...(active.worker ? [active.worker.close()] : []),
     ]).then(() => {
       if (this.active.get(id) === active) this.active.delete(id);
     });
@@ -736,6 +780,7 @@ export class WorkService {
     this.starting.get(id)?.abort.abort();
     this.active.get(id)?.abort.abort();
     const active = this.active.get(id);
+    if (active?.worker) void active.worker.close();
     if (active && !active.promise && !this.starting.has(id)) {
       active.promise = this.release(id, active);
     }

@@ -72,6 +72,17 @@ for (const transport of ["stdio", "http"] as const) {
         };
         service.decide(work.id, decision);
         const completed = await waitFor(service, work.id, "completed");
+        let workerStatus = "running";
+        for (let attempt = 0; attempt < 100; attempt++) {
+          workerStatus = (
+            service.store.db
+              .prepare("SELECT status FROM worker_jobs WHERE run_id=?")
+              .get(work.runId) as { status: string }
+          ).status;
+          if (!["starting", "running"].includes(workerStatus)) break;
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        }
+        expect(workerStatus).toBe("exited");
         expect(service.operations.get(operationId)).toMatchObject({
           phase: "settled",
           outcome: "succeeded",

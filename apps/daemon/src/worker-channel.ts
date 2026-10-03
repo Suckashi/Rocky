@@ -10,9 +10,16 @@ import { WorkerJobs } from "./worker-jobs.js";
 type Message = ReturnType<typeof parseIpcMessage>;
 type Handler = (
   work: Work,
-  payload: Extract<Message["payload"], { kind: "tool_request" }>,
+  payload: Extract<
+    Message["payload"],
+    { kind: "tool_request" | "model_request" }
+  >,
   signal: AbortSignal,
 ) => Promise<unknown>;
+type AgentOptions = {
+  graphPath: string;
+  event: (work: Work, name: string, data: Record<string, unknown>) => void;
+};
 
 /** Trusted Node entry only. A channel grants one stored run, never a domain database path. */
 export class WorkerChannel {
@@ -28,9 +35,17 @@ export class WorkerChannel {
   private readonly seen = new Set<string>();
   private readonly jobs = new Set<Promise<void>>();
   private stopped = false;
+  private completedInvocation = false;
   private failure: string | null = null;
   private closing?: Promise<void>;
   private readonly owner: Work;
+  private readonly agentOptions?: AgentOptions;
+  private readonly startRequestId = randomUUID();
+  private invocation?: {
+    id: string;
+    resolve: (result: unknown) => void;
+    reject: (error: Error) => void;
+  };
   private readonly jobRegistry: WorkerJobs;
   readonly jobId: string;
   constructor(
@@ -38,7 +53,9 @@ export class WorkerChannel {
     workId: string,
     entry: string,
     private readonly handler: Handler,
+    agentOptions?: AgentOptions,
   ) {
+    this.agentOptions = agentOptions;
     this.owner = store.get(workId);
     if (this.owner.status !== "running")
       throw new RockyError(
@@ -81,11 +98,13 @@ export class WorkerChannel {
         try {
           const status = this.failure
             ? "interrupted"
-            : this.closing
-              ? "cancelled"
-              : code === 0
-                ? "exited"
-                : "interrupted";
+            : this.completedInvocation && code === 0
+              ? "exited"
+              : this.closing
+                ? "cancelled"
+                : code === 0
+                  ? "exited"
+                  : "interrupted";
           this.jobRegistry.finish(
             this.jobId,
             status,
@@ -127,7 +146,11 @@ export class WorkerChannel {
       void job.finally(() => this.jobs.delete(job));
     });
     try {
-      this.send(randomUUID(), { kind: "start", text: this.owner.text });
+      this.send(this.startRequestId, {
+        kind: "start",
+        text: this.owner.text,
+        ...(agentOptions ? { graphPath: agentOptions.graphPath } : {}),
+      });
     } catch (error) {
       void this.close();
       throw error;
@@ -138,6 +161,28 @@ export class WorkerChannel {
   }
   get pendingCount() {
     return this.pending.size;
+  }
+  invoke(decision?: "approve" | "reject"): Promise<unknown> {
+    if (!this.agentOptions) throw Error("Worker is not an Agent runtime");
+    if (this.invocation)
+      throw new RockyError(
+        "worker_busy",
+        "Agent invocation is already active",
+        409,
+      );
+    const id = decision ? randomUUID() : this.startRequestId;
+    const promise = new Promise<unknown>((resolve, reject) => {
+      this.invocation = { id, resolve, reject };
+    });
+    if (decision) {
+      try {
+        this.send(id, { kind: "resume", decision });
+      } catch (error) {
+        this.invocation = undefined;
+        return Promise.reject(error);
+      }
+    }
+    return promise;
   }
   private owned() {
     const work = this.store.get(this.owner.id);
@@ -186,10 +231,51 @@ export class WorkerChannel {
       ) ||
       BigInt(message.sequence) !== this.received + 1n ||
       this.seen.has(message.requestId) ||
-      message.payload.kind !== "tool_request"
+      ![
+        "tool_request",
+        "model_request",
+        "runtime_event",
+        "run_result",
+        "error",
+      ].includes(message.payload.kind)
     )
       throw Error("Invalid worker request");
     this.received = BigInt(message.sequence);
+    if (message.payload.kind === "runtime_event") {
+      this.owned();
+      this.agentOptions?.event(
+        this.owner,
+        message.payload.name,
+        message.payload.data,
+      );
+      return;
+    }
+    if (
+      message.payload.kind === "run_result" ||
+      message.payload.kind === "error"
+    ) {
+      const pending = this.invocation;
+      if (!pending || pending.id !== message.requestId)
+        throw Error("Unexpected Agent invocation response");
+      this.invocation = undefined;
+      if (message.payload.kind === "error")
+        pending.reject(new Error(message.payload.error.message));
+      else {
+        const result = message.payload.result as {
+          __interrupt__?: unknown[];
+        } | null;
+        this.completedInvocation =
+          !Array.isArray(result?.__interrupt__) ||
+          result.__interrupt__.length === 0;
+        pending.resolve(message.payload.result);
+      }
+      return;
+    }
+    if (
+      message.payload.kind !== "tool_request" &&
+      message.payload.kind !== "model_request"
+    )
+      throw Error("Unexpected worker message");
     if (this.pending.size >= 8 || this.seen.size >= 10000)
       throw Error("Worker queue limit");
     const work = this.owned();
@@ -213,7 +299,12 @@ export class WorkerChannel {
       ]);
       abort.signal.throwIfAborted();
       this.owned();
-      this.send(message.requestId, { kind: "tool_result", result });
+      this.send(
+        message.requestId,
+        message.payload.kind === "model_request"
+          ? { kind: "model_result", message: result }
+          : { kind: "tool_result", result },
+      );
     } catch {
       if (!this.stopped)
         this.send(message.requestId, {
@@ -232,12 +323,16 @@ export class WorkerChannel {
   private abortAll() {
     this.stopped = true;
     for (const controller of this.pending.values()) controller.abort();
+    this.invocation?.reject(
+      new Error("Worker process stopped before Agent result"),
+    );
+    this.invocation = undefined;
   }
   close(): Promise<void> {
     return (this.closing ??= this.shutdown());
   }
   private async shutdown() {
-    if (!this.stopped && this.child.connected) {
+    if (!this.stopped && !this.completedInvocation && this.child.connected) {
       try {
         this.send(randomUUID(), { kind: "cancel", reason: "shutdown" });
       } catch {
