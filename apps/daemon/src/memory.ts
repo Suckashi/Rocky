@@ -11,6 +11,14 @@ import { Store } from "./store.js";
 import { WorkspaceRegistry } from "./workspaces.js";
 import { intentHash } from "./intent.js";
 import { DocumentStore } from "./documents.js";
+import { Tiktoken } from "js-tiktoken/lite";
+import cl100k from "js-tiktoken/ranks/cl100k_base";
+let memoryEncoder: Tiktoken | undefined;
+function contextTokens(context: string) {
+  memoryEncoder ??= new Tiktoken(cl100k);
+  // Treat all user text, including special-token spellings, as ordinary data.
+  return memoryEncoder.encode(context, [], []).length;
+}
 export class MemoryRegistry {
   constructor(
     private store: Store,
@@ -204,6 +212,8 @@ export class MemoryRegistry {
             .all(scope)
     ) as { data: string }[];
     const items = [];
+    let context = "[]";
+    let tokens = contextTokens(context);
     let bytes = 0,
       truncated = false;
     for (const row of rows) {
@@ -213,13 +223,25 @@ export class MemoryRegistry {
         truncated = true;
         continue;
       }
+      const nextContext = JSON.stringify([...items, item]);
+      const nextTokens = contextTokens(nextContext);
+      if (nextTokens > command.tokenBudget) {
+        truncated = true;
+        continue;
+      }
       items.push(item);
       bytes += size;
+      context = nextContext;
+      tokens = nextTokens;
     }
     return {
       items,
       contentBytes: bytes,
       byteBudget: command.byteBudget,
+      context,
+      contextTokens: tokens,
+      tokenBudget: command.tokenBudget,
+      encoding: "cl100k_base" as const,
       truncated,
     };
   }

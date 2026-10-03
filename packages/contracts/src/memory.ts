@@ -43,5 +43,6 @@ export const memorySearchSchema = z.strictObject({
   scope: memoryScopeSchema,
   query: z.string().trim().max(128).default(""),
   byteBudget: z.number().int().min(128).max(16384).default(4096),
+  tokenBudget: z.number().int().min(2).max(16384).default(8192),
 });
 export type Memory = z.infer<typeof memorySchema>;

@@ -6,6 +6,8 @@ import { randomUUID } from "node:crypto";
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { createApp } from "../apps/daemon/src/http.js";
 import { intentHash } from "../apps/daemon/src/intent.js";
+import { Tiktoken } from "js-tiktoken/lite";
+import cl100k from "js-tiktoken/ranks/cl100k_base";
 test("owner memory scopes, locks, CAS, bilingual search, atomic deletion and restart", async () => {
   const root = await mkdtemp(join(tmpdir(), "rocky-memory-"));
   let service = new WorkService(join(root, "data"));
@@ -24,9 +26,37 @@ test("owner memory scopes, locks, CAS, bilingual search, atomic deletion and res
       id: randomUUID(),
       expectedRevision: 0,
       scope: { kind: "user" as const },
-      content: "偏好繁體中文；concise engineering reports",
+      content: "偏好繁體中文；concise engineering reports 🪨 <|endoftext|>",
     };
     const receipt = service.memories.save(command);
+    const encoder = new Tiktoken(cl100k);
+    const full = service.memories.search({
+      scope: command.scope,
+      tokenBudget: 16384,
+    });
+    expect(JSON.parse(full.context)).toEqual(full.items);
+    expect(full.contextTokens).toBe(
+      encoder.encode(full.context, [], []).length,
+    );
+    expect(full.encoding).toBe("cl100k_base");
+    expect(full.contextTokens).toBeGreaterThan(
+      encoder.encode(command.content, [], []).length,
+    );
+    expect(
+      service.memories.search({
+        scope: command.scope,
+        tokenBudget: full.contextTokens,
+      }).items,
+    ).toHaveLength(1);
+    expect(
+      service.memories.search({
+        scope: command.scope,
+        tokenBudget: full.contextTokens - 1,
+      }),
+    ).toMatchObject({ items: [], truncated: true, context: "[]" });
+    expect(() =>
+      service.memories.search({ scope: command.scope, tokenBudget: 0 }),
+    ).toThrow();
     expect(
       (
         service.store.db
@@ -176,7 +206,12 @@ test("owner memory scopes, locks, CAS, bilingual search, atomic deletion and res
       body: JSON.stringify({ scope: scoped.scope, query: "專用" }),
     });
     expect(response.status).toBe(200);
-    expect((await response.json()).items[0].id).toBe(scoped.id);
+    const payload = await response.json();
+    expect(payload.items[0].id).toBe(scoped.id);
+    expect(payload.contextTokens).toBeLessThanOrEqual(payload.tokenBudget);
+    expect(encoder.encode(payload.context, [], []).length).toBe(
+      payload.contextTokens,
+    );
     await service.close();
     service = new WorkService(join(root, "data"));
     expect(
