@@ -16,6 +16,7 @@ export const ipcMessageSchema = z
     runCapability: z.string().regex(/^[a-f0-9]{64}$/),
     sequence: sequenceSchema,
     payload: z.discriminatedUnion("kind", [
+      z.strictObject({ kind: z.literal("start"), text: z.string().max(32768) }),
       z
         .object({
           kind: z.literal("tool_request"),
