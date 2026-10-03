@@ -18,6 +18,7 @@ export function Chrome({
   actions,
   children,
   settings,
+  workspaces,
 }: {
   locale: "zh" | "en";
   connected: boolean;
@@ -25,6 +26,7 @@ export function Chrome({
   actions: ReactNode;
   children: ReactNode;
   settings: ReactNode;
+  workspaces?: ReactNode;
 }) {
   const zh = locale === "zh";
   const [collapsed, setCollapsed] = useState(false);
@@ -230,6 +232,8 @@ export function Chrome({
         <div className="pane-body">
           {panel === "7" ? (
             settings
+          ) : panel === "3" ? (
+            workspaces
           ) : (
             <p role="status">
               {zh

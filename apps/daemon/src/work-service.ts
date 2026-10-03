@@ -40,6 +40,7 @@ import { authorizeOperation } from "./policy.js";
 import { OperationReconciler } from "./operation-reconciler.js";
 import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
+import { WorkspaceRegistry } from "./workspaces.js";
 import { WorkerJobs } from "./worker-jobs.js";
 import { ModelSlots } from "./model-slots.js";
 import {
@@ -67,6 +68,7 @@ export class WorkService {
   readonly modelBudgets: ModelBudgetLedger;
   readonly operations: OperationLedger;
   readonly grants: GrantRegistry;
+  readonly workspaces: WorkspaceRegistry;
   readonly modelSlots: ModelSlots;
   readonly admissionConfig: ReturnType<typeof admissionConfigSchema.parse>;
   readonly events = new EventEmitter();
@@ -97,6 +99,7 @@ export class WorkService {
       this.modelBudgets = new ModelBudgetLedger(this.store);
       this.operations = new OperationLedger(this.store);
       this.grants = new GrantRegistry(this.store);
+      this.workspaces = new WorkspaceRegistry(this.store);
       new WorkerJobs(this.store).recover();
       // Never auto-replay an interrupted external action.
       for (const work of this.store.list())

@@ -223,6 +223,31 @@ export function createApp(service: WorkService) {
     c.json(service.store.get(c.req.param("id"))),
   );
   app.get("/api/v1/mcp-config", (c) => c.json(service.mcp.snapshot()));
+  app.get("/api/v1/workspaces", (c) =>
+    c.json({ workspaces: service.workspaces.list() }),
+  );
+  app.post("/api/v1/workspaces", async (c) =>
+    c.json(await service.workspaces.save(await readJson(c))),
+  );
+  app.get("/api/v1/workspaces/:id/files", async (c) =>
+    c.json(
+      await service.workspaces.files(
+        c.req.param("id"),
+        z.coerce.number().int().positive().parse(c.req.query("revision")),
+        c.req.query("path") ?? "",
+      ),
+    ),
+  );
+  app.get("/api/v1/workspaces/:id/file", async (c) =>
+    c.json(
+      await service.workspaces.read(
+        c.req.param("id"),
+        z.coerce.number().int().positive().parse(c.req.query("revision")),
+        z.string().min(1).max(4096).parse(c.req.query("path")),
+        c.req.query("sha256"),
+      ),
+    ),
+  );
   app.get("/api/v1/mcp-servers", (c) =>
     c.json({ servers: service.mcpManager.list() }),
   );

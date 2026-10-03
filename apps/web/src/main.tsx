@@ -6,6 +6,7 @@ import { API_PREFIX } from "../../../packages/contracts/src/index.js";
 import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
+import { Workspaces } from "./workspaces.js";
 import { WorkOperations } from "./work-operations.js";
 import { WorkGrants } from "./work-grants.js";
 import { WorkSteering } from "./work-steering.js";
@@ -190,6 +191,7 @@ function App() {
       locale={locale}
       connected={connected}
       count={works.length}
+      workspaces={<Workspaces locale={locale} request={request} />}
       actions={
         <>
           <button onClick={() => setLocale(locale === "zh" ? "en" : "zh")}>

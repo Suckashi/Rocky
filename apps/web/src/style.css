@@ -590,6 +590,29 @@ input[type="checkbox"] {
 .model-card .actions button {
   font-size: 12px;
 }
+.workspace-settings fieldset button {
+  justify-self: start;
+}
+.workspace-file-row button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  margin-top: 6px;
+}
+.workspace-file-row svg {
+  flex-shrink: 0;
+}
+.workspace-file-row span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.workspace-text-preview {
+  max-height: 320px;
+  overflow: auto;
+}
 .mobile-menu,
 .nav-scrim {
   display: none;
