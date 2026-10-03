@@ -21,6 +21,7 @@ export const ipcMessageSchema = z
         text: z.string().max(32768),
         mode: z.enum(["fixture", "configured"]).optional(),
         graphPath: z.string().max(4096).optional(),
+        sourceGraphThreadId: idSchema.optional(),
       }),
       z.strictObject({
         kind: z.literal("resume"),

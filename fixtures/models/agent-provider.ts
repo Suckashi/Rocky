@@ -26,6 +26,7 @@ export async function startAgentProvider(
     hold?: boolean;
     streamDelayMs?: number;
     truncateStream?: boolean;
+    reply?: (messages: BaseMessage[], child: boolean) => Promise<AIMessage>;
   } = {},
 ) {
   const requests: Record<string, unknown>[] = [];
@@ -92,7 +93,13 @@ export async function startAgentProvider(
         else messages.push(new HumanMessage(String(m.content)));
       }
       const child = JSON.stringify(body.tools ?? []).includes("inspect_sample");
-      const generated = await new FixtureModel(child)._generate(messages);
+      const generated = options.reply
+        ? {
+            generations: [
+              { text: "", message: await options.reply(messages, child) },
+            ],
+          }
+        : await new FixtureModel(child)._generate(messages);
       const message = generated.generations[0]!.message as AIMessage;
       const calls = message.tool_calls ?? [];
       if (body.stream) {

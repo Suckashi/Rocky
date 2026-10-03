@@ -88,6 +88,31 @@ export class ConversationStore {
   }
   update(work: Work) {
     const session = this.session(work.id);
+    if (
+      session.status === "queued" &&
+      work.status === "running" &&
+      session.kind === "main" &&
+      work.runMode === "normal"
+    ) {
+      const earlier = this.store.list().slice(
+        0,
+        this.store.list().findIndex((item) => item.id === work.id),
+      );
+      const previous = earlier.findLast(
+        (item) => item.runMode === "normal" && (item.kind ?? "main") === "main",
+      );
+      if (
+        previous?.status === "completed" &&
+        previous.mode === work.mode &&
+        previous.workspaceId === work.workspaceId &&
+        JSON.stringify(previous.modelSelection) ===
+          JSON.stringify(work.modelSelection)
+      ) {
+        const source = this.session(previous.id);
+        session.sourceGraphThreadId = source.graphThreadId;
+        session.generation = source.generation + 1;
+      }
+    }
     session.status = work.status;
     this.store.db
       .prepare("UPDATE execution_sessions SET data=? WHERE id=?")

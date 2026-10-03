@@ -98,7 +98,7 @@ export function createRockyAgent(
     systemPrompt:
       ROCKY_PERSONA +
       (models
-        ? "\nYou use the explicitly configured model. Available tools operate only on synthetic samples; never claim to have read or modified real files."
+        ? "\nYou use the explicitly configured model. The MCP sample tools operate only on synthetic samples; never claim to have read or modified host files."
         : "\nThis run uses synthetic fixtures.") +
       "\nNative filesystem tools access only run-private virtual /scratch paths in graph checkpoints. They do not read or modify host files or registered workspaces. Always supply an absolute /scratch path to ls/glob/grep. Native context offloads under /large_tool_results and /conversation_history are read-only to tools. Shell execution is unavailable.",
     tools: [write],

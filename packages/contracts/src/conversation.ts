@@ -19,6 +19,7 @@ export const executionSessionSchema = z.strictObject({
   workId: idSchema,
   kind: z.enum(["main", "background", "evaluation"]),
   graphThreadId: idSchema,
+  sourceGraphThreadId: idSchema.optional(),
   workspaceId: idSchema.nullable(),
   generation: z.number().int().positive(),
   status: workStatus,

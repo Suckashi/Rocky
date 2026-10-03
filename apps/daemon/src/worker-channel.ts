@@ -18,6 +18,7 @@ type Handler = (
 ) => Promise<unknown>;
 type AgentOptions = {
   graphPath: string;
+  sourceGraphThreadId?: string;
   mode?: "fixture" | "configured";
   event: (work: Work, name: string, data: Record<string, unknown>) => void;
 };
@@ -157,6 +158,9 @@ export class WorkerChannel {
         text: this.owner.text,
         ...(agentOptions?.mode ? { mode: agentOptions.mode } : {}),
         ...(agentOptions ? { graphPath: agentOptions.graphPath } : {}),
+        ...(agentOptions?.sourceGraphThreadId
+          ? { sourceGraphThreadId: agentOptions.sourceGraphThreadId }
+          : {}),
       });
     } catch (error) {
       void this.close();

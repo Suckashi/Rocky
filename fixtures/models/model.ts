@@ -20,6 +20,11 @@ export class FixtureModel extends BaseChatModel {
   }
   async _generate(messages: BaseMessage[]): Promise<ChatResult> {
     if (this.request) return this.request(messages, this.child);
+    // Script only this invocation, while the real runtime retains earlier conversation context.
+    const lastUser = messages.findLastIndex(
+      (message) => message.type === "human",
+    );
+    messages = messages.slice(Math.max(0, lastUser));
     const seen = (name: string) =>
       messages.some((m) => m.type === "tool" && m.name === name);
     const call = (name: string, args: Record<string, unknown>) =>

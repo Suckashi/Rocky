@@ -17,6 +17,7 @@ import {
   type Work,
 } from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
+import { ConversationStore } from "./conversation-store.js";
 import { ModelRegistry } from "./model-registry.js";
 import { ModelBudgetLedger } from "./model-budget.js";
 import { intentHash } from "./intent.js";
@@ -205,7 +206,7 @@ export class WorkService {
       transport: parsed.transport,
       mode: parsed.mode,
       kind: parsed.kind,
-      workspaceId: parsed.workspaceId ?? randomUUID(),
+      ...(parsed.workspaceId ? { workspaceId: parsed.workspaceId } : {}),
       wallBudgetMs:
         runMode === "evaluation"
           ? this.admissionConfig.evaluationWallBudgetMs
@@ -638,6 +639,9 @@ export class WorkService {
           },
           {
             graphPath: join(this.store.root, "graph-checkpoints.sqlite"),
+            sourceGraphThreadId: new ConversationStore(this.store).session(
+              work.id,
+            ).sourceGraphThreadId,
             mode: work.mode,
             event: (_owned, name, data) => hooks.event(name, data),
           },

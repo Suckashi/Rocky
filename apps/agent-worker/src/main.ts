@@ -71,6 +71,25 @@ async function invoke(requestId: string, decision?: "approve" | "reject") {
   if (!agent || !owner || running) throw Error("Agent invocation unavailable");
   running = true;
   try {
+    if (
+      !decision &&
+      owner.payload.kind === "start" &&
+      owner.payload.sourceGraphThreadId
+    ) {
+      const source = await saver!.getTuple({
+        configurable: { thread_id: owner.payload.sourceGraphThreadId },
+      });
+      if (!source?.checkpoint.channel_values.messages)
+        throw Error("Confirmed conversation checkpoint is missing");
+      // Copy only conversation context into a new owned thread; never copy pending tasks, interrupts or effects.
+      await agent.updateState(
+        { configurable: { thread_id: owner.runId } },
+        {
+          messages: source.checkpoint.channel_values.messages,
+          files: source.checkpoint.channel_values.files ?? {},
+        },
+      );
+    }
     const result = await agent.invoke(
       decision
         ? new Command({
@@ -98,6 +117,7 @@ async function invoke(requestId: string, decision?: "approve" | "reject") {
         configurable: { thread_id: owner.runId },
         signal: abort.signal,
         recursionLimit: 30,
+        durability: "sync",
       },
     );
     abort.signal.throwIfAborted();
@@ -120,7 +140,7 @@ async function invoke(requestId: string, decision?: "approve" | "reject") {
           ...(output.__interrupt__
             ? { __interrupt__: output.__interrupt__ }
             : {}),
-          messages: output.messages?.map((message) => ({
+          messages: output.messages?.slice(-1).map((message) => ({
             type: message.type,
             name: message.name,
             content: message.content,
