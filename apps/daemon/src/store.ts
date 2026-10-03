@@ -351,7 +351,7 @@ export class Store {
       name === "rocky.work.updated"
         ? this.db
             .prepare(
-              "SELECT id,CAST(sequence AS TEXT) AS sequence,work_id AS workId FROM conversation_history WHERE work_id=? ORDER BY conversation_history.sequence",
+              "SELECT id,CAST(sequence AS TEXT) AS sequence,work_id AS workId FROM conversation_history WHERE work_id=? ORDER BY conversation_history.sequence DESC LIMIT 2",
             )
             .all(work.id)
         : undefined;
