@@ -77,3 +77,18 @@ English/dark long-content screenshots: [1440](evidence/2026-10-04/memory-scope/d
 - Memory native model retrieval/writes/permissions and broader Knowledge ingestion remain missing; T-025 in_progress
 - Search503 is an explicit browser interception fixture, not evidence of external-service outage recovery
 - All70 globalAT remain unchanged
+
+## Grant-bound native search (21aba71c424901edad1d920774bc58f93628e880)
+
+Configured normal root agent now exposes memory_search. Daemon derives user/project/task IDs from active Work, checks exact run/session grant and model revision, applies current protected-data redaction before encoding, and returns only the bounded serialized array. No caller-supplied arbitrary scope ID. Child tool whitelist does not expose memory_search. No native writes or automatic memory injection.
+
+Owner-session POST /api/v1/works/:id/memory-read-grants accepts requestId, scope(user/project/task), includePrivate(defaultfalse), expiresAt(defaultnull). GrantRegistry binds owner-selected scope/privacy hash to Work/run/execution session/policy and existing revocation/expiration. Private exclusion occurs in SQL before search limits. Grant metadata marks resource=memory so existing permissions UI does not mislabel it as workspace access. Issuance UI still pending.
+
+[Evidence](evidence/2026-10-04/memory-native.json):9 tests across3 files plus3 browser regression tests pass. Five native cases: public grant, no grant, revoked grant, explicit private grant, private escalation denial. Tool-failed events substantiate denied execution. Type/lint/build/format pass.
+
+- Owner memory grant creation is API-only; scope/privacy grant UI and full identity labels remain missing
+- Native project/task reads, child denial, cross-Work replay and private/redaction cases beyond current five-mode matrix need additional dedicated integration coverage
+- Read tool returns exact bounded JSON array context; omitted entries are documented in tool description but no per-call truncation flag is included
+- No model remember/update implemented; manual locks remain unchanged
+- Delivered model/checkpoint copies are not removed by registry deletion; derivative/reference cleanup and withdrawal semantics remain incomplete
+- No live external model, Ubuntu or fullAT36/46 evidence; all70 global AT unchanged

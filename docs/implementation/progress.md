@@ -527,3 +527,7 @@ Added explicit cl100k_base tokenBudget over serialized records, including proven
 ## Memory scope browser coverage (5f192c636d6444f740bb8371c7715cca5707506f)
 
 Added actual browser user/project isolation, draft scope lock, status/privacy save, error/retry, basic keyboard and English/dark four-width long-content coverage.2 browser tests pass; type/lint pass. [Screenshots and limits](memory-registry.md). T-025 remains in_progress; native runtime integration and task-scope browser coverage remain open.
+
+## Native Memory read (21aba71c424901edad1d920774bc58f93628e880)
+
+Root memory_search now uses explicit owner scope/privacy grants, active execution checks, current redaction and bounded context. Owner HTTP issuance exists; no native writes.9 related tests and3 browser regressions pass. [Evidence](memory-registry.md). Next: scope/privacy grant UI, native project/task/child isolation coverage and complete deletion/derived cleanup. T-025 remains in_progress.

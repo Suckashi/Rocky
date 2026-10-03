@@ -3850,6 +3850,30 @@
             "Search503 is an explicit browser interception fixture, not evidence of external-service outage recovery",
             "All70 globalAT remain unchanged"
           ]
+        },
+        {
+          "commit": "21aba71c424901edad1d920774bc58f93628e880",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/memory-native.test.ts tests/memory.test.ts tests/grants.test.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts memory.spec.ts workspace-read.spec.ts; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/memory-native.json",
+          "testFiles": [
+            "tests/memory-native.test.ts",
+            "tests/memory.test.ts",
+            "tests/grants.test.ts",
+            "tests/e2e/memory.spec.ts",
+            "tests/e2e/workspace-read.spec.ts"
+          ],
+          "limitations": [
+            "Owner memory grant creation is API-only; scope/privacy grant UI and full identity labels remain missing",
+            "Native project/task reads, child denial, cross-Work replay and private/redaction cases beyond current five-mode matrix need additional dedicated integration coverage",
+            "Read tool returns exact bounded JSON array context; omitted entries are documented in tool description but no per-call truncation flag is included",
+            "No model remember/update implemented; manual locks remain unchanged",
+            "Delivered model/checkpoint copies are not removed by registry deletion; derivative/reference cleanup and withdrawal semantics remain incomplete",
+            "No live external model, Ubuntu or fullAT36/46 evidence; all70 global AT unchanged"
+          ]
         }
       ],
       "blockedReason": null,

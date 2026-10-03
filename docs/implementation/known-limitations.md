@@ -88,3 +88,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 Memory token budget (c2962d6ee69b0fa93142f24bbd4c8a70a79f4a98): former byte-only context limitation is partially superseded by explicit cl100k_base serialized-context budgeting. This does not match every configured model tokenizer/billing or account for runtime prompt wrappers; permission-bound native retrieval integration and fullAT remain open.
 
 2026-10-04 Memory scope verification (5f192c636d6444f740bb8371c7715cca5707506f): prior completely-unverified English/dark and project-scope notes are partially superseded. User/project selector, English/dark long-content widths and basic Enter/Escape actions now tested. Task scope/full Tab order and full visual/reference matrix remain open.
+
+2026-10-04 native Memory search (21aba71c424901edad1d920774bc58f93628e880): previous no-native-read statements are historical. Root grant-bound read now works with owner API; grant issuance UI and full scope/child/cross-Work matrix remain pending. Native writes and removal of already-delivered checkpoint/provider copies are not implemented.
