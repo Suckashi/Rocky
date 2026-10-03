@@ -28,6 +28,12 @@ for (const transport of ["stdio", "http"] as const) {
           mode: "fixture",
         });
         const waiting = await waitFor(service, work.id, "waiting_approval");
+        const operationId = waiting.approval!.operationId!;
+        expect(service.operations.get(operationId)).toMatchObject({
+          phase: "prepared",
+          outcome: "not_executed",
+          result: null,
+        });
         const usage = service.modelBudgets.snapshot(work.runId);
         expect(
           usage.entries.some((entry) => entry.purpose === "subagent"),
@@ -37,7 +43,9 @@ for (const transport of ["stdio", "http"] as const) {
         );
         expect(usage.unknownUsageCalls).toBe(usage.calls);
         expect(
-          service.store.db.prepare("SELECT * FROM operations").all(),
+          service.store.db
+            .prepare("SELECT * FROM operations WHERE outcome!='not_executed'")
+            .all(),
         ).toHaveLength(1);
         expect(
           service.store
@@ -64,6 +72,13 @@ for (const transport of ["stdio", "http"] as const) {
         };
         service.decide(work.id, decision);
         const completed = await waitFor(service, work.id, "completed");
+        expect(service.operations.get(operationId)).toMatchObject({
+          phase: "settled",
+          outcome: "succeeded",
+        });
+        expect(
+          service.store.db.prepare("SELECT * FROM operations").all(),
+        ).toHaveLength(2);
         expect(completed.answer).toContain("核准後寫入");
         expect(
           service.store.db
@@ -72,7 +87,9 @@ for (const transport of ["stdio", "http"] as const) {
         ).toHaveLength(2);
         service.decide(work.id, decision);
         expect(
-          service.store.db.prepare("SELECT * FROM operations").all(),
+          service.store.db
+            .prepare("SELECT * FROM operations WHERE outcome!='not_executed'")
+            .all(),
         ).toHaveLength(2);
       } finally {
         await service.close();
@@ -100,8 +117,15 @@ test("T-003/T-037 persona bypass request still requires approval; rejection has 
     expect((await waitFor(service, work.id, "completed")).answer).toContain(
       "拒絕",
     );
+    expect(service.operations.get(w.approval!.operationId!)).toMatchObject({
+      phase: "settled",
+      outcome: "not_executed",
+      result: null,
+    });
     expect(
-      service.store.db.prepare("SELECT * FROM operations").all(),
+      service.store.db
+        .prepare("SELECT * FROM operations WHERE outcome!='not_executed'")
+        .all(),
     ).toHaveLength(1);
   } finally {
     await service.close();

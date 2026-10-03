@@ -66,6 +66,7 @@ export const stopSchema = z
 export const approvalSchema = z
   .object({
     id: idSchema,
+    operationId: z.string().min(1).max(300).optional(),
     revision: revisionSchema,
     intentFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
     tool: z.string().min(1),

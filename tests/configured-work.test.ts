@@ -91,7 +91,9 @@ for (const provider of ["openai-compatible", "anthropic"] as const)
         .toBe("waiting_approval");
       expect(
         service.store.db
-          .prepare("SELECT * FROM operations WHERE id LIKE ?")
+          .prepare(
+            "SELECT * FROM operations WHERE id LIKE ? AND outcome!='not_executed'",
+          )
           .all(work.runId + ":%"),
       ).toHaveLength(1);
       const waiting = service.store.get(work.id);
@@ -189,7 +191,9 @@ test("T-007 submission rejects implicit model selection and stale configured app
       }),
     ).toThrow("changed");
     expect(
-      service.store.db.prepare("SELECT * FROM operations").all(),
+      service.store.db
+        .prepare("SELECT * FROM operations WHERE outcome!='not_executed'")
+        .all(),
     ).toHaveLength(1);
     expect(() => service.submit({ ...input, requestId: randomUUID() })).toThrow(
       "changed",

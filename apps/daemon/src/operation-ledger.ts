@@ -79,8 +79,12 @@ export class OperationLedger {
     outcome: "not_executed" | "unknown" | "succeeded",
     result: string | null = null,
     evidence: Record<string, unknown> = {},
+    after?: () => void,
   ) {
     const valid =
+      (operation.phase === "prepared" &&
+        phase === "settled" &&
+        outcome === "not_executed") ||
       (operation.phase === "prepared" &&
         phase === "authorized" &&
         outcome === "not_executed") ||
@@ -144,6 +148,7 @@ export class OperationLedger {
           effectOutcome: outcome,
         },
       );
+      after?.();
       return this.get(operation.id)!;
     });
   }

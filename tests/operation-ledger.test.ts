@@ -42,6 +42,21 @@ test("T-008 durable stages, exact intent, CAS and unknown never reset on restart
       outcome: "not_executed",
       revision: 1,
     });
+    expect(() =>
+      ledger.transition(
+        work,
+        prepared,
+        "settled",
+        "not_executed",
+        null,
+        {},
+        () => {
+          throw Error("receipt failed");
+        },
+      ),
+    ).toThrow("receipt failed");
+    expect(ledger.get(prepared.id)).toEqual(prepared);
+    expect(store.eventsForWork(work.id)).toHaveLength(1);
     expect(
       ledger.prepare(
         work,

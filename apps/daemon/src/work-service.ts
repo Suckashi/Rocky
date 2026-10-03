@@ -273,6 +273,7 @@ export class WorkService {
               const approval = current.approval;
               if (
                 approval?.status !== "approved" ||
+                approval.operationId !== operation.id ||
                 approval.intentFingerprint !==
                   this.fingerprint(current, name, args)
               )
@@ -399,15 +400,41 @@ export class WorkService {
             actionRequests: { name: string; args: Record<string, unknown> }[];
           };
         }[];
-        messages?: { content: unknown; type?: string }[];
+        messages?: {
+          content: unknown;
+          type?: string;
+          tool_calls?: {
+            id?: string;
+            name: string;
+            args: Record<string, unknown>;
+          }[];
+        }[];
       };
       const request = raw.__interrupt__?.[0]?.value.actionRequests?.[0];
       if (request) {
         if (request.name !== "write_sample")
           throw Error("Unsupported interrupt");
+        const calls =
+          raw.messages
+            ?.at(-1)
+            ?.tool_calls?.filter(
+              (call) =>
+                call.name === request.name &&
+                intentHash(call.args) === intentHash(request.args),
+            ) ?? [];
+        if (calls.length !== 1 || !calls[0]?.id)
+          throw Error("Interrupted tool identity is ambiguous or missing");
+        const operation = this.operations.prepare(
+          work,
+          calls[0].id,
+          request.name,
+          request.args,
+          this.fingerprint(work, request.name, request.args),
+        );
         work.status = "waiting_approval";
         work.approval = {
           id: randomUUID(),
+          operationId: operation.id,
           revision: 1,
           tool: request.name,
           args: request.args,
@@ -503,13 +530,31 @@ export class WorkService {
       decision.decision === "approve" ? "approved" : "rejected";
     work.approval.revision++;
     work.revision++;
-    this.store.transaction(() => {
+    const persistDecision = () => {
       this.store.db
         .prepare("INSERT INTO decisions VALUES(?,?,?)")
         .run(decision.requestId, intent, id);
       this.store.save(work, work.revision - 1);
       this.store.event(work, "rocky.work.updated", { work });
-    });
+    };
+    if (decision.decision === "reject" && work.approval.operationId) {
+      const operation = this.operations.get(work.approval.operationId);
+      if (!operation)
+        throw new RockyError(
+          "operation_missing",
+          "Approval operation missing",
+          409,
+        );
+      this.operations.transition(
+        work,
+        operation,
+        "settled",
+        "not_executed",
+        null,
+        {},
+        persistDecision,
+      );
+    } else this.store.transaction(persistDecision);
     this.flushOutbox();
     const active = this.active.get(id)!;
     active.promise = this.run(id, decision.decision);
