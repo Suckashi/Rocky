@@ -1,5 +1,5 @@
 import "./environment.js";
-import { createDeepAgent } from "deepagents";
+import { createDeepAgent, StateBackend } from "deepagents";
 import { createMiddleware, todoListMiddleware, tool } from "langchain";
 import { z } from "zod";
 import type { BaseCheckpointSaver } from "@langchain/langgraph-checkpoint";
@@ -8,6 +8,7 @@ import type { BaseMessage } from "@langchain/core/messages";
 import type { ChatResult } from "@langchain/core/outputs";
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { ROCKY_PERSONA } from "./persona.js";
+import { scratchTools, validateScratchCall } from "./scratch-policy.js";
 export type RuntimeHooks = {
   event: (name: string, data: Record<string, unknown>) => void;
   call: (
@@ -31,15 +32,18 @@ export function createRockyAgent(
       wrapToolCall: async (request, handler) => {
         const { name, args, id } = request.toolCall;
         const allowed = child
-          ? ["inspect_sample"]
-          : ["task", "write_todos", "write_sample"];
+          ? ["inspect_sample", ...scratchTools]
+          : ["task", "write_todos", "write_sample", ...scratchTools];
         if (!allowed.includes(name))
           throw Error("Rocky policy denied tool: " + name);
         const callId = id ?? "";
         if (!callId) throw Error("Tool call identity required");
+        const publicArgs = scratchTools.includes(name)
+          ? validateScratchCall(name, args)
+          : args;
         hooks.event(
           name === "task" ? "rocky.subagent.started" : "rocky.tool.started",
-          { name, callId, args, child },
+          { name, callId, args: publicArgs, child },
         );
         const result = await handler(request);
         hooks.event(
@@ -72,11 +76,13 @@ export function createRockyAgent(
     name: "rocky",
     model: models?.root ?? new FixtureModel(false, hooks.modelRequest),
     checkpointer,
+    backend: new StateBackend(),
     systemPrompt:
       ROCKY_PERSONA +
       (models
         ? "\nYou use the explicitly configured model. Available tools operate only on synthetic samples; never claim to have read or modified real files."
-        : "\nThis run uses synthetic fixtures."),
+        : "\nThis run uses synthetic fixtures.") +
+      "\nNative filesystem tools access only run-private virtual /scratch paths in graph checkpoints. They do not read or modify host files or registered workspaces. Always supply an absolute /scratch path to ls/glob/grep. Native context offloads under /large_tool_results and /conversation_history are read-only to tools. Shell execution is unavailable.",
     tools: [write],
     middleware: [todoListMiddleware(), guard(false)],
     subagents: [
@@ -84,13 +90,29 @@ export function createRockyAgent(
         name: "general-purpose",
         description: "Inspect synthetic samples only",
         model: models?.child ?? new FixtureModel(true, hooks.modelRequest),
-        systemPrompt: "Report only observed synthetic sample evidence.",
+        systemPrompt:
+          "Report only observed evidence. Native files are private virtual /scratch graph state, not host files or workspace effects; supply explicit /scratch paths. Context offloads are read-only. Shell execution is unavailable.",
         tools: [read],
         middleware: [guard(true)],
       },
     ],
     interruptOn: { write_sample: { allowedDecisions: ["approve", "reject"] } },
     permissions: [
+      {
+        operations: ["read", "write"],
+        paths: ["/scratch", "/scratch/**"],
+        mode: "allow",
+      },
+      {
+        operations: ["read"],
+        paths: [
+          "/large_tool_results",
+          "/large_tool_results/**",
+          "/conversation_history",
+          "/conversation_history/**",
+        ],
+        mode: "allow",
+      },
       { operations: ["read", "write"], paths: ["/**"], mode: "deny" },
     ],
   });
