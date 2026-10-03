@@ -24,7 +24,10 @@ import { SteeringStore } from "./steering.js";
 import { ModelRegistry } from "./model-registry.js";
 import { McpRegistry } from "./mcp-registry.js";
 import { McpManager } from "./mcp-manager.js";
-import { mcpDeliverySchema } from "../../../packages/contracts/src/mcp-result.js";
+import {
+  mcpDeliverySchema,
+  mcpDataResultSchema,
+} from "../../../packages/contracts/src/mcp-result.js";
 import { mapMcpDelivery } from "../../../packages/agent-runtime/src/mcp-result.js";
 import {
   mcpCallSchema,
@@ -789,7 +792,7 @@ export class WorkService {
                   undefined,
                   { signal: abort.signal, timeout: 10000 },
                 );
-            if (result.isError)
+            if ("isError" in result && result.isError)
               throw Error(
                 "MCP tool returned an error; effects are unconfirmed",
               );
@@ -982,6 +985,8 @@ export class WorkService {
   ) {
     const { serverId, configRevision, registryRevision, toolName, schemaHash } =
       prepared.identity;
+    const data =
+      "request" in prepared ? mcpDataResultSchema.parse(result) : undefined;
     const delivery = mcpDeliverySchema.parse({
       kind: "mcp_result",
       source: {
@@ -991,7 +996,8 @@ export class WorkService {
         toolName,
         schemaHash,
       },
-      result: this.models.redact(this.mcp.redact(result)),
+      result: this.models.redact(this.mcp.redact(data ? data.result : result)),
+      ...(data ? { dataKind: data.dataKind } : {}),
     });
     mapMcpDelivery(delivery);
     return delivery;

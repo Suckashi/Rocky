@@ -24,11 +24,13 @@ export function mcpOffloadMiddleware() {
         const artifact = message.artifact as {
           source?: unknown;
           mcp?: unknown;
+          dataKind?: unknown;
         };
         const delivery = mcpDeliverySchema.safeParse({
           kind: "mcp_result",
           source: artifact.source,
           result: artifact.mcp,
+          ...(artifact.dataKind ? { dataKind: artifact.dataKind } : {}),
         });
         if (!delivery.success) continue;
         const [content] = mapMcpDelivery(delivery.data);

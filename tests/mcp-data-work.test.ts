@@ -1,3 +1,5 @@
+import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
+import { largeSyntheticPng } from "../fixtures/mcp/png.js";
 import { test, expect } from "vitest";
 import { randomUUID } from "node:crypto";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -16,6 +18,7 @@ test.each([
   "prompt",
   "prompt-image",
   "resource-image",
+  "resource-large-image",
   "reject",
   "revoke",
   "invalid",
@@ -24,18 +27,27 @@ test.each([
   "uncertain",
 ] as const)("configured MCP task data exact approval: %s", async (mode) => {
   let reads = 0;
+  const png =
+    mode === "resource-large-image"
+      ? largeSyntheticPng()
+      : "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA0sAAAAASUVORK5CYII=";
+  const extensions = {
+    _meta: { origin: "fixture-envelope", apiKey: "synthetic-envelope-secret" },
+    vendorResult: { revision: 7 },
+  };
   const mcp = await startHttpFixture(undefined, false, false, () => {
     const server = new McpServer({ name: "data-fixture", version: "1" });
     server.registerResource("note", "fixture://note", {}, async (uri) => {
       reads++;
       if (mode === "uncertain") throw Error("Uncertain response after request");
       return {
+        ...extensions,
         contents: [
-          mode === "resource-image"
+          mode === "resource-image" || mode === "resource-large-image"
             ? {
                 uri: uri.href,
                 mimeType: "image/png",
-                blob: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA0sAAAAASUVORK5CYII=",
+                blob: png,
               }
             : { uri: uri.href, text: "observed note" },
         ],
@@ -48,6 +60,7 @@ test.each([
       async (uri) => {
         reads++;
         return {
+          ...extensions,
           contents: [{ uri: uri.href, text: "observed template " + uri.href }],
         };
       },
@@ -58,6 +71,7 @@ test.each([
       async (args) => {
         reads++;
         return {
+          ...extensions,
           messages: [
             ...(mode === "prompt-image"
               ? [
@@ -178,7 +192,9 @@ test.each([
       modelSelection: { connectionId: id, revision: 1 },
     });
     if (mode === "invalid") {
-      await expect.poll(() => service.store.get(work.id).status).toBe("failed");
+      await expect
+        .poll(() => service.store.get(work.id).status, { timeout: 15000 })
+        .toBe("failed");
       expect(reads).toBe(0);
       expect(service.operations.list(work.id)).toHaveLength(0);
       return;
@@ -221,7 +237,49 @@ test.each([
         content: unknown;
       }[];
       const wire = JSON.stringify(messages);
-      expect(wire).toContain("Untrusted MCP task data");
+      expect(wire).toContain(
+        mode === "resource-large-image"
+          ? "Untrusted MCP text and structured evidence retained"
+          : "Untrusted MCP task data",
+      );
+      expect(wire).not.toContain("fixture-envelope");
+      expect(wire).not.toContain("synthetic-envelope-secret");
+      const raw = JSON.parse(
+        service.operations.get(service.operations.list(work.id)[0]!.id)!
+          .result!,
+      );
+      expect(raw.kind).toBe("mcp_data_result");
+      expect(raw.result._meta).toEqual(extensions._meta);
+      expect(raw.result.vendorResult).toEqual({ revision: 7 });
+      const saver = SqliteSaver.fromConnString(
+        join(root, "graph-checkpoints.sqlite"),
+      );
+      try {
+        const state = (await saver.getTuple({
+          configurable: { thread_id: work.runId },
+        }))!.checkpoint.channel_values;
+        const tool = (
+          state.messages as {
+            name?: string;
+            artifact?: {
+              dataKind: string;
+              mcp: { _meta: { apiKey: string }; vendorResult: unknown };
+            };
+          }[]
+        ).find((m) => m.name === "mcp_data")!;
+        expect(tool.artifact?.dataKind).toBe(prompt ? "prompt" : "resource");
+        expect(tool.artifact?.mcp._meta.apiKey).toBe("[REDACTED]");
+        expect(tool.artifact?.mcp.vendorResult).toEqual({ revision: 7 });
+        if (mode === "resource-large-image") {
+          expect(Buffer.byteLength(JSON.stringify(raw))).toBeGreaterThan(
+            1100000,
+          );
+          expect(Buffer.byteLength(JSON.stringify(raw))).toBeLessThan(2097152);
+          expect(JSON.stringify(state.files)).not.toContain(png.slice(32, 80));
+        }
+      } finally {
+        saver.db.close();
+      }
       if (mode.endsWith("-image")) {
         expect(wire).toContain("not inspected");
         expect(wire).not.toContain("iVBORw0KGgo");

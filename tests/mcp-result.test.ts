@@ -17,6 +17,63 @@ const source = {
   toolName: "visual",
   schemaHash: "a".repeat(64),
 };
+test.each(["resource", "prompt"] as const)(
+  "raw %s envelope stays in artifact, not model authority or metadata",
+  (dataKind) => {
+    const block = { type: "image" as const, mimeType: "image/png", data: png };
+    const result =
+      dataKind === "prompt"
+        ? {
+            messages: [{ role: "assistant", content: block }],
+            _meta: { origin: "private-metadata" },
+            vendor: { version: 2 },
+          }
+        : {
+            contents: [
+              { uri: "fixture://image", mimeType: "image/png", blob: png },
+            ],
+            _meta: { origin: "private-metadata" },
+            vendor: { version: 2 },
+          };
+    const delivery = {
+      kind: "mcp_result" as const,
+      source: {
+        ...source,
+        toolName: dataKind === "prompt" ? "prompts/get" : "resources/read",
+      },
+      dataKind,
+      result,
+    };
+    const [content, artifact] = mapMcpDelivery(delivery);
+    expect(artifact.mcp).toEqual(result);
+    expect(artifact.dataKind).toBe(dataKind);
+    const wire = toModelWire([
+      new ToolMessage({
+        name: "mcp_data",
+        content,
+        artifact,
+        tool_call_id: "owned",
+      }),
+    ]);
+    expect(JSON.stringify(wire)).not.toContain("private-metadata");
+    expect(JSON.stringify(wire)).not.toContain("vendor");
+    expect(JSON.stringify(wire)).toContain("image_url");
+    expect(() =>
+      mapMcpDelivery({
+        ...delivery,
+        source: { ...source, toolName: "wrong-action" },
+      }),
+    ).toThrow("source action");
+    expect(() =>
+      mapMcpDelivery({
+        ...delivery,
+        result: { messages: [], contents: "invalid" },
+        dataKind: "resource",
+        source: { ...source, toolName: "resources/read" },
+      }),
+    ).toThrow();
+  },
+);
 test("MCP image, structured content and source retain types/artifact across model wire; resource links remain unfetched data", () => {
   const result = {
     content: [
