@@ -91,3 +91,11 @@ Implementation `af4c3030a5845e76f098be8e76ecba9eb029634d` connects trusted confi
 The full suite passed 58 tests before the added lease regression; focused final evaluation/network tests passed 5 tests. Four full Agent Promptfoo fixture cases passed. Typecheck (after correcting test optional-field narrowing), server build, lint, formatting and source guards passed. See [configured evaluation evidence](evidence/2026-10-03/models/configured-evaluation.json). No live calls, dependency changes or UI changes this turn.
 
 T-007 remains in_progress for trusted token profiles, cache pricing, editable budgets and DNS policy evidence. Evaluation still operates synthetic tools; live protocol evidence from the previous turn is not full live Agent evidence. Ubuntu, browser egress and global acceptance are unchanged. Goal stays active.
+
+## Goal continuation: explicit Work budgets
+
+Implementation `27f28439f8c819da509da73fb465eb484f725af9` exposes optional per-Work model budgets through submission, CopilotKit forwarding and trusted evaluation configuration. Budget creation is atomic with Work creation; request receipts and CAS prevent changing a pinned budget. Root and children use the same persisted limits, including after reopening the store.
+
+All 61 core tests passed, along with typecheck, lint, server build and source guards. A real Promptfoo negative run with maxCalls=1 stopped all four cases before their second model call; read-only database inspection confirmed four immutable budgets of 1 and one recorded call per Work. The expected command exit was 1, not a passing evaluation claim. See [Work budget evidence](evidence/2026-10-03/models/work-budgets.json).
+
+T-007 stays in_progress: budget UI, token profiles, cache pricing and DNS policy evidence remain. Missing trusted bounds safely prevent token/cost-capped dispatch. No live or remote action this turn; Goal active and external gates unchanged.

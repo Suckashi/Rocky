@@ -862,6 +862,25 @@
             "Ubuntu and strict browser egress remain open; no global acceptance promoted",
             "Backend-only change; no browser or dependency-install rerun; no remote action"
           ]
+        },
+        {
+          "commit": "27f28439f8c819da509da73fb465eb484f725af9",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/models/work-budgets.json",
+          "testFiles": [
+            "tests/model-budget.test.ts"
+          ],
+          "limitations": [
+            "T-007 remains in_progress: UI budget controls, trusted token profiles, cache pricing and DNS policy evidence remain",
+            "Token/cost capped runs without trusted bounds fail before model dispatch; no guessed tokenizer",
+            "No live request, browser rerun, dependency change or remote action this turn",
+            "Ubuntu/browser egress remain open and no global AT promoted"
+          ]
         }
       ],
       "blockedReason": null,
