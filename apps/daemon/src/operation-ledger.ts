@@ -142,11 +142,20 @@ export class OperationLedger {
     return this.retryAncestors(work).map((source) => ({
       workId: source.id,
       status: source.status,
-      answer: source.answer,
+      answer:
+        source.workspaceRead && !work.workspaceRead
+          ? "Scoped workspace result omitted without fresh read scope"
+          : source.answer,
       error: source.error,
       operations: this.list(source.id).map((summary) => ({
         ...summary,
-        result: this.get(summary.id)?.result,
+        result:
+          !work.workspaceRead &&
+          ["workspace_info", "workspace_files", "workspace_read"].includes(
+            summary.tool,
+          )
+            ? undefined
+            : this.get(summary.id)?.result,
       })),
     }));
   }
@@ -205,6 +214,28 @@ export class OperationLedger {
           operationId: operation.id,
           phase: "settled",
           effectOutcome: "not_executed",
+          reason,
+        });
+      }
+      // These daemon-owned tools can only read. Interrupted delivery is not an unknown mutation.
+      const reads = this.store.db
+        .prepare(
+          "SELECT * FROM operations WHERE json_extract(context,'$.workId')=? AND json_extract(context,'$.runId')=? AND json_extract(context,'$.executionSessionId')=? AND phase='dispatched' AND outcome='unknown' AND json_extract(context,'$.name') IN ('workspace_info','workspace_files','workspace_read')",
+        )
+        .all(owned.id, owned.runId, owned.executionSessionId) as Operation[];
+      for (const operation of reads) {
+        this.store.db
+          .prepare(
+            "UPDATE operations SET phase='settled',outcome='failed_known_no_effect',revision=revision+1 WHERE id=? AND revision=?",
+          )
+          .run(operation.id, operation.revision);
+        this.store.db
+          .prepare("DELETE FROM target_claims WHERE operation_id=?")
+          .run(operation.id);
+        this.store.event(owned, "rocky.operation.failed_no_effect", {
+          operationId: operation.id,
+          phase: "settled",
+          effectOutcome: "failed_known_no_effect",
           reason,
         });
       }
@@ -302,7 +333,8 @@ export class OperationLedger {
     work: Work,
     operation: Operation,
     phase: "authorized" | "dispatched" | "settled",
-    outcome: "not_executed" | "unknown" | "succeeded",
+    outcome:
+      "not_executed" | "unknown" | "succeeded" | "failed_known_no_effect",
     result: string | null = null,
     evidence: Record<string, unknown> = {},
     after?: () => void,
@@ -319,7 +351,7 @@ export class OperationLedger {
         outcome === "unknown") ||
       (operation.phase === "dispatched" &&
         phase === "settled" &&
-        ["unknown", "succeeded"].includes(outcome));
+        ["unknown", "succeeded", "failed_known_no_effect"].includes(outcome));
     if (!valid || (outcome === "succeeded") !== (result !== null))
       throw new RockyError(
         "operation_transition",

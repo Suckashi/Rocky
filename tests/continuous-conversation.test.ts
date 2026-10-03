@@ -87,6 +87,9 @@ test("confirmed native checkpoint context reaches next main worker, survives res
     },
   });
   const root = mkdtempSync(join(tmpdir(), "rocky-continuous-"));
+  const workspaceRoot = mkdtempSync(
+    join(tmpdir(), "rocky-continuous-project-"),
+  );
   let service = new WorkService(root);
   const connectionId = randomUUID();
   try {
@@ -217,10 +220,18 @@ test("confirmed native checkpoint context reaches next main worker, survives res
       new ConversationStore(service.store).session(switched.id)
         .sourceGraphThreadId,
     ).toBe(warm.runId);
+    const registeredWorkspace = await service.workspaces.save({
+      requestId: randomUUID(),
+      id: randomUUID(),
+      expectedRevision: 0,
+      name: "Different workspace",
+      root: workspaceRoot,
+    });
     const changedWorkspace = service.submit({
       requestId: randomUUID(),
       text: "What colour in a different workspace?",
-      workspaceId: randomUUID(),
+      workspaceId: registeredWorkspace.id,
+      workspaceRevision: registeredWorkspace.revision,
       mode: "configured",
       transport: "http",
       modelSelection: { connectionId, revision: 1 },
@@ -234,6 +245,7 @@ test("confirmed native checkpoint context reaches next main worker, survives res
     await service.close();
     await provider.close();
     rmSync(root, { recursive: true, force: true });
+    rmSync(workspaceRoot, { recursive: true, force: true });
   }
 }, 30000);
 

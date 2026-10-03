@@ -21,6 +21,8 @@ export const executionSessionSchema = z.strictObject({
   graphThreadId: idSchema,
   sourceGraphThreadId: idSchema.optional(),
   workspaceId: idSchema.nullable(),
+  workspaceRevision: revisionSchema.optional(),
+  workspaceRead: z.boolean().optional(),
   generation: z.number().int().positive(),
   status: workStatus,
 });

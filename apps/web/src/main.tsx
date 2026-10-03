@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { CopilotKitProvider, useAgent } from "@copilotkit/react-core/v2";
 import type { Work } from "../../../packages/contracts/src/index.js";
@@ -7,6 +7,7 @@ import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
 import { Workspaces } from "./workspaces.js";
+import type { Workspace } from "../../../packages/contracts/src/workspaces.js";
 import { WorkOperations } from "./work-operations.js";
 import { WorkGrants } from "./work-grants.js";
 import { WorkSteering } from "./work-steering.js";
@@ -114,6 +115,9 @@ function App() {
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const [maxCalls, setMaxCalls] = useState("48");
+  const modelTools = useRef<HTMLDetailsElement>(null);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace>(),
+    [workspaceRead, setWorkspaceRead] = useState(false);
   const validBudget =
     /^\d+$/.test(maxCalls) &&
     Number(maxCalls) >= 1 &&
@@ -141,6 +145,7 @@ function App() {
       return;
     setError("");
     setBusy(true);
+    if (modelTools.current) modelTools.current.open = false;
     try {
       agent.addMessage({
         id: crypto.randomUUID(),
@@ -148,11 +153,19 @@ function App() {
         content: text,
       });
       setText("");
+      setWorkspaceRead(false);
       await agent.runAgent({
         runId: crypto.randomUUID(),
         forwardedProps: selectedModel
           ? {
               mode: "configured",
+              ...(selectedWorkspace
+                ? {
+                    workspaceId: selectedWorkspace.id,
+                    workspaceRevision: selectedWorkspace.revision,
+                    workspaceRead,
+                  }
+                : {}),
               transport,
               modelBudget: { maxCalls: Number(maxCalls) },
               modelSelection: {
@@ -191,7 +204,16 @@ function App() {
       locale={locale}
       connected={connected}
       count={works.length}
-      workspaces={<Workspaces locale={locale} request={request} />}
+      workspaces={
+        <Workspaces
+          locale={locale}
+          request={request}
+          onSelect={(workspace) => {
+            setSelectedWorkspace(workspace);
+            setWorkspaceRead(false);
+          }}
+        />
+      }
       actions={
         <>
           <button onClick={() => setLocale(locale === "zh" ? "en" : "zh")}>
@@ -530,11 +552,48 @@ function App() {
               </p>
             )}
             <div className="composer-tools">
-              <details className="connection-options">
+              <details
+                className="connection-options"
+                ref={modelTools}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    event.currentTarget.open = false;
+                    event.currentTarget.querySelector("summary")?.focus();
+                  }
+                }}
+              >
                 <summary>
                   {locale === "zh" ? "模型與工具" : "Model & tools"}
                 </summary>{" "}
                 <section id="setup" className="setup">
+                  {selectedWorkspace && (
+                    <>
+                      <span>
+                        {locale === "zh" ? "工作區：" : "Workspace: "}
+                        {selectedWorkspace.name}
+                      </span>
+                      <label>
+                        <input
+                          type="checkbox"
+                          disabled={!selectedModel}
+                          checked={workspaceRead}
+                          onChange={(e) => setWorkspaceRead(e.target.checked)}
+                        />
+                        {locale === "zh"
+                          ? "允許此工作讀取工作區（含臨時子任務）"
+                          : "Allow workspace reads for this Work and ephemeral children"}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedWorkspace(undefined);
+                          setWorkspaceRead(false);
+                        }}
+                      >
+                        {locale === "zh" ? "取消工作區選取" : "Clear workspace"}
+                      </button>
+                    </>
+                  )}
                   <label>
                     <input
                       type="checkbox"

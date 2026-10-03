@@ -13,6 +13,7 @@ import {
   conversationViewSchema,
   executionSessionSchema,
 } from "../packages/contracts/src/conversation.js";
+import { ContextLedger } from "../apps/daemon/src/context-ledger.js";
 function work(
   kind: "main" | "background" = "main",
   runMode: "normal" | "evaluation" = "normal",
@@ -33,6 +34,70 @@ function work(
     createdAt: new Date().toISOString(),
   };
 }
+test.each([1, 2])(
+  "workspace revision/read scope isolates native checkpoint/history: revision %s",
+  (nextRevision) => {
+    const root = mkdtempSync(join(tmpdir(), "rocky-workspace-context-")),
+      store = new Store(root),
+      history = new ConversationStore(store),
+      workspaceId = randomUUID();
+    try {
+      const first = {
+        ...work(),
+        workspaceId,
+        workspaceRevision: 1,
+        workspaceRead: true,
+      };
+      store.add(first, "first scope");
+      store.save({ ...first, status: "running", revision: 2 }, 1);
+      store.save(
+        {
+          ...first,
+          status: "completed",
+          answer: "OLD_WORKSPACE_EVIDENCE",
+          revision: 3,
+        },
+        2,
+      );
+      const next = {
+        ...work(),
+        workspaceId,
+        workspaceRevision: nextRevision,
+        workspaceRead: nextRevision === 2,
+      };
+      store.add(next, "new scope");
+      store.save({ ...next, status: "running", revision: 2 }, 1);
+      expect(history.session(next.id).sourceGraphThreadId).toBeUndefined();
+      expect(
+        new ContextLedger(store).prepare({
+          ...next,
+          status: "running",
+          revision: 2,
+        }).items,
+      ).toEqual([]);
+      expect(() =>
+        store.save(
+          { ...next, workspaceRevision: 3, revision: 3, status: "running" },
+          2,
+        ),
+      ).toThrow("Work revision changed");
+      expect(() =>
+        store.save(
+          {
+            ...next,
+            workspaceRead: !next.workspaceRead,
+            revision: 3,
+            status: "running",
+          },
+          2,
+        ),
+      ).toThrow("Work revision changed");
+    } finally {
+      store.close();
+      rmSync(root, { recursive: true, force: true });
+    }
+  },
+);
 test("one conversation persists separate execution sessions and atomic submission/result history", () => {
   const root = mkdtempSync(join(tmpdir(), "rocky-conversation-"));
   let store = new Store(root);

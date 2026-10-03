@@ -333,6 +333,9 @@ export function createApp(service: WorkService) {
         mode: z.enum(["fixture", "configured"]),
         modelSelection: modelSelectionSchema.optional(),
         modelBudget: modelBudgetSchema.optional(),
+        workspaceId: z.uuid().optional(),
+        workspaceRevision: z.number().int().positive().optional(),
+        workspaceRead: z.boolean().optional(),
         transport: z.enum(["stdio", "http"]),
       })
       .strict()

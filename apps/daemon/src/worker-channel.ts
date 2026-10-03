@@ -183,6 +183,7 @@ export class WorkerChannel {
     try {
       this.send(this.startRequestId, {
         kind: "start",
+        graphStepLimit: 64 + 16 * (this.owner.modelBudget?.maxCalls ?? 48),
         ...(agentOptions?.steering ? { steering: true } : {}),
         text: this.owner.text,
         ...(agentOptions?.mode ? { mode: agentOptions.mode } : {}),

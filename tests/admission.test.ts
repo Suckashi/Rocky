@@ -381,7 +381,7 @@ test("T-010 same resource waits before worker or model slot; unrelated backgroun
 
 test("T-010 queued model selection stays pinned and never adopts another Work's changed connection", async () => {
   const root = mkdtempSync(join(tmpdir(), "rocky-queued-settings-"));
-  const service = new WorkService(root);
+  const service = new WorkService(join(root, "data"));
   try {
     const connectionId = randomUUID();
     const config = {
@@ -398,7 +398,14 @@ test("T-010 queued model selection stays pinned and never adopts another Work's 
       expectedRevision: 0,
       config,
     });
-    const shared = randomUUID();
+    const workspace = await service.workspaces.save({
+        requestId: randomUUID(),
+        id: randomUUID(),
+        expectedRevision: 0,
+        name: "Pinned workspace",
+        root: mkdtempSync(join(root, "project-")),
+      }),
+      shared = workspace.id;
     const occupied = service.submit({
       requestId: randomUUID(),
       text: "Occupy shared resource",
@@ -412,6 +419,7 @@ test("T-010 queued model selection stays pinned and never adopts another Work's 
       text: "Pinned queued model",
       kind: "background",
       workspaceId: shared,
+      workspaceRevision: workspace.revision,
       mode: "configured",
       transport: "http",
       modelSelection: { connectionId, revision: 1 },

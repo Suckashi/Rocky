@@ -41,6 +41,10 @@ import { OperationReconciler } from "./operation-reconciler.js";
 import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
 import { WorkspaceRegistry } from "./workspaces.js";
+import {
+  workspaceToolSchema,
+  workspaceReadToolSchema,
+} from "../../../packages/contracts/src/workspaces.js";
 import { WorkerJobs } from "./worker-jobs.js";
 import { ModelSlots } from "./model-slots.js";
 import {
@@ -263,6 +267,7 @@ export class WorkService {
       mode: source.mode,
       kind: source.kind ?? "main",
       workspaceId: source.workspaceId,
+      workspaceRevision: source.workspaceRevision,
       modelSelection: command.modelSelection ?? source.modelSelection,
       modelBudget: source.modelBudget,
     });
@@ -285,6 +290,23 @@ export class WorkService {
         parsed.modelSelection.connectionId,
         parsed.modelSelection.revision,
       );
+    if (parsed.workspaceRevision) {
+      if (runMode !== "normal")
+        throw new RockyError(
+          "workspace_scope",
+          "Host workspace access is unavailable for evaluation",
+          403,
+        );
+      if (
+        this.workspaces.get(parsed.workspaceId!).revision !==
+        parsed.workspaceRevision
+      )
+        throw new RockyError(
+          "stale_workspace",
+          "Workspace revision changed",
+          409,
+        );
+    }
     const work: Work = {
       id: randomUUID(),
       runId: randomUUID(),
@@ -296,6 +318,12 @@ export class WorkService {
       mode: parsed.mode,
       kind: parsed.kind,
       ...(parsed.workspaceId ? { workspaceId: parsed.workspaceId } : {}),
+      ...(parsed.workspaceRevision
+        ? {
+            workspaceRevision: parsed.workspaceRevision,
+            workspaceRead: parsed.workspaceRead === true,
+          }
+        : {}),
       wallBudgetMs:
         runMode === "evaluation"
           ? this.admissionConfig.evaluationWallBudgetMs
@@ -316,6 +344,15 @@ export class WorkService {
       this.store.add(work, intent);
       this.modelBudgets.open(work.runId, work.modelBudget);
       this.store.event(work, "rocky.work.updated", { work });
+      if (parsed.workspaceRead)
+        this.grants.issue({
+          requestId: randomUUID(),
+          workId: work.id,
+          targetHash: this.workspaceScope(work),
+          effect: "known_read",
+          policyRevision: 1,
+          expiresAt: null,
+        });
     });
     this.flushOutbox();
     if (work.mode === "fixture" || this.testFixtureTools)
@@ -580,6 +617,18 @@ export class WorkService {
         call: async (name, args, callId) => {
           abort.signal.throwIfAborted();
           const current = this.store.get(work.id);
+          if (
+            ["workspace_info", "workspace_files", "workspace_read"].includes(
+              name,
+            )
+          )
+            return this.callWorkspace(
+              current,
+              name,
+              args,
+              callId,
+              abort.signal,
+            );
           if (
             (name === "inspect_sample" || name === "write_sample") &&
             !connection
@@ -959,6 +1008,202 @@ export class WorkService {
         : {}),
       ...(work.modelSelection ? { modelSelection: work.modelSelection } : {}),
     });
+  }
+  private workspaceScope(work: Work) {
+    if (
+      work.mode !== "configured" ||
+      work.runMode !== "normal" ||
+      work.workspaceRead !== true ||
+      !work.workspaceId ||
+      !work.workspaceRevision
+    )
+      throw new RockyError(
+        "workspace_scope",
+        "No registered workspace is bound to this Work",
+        403,
+      );
+    const workspace = this.workspaces.get(work.workspaceId);
+    if (workspace.revision !== work.workspaceRevision)
+      throw new RockyError(
+        "stale_workspace",
+        "Workspace revision changed",
+        409,
+      );
+    return intentHash({
+      workspaceId: workspace.id,
+      revision: workspace.revision,
+      rootIdentity: workspace.rootIdentity,
+      root: workspace.root,
+      effect: "known_read",
+      policyRevision: 1,
+    });
+  }
+  private async callWorkspace(
+    work: Work,
+    name: string,
+    args: Record<string, unknown>,
+    callId: string,
+    signal: AbortSignal,
+  ) {
+    const paging =
+      name === "workspace_read"
+        ? workspaceReadToolSchema.parse(args)
+        : undefined;
+    const query = paging ?? workspaceToolSchema.parse(args),
+      targetHash = this.workspaceScope(work);
+    const check = () => {
+      signal.throwIfAborted();
+      if (!this.grants.allows(work, targetHash, "known_read", 1))
+        throw new RockyError(
+          "workspace_scope",
+          "This Work has no active workspace read grant",
+          403,
+        );
+      if (this.workspaceScope(work) !== targetHash)
+        throw new RockyError(
+          "workspace_changed",
+          "Workspace scope changed",
+          409,
+        );
+    };
+    check();
+    if (work.modelSelection)
+      this.models.assertRunnable(
+        work.modelSelection.connectionId,
+        work.modelSelection.revision,
+      );
+    const fingerprint = intentHash({
+      workId: work.id,
+      runId: work.runId,
+      executionSessionId: work.executionSessionId,
+      name,
+      args: query,
+      targetHash,
+      modelSelection: work.modelSelection,
+    });
+    let operation = this.operations.prepare(
+      work,
+      callId,
+      name,
+      query,
+      fingerprint,
+      intentHash({ scope: targetHash, runId: work.runId, readCallId: callId }),
+    );
+    if (operation.outcome === "succeeded") return operation.result!;
+    if (operation.phase !== "prepared")
+      throw new RockyError(
+        "read_replay",
+        "Previous read did not complete; use a fresh call identity",
+        409,
+      );
+    const owner = {
+      workId: work.id,
+      runId: work.runId,
+      executionSessionId: work.executionSessionId,
+    };
+    authorizeOperation({
+      owner,
+      resolvedOwner: owner,
+      mode: work.runMode,
+      effect: "known_read",
+      configurationAllowed: true,
+      resourceAllowed: this.grants.allows(work, targetHash, "known_read", 1),
+      revoked: false,
+      preparedTargetHash: targetHash,
+      currentTargetHash: targetHash,
+      policyRevision: 1,
+      preparedPolicyRevision: 1,
+      operationId: operation.id,
+      intentFingerprint: fingerprint,
+      synthetic: false,
+      allowLocalNew: false,
+      targetExists: true,
+      approval: null,
+    });
+    operation = this.operations.transition(
+      work,
+      operation,
+      "authorized",
+      "not_executed",
+    );
+    operation = this.operations.transition(
+      work,
+      operation,
+      "dispatched",
+      "unknown",
+      null,
+      { destination: "workspace:" + work.workspaceId },
+    );
+    this.flushOutbox();
+    try {
+      const workspace = await this.workspaces.root(
+        work.workspaceId!,
+        work.workspaceRevision!,
+      );
+      let result: Record<string, unknown> =
+        name === "workspace_info"
+          ? {
+              workspaceId: workspace.id,
+              revision: workspace.revision,
+              name: workspace.name,
+              untrustedData: true,
+              capabilities: ["workspace_files", "workspace_read"],
+            }
+          : name === "workspace_files"
+            ? await this.workspaces.files(
+                workspace.id,
+                workspace.revision,
+                query.path,
+              )
+            : await this.workspaces.read(
+                workspace.id,
+                workspace.revision,
+                query.path,
+                paging?.expectedHash,
+              );
+      if (paging) {
+        const file = result as Awaited<ReturnType<WorkspaceRegistry["read"]>>,
+          characters = [...file.text];
+        const end = Math.min(characters.length, paging.offset + paging.limit);
+        result = {
+          ...file,
+          text: characters.slice(paging.offset, end).join(""),
+          offset: paging.offset,
+          nextOffset: end < characters.length ? end : null,
+          totalCharacters: characters.length,
+          truncated: end < characters.length,
+        };
+      }
+      check();
+      if (work.modelSelection)
+        this.models.assertRunnable(
+          work.modelSelection.connectionId,
+          work.modelSelection.revision,
+        );
+      const delivery = this.models.redact(
+          this.mcp.redact({ ...result, untrustedData: true }),
+        ),
+        serialized = JSON.stringify(delivery);
+      this.operations.transition(
+        work,
+        operation,
+        "settled",
+        "succeeded",
+        serialized,
+        { result: delivery },
+      );
+      this.flushOutbox();
+      return serialized;
+    } catch (error) {
+      this.operations.transition(
+        work,
+        operation,
+        "settled",
+        "failed_known_no_effect",
+      );
+      this.flushOutbox();
+      throw error;
+    }
   }
   private configuredTool(
     work: Work,

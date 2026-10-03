@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import { Store } from "../apps/daemon/src/store.js";
 import { OperationLedger } from "../apps/daemon/src/operation-ledger.js";
 import { workSchema } from "../packages/contracts/src/index.js";
@@ -26,6 +26,43 @@ function setup() {
   store.add(work, "test");
   return { root, store, work, ledger: new OperationLedger(store) };
 }
+test("daemon-owned interrupted workspace reads settle with no mutation while dispatched MCP stays unknown", () => {
+  const { root, store, work, ledger } = setup();
+  try {
+    for (const name of ["workspace_read", "mcp_call"]) {
+      let op = ledger.prepare(
+        work,
+        name,
+        name,
+        { path: "actual.txt" },
+        name + "-boundary",
+        createHash("sha256").update(name).digest("hex"),
+      );
+      op = ledger.transition(work, op, "authorized", "not_executed");
+      ledger.transition(work, op, "dispatched", "unknown");
+    }
+    ledger.finishUndispatched(work, "restarted", () => {});
+    expect(
+      store.db.prepare("SELECT COUNT(*) AS count FROM target_claims").get()
+        ?.count,
+    ).toBe(1);
+    expect(ledger.list(work.id)).toEqual([
+      expect.objectContaining({
+        tool: "workspace_read",
+        phase: "settled",
+        outcome: "failed_known_no_effect",
+      }),
+      expect.objectContaining({
+        tool: "mcp_call",
+        phase: "dispatched",
+        outcome: "unknown",
+      }),
+    ]);
+  } finally {
+    store.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 test("configured MCP reconnect revision cannot bypass confirmed-effect retry protection, while distinct server targets remain distinct", () => {
   const { root, store, work, ledger } = setup();
   try {

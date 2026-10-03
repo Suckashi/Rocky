@@ -21,9 +21,11 @@ const previewSchema = z.object({
 export function Workspaces({
   locale,
   request,
+  onSelect,
 }: {
   locale: "zh" | "en";
   request: (path: string, body?: unknown) => Promise<unknown>;
+  onSelect?: (workspace: Workspace) => void;
 }) {
   const zh = locale === "zh",
     epoch = useRef(0);
@@ -123,8 +125,8 @@ export function Workspaces({
       <h2>{zh ? "本機工作區" : "Local workspaces"}</h2>
       <p>
         {zh
-          ? "明確註冊資料夾後，你可以瀏覽及預覽 UTF-8 文字；尚未授權助手存取。Native 使用你的 OS 權限，並非 OS sandbox。助手工具、寫入、shell 與 worktree 尚未接通。"
-          : "Register a folder to browse and preview UTF-8 text yourself; this does not authorize assistant access. Native uses your OS permissions, not an OS sandbox. Assistant tools, writes, shell and worktrees are not connected yet."}
+          ? "註冊後可自行瀏覽。選擇工作區，並在送出前明確啟用唯讀權限，才能讓該工作與臨時子任務讀取。Native 使用你的 OS 權限，並非 OS sandbox。寫入、shell 與 worktree 尚未接通。"
+          : "Browse registered folders yourself. Select a workspace and explicitly enable read scope before sending to allow that Work and its ephemeral children to read. Native uses your OS permissions, not an OS sandbox. Writes, shell and worktrees are not connected yet."}
       </p>
       <form onSubmit={(event) => void save(event)}>
         <fieldset disabled={busy}>
@@ -165,6 +167,11 @@ export function Workspaces({
           <button disabled={busy} onClick={() => void browse(workspace)}>
             {zh ? "瀏覽檔案" : "Browse files"}
           </button>
+          {onSelect && (
+            <button disabled={busy} onClick={() => onSelect(workspace)}>
+              {zh ? "選擇給下一個工作" : "Select for next Work"}
+            </button>
+          )}
         </article>
       ))}
       {selected && listing && (

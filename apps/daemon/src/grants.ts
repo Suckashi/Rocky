@@ -43,12 +43,14 @@ export class GrantRegistry {
       revision: 1,
       revoked: false,
     });
-    this.store.transaction(() => {
+    const persist = () => {
       this.store.db
         .prepare("INSERT INTO capability_grants VALUES(?,?,?,?)")
         .run(grant.id, command.requestId, hash, JSON.stringify(grant));
       this.store.event(work, "rocky.grant.issued", { grant });
-    });
+    };
+    if (this.store.db.isTransaction) persist();
+    else this.store.transaction(persist);
     return grant;
   }
   list(workId: string) {

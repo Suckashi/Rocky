@@ -1,4 +1,20 @@
 import { z } from "zod";
+export const workspaceToolSchema = z.strictObject({
+  path: z.string().max(4096).default(""),
+});
+export const workspaceReadToolSchema = z
+  .strictObject({
+    path: z.string().min(1).max(4096),
+    offset: z.number().int().min(0).max(1048576).default(0),
+    limit: z.number().int().min(1).max(65536).default(16384),
+    expectedHash: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
+  })
+  .refine((value) => value.offset === 0 || !!value.expectedHash, {
+    message: "Continuation requires the original file hash",
+  });
 export const workspaceSchema = z.strictObject({
   id: z.uuid(),
   name: z.string().trim().min(1).max(120),

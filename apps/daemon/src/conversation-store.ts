@@ -77,6 +77,12 @@ export class ConversationStore {
         work.runMode === "evaluation" ? "evaluation" : (work.kind ?? "main"),
       graphThreadId: work.runId,
       workspaceId: work.workspaceId ?? null,
+      ...(work.workspaceRevision
+        ? {
+            workspaceRevision: work.workspaceRevision,
+            workspaceRead: work.workspaceRead,
+          }
+        : {}),
       generation: 1,
       status: work.status,
     });
@@ -105,12 +111,16 @@ export class ConversationStore {
           (item.kind ?? "main") === "main" &&
           item.status === "completed" &&
           item.mode === work.mode &&
-          item.workspaceId === work.workspaceId,
+          item.workspaceId === work.workspaceId &&
+          item.workspaceRevision === work.workspaceRevision &&
+          item.workspaceRead === work.workspaceRead,
       );
       if (
         previous?.status === "completed" &&
         previous.mode === work.mode &&
-        previous.workspaceId === work.workspaceId
+        previous.workspaceId === work.workspaceId &&
+        previous.workspaceRevision === work.workspaceRevision &&
+        previous.workspaceRead === work.workspaceRead
       ) {
         const source = this.session(previous.id);
         session.sourceGraphThreadId = source.graphThreadId;
@@ -177,20 +187,18 @@ export class ConversationStore {
     work: Work,
     receipt: { id: string; text: string; createdAt: string },
   ) {
-    const base = conversationMessageSchema
-      .omit({ sequence: true })
-      .parse({
-        id: "steer:" + receipt.id,
-        conversationId: this.main().id,
-        workId: work.id,
-        runId: work.runId,
-        executionSessionId: work.executionSessionId,
-        role: "user",
-        source: "steering",
-        text: this.store.publicEvidence(receipt.text),
-        status: work.status,
-        createdAt: receipt.createdAt,
-      });
+    const base = conversationMessageSchema.omit({ sequence: true }).parse({
+      id: "steer:" + receipt.id,
+      conversationId: this.main().id,
+      workId: work.id,
+      runId: work.runId,
+      executionSessionId: work.executionSessionId,
+      role: "user",
+      source: "steering",
+      text: this.store.publicEvidence(receipt.text),
+      status: work.status,
+      createdAt: receipt.createdAt,
+    });
     this.store.db
       .prepare(
         "INSERT OR IGNORE INTO conversation_history(id,conversation_id,work_id,data) VALUES(?,?,?,?)",

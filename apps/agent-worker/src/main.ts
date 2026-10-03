@@ -278,7 +278,10 @@ async function invoke(requestId: string, decision?: "approve" | "reject") {
       {
         configurable: { thread_id: owner.runId },
         signal: abort.signal,
-        recursionLimit: 30,
+        recursionLimit:
+          owner.payload.kind === "start"
+            ? (owner.payload.graphStepLimit ?? 832)
+            : 832,
         durability: "sync",
       },
     );

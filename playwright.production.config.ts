@@ -2,7 +2,11 @@ import { defineConfig } from "@playwright/test";
 import base from "./playwright.config.js";
 export default defineConfig({
   testDir: "tests/e2e",
-  testMatch: ["mcp-work.spec.ts", "workspaces.spec.ts"],
+  testMatch: [
+    "mcp-work.spec.ts",
+    "workspaces.spec.ts",
+    "workspace-read.spec.ts",
+  ],
   workers: 1,
   projects: [{ name: "production-path" }],
   timeout: 30000,

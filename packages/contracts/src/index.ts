@@ -38,10 +38,30 @@ export const submissionSchema = z
     mode: z.enum(["fixture", "configured"]),
     kind: z.enum(["main", "background"]).default("main"),
     workspaceId: idSchema.optional(),
+    workspaceRevision: revisionSchema.optional(),
+    workspaceRead: z.boolean().optional(),
     modelSelection: modelSelectionSchema.optional(),
     modelBudget: modelBudgetSchema.optional(),
   })
   .strict()
+  .refine((value) => !value.workspaceRevision || !!value.workspaceId, {
+    message: "Workspace revision requires an id",
+  })
+  .refine(
+    (value) =>
+      value.mode !== "configured" ||
+      !!value.workspaceId === !!value.workspaceRevision,
+    { message: "Configured workspace requires an exact registered revision" },
+  )
+  .refine(
+    (value) =>
+      !value.workspaceRead ||
+      (value.mode === "configured" && !!value.workspaceRevision),
+    {
+      message:
+        "Workspace read scope requires a configured registered workspace",
+    },
+  )
   .refine(
     (value) =>
       (value.mode === "configured") === (value.modelSelection !== undefined),
@@ -99,6 +119,8 @@ export const workSchema = z
     mode: z.enum(["fixture", "configured"]),
     kind: z.enum(["main", "background"]).optional(),
     workspaceId: idSchema.optional(),
+    workspaceRevision: revisionSchema.optional(),
+    workspaceRead: z.boolean().optional(),
     wallBudgetMs: z.number().int().min(100).max(14400000).optional(),
     modelSelection: modelSelectionSchema.optional(),
     modelBudget: modelBudgetSchema.optional(),

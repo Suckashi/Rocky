@@ -65,8 +65,8 @@ export function WorkGrants({
       <summary>{locale === "zh" ? "此工作權限" : "Work permissions"}</summary>
       <p>
         {locale === "zh"
-          ? "僅限此工作的合成工具。撤銷可阻止後續使用，不會撤回已送出的操作。"
-          : "Synthetic tools for this work only. Revocation blocks future use; it does not undo dispatched operations."}
+          ? "權限只限此工作。撤銷可阻止後續使用，不會撤回已送出的操作。"
+          : "Permissions apply only to this Work. Revocation blocks future use; it does not undo dispatched operations."}
       </p>
       {error && <p role="alert">{error}</p>}
       {grants.map((grant) => (
@@ -74,8 +74,12 @@ export function WorkGrants({
           <span>
             {grant.effect === "known_read"
               ? locale === "zh"
-                ? "讀取合成資料"
-                : "Read synthetic data"
+                ? work.mode === "configured"
+                  ? "讀取綁定的工作區"
+                  : "讀取合成資料"
+                : work.mode === "configured"
+                  ? "Read bound workspace"
+                  : "Read synthetic data"
               : locale === "zh"
                 ? "建立新項目"
                 : "Create new items"}

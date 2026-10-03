@@ -20,6 +20,7 @@ export const ipcMessageSchema = z
     payload: z.discriminatedUnion("kind", [
       z.strictObject({
         kind: z.literal("start"),
+        graphStepLimit: z.number().int().min(64).max(160064).optional(),
         text: z.string().max(32768),
         mode: z.enum(["fixture", "configured"]).optional(),
         graphPath: z.string().max(4096).optional(),
