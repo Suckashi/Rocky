@@ -198,7 +198,7 @@ export class WorkspaceRegistry {
       );
     return workspace;
   }
-  private check(root: string, path: string) {
+  check(root: string, path: string) {
     if (sensitive(path) || within(this.store.root, resolve(root, path)))
       throw denied();
   }

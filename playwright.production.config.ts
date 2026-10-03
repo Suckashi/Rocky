@@ -6,6 +6,7 @@ export default defineConfig({
     "mcp-work.spec.ts",
     "workspaces.spec.ts",
     "workspace-read.spec.ts",
+    "workspace-write.spec.ts",
   ],
   workers: 1,
   projects: [{ name: "production-path" }],

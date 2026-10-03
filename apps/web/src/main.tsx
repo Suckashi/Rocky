@@ -327,7 +327,11 @@ function App() {
                           ? locale === "zh"
                             ? "這將呼叫你配置的外部 MCP 伺服器，可能改變外部資料。"
                             : "This calls your configured MCP server and may change external data."
-                          : t.impact}
+                          : w.approval.tool === "workspace_write"
+                            ? locale === "zh"
+                              ? "這將在選定工作區建立或完整取代一個檔案。"
+                              : "This creates or fully replaces one file in the selected workspace."
+                            : t.impact}
                       </p>
                       {["mcp_call", "mcp_data"].includes(w.approval.tool) ? (
                         <>
@@ -400,6 +404,42 @@ function App() {
                             </pre>
                           </details>
                         </>
+                      ) : w.approval.tool === "workspace_write" ? (
+                        <>
+                          <p>
+                            <strong>{String(w.approval.args.path)}</strong>
+                          </p>
+                          <p>
+                            {locale === "zh"
+                              ? "核准只適用下方完整新內容；檔案若已改變，本次寫入會停止。拒絕不會更動檔案。"
+                              : "Approval covers the complete new content below. A changed file stops this write. Rejection leaves the file unchanged."}
+                          </p>
+                          <details open>
+                            <summary>
+                              {locale === "zh"
+                                ? "待寫入完整內容"
+                                : "Complete proposed content"}
+                            </summary>
+                            <pre className="approval-proposal" tabIndex={0}>
+                              {String(w.approval.args.content)}
+                            </pre>
+                          </details>
+                          <details>
+                            <summary>
+                              {locale === "zh"
+                                ? "原始檔案驗證"
+                                : "Original file verification"}
+                            </summary>
+                            <code>
+                              {String(
+                                w.approval.args.expectedHash ??
+                                  (locale === "zh"
+                                    ? "新檔案：目標必須不存在"
+                                    : "New file: target must not exist"),
+                              )}
+                            </code>
+                          </details>
+                        </>
                       ) : (
                         <code>
                           {w.approval.tool}({JSON.stringify(w.approval.args)})
@@ -410,7 +450,9 @@ function App() {
                           className="primary"
                           onClick={() => void decide(w, "approve")}
                         >
-                          {["mcp_call", "mcp_data"].includes(w.approval.tool)
+                          {["mcp_call", "mcp_data", "workspace_write"].includes(
+                            w.approval.tool,
+                          )
                             ? locale === "zh"
                               ? "核准這次操作"
                               : "Approve this operation"

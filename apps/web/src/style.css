@@ -364,6 +364,10 @@ li {
   font-size: 13px;
   line-height: 1.65;
 }
+.approval-proposal {
+  margin: 14px 22px 18px;
+  max-height: 240px;
+}
 .approval code {
   display: block;
   margin: 14px 22px 18px;

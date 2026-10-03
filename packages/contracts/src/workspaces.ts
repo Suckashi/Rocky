@@ -1,4 +1,12 @@
 import { z } from "zod";
+export const workspaceWriteSchema = z.strictObject({
+  path: z.string().min(1).max(4096),
+  content: z.string().max(65536),
+  expectedHash: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/)
+    .nullable(),
+});
 export const workspaceToolSchema = z.strictObject({
   path: z.string().max(4096).default(""),
 });
