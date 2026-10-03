@@ -1,0 +1,89 @@
+{
+  "commit": "bd76a3da3fef0830a2acfc6499fc3f9d5d42d2df",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "df4ff0e83669da0aaf947a7010eb6969f57841eb76b16f386e3ef3580fbd6f6a",
+  "mode": "fixture",
+  "recordedAt": "2026-10-03T03:53:58.358Z",
+  "tasks": ["T-003", "T-012 (partial prerequisite contribution only)"],
+  "commands": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "passed": 14,
+      "files": 7
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "warning": "Existing large client chunks remain"
+    },
+    {
+      "command": "npm run test:network",
+      "exitCode": 0,
+      "networkTests": 2,
+      "evaluationCases": 4
+    },
+    {
+      "command": "npm run test:e2e (ROCKY_TEST_BROWSER=Chromium 1223)",
+      "exitCode": 1,
+      "stats": {
+        "startTime": "2026-10-03T03:52:30.587Z",
+        "duration": 8382.9,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "passed": [
+        "Native task/MCP/approval/reload/mobile",
+        "Stop/expire approval/reload"
+      ],
+      "failed": ["Strict browser egress: host AdGuard injection"]
+    },
+    {
+      "command": "npm run format:check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    }
+  ],
+  "testFiles": [
+    "tests/stop.test.ts",
+    "tests/http.test.ts",
+    "tests/store.test.ts",
+    "tests/e2e/work.spec.ts"
+  ],
+  "verified": [
+    "Stale run/session/revision rejected before cancellation",
+    "Duplicate stop has no second event/effect and survives restart",
+    "Same requestId with changed target/content conflicts",
+    "Other concurrent Work stays waiting for its own approval",
+    "Unknown dispatched outcome stays blocked for reconciliation",
+    "Stop and shutdown share one resource cleanup promise",
+    "Streamed bytes capped at 65536 without Content-Length",
+    "Malformed JSON returns 400 without echoing private input",
+    "Session responses use no-store"
+  ],
+  "limitations": [
+    "Ubuntu not_run",
+    "No live endpoints",
+    "Synthetic operation result-loss boundary, not real remote crash injection",
+    "No worker IPC, steering, full retry/reconciliation implementation; T-012 not complete",
+    "Dependency set unchanged; clean install was not repeated this turn",
+    "Strict browser egress remains failed; original P0 gate remains open"
+  ],
+  "requirementIds": ["R-010", "R-011", "R-016", "R-038"],
+  "acceptanceContributions": ["AT-11", "AT-14", "AT-17", "AT-54"],
+  "acceptanceStatus": "partial evidence only; global acceptance remains not_run"
+}
