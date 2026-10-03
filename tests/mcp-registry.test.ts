@@ -98,6 +98,10 @@ test("MCP settings use atomic CAS and persistent receipts, isolated launch env/p
       expect(launch.args).toEqual(["./tools/server.js"]);
     }
     expect(() => registry.launchSpec("remote", 1)).toThrow("disabled");
+    expect(() => registry.launchSpec("local", 0)).toThrow("changed");
+    expect(() => new McpRegistry(store, {}).launchSpec("local", 1)).toThrow(
+      "unavailable",
+    );
     const bad = config();
     bad.mcpServers.local.args = ["synthetic-mcp-credential"];
     expect(() =>
