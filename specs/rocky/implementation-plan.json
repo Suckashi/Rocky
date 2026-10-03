@@ -1086,6 +1086,29 @@
             "Persistent grants/production target resolution/audit redaction remain pending",
             "No live/remote/browser action; existing external gates unchanged"
           ]
+        },
+        {
+          "commit": "9f91549695deb8131a5fbfa056b4e5fde68b0fec",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/policy/redaction.json",
+          "testFiles": [
+            "tests/redaction.test.ts",
+            "tests/http.test.ts",
+            "tests/runtime.test.ts"
+          ],
+          "limitations": [
+            "Recognized credential fields/patterns and currently configured model secret values only; not universal secret detection",
+            "Private Work rows, checkpoints and operation results are not comprehensively scrubbed by this public projection layer",
+            "Retired credential values unavailable after environment/config changes may not be recognized unless matching a pattern",
+            "No historical event rewrite; HTTP/SSE projection masks recognized values when served",
+            "T-008 remains in_progress: grants, production target resolution and concrete reconciliation adapter/UI remain",
+            "No browser/live/remote action; existing Ubuntu/browser egress gates unchanged"
+          ]
         }
       ],
       "blockedReason": null,

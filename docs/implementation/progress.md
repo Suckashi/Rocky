@@ -156,3 +156,11 @@ Implementation `8d3bfea22a1fab258d53b5ee3abb84bb50db3878` adds a trusted adapter
 Seven reconciliation/ledger tests passed. A synthetic receipt file demonstrates result-loss recovery without tool replay; cancellation, evidence mismatch, concurrent CAS and restart idempotency are covered. Typecheck, server build, lint, format and source guards passed. See [reconciliation evidence](evidence/2026-10-03/policy/reconciliation.json).
 
 This is a core seam, not a completed user-facing reconciliation flow: real status adapters and owner API/UI are pending, alongside grants, target resolvers and redaction. No client may submit an outcome through HTTP. T-008 and Goal remain active; no live or remote action.
+
+## T-008 continuation: public evidence redaction
+
+Implementation `9f91549695deb8131a5fbfa056b4e5fde68b0fec` masks recognized credential fields/patterns and current configured model secret values before new domain event persistence, and at HTTP/SSE/AG-UI output. Nested JSON tool text is handled without changing ordinary text formatting; public numeric usage is retained. The dedicated local session bootstrap remains functional.
+
+All 77 tests across 22 files passed, plus typecheck, server build, lint and formatting. Tests inject synthetic credentials into tool evidence and Work text, verify persisted events and public projections, and explicitly show that private Work storage is not a scrubbed export. See [redaction evidence](evidence/2026-10-03/policy/redaction.json).
+
+This is not universal DLP or complete private-data retention handling. Old unavailable secret values, private checkpoints/results and diagnostics require later lifecycle/export work. T-008 remains in_progress for grants, actual target resolvers and concrete reconciliation integration. Goal active; no live/remote actions.
