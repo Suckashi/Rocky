@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { EventSchemas } from "@ag-ui/core/schemas";
+import { modelBudgetSchema } from "./model-budget.js";
 export const API_PREFIX = "/api/v1";
 export const idSchema = z.uuid();
 export const revisionSchema = z.number().int().positive();
@@ -36,6 +37,7 @@ export const submissionSchema = z
     transport: z.enum(["stdio", "http"]).default("stdio"),
     mode: z.enum(["fixture", "configured"]),
     modelSelection: modelSelectionSchema.optional(),
+    modelBudget: modelBudgetSchema.optional(),
   })
   .strict()
   .refine(
@@ -81,6 +83,7 @@ export const workSchema = z
     transport: z.enum(["stdio", "http"]),
     mode: z.enum(["fixture", "configured"]),
     modelSelection: modelSelectionSchema.optional(),
+    modelBudget: modelBudgetSchema.optional(),
     runMode: z.enum(["normal", "evaluation", "unknown"]),
     status: workStatus,
     revision: revisionSchema,

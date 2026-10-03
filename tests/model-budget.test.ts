@@ -188,3 +188,75 @@ test("T-007 actual Work path refuses the next model dispatch when its root call 
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("T-007 submission freezes custom budget across receipts, CAS and restart", async () => {
+  const root = mkdtempSync(join(tmpdir(), "rocky-budget-submit-"));
+  const service = new WorkService(root);
+  let closed = false;
+  try {
+    const command = {
+      requestId: randomUUID(),
+      text: "Bounded fixture",
+      mode: "fixture",
+      transport: "http",
+      modelBudget: { maxCalls: 1 },
+    };
+    const work = service.submit(command);
+    expect(service.modelBudgets.snapshot(work.runId).budget.maxCalls).toBe(1);
+    expect(service.submit(command).id).toBe(work.id);
+    expect(() =>
+      service.submit({ ...command, modelBudget: { maxCalls: 2 } }),
+    ).toThrow("different content");
+    expect(() =>
+      service.store.save(
+        {
+          ...work,
+          revision: 2,
+          modelBudget: { ...work.modelBudget!, maxCalls: 2 },
+        },
+        1,
+      ),
+    ).toThrow("revision changed");
+    await expect.poll(() => service.store.get(work.id).status).toBe("failed");
+    expect(service.modelBudgets.snapshot(work.runId).calls).toBe(1);
+    await service.close();
+    closed = true;
+    const reopened = new Store(root);
+    try {
+      const ledger = new ModelBudgetLedger(reopened);
+      expect(ledger.snapshot(work.runId).budget.maxCalls).toBe(1);
+      expect(ledger.snapshot(work.runId).calls).toBe(1);
+      expect(() => ledger.open(work.runId, { maxCalls: 48 })).toThrow(
+        "immutable",
+      );
+      expect(reopened.get(work.id).modelBudget?.maxCalls).toBe(1);
+    } finally {
+      reopened.close();
+    }
+  } finally {
+    if (!closed) await service.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("T-007 submitted token cap fails closed before dispatch when no trusted bounds exist", async () => {
+  const root = mkdtempSync(join(tmpdir(), "rocky-budget-no-bounds-"));
+  const service = new WorkService(root);
+  try {
+    const work = service.submit({
+      requestId: randomUUID(),
+      text: "Never guess tokens",
+      mode: "fixture",
+      transport: "http",
+      modelBudget: { maxTokens: 1000 },
+    });
+    await expect.poll(() => service.store.get(work.id).status).toBe("failed");
+    expect(service.modelBudgets.snapshot(work.runId).calls).toBe(0);
+    expect(
+      service.store.db.prepare("SELECT * FROM operations").all(),
+    ).toHaveLength(0);
+  } finally {
+    await service.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});

@@ -11,6 +11,7 @@ import {
   modelSelectionSchema,
 } from "../../../packages/contracts/src/index.js";
 import { WorkService } from "./work-service.js";
+import { modelBudgetSchema } from "../../../packages/contracts/src/model-budget.js";
 async function readJson(c: Context): Promise<unknown> {
   try {
     return await c.req.json();
@@ -216,6 +217,7 @@ export function createApp(service: WorkService) {
       .object({
         mode: z.enum(["fixture", "configured"]),
         modelSelection: modelSelectionSchema.optional(),
+        modelBudget: modelBudgetSchema.optional(),
         transport: z.enum(["stdio", "http"]),
       })
       .strict()

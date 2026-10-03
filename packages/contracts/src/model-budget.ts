@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema } from "./index.js";
+const idSchema = z.uuid();
 const count = z.number().int().min(0).max(1000000000);
 export const modelBudgetSchema = z
   .strictObject({

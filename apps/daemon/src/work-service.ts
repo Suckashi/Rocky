@@ -120,6 +120,7 @@ export class WorkService {
       text: parsed.text,
       transport: parsed.transport,
       mode: parsed.mode,
+      ...(parsed.modelBudget ? { modelBudget: parsed.modelBudget } : {}),
       ...(parsed.modelSelection
         ? { modelSelection: parsed.modelSelection }
         : {}),
@@ -131,6 +132,7 @@ export class WorkService {
     };
     this.store.transaction(() => {
       this.store.add(work, intent);
+      this.modelBudgets.open(work.runId, work.modelBudget);
       this.store.event(work, "rocky.work.updated", { work });
     });
     this.flushOutbox();
@@ -167,7 +169,7 @@ export class WorkService {
       if (abort.signal.aborted) {
         return;
       }
-      this.modelBudgets.open(work.runId);
+      this.modelBudgets.open(work.runId, work.modelBudget);
       const selection = work.modelSelection;
       const configuredModels = selection
         ? (() => {

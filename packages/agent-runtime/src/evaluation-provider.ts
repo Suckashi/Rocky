@@ -4,11 +4,16 @@ import type { WorkService } from "../../../apps/daemon/src/work-service.js";
 import { z } from "zod";
 import { modelSelectionSchema } from "../../contracts/src/index.js";
 import { allowEvaluationEndpoint } from "./evaluation-egress.js";
+import { modelBudgetSchema } from "../../contracts/src/model-budget.js";
 const targetSchema = z.discriminatedUnion("mode", [
-  z.strictObject({ mode: z.literal("fixture") }),
+  z.strictObject({
+    mode: z.literal("fixture"),
+    modelBudget: modelBudgetSchema.optional(),
+  }),
   z.strictObject({
     mode: z.literal("configured"),
     modelSelection: modelSelectionSchema,
+    modelBudget: modelBudgetSchema.optional(),
   }),
 ]);
 const caseSchema = z
@@ -21,7 +26,7 @@ export class RockyEvaluationProvider {
   private readonly target: z.infer<typeof targetSchema>;
   constructor(
     private readonly service: WorkService,
-    target: z.infer<typeof targetSchema> = { mode: "fixture" },
+    target: z.input<typeof targetSchema> = { mode: "fixture" },
   ) {
     // Trusted suite configuration only. Prompt/case text cannot select a provider.
     this.target = targetSchema.parse(target);

@@ -27,7 +27,15 @@ try {
         ),
       }
     : { mode: "fixture" as const };
-  const provider = new RockyEvaluationProvider(service, target);
+  const { modelBudgetSchema } =
+    await import("../packages/contracts/src/model-budget.js");
+  const modelBudget = process.env.ROCKY_EVAL_MODEL_BUDGET
+    ? modelBudgetSchema.parse(JSON.parse(process.env.ROCKY_EVAL_MODEL_BUDGET))
+    : undefined;
+  const provider = new RockyEvaluationProvider(service, {
+    ...target,
+    ...(modelBudget ? { modelBudget } : {}),
+  });
   const cases = (["stdio", "http"] as const).flatMap((transport) =>
     (["approve", "reject"] as const).map((decision) => ({
       vars: { case: JSON.stringify({ transport, decision }) },
