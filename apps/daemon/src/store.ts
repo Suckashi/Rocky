@@ -5,9 +5,6 @@ import {
   readFileSync,
   writeFileSync,
   existsSync,
-  openSync,
-  closeSync,
-  unlinkSync,
 } from "node:fs";
 import { resolve, join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -21,13 +18,17 @@ import {
   publicEventSchema,
   sequenceSchema,
   snapshotSchema,
+  completionSchema,
   type Work,
   type PublicEvent,
 } from "../../../packages/contracts/src/index.js";
+import { acquireWriterLock } from "./writer-lock.js";
 export class Store {
   readonly db: DatabaseSync;
   readonly root: string;
-  private lock: number;
+  private releaseLock: () => void;
+  private inTransaction = false;
+  private closed = false;
   constructor(root: string) {
     this.root = resolve(root);
     mkdirSync(this.root, { recursive: true });
@@ -56,35 +57,15 @@ export class Store {
         }),
       );
     }
-    const lockPath = join(this.root, "daemon.lock");
+    this.releaseLock = acquireWriterLock(this.root);
+    let database: DatabaseSync | undefined;
     try {
-      this.lock = openSync(lockPath, "wx");
-      writeFileSync(this.lock, String(process.pid));
-    } catch {
-      let alive = true;
-      try {
-        const pid = Number(readFileSync(lockPath, "utf8"));
-        if (!Number.isSafeInteger(pid) || pid < 1) throw Error("Invalid lock");
-        process.kill(pid, 0);
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === "ESRCH") alive = false;
-      }
-      if (alive)
-        throw new RockyError(
-          "store_locked",
-          "Another daemon owns this data directory",
-          409,
-        );
-      unlinkSync(lockPath);
-      this.lock = openSync(lockPath, "wx");
-      writeFileSync(this.lock, String(process.pid));
-    }
-    this.db = new DatabaseSync(join(this.root, "domain.sqlite"));
-    try {
+      database = new DatabaseSync(join(this.root, "domain.sqlite"));
+      this.db = database;
       const version = (
         this.db.prepare("PRAGMA user_version").get() as { user_version: number }
       ).user_version;
-      if (version > 1)
+      if (version > 2)
         throw new RockyError(
           "unsupported_store",
           "Rocky store version is newer than this application",
@@ -111,7 +92,9 @@ export class Store {
             const work = JSON.parse(row.data);
             work.executionSessionId ??= work.runId;
             work.runMode ??= "unknown";
-            this.save(workSchema.parse(work));
+            this.db
+              .prepare("UPDATE works SET data=? WHERE id=?")
+              .run(JSON.stringify(workSchema.parse(work)), work.id);
           }
           for (const row of this.db
             .prepare(
@@ -137,15 +120,30 @@ export class Store {
           }
           this.db.exec("PRAGMA user_version=1");
         });
+      if (version < 2)
+        this.transaction(() => {
+          this.db.exec(
+            "CREATE TABLE IF NOT EXISTS outbox(event_id TEXT PRIMARY KEY, sequence INTEGER UNIQUE NOT NULL REFERENCES events(sequence), delivered_at TEXT); CREATE TABLE IF NOT EXISTS completion_messages(id TEXT PRIMARY KEY, work_id TEXT UNIQUE NOT NULL, sequence INTEGER UNIQUE NOT NULL, data TEXT NOT NULL)",
+          );
+          this.db.exec(
+            "INSERT OR IGNORE INTO outbox(event_id,sequence) SELECT json_extract(data,'$.id'),sequence FROM events; PRAGMA user_version=2",
+          );
+        });
     } catch (error) {
-      this.db.close();
-      closeSync(this.lock);
-      unlinkSync(lockPath);
+      database?.close();
+      this.releaseLock();
       throw error;
     }
   }
   transaction<T>(fn: () => T): T {
+    if (this.inTransaction)
+      throw new RockyError(
+        "nested_transaction",
+        "Nested domain transaction is not allowed",
+        500,
+      );
     this.db.exec("BEGIN IMMEDIATE");
+    this.inTransaction = true;
     try {
       const result = fn();
       this.db.exec("COMMIT");
@@ -153,6 +151,8 @@ export class Store {
     } catch (error) {
       this.db.exec("ROLLBACK");
       throw error;
+    } finally {
+      this.inTransaction = false;
     }
   }
   list(): Work[] {
@@ -184,12 +184,35 @@ export class Store {
         JSON.stringify(workSchema.parse(work)),
       );
   }
-  save(work: Work) {
-    this.db
-      .prepare("UPDATE works SET data=? WHERE id=?")
-      .run(JSON.stringify(workSchema.parse(work)), work.id);
+  save(work: Work, expectedRevision: number) {
+    if (
+      !Number.isSafeInteger(expectedRevision) ||
+      expectedRevision < 1 ||
+      work.revision !== expectedRevision + 1
+    )
+      throw new RockyError(
+        "revision_conflict",
+        "Work revision must advance exactly once",
+        409,
+      );
+    const result = this.db
+      .prepare(
+        "UPDATE works SET data=? WHERE id=? AND json_extract(data,'$.revision')=? AND request_id=? AND json_extract(data,'$.runId')=? AND json_extract(data,'$.executionSessionId')=?",
+      )
+      .run(
+        JSON.stringify(workSchema.parse(work)),
+        work.id,
+        expectedRevision,
+        work.requestId,
+        work.runId,
+        work.executionSessionId,
+      );
+    if (result.changes !== 1)
+      throw new RockyError("revision_conflict", "Work revision changed", 409);
   }
-  event(work: Work, name: string, data: Record<string, unknown>) {
+  event(work: Work, name: string, data: Record<string, unknown>): PublicEvent {
+    if (!this.inTransaction)
+      return this.transaction(() => this.event(work, name, data));
     const base = publicEventSchema.omit({ sequence: true }).parse({
       schemaVersion: 1 as const,
       id: randomUUID(),
@@ -205,6 +228,9 @@ export class Store {
     const { sequence } = this.db
       .prepare("SELECT CAST(last_insert_rowid() AS TEXT) AS sequence")
       .get() as { sequence: string };
+    this.db
+      .prepare("INSERT INTO outbox(event_id,sequence) VALUES(?,?)")
+      .run(base.id, sequence);
     return publicEventSchema.parse({
       ...base,
       sequence,
@@ -266,9 +292,103 @@ export class Store {
       .get() as { id: string };
     return assistantSchema.parse({ id: row.id, ...ROCKY_IDENTITY });
   }
+  dispatchOutbox(deliver: (event: PublicEvent) => void, limit = 100) {
+    if (this.inTransaction)
+      throw new RockyError(
+        "uncommitted_delivery",
+        "Cannot deliver before commit",
+        500,
+      );
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000)
+      throw new RockyError(
+        "invalid_limit",
+        "Outbox batch limit must be 1–1000",
+      );
+    const rows = this.db
+      .prepare(
+        "SELECT CAST(e.sequence AS TEXT) AS sequence,e.data FROM outbox o JOIN events e ON e.sequence=o.sequence WHERE o.delivered_at IS NULL ORDER BY o.sequence LIMIT ?",
+      )
+      .all(limit) as { sequence: string; data: string }[];
+    for (const row of rows) {
+      const event = publicEventSchema.parse({
+        ...JSON.parse(row.data),
+        sequence: row.sequence,
+      });
+      // Delivery can be repeated after a crash; the callback must never execute tools.
+      deliver(event);
+      this.transaction(() => {
+        if (
+          event.payload.kind === "domain" &&
+          event.payload.name === "rocky.work.updated"
+        ) {
+          const work = workSchema.parse(event.payload.data.work);
+          if (
+            [
+              "completed",
+              "failed",
+              "cancelled",
+              "blocked",
+              "interrupted",
+            ].includes(work.status)
+          ) {
+            const message = completionSchema.parse({
+              id: "work-result:" + work.id,
+              workId: work.id,
+              runId: work.runId,
+              sequence: row.sequence,
+              status: work.status,
+              text: work.answer,
+              error: work.error,
+              createdAt: event.timestamp,
+            });
+            this.db
+              .prepare(
+                "INSERT OR IGNORE INTO completion_messages VALUES(?,?,?,?)",
+              )
+              .run(message.id, work.id, row.sequence, JSON.stringify(message));
+          }
+        }
+        this.db
+          .prepare("UPDATE outbox SET delivered_at=? WHERE event_id=?")
+          .run(new Date().toISOString(), event.id);
+      });
+    }
+    return rows.length;
+  }
+  completions(before?: string, limit = 50) {
+    if (before !== undefined && !sequenceSchema.safeParse(before).success)
+      throw new RockyError("invalid_cursor", "Invalid cursor");
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100)
+      throw new RockyError("invalid_limit", "Message limit must be 1–100");
+    const rows = this.db
+      .prepare(
+        "SELECT data FROM completion_messages WHERE (? IS NULL OR sequence < ?) ORDER BY sequence DESC LIMIT ?",
+      )
+      .all(before ?? null, before ?? null, limit + 1) as { data: string }[];
+    const messages = rows
+      .slice(0, limit)
+      .map((row) => completionSchema.parse(JSON.parse(row.data)));
+    return {
+      messages: messages.reverse(),
+      nextCursor: rows.length > limit ? messages[0]!.sequence : null,
+    };
+  }
+  pendingDeliveries() {
+    return (
+      this.db
+        .prepare(
+          "SELECT count(*) AS count FROM outbox WHERE delivered_at IS NULL",
+        )
+        .get() as { count: number }
+    ).count;
+  }
   close() {
-    this.db.close();
-    closeSync(this.lock);
-    unlinkSync(join(this.root, "daemon.lock"));
+    if (this.closed) return;
+    this.closed = true;
+    try {
+      this.db.close();
+    } finally {
+      this.releaseLock();
+    }
   }
 }

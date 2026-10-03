@@ -101,7 +101,7 @@ test("snapshot high water and replay preserve newer revisions and deduplicate ev
     const snapshot = store.snapshot();
     expect(snapshot.cursor).toBe(old.sequence);
     const newer = { ...work, status: "running" as const, revision: 2 };
-    store.save(newer);
+    store.save(newer, work.revision);
     const event = store.event(newer, "rocky.work.updated", { work: newer });
     expect(store.events(snapshot.cursor)).toEqual([event]);
     const projected = projectWork(snapshot.works, event);

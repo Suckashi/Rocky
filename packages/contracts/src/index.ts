@@ -147,6 +147,24 @@ export const errorSchema = z
     details: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
+export const completionSchema = z
+  .object({
+    id: z.string().regex(/^work-result:[0-9a-f-]{36}$/),
+    workId: idSchema,
+    runId: idSchema,
+    sequence: sequenceSchema,
+    status: z.enum([
+      "completed",
+      "failed",
+      "cancelled",
+      "blocked",
+      "interrupted",
+    ]),
+    text: z.string(),
+    error: z.string().optional(),
+    createdAt: timestampSchema,
+  })
+  .strict();
 export const environmentSchema = z
   .object({ ROCKY_DATA_DIR: z.string().trim().min(1).optional() })
   .strict();

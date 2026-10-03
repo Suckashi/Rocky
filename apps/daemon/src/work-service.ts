@@ -12,7 +12,6 @@ import {
   stopSchema,
   RockyError,
   type Work,
-  type PublicEvent,
 } from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
@@ -33,35 +32,57 @@ export class WorkService {
   readonly events = new EventEmitter();
   private active = new Map<string, Active>();
   private stopping = false;
+  private deliveryTimer: ReturnType<typeof setInterval>;
+  deliveryError: string | null = null;
   constructor(root: string) {
     this.store = new Store(root);
-    this.saver = SqliteSaver.fromConnString(
-      join(this.store.root, "graph-checkpoints.sqlite"),
-    );
-    // Never auto-replay an interrupted external action.
-    for (const work of this.store.list())
-      if (["running", "waiting_approval", "queued"].includes(work.status)) {
-        work.status = "blocked";
-        work.error =
-          "Daemon restarted; review prior effects before starting a new work.";
-        if (work.approval?.status === "pending")
-          work.approval.status = "expired";
-        this.update(work);
-      }
+    let saver: SqliteSaver | undefined;
+    try {
+      saver = SqliteSaver.fromConnString(
+        join(this.store.root, "graph-checkpoints.sqlite"),
+      );
+      this.saver = saver;
+      // Never auto-replay an interrupted external action.
+      for (const work of this.store.list())
+        if (["running", "waiting_approval", "queued"].includes(work.status)) {
+          work.status = "blocked";
+          work.error =
+            "Daemon restarted; review prior effects before starting a new work.";
+          if (work.approval?.status === "pending")
+            work.approval.status = "expired";
+          this.update(work);
+        }
+      this.flushOutbox();
+      this.deliveryTimer = setInterval(() => this.flushOutbox(), 500);
+      this.deliveryTimer.unref();
+    } catch (error) {
+      saver?.db.close();
+      this.store.close();
+      throw error;
+    }
+  }
+  private flushOutbox() {
+    try {
+      this.store.dispatchOutbox((event) => {
+        this.events.emit("event", event);
+      }, 1000);
+      this.deliveryError = null;
+    } catch {
+      this.deliveryError = "Pending event delivery will be retried";
+    }
   }
   emit(work: Work, name: string, data: Record<string, unknown>) {
     const event = this.store.event(work, name, data);
-    this.events.emit("event", event);
+    this.flushOutbox();
     return event;
   }
   update(work: Work) {
     work.revision++;
-    let event: PublicEvent;
     this.store.transaction(() => {
-      this.store.save(work);
-      event = this.store.event(work, "rocky.work.updated", { work });
+      this.store.save(work, work.revision - 1);
+      this.store.event(work, "rocky.work.updated", { work });
     });
-    this.events.emit("event", event!);
+    this.flushOutbox();
   }
   submit(input: unknown, runMode: "normal" | "evaluation" = "normal") {
     if (this.stopping)
@@ -98,6 +119,7 @@ export class WorkService {
       this.store.add(work, intent);
       this.store.event(work, "rocky.work.updated", { work });
     });
+    this.flushOutbox();
     const abort = new AbortController();
     // Reserve before the first asynchronous connection, so stop and capacity checks are exact.
     const promise = this.start(work, abort);
@@ -180,14 +202,17 @@ export class WorkService {
               "Tool is not in fixture scope",
               403,
             );
-          this.store.db
-            .prepare("INSERT INTO operations VALUES(?,?,?,NULL)")
-            .run(identity, argsHash, "unknown");
-          this.emit(current, "rocky.operation.dispatched", {
-            operationId: identity,
-            name,
-            destination: connection.destination,
+          this.store.transaction(() => {
+            this.store.db
+              .prepare("INSERT INTO operations VALUES(?,?,?,NULL)")
+              .run(identity, argsHash, "unknown");
+            this.store.event(current, "rocky.operation.dispatched", {
+              operationId: identity,
+              name,
+              destination: connection.destination,
+            });
           });
+          this.flushOutbox();
           try {
             const result = await connection.client.callTool(
               { name, arguments: args },
@@ -196,14 +221,17 @@ export class WorkService {
             );
             if (result.isError) throw Error("MCP fixture returned an error");
             const serialized = JSON.stringify(result);
-            this.store.db
-              .prepare("UPDATE operations SET outcome=?, result=? WHERE id=?")
-              .run("succeeded", serialized, identity);
-            this.emit(current, "rocky.operation.succeeded", {
-              operationId: identity,
-              name,
-              result,
+            this.store.transaction(() => {
+              this.store.db
+                .prepare("UPDATE operations SET outcome=?, result=? WHERE id=?")
+                .run("succeeded", serialized, identity);
+              this.store.event(current, "rocky.operation.succeeded", {
+                operationId: identity,
+                name,
+                result,
+              });
             });
+            this.flushOutbox();
             return serialized;
           } catch (error) {
             this.emit(current, "rocky.operation.unknown", {
@@ -370,12 +398,15 @@ export class WorkService {
     work.approval.status =
       decision.decision === "approve" ? "approved" : "rejected";
     work.approval.revision++;
+    work.revision++;
     this.store.transaction(() => {
       this.store.db
         .prepare("INSERT INTO decisions VALUES(?,?,?)")
         .run(decision.requestId, intent, id);
-      this.store.save(work);
+      this.store.save(work, work.revision - 1);
+      this.store.event(work, "rocky.work.updated", { work });
     });
+    this.flushOutbox();
     const active = this.active.get(id)!;
     active.promise = this.run(id, decision.decision);
     return this.store.get(id);
@@ -428,16 +459,15 @@ export class WorkService {
         "Stopped with an unconfirmed operation outcome; reconciliation is required.";
     if (work.approval?.status === "pending") work.approval.status = "expired";
     work.revision++;
-    let event: PublicEvent;
     this.store.transaction(() => {
-      this.store.save(work);
-      event = this.store.event(work, "rocky.work.updated", { work });
+      this.store.save(work, work.revision - 1);
+      this.store.event(work, "rocky.work.updated", { work });
       if (receipt)
         this.store.db
           .prepare("INSERT INTO stop_receipts VALUES(?,?,?)")
           .run(receipt.requestId, receipt.intent, JSON.stringify(work));
     });
-    this.events.emit("event", event!);
+    this.flushOutbox();
     this.starting.get(id)?.abort.abort();
     this.active.get(id)?.abort.abort();
     const active = this.active.get(id);
@@ -448,6 +478,7 @@ export class WorkService {
   }
   async close() {
     this.stopping = true;
+    clearInterval(this.deliveryTimer);
     for (const work of this.store.list())
       if (["queued", "running", "waiting_approval"].includes(work.status))
         this.cancelWork(work.id);
@@ -459,6 +490,7 @@ export class WorkService {
       }),
     );
     this.active.clear();
+    this.flushOutbox();
     this.saver.db.close();
     this.store.close();
   }

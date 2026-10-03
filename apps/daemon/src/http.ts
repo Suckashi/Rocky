@@ -112,7 +112,15 @@ export function createApp(service: WorkService) {
   app.get("/api/v1/session", (c) => c.json({ token }));
   app.get("/api/v1/assistant", (c) => c.json(service.store.assistant()));
   app.get("/api/v1/health", (c) =>
-    c.json({ productId: "rocky", status: "ready", mode: "fixture-capable" }),
+    c.json({
+      productId: "rocky",
+      status: service.deliveryError ? "degraded" : "ready",
+      mode: "fixture-capable",
+      delivery: {
+        pending: service.store.pendingDeliveries(),
+        error: service.deliveryError,
+      },
+    }),
   );
   app.get("/api/v1/capabilities", (c) =>
     c.json({
@@ -123,6 +131,14 @@ export function createApp(service: WorkService) {
     }),
   );
   app.get("/api/v1/works", (c) => c.json({ works: service.store.list() }));
+  app.get("/api/v1/conversation/messages", (c) =>
+    c.json(
+      service.store.completions(
+        c.req.query("before"),
+        c.req.query("limit") === undefined ? 50 : Number(c.req.query("limit")),
+      ),
+    ),
+  );
   app.get("/api/v1/snapshot", (c) => {
     if (c.req.query("after") !== undefined)
       sequenceSchema.parse(c.req.query("after"));
