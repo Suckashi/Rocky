@@ -3766,6 +3766,27 @@
             "Downstream Learning/Skill derivation references are not implemented; affected-skill cleanup and full AT46 remain open",
             "Windows Node24 bundled SQLite only; Ubuntu/live/full AT36/46 not_run"
           ]
+        },
+        {
+          "commit": "d666feff90f5c07f917c01c0773aa62466e99496",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/memory.test.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts memory.spec.ts; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/memory-ui.json",
+          "testFiles": [
+            "tests/e2e/memory.spec.ts",
+            "tests/memory.test.ts"
+          ],
+          "limitations": [
+            "T-025 in_progress; Knowledge provenance and native model retrieval/permissions remain missing",
+            "Browser checks Chinese/light owner CRUD, stale CAS draft preservation, reload and four-width overflow only; project/task UI scope switching, English/dark and full keyboard matrix not_run",
+            "Screenshots are Rocky after only; no new matched OpenDots reference comparison",
+            "Drafts survive command failures but are not persisted across closing settings or reload",
+            "Search is capped at20 entries/16384 UTF8 bytes with truncation; no pagination or token-aware context budget",
+            "Learning/derived-skill cleanup and physical backup/WAL erasure are not implemented; all70 global AT unchanged"
+          ]
         }
       ],
       "blockedReason": null,

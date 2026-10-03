@@ -511,3 +511,7 @@ Screenshots: [1440](evidence/2026-10-04/document-history/document-history-1440.p
 ## Memory registry foundation (e2656034210873026b265051839401ecd5fb2983)
 
 T-025 now in_progress: schema19 owner-managed scoped Memory, CAS, fixed manual locks, FTS/substring search, bounded results and transactional deletion implemented.16 related tests/type/lint/build pass. [Report](memory-registry.md). UI, Knowledge and native permissions/consumption remain missing; no global AT pass.
+
+## Owner Memory UI (d666feff90f5c07f917c01c0773aa62466e99496)
+
+T-025 remains in_progress. Owner local scoped search/create/edit/delete UI now exists; browser validates stale revision preserves draft, explicit save, reload and deletion. Type/lint/build plus backend1/browser1 pass. [Evidence and remaining scope](memory-registry.md). Four-width after screenshots saved; no full alignment/globalAT claim. Next: Knowledge source references and native permission-bound consumption.

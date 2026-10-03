@@ -80,3 +80,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 document history (565e888edcb0fa2c0c71e34a15954bd44638fcad): previous absent-history-UI statements are superseded by revision-number browsing and explicit restore-as-new-version. Full timeline/search, blank creation and native agent/context tools remain missing.
 
 2026-10-04 Memory foundation (e2656034210873026b265051839401ecd5fb2983): previous fully-pending registry is now partial owner-only backend. UI, Knowledge sources, model read/write permission/budgets, derived-skill cleanup and AT36/46 remain open. Logical deletion is not physical backup/WAL/remote erasure. See memory-registry.md.
+
+2026-10-04 Memory UI (d666feff90f5c07f917c01c0773aa62466e99496): previous absent-owner-UI statements are historical. Owner CRUD now exists and has Chinese/light four-width browser evidence. Knowledge/native permissions, full scope/theme/keyboard UI matrix, durable drafts and derived-skill cleanup remain open. See memory-registry.md.

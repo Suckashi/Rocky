@@ -21,3 +21,18 @@ Delete removes row and FTS index in one transaction; command receipt retains onl
 - Windows Node24 bundled SQLite only; Ubuntu/live/full AT36/46 not_run
 
 Goal active; all70 global AT unchanged. No remote actions or Apsis changes.
+
+## Owner Memory interface (d666feff90f5c07f917c01c0773aa62466e99496)
+
+Collapsed Memory settings now provide user/project/task scope selectors, bounded search, explicit create/edit with status/private controls and exact-revision delete confirmation. One owner request path; no card polling. Save/delete retry reuse request identity for unchanged intent. Daemon conflicts preserve the editor draft. Manual entries remain owner-locked. Existing neutral cards/forms and semantic tokens are reused; no new upstream code copied.
+
+[Evidence](evidence/2026-10-04/memory-ui.json): type/lint/build/format pass, one backend integration test and one actual browser CRUD/CAS/reload/delete test pass. Four widths1440×900,1280×800,390×844,320×844 have no document overflow.320 screenshot visually inspected. Vite existing large-chunk warning remains.
+
+[Screenshot 1440](evidence/2026-10-04/memory-ui/after-1440.png) · [Screenshot 1280](evidence/2026-10-04/memory-ui/after-1280.png) · [Screenshot 390](evidence/2026-10-04/memory-ui/after-390.png) · [Screenshot 320](evidence/2026-10-04/memory-ui/after-320.png)
+
+- T-025 in_progress; Knowledge provenance and native model retrieval/permissions remain missing
+- Browser checks Chinese/light owner CRUD, stale CAS draft preservation, reload and four-width overflow only; project/task UI scope switching, English/dark and full keyboard matrix not_run
+- Screenshots are Rocky after only; no new matched OpenDots reference comparison
+- Drafts survive command failures but are not persisted across closing settings or reload
+- Search is capped at20 entries/16384 UTF8 bytes with truncation; no pagination or token-aware context budget
+- Learning/derived-skill cleanup and physical backup/WAL erasure are not implemented; all70 global AT unchanged
