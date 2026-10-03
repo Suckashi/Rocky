@@ -229,3 +229,9 @@ Implementation `7f973e4422d91ac355a2bdd011f42f977bc681cf` adds Rocky domain v10 
 All 93 tests in 25 files passed on Windows. The dedicated real-child tests cover normal exit, capability violations, queue overflow, shutdown and restart recovery. Typecheck, server build, lint, formatting and source guards passed. See [worker job evidence](evidence/2026-10-03/worker/job-lifecycle.json).
 
 T-009 remains in_progress: the Deep Agents runtime still runs in the daemon, and process-tree cleanup and durable job admission are not complete. Recovery cannot prove an orphaned detached process stopped. Ubuntu and strict browser egress gates remain open; no live model, remote action or global AT promotion.
+
+## T-009 continuation: actual descendant cleanup
+
+Implementation `bfbfbe111fd07ed5f5858d6bfdd3d7c75fd355bb` extends the synthetic worker to spawn a persistent Node descendant and tests shutdown of the worker process tree. The test confirms the descendant PID is alive before cancellation and absent afterward; it also has its own leak cleanup for failures. Seven worker tests passed, plus typecheck, server build, lint, formatting and source guards. See [process tree evidence](evidence/2026-10-03/worker/process-tree.json).
+
+This Windows test covers one real descendant, not every process-tree shape or Ubuntu. It does not prove an already dispatched external effect stopped. T-009 remains in_progress until native Agent execution and daemon IPC integration are complete; no global AT promotion, live model or remote action.

@@ -1313,6 +1313,25 @@
             "Ubuntu and strict browser egress remain unverified; no live model or remote repository action",
             "T-009 remains in_progress; no global acceptance promotion"
           ]
+        },
+        {
+          "commit": "bfbfbe111fd07ed5f5858d6bfdd3d7c75fd355bb",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx vitest run tests/worker-channel.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/worker/process-tree.json",
+          "testFiles": [
+            "tests/worker-channel.test.ts"
+          ],
+          "limitations": [
+            "Verified one real Node descendant on Windows; Ubuntu and larger multi-level trees not run",
+            "This is process lifecycle evidence, not proof that an already dispatched external effect was cancelled",
+            "Deep Agents still runs in daemon; T-009 remains in_progress",
+            "Strict browser egress and global AT statuses unchanged; no live or remote action"
+          ]
         }
       ],
       "blockedReason": null,

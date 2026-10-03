@@ -4,7 +4,7 @@
   "localRoot": "D:/Code/Rocky",
   "branch": "feat/rocky-foundation",
   "strategy": "greenfield_no_fork_no_imported_git_history",
-  "implementationCommit": "7f973e4422d91ac355a2bdd011f42f977bc681cf",
+  "implementationCommit": "bfbfbe111fd07ed5f5858d6bfdd3d7c75fd355bb",
   "remote": {
     "status": "not_created",
     "url": null,
