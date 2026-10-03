@@ -32,6 +32,7 @@ import {
   validateScratchCall,
   scratchToolFailed,
 } from "./scratch-policy.js";
+import { artifactPublishToolSchema } from "../../contracts/src/artifacts.js";
 export type RuntimeHooks = {
   steer?: () => Promise<{ id: string; text: string }[]>;
   event: (name: string, data: Record<string, unknown>) => void;
@@ -82,6 +83,7 @@ export function createRockyAgent(
                     "mcp_discover",
                     "workspace_write",
                     "workspace_worktree",
+                    "artifact_publish",
                     "mcp_call",
                     "mcp_data",
                     "workspace_info",
@@ -213,6 +215,16 @@ export function createRockyAgent(
       },
     ),
   );
+  const artifactPublish = tool(
+    async (args, config) =>
+      hooks.call("artifact_publish", args, config.toolCall?.id ?? ""),
+    {
+      name: "artifact_publish",
+      schema: artifactPublishToolSchema,
+      description:
+        "Publish an immutable local artifact from a succeeded workspace_write in this Work. Supply that write's tool call ID and a short title. Daemon verifies the exact confirmed file hash; changed/unconfirmed files fail. Returns artifact ID, manifest and download reference. No external sharing, new workspace access or publication from other Works. Repeating the same call identity is idempotent.",
+    },
+  );
   const workspaceWorktree = tool(
     async (args, config) =>
       hooks.call("workspace_worktree", args, config.toolCall?.id ?? ""),
@@ -256,6 +268,7 @@ export function createRockyAgent(
             data,
             workspaceWrite,
             workspaceWorktree,
+            artifactPublish,
             ...workspaceTools,
           ]
         : []),

@@ -21,21 +21,34 @@ test("restricted HTML artifact renders without script, storage, API or network a
   const url = `http://127.0.0.1:${address.port}`;
   const root = await mkdtemp(join(tmpdir(), "rocky-html-preview-"));
   const content = `<!doctype html><meta http-equiv=refresh content="0;url=${url}/refresh"><base href="${url}/"><style>@import url('${url}/import');body{color:rgb(18,52,86);background-image:url('${url}/css')}h1{font-size:24px}.report{padding:12px;border:1px solid #ddd}</style><script>window.ARTIFACT_SCRIPT_RAN=true;parent.localStorage.setItem('artifact-attack','yes');fetch('${url}/script');fetch('/api/v1/session')</script><section class=report onclick="fetch('${url}/click')"><h1>Verified local report</h1><p>Static HTML from an immutable artifact.</p><table><tr><th>Result</th><th>Status</th></tr><tr><td>Fixture report</td><td>Actual saved bytes</td></tr></table><a id=attack-link href='${url}/navigate' target=_top ping='${url}/ping'>Navigation disabled</a><img src='${url}/image' onerror="fetch('${url}/handler')"><iframe src='${url}/frame'></iframe><form action='${url}/form'><button>Submit</button></form></section>`;
+  const title = "HTML preview " + randomUUID();
   const provider = await startAgentProvider({
     reply: async (messages) =>
-      messages.some((m) => m.type === "tool")
+      messages.filter((m) => m.type === "tool").length >= 2
         ? new AIMessage("HTML receipt")
-        : new AIMessage({
-            content: "",
-            tool_calls: [
-              {
-                id: "html-write",
-                name: "workspace_write",
-                args: { path: "report.html", content, expectedHash: null },
-                type: "tool_call",
-              },
-            ],
-          }),
+        : messages.some((m) => m.type === "tool")
+          ? new AIMessage({
+              content: "",
+              tool_calls: [
+                {
+                  id: "html-publish",
+                  name: "artifact_publish",
+                  args: { writeCallId: "html-write", title },
+                  type: "tool_call",
+                },
+              ],
+            })
+          : new AIMessage({
+              content: "",
+              tool_calls: [
+                {
+                  id: "html-write",
+                  name: "workspace_write",
+                  args: { path: "report.html", content, expectedHash: null },
+                  type: "tool_call",
+                },
+              ],
+            }),
   });
   try {
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -98,9 +111,6 @@ test("restricted HTML artifact renders without script, storage, API or network a
             .status,
       )
       .toBe("waiting_approval");
-    const pending = await (
-      await page.request.get(`/api/v1/works/${work.id}`)
-    ).json();
     await page
       .locator("article.work")
       .filter({ hasText: "HTML_PREVIEW_FIXTURE" })
@@ -113,20 +123,13 @@ test("restricted HTML artifact renders without script, storage, API or network a
             .status,
       )
       .toBe("completed");
-    const title = "HTML preview " + randomUUID();
-    const publication = await page.request.post(
-      `/api/v1/works/${work.id}/artifacts`,
-      {
-        headers,
-        data: {
-          requestId: randomUUID(),
-          operationId: pending.approval.operationId,
-          title,
-        },
-      },
+    const { artifacts } = await (
+      await page.request.get("/api/v1/artifacts")
+    ).json();
+    const artifact = artifacts.find(
+      (item: { workId: string }) => item.workId === work.id,
     );
-    expect(publication.ok()).toBe(true);
-    const artifact = await publication.json();
+    expect(artifact).toBeTruthy();
     await page
       .locator(".sidebar")
       .getByRole("button", { name: "文件與成果", exact: true })

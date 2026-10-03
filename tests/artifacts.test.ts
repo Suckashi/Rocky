@@ -82,6 +82,14 @@ test("artifact publication: native receipt, atomic registry, immutable download,
     await expect
       .poll(() => service.store.get(work.id).status, { timeout: 15000 })
       .toBe("completed");
+    let checks = 0;
+    await expect(
+      service.artifacts.publish(work.id, command, () => {
+        if (++checks === 2) throw Error("Cancelled before commit");
+      }),
+    ).rejects.toThrow("Cancelled before commit");
+    expect(checks).toBe(2);
+    expect(service.artifacts.list()).toHaveLength(0);
     const fail = vi.spyOn(service.store, "event").mockImplementationOnce(() => {
       throw Error("Injected registry commit failure");
     });

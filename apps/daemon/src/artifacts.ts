@@ -107,7 +107,12 @@ export class ArtifactStore {
       bytes: await this.blob(entry.sha256, entry.size),
     };
   }
-  async publish(workId: string, input: unknown) {
+  async publish(
+    workId: string,
+    input: unknown,
+    assertActive: () => void = () => {},
+  ) {
+    assertActive();
     const command = artifactPublishSchema.parse(input),
       hash = intentHash({ workId, ...command });
     const replay = () => {
@@ -210,6 +215,7 @@ export class ArtifactStore {
       manifestHash: intentHash(manifest),
     });
     return this.store.transaction(() => {
+      assertActive();
       const repeated = replay();
       if (repeated) return repeated;
       this.store.db

@@ -1,7 +1,11 @@
 import { z } from "zod";
 export const artifactPublishSchema = z.strictObject({
   requestId: z.uuid(),
-  operationId: z.string().min(1).max(256),
+  operationId: z.string().min(1).max(512),
+  title: z.string().trim().min(1).max(120),
+});
+export const artifactPublishToolSchema = z.strictObject({
+  writeCallId: z.string().min(1).max(256),
   title: z.string().trim().min(1).max(120),
 });
 export const artifactSchema = z.strictObject({
@@ -28,7 +32,7 @@ export const artifactSchema = z.strictObject({
     workspaceRevision: z.number().int().positive(),
     path: z.string().min(1).max(4096),
   }),
-  verificationRefs: z.array(z.string().min(1).max(256)),
+  verificationRefs: z.array(z.string().min(1).max(512)),
   createdAt: z.iso.datetime(),
 });
 export type Artifact = z.infer<typeof artifactSchema>;

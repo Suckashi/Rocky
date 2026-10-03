@@ -42,6 +42,7 @@ import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
 import { DocumentStore } from "./documents.js";
 import { ArtifactStore } from "./artifacts.js";
+import { artifactPublishToolSchema } from "../../../packages/contracts/src/artifacts.js";
 import { WorkspaceWorktrees } from "./workspace-worktrees.js";
 import { WorkspaceWriter, WorkspaceWriteError } from "./workspace-writes.js";
 import { WorkspaceRegistry, workspaceRootsOverlap } from "./workspaces.js";
@@ -650,6 +651,57 @@ export class WorkService {
         call: async (name, args, callId) => {
           abort.signal.throwIfAborted();
           const current = this.store.get(work.id);
+          if (name === "artifact_publish") {
+            const command = artifactPublishToolSchema.parse(args);
+            if (!callId || callId.length > 256)
+              throw new RockyError(
+                "artifact_identity",
+                "Tool identity required",
+                400,
+              );
+            const assertActive = () => {
+              abort.signal.throwIfAborted();
+              const latest = this.store.get(current.id);
+              if (
+                latest.mode !== "configured" ||
+                latest.runMode !== "normal" ||
+                latest.status !== "running" ||
+                latest.runId !== current.runId ||
+                latest.executionSessionId !== current.executionSessionId
+              )
+                throw new RockyError(
+                  "artifact_scope",
+                  "Artifact publication requires this active normal Work",
+                  403,
+                );
+            };
+            const digest = hash(["artifact_publish", current.runId, callId]);
+            const requestId =
+              digest.slice(0, 8) +
+              "-" +
+              digest.slice(8, 12) +
+              "-4" +
+              digest.slice(13, 16) +
+              "-8" +
+              digest.slice(17, 20) +
+              "-" +
+              digest.slice(20, 32);
+            const artifact = await this.artifacts.publish(
+              current.id,
+              {
+                requestId,
+                operationId: current.runId + ":" + command.writeCallId,
+                title: command.title,
+              },
+              assertActive,
+            );
+            this.flushOutbox();
+            return JSON.stringify({
+              artifact,
+              download:
+                "/api/v1/artifacts/" + artifact.id + "/files/" + artifact.entry,
+            });
+          }
           if (name === "workspace_write" || name === "workspace_worktree") {
             try {
               return await this.callWorkspaceWrite(
