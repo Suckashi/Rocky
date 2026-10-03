@@ -300,3 +300,9 @@ Windows：31 files／117 tests、11 browser tests、check／lint／build 通過�
 Local commit dca0cd8 enables the public StateBackend and native file tools in run-private /scratch graph state. Context offload paths are read-only; host files and execute remain denied. Public traces omit scratch contents. Actual native write/edit/read, checkpoint state, separate-thread isolation and denial-before-dispatch tests pass.
 
 Windows fixture: typecheck, lint, build and all 120 tests pass (32 files, 56.09s). See [evidence](evidence/2026-10-03/native-scratch.json). Context compaction, durable continuous conversation and inbox barrier remain pending; T-011 stays in_progress, global AT remain not_run. Next: conversation/history and execution-session persistence.
+
+## Conversation and execution-session persistence
+
+Local commit f911e75 adds one durable main Conversation, separate per-Work ExecutionSession records, and immutable user/result history. Main active session follows daemon Work state; background/evaluation sessions do not replace it. Submission/history writes share domain transactions; outbox result delivery is deduplicated. New history API uses bounded numeric pagination, current public redaction and excludes evaluation data. Own Rocky schema10 upgrades to11 with source chronology; no foreign-store importer.
+
+Windows fixture: check/lint/build pass, all 124 tests pass (33 files, 57.81s); actual streaming/reconnect browser regression passes 2 tests (23.6s, existing Chromium148). Initial test cleanup/schema-version assertions were corrected; see [evidence](evidence/2026-10-03/conversation-history.json). T-011/T-013/T-018 remain in_progress: history UI paging, cross-turn model context, precise steering and checkpoint/inbox acknowledgement are unfinished. No global AT pass or remote action.

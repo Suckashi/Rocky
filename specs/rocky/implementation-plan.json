@@ -1556,6 +1556,30 @@
             "Ubuntu/live external provider validation not run",
             "No remote actions"
           ]
+        },
+        {
+          "commit": "f911e75",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; targeted Playwright streaming/reconnect",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/conversation-history.json",
+          "testFiles": [
+            "tests/conversation-store.test.ts",
+            "tests/scratch-runtime.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/reconnect.spec.ts"
+          ],
+          "limitations": [
+            "Conversation/session/history persistence API is implemented; UI still projects Work cards and does not consume the new paginated history API",
+            "Cross-turn model context and inbox checkpoint acknowledgement are not implemented; T-011/T-013/T-018 remain incomplete",
+            "Native scratch failed tool results now emit tool.failed, not tool.completed; Work outcome stays daemon-authoritative",
+            "Evaluation results excluded from new visible history; pre-existing completion-result endpoint remains separate",
+            "Local fixture only, no Ubuntu or new live service validation",
+            "No remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -1648,7 +1672,7 @@
         "R-038",
         "R-042"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "evidence": [
         {
           "commit": "c57c7c7fea228c3b1feab2e418782b1736930eba",
@@ -1664,6 +1688,30 @@
           ],
           "limitations": [
             "Partial domain outbox/completion projection contribution only; full inbox/checkpoint coordination is not implemented."
+          ]
+        },
+        {
+          "commit": "f911e75",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; targeted Playwright streaming/reconnect",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/conversation-history.json",
+          "testFiles": [
+            "tests/conversation-store.test.ts",
+            "tests/scratch-runtime.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/reconnect.spec.ts"
+          ],
+          "limitations": [
+            "Conversation/session/history persistence API is implemented; UI still projects Work cards and does not consume the new paginated history API",
+            "Cross-turn model context and inbox checkpoint acknowledgement are not implemented; T-011/T-013/T-018 remain incomplete",
+            "Native scratch failed tool results now emit tool.failed, not tool.completed; Work outcome stays daemon-authoritative",
+            "Evaluation results excluded from new visible history; pre-existing completion-result endpoint remains separate",
+            "Local fixture only, no Ubuntu or new live service validation",
+            "No remote actions"
           ]
         }
       ],
@@ -1849,6 +1897,30 @@
             "Partial streaming reconstructs from bounded recent event projection; a dedicated durable message history remains pending",
             "Redaction retains 32 characters plus maximum known credential length and incomplete URLs; short replies and structured JSON may become visible only after complete validation",
             "Strict browser egress remains host AdGuard blocked; no additional attempt or relaxed assertion",
+            "No remote actions"
+          ]
+        },
+        {
+          "commit": "f911e75",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; targeted Playwright streaming/reconnect",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/conversation-history.json",
+          "testFiles": [
+            "tests/conversation-store.test.ts",
+            "tests/scratch-runtime.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/reconnect.spec.ts"
+          ],
+          "limitations": [
+            "Conversation/session/history persistence API is implemented; UI still projects Work cards and does not consume the new paginated history API",
+            "Cross-turn model context and inbox checkpoint acknowledgement are not implemented; T-011/T-013/T-018 remain incomplete",
+            "Native scratch failed tool results now emit tool.failed, not tool.completed; Work outcome stays daemon-authoritative",
+            "Evaluation results excluded from new visible history; pre-existing completion-result endpoint remains separate",
+            "Local fixture only, no Ubuntu or new live service validation",
             "No remote actions"
           ]
         }

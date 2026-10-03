@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-03",
+  "commit": "f911e75",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "mode": "fixture",
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "result": "13.78s, existing CopilotKit bundle warnings"
+    },
+    {
+      "command": "npx vitest run tests/conversation-store.test.ts tests/operation-ledger.test.ts",
+      "exitCode": 0,
+      "result": "9 passed"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "result": "33 files / 124 passed",
+      "durationSeconds": 57.81
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<Chromium1223>; npx playwright test tests/e2e/streaming.spec.ts tests/e2e/reconnect.spec.ts --reporter=list",
+      "exitCode": 0,
+      "result": "2 passed",
+      "durationSeconds": 23.6
+    }
+  ],
+  "correctedFailures": [
+    "Initial full run: 2 failures (test cleanup used nonexistent shutdown method; own-store migration expected schema10 instead of new schema11). Corrected test cleanup to close and asserted new schema; rerun passed. No production bypass or relaxed behavior assertion."
+  ],
+  "limitations": [
+    "Conversation/session/history persistence API is implemented; UI still projects Work cards and does not consume the new paginated history API",
+    "Cross-turn model context and inbox checkpoint acknowledgement are not implemented; T-011/T-013/T-018 remain incomplete",
+    "Native scratch failed tool results now emit tool.failed, not tool.completed; Work outcome stays daemon-authoritative",
+    "Evaluation results excluded from new visible history; pre-existing completion-result endpoint remains separate",
+    "Local fixture only, no Ubuntu or new live service validation",
+    "No remote actions"
+  ]
+}
