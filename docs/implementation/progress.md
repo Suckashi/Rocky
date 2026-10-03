@@ -523,3 +523,7 @@ T-025 partial source layer now pins validated local document revisions, checks w
 ## Memory context budget (c2962d6ee69b0fa93142f24bbd4c8a70a79f4a98)
 
 Added explicit cl100k_base tokenBudget over serialized records, including provenance and metadata, with returned encoding/count and truncation. Direct pinned pure-JS dependency; local ranks only. Related2/finalMemory1/browser1 tests and type/lint/build/licenses pass. [Evidence](memory-registry.md). Model permission/consumption and provider-specific full-prompt accounting remain open; T-025/Goal active.
+
+## Memory scope browser coverage (5f192c636d6444f740bb8371c7715cca5707506f)
+
+Added actual browser user/project isolation, draft scope lock, status/privacy save, error/retry, basic keyboard and English/dark four-width long-content coverage.2 browser tests pass; type/lint pass. [Screenshots and limits](memory-registry.md). T-025 remains in_progress; native runtime integration and task-scope browser coverage remain open.

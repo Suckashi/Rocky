@@ -3831,6 +3831,25 @@
             "No UI layout changed; browser regression only, no new reference comparison or complete language/theme matrix",
             "Ubuntu and fullAT36/46 remain not_run; all70 global AT unchanged"
           ]
+        },
+        {
+          "commit": "5f192c636d6444f740bb8371c7715cca5707506f",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts memory.spec.ts; npm run check; npm run lint; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/memory-scope.json",
+          "testFiles": [
+            "tests/e2e/memory.spec.ts"
+          ],
+          "limitations": [
+            "Task-scope browser selector, complete Tab order/focus and full language/theme cross-product not_run",
+            "Four-width English/dark screenshots are Rocky after only, not new matched OpenDots comparison",
+            "Memory native model retrieval/writes/permissions and broader Knowledge ingestion remain missing; T-025 in_progress",
+            "Search503 is an explicit browser interception fixture, not evidence of external-service outage recovery",
+            "All70 globalAT remain unchanged"
+          ]
         }
       ],
       "blockedReason": null,

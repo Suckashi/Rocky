@@ -65,3 +65,15 @@ Pure JS js-tiktoken1.0.21 is now a direct pinned dependency, with bundled cl100k
 - Search still caps20 entries/21 candidates and UTF8 content bytes; no pagination
 - No UI layout changed; browser regression only, no new reference comparison or complete language/theme matrix
 - Ubuntu and fullAT36/46 remain not_run; all70 global AT unchanged
+
+## Scope and dark settings browser coverage (5f192c636d6444f740bb8371c7715cca5707506f)
+
+[Evidence](evidence/2026-10-04/memory-scope.json):2 production-path browser tests passed6.5s; type/lint/diff pass. Registered actual temporary workspace and owner entries through API, then verified user/project switching removes stale rows and isolates matching content. Editing prevents scope change; status/private changes persist. Explicit503 interception preserves prior result with error and keyboard retry recovers. Enter toggles details, Escape closes settings. No product code changes were necessary for these assertions.
+
+English/dark long-content screenshots: [1440](evidence/2026-10-04/memory-scope/dark-en-1440.png), [1280](evidence/2026-10-04/memory-scope/dark-en-1280.png), [390](evidence/2026-10-04/memory-scope/dark-en-390.png), [320](evidence/2026-10-04/memory-scope/dark-en-320.png).320 visually inspected; no page overflow in all four. Dialog owns vertical scroll; screenshot is scrolled to the card.
+
+- Task-scope browser selector, complete Tab order/focus and full language/theme cross-product not_run
+- Four-width English/dark screenshots are Rocky after only, not new matched OpenDots comparison
+- Memory native model retrieval/writes/permissions and broader Knowledge ingestion remain missing; T-025 in_progress
+- Search503 is an explicit browser interception fixture, not evidence of external-service outage recovery
+- All70 globalAT remain unchanged
