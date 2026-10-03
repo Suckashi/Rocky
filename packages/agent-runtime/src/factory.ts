@@ -38,6 +38,8 @@ import {
   scratchToolFailed,
 } from "./scratch-policy.js";
 import { artifactPublishToolSchema } from "../../contracts/src/artifacts.js";
+import { reflectionProfile } from "./reflection-profile.js";
+import { reflectionBindingSchema } from "../../contracts/src/reflection.js";
 import { SkillBackend } from "./skill-backend.js";
 export type RuntimeHooks = {
   steer?: () => Promise<{ id: string; text: string }[]>;
@@ -61,7 +63,28 @@ export function createRockyAgent(
   },
   testFixtureTools = false,
   skillSources: string[] = [],
+  reflection?: z.infer<typeof reflectionBindingSchema>,
 ) {
+  if (reflection) {
+    if (!models || testFixtureTools || skillSources.length)
+      throw Error(
+        "Reflection requires configured models and no normal skill or fixture tools",
+      );
+    const profile = reflectionProfile(reflection, hooks);
+    return createDeepAgent({
+      name: "rocky-reflection",
+      model: models.root,
+      checkpointer,
+      backend: new StateBackend(),
+      systemPrompt: profile.systemPrompt,
+      tools: profile.tools,
+      middleware: [profile.middleware],
+      subagents: [],
+      permissions: [
+        { operations: ["read", "write"], paths: ["/**"], mode: "deny" },
+      ],
+    });
+  }
   const skillRpc = async (args: Record<string, unknown>) => {
     const result = await hooks.call(
       "rocky_skill_backend",

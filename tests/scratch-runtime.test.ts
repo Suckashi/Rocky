@@ -50,7 +50,8 @@ test("native scratch writes/edits/read survive checkpoints and stay isolated by 
     saver,
     {
       event: (name, data) => events.push({ ...data, event: name }),
-      call: async () => {
+      call: async (name) => {
+        if (name === "rocky_skill_check") return "ok";
         throw Error("No MCP effect expected");
       },
     },
@@ -144,7 +145,8 @@ test("native guard refuses execute and out-of-scope tools before any public star
       new MemorySaver(),
       {
         event: (event) => events.push(event),
-        call: async () => {
+        call: async (name) => {
+          if (name === "rocky_skill_check") return "ok";
           throw Error("Unexpected effect");
         },
       },
