@@ -70,7 +70,7 @@ export class Store {
       const version = (
         this.db.prepare("PRAGMA user_version").get() as { user_version: number }
       ).user_version;
-      if (version > 18)
+      if (version > 19)
         throw new RockyError(
           "unsupported_store",
           "Rocky store version is newer than this application",
@@ -275,6 +275,12 @@ export class Store {
         this.transaction(() =>
           this.db.exec(
             "CREATE TABLE IF NOT EXISTS documents(id TEXT PRIMARY KEY,revision INTEGER NOT NULL,data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS document_versions(document_id TEXT NOT NULL,revision INTEGER NOT NULL,data TEXT NOT NULL,PRIMARY KEY(document_id,revision)); CREATE TABLE IF NOT EXISTS document_blobs(hash TEXT PRIMARY KEY,content TEXT NOT NULL); CREATE TABLE IF NOT EXISTS document_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,document_id TEXT NOT NULL,revision INTEGER NOT NULL); PRAGMA user_version=18",
+          ),
+        );
+      if (version < 19)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE IF NOT EXISTS memories(id TEXT PRIMARY KEY,scope TEXT NOT NULL,data TEXT NOT NULL); CREATE INDEX IF NOT EXISTS memories_scope ON memories(scope); CREATE VIRTUAL TABLE IF NOT EXISTS memory_fts USING fts5(id UNINDEXED,content); CREATE TABLE IF NOT EXISTS memory_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,result TEXT NOT NULL); PRAGMA user_version=19",
           ),
         );
     } catch (error) {

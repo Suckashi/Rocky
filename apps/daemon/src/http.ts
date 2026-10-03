@@ -267,6 +267,15 @@ export function createApp(service: WorkService) {
   app.get("/api/v1/artifacts", (c) =>
     c.json({ artifacts: service.artifacts.list() }),
   );
+  app.post("/api/v1/memories/search", async (c) =>
+    c.json(service.memories.search(await c.req.json())),
+  );
+  app.post("/api/v1/memories", async (c) =>
+    c.json(service.memories.save(await c.req.json())),
+  );
+  app.post("/api/v1/memories/:id/delete", async (c) =>
+    c.json(service.memories.delete(c.req.param("id"), await c.req.json())),
+  );
   app.post("/api/v1/works/:id/artifacts", async (c) =>
     c.json(
       await service.artifacts.publish(c.req.param("id"), await readJson(c)),

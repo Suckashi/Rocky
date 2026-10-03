@@ -120,7 +120,7 @@ test("workspace registration persists, replays parallel requests, enforces CAS a
     expect(new WorkspaceRegistry(restarted).list()[0]?.name).toBe("Renamed");
     expect(
       restarted.db.prepare("PRAGMA user_version").get()?.user_version,
-    ).toBe(18);
+    ).toBe(19);
   } finally {
     restarted.close();
     await rm(base, { recursive: true, force: true });
