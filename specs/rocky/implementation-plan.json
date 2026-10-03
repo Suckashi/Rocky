@@ -4173,6 +4173,28 @@
             "glob/grep intentionally return unavailable; binary assets available via backend download but read_file remains text-only",
             "No new browser/UI/Ubuntu/live evidence; T-026 remains in_progress"
           ]
+        },
+        {
+          "commit": "2926ff9f14cd853e4afde48e111f42cec4441eee",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/skill-native.test.ts tests/skill-backend.test.ts tests/memory-write.test.ts; npm run check; scoped eslint; npm run build; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-native.json",
+          "testFiles": [
+            "tests/skill-native.test.ts",
+            "tests/skill-backend.test.ts",
+            "tests/memory-write.test.ts"
+          ],
+          "limitations": [
+            "Same-name native metadata is deduplicated by upstream name; explicit scope/ID display mapping still pending",
+            "Root read_file/ls only; child skill load not enabled by Rocky guard and not independently browser-tested",
+            "Quarantine blocks future file reads; all subsequent tool-call revocation and active-Work notification still pending",
+            "Virtual read-only published view backed by SQLite, not physical published directory materialization",
+            "No Skills import/review UI or filesystem discovery yet; no new browser screenshots",
+            "No live provider/Ubuntu/fullAT claim; T-026/T-027 in_progress"
+          ]
         }
       ],
       "blockedReason": null,
