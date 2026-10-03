@@ -4,9 +4,10 @@ export default defineConfig({
   workers: 1,
   timeout: 30000,
   webServer: {
-    command: "npm run dev",
+    command:
+      "node --import tsx tests/e2e/seed-reconciliation.ts && npm run dev",
     url: "http://127.0.0.1:3210/api/v1/health",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     env: { ROCKY_DATA_DIR: ".rocky-e2e" },
     timeout: 60000,
   },

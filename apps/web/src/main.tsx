@@ -12,6 +12,7 @@ import {
 } from "../../../packages/contracts/src/index.js";
 import { projectWork, projectEvidence } from "./projection.js";
 import { ModelSettings } from "./model-settings.js";
+import { WorkOperations } from "./work-operations.js";
 import { WorkGrants } from "./work-grants.js";
 import "./style.css";
 let session = "";
@@ -318,6 +319,19 @@ function App() {
                 <details>
                   <summary>{t.detail}</summary>
                   <WorkGrants work={w} locale={locale} request={request} />
+                  <WorkOperations
+                    workId={w.id}
+                    revision={
+                      events.findLast(
+                        (e) =>
+                          e.workId === w.id &&
+                          e.payload.kind === "domain" &&
+                          e.payload.name.startsWith("rocky.operation."),
+                      )?.sequence ?? "0"
+                    }
+                    locale={locale}
+                    request={request}
+                  />
                   <p>
                     {locale === "zh"
                       ? "此工作模型呼叫上限"
