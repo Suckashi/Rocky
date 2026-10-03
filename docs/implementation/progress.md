@@ -459,3 +459,7 @@ Native and owner-published artifacts now appear in the originating Work with dir
 ## Independent artifact load recovery (9feaf7920138db6a9729071765697a741daac678)
 
 Shared adapter loads artifact metadata independently of conversation bootstrap; late responses merge immutable records with streamed publications. Failure retains last known cards and shows a retry state in chat/library. Retry affects only metadata loading, not the event stream. Browser injects503, confirms conversation connected/Work visible, removes fault and retries to recover the delivered card. Focused browser1 passed8.9s; type/lint/build/format/diff pass. [Evidence](evidence/2026-10-04/artifact-load-recovery.json). Prior bootstrap dependency limitation is resolved. No new full-suite/theme/reference comparison claim.
+
+## Confirmed presence (3d49ea33c52966c58b893e6bd128f49805c13ef7)
+
+T-038 now in_progress: pure foreground/background/connection projection and bounded motion with persistent preference/reduced motion implemented.6 unit/projection tests and focused normal-daemon browser flow pass. [Presence report](presence.md) lists remaining completion/freshness/navigation/performance scope.
