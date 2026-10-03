@@ -1,0 +1,100 @@
+{
+  "commit": "c57c7c7fea228c3b1feab2e418782b1736930eba",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "df4ff0e83669da0aaf947a7010eb6969f57841eb76b16f386e3ef3580fbd6f6a",
+  "mode": "fixture",
+  "recordedAt": "2026-10-03T05:00:16.155Z",
+  "task": "T-006",
+  "requirementIds": [
+    "R-010",
+    "R-012",
+    "R-013",
+    "R-038",
+    "R-039",
+    "R-041",
+    "R-042",
+    "R-049",
+    "R-051",
+    "R-056"
+  ],
+  "acceptanceContributions": ["AT-19", "AT-47", "AT-57", "AT-70"],
+  "commands": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "passed": 29,
+      "files": 10
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run format:check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "warning": "Existing large web bundle warning remains"
+    },
+    {
+      "command": "npm run test:network",
+      "exitCode": 0,
+      "networkTests": 2,
+      "evaluationCases": 4
+    },
+    {
+      "command": "npx playwright test --grep-invert 'browser egress' (ROCKY_TEST_BROWSER=Chromium 1223)",
+      "exitCode": 0,
+      "stats": {
+        "startTime": "2026-10-03T04:56:18.216Z",
+        "duration": 8828.411,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "excluded": "Strict browser egress not rerun; prior AdGuard failure remains open."
+    }
+  ],
+  "testFiles": [
+    "tests/persistence.test.ts",
+    "fixtures/persistence/crash-worker.ts",
+    "tests/store.test.ts",
+    "tests/runtime.test.ts",
+    "tests/http.test.ts",
+    "tests/e2e/work.spec.ts"
+  ],
+  "verified": [
+    "Schema version 2 and safe own-store upgrade",
+    "CAS rejects stale revisions and changed run/session identity",
+    "Work and operation ledger writes commit atomically with events/outbox",
+    "Injected outbox write failure rolls back ledger/event writes",
+    "Actual child process exits before commit roll back writes",
+    "Actual exit after commit preserves pending completion delivery",
+    "Simultaneous stale PID contenders yield one writer and one rejection",
+    "Repeated notification cannot duplicate a completion or dispatch a tool",
+    "105 completion messages paginate with no missing or duplicate IDs",
+    "Graph checkpoints remain separate from domain SQLite"
+  ],
+  "limitations": [
+    "Ubuntu installation/validation deferred at user request; not_run",
+    "Strict browser egress remains a known failing gate, excluded from this functional rerun",
+    "No full cross-database inbox/checkpoint recovery claim; T-013 remains pending",
+    "Current conversation/messages GET projects work results only, not a complete transcript",
+    "Queued-work re-admission, worker IPC and full effect reconciliation remain later tasks",
+    "Model configuration and live endpoints remain T-007/later work",
+    "Dependencies unchanged; no-Python clean install was not repeated this turn",
+    "No remote creation, push, merge, tag or deployment"
+  ]
+}

@@ -8,7 +8,7 @@
 - CopilotKit's initial UI bundle remains large; final bundle budgets/optimization are not claimed. T-037 original vector baseline is implemented; brand distribution rights review and T-038 presence remain pending.
 - Only synthetic models/MCP effects are supported by the current app. The UI is not a general-purpose live assistant yet. No API credentials, external business service, browser automation capability or paid model has been validated.
 - Four evaluation cases validate integration, not learned-skill quality. Learning is off; no proposals, published skills or claimed improvement exist.
-- The P0 facade has no worker boundary, full history pagination or inbox/outbox implementation. Do not expose it beyond loopback.
+- The executor has no worker boundary or full conversation/inbox-checkpoint implementation. T-006 now has a domain outbox, deduplicated completion results and completion-result pagination. Do not expose it beyond loopback.
 - No remote repository, visibility configuration, first push, protections, merge, tag or deployment has been performed.
 
-Next: run the locked clean-copy installation/build/evaluation on Ubuntu and the strict browser network test in a clean browser environment. The user has explicitly authorized local feature development while these gates remain open. T-005 and T-037 now have local completion evidence; proceed with T-006 persistence and T-007 model/network configuration. Do not mark P0 passed.
+Next: run the locked clean-copy installation/build/evaluation on Ubuntu and the strict browser network test in a clean browser environment. The user has explicitly authorized local feature development while these gates remain open. T-005, T-006 and T-037 now have local completion evidence; proceed with T-007 model/network configuration. WSL installation was deferred by the user. Do not mark P0 passed.
