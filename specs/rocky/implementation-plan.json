@@ -3349,8 +3349,32 @@
         "R-028",
         "R-046"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "0a677c28fd8306b28c8ba9a1b1d58a425477d56b",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/artifacts.test.ts tests/workspace-writes.test.ts tests/operation-ledger.test.ts tests/persistence.test.ts; focused migration rerun; normal-daemon browser6 and final focused browser1; npm run check; npm run lint; npm run build",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/artifacts/verification.json",
+          "testFiles": [
+            "tests/artifacts.test.ts",
+            "tests/e2e/workspace-write.spec.ts"
+          ],
+          "limitations": [
+            "T-020 partial: single UTF-8 file from confirmed workspace_write receipt only; no native publish tool, arbitrary bundle/image publication or automatic artifact success",
+            "Markdown Document revisions/CAS/editor and file-context references are not implemented",
+            "HTML is escaped source text, not rendered interactive/isolated HTML preview; PNG/JPEG previews remain pending",
+            "Atomic SQL registry/event publication follows verified blob creation; orphan staging/blob cleanup, power-loss fsync guarantees and hostile external race matrix remain unverified",
+            "List currently capped at200; pagination/search and richer source navigation pending",
+            "Existing global evidence redaction applies to JSON source preview; raw download verifies original immutable bytes",
+            "No fresh matched upstream reference/before/after screenshots for populated artifact state; source-based pane geometry is measured, not full fidelity proof",
+            "Ubuntu/live provider/HTML egress/full AT26/27 not_run; existing host AdGuard browser-egress blocker unchanged"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [

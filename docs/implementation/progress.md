@@ -1,6 +1,6 @@
 # Rocky implementation progress
 
-2026-10-04, Asia/Taipei. Current work: OpenDots-aligned main chat, configured native conversation/MCP tools and data, and registered workspaces with explicitly granted native root/child reads, exact-approved root writes and Git worktree creation. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
+2026-10-04, Asia/Taipei. Current work: OpenDots-aligned main chat, configured native conversation/MCP tools and data, and registered workspaces with explicitly granted native root/child reads, exact-approved root writes and Git worktree creation, plus immutable artifacts and a responsive result pane. Rocky V1 remains incomplete; see dated evidence below and known-limitations.md.
 
 | Task                  | Status      | Actual result                                                                                                                                                                       |
 | --------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -21,6 +21,8 @@
 | T-014 / T-015 / T-021 | in_progress | Configured MCP registry, lifecycle/discovery and settings verified locally; full process/network/permission scope pending.                                                          |
 | T-016                 | in_progress | Configured dispatch, typed media and original resource/prompt envelopes implemented; target mapping, advanced schemas, generic reconciliation remain.                               |
 | T-017                 | in_progress | Registered roots, native reads/writes, bounded diff, overlapping-root admission and exact-approved Git worktrees; shell/default coding isolation/full leases/reconciliation remain. |
+
+T-020 is now in_progress: confirmed-write snapshots, ID-only downloads and result pane implemented; Markdown revisions, images and rendered isolated HTML remain open.
 
 Node 24.12.0 / npm 11.6.4 baseline. OpenDots MIT presentation CSS adapted with notices; no upstream history, backend, data, settings or brand assets imported. Test data is synthetic. No remote action; existing live probe evidence is separate from this fixture UI slice. See known-limitations.md for gates and follow-up.
 
@@ -433,3 +435,7 @@ Git cancellation now terminates its owned process tree, propagates abort through
 ## Exact-approved native worktrees (682b5c3fd2c2d6fc3765c4efed4cefa6d19cf7e0)
 
 Root-only native tool now reaches exact daemon consent/ledger, actual committed Git checkout, verified root registration and immutable receipt. No dirty-source copying, inherited read grant or current Work redirection. Registration failure after Git becomes unknown/blocked with effects retained. Related26 tests, finalnative6, normal-daemon browser6 and type/lint/build pass. See [worktree implementation/evidence](workspace-worktrees.md). Background coding defaults, non-Git isolation, linked-root support, cleanup/reconciliation and later V1 scope remain unfinished. T-017 in_progress; Goal active.
+
+## Immutable artifacts and OpenDots result pane (0a677c28fd8306b28c8ba9a1b1d58a425477d56b)
+
+Confirmed workspace writes can now be saved as immutable hash-verified snapshots, previewed and downloaded from a real right-side results pane. SQL registry/events publish atomically after verified blob storage. Related22 pass; full264pass/1old-schema-assertion failure, corrected by focused4pass (no full rerun); browser6 plus final enriched artifact flow1 pass. Four-width measurements and light/dark-English screenshots in [artifacts.md](artifacts.md). T-020 now in_progress; Markdown CAS/editor, images, rendered isolated HTML, native publication/context references and full comparison remain gaps. Goal active; no remote actions.
