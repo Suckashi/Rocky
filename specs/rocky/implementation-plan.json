@@ -1536,6 +1536,26 @@
             "Strict browser egress remains host AdGuard blocked; no additional attempt or relaxed assertion",
             "No remote actions"
           ]
+        },
+        {
+          "commit": "dca0cd8",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/native-scratch.json",
+          "testFiles": [
+            "tests/scratch-runtime.test.ts"
+          ],
+          "limitations": [
+            "MemorySaver test proves native per-thread graph state, not host workspace file effects",
+            "Native context compaction and persistent conversation/inbox barrier remain pending; T-011 stays in_progress",
+            "No new UI behavior in this backend-only slice; preceding browser evidence is separate",
+            "Ubuntu/live external provider validation not run",
+            "No remote actions"
+          ]
         }
       ],
       "blockedReason": null,

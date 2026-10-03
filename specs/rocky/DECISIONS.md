@@ -50,4 +50,6 @@ Local + Explicit Network；Node/TypeScript-only；CopilotKit OSS/AG-UI；Deep Ag
 - 新增T-037（P1角色與視覺）及T-038（P4狀態/persona整合）；依DAG執行，不按ID大小猜順序。
 - AT-47不再驗收舊資料匯入；新增AT-59～AT-70。
 
-本版共56項需求、38個開發任務、70項驗收。全部tasks維持pending、全部AT維持not_run；先前Spec或參考Repo的通過結果不能當Rocky證據。
+本版共56項需求、38個開發任務、70項驗收。實際任務狀態與證據以 implementation-plan.json 及 docs/implementation/progress.md 為準；全部全域 AT 仍維持 not_run，局部測試與參考 Repo 的結果不能冒充完整驗收。
+
+**2026-10-03 原生暫存 backend。**使用 Deep Agents 1.14.1 公開的零參數 StateBackend；檔案位於每個執行 thread 的 checkpoint graph state，並非主機檔案。工具限 /scratch；原生上下文卸載目錄只讀；execute 未開放。Rocky middleware 在工具執行與公開 trace 之前檢查路徑和 24 KiB 參數上限，trace 只記路徑、儲存種類與位元組數。真實 workspace／shell 留給 daemon broker；不新增 backend 格式、runtime 或上游 monkey patch。原生 context 壓縮驗收尚未執行。

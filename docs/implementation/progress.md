@@ -294,3 +294,9 @@ Source 04e1e94436e98b24cd6ac72b6c802fea008c2477。OpenAI-compatible／Anthropic 
 新增共用 Rocky projection／commands、初始 snapshot 失敗重連、斷線 Enter 防送出、mobile dialog 焦點返回。修復 SQLite CAST sequence alias 的字典序，改按 integer column 排序；AG-UI 逐頁排完該 Work 事件才送 receipt。1,001 chunks replay、截斷兩種 provider、不調用工具、unknown usage、split credential 遮罩都有測試。
 
 Windows：31 files／117 tests、11 browser tests、check／lint／build 通過；最後 focused streaming viewport 測試 1 passed。證據 evidence/2026-10-03/streaming/verification.json。T-011／018／019 均 in_progress，AT 不變。短尾遮罩與結構化內容可能延後顯示，recent-event projection 還不是完整 Message persistence。下一項為 guarded native scratch backend／持續對話與安全 inbox；未執行 live／Ubuntu 或遠端操作。
+
+## T-011: guarded native scratch backend
+
+Local commit dca0cd8 enables the public StateBackend and native file tools in run-private /scratch graph state. Context offload paths are read-only; host files and execute remain denied. Public traces omit scratch contents. Actual native write/edit/read, checkpoint state, separate-thread isolation and denial-before-dispatch tests pass.
+
+Windows fixture: typecheck, lint, build and all 120 tests pass (32 files, 56.09s). See [evidence](evidence/2026-10-03/native-scratch.json). Context compaction, durable continuous conversation and inbox barrier remain pending; T-011 stays in_progress, global AT remain not_run. Next: conversation/history and execution-session persistence.
