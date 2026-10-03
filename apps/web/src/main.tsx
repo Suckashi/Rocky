@@ -628,7 +628,12 @@ function App() {
                   <details>
                     <summary>{t.detail}</summary>
                     <WorkGrants work={w} locale={locale} request={request} />
-                    <WorkLearning work={w} locale={locale} request={request} />
+                    <WorkLearning
+                      work={w}
+                      events={events}
+                      locale={locale}
+                      request={request}
+                    />
                     <WorkSteering
                       work={w}
                       events={events}

@@ -24,7 +24,7 @@ test("Learning UI requires scoped consent, preserves stale drafts and turns poli
   ).toBe(true);
   await page.getByRole("button", { name: "Learning", exact: true }).click();
   const ui = page.locator(".learning-settings");
-  await expect(ui.getByRole("status")).toContainText("off");
+  await expect(ui.locator(':scope > [role="status"]')).toContainText("off");
   await expect(ui).toContainText("尚未接通");
   await ui.getByLabel("Learning 模式").selectOption("propose");
   const save = ui.getByRole("button", { name: "保存學習政策" });
@@ -33,7 +33,7 @@ test("Learning UI requires scoped consent, preserves stale drafts and turns poli
   await expect(save).toBeDisabled();
   await ui.getByLabel("我同意在以上範圍提出學習候選").check();
   await save.click();
-  await expect(ui.getByRole("status")).toContainText("propose");
+  await expect(ui.locator(':scope > [role="status"]')).toContainText("propose");
   await expect(ui.getByLabel("我同意在以上範圍提出學習候選")).not.toBeChecked();
   const current = await (
     await page.request.get("/api/v1/learning/policy")
@@ -78,10 +78,10 @@ test("Learning UI requires scoped consent, preserves stale drafts and turns poli
   await ui.getByLabel("個人範圍（不包含專案）").check();
   await ui.getByLabel("我同意在以上範圍提出學習候選").check();
   await save.click();
-  await expect(ui.getByRole("status")).toContainText("propose");
+  await expect(ui.locator(':scope > [role="status"]')).toContainText("propose");
   await ui.getByLabel("Learning 模式").selectOption("off");
   await save.click();
-  await expect(ui.getByRole("status")).toContainText("off");
+  await expect(ui.locator(':scope > [role="status"]')).toContainText("off");
   expect(
     (await (await page.request.get("/api/v1/learning/policy")).json()).scopes,
   ).toEqual([]);
@@ -92,11 +92,32 @@ test("Learning UI requires scoped consent, preserves stale drafts and turns poli
 test("work Learning consent defaults excluded, saves review consent and withdraws", async ({
   page,
 }) => {
-  const { AIMessage } = await import("@langchain/core/messages");
+  const { AIMessage, ToolMessage } = await import("@langchain/core/messages");
   const { startAgentProvider } =
     await import("../../fixtures/models/agent-provider.js");
+  const callId = randomUUID();
   const provider = await startAgentProvider({
-    reply: async () => new AIMessage("Finished local consent fixture"),
+    reply: async (messages) =>
+      messages.some(
+        (message) =>
+          message instanceof ToolMessage && message.tool_call_id === callId,
+      )
+        ? new AIMessage("Finished local consent fixture")
+        : new AIMessage({
+            content: "",
+            tool_calls: [
+              {
+                id: callId,
+                name: "write_todos",
+                args: {
+                  todos: [
+                    { content: "Record observed plan", status: "completed" },
+                  ],
+                },
+                type: "tool_call",
+              },
+            ],
+          }),
   });
   try {
     await page.goto("/");
@@ -140,16 +161,49 @@ test("work Learning consent defaults excluded, saves review consent and withdraw
     await work.locator(":scope > details > summary").click();
     const ui = work.locator(".work-learning");
     await ui.locator("summary").click();
-    await expect(ui.getByRole("status")).toContainText("排除學習");
+    await expect(ui.locator(':scope > [role="status"]')).toContainText(
+      "排除學習",
+    );
     await expect(ui.getByLabel("排除此工作學習")).toBeChecked();
     await expect(ui.getByLabel("我確認來源條款允許重用")).not.toBeChecked();
     await ui.getByLabel("排除此工作學習").uncheck();
     await ui.getByLabel("我確認來源條款允許重用").check();
     await ui.getByRole("button", { name: "保存此工作學習權限" }).click();
-    await expect(ui.getByRole("status")).toContainText("允許來源審查");
+    await expect(ui.locator(':scope > [role="status"]')).toContainText(
+      "允許來源審查",
+    );
+    const episodeForm = ui.locator(".learning-episode-form");
+    await episodeForm.locator("summary").click();
+    await episodeForm
+      .getByLabel("可重用的目標")
+      .fill("Reusable browser summary password=fixture-private");
+    await episodeForm
+      .getByLabel("驗證結果（每行一項）")
+      .fill("Observed plan update, not a general success claim");
+    await episodeForm.getByRole("checkbox").first().check();
+    await episodeForm.getByRole("button", { name: "保存待審查摘要" }).click();
+    await expect(episodeForm.getByRole("status")).toContainText("待審查");
+    await expect(episodeForm).toContainText("[REDACTED]");
+    await expect(episodeForm).not.toContainText("fixture-private");
+    const episodeId = await episodeForm.locator("code").textContent();
+    await page.setViewportSize({ width: 320, height: 844 });
+    await episodeForm.scrollIntoViewIfNeeded();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({ path: "test-results/learning-episode-320.png" });
     await ui.getByLabel("私人來源，不用於學習").check();
     await ui.getByRole("button", { name: "保存此工作學習權限" }).click();
-    await expect(ui.getByRole("status")).toContainText("排除學習");
+    await expect(ui.locator(':scope > [role="status"]')).toContainText(
+      "排除學習",
+    );
+    expect(
+      (
+        await page.request.get(`/api/v1/learning/episodes/${episodeId}`)
+      ).status(),
+    ).toBe(403);
     const saved = await (
       await page.request.get(`/api/v1/works/${created.id}/learning-consent`)
     ).json();

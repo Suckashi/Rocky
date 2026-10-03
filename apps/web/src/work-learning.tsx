@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
-import type { Work } from "../../../packages/contracts/src/index.js";
+import { LearningEpisodeForm } from "./learning-episode-form.js";
+import type {
+  Work,
+  PublicEvent,
+} from "../../../packages/contracts/src/index.js";
 import { learningWorkConsentSchema } from "../../../packages/contracts/src/learning.js";
 export function WorkLearning({
   work,
+  events,
   locale,
   request,
 }: {
   work: Work;
+  events: PublicEvent[];
   locale: "zh" | "en";
   request: (path: string, body?: unknown) => Promise<unknown>;
 }) {
@@ -151,6 +157,21 @@ export function WorkLearning({
           {zh ? "保存此工作學習權限" : "Save work Learning permissions"}
         </button>
       </fieldset>
+      {value &&
+        !value.private &&
+        !value.excluded &&
+        value.sourceReuseAllowed &&
+        work.runMode === "normal" &&
+        work.status === "completed" && (
+          <LearningEpisodeForm
+            key={value.revision}
+            work={work}
+            events={events}
+            consentRevision={value.revision}
+            locale={locale}
+            request={request}
+          />
+        )}
     </details>
   );
 }
