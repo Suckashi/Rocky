@@ -199,3 +199,7 @@ Skill binary comparison follow-up (`fcf861d`): existing details/typography token
 ### Manual episode summary — 2026-10-04
 
 `learning-episode-form.tsx` extends existing collapsed Work Learning controls with neutral forms and text preview. Event types have readable labels; raw record ID stays in details. No new upstream code/CSS/assets copied; this is a Rocky-specific Learning workflow. [320px after](evidence/2026-10-04/learning-episode-ui/after-320.png), [browser evidence](evidence/2026-10-04/learning-episode-ui.json). Native fixture evidence is synthetic service input, not live provider proof. No matched OpenDots comparison or full theme/form/focus matrix completed.
+
+### Persisted Learning summaries — 2026-10-04
+
+`learning-episodes.tsx` adds explicit-refresh cards and nested source evidence under the same Learning dialog. Existing neutral card/details/type styles reused; no new upstream source copied. [320px after](evidence/2026-10-04/learning-library/after-320.png), [tests](evidence/2026-10-04/learning-library.json). Persistent summaries are clearly labeled owner-provided/unverified. This is an after-only fixture capture, not a completed reference comparison or full responsive/accessibility matrix.
