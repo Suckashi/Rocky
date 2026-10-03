@@ -1727,6 +1727,27 @@
             "Full power-loss/crash matrix, precise steering/reset/retry and later V1 modules remain unfinished; global AT unchanged",
             "No remote actions"
           ]
+        },
+        {
+          "commit": "7d42223f2abcc34583caaee9bdd5055aff25aa34",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm test; npm run build; npx vitest run tests/mcp-work.test.ts tests/grants.test.ts tests/worker-channel.test.ts; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/synthetic-isolation/verification.json",
+          "testFiles": [
+            "tests/mcp-work.test.ts",
+            "tests/worker-channel.test.ts",
+            "tests/e2e/mcp-work.spec.ts"
+          ],
+          "limitations": [
+            "Full186 tests passed before final unused grant removal; latest23 focused tests passed after it",
+            "Normal-daemon four-width browser uses synthetic configured external services; explicit fixture daemon separately tested",
+            "Typed results/reconciliation/resources/prompts/target mapping/schema supersession and later V1 modules incomplete",
+            "Ubuntu/live integrations not_run; global AT unchanged; Goal active; no remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -2191,6 +2212,27 @@
             "Inherited synthetic sample exposure in configured graph still requires production cleanup",
             "Loopback fixtures only; Ubuntu/live integration not_run; no new fidelity comparison",
             "T-016 remains in_progress; global AT unchanged; no remote actions"
+          ]
+        },
+        {
+          "commit": "7d42223f2abcc34583caaee9bdd5055aff25aa34",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm test; npm run build; npx vitest run tests/mcp-work.test.ts tests/grants.test.ts tests/worker-channel.test.ts; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/synthetic-isolation/verification.json",
+          "testFiles": [
+            "tests/mcp-work.test.ts",
+            "tests/worker-channel.test.ts",
+            "tests/e2e/mcp-work.spec.ts"
+          ],
+          "limitations": [
+            "Full186 tests passed before final unused grant removal; latest23 focused tests passed after it",
+            "Normal-daemon four-width browser uses synthetic configured external services; explicit fixture daemon separately tested",
+            "Typed results/reconciliation/resources/prompts/target mapping/schema supersession and later V1 modules incomplete",
+            "Ubuntu/live integrations not_run; global AT unchanged; Goal active; no remote actions"
           ]
         }
       ],

@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-03",
+  "commit": "7d42223f2abcc34583caaee9bdd5055aff25aa34",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "mode": "fixture",
+  "checks": [
+    { "command": "npm run check", "exitCode": 0 },
+    { "command": "npm run lint", "exitCode": 0 },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "result": "45 files / 186 tests; after direct worker fixture opt-in, before final unused production sample grant removal",
+      "durationSeconds": 119.89
+    },
+    {
+      "command": "npx vitest run tests/mcp-work.test.ts tests/grants.test.ts tests/worker-channel.test.ts",
+      "exitCode": 0,
+      "result": "3 files / 23 tests after final grant removal",
+      "durationSeconds": 17.87
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "result": "14.62s, existing size warning; before final unused grant removal"
+    },
+    {
+      "command": "$env:ROCKY_TEST_BROWSER=Join-Path $env:LOCALAPPDATA 'ms-playwright/chromium-1223/chrome-win64/chrome.exe'; npx playwright test tests/e2e/mcp-work.spec.ts tests/e2e/streaming.spec.ts",
+      "exitCode": 0,
+      "result": "2 passed using explicit fixture daemon",
+      "durationSeconds": 26.4
+    },
+    {
+      "command": "npx playwright test --config playwright.production.config.ts",
+      "exitCode": 0,
+      "result": "1 passed using normal daemon and synthetic configured external services; before final unused grant removal",
+      "durationSeconds": 5.7
+    },
+    { "command": "git diff --check", "exitCode": 0 }
+  ],
+  "corrections": [
+    "Initial worker hook insertion matched wrong undefined expression; fixed before tests",
+    "First full regression: 185 passed / 1 failed; direct large synthetic tool worker test missed explicit flag; corrected, full rerun passed"
+  ],
+  "browser": {
+    "version": "Chromium 148.0.7778.96",
+    "DPR": 1,
+    "zoom": "100%",
+    "locale": "zh-TW",
+    "theme": "light",
+    "viewports": ["1440x900", "1280x800", "390x844", "320x844"]
+  },
+  "screenshots": [
+    "production-1440.png",
+    "production-1280.png",
+    "production-390.png",
+    "production-320.png"
+  ],
+  "limitations": [
+    "Normal application path verified with loopback fixtures, not paid/live integrations",
+    "Typed results/offloading/resources/prompts/reconciliation/target mapping/schema supersession pending",
+    "No new reference comparison or dark/English/reduced-motion proof",
+    "Ubuntu not_run; global AT unchanged; Goal active",
+    "No remote actions or Apsis changes"
+  ]
+}

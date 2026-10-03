@@ -85,3 +85,7 @@ Settings now shows authoritative connection status, discovered count and last-co
 ## Configured MCP exact approval (2d8cdf3 / ce42900)
 
 PageReviewCard-derived approval structure now shows actual server/tool, honest external-data impact, collapsible exact arguments and a generic operation approval button. Composer/settings no longer claim configured tools are synthetic-only. Actual native/daemon browser flow at1440/1280/390/320 has no full-page overflow, one receipt and no reload dispatch; see [screenshots and limits](mcp-runtime.md). No new upstream reference comparison or full tool/result UI acceptance.
+
+## Normal-daemon MCP browser verification (7d42223)
+
+The same reference-derived approval geometry was verified at1440/1280/390/320 using the normal application daemon, separate from the explicit synthetic test harness. Original configured-tool metadata and one actual fixture receipt remain visible; no built-in sample binding/fixture connection in production. [Normal-path screenshots and limitations](synthetic-isolation.md). This is not a new full OpenDots fidelity comparison or a live business-system claim.
