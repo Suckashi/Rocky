@@ -5,7 +5,9 @@ test("T-007 editable call cap is pinned through CopilotKit and visible after rel
 }) => {
   const prompt = `Budget UI ${Date.now()}`;
   await page.goto("/");
+  await page.getByText("模型與工具", { exact: true }).click();
   await page.getByLabel("啟用合成測試").check();
+  await page.getByText("模型與工具", { exact: true }).click();
   await page.getByText("工作預算 · 48", { exact: true }).click();
   const input = page.getByLabel("模型呼叫上限", { exact: true });
   await input.fill("0");

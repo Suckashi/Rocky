@@ -2,6 +2,8 @@
 
 **版本2.0.0｜2026-10-02。**本紀錄與主Spec完整取代先前Apsis重構Spec；不是貼在舊需求後的可選附錄。
 
+> 2026-10-03 最新 UI 決策：OpenDots 是 Rocky 的主要 UI／UX 對照基準；Rocky 的原創設計集中在角色、名稱與必要的功能適配。 舊版與其衝突的全站配色、sidebar、閱讀區、卡片及間距值由本決策取代；產品與技術契約不變。
+
 ## 最新使用者決策
 
 從Apsis改造轉為新的Rocky Repo。名稱靈感來自Project Hail Mary中的Rocky，Bot重新設計。Apsis與OpenDots只是參考範本，不再是必須保留、遷移或fork的產品底座。
@@ -33,7 +35,7 @@ Local + Explicit Network；Node/TypeScript-only；CopilotKit OSS/AG-UI；Deep Ag
 
 **Rocky Repo與npm名稱可用性未查證。**名稱按使用者定案；有衝突或權限不足時只停止相應遠端操作，完成本地可做部分。
 
-**不要改造成「Rocky=OpenDots換皮」。**借用工具卡與Computer責任邊界；原始元件及程式可少量授權重用，但不能直接整包移植或保留Intelligence route。
+**2026-10-03 UI／UX 最新決策。**OpenDots 是 Rocky 的主要 UI／UX 對照基準；Rocky 的原創設計集中在角色、名稱與必要的功能適配。 可在 MIT 授權下重用展示元件、CSS、tokens 與互動結構；不得整包移植產品、後端、資料、Git 歷史或 Intelligence route。
 
 **不要刪掉通用能力。**使用者主動加入程式專案、文件或標準Skill仍允許；取消的是跨產品資料遷移，不是取消普通file import、workspace或skill import。
 

@@ -5,6 +5,8 @@
 
 本文件配合 [ROCKY_GREENFIELD_SPEC.md](ROCKY_GREENFIELD_SPEC.md)。工作、授權、MCP、資料、Learning 的責任由主Spec決定；本文件定義其人機互動。本文不新增第二個Agent runtime。
 
+> 2026-10-03 最新 UI 決策：OpenDots 是 Rocky 的主要 UI／UX 對照基準；Rocky 的原創設計集中在角色、名稱與必要的功能適配。 舊版與其衝突的全站配色、sidebar、閱讀區、卡片及間距值由本決策取代；產品與技術契約不變。
+
 ## B0. 固定方向與可調整範圍
 
 **使用者已定案：**新Repo名Rocky；不再改造Apsis；Apsis及OpenDots僅參考；重新設計Bot；Local + Explicit Network；Node/TypeScript-only；單一助手與可觀測的背景工作。
@@ -71,22 +73,9 @@ P0互動spike可暫用中性圖示，T-037完成時必須有真正的新視覺so
 
 ## B3. 色彩、排版與版面
 
-以下為新設計起始值，必須實測對比與視覺效果，不宣稱已達標。跨元件用semantic tokens，不散落hard-coded colours。
+OpenDots 是 Rocky 的主要 UI／UX 對照基準；Rocky 的原創設計集中在角色、名稱與必要的功能適配。
 
-| token | 深色起始值 | 淺色起始值 | 角色 |
-|---|---|---|---|
-| canvas | `#15181C` | `#F6F4EF` | 主背景 |
-| surface | `#20252B` | `#FFFFFF` | 面板 |
-| surface-raised | `#2A3038` | `#ECE9E1` | 次級層次 |
-| text-primary | `#F4F1E9` | `#1C232A` | 主要文字 |
-| text-secondary | `#B8C0C8` | `#505A65` | 說明 |
-| accent | `#E8AF5C` | `#8F5314` | Rocky琥珀、focus與主操作 |
-| rock-base | `#77736D` | `#716A61` | avatar材質，不當狀態色 |
-| border | `#3B4652` | `#B8BEC4` | 分隔 |
-
-success/warning/error用獨立semantic tokens，配icon與文案；琥珀品牌色不等於一律警告，紅色不等於整個畫面充滿紅光。正常文字對比以4.5:1為驗收目標、大字與非文字重要控制以3:1為目標，實際配對需測。[此為本計畫驗收標準]
-
-排版使用本機system font stack，中英皆可讀；不抓遠端字型。正文以16px、行高約1.6為起點。不要因太空主題把所有字改成窄字／全大寫／過小code font。
+以 OpenDots c2569bb6 的 style.css 加上 editor.css 後段實際覆寫為準：白色 canvas、中性灰 chrome、48px rail、220px sidebar、64px topbar、850px live-chat 容器、22px composer 圓角。淺色優先，深色以同一結構和語意 tokens 延伸。琥珀限 avatar／mark 與少量品牌細節。必要焦點與文字對比修正記錄於 UI 對齊證據，不另外設計布局。
 
 ### B3.1 首頁資訊架構
 
@@ -97,13 +86,13 @@ success/warning/error用獨立semantic tokens，配icon與文案；琥珀品牌�
 Learning Inbox：有候選時顯示badge與明確入口，不永久塞滿主畫面
 ```
 
-這是Rocky的新布局。可以借OpenDots的工作內嵌模式，但不用它的Dot roster／Spaces關係；不要直接複製其版面CSS或Apsis component tree。
+沿用 OpenDots 的導覽和工作內嵌布局，以 Rocky adapters 接資料與 commands；不用 Dot roster／上游 Spaces persistence，允許授權展示 CSS／元件重用。
 
 320px行動版以單欄對話為主，詳細面板以drawer呈現；不把原桌面三欄縮到看不清。最重要的「補充工作」「停止」「核准／拒絕」「查看成果」仍可鍵盤與觸控操作。
 
 ### B3.2 Chat與WorkCard
 
-主對話avatar建議32px，工作卡24px，welcome 96px，sidebar mark 20–24px。Reading column寬度限制以60–76字元為起點，依實際中英內容驗證；工作細節可較寬。
+主對話 avatar 50px、empty persona 68px、sidebar mark 20px；對話外容器最大 850px，desktop padding 18px 35px 22px，依上游實際 CSS 對照。
 
 每張WorkCard第一層只顯示標題、目前已確認動作/阻礙、狀態與時間；第二層是todos/subagents/工具/檔案/測試；第三層才是raw IDs與JSON。不得為了好看把未知、失敗、已取消都顯示成同一種勾號。
 
@@ -272,7 +261,7 @@ source/spec包不附任何電影圖像或音訊。開發時用乾淨合成資料
 
 ## B9. 交付給設計／實作Agent的一段brief
 
-> 為新的Rocky本地AI助手建立獨立品牌與Bot。名稱源自Project Hail Mary角色，但要產出自己的抽象工程夥伴視覺，不使用電影或上游Repo素材。主形是穩定的中央岩質身體與五向關節結構，少量琥珀點綴，沒有普通機器人雙眼嘴巴，也不要恐怖蜘蛛或桌面寵物感。優先SVG/CSS、24–96px可辨識、深淺色與單色mark；介面清楚專業，太空感只在細節。角色動作只能反映已確認Work/Approval事件，失聯、待核准、失敗都要如實且清楚，完整支援reduced motion。不要複製Apsis/OpenDots component tree或頭像庫。完成可運行元件、素材source、provenance與測試，不只交一張宣傳圖或一份mockup。
+> 為新的Rocky本地AI助手建立獨立品牌與Bot。名稱源自Project Hail Mary角色，但要產出自己的抽象工程夥伴視覺，不使用電影或上游Repo素材。主形是穩定的中央岩質身體與五向關節結構，少量琥珀點綴，沒有普通機器人雙眼嘴巴，也不要恐怖蜘蛛或桌面寵物感。優先SVG/CSS、24–96px可辨識、深淺色與單色mark；介面清楚專業，太空感只在細節。角色動作只能反映已確認Work/Approval事件，失聯、待核准、失敗都要如實且清楚，完整支援reduced motion。不得複製 Apsis 程式或上游頭像庫；允許 OpenDots 授權展示元件與 CSS 適配。完成可運行元件、素材source、provenance與測試，不只交一張宣傳圖或一份mockup。
 
 ## B10. 靈感來源
 

@@ -6,6 +6,8 @@
 
 本文件 **v2.0.0 是規格版本**，不是 Rocky 應用程式版本。本文件完整取代《Apsis 2.0 大幅重構 Spec v1.0.0》；Rocky 是新的 Repo／產品，不是 Apsis 改名、升級或 fork。正式程式版本與 remote release/tag 由維護者另定。
 
+> 2026-10-03 最新 UI 決策：OpenDots 是 Rocky 的主要 UI／UX 對照基準；Rocky 的原創設計集中在角色、名稱與必要的功能適配。 舊版與其衝突的全站配色、sidebar、閱讀區、卡片及間距值由本決策取代；產品與技術契約不變。
+
 ## 0. 如何使用這份規格
 
 讀取順序：本章 → 第 1–5 章固定決策 → 與當前任務相關的契約章節 → 第 22–25 章任務／驗收。
@@ -99,10 +101,10 @@ API、型別、資料夾、指令均為**待建立的 Rocky 契約**；除特別
 | 來源 | 固定的歷史參考 | 可以借鑑 | 不繼承 |
 |---|---|---|---|
 | Apsis | `0b03c634a69494ef768c027ba894dcb40390e621` [SRC-01] | 工作/核准/故障/背景結果的設計經驗 | codebase、Git歷史、API、資料庫、env、人格、全部功能或測試 |
-| CopilotKit/OpenDots | `b01ac1f6a903e5e56c119d960901353ac0a3d171` [SRC-08] | 工具卡、漸進揭露、review、Computer ownership | 整份樣板、Intelligence、Dot roster、原美術或資料層 |
+| CopilotKit/OpenDots | `c2569bb6a13a22e565cf3eb791c62267d06babb1` [SRC-08] | 主要 UI／UX、展示元件／CSS／tokens、review、Computer ownership | 整份樣板、Intelligence、Dot roster、原美術或資料層 |
 | OpenClaw治理參考 | P0按需確認 [SRC-21] | 提案/版本/審查/回滾思想 | 整套runtime、commercial服務、auto擴權 |
 
-以上SHA是上版提供的參考定位，不是本次重新查證的最新HEAD；Rocky不用追蹤Apsis進度、不做同步merge、不強制先跑上游tests。參考不可用時，記錄缺口，仍可依Rocky明確契約實作。
+OpenDots UI SHA 已於2026-10-03取得原始碼並確認 MIT；其他 SHA 維持历史參考定位；Rocky不用追蹤Apsis進度、不做同步merge、不強制先跑上游tests。參考不可用時，記錄缺口，仍可依Rocky明確契約實作。
 
 ### 2.4 局部採用規則
 
@@ -139,7 +141,7 @@ Repo原創程式初始使用Apache-2.0；此決策不授予第三方素材權利
 | R-004 | 寬鬆開源 | 採 MIT／Apache-2.0 等允許清單；逐版檢查轉依賴及複製程式碼，保留 notices；不可僅檢查根 repo 授權。 |
 | R-005 | 單一 Rocky 助手 | 新建一個持續的 Rocky 與主對話；背景 Work／原生 subagents 不是新永久人格，不建立 roster 或舊 avatar gallery。 |
 | R-006 | 唯一主要 harness | 新版採 Deep Agents JS／LangGraph。普通、背景、Learning／eval 用同一套執行組裝；不並行加入 TanStack AI／Mastra／OpenClaw Agent loop。 |
-| R-007 | 開源互動層 | 採 CopilotKit OSS／AG-UI，參考 OpenDots 的漸進揭露與工具卡；以 Rocky 原創介面實作，本地 persistence、授權和 queue 屬 Rocky。 |
+| R-007 | 開源互動層 | 採 CopilotKit OSS／AG-UI，以 OpenDots 為主要 UI／UX 基準，允許授權展示元件與 CSS 重用，本地 persistence、授權和 queue 屬 Rocky。 |
 | R-008 | 原生規劃與子代理 | 優先原生 task／todos／context／checkpointer；Rocky 只觀測與控管，不重建 planner 或第二套 subagent 引擎。 |
 | R-009 | 背景獨立 | 背景工作有獨立 execution session、固定 workspace 與設定快照，返回 receipt 後主對話可繼續。 |
 | R-010 | 冪等命令 | 提交、steering、核准、發佈、retry 都有穩定 requestId 與 canonical request hash；同 ID 不同內容回 409。 |
@@ -184,7 +186,7 @@ Repo原創程式初始使用Apache-2.0；此決策不授予第三方素材權利
 | R-049 | 獨立新建 | Rocky 從新的目錄與獨立 Git root 開始；不得 rename/fork/snapshot 整個 Apsis 或 OpenDots 當骨架，不合併上游歷史、tags、branches。 |
 | R-050 | 參考而非相容義務 | 只依 Rocky in-scope 需求驗收；不要求重做 Apsis 的全部功能、測試、格式或 importer；必要局部引用先記 decision/provenance/license，不把整個參考專案加為 dependency/submodule。 |
 | R-051 | Rocky 一致命名 | 產品名與 Repo 名 Rocky；package scopes 為 private @rocky/*、API /api/v1、CUSTOM events rocky.*、env ROCKY_*、MCP extension x-rocky、productId rocky；不加 apsis 相容別名或預設路徑。 |
-| R-052 | 新 Bot 視覺身份 | 依 ROCKY_BOT_DESIGN_SPEC.md 新建 Rocky avatar、mark、tokens、空狀態與工具／工作介面；不繼承 Apsis/OpenDots 頭像、logo、截圖、CSS 換皮或 roster。 |
+| R-052 | 新 Bot 視覺身份 | 依 ROCKY_BOT_DESIGN_SPEC.md 新建 Rocky avatar、mark、tokens、空狀態與工具／工作介面；不繼承 Apsis/OpenDots 頭像、logo 或 roster；OpenDots 展示 CSS 可依 MIT 重用。 |
 | R-053 | Presence 真實且可存取 | Rocky 的姿態由可驗證的 per-work 狀態推導；連線狀態與工作狀態分開；主對話閒置時仍標示背景數量；失聯不假定停止，核准不假定成功，支援 reduced motion／鍵盤／螢幕閱讀器。 |
 | R-054 | 人格不取代能力與權限 | Rocky 是溫暖直接的解題助手；不假裝電影中的真實角色、不頻繁角色扮演；persona 不能擴權、動態建立第二引擎、修改 evaluator/policy 或宣稱未驗證成功。 |
 | R-055 | 素材來源與獨立品牌 | 程式與 Bot 素材分開記來源、作者、授權、hash、發布審核狀態；名稱/角色靈感不等於取得電影素材授權，不把未核實權利的素材列為 MIT/Apache。 |
@@ -523,7 +525,7 @@ SDK render projections 和產品 views 共用 stable IDs，不各自維持一份
 Work 詳情：公開 commentary、原生 todos、subagent assignment/status/activity/result、工具證據、變更／測試／成果；raw IDs 和 JSON 在最深層。
 角色活動由Work/Run/Operation/Approval的已確認事件驅動；heartbeat只表示程序存活，不表示工具前進。60秒沒有可觀測進度顯示stale並停止忙碌動畫；失聯是同步狀態，不等於daemon停止。
 核准等待顯示 operation、實際工作位置、args/diff、外部目的地與影響，不只顯示一句「允許嗎」。
-重新創作Rocky品牌、角色與互動，不沿用Apsis/OpenDots資產或48-avatar選擇。依Bot設計規格實作；所有固定UI文字支援繁中/英文，模型原文不自動翻譯。
+重新創作 Rocky 品牌與角色，不沿用上游品牌素材或48-avatar選擇；展示布局與互動以 OpenDots 為主基準。依Bot設計規格實作；所有固定UI文字支援繁中/英文，模型原文不自動翻譯。
 公開摘要可以展開；不顯示／保存供應商私有 reasoning blocks 為工作內容，也不要求模型吐 raw chain-of-thought。
 完成驗證看真結果；HTTP 200、graph invocation ended、tool response arrived，都不是任務成功的充分條件。
 
@@ -1104,7 +1106,7 @@ Phase 是驗收分組，具體依賴以配套 DAG 為準；不同模組可平行
 | T-016 | P3 | MCP Tool Broker／按需探索 | T-015, T-011 | schema validation、namespace、annotations 不信任、structured/image 映射、resource/prompt only data、permissions。 | AT-08, AT-14, AT-22 |
 | T-017 | P3 | Workspace／local tools／worktree | T-008, T-010 | canonical path/junction、root-owned leases、target lock、atomic edits、local git worktree、受控 shell。 | AT-16, AT-31 |
 | T-018 | P4 | AG-UI adapter 與 replay | T-012, T-013, T-016 | 標準事件與 CUSTOM 領域事件、durable cursor、reconnect snapshot、transport detach 不 abort。 | AT-12, AT-13, AT-19 |
-| T-019 | P4 | Rocky 主對話與 Work Timeline | T-018, T-037 | 原創Rocky ChatShell/WorkCard/ApprovalCard/ArtifactCard；新角色與tokens、背景摘要、subagent/steering/stop、繁中英文；不保留舊48頭像/多Bot清單。 | AT-10, AT-11, AT-14, AT-49, AT-62, AT-68 |
+| T-019 | P4 | Rocky 主對話與 Work Timeline | T-018, T-037 | OpenDots 對齊的 Rocky ChatShell/WorkCard/ApprovalCard/ArtifactCard；Rocky 原創角色與參考 tokens、背景摘要、subagent/steering/stop、繁中英文；不保留舊48頭像/多Bot清單。 | AT-10, AT-11, AT-14, AT-49, AT-62, AT-68 |
 | T-020 | P4 | Artifacts／文件與安全 preview | T-017, T-019 | immutable artifact manifest、download/preview、basic Markdown editor revision、file context references、來源連結。 | AT-26, AT-27 |
 | T-021 | P4 | Settings／MCP／Network UI | T-007, T-015, T-019 | Rocky 新onboarding、model/explicit-network設定、MCP diagnostics、redacted logs與未配置降級；無Apsis upgrade/import頁或憑證自動沿用。 | AT-24, AT-25, AT-58, AT-68 |
 | T-038 | P4 | Rocky Presence／人格／工作狀態整合 | T-019, T-037 | RockyAvatar/RockyPresence/PresenceAdapter＋背景counts與注意事項；connection/work state分離、stale/failure/approval/reduced-motion；persona保留同一個助手及安全邊界；fake clock與E2E。 | AT-63, AT-64, AT-65, AT-66, AT-69, AT-70 |

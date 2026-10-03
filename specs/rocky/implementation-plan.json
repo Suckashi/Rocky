@@ -60,7 +60,8 @@
     "envNamespace": "ROCKY_*",
     "mcpExtension": "x-rocky (version 1)",
     "dataPolicy": "Rocky-owned fresh store; no scanning or importing Apsis/OpenDots data/config/history",
-    "runtimeNamespace": "productId=rocky; own DB, browser profiles, cache, sessions and credentials"
+    "runtimeNamespace": "productId=rocky; own DB, browser profiles, cache, sessions and credentials",
+    "uiux": "OpenDots 是 Rocky 的主要 UI／UX 對照基準；Rocky 的原創設計集中在角色、名稱與必要的功能適配。 固定 c2569bb6a13a22e565cf3eb791c62267d06babb1，允許 MIT 展示元件與 CSS 重用；不採上游產品後端。"
   },
   "requirements": [
     {
@@ -96,7 +97,7 @@
     {
       "id": "R-007",
       "title": "開源互動層",
-      "requirement": "採 CopilotKit OSS／AG-UI，參考 OpenDots 的漸進揭露與工具卡；以 Rocky 原創介面實作，本地 persistence、授權和 queue 屬 Rocky。"
+      "requirement": "採 CopilotKit OSS／AG-UI；OpenDots 為主要 UI／UX 基準，允許授權展示元件／CSS 重用，本地 persistence、授權及 queue 屬 Rocky。"
     },
     {
       "id": "R-008",
@@ -321,7 +322,7 @@
     {
       "id": "R-052",
       "title": "新 Bot 視覺身份",
-      "requirement": "依 ROCKY_BOT_DESIGN_SPEC.md 新建 Rocky avatar、mark、tokens、空狀態與工具／工作介面；不繼承 Apsis/OpenDots 頭像、logo、截圖、CSS 換皮或 roster。"
+      "requirement": "原創 Rocky avatar／mark，OpenDots 對齊的 tokens、空狀態及工具／工作介面；不繼承上游頭像、logo 或 roster。"
     },
     {
       "id": "R-053",
@@ -1794,7 +1795,7 @@
         "T-018",
         "T-037"
       ],
-      "deliverable": "原創Rocky ChatShell/WorkCard/ApprovalCard/ArtifactCard；新角色與tokens、背景摘要、subagent/steering/stop、繁中英文；不保留舊48頭像/多Bot清單。",
+      "deliverable": "OpenDots 對齊的 Rocky ChatShell/WorkCard/ApprovalCard/ArtifactCard；Rocky 原創角色與參考 tokens、背景摘要、subagent/steering/stop、繁中英文；不保留舊48頭像/多Bot清單。",
       "acceptanceIds": [
         "AT-10",
         "AT-11",
@@ -1818,7 +1819,7 @@
         "R-053",
         "R-055"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "evidence": [],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
@@ -3671,8 +3672,8 @@
     },
     {
       "name": "CopilotKit/OpenDots",
-      "referenceCommit": "b01ac1f6a903e5e56c119d960901353ac0a3d171",
-      "role": "read-only interaction and computer reference; not product scaffold"
+      "referenceCommit": "c2569bb6a13a22e565cf3eb791c62267d06babb1",
+      "role": "Primary UI/UX reference; MIT presentation CSS adaptation, no backend/history/data adoption"
     }
   ],
   "executionDecisions": [
@@ -3689,6 +3690,22 @@
         "T-004 strict browser egress"
       ],
       "reference": "docs/adr/005-contracts-identity-and-open-gates.md"
+    },
+    {
+      "date": "2026-10-03",
+      "decision": "Persistent Goal: align OpenDots UI first, then implement first-version in-scope features",
+      "authorization": "User: PLEASE IMPLEMENT THIS PLAN",
+      "scope": [
+        "T-019",
+        "remaining first-version tasks under existing DAG"
+      ],
+      "openGates": [
+        "Ubuntu not available",
+        "strict browser egress host injection",
+        "real external services not configured"
+      ],
+      "reference": "docs/implementation/uiux-opendots-alignment.md",
+      "deferRule": "At most two grounded investigations / approximately 15 minutes per environment blocker; preserve acceptance status and proceed with independent features; no remote actions"
     }
   ]
 }

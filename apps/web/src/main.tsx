@@ -14,6 +14,8 @@ import { projectWork, projectEvidence } from "./projection.js";
 import { ModelSettings } from "./model-settings.js";
 import { WorkOperations } from "./work-operations.js";
 import { WorkGrants } from "./work-grants.js";
+import { Chrome, Transcript } from "./chrome.js";
+import ReactMarkdown from "react-markdown";
 import "./style.css";
 let session = "";
 async function request(path: string, body?: unknown) {
@@ -95,7 +97,7 @@ const labels = {
 function App() {
   const { agent, isReady } = useAgent({ agentId: "rocky" });
   const [locale, setLocale] = useState<"zh" | "en">("zh"),
-    [theme, setTheme] = useState("dark"),
+    [theme, setTheme] = useState("light"),
     [enabled, setEnabled] = useState(false),
     [transport, setTransport] = useState<"stdio" | "http">("stdio");
   const [works, setWorks] = useState<Work[]>([]),
@@ -202,263 +204,321 @@ function App() {
       setError(String(e));
     }
   }
+  async function stopWork(w: Work) {
+    try {
+      await request("/works/" + w.id + "/stop", {
+        requestId: crypto.randomUUID(),
+        runId: w.runId,
+        executionSessionId: w.executionSessionId,
+        expectedRevision: w.revision,
+      });
+    } catch (e) {
+      setError(String(e));
+    }
+  }
   return (
-    <div className="shell">
-      <aside>
-        <a className="brand" href="/" aria-label="Rocky home">
-          <img src="/rocky/mark.svg" width="32" height="32" alt="" />
-          Rocky
-        </a>
-        <nav>
-          <a href="#chat" className="selected">
-            {t.chat}
-          </a>
-          <a href="#works">
-            {t.work}
-            <span>{works.length}</span>
-          </a>
-          <a href="#setup">{t.setup}</a>
-        </nav>
-        <div className="sidebar-note">
-          LOCAL + EXPLICIT NETWORK
-          <br />
-          Development · Fixture
-        </div>
-      </aside>
-      <main id="chat">
-        <header>
-          <span className={connected ? "connection" : "connection warning"}>
-            {connected ? t.online : t.offline}
-          </span>
-          <div>
-            <button onClick={() => setLocale(locale === "zh" ? "en" : "zh")}>
-              {locale === "zh" ? "English" : "繁體中文"}
-            </button>
-            <button
-              aria-label="Toggle theme"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    <Chrome
+      locale={locale}
+      connected={connected}
+      count={works.length}
+      actions={
+        <>
+          <button onClick={() => setLocale(locale === "zh" ? "en" : "zh")}>
+            {locale === "zh" ? "English" : "繁體中文"}
+          </button>
+          <button
+            aria-label="Toggle theme"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? "☀" : "☾"}
+          </button>
+        </>
+      }
+      settings={
+        <ModelSettings
+          locale={locale}
+          request={request}
+          onSelect={(model) => {
+            setSelectedModel(model);
+            setEnabled(false);
+          }}
+        />
+      }
+    >
+      <section className="chat-workspace">
+        <div className={works.length ? "live-chat" : "new-conversation"}>
+          <section className="conversation">
+            <div
+              className={works.length ? "chat-persona" : "empty-chat-persona"}
             >
-              {theme === "dark" ? "☀" : "☾"}
-            </button>
-          </div>
-        </header>
-        <section className="conversation">
-          <div className="welcome">
-            <img
-              className="rocky-avatar"
-              src="/rocky/avatar.svg"
-              width="96"
-              height="96"
-              alt="Rocky"
-            />
-            <span className="eyebrow">ROCKY / ENGINEERING PARTNER</span>
-            <h1>{t.title}</h1>
-            <p>{t.intro}</p>
-          </div>
-          <section id="setup" className="setup">
-            <label>
-              <input
-                type="checkbox"
-                checked={enabled}
-                onChange={(e) => {
-                  setEnabled(e.target.checked);
-                  if (e.target.checked) setSelectedModel(null);
-                }}
+              <img
+                className="rocky-avatar"
+                src="/rocky/avatar.svg"
+                width="68"
+                height="68"
+                alt="Rocky"
               />
-              {t.fixture}
-            </label>
-            <select
-              aria-label="MCP transport"
-              value={transport}
-              onChange={(e) => setTransport(e.target.value as "stdio" | "http")}
+              <h1>{works.length ? "Rocky" : t.title}</h1>
+              <p>
+                {works.length
+                  ? locale === "zh"
+                    ? "一位持續助手 · 真實工作狀態"
+                    : "One continuous assistant · confirmed work state"
+                  : t.intro}
+              </p>
+            </div>
+            <Transcript
+              revision={works.map((w) => `${w.id}:${w.revision}`).join("|")}
             >
-              <option value="stdio">MCP · stdio</option>
-              <option value="http">MCP · Streamable HTTP</option>
-            </select>
-          </section>
-          <ModelSettings
-            locale={locale}
-            request={request}
-            onSelect={(model) => {
-              setSelectedModel(model);
-              setEnabled(false);
-            }}
-          />
-          <div id="works" className="works">
-            {!works.length && <p className="empty">{t.empty}</p>}
-            {works.map((w) => (
-              <article className="work" key={w.id}>
-                <div className="work-heading">
-                  <strong>{w.text}</strong>
-                  <span className={"status " + w.status}>
-                    {t.status[w.status]}
-                  </span>
-                </div>
-                {w.approval?.status === "pending" && (
-                  <section className="approval">
-                    <h2>{t.approval}</h2>
-                    <p>{t.impact}</p>
-                    <code>
-                      {w.approval.tool}({JSON.stringify(w.approval.args)})
-                    </code>
-                    <div className="actions">
-                      <button
-                        className="primary"
-                        onClick={() => void decide(w, "approve")}
+              {!works.length && <p className="empty">{t.empty}</p>}
+              {works.map((w) => (
+                <article className="work" key={w.id}>
+                  <div className="work-heading">
+                    <strong>{w.text}</strong>
+                    <span className={"status " + w.status}>
+                      {t.status[w.status]}
+                    </span>
+                  </div>
+                  {w.approval?.status === "pending" && (
+                    <section className="approval">
+                      <h2>{t.approval}</h2>
+                      <p>{t.impact}</p>
+                      <code>
+                        {w.approval.tool}({JSON.stringify(w.approval.args)})
+                      </code>
+                      <div className="actions">
+                        <button
+                          className="primary"
+                          onClick={() => void decide(w, "approve")}
+                        >
+                          {t.approve}
+                        </button>
+                        <button onClick={() => void decide(w, "reject")}>
+                          {t.reject}
+                        </button>
+                      </div>
+                    </section>
+                  )}
+                  {w.answer && (
+                    <div className="answer">
+                      <ReactMarkdown
+                        components={{
+                          img: ({ alt }) => <span>{alt}</span>,
+                          a: ({ children, href }) => (
+                            <a href={href} target="_blank" rel="noreferrer">
+                              {children}
+                            </a>
+                          ),
+                        }}
                       >
-                        {t.approve}
-                      </button>
-                      <button onClick={() => void decide(w, "reject")}>
-                        {t.reject}
-                      </button>
+                        {w.answer}
+                      </ReactMarkdown>
                     </div>
-                  </section>
-                )}
-                {w.answer && <p className="answer">{w.answer}</p>}
-                {w.error && <p role="alert">{w.error}</p>}
-                <details>
-                  <summary>{t.detail}</summary>
-                  <WorkGrants work={w} locale={locale} request={request} />
-                  <WorkOperations
-                    workId={w.id}
-                    revision={
-                      events.findLast(
-                        (e) =>
-                          e.workId === w.id &&
-                          e.payload.kind === "domain" &&
-                          e.payload.name.startsWith("rocky.operation."),
-                      )?.sequence ?? "0"
-                    }
-                    locale={locale}
-                    request={request}
-                  />
-                  <p>
-                    {locale === "zh"
-                      ? "此工作模型呼叫上限"
-                      : "Model call limit for this work"}
-                    : {w.modelBudget?.maxCalls ?? 48}
-                  </p>
-                  <ol>
-                    {events
-                      .filter(
-                        (e) =>
-                          e.workId === w.id &&
-                          e.payload.kind === "domain" &&
-                          e.payload.name !== "rocky.work.updated",
-                      )
-                      .map((e) => (
-                        <li key={e.id}>
-                          <span>
-                            {e.payload.kind === "domain"
-                              ? e.payload.name.replace("rocky.", "")
-                              : e.payload.event.type}
-                          </span>{" "}
-                          <small>
-                            {e.payload.kind === "domain"
-                              ? String(e.payload.data.name ?? "")
-                              : ""}
-                          </small>
-                          <details>
-                            <summary>Evidence</summary>
-                            <pre>{JSON.stringify(e.payload, null, 2)}</pre>
-                          </details>
-                        </li>
-                      ))}
-                  </ol>
-                </details>
-                {["queued", "running", "waiting_approval"].includes(
-                  w.status,
-                ) && (
-                  <button
-                    className="stop"
-                    onClick={() =>
-                      void request("/works/" + w.id + "/stop", {
-                        requestId: crypto.randomUUID(),
-                        runId: w.runId,
-                        executionSessionId: w.executionSessionId,
-                        expectedRevision: w.revision,
-                      }).catch((e) => setError(String(e)))
+                  )}
+                  {w.error && <p role="alert">{w.error}</p>}
+                  <details>
+                    <summary>{t.detail}</summary>
+                    <WorkGrants work={w} locale={locale} request={request} />
+                    <WorkOperations
+                      workId={w.id}
+                      revision={
+                        events.findLast(
+                          (e) =>
+                            e.workId === w.id &&
+                            e.payload.kind === "domain" &&
+                            e.payload.name.startsWith("rocky.operation."),
+                        )?.sequence ?? "0"
+                      }
+                      locale={locale}
+                      request={request}
+                    />
+                    <p>
+                      {locale === "zh"
+                        ? "此工作模型呼叫上限"
+                        : "Model call limit for this work"}
+                      : {w.modelBudget?.maxCalls ?? 48}
+                    </p>
+                    <ol>
+                      {events
+                        .filter(
+                          (e) =>
+                            e.workId === w.id &&
+                            e.payload.kind === "domain" &&
+                            e.payload.name !== "rocky.work.updated",
+                        )
+                        .map((e) => (
+                          <li key={e.id}>
+                            <span>
+                              {e.payload.kind === "domain"
+                                ? e.payload.name.replace("rocky.", "")
+                                : e.payload.event.type}
+                            </span>{" "}
+                            <small>
+                              {e.payload.kind === "domain"
+                                ? String(e.payload.data.name ?? "")
+                                : ""}
+                            </small>
+                            <details>
+                              <summary>Evidence</summary>
+                              <pre>{JSON.stringify(e.payload, null, 2)}</pre>
+                            </details>
+                          </li>
+                        ))}
+                    </ol>
+                  </details>
+                  {["queued", "running", "waiting_approval"].includes(
+                    w.status,
+                  ) && (
+                    <button
+                      className="stop"
+                      onClick={() =>
+                        void request("/works/" + w.id + "/stop", {
+                          requestId: crypto.randomUUID(),
+                          runId: w.runId,
+                          executionSessionId: w.executionSessionId,
+                          expectedRevision: w.revision,
+                        }).catch((e) => setError(String(e)))
+                      }
+                    >
+                      {t.stop}
+                    </button>
+                  )}
+                </article>
+              ))}
+            </Transcript>
+          </section>
+          <div className="composer-wrap chat-composer">
+            {selectedModel && (
+              <p role="status">
+                {locale === "zh"
+                  ? `使用 ${selectedModel.name}：訊息會送至此模型，可能產生費用。工具只操作合成範例。`
+                  : `Using ${selectedModel.name}: messages go to this model and may incur charges. Tools operate only on synthetic samples.`}{" "}
+                <button onClick={() => setSelectedModel(null)}>
+                  {locale === "zh" ? "取消選取" : "Clear selection"}
+                </button>
+              </p>
+            )}
+            {error && (
+              <p role="alert" className="error">
+                {error}
+              </p>
+            )}
+            <div className="composer-tools">
+              <details className="connection-options">
+                <summary>
+                  {locale === "zh" ? "模型與工具" : "Model & tools"}
+                </summary>{" "}
+                <section id="setup" className="setup">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={enabled}
+                      onChange={(e) => {
+                        setEnabled(e.target.checked);
+                        if (e.target.checked) setSelectedModel(null);
+                      }}
+                    />
+                    {t.fixture}
+                  </label>
+                  <select
+                    aria-label="MCP transport"
+                    value={transport}
+                    onChange={(e) =>
+                      setTransport(e.target.value as "stdio" | "http")
                     }
                   >
-                    {t.stop}
-                  </button>
-                )}
-              </article>
-            ))}
-          </div>
-        </section>
-        <div className="composer-wrap">
-          {selectedModel && (
-            <p role="status">
-              {locale === "zh"
-                ? `使用 ${selectedModel.name}：訊息會送至此模型，可能產生費用。工具只操作合成範例。`
-                : `Using ${selectedModel.name}: messages go to this model and may incur charges. Tools operate only on synthetic samples.`}{" "}
-              <button onClick={() => setSelectedModel(null)}>
-                {locale === "zh" ? "取消選取" : "Clear selection"}
+                    <option value="stdio">MCP · stdio</option>
+                    <option value="http">MCP · Streamable HTTP</option>
+                  </select>
+                </section>
+              </details>
+              <details className="work-budget">
+                <summary>
+                  {locale === "zh" ? "工作預算" : "Work budget"} ·{" "}
+                  {maxCalls || "—"}
+                </summary>
+                <label htmlFor="max-model-calls">
+                  {locale === "zh" ? "模型呼叫上限" : "Maximum model calls"}
+                </label>{" "}
+                <input
+                  id="max-model-calls"
+                  form="compose"
+                  type="number"
+                  min="1"
+                  max="10000"
+                  step="1"
+                  required
+                  value={maxCalls}
+                  onChange={(event) => setMaxCalls(event.target.value)}
+                  aria-describedby="budget-help"
+                />
+                <p id="budget-help">
+                  {locale === "zh"
+                    ? "每個新工作與其子代理共用此上限。送出後固定；這不是金額或 token 上限。"
+                    : "Each new work shares this limit with its subagents. Fixed after sending; this is not a money or token limit."}
+                </p>
+              </details>
+            </div>
+            <form id="compose" onSubmit={send}>
+              <textarea
+                aria-label={t.placeholder}
+                placeholder={t.placeholder}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Enter" &&
+                    !e.shiftKey &&
+                    !e.nativeEvent.isComposing
+                  ) {
+                    e.preventDefault();
+                    e.currentTarget.form?.requestSubmit();
+                  }
+                }}
+                rows={2}
+              />
+              {works.findLast((w) =>
+                ["queued", "running"].includes(w.status),
+              ) && (
+                <button
+                  type="button"
+                  className="composer-stop"
+                  aria-label={
+                    locale === "zh" ? "停止目前工作" : "Stop current work"
+                  }
+                  onClick={() => {
+                    const work = works.findLast((w) =>
+                      ["queued", "running"].includes(w.status),
+                    );
+                    if (work) void stopWork(work);
+                  }}
+                >
+                  ■
+                </button>
+              )}
+              <button
+                className="primary"
+                disabled={
+                  (!enabled && !selectedModel) ||
+                  !text.trim() ||
+                  busy ||
+                  !validBudget ||
+                  !isReady ||
+                  !connected
+                }
+              >
+                {selectedModel
+                  ? locale === "zh"
+                    ? "傳送至模型"
+                    : "Send to model"
+                  : t.send}{" "}
+                ↗
               </button>
-            </p>
-          )}
-          {error && (
-            <p role="alert" className="error">
-              {error}
-            </p>
-          )}
-          <details className="work-budget">
-            <summary>
-              {locale === "zh" ? "工作預算" : "Work budget"} · {maxCalls || "—"}
-            </summary>
-            <label htmlFor="max-model-calls">
-              {locale === "zh" ? "模型呼叫上限" : "Maximum model calls"}
-            </label>{" "}
-            <input
-              id="max-model-calls"
-              form="compose"
-              type="number"
-              min="1"
-              max="10000"
-              step="1"
-              required
-              value={maxCalls}
-              onChange={(event) => setMaxCalls(event.target.value)}
-              aria-describedby="budget-help"
-            />
-            <p id="budget-help">
-              {locale === "zh"
-                ? "每個新工作與其子代理共用此上限。送出後固定；這不是金額或 token 上限。"
-                : "Each new work shares this limit with its subagents. Fixed after sending; this is not a money or token limit."}
-            </p>
-          </details>
-          <form id="compose" onSubmit={send}>
-            <textarea
-              aria-label={t.placeholder}
-              placeholder={t.placeholder}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={2}
-            />
-            <button
-              className="primary"
-              disabled={
-                (!enabled && !selectedModel) ||
-                !text.trim() ||
-                busy ||
-                !validBudget ||
-                !isReady ||
-                !connected
-              }
-            >
-              {selectedModel
-                ? locale === "zh"
-                  ? "傳送至模型"
-                  : "Send to model"
-                : t.send}{" "}
-              ↗
-            </button>
-          </form>
-          <footer>{t.foot}</footer>
+            </form>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+    </Chrome>
   );
 }
 async function bootstrap() {

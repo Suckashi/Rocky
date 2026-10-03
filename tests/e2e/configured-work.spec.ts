@@ -8,6 +8,10 @@ test("T-007 UI selected model → CopilotKit → configured Work → approval �
     prompt = `Inspect synthetic sample ${Date.now()}`;
   try {
     await page.goto("/");
+    await page
+      .getByRole("button", { name: "設定", exact: true })
+      .last()
+      .click();
     await page.getByText("模型連線設定", { exact: true }).click();
     await page.getByLabel("名稱", { exact: true }).fill(name);
     await page.getByLabel("API 基底網址（包含版本路徑）").fill(server.baseUrl);
@@ -19,7 +23,7 @@ test("T-007 UI selected model → CopilotKit → configured Work → approval �
       .getByRole("button", { name: "使用此模型", exact: true })
       .click();
     expect(server.requests).toHaveLength(0);
-    await page.getByText("模型連線設定", { exact: true }).click();
+    await page.keyboard.press("Escape");
     await page.locator("textarea").fill(prompt);
     await page
       .getByRole("button", { name: "傳送至模型", exact: false })

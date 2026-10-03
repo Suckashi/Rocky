@@ -1,6 +1,6 @@
 # Third-party notices
 
-Original Rocky source is Apache-2.0. No Apsis/OpenDots code or assets are copied.
+Original Rocky source is Apache-2.0. No Apsis code or upstream brand assets are copied. OpenDots presentation CSS is adapted under MIT as listed below.
 
 Dependencies and exact versions/licenses are inventoried in docs/implementation/dependency-licenses.json and package-lock.json. npm-installed packages retain their upstream license and copyright files. Omitted optional packages are not approved for inclusion in a release.
 
@@ -15,3 +15,17 @@ Dependencies and exact versions/licenses are inventoried in docs/implementation/
 - caniuse-lite 1.0.30001814: browser compatibility data, CC-BY-4.0; upstream https://github.com/browserslist/caniuse-lite, derived from https://caniuse.com. Data is unmodified; its package includes the full attribution license.
 
 This source-stage inventory does not replace the P8 complete bundled/distribution notice review. No film imagery, upstream avatars, remote fonts or generated brand assets are included.
+
+## OpenDots presentation adaptation
+
+Source: https://github.com/CopilotKit/OpenDots/tree/c2569bb6a13a22e565cf3eb791c62267d06babb1
+
+Upstream src/client/style.css and src/client/editor.css effective compact chrome rules are adapted into apps/web/src/style.css and apps/web/src/tokens.css: selectors reduced to Rocky presentation, semantic theme tokens, mobile/focus changes. apps/web/src/chrome.tsx and main.tsx are Rocky implementations aligned to App/Chat/ChatTranscript/PageReviewCard structure, with no upstream API, persistence or polling. No upstream images, logo or mascot are used.
+
+Copyright (c) Atai Barkai
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

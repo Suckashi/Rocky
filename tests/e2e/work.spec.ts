@@ -11,8 +11,10 @@ test("CopilotKit → native task → MCP → approval, reload and mobile", async
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
   await expect(page.getByText("本機已連線", { exact: true })).toBeVisible();
+  await page.getByText("模型與工具", { exact: true }).click();
   await page.getByRole("checkbox", { name: "啟用合成測試" }).check();
   await page.getByRole("combobox").selectOption("http");
+  await page.getByText("模型與工具", { exact: true }).click();
   const title = "E2E synthetic " + Date.now();
   await page.getByRole("textbox").fill(title);
   await page.getByRole("button", { name: "開始驗證" }).click();
@@ -36,7 +38,7 @@ test("CopilotKit → native task → MCP → approval, reload and mobile", async
   await page.setViewportSize({ width: 320, height: 800 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(
-    page.getByRole("heading", { name: "Let’s work through it." }),
+    page.getByRole("heading", { name: "Rocky", exact: true }),
   ).toBeVisible();
   expect(
     await page.evaluate(
@@ -74,8 +76,10 @@ test("stop from the UI expires only the selected work approval and persists afte
 }) => {
   await page.goto("/");
   await expect(page.getByText("本機已連線", { exact: true })).toBeVisible();
+  await page.getByText("模型與工具", { exact: true }).click();
   await page.getByRole("checkbox", { name: "啟用合成測試" }).check();
   await page.getByRole("combobox").selectOption("http");
+  await page.getByText("模型與工具", { exact: true }).click();
   const title = "Stop fixture " + Date.now();
   await page.getByRole("textbox").fill(title);
   await page.getByRole("button", { name: "開始驗證" }).click();

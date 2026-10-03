@@ -7,6 +7,10 @@ test("T-007 connection settings save without traffic, probe, reload and mobile e
   const title = `Model fixture ${Date.now()}`;
   try {
     await page.goto("/");
+    await page
+      .getByRole("button", { name: "設定", exact: true })
+      .last()
+      .click();
     await page.getByText("模型連線設定", { exact: true }).click();
     await page.getByLabel("名稱", { exact: true }).fill(title);
     await page.getByLabel("API 基底網址（包含版本路徑）").fill(fixture.baseUrl);
@@ -23,6 +27,10 @@ test("T-007 connection settings save without traffic, probe, reload and mobile e
     });
     expect(fixture.requests).toHaveLength(5);
     await page.reload();
+    await page
+      .getByRole("button", { name: "設定", exact: true })
+      .last()
+      .click();
     await page.getByText("模型連線設定", { exact: true }).click();
     await expect(card.getByText("文字: 通過")).toBeVisible();
     await card.getByRole("button", { name: "編輯", exact: true }).click();

@@ -54,10 +54,10 @@ test("T-037 original avatar in app and all sizes/themes render without remote as
   });
   await page.getByRole("button", { name: "Toggle theme" }).focus();
   await page.keyboard.press("Enter");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Let’s work through it." }),
+    page.getByRole("heading", { name: /Rocky|Let’s work through it./ }),
   ).toBeVisible();
   await page.setViewportSize({ width: 320, height: 800 });
   await page.emulateMedia({ reducedMotion: "reduce" });
