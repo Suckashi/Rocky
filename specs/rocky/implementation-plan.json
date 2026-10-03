@@ -2380,6 +2380,27 @@
             "Original SDK top-level extension envelope, optional template parameters and advanced schemas remain gaps",
             "T-015/T-016/T-019 in_progress; global AT unchanged; no remote actions"
           ]
+        },
+        {
+          "commit": "5505c4a5ba25219e881718d076e15336451ddce4",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npx vitest run tests/mcp-result.test.ts tests/mcp-data-work.test.ts tests/mcp-vision-work.test.ts; npm test; npx playwright test --config playwright.production.config.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/mcp-data-envelopes/verification.json",
+          "testFiles": [
+            "tests/mcp-data-work.test.ts",
+            "tests/mcp-result.test.ts"
+          ],
+          "limitations": [
+            "No live image/service/Ubuntu evidence",
+            "No complete decoder or long-history media proof",
+            "Earlier development receipts lost metadata; crash/replay upgrade not verified",
+            "Owner selection UI/reconciliation/jobs/grants/later V1 incomplete",
+            "T-016 in_progress; global AT unchanged; no remote actions"
+          ]
         }
       ],
       "blockedReason": null,

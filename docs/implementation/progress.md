@@ -398,3 +398,7 @@ Bounded on-demand resources/templates/prompts discovery now shares mcp_discover 
 ## Approved MCP data retrieval (567344c)
 
 Root native mcp_data now reads discovered resources/templates/prompts after exact owner approval. Prompt roles remain tool evidence; disabled images are uninspected; unknown after dispatch blocks Work. Existing approval card shows daemon-resolved target preview. Full215 before final changes, final24+11 focused tests, build and two four-width browser flows passed; see mcp-data-retrieval.md. T-015/T-016/T-019 remain in_progress; owner selection UI/reconciliation and later V1 modules remain open.
+
+## Original MCP data envelopes (5505c4a)
+
+Daemon ledger and sanitized checkpoint retain original SDK resources/prompts, including extensions/metadata, without binary duplication in worker delivery. Mapper alone creates model task data; native offload retains dataKind. Full220, focused27, build and two four-width normal-daemon browser checks passed. See mcp-data-envelopes.md. T-016 stays in_progress. Next: T-017 real workspace registration and guarded file operations.

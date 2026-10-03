@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-03",
+  "commit": "5505c4a5ba25219e881718d076e15336451ddce4",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "lockfileHash": "af9d6be18dc04cd2eb8fe902ab8916efa3dafe90130eafbe6f69c1c1c5fe66ec",
+  "commands": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "viteSeconds": 15.59
+    },
+    {
+      "command": "npx vitest run tests/mcp-result.test.ts tests/mcp-data-work.test.ts tests/mcp-vision-work.test.ts",
+      "exitCode": 0,
+      "tests": 27,
+      "durationSeconds": 22.46
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "files": 49,
+      "tests": 220,
+      "durationSeconds": 155.89
+    },
+    {
+      "command": "npx playwright test --config playwright.production.config.ts",
+      "exitCode": 0,
+      "tests": 2,
+      "durationSeconds": 11.4
+    }
+  ],
+  "limitations": [
+    "No live image/service/Ubuntu evidence",
+    "No complete decoder or long-history media proof",
+    "Earlier development receipts lost metadata; crash/replay upgrade not verified",
+    "Owner selection UI/reconciliation/jobs/grants/later V1 incomplete",
+    "T-016 in_progress; global AT unchanged; no remote actions"
+  ]
+}
