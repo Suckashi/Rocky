@@ -27,6 +27,10 @@ import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
 import { WorkerJobs } from "./worker-jobs.js";
 import { ModelSlots } from "./model-slots.js";
+import {
+  admissionConfigSchema,
+  admissionConfigFromEnv,
+} from "./admission-config.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -37,6 +41,8 @@ type Active = {
   abort: AbortController;
   promise?: Promise<void>;
   closing?: Promise<void>;
+  wallElapsedMs: number;
+  wallTimer?: ReturnType<typeof setTimeout>;
 };
 export class WorkService {
   readonly store: Store;
@@ -44,7 +50,8 @@ export class WorkService {
   readonly modelBudgets: ModelBudgetLedger;
   readonly operations: OperationLedger;
   readonly grants: GrantRegistry;
-  readonly modelSlots = new ModelSlots(2);
+  readonly modelSlots: ModelSlots;
+  readonly admissionConfig: ReturnType<typeof admissionConfigSchema.parse>;
   readonly events = new EventEmitter();
   private active = new Map<string, Active>();
   private stopping = false;
@@ -52,7 +59,13 @@ export class WorkService {
   private readonly reconciliations = new Set<Promise<unknown>>();
   private deliveryTimer: ReturnType<typeof setInterval>;
   deliveryError: string | null = null;
-  constructor(root: string) {
+  constructor(root: string, config?: unknown) {
+    this.admissionConfig = Object.freeze(
+      config === undefined
+        ? admissionConfigFromEnv()
+        : admissionConfigSchema.parse(config),
+    );
+    this.modelSlots = new ModelSlots(this.admissionConfig.modelSlots);
     this.store = new Store(root);
     try {
       this.models = new ModelRegistry(this.store);
@@ -173,7 +186,10 @@ export class WorkService {
         );
       return this.store.get(prior.id);
     }
-    if (this.store.list().filter((w) => w.status === "queued").length >= 64)
+    if (
+      this.store.list().filter((w) => w.status === "queued").length >=
+      this.admissionConfig.maxQueued
+    )
       throw new RockyError("capacity", "Work admission queue is full", 429);
     if (parsed.modelSelection)
       this.models.assertRunnable(
@@ -189,6 +205,13 @@ export class WorkService {
       transport: parsed.transport,
       mode: parsed.mode,
       kind: parsed.kind,
+      workspaceId: parsed.workspaceId ?? randomUUID(),
+      wallBudgetMs:
+        runMode === "evaluation"
+          ? this.admissionConfig.evaluationWallBudgetMs
+          : parsed.kind === "background"
+            ? this.admissionConfig.backgroundWallBudgetMs
+            : this.admissionConfig.mainWallBudgetMs,
       ...(parsed.modelBudget ? { modelBudget: parsed.modelBudget } : {}),
       ...(parsed.modelSelection
         ? { modelSelection: parsed.modelSelection }
@@ -238,9 +261,9 @@ export class WorkService {
         );
       }).length;
     for (const [kind, limit] of [
-      ["main", 1],
-      ["background", 2],
-      ["evaluation", 1],
+      ["main", this.admissionConfig.mainSlots],
+      ["background", this.admissionConfig.backgroundSlots],
+      ["evaluation", this.admissionConfig.evaluationSlots],
     ] as const) {
       let count = classCount(kind);
       for (const work of this.store.list()) {
@@ -249,6 +272,22 @@ export class WorkService {
           work.status !== "queued" ||
           occupied.has(work.id) ||
           this.admissionClass(work) !== kind
+        )
+          continue;
+        if (
+          this.store
+            .list()
+            .some(
+              (other) =>
+                other.id !== work.id &&
+                (other.workspaceId ?? other.id) ===
+                  (work.workspaceId ?? work.id) &&
+                (["blocked"].includes(other.status) ||
+                  (occupied.has(other.id) &&
+                    ["queued", "running", "waiting_approval"].includes(
+                      other.status,
+                    ))),
+            )
         )
           continue;
         const abort = new AbortController();
@@ -538,7 +577,13 @@ export class WorkService {
           },
         );
       }
-      const active = { worker, connection, model, abort };
+      const active: Active = {
+        worker,
+        connection,
+        model,
+        abort,
+        wallElapsedMs: 0,
+      };
       this.active.set(work.id, active);
       handedOff = true;
       await this.run(work.id, undefined);
@@ -571,6 +616,25 @@ export class WorkService {
     let work = this.store.get(id);
     work.status = "running";
     this.update(work);
+    const wallBudgetMs =
+      work.wallBudgetMs ??
+      (this.admissionClass(work) === "background"
+        ? this.admissionConfig.backgroundWallBudgetMs
+        : this.admissionClass(work) === "evaluation"
+          ? this.admissionConfig.evaluationWallBudgetMs
+          : this.admissionConfig.mainWallBudgetMs);
+    const remaining = wallBudgetMs - active.wallElapsedMs;
+    if (remaining <= 0) {
+      this.cancelWork(id, undefined, "wall_budget");
+      await this.release(id, active);
+      return;
+    }
+    const segmentStarted = performance.now();
+    active.wallTimer = setTimeout(() => {
+      if (this.store.get(id).status === "running")
+        this.cancelWork(id, undefined, "wall_budget");
+    }, remaining);
+    active.wallTimer.unref();
     try {
       const result = await active.worker.invoke(decision);
       if (active.abort.signal.aborted) return;
@@ -656,6 +720,9 @@ export class WorkService {
         this.update(work);
       }
     } finally {
+      clearTimeout(active.wallTimer);
+      active.wallTimer = undefined;
+      active.wallElapsedMs += performance.now() - segmentStarted;
       if (this.store.get(id).status !== "waiting_approval") {
         await this.release(id, active);
       }
@@ -778,6 +845,7 @@ export class WorkService {
   private cancelWork(
     id: string,
     receipt?: { requestId: string; intent: string },
+    reason: "stopped" | "wall_budget" = "stopped",
   ) {
     const work = this.store.get(id);
     if (!["queued", "running", "waiting_approval"].includes(work.status))
@@ -787,13 +855,19 @@ export class WorkService {
         "SELECT id FROM operations WHERE id LIKE ? AND outcome='unknown' LIMIT 1",
       )
       .get(work.runId + ":%");
-    work.status = unknown ? "blocked" : "cancelled";
+    work.status = unknown
+      ? "blocked"
+      : reason === "wall_budget"
+        ? "failed"
+        : "cancelled";
     if (unknown)
       work.error =
         "Stopped with an unconfirmed operation outcome; reconciliation is required.";
+    else if (reason === "wall_budget")
+      work.error = "Work active execution time budget exhausted";
     if (work.approval?.status === "pending") work.approval.status = "expired";
     work.revision++;
-    this.operations.finishUndispatched(work, "stopped", () => {
+    this.operations.finishUndispatched(work, reason, () => {
       this.store.save(work, work.revision - 1);
       this.store.event(work, "rocky.work.updated", { work });
       if (receipt)

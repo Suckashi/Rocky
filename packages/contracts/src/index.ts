@@ -37,6 +37,7 @@ export const submissionSchema = z
     transport: z.enum(["stdio", "http"]).default("stdio"),
     mode: z.enum(["fixture", "configured"]),
     kind: z.enum(["main", "background"]).default("main"),
+    workspaceId: idSchema.optional(),
     modelSelection: modelSelectionSchema.optional(),
     modelBudget: modelBudgetSchema.optional(),
   })
@@ -85,6 +86,8 @@ export const workSchema = z
     transport: z.enum(["stdio", "http"]),
     mode: z.enum(["fixture", "configured"]),
     kind: z.enum(["main", "background"]).optional(),
+    workspaceId: idSchema.optional(),
+    wallBudgetMs: z.number().int().min(100).max(14400000).optional(),
     modelSelection: modelSelectionSchema.optional(),
     modelBudget: modelBudgetSchema.optional(),
     runMode: z.enum(["normal", "evaluation", "unknown"]),

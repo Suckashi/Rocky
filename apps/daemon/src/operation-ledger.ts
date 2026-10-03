@@ -20,7 +20,7 @@ export class OperationLedger {
   constructor(private readonly store: Store) {}
   finishUndispatched(
     work: Work,
-    reason: "stopped" | "restarted",
+    reason: "stopped" | "restarted" | "wall_budget",
     after: () => void,
   ) {
     const owned = this.store.get(work.id);
