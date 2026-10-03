@@ -44,3 +44,7 @@ Work submission and CopilotKit forwarded properties accept optional `modelBudget
 Trusted evaluation configuration accepts the same budget. The runner reads `ROCKY_EVAL_MODEL_BUDGET` as JSON, for example `{"maxCalls":12}`. This is a per-Work cap, not an aggregate campaign cap. The composer exposes the call cap in collapsed Work budget controls; campaign budgets remain pending. Token/cost caps require trusted bounds; without a configured trusted tokenizer they fail before dispatch rather than guessing. Prices are owner-supplied estimates, not provider invoices.
 
 The composer defaults to 48 model calls per new Work, adjustable from 1 to 10000. Invalid values disable send. Existing Work details show the original pinned cap even if the composer value is changed. This control does not claim a money or token cap; those remain API-only and require trusted bounds.
+
+## DNS connection lifetime
+
+Each direct ModelNetwork instance resolves the exact configured hostname when opening sockets and fixes the first valid IPv4/IPv6 answer set for that instance. Reordering is accepted; changing addresses rejects the next socket before sending credentials. Explicit literal IP endpoints retain their selected destination. A new instance begins a new DNS lifetime; persistent revision-level pinning is not implemented. Proxy socket lookup uses the same hook, but target DNS resolved by a CONNECT proxy is outside this client validation. This is a limited rebinding defense, not complete network isolation.

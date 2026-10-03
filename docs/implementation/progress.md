@@ -107,3 +107,9 @@ Implementation `692d7c57f71a7ecf16c33e71f8ae3164fcb65447` adds collapsed per-Wor
 Six functional browser tests passed, including new cap exhaustion, persisted daemon budget, reload and 320px checks. Traditional Chinese dark and English light screenshots were visually inspected. Typecheck, lint, build, final formatting and source guards passed. See [budget UI evidence](evidence/2026-10-03/models/budget-ui.json). A pre-existing test formatting issue was corrected; no runtime change resulted.
 
 T-007 remains in_progress for token profiles, cache pricing and DNS policy evidence. Known strict browser egress failure was excluded and remains open; Ubuntu unverified. No live or remote actions. Goal active.
+
+## Goal continuation: DNS lease revalidation
+
+Implementation `c3e7d386c1fd3f6967d7735582d6145f802db306` validates exact model hostname and IPv4/IPv6 answers at socket lookup. Each network instance rejects a changed DNS answer set, while answer reordering remains valid. Actual HTTP testing confirms only the first request reaches the server after a simulated rebind. Four focused DNS/proxy/TLS tests passed, with typecheck, server build, lint, format and source guards. See [DNS evidence](evidence/2026-10-03/models/dns-lease.json).
+
+This is intentionally recorded as partial DNS evidence: pins do not persist across network instances, and proxy-side target resolution is not enforced locally. T-007 remains in_progress for full policy integration, profiles and cache pricing. No global acceptance, OS isolation, Ubuntu or strict browser egress claim was changed. Goal active.

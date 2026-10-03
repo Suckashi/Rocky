@@ -902,6 +902,28 @@
             "Existing Vite bundle-size warning remains",
             "No live/remote action or dependency change; core suite not repeated for UI-only changes"
           ]
+        },
+        {
+          "commit": "c3e7d386c1fd3f6967d7735582d6145f802db306",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx vitest run tests/model-dns.test.ts tests/model-network.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/models/dns-lease.json",
+          "testFiles": [
+            "tests/model-dns.test.ts",
+            "tests/model-network.test.ts"
+          ],
+          "limitations": [
+            "DNS pinning lasts one ModelNetwork instance; no persistent connection-revision pin across new leases",
+            "Initial explicit model host may resolve to a local/company address; no arbitrary browsing permission is granted",
+            "HTTP CONNECT proxy may resolve destination itself; destination DNS enforcement at proxy remains unverified",
+            "No OS sandbox claim, DNS packet interception or global DNS changes",
+            "T-007 remains in_progress for full DNS policy integration, token profiles and cache pricing",
+            "Ubuntu/browser egress unchanged; no global AT promotion or remote action"
+          ]
         }
       ],
       "blockedReason": null,
