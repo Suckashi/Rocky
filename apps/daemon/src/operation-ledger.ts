@@ -16,6 +16,40 @@ type Operation = {
 };
 export class OperationLedger {
   constructor(private readonly store: Store) {}
+  finishUndispatched(
+    work: Work,
+    reason: "stopped" | "restarted",
+    after: () => void,
+  ) {
+    const owned = this.store.get(work.id);
+    if (
+      owned.runId !== work.runId ||
+      owned.executionSessionId !== work.executionSessionId
+    )
+      throw new RockyError("operation_owner", "Operation context changed", 409);
+    return this.store.transaction(() => {
+      const pending = this.store.db
+        .prepare(
+          "SELECT * FROM operations WHERE json_extract(context,'$.workId')=? AND json_extract(context,'$.runId')=? AND json_extract(context,'$.executionSessionId')=? AND phase IN ('prepared','authorized') AND outcome='not_executed'",
+        )
+        .all(owned.id, owned.runId, owned.executionSessionId) as Operation[];
+      for (const operation of pending) {
+        this.store.db
+          .prepare(
+            "UPDATE operations SET phase='settled',revision=revision+1 WHERE id=? AND revision=?",
+          )
+          .run(operation.id, operation.revision);
+        this.store.event(owned, "rocky.operation.not_executed", {
+          operationId: operation.id,
+          phase: "settled",
+          effectOutcome: "not_executed",
+          reason,
+        });
+      }
+      after();
+      return pending.length;
+    });
+  }
   get(id: string): Operation | undefined {
     return this.store.db
       .prepare("SELECT * FROM operations WHERE id=?")

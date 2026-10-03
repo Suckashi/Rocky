@@ -210,3 +210,58 @@ test("T-008 own v4 operation migration preserves success and unknown without inv
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("T-008 restart settles only undispatched owned operations and cleanup rolls back with Work failure", async () => {
+  const { WorkService } = await import("../apps/daemon/src/work-service.js");
+  const { root, store, work, ledger } = setup();
+  let closed = false;
+  try {
+    const prepared = ledger.prepare(work, "prepared", "write_sample", {}, "f");
+    const authorized = ledger.transition(
+      work,
+      ledger.prepare(work, "authorized", "write_sample", {}, "f"),
+      "authorized",
+      "not_executed",
+    );
+    const dispatched = ledger.transition(
+      work,
+      ledger.transition(
+        work,
+        ledger.prepare(work, "dispatched", "write_sample", {}, "f"),
+        "authorized",
+        "not_executed",
+      ),
+      "dispatched",
+      "unknown",
+    );
+    const eventCount = store.eventsForWork(work.id).length;
+    expect(() =>
+      ledger.finishUndispatched(work, "stopped", () => {
+        throw Error("work commit failed");
+      }),
+    ).toThrow("work commit failed");
+    expect(ledger.get(prepared.id)).toEqual(prepared);
+    expect(ledger.get(authorized.id)).toEqual(authorized);
+    expect(store.eventsForWork(work.id)).toHaveLength(eventCount);
+    store.close();
+    closed = true;
+    const recovered = new WorkService(root);
+    try {
+      expect(recovered.store.get(work.id).status).toBe("blocked");
+      expect(recovered.operations.get(prepared.id)).toMatchObject({
+        phase: "settled",
+        outcome: "not_executed",
+      });
+      expect(recovered.operations.get(authorized.id)).toMatchObject({
+        phase: "settled",
+        outcome: "not_executed",
+      });
+      expect(recovered.operations.get(dispatched.id)).toEqual(dispatched);
+    } finally {
+      await recovered.close();
+    }
+  } finally {
+    if (!closed) store.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});

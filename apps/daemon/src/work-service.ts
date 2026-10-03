@@ -60,7 +60,11 @@ export class WorkService {
             "Daemon restarted; review prior effects before starting a new work.";
           if (work.approval?.status === "pending")
             work.approval.status = "expired";
-          this.update(work);
+          work.revision++;
+          this.operations.finishUndispatched(work, "restarted", () => {
+            this.store.save(work, work.revision - 1);
+            this.store.event(work, "rocky.work.updated", { work });
+          });
         }
       this.flushOutbox();
       this.deliveryTimer = setInterval(() => this.flushOutbox(), 500);
@@ -608,7 +612,7 @@ export class WorkService {
         "Stopped with an unconfirmed operation outcome; reconciliation is required.";
     if (work.approval?.status === "pending") work.approval.status = "expired";
     work.revision++;
-    this.store.transaction(() => {
+    this.operations.finishUndispatched(work, "stopped", () => {
       this.store.save(work, work.revision - 1);
       this.store.event(work, "rocky.work.updated", { work });
       if (receipt)

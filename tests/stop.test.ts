@@ -57,6 +57,13 @@ test("stale stop cannot cancel another run/session or a newer revision; receipt 
     const result = service.stop(a.id, stop);
     expect(result.status).toBe("cancelled");
     expect(result.approval?.status).toBe("expired");
+    expect(
+      service.operations.get(current.approval!.operationId!),
+    ).toMatchObject({ phase: "settled", outcome: "not_executed" });
+    expect(service.operations.get(other.approval!.operationId!)).toMatchObject({
+      phase: "prepared",
+      outcome: "not_executed",
+    });
     expect(service.store.get(b.id)).toEqual(other);
     const eventCount = service.store.eventsForWork(a.id).length;
     expect(service.stop(a.id, stop)).toEqual(result);
@@ -100,6 +107,13 @@ test("stopping with a dispatched unknown effect requires reconciliation", async 
     const result = service.stop(w.id, command(current));
     expect(result.status).toBe("blocked");
     expect(result.error).toContain("reconciliation");
+    expect(service.operations.get(w.runId + ":lost-result")).toMatchObject({
+      phase: "dispatched",
+      outcome: "unknown",
+    });
+    expect(
+      service.operations.get(current.approval!.operationId!),
+    ).toMatchObject({ phase: "settled", outcome: "not_executed" });
     expect(result.approval?.status).toBe("expired");
   } finally {
     await service.close();
