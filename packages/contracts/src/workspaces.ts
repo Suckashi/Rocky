@@ -7,6 +7,38 @@ export const workspaceWriteSchema = z.strictObject({
     .regex(/^[a-f0-9]{64}$/)
     .nullable(),
 });
+
+export const writePreviewRequestSchema = z.strictObject({
+  expectedRevision: z.number().int().positive(),
+  intentFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+});
+export const writePreviewSchema = z.strictObject({
+  path: z.string().min(1).max(4096),
+  previousHash: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/)
+    .nullable(),
+  sha256: z.string().regex(/^[a-f0-9]{64}$/),
+  removedLines: z.number().int().nonnegative(),
+  addedLines: z.number().int().nonnegative(),
+  complete: z.boolean(),
+  omittedRows: z.number().int().nonnegative(),
+  previousHasBOM: z.boolean(),
+  nextHasBOM: z.boolean(),
+  previousLineEnding: z.enum(["none", "lf", "crlf", "cr", "mixed"]),
+  nextLineEnding: z.enum(["none", "lf", "crlf", "cr", "mixed"]),
+  previousEndsWithNewline: z.boolean(),
+  nextEndsWithNewline: z.boolean(),
+  rows: z
+    .array(
+      z.strictObject({
+        kind: z.enum(["context", "remove", "add"]),
+        text: z.string().max(8192),
+        truncated: z.boolean(),
+      }),
+    )
+    .max(500),
+});
 export const workspaceToolSchema = z.strictObject({
   path: z.string().max(4096).default(""),
 });

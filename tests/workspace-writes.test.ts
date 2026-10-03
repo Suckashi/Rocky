@@ -12,6 +12,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { randomUUID, createHash } from "node:crypto";
 import { AIMessage } from "@langchain/core/messages";
+import { createApp } from "../apps/daemon/src/http.js";
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { WorkspaceWriter } from "../apps/daemon/src/workspace-writes.js";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
@@ -115,9 +116,69 @@ test.each([
       approval = pending.approval!;
     expect(approval.args).toEqual({ path: "output.md", content, expectedHash });
     expect(approval.targetPreview).toBe("output.md");
+    const previewCommand = {
+      expectedRevision: approval.revision,
+      intentFingerprint: approval.intentFingerprint,
+    };
+    const preview = await service.previewWrite(approval.id, previewCommand);
+    expect(preview.previousHash).toBe(expectedHash);
+    expect(
+      preview.rows
+        .filter((row) => row.kind === "add")
+        .map((row) => row.text)
+        .join(""),
+    ).toBe(content);
+    expect(
+      preview.rows
+        .filter((row) => row.kind === "remove")
+        .map((row) => row.text)
+        .join(""),
+    ).toBe(existing ? original : "");
+    expect(service.store.get(work.id).revision).toBe(pending.revision);
+    expect(service.operations.list(work.id)[0]!.outcome).toBe("not_executed");
+    await expect(
+      service.previewWrite(approval.id, {
+        ...previewCommand,
+        expectedRevision: 2,
+      }),
+    ).rejects.toThrow("no longer pending");
+    if (mode === "replace") {
+      const app = createApp(service),
+        headers = {
+          host: "127.0.0.1:3211",
+          "content-type": "application/json",
+        };
+      const url = "/api/v1/approvals/" + approval.id + "/preview";
+      expect(
+        (
+          await app.request(url, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(previewCommand),
+          })
+        ).status,
+      ).toBe(403);
+      const session = await (
+        await app.request("/api/v1/session", { headers })
+      ).json();
+      expect(
+        (
+          await app.request(url, {
+            method: "POST",
+            headers: { ...headers, "x-rocky-session": session.token },
+            body: JSON.stringify(previewCommand),
+          })
+        ).status,
+      ).toBe(200);
+    }
     if (existing) expect(await readFile(path, "utf8")).toBe(original);
     else await expect(readFile(path)).rejects.toThrow();
-    if (mode === "stale") await writeFile(path, "EXTERNAL_CHANGED_CONTENT");
+    if (mode === "stale") {
+      await writeFile(path, "EXTERNAL_CHANGED_CONTENT");
+      await expect(
+        service.previewWrite(approval.id, previewCommand),
+      ).rejects.toThrow("File state changed");
+    }
     if (mode === "cancel")
       service.stop(work.id, {
         requestId: randomUUID(),

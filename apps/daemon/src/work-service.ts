@@ -43,9 +43,12 @@ import { GrantRegistry } from "./grants.js";
 import { WorkspaceWriter, WorkspaceWriteError } from "./workspace-writes.js";
 import { WorkspaceRegistry } from "./workspaces.js";
 import {
+  writePreviewRequestSchema,
+  writePreviewSchema,
   workspaceToolSchema,
   workspaceReadToolSchema,
 } from "../../../packages/contracts/src/workspaces.js";
+import { replacementDiff } from "./write-diff.js";
 import { WorkerJobs } from "./worker-jobs.js";
 import { ModelSlots } from "./model-slots.js";
 import {
@@ -1037,6 +1040,74 @@ export class WorkService {
           }
         : {}),
       ...(work.modelSelection ? { modelSelection: work.modelSelection } : {}),
+    });
+  }
+  async previewWrite(approvalId: string, input: unknown) {
+    const command = writePreviewRequestSchema.parse(input);
+    const work = this.store.list().find((w) => w.approval?.id === approvalId);
+    if (!work) throw new RockyError("not_found", "Approval not found", 404);
+    const check = () => {
+      const current = this.store.get(work.id),
+        approval = current.approval;
+      if (
+        current.status !== "waiting_approval" ||
+        approval?.id !== approvalId ||
+        approval.tool !== "workspace_write" ||
+        approval.status !== "pending" ||
+        approval.revision !== command.expectedRevision ||
+        approval.intentFingerprint !== command.intentFingerprint
+      )
+        throw new RockyError(
+          "stale_approval",
+          "This write proposal is no longer pending",
+          409,
+        );
+    };
+    check();
+    const approval = work.approval!,
+      proposal = this.workspaceWrites.get(approval.operationId!);
+    if (!proposal)
+      throw new RockyError(
+        "stale_approval",
+        "Write proposal is unavailable",
+        409,
+      );
+    const fresh = await new WorkspaceWriter(this.workspaces).prepare(
+      work,
+      approval.args,
+    );
+    if (fresh.fingerprint !== proposal.fingerprint)
+      throw new RockyError(
+        "target_changed",
+        "File state changed; prepare a fresh proposal",
+        409,
+      );
+    const before = proposal.target.exists
+      ? (
+          await this.workspaces.read(
+            proposal.workspace.id,
+            proposal.workspace.revision,
+            proposal.args.path,
+            proposal.target.contentHash!,
+          )
+        ).text
+      : "";
+    const final = await new WorkspaceWriter(this.workspaces).prepare(
+      work,
+      approval.args,
+    );
+    check();
+    if (final.fingerprint !== proposal.fingerprint)
+      throw new RockyError(
+        "target_changed",
+        "File changed during preview",
+        409,
+      );
+    return writePreviewSchema.parse({
+      path: proposal.target.relativePath,
+      previousHash: proposal.target.contentHash,
+      sha256: proposal.sha256,
+      ...replacementDiff(before, proposal.args.content),
     });
   }
   private async callWorkspaceWrite(

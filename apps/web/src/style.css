@@ -368,6 +368,19 @@ li {
   margin: 14px 22px 18px;
   max-height: 240px;
 }
+.proposal-review {
+  padding: 14px 22px;
+}
+.diff-preview span {
+  display: block;
+  white-space: pre-wrap;
+}
+.diff-add {
+  border-left: 2px solid #496d61;
+}
+.diff-remove {
+  border-left: 2px solid #a33e39;
+}
 .approval code {
   display: block;
   margin: 14px 22px 18px;

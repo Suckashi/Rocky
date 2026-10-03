@@ -6,6 +6,7 @@ import { API_PREFIX } from "../../../packages/contracts/src/index.js";
 import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
+import { WriteProposal } from "./write-proposal.js";
 import { Workspaces } from "./workspaces.js";
 import type { Workspace } from "../../../packages/contracts/src/workspaces.js";
 import { WorkOperations } from "./work-operations.js";
@@ -405,41 +406,12 @@ function App() {
                           </details>
                         </>
                       ) : w.approval.tool === "workspace_write" ? (
-                        <>
-                          <p>
-                            <strong>{String(w.approval.args.path)}</strong>
-                          </p>
-                          <p>
-                            {locale === "zh"
-                              ? "核准只適用下方完整新內容；檔案若已改變，本次寫入會停止。拒絕不會更動檔案。"
-                              : "Approval covers the complete new content below. A changed file stops this write. Rejection leaves the file unchanged."}
-                          </p>
-                          <details open>
-                            <summary>
-                              {locale === "zh"
-                                ? "待寫入完整內容"
-                                : "Complete proposed content"}
-                            </summary>
-                            <pre className="approval-proposal" tabIndex={0}>
-                              {String(w.approval.args.content)}
-                            </pre>
-                          </details>
-                          <details>
-                            <summary>
-                              {locale === "zh"
-                                ? "原始檔案驗證"
-                                : "Original file verification"}
-                            </summary>
-                            <code>
-                              {String(
-                                w.approval.args.expectedHash ??
-                                  (locale === "zh"
-                                    ? "新檔案：目標必須不存在"
-                                    : "New file: target must not exist"),
-                              )}
-                            </code>
-                          </details>
-                        </>
+                        <WriteProposal
+                          key={w.approval.id + ":" + w.approval.revision}
+                          approval={w.approval}
+                          locale={locale}
+                          request={request}
+                        />
                       ) : (
                         <code>
                           {w.approval.tool}({JSON.stringify(w.approval.args)})

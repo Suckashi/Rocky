@@ -265,6 +265,9 @@ export function createApp(service: WorkService) {
   app.post("/api/v1/conversation/messages", async (c) =>
     c.json(service.submit(await readJson(c)), 202),
   );
+  app.post("/api/v1/approvals/:id/preview", async (c) =>
+    c.json(await service.previewWrite(c.req.param("id"), await readJson(c))),
+  );
   app.post("/api/v1/approvals/:id/decision", async (c) => {
     const work = service.store
       .list()
