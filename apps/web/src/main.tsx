@@ -7,6 +7,7 @@ import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { WorkOperations } from "./work-operations.js";
 import { WorkGrants } from "./work-grants.js";
+import { WorkSteering } from "./work-steering.js";
 import { Chrome, Transcript } from "./chrome.js";
 import ReactMarkdown from "react-markdown";
 import "./style.css";
@@ -330,6 +331,13 @@ function App() {
                   <details>
                     <summary>{t.detail}</summary>
                     <WorkGrants work={w} locale={locale} request={request} />
+                    <WorkSteering
+                      work={w}
+                      events={events}
+                      locale={locale}
+                      connected={connected}
+                      request={request}
+                    />
                     <WorkOperations
                       workId={w.id}
                       revision={

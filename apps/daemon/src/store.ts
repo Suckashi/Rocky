@@ -26,6 +26,7 @@ import { acquireWriterLock } from "./writer-lock.js";
 import { redactEvidence } from "./redaction.js";
 import { ConversationStore } from "./conversation-store.js";
 import { ContextLedger } from "./context-ledger.js";
+import { SteeringStore } from "./steering.js";
 export class Store {
   publicEvidence: (value: unknown) => unknown = redactEvidence;
   readonly db: DatabaseSync;
@@ -69,7 +70,7 @@ export class Store {
       const version = (
         this.db.prepare("PRAGMA user_version").get() as { user_version: number }
       ).user_version;
-      if (version > 12)
+      if (version > 13)
         throw new RockyError(
           "unsupported_store",
           "Rocky store version is newer than this application",
@@ -240,6 +241,11 @@ export class Store {
         this.transaction(() => {
           new ContextLedger(this).initialize();
           this.db.exec("PRAGMA user_version=12");
+        });
+      if (version < 13)
+        this.transaction(() => {
+          new SteeringStore(this).initialize();
+          this.db.exec("PRAGMA user_version=13");
         });
     } catch (error) {
       database?.close();

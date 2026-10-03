@@ -9,6 +9,7 @@ import { z } from "zod";
 import type { BaseCheckpointSaver } from "@langchain/langgraph-checkpoint";
 import { FixtureModel } from "../../../fixtures/models/model.js";
 import type { BaseMessage } from "@langchain/core/messages";
+import { HumanMessage } from "@langchain/core/messages";
 import type { ChatResult } from "@langchain/core/outputs";
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { ROCKY_PERSONA } from "./persona.js";
@@ -18,6 +19,7 @@ import {
   scratchToolFailed,
 } from "./scratch-policy.js";
 export type RuntimeHooks = {
+  steer?: () => Promise<{ id: string; text: string }[]>;
   event: (name: string, data: Record<string, unknown>) => void;
   call: (
     name: string,
@@ -110,6 +112,23 @@ export function createRockyAgent(
       "\nNative filesystem tools access only run-private virtual /scratch paths in graph checkpoints. They do not read or modify host files or registered workspaces. Always supply an absolute /scratch path to ls/glob/grep. Native context offloads under /large_tool_results and /conversation_history are read-only to tools. Shell execution is unavailable.",
     tools: [write],
     middleware: [
+      createMiddleware({
+        name: "RockySteering",
+        beforeModel: async () => {
+          const commands = (await hooks.steer?.()) ?? [];
+          return commands.length
+            ? {
+                messages: commands.map(
+                  (command) =>
+                    new HumanMessage({
+                      id: "steer:" + command.id,
+                      content: command.text,
+                    }),
+                ),
+              }
+            : undefined;
+        },
+      }),
       createSummarizationMiddleware({
         backend: new StateBackend(),
         summaryPrompt:

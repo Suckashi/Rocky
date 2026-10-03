@@ -668,3 +668,31 @@ input[type="checkbox"] {
   min-height: 130px;
   padding: 21px 20px 14px;
 }
+.work-steering {
+  margin: 12px 0;
+}
+.work-steering p {
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.work-steering textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 76px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--canvas);
+  color: var(--ink);
+  font: inherit;
+  resize: vertical;
+}
+.steering-receipt {
+  padding: 10px 12px;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}

@@ -26,6 +26,7 @@ export const ipcMessageSchema = z
         sourceGraphThreadId: idSchema.optional(),
         contextBatchId: idSchema.optional(),
         maxInputTokens: z.number().int().positive().max(100000000).optional(),
+        steering: z.boolean().optional(),
       }),
       z.strictObject({
         kind: z.literal("resume"),
@@ -52,6 +53,12 @@ export const ipcMessageSchema = z
         checkpointId: idSchema,
       }),
       z.strictObject({ kind: z.literal("run_result"), result: z.unknown() }),
+      z.strictObject({ kind: z.literal("steer_read") }),
+      z.strictObject({
+        kind: z.literal("steer_ack"),
+        id: idSchema,
+        checkpointId: idSchema,
+      }),
       z
         .object({
           kind: z.literal("tool_request"),

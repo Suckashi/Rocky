@@ -10,6 +10,7 @@ import type { RuntimeHooks } from "../../../packages/agent-runtime/src/factory.j
 import { WorkerModel } from "../../../packages/agent-runtime/src/worker-model.js";
 import { toModelWire } from "../../../packages/agent-runtime/src/model-wire.js";
 import { parseIpcMessage } from "../../../packages/contracts/src/ipc.js";
+import { steeringReceiptSchema } from "../../../packages/contracts/src/steering.js";
 import {
   frameModelRequest,
   type ModelRequest,
@@ -45,6 +46,7 @@ const requests = new Map<
 >();
 const abort = new AbortController();
 const resultTransfer = new ResultTransferAssembler();
+const pendingSteering: { id: string; text: string }[] = [];
 function send(
   requestId: string,
   payload: Message["payload"],
@@ -75,6 +77,8 @@ function rpc(
       kind:
         | "tool_request"
         | "model_request"
+        | "steer_read"
+        | "steer_ack"
         | "context_read"
         | "context_ack"
         | "model_begin"
@@ -102,6 +106,23 @@ function rpc(
   });
 }
 async function modelRpc(payload: ModelRequest) {
+  if (pendingSteering.length) {
+    const checkpoint = await saver!.getTuple({
+      configurable: { thread_id: owner!.runId },
+    });
+    if (!checkpoint) throw Error("Steering checkpoint missing");
+    for (const command of pendingSteering.splice(0)) {
+      const receipt = steeringReceiptSchema.parse(
+        await rpc({
+          kind: "steer_ack",
+          id: command.id,
+          checkpointId: checkpoint.checkpoint.id,
+        }),
+      );
+      if (receipt.id !== command.id || receipt.status !== "applied")
+        throw Error("Steering receipt mismatch");
+    }
+  }
   if (Buffer.byteLength(JSON.stringify(payload)) < 40000) return rpc(payload);
   let result: unknown;
   for (const frame of frameModelRequest(payload)) result = await rpc(frame);
@@ -346,6 +367,25 @@ process.on("message", (wire) => {
       owner = message;
       saver = SqliteSaver.fromConnString(message.payload.graphPath);
       const hooks: RuntimeHooks = {
+        steer: message.payload.steering
+          ? async () => {
+              const commands: { id: string; text: string }[] = [];
+              for (let i = 0; i < 8; i++) {
+                const raw = await rpc({ kind: "steer_read" });
+                if (raw === null) break;
+                const receipt = steeringReceiptSchema.parse(raw);
+                if (
+                  receipt.runId !== owner!.runId ||
+                  receipt.executionSessionId !== owner!.executionSessionId ||
+                  receipt.status !== "accepted"
+                )
+                  throw Error("Steering target changed");
+                commands.push({ id: receipt.id, text: receipt.text });
+              }
+              pendingSteering.push(...commands);
+              return commands;
+            }
+          : undefined,
         event: (name, data) =>
           send(randomUUID(), { kind: "runtime_event", name, data }),
         call: async (name, args, callId) =>

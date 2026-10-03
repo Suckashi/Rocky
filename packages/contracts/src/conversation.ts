@@ -32,7 +32,7 @@ export const conversationMessageSchema = z.strictObject({
   runId: idSchema,
   executionSessionId: idSchema,
   role: z.enum(["user", "assistant"]),
-  source: z.enum(["submission", "work_result"]),
+  source: z.enum(["submission", "work_result", "steering"]),
   text: z.string(),
   status: workStatus,
   error: z.string().optional(),

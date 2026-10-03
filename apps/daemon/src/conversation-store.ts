@@ -173,6 +173,30 @@ export class ConversationStore {
       )
       .run(base.id, base.conversationId, work.id, JSON.stringify(base));
   }
+  steering(
+    work: Work,
+    receipt: { id: string; text: string; createdAt: string },
+  ) {
+    const base = conversationMessageSchema
+      .omit({ sequence: true })
+      .parse({
+        id: "steer:" + receipt.id,
+        conversationId: this.main().id,
+        workId: work.id,
+        runId: work.runId,
+        executionSessionId: work.executionSessionId,
+        role: "user",
+        source: "steering",
+        text: this.store.publicEvidence(receipt.text),
+        status: work.status,
+        createdAt: receipt.createdAt,
+      });
+    this.store.db
+      .prepare(
+        "INSERT OR IGNORE INTO conversation_history(id,conversation_id,work_id,data) VALUES(?,?,?,?)",
+      )
+      .run(base.id, base.conversationId, work.id, JSON.stringify(base));
+  }
   page(before?: string, limit = 50) {
     if (before !== undefined && !sequenceSchema.safeParse(before).success)
       throw new RockyError("invalid_cursor", "Invalid history cursor");

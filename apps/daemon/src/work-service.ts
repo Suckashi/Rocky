@@ -19,6 +19,7 @@ import {
 import { Store } from "./store.js";
 import { ConversationStore } from "./conversation-store.js";
 import { ContextLedger } from "./context-ledger.js";
+import { SteeringStore } from "./steering.js";
 import { ModelRegistry } from "./model-registry.js";
 import { ModelBudgetLedger } from "./model-budget.js";
 import { intentHash } from "./intent.js";
@@ -87,6 +88,7 @@ export class WorkService {
           work.revision++;
           this.operations.finishUndispatched(work, "restarted", () => {
             this.store.save(work, work.revision - 1);
+            new SteeringStore(this.store).finish(work);
             this.store.event(work, "rocky.work.updated", { work });
           });
         }
@@ -169,6 +171,8 @@ export class WorkService {
     work.revision++;
     this.store.transaction(() => {
       this.store.save(work, work.revision - 1);
+      if (!["queued", "running", "waiting_approval"].includes(work.status))
+        new SteeringStore(this.store).finish(work);
       this.store.event(work, "rocky.work.updated", { work });
     });
     this.flushOutbox();
@@ -634,6 +638,17 @@ export class WorkService {
                 payload.index,
                 payload.offset,
               );
+            if (payload.kind === "steer_read")
+              return new SteeringStore(this.store).read(_owned);
+            if (payload.kind === "steer_ack") {
+              const result = await new SteeringStore(this.store).acknowledge(
+                _owned,
+                payload.id,
+                payload.checkpointId,
+              );
+              this.flushOutbox();
+              return result;
+            }
             if (payload.kind === "context_ack") {
               const receipt = await new ContextLedger(this.store).acknowledge(
                 _owned,
@@ -679,6 +694,7 @@ export class WorkService {
             ).sourceGraphThreadId,
             contextBatchId: contextBatch?.id,
             maxInputTokens: configuredModels?.root.profile.maxInputTokens,
+            steering: true,
             mode: work.mode,
             event: (_owned, name, data) => hooks.event(name, data),
           },
@@ -949,6 +965,11 @@ export class WorkService {
       throw new RockyError("terminal_work", "Work is no longer active", 409);
     return this.cancelWork(id, { requestId: command.requestId, intent });
   }
+  steer(id: string, input: unknown) {
+    const result = new SteeringStore(this.store).accept(id, input);
+    this.flushOutbox();
+    return this.store.publicEvidence(result);
+  }
   private cancelWork(
     id: string,
     receipt?: { requestId: string; intent: string },
@@ -977,6 +998,7 @@ export class WorkService {
     this.operations.finishUndispatched(work, reason, () => {
       this.store.save(work, work.revision - 1);
       this.store.event(work, "rocky.work.updated", { work });
+      new SteeringStore(this.store).finish(work);
       if (receipt)
         this.store.db
           .prepare("INSERT INTO stop_receipts VALUES(?,?,?)")

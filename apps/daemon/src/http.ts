@@ -1,5 +1,6 @@
 import { Hono, type Context } from "hono";
 import { ConversationStore } from "./conversation-store.js";
+import { SteeringStore } from "./steering.js";
 import { streamSSE } from "hono/streaming";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { randomBytes } from "node:crypto";
@@ -233,6 +234,17 @@ export function createApp(service: WorkService) {
   app.post("/api/v1/works/:id/stop", async (c) =>
     c.json(service.stop(c.req.param("id"), await readJson(c))),
   );
+  app.post("/api/v1/works/:id/steer", async (c) =>
+    c.json(service.steer(c.req.param("id"), await readJson(c))),
+  );
+  app.get("/api/v1/works/:id/steering", (c) => {
+    service.store.get(c.req.param("id"));
+    return c.json({
+      receipts: service.store.publicEvidence(
+        new SteeringStore(service.store).list(c.req.param("id")),
+      ),
+    });
+  });
   app.get("/api/v1/events", (c) => {
     let after = c.req.header("last-event-id") ?? c.req.query("after") ?? "0";
     service.store.events(after); // validate before committing SSE headers

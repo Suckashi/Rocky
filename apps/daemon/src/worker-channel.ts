@@ -18,7 +18,15 @@ type Handler = (
   work: Work,
   payload: Extract<
     Message["payload"],
-    { kind: "tool_request" | "model_request" | "context_read" | "context_ack" }
+    {
+      kind:
+        | "tool_request"
+        | "model_request"
+        | "context_read"
+        | "context_ack"
+        | "steer_read"
+        | "steer_ack";
+    }
   >,
   signal: AbortSignal,
 ) => Promise<unknown>;
@@ -27,6 +35,7 @@ type AgentOptions = {
   sourceGraphThreadId?: string;
   contextBatchId?: string;
   maxInputTokens?: number;
+  steering?: boolean;
   mode?: "fixture" | "configured";
   event: (work: Work, name: string, data: Record<string, unknown>) => void;
 };
@@ -172,6 +181,7 @@ export class WorkerChannel {
     try {
       this.send(this.startRequestId, {
         kind: "start",
+        ...(agentOptions?.steering ? { steering: true } : {}),
         text: this.owner.text,
         ...(agentOptions?.mode ? { mode: agentOptions.mode } : {}),
         ...(agentOptions ? { graphPath: agentOptions.graphPath } : {}),
@@ -300,6 +310,8 @@ export class WorkerChannel {
         "model_commit",
         "context_read",
         "context_ack",
+        "steer_read",
+        "steer_ack",
         "runtime_event",
         "run_result",
         "result_begin",
@@ -374,7 +386,9 @@ export class WorkerChannel {
       message.payload.kind !== "model_chunk" &&
       message.payload.kind !== "model_commit" &&
       message.payload.kind !== "context_read" &&
-      message.payload.kind !== "context_ack"
+      message.payload.kind !== "context_ack" &&
+      message.payload.kind !== "steer_read" &&
+      message.payload.kind !== "steer_ack"
     )
       throw Error("Unexpected worker message");
     if (this.pending.size >= 8 || this.seen.size >= 10000)
