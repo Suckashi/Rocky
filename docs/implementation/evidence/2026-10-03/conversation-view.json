@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-03",
+  "commit": "702ca02",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npx vitest run tests/conversation-store.test.ts tests/http.test.ts",
+      "exitCode": 0,
+      "result": "8 tests passed"
+    },
+    {
+      "command": "npx vitest run tests/conversation-store.test.ts",
+      "exitCode": 0,
+      "result": "Final active-session/cursor assertions: 4 passed"
+    }
+  ],
+  "limitations": [
+    "API-only addition; no new browser or build evidence in this slice",
+    "GET/conversation now includes newest bounded messages/cursor and daemon-owned active session; this is not cross-turn model context or inbox consumption",
+    "T-011/T-013/T-018 remain in_progress; no new global AT pass",
+    "No external service/platform or remote action"
+  ]
+}
