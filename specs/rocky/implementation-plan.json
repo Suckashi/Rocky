@@ -4110,6 +4110,28 @@
             "Scope/name catalog deduplication, pagination and secret/static capability review remain open",
             "No new browser, Ubuntu or live provider evidence; T-026 in_progress, all70 global AT unchanged"
           ]
+        },
+        {
+          "commit": "75b890e973adc54ba43d10f42c6c17bc24384099",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/skill-selection.test.ts tests/skills.test.ts tests/skill-package.test.ts; npm run check; scoped eslint skills/store/http and skill tests; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-selection.json",
+          "testFiles": [
+            "tests/skill-selection.test.ts",
+            "tests/skills.test.ts",
+            "tests/skill-package.test.ts"
+          ],
+          "limitations": [
+            "Local registry selection only; no native loader/catalog integration, published filesystem view or running-Work revoke enforcement yet",
+            "Owner API does not yet have browser trust/review UI; no new screenshots",
+            "Quarantine keyed by skill ID and content hash; cross-ID identical-content deny policy remains open",
+            "Manual import selection path only; Learning proposals/evaluation publication gates remain unimplemented",
+            "Required-capability/static secret review and manifest provenance expansion remain pending",
+            "No Ubuntu/live provider/fullAT evidence; T-026/T-027 in_progress"
+          ]
         }
       ],
       "blockedReason": null,
@@ -4141,8 +4163,31 @@
         "R-032",
         "R-036"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "75b890e973adc54ba43d10f42c6c17bc24384099",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/skill-selection.test.ts tests/skills.test.ts tests/skill-package.test.ts; npm run check; scoped eslint skills/store/http and skill tests; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/skill-selection.json",
+          "testFiles": [
+            "tests/skill-selection.test.ts",
+            "tests/skills.test.ts",
+            "tests/skill-package.test.ts"
+          ],
+          "limitations": [
+            "Local registry selection only; no native loader/catalog integration, published filesystem view or running-Work revoke enforcement yet",
+            "Owner API does not yet have browser trust/review UI; no new screenshots",
+            "Quarantine keyed by skill ID and content hash; cross-ID identical-content deny policy remains open",
+            "Manual import selection path only; Learning proposals/evaluation publication gates remain unimplemented",
+            "Required-capability/static secret review and manifest provenance expansion remain pending",
+            "No Ubuntu/live provider/fullAT evidence; T-026/T-027 in_progress"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
