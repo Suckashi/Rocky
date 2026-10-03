@@ -6,6 +6,7 @@ import {
 } from "../../contracts/src/models.js";
 import { RockyError } from "../../contracts/src/index.js";
 import { assertEvaluationEgress } from "./evaluation-egress.js";
+import { pinnedLookup, type HostResolver } from "./model-dns.js";
 
 export function bypassProxy(url: URL, patterns: string): boolean {
   const host = url.hostname.toLowerCase();
@@ -46,7 +47,11 @@ export class ModelNetwork {
   private readonly dispatcher: Dispatcher;
   readonly endpoint: string;
   private readonly headers: Record<string, string>;
-  constructor(config: ModelConfig, env: NodeJS.ProcessEnv = process.env) {
+  constructor(
+    config: ModelConfig,
+    env: NodeJS.ProcessEnv = process.env,
+    resolver?: HostResolver,
+  ) {
     const base = endpointSchema.parse(config.baseUrl);
     this.endpoint =
       base +
@@ -76,9 +81,17 @@ export class ModelNetwork {
       ? new ProxyAgent({
           uri: proxy,
           requestTls: tls,
-          proxyTls: { rejectUnauthorized: true },
+          proxyTls: {
+            rejectUnauthorized: true,
+            lookup: pinnedLookup(new URL(proxy).hostname, resolver),
+          },
         })
-      : new Agent({ connect: tls });
+      : new Agent({
+          connect: {
+            ...tls,
+            lookup: pinnedLookup(new URL(base).hostname, resolver),
+          },
+        });
     this.headers = { "content-type": "application/json" };
     if (config.provider === "anthropic") {
       this.headers["anthropic-version"] = "2023-06-01";
