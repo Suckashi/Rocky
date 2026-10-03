@@ -1,0 +1,37 @@
+{
+  "task": "T-010",
+  "sourceCommit": "deeae5c2c04501d902560d5a2a8b54f0c967e6ab",
+  "platform": "Windows x64",
+  "node": "v24.12.0",
+  "npm": "11.6.4",
+  "lockfileSha256": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+  "status": "in_progress",
+  "checks": [
+    { "command": "npm test", "exitCode": 0, "result": "98 tests in 27 files" },
+    { "command": "npm run check", "exitCode": 0 },
+    { "command": "npm run build", "exitCode": 0 },
+    { "command": "npm run lint", "exitCode": 0 },
+    { "command": "npm run format:check", "exitCode": 0 },
+    { "command": "npm run check:docs", "exitCode": 0 },
+    { "command": "npm run check:secrets", "exitCode": 0 },
+    {
+      "command": "npx playwright test --grep-invert 'browser egress'",
+      "exitCode": 0,
+      "result": "8 browser tests before the final backend-only queued-recovery change"
+    }
+  ],
+  "proof": [
+    "One main slot is reserved alongside two background slots; evaluation has a separate admission class.",
+    "The third background Work remains durably queued with no worker job or model call until a background slot releases.",
+    "Four Works have distinct execution sessions; stopping one background Work leaves main and another background approval unchanged.",
+    "Main/background kind is pinned by the Store CAS, and request receipts still return the original Work.",
+    "Restart re-admits a queued command without replaying previously running sessions."
+  ],
+  "limitations": [
+    "Workspace reservation and global model-call semaphore are not yet implemented; the test only proves a queued Work does not start a worker/model call.",
+    "Learning priority, configurable slot bounds, wall time budgets, durable inbox and full setting/workspace snapshots remain pending.",
+    "Recovery test seeds a queued crash boundary in an isolated fixture after graceful shutdown; actual power-loss behavior is not asserted.",
+    "Ubuntu and strict browser egress remain unverified; global acceptance statuses remain not_run.",
+    "No live paid model or remote repository action was performed."
+  ]
+}

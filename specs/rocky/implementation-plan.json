@@ -1412,8 +1412,29 @@
         "R-031",
         "R-037"
       ],
-      "status": "pending",
-      "evidence": [],
+      "status": "in_progress",
+      "evidence": [
+        {
+          "commit": "deeae5c2c04501d902560d5a2a8b54f0c967e6ab",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/work/admission.json",
+          "testFiles": [
+            "tests/admission.test.ts",
+            "tests/stop.test.ts"
+          ],
+          "limitations": [
+            "Main/background/evaluation admission and durable queued recovery proven locally; T-010 remains in_progress",
+            "Workspace reservation, global model semaphore, configurable capacity and full setting snapshots remain pending",
+            "Ubuntu and strict browser egress unverified; global AT unchanged",
+            "No live paid model or remote action"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
