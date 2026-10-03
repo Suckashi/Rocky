@@ -179,6 +179,7 @@ test("owner imports a real local folder as untrusted snapshot", async ({
     );
     await card.getByRole("button", { name: "匯入新版", exact: true }).click();
     await expect(form.getByLabel("匯入範圍")).toBeDisabled();
+    await expect(form.getByLabel("技能資料夾", { exact: true })).toBeFocused();
     await page.setViewportSize({ width: 320, height: 844 });
     await form.scrollIntoViewIfNeeded();
     expect(
