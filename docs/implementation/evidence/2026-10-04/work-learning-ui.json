@@ -1,0 +1,33 @@
+{
+  "commit": "c84cecf814c05846027e36b89fcb34cfd0eb6dcc",
+  "implementationCommit": "aad4b7dd134552d02a48669660c627c37a245ce1",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npm run check; npx eslint apps/web/src/work-learning.tsx apps/web/src/main.tsx tests/e2e/learning.spec.ts; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts learning.spec.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/work-learning-ui.json",
+  "testFiles": ["tests/e2e/learning.spec.ts"],
+  "browserTests": 2,
+  "browserSeconds": 6.9,
+  "screenshots": [
+    "docs/implementation/evidence/2026-10-04/work-learning-ui/after-1440.png",
+    "docs/implementation/evidence/2026-10-04/work-learning-ui/after-1280.png",
+    "docs/implementation/evidence/2026-10-04/work-learning-ui/after-390.png",
+    "docs/implementation/evidence/2026-10-04/work-learning-ui/after-320.png"
+  ],
+  "repair": "Initial typecheck found synchronous fixture reply incompatible with Promise contract; async added, typecheck and browser rerun passed",
+  "limitations": [
+    "Work consent UI only; episode create/review and reflection/evaluation dispatch remain pending",
+    "Browser proves consent persistence/private exclusion but not actual episode removal; transaction cleanup covered by separate backend tests",
+    "Chinese/light Chromium148.0.7778.96 DPR1, four-width after-only evidence; dark/English/focus/matched OpenDots matrix pending",
+    "No Ubuntu/live provider/global AT completion claim"
+  ],
+  "assertions": [
+    "Work details progressively disclose Learning permissions and fetch consent on expansion",
+    "Default excluded/no-reuse; explicit changes save with expected revision",
+    "Private source remains excluded and reload preserves saved state",
+    "Withdrawal explains summary/evidence removal and non-restoration; no auto-reflection",
+    "1440x900/1280x800/390x844/320x844 no document horizontal overflow;320 inspected"
+  ]
+}

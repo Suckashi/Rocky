@@ -191,3 +191,7 @@ Skill binary comparison follow-up (`fcf861d`): existing details/typography token
 ### Learning policy — 2026-10-04
 
 `learning-settings.tsx` replaces sidebar panel5 placeholder using the existing Chrome dialog, neutral form/card controls and explicit saved status. No additional upstream source/CSS copied; same fixed OpenDots reference remains. Learning scope/consent are necessary Rocky-specific controls, and unimplemented reflection is visibly disclosed. [Four-width fixture evidence](evidence/2026-10-04/learning-policy-ui.json), [320px after](evidence/2026-10-04/learning-policy-ui/after-320.png). After-only evidence; full reference comparison and keyboard/theme/language coverage remain pending.
+
+### Work Learning permissions — 2026-10-04
+
+`work-learning.tsx` uses existing transcript details/model-card controls inside Work details, collapsed by default. Data is fetched on expansion and mutations use daemon CAS; no polling or new state source. This is a necessary Rocky Learning adaptation; no upstream CSS/assets copied. [Four-width evidence](evidence/2026-10-04/work-learning-ui.json), [320px after](evidence/2026-10-04/work-learning-ui/after-320.png). Long forms scroll within transcript; composer remains outside. After-only fixture proof does not close matched OpenDots comparison or complete focus/theme/language coverage.
