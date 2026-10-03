@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { writePreviewSchema } from "./workspaces.js";
 export const memorySourceSchema = z.strictObject({
   kind: z.literal("document"),
   id: z.uuid(),
@@ -80,3 +81,13 @@ export const memoryWriteToolSchema = z.strictObject({
   private: z.boolean().default(true),
   sources: z.array(memorySourceSchema).max(16).default([]),
 });
+export const memoryWritePreviewSchema = writePreviewSchema
+  .omit({ path: true, previousHash: true, sha256: true })
+  .extend({
+    memoryId: z.uuid(),
+    revision: z.number().int().nonnegative(),
+    previousPrivate: z.boolean().nullable(),
+    nextPrivate: z.boolean(),
+    previousSources: z.array(memorySourceSchema).max(16),
+    nextSources: z.array(memorySourceSchema).max(16),
+  });

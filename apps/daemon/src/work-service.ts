@@ -1230,6 +1230,25 @@ export class WorkService {
       ...replacementDiff(before, proposal.args.content),
     });
   }
+  previewMemory(approvalId: string, input: unknown) {
+    const command = writePreviewRequestSchema.parse(input);
+    const work = this.store.list().find((w) => w.approval?.id === approvalId);
+    const approval = work?.approval;
+    if (
+      !work ||
+      work.status !== "waiting_approval" ||
+      approval?.tool !== "memory_write" ||
+      approval.status !== "pending" ||
+      approval.revision !== command.expectedRevision ||
+      approval.intentFingerprint !== command.intentFingerprint
+    )
+      throw new RockyError(
+        "stale_approval",
+        "Memory proposal is no longer pending",
+        409,
+      );
+    return this.memories.previewModel(work, approval.args);
+  }
   private callMemoryWrite(
     work: Work,
     args: Record<string, unknown>,

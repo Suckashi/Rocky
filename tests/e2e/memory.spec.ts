@@ -537,6 +537,10 @@ test("native memory proposal is visible before exact approval and persists model
       approval = work.locator(".approval");
     await expect(approval).toContainText("本地記憶");
     await expect(approval).toContainText(marker);
+    await approval.getByRole("button", { name: "檢視記憶差異" }).click();
+    await expect(
+      approval.getByLabel("記憶差異", { exact: true }),
+    ).toContainText("+" + marker);
     const search = async () =>
       (
         await (

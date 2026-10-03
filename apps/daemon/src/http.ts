@@ -189,6 +189,9 @@ export function createApp(service: WorkService) {
     const work = service.store.get(c.req.param("id"));
     return c.json({ grants: service.grants.list(work.id) });
   });
+  app.post("/api/v1/approvals/:id/memory-preview", async (c) =>
+    c.json(service.previewMemory(c.req.param("id"), await readJson(c))),
+  );
   app.post("/api/v1/works/:id/memory-read-grants", async (c) =>
     c.json(service.memories.grantRead(c.req.param("id"), await readJson(c))),
   );

@@ -35,7 +35,12 @@ test.each(["approve", "reject", "locked", "race", "rollback", "update"])(
                           ? messages.filter((m) => m.type === "tool").length
                           : 0,
                     scope: "user",
-                    content: "Model proposed preference",
+                    content:
+                      "Model proposed preference" +
+                      (mode === "update" &&
+                      messages.some((m) => m.type === "tool")
+                        ? " updated"
+                        : ""),
                     private: true,
                     sources: [],
                   },
@@ -94,6 +99,32 @@ test.each(["approve", "reject", "locked", "race", "rollback", "update"])(
       }
       const approval = service.store.get(work.id).approval!;
       expect(approval.tool).toBe("memory_write");
+      const previewInput = {
+        expectedRevision: approval.revision,
+        intentFingerprint: approval.intentFingerprint,
+      };
+      if (mode === "race")
+        expect(() =>
+          service.previewMemory(approval.id, previewInput),
+        ).toThrow();
+      else {
+        const preview = service.previewMemory(approval.id, previewInput);
+        expect(preview).toMatchObject({
+          memoryId: id,
+          revision: 0,
+          removedLines: 0,
+          addedLines: 1,
+          previousPrivate: null,
+          nextPrivate: true,
+        });
+        expect(preview.rows[0]?.text).toContain("Model proposed preference");
+        expect(() =>
+          service.previewMemory(approval.id, {
+            ...previewInput,
+            expectedRevision: 99,
+          }),
+        ).toThrow();
+      }
       service.decide(work.id, {
         requestId: randomUUID(),
         expectedRevision: approval.revision,
@@ -108,6 +139,18 @@ test.each(["approve", "reject", "locked", "race", "rollback", "update"])(
           )
           .toBe(1);
         const next = service.store.get(work.id).approval!;
+        const changes = service.previewMemory(next.id, {
+          expectedRevision: next.revision,
+          intentFingerprint: next.intentFingerprint,
+        });
+        expect(changes).toMatchObject({
+          removedLines: 1,
+          addedLines: 1,
+          revision: 1,
+        });
+        expect(
+          changes.rows.filter((row) => row.kind === "add")[0]?.text,
+        ).toContain("updated");
         service.decide(work.id, {
           requestId: randomUUID(),
           expectedRevision: next.revision,
@@ -122,9 +165,11 @@ test.each(["approve", "reject", "locked", "race", "rollback", "update"])(
           { timeout: 15000 },
         )
         .toBe(true);
+      expect(() => service.previewMemory(approval.id, previewInput)).toThrow();
       if (mode === "approve" || mode === "update") {
         expect(service.memories.get(id)).toMatchObject({
-          content: "Model proposed preference",
+          content:
+            "Model proposed preference" + (mode === "update" ? " updated" : ""),
           source: "model",
           sourceWorkId: work.id,
           sourceRunId: work.runId,

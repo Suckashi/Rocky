@@ -8,6 +8,7 @@ import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
 import { MemorySettings } from "./memory-settings.js";
 import { WriteProposal } from "./write-proposal.js";
+import { MemoryProposal } from "./memory-proposal.js";
 import { WorkArtifacts } from "./work-artifacts.js";
 import type { Artifact } from "../../../packages/contracts/src/artifacts.js";
 import { Artifacts } from "./artifacts.js";
@@ -445,6 +446,12 @@ function App() {
                           <div className="memory-content approval-proposal">
                             {String(w.approval.args.content)}
                           </div>
+                          <MemoryProposal
+                            key={w.approval.id + ":" + w.approval.revision}
+                            approval={w.approval}
+                            locale={locale}
+                            request={request}
+                          />
                         </>
                       ) : ["mcp_call", "mcp_data"].includes(w.approval.tool) ? (
                         <>

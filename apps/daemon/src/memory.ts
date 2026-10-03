@@ -8,6 +8,7 @@ import {
   memoryReadToolSchema,
   memoryReadGrantSchema,
   memoryWriteToolSchema,
+  memoryWritePreviewSchema,
 } from "../../../packages/contracts/src/memory.js";
 import { RockyError } from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
@@ -15,6 +16,7 @@ import { WorkspaceRegistry } from "./workspaces.js";
 import { intentHash } from "./intent.js";
 import { DocumentStore } from "./documents.js";
 import { GrantRegistry } from "./grants.js";
+import { replacementDiff } from "./write-diff.js";
 import type { Work } from "../../../packages/contracts/src/index.js";
 import { Tiktoken } from "js-tiktoken/lite";
 import cl100k from "js-tiktoken/ranks/cl100k_base";
@@ -161,14 +163,15 @@ export class MemoryRegistry {
   save(input: unknown) {
     return this.persist(input);
   }
-  modelProposal(work: Work, input: unknown) {
+  modelProposal(work: Work, input: unknown, preview = false) {
     const command = memoryWriteToolSchema.parse(input);
     const scope = this.readScope(work, command.scope);
     const current = this.store.get(work.id);
     if (
       current.runId !== work.runId ||
       current.executionSessionId !== work.executionSessionId ||
-      current.status !== "running"
+      (current.status !== "running" &&
+        !(preview && current.status === "waiting_approval"))
     )
       throw new RockyError(
         "memory_scope",
@@ -193,6 +196,31 @@ export class MemoryRegistry {
     if (previous && JSON.stringify(previous.scope) !== JSON.stringify(scope))
       throw new RockyError("memory_scope", "Memory scope cannot change", 403);
     return { ...command, scope, status: "unverified" as const };
+  }
+  previewModel(work: Work, input: unknown) {
+    const proposal = this.modelProposal(work, input, true);
+    const previous = proposal.expectedRevision
+      ? this.get(proposal.id)
+      : undefined;
+    const before = previous?.content ?? "";
+    if (
+      this.store.publicEvidence(before) !== before ||
+      this.store.publicEvidence(proposal.content) !== proposal.content
+    )
+      throw new RockyError(
+        "memory_content",
+        "Protected memory content cannot be previewed",
+        422,
+      );
+    return memoryWritePreviewSchema.parse({
+      memoryId: proposal.id,
+      revision: proposal.expectedRevision,
+      previousPrivate: previous?.private ?? null,
+      nextPrivate: proposal.private,
+      previousSources: previous?.sources ?? [],
+      nextSources: proposal.sources,
+      ...replacementDiff(before, proposal.content),
+    });
   }
   saveModel(work: Work, input: unknown, requestId: string) {
     if (!this.store.db.isTransaction)

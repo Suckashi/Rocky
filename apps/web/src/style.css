@@ -338,6 +338,12 @@ li {
 .proposal-review {
   padding: 14px 22px;
 }
+.memory-review p {
+  padding: 12px 0 0;
+}
+.memory-review .approval-proposal {
+  margin: 14px 0;
+}
 .diff-preview span {
   display: block;
   white-space: pre-wrap;
