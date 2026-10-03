@@ -1820,7 +1820,36 @@
         "R-055"
       ],
       "status": "in_progress",
-      "evidence": [],
+      "evidence": [
+        {
+          "commit": "cb54e75813e3585b4232642fca6356fd0447b769",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm test; ROCKY_TEST_BROWSER=<Chromium1223> npx playwright test --grep-invert 'browser egress'",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/uiux/verification.json",
+          "testFiles": [
+            "tests/e2e/alignment.spec.ts",
+            "tests/e2e/work.spec.ts",
+            "tests/e2e/models.spec.ts",
+            "tests/e2e/configured-work.spec.ts",
+            "tests/e2e/grants.spec.ts",
+            "tests/e2e/reconciliation.spec.ts",
+            "tests/e2e/budget.spec.ts",
+            "tests/identity.test.ts"
+          ],
+          "limitations": [
+            "T-019 in_progress; no full UI alignment claim",
+            "Only empty states have comparable reference-before-after fixtures; active work states captured after only",
+            "Incremental model streaming, full scroll-follow dynamic verification, right result/Computer/document pane, MCP/skills/Learning product modules remain incomplete",
+            "Ubuntu not_run, existing strict browser egress blocked by host AdGuard; not rerun without new environment",
+            "No real external service or paid model Agent validation; configured browser test uses explicitly local scripted provider",
+            "No remote creation/visibility/push/merge/tag/deployment"
+          ]
+        }
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [

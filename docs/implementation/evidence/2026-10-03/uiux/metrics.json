@@ -1,0 +1,143 @@
+{
+  "browser": "148.0.7778.96",
+  "platform": "win32",
+  "mode": "local-empty",
+  "metrics": [
+    {
+      "viewport": 1440,
+      "overflow": false,
+      "rail": {
+        "x": 0,
+        "y": 0,
+        "width": 48,
+        "height": 900
+      },
+      "sidebar": {
+        "x": 48,
+        "y": 0,
+        "width": 220,
+        "height": 900
+      },
+      "topbar": {
+        "x": 268,
+        "y": 0,
+        "width": 1172,
+        "height": 64
+      },
+      "chat": {
+        "x": 454,
+        "y": 64,
+        "width": 800,
+        "height": 836
+      },
+      "composer": {
+        "x": 492,
+        "y": 742,
+        "width": 724,
+        "height": 130
+      }
+    },
+    {
+      "viewport": 1280,
+      "overflow": false,
+      "rail": {
+        "x": 0,
+        "y": 0,
+        "width": 48,
+        "height": 800
+      },
+      "sidebar": {
+        "x": 48,
+        "y": 0,
+        "width": 220,
+        "height": 800
+      },
+      "topbar": {
+        "x": 268,
+        "y": 0,
+        "width": 1012,
+        "height": 64
+      },
+      "chat": {
+        "x": 374,
+        "y": 64,
+        "width": 800,
+        "height": 736
+      },
+      "composer": {
+        "x": 412,
+        "y": 642,
+        "width": 724,
+        "height": 130
+      }
+    },
+    {
+      "viewport": 390,
+      "overflow": false,
+      "rail": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "sidebar": {
+        "x": -252,
+        "y": 0,
+        "width": 252,
+        "height": 844
+      },
+      "topbar": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 64
+      },
+      "chat": {
+        "x": 0,
+        "y": 64,
+        "width": 390,
+        "height": 780
+      },
+      "composer": {
+        "x": 18,
+        "y": 694,
+        "width": 354,
+        "height": 130
+      }
+    },
+    {
+      "viewport": 320,
+      "overflow": false,
+      "rail": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "sidebar": {
+        "x": -252,
+        "y": 0,
+        "width": 252,
+        "height": 844
+      },
+      "topbar": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 64
+      },
+      "chat": {
+        "x": 0,
+        "y": 64,
+        "width": 320,
+        "height": 780
+      },
+      "composer": {
+        "x": 18,
+        "y": 694,
+        "width": 284,
+        "height": 130
+      }
+    }
+  ]
+}

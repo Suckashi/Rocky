@@ -2,21 +2,23 @@
 
 2026-10-03, Asia/Taipei. Working local P0 fixture plus P1 contracts and original identity; not the complete Rocky product.
 
-| Task        | Status      | Actual result                                                                                                                                       |
-| ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T-001       | done        | Independent Git root and local commit, original engineering files, Apache-2.0, workspace, new CI and reference decisions. Remote uncreated.         |
-| T-002       | blocked     | Locked dependencies, installed license inventory and Windows clean-copy no-Python validation. Ubuntu evidence unavailable.                          |
-| T-003       | in_progress | Real CopilotKit gateway → Work → native Deep Agents task/todos/interrupt → stdio/HTTP MCP. Functional browser flow verified; upstream P0 gate open. |
-| T-004       | blocked     | Four Promptfoo full-path cases and Node egress pass with blocked SDK telemetry recorded. Browser egress fails from host AdGuard injection.          |
-| T-005       | done        | Validated DTO/event/error/IPC wire contracts and cursor-based snapshot synchronization. Worker IPC execution remains T-009.                         |
-| T-006       | done        | Domain schema v2, identity-preserving CAS, atomic events/outbox, recoverable completion projection and OS-released single writer lock.              |
-| T-007       | in_progress | Model UI/API, shared Work/evaluation routing, budgets, live probe and proxy/CA tests; profiles/cache pricing/full DNS policy pending.               |
-| T-008       | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.       |
-| T-009       | in_progress | Durable child IPC and process tree tests; native fixture Agent runs in worker via daemon model/tool RPC. Configured Agent pending.                  |
-| T-037       | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                    |
-| Later tasks | pending     | Product modules and confirmed-state presence remain pending.                                                                                        |
+| Task        | Status      | Actual result                                                                                                                                               |
+| ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T-001       | done        | Independent Git root and local commit, original engineering files, Apache-2.0, workspace, new CI and reference decisions. Remote uncreated.                 |
+| T-002       | blocked     | Locked dependencies, installed license inventory and Windows clean-copy no-Python validation. Ubuntu evidence unavailable.                                  |
+| T-003       | in_progress | Real CopilotKit gateway → Work → native Deep Agents task/todos/interrupt → stdio/HTTP MCP. Functional browser flow verified; upstream P0 gate open.         |
+| T-004       | blocked     | Four Promptfoo full-path cases and Node egress pass with blocked SDK telemetry recorded. Browser egress fails from host AdGuard injection.                  |
+| T-005       | done        | Validated DTO/event/error/IPC wire contracts and cursor-based snapshot synchronization. Worker IPC execution remains T-009.                                 |
+| T-006       | done        | Domain schema v2, identity-preserving CAS, atomic events/outbox, recoverable completion projection and OS-released single writer lock.                      |
+| T-007       | in_progress | Model UI/API, shared Work/evaluation routing, budgets, live probe and proxy/CA tests; profiles/cache pricing/full DNS policy pending.                       |
+| T-008       | in_progress | Canonical intent, grants, exact consent, target claims/recheck, redaction and synthetic MCP reconciliation API/UI; final scope audit pending.               |
+| T-009       | done        | Durable child IPC and configured/fixture native Deep Agents workers; daemon owns model/tool RPC, shutdown and descendant cleanup.                           |
+| T-010       | done        | Durable bounded admission, main/background/evaluation slots, workspace UUID reservations, model semaphore and pinned budget/configuration.                  |
+| T-019       | in_progress | OpenDots compact shell/main chat slice, model popovers/dialog, original avatar, approvals/stop/reconcile; full tools/results/presence and streaming remain. |
+| T-037       | done        | Original editable SVG identity, tokens, persistent assistant ID and versioned persona; rendered baseline, rights review pending.                            |
+| Later tasks | pending     | Product modules and confirmed-state presence remain pending.                                                                                                |
 
-Node 24.12.0 / npm 11.6.4 baseline. No upstream code, history, data, settings or assets imported. All test data synthetic. No remote action or live paid endpoint used. See known-limitations.md for gates and follow-up.
+Node 24.12.0 / npm 11.6.4 baseline. OpenDots MIT presentation CSS adapted with notices; no upstream history, backend, data, settings or brand assets imported. Test data is synthetic. No remote action; existing live probe evidence is separate from this fixture UI slice. See known-limitations.md for gates and follow-up.
 
 Evidence: [verification](evidence/2026-10-03/verification.json), [dependency baseline](dependency-baseline.json), [acceptance matrix](acceptance-report.md). All 70 global acceptance entries remain not_run; phase checks do not imply full acceptance.
 
@@ -275,3 +277,11 @@ Implementation `ead307c7733284ca4642daa5164669774e152e31` completes bounded admi
 On Windows x64 with Node v24.12.0, npm 11.6.4 and lockfile SHA-256 `d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea`, `npm test` passed 108 tests in 28 files. The 10 focused admission tests cover independent sessions, repeat/restart background receipts, changed-payload rejection, resource waits, immutable snapshots and wall budget. Eight local Chromium flows, three network tests and four fixture Agent evaluation cases passed. Typecheck, production build, lint, format, docs, source guards and the clean-copy Node-only install/test/learning check passed. Commands, exit codes and limits are recorded in [T-010 completion evidence](evidence/2026-10-03/work/complete.json).
 
 T-010's local doneWhen is met and its plan status is `done`. Resource identity is still an opaque UUID, not a canonical workspace or OS lock; T-017 owns that boundary. The restart case is an isolated seeded crash boundary, not a power-loss test. Ubuntu, strict browser egress and live paid-model behavior remain unverified; all global AT statuses stay `not_run`. No remote repository, push, merge, tag or deployment action occurred. Work on the broader Rocky goal stops here at the user's request.
+
+## 2026-10-03 — OpenDots 主對話切片／持續 Goal
+
+在 codex/opendots-ui-alignment 實作，Goal 保持 active，T-019 in_progress。替換 shell／配色／sidebar／topbar／persona／composer，保留 daemon commands；四尺寸 reference/before/after 與核准／完成畫面見 uiux-opendots-alignment.md。全域 AT 不變。
+
+本輪 Windows：typecheck、lint、docs DAG、build exit 0；28 files／108 tests passed；9 functional browser tests passed（排除既有 host AdGuard egress 阻塞）。實測四尺寸無全頁水平溢出，drawer Escape/focus、light/dark、模型設定、budget、核准、停止、revoke、reconcile 通過。不是 live／Ubuntu／全版 UI 驗收。
+
+未完成：真正 incremental streaming／steering／history/inbox、真 MCP/workspace、成果文件／Computer、memory/skills/Learning、backup/package。下一項：完成共用 UI adapter 與主對話 reconnect／增量 runtime delivery，按 T-011～013 契約接續；環境驗證按兩次／15分鐘上限遞延，沒有遠端動作。

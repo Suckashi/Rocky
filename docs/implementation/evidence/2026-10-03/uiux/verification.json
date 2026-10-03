@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-03",
+  "commit": "cb54e75813e3585b4232642fca6356fd0447b769",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "browserVersion": "148.0.7778.96",
+  "browserExecutable": "Chromium revision 1223, existing local installation",
+  "referenceCommit": "c2569bb6a13a22e565cf3eb791c62267d06babb1",
+  "mode": "fixture",
+  "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:docs",
+      "exitCode": 0,
+      "result": "38 tasks / 56 requirements / 70 AT; valid DAG"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "limitations": [
+        "Existing CopilotKit bundle size warnings remain; no bundle budget claim"
+      ]
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "result": "28 files / 108 tests passed",
+      "durationSeconds": 54.11
+    },
+    {
+      "command": "ROCKY_TEST_BROWSER=<existing Chromium>; npx playwright test --grep-invert 'browser egress'",
+      "exitCode": 0,
+      "result": "9 tests passed",
+      "durationSeconds": 31.1
+    },
+    {
+      "command": "npm run check:licenses",
+      "exitCode": 0,
+      "result": "1156 installed / 404 omitted / zero violations"
+    },
+    {
+      "command": "node .rocky-ui-browser.mjs",
+      "exitCode": 0,
+      "result": "four viewport captures and geometry; drawer Escape/focus; settings and dark",
+      "currentScriptLocation": "Windows TEMP/rocky-ui-alignment-scripts-20261003",
+      "report": "metrics.json"
+    },
+    {
+      "command": "node .rocky-reference.mjs",
+      "exitCode": 0,
+      "result": "unmodified upstream ChatTranscript and raw style.css/editor.css in reconstructed fixture; no real upstream service",
+      "report": "reference-metrics.json",
+      "firstAttempt": "failed JSX-dev-runtime alias; fixed exact alias, second attempt passed"
+    },
+    {
+      "command": "node .rocky-ui-comparison.mjs",
+      "exitCode": 0,
+      "result": "four reference-before-after comparisons from captured source PNGs"
+    },
+    {
+      "command": "node .rocky-ui-work-evidence.mjs",
+      "exitCode": 0,
+      "result": "real daemon fixture approval, completion, expanded evidence and mobile"
+    }
+  ],
+  "limitations": [
+    "T-019 in_progress; no full UI alignment claim",
+    "Only empty states have comparable reference-before-after fixtures; active work states captured after only",
+    "Incremental model streaming, full scroll-follow dynamic verification, right result/Computer/document pane, MCP/skills/Learning product modules remain incomplete",
+    "Ubuntu not_run, existing strict browser egress blocked by host AdGuard; not rerun without new environment",
+    "No real external service or paid model Agent validation; configured browser test uses explicitly local scripted provider",
+    "No remote creation/visibility/push/merge/tag/deployment"
+  ],
+  "acceptanceStatus": "Global AT unchanged; fixture checks do not complete cross-phase acceptance"
+}
