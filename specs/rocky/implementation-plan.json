@@ -4691,6 +4691,37 @@
             "Revision CAS rejects stale commands; durable exact receipt replay does not restore earlier policy",
             "Disabled policy persists across service restart"
           ]
+        },
+        {
+          "commit": "4e417d45f2fd9461d8a60e72808e976077420c57",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npm run check; npx vitest run tests/learning-source.test.ts tests/learning-policy.test.ts tests/skills.test.ts; scoped eslint learning contracts/registry/store/http and tests; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/learning-source.json",
+          "testFiles": [
+            "tests/learning-source.test.ts",
+            "tests/learning-policy.test.ts",
+            "tests/skills.test.ts"
+          ],
+          "tests": 4,
+          "seconds": 2.58,
+          "limitations": [
+            "Shared source preflight is not yet called by an episode-creation pipeline; episode storage, terminal-sequence provenance, trigger evidence/redaction/dedupe and queues remain to implement",
+            "Per-work Learning privacy/exclusion API only; no composer/incognito or consent UI wired yet",
+            "Only completed sources allowed in this foundation; cancelled/failed sources with independently verified conclusions require later support",
+            "Any historical private-memory grant conservatively excludes the work, including revoked or unused grants",
+            "Reflection run mode is not yet implemented; current nonnormal evaluation/unknown modes denied",
+            "No browser/Ubuntu/live provider/global AT completion claim"
+          ],
+          "assertions": [
+            "Schema24 stores work consent separately with excluded/no-reuse defaults",
+            "Manual admission preflight can operate with global off after explicit work consent; automatic requires exact user/project policy scope",
+            "Private/excluded/no-reuse and nonnormal/noncompleted work rejected",
+            "Historical receipt replay does not undo newer exclusion; state persists after restart",
+            "Private-memory grant remains exclusion even after revocation; answer text is never treated as tool evidence"
+          ]
         }
       ],
       "blockedReason": null,
