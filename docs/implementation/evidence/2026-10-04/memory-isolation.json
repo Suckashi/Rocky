@@ -1,0 +1,30 @@
+{
+  "commit": "a0b070cdac06fc788a046364aad81438e1346ff8",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/memory-native.test.ts; npm run check; npm run lint; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/memory-isolation.json",
+  "testFiles": ["tests/memory-native.test.ts"],
+  "limitations": [
+    "Fixture configured model over actual normal daemon/Deep Agents path; not a live external provider test",
+    "No new UI/build evidence needed for test-only change; browser matrix unchanged",
+    "Model remember/update, durable ungranted-consent wait, derived-skill invalidation and delivered-checkpoint cleanup remain incomplete",
+    "Expiry races, daemon restart/retry matrix and fullAT36/46 remain open; all70 global AT unchanged"
+  ],
+  "tests": 11,
+  "seconds": 10.85,
+  "assertions": [
+    "project read delivers only bound project, excludes other project and user",
+    "task read delivers only this Work, excludes other Work/project/user",
+    "simultaneous background Work has zero inherited grants and actual memory_search failed event",
+    "child attempts memory tool via real task child but receives no protected content",
+    "revoked submission replay does not restore grant",
+    "evaluation submission with memoryRead throws and rolls back Work/grant transaction",
+    "existing public/private/no-grant/escalation/submitted native cases still pass"
+  ],
+  "notes": [
+    "test-only coverage, no product implementation change; no new failure in final run"
+  ]
+}

@@ -539,3 +539,7 @@ Owner can now grant active Work scoped memory reads with explicit private option
 ## Composer memory consent (95c144678f0c591e6b990ae7b4d5b9c8b122523a)
 
 Pre-submit memory scope/private selections now pass through CopilotKit and atomic daemon admission before native execution. UI resets consent per Work/target. Native6 plus final contract3 tests and focused browser1 pass; type/lint/build pass. [Evidence and screenshots](memory-registry.md). Ungranted-call waiting, native writes and full scope matrix remain open; T-025/Goal active.
+
+## Memory isolation evidence (a0b070cdac06fc788a046364aad81438e1346ff8)
+
+Expanded native scope/child/cross-Work/revoked-replay/evaluation rollback coverage;11 actual daemon/Deep Agents fixture tests pass. Type/lint pass. [Report](memory-registry.md). Existing claims of fully missing native project/task/child coverage are historical; complete retry/expiry/restart and write/cleanup semantics remain open. T-025/Goal active.

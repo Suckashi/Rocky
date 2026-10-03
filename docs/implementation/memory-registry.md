@@ -118,3 +118,12 @@ Composer Model/tools popover defaults to no memory access, offers user/selected-
 - Model remember/update and full project/task/child/cross-Work validation matrix remain open
 - Four-width Chinese/light after screenshots only; full reference comparison and grant-specific English/dark matrix not_run
 - Deletion cannot recall provider/checkpoint copies already delivered; all70 global AT unchanged
+
+## Native isolation expansion (a0b070cdac06fc788a046364aad81438e1346ff8)
+
+[Evidence](evidence/2026-10-04/memory-isolation.json):11 native integration cases pass10.85s; type/lint/diff pass. Project/task scope tests seed distracting user/project/other-task records and verify only scoped source content reaches the model. A second background Work actually attempts memory_search without inherited grants and emits tool.failed. Native child attempts memory_search despite root grant and receives no memory content. Revoked submission replay stays revoked. Evaluation-mode memory grant admission rolls back all Work/grant state. No production code changes required.
+
+- Fixture configured model over actual normal daemon/Deep Agents path; not a live external provider test
+- No new UI/build evidence needed for test-only change; browser matrix unchanged
+- Model remember/update, durable ungranted-consent wait, derived-skill invalidation and delivered-checkpoint cleanup remain incomplete
+- Expiry races, daemon restart/retry matrix and fullAT36/46 remain open; all70 global AT unchanged
