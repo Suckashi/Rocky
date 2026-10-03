@@ -42,3 +42,9 @@ export const conversationPageSchema = z.strictObject({
   messages: z.array(conversationMessageSchema),
   nextCursor: sequenceSchema.nullable(),
 });
+export const conversationViewSchema = conversationSchema.extend({
+  activeSession: executionSessionSchema.nullable(),
+  messages: z.array(conversationMessageSchema).max(50),
+  cursor: sequenceSchema,
+  nextCursor: sequenceSchema.nullable(),
+});

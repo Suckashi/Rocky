@@ -191,7 +191,7 @@ export function createApp(service: WorkService) {
     ),
   );
   app.get("/api/v1/conversation", (c) =>
-    c.json(new ConversationStore(service.store).main()),
+    c.json(new ConversationStore(service.store).view()),
   );
   app.get("/api/v1/conversation/history", (c) =>
     c.json(

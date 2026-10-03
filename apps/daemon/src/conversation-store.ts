@@ -10,6 +10,7 @@ import {
   executionSessionSchema,
   conversationMessageSchema,
   conversationPageSchema,
+  conversationViewSchema,
 } from "../../../packages/contracts/src/conversation.js";
 // Visible history is separate from graph state; this does not acknowledge an inbox checkpoint.
 export class ConversationStore {
@@ -34,6 +35,30 @@ export class ConversationStore {
       .prepare("SELECT data FROM conversations WHERE kind='main'")
       .get() as { data: string };
     return conversationSchema.parse(JSON.parse(row.data));
+  }
+  view() {
+    const page = this.page();
+    const row = page.conversation.activeExecutionSessionId
+      ? (this.store.db
+          .prepare("SELECT data FROM execution_sessions WHERE id=?")
+          .get(page.conversation.activeExecutionSessionId) as
+          { data: string } | undefined)
+      : undefined;
+    if (page.conversation.activeExecutionSessionId && !row)
+      throw new RockyError(
+        "session_projection_missing",
+        "Active execution session is missing",
+        500,
+      );
+    return conversationViewSchema.parse({
+      ...page.conversation,
+      activeSession: row
+        ? executionSessionSchema.parse(JSON.parse(row.data))
+        : null,
+      messages: page.messages,
+      cursor: page.messages.at(-1)?.sequence ?? "0",
+      nextCursor: page.nextCursor,
+    });
   }
   session(workId: string) {
     const row = this.store.db

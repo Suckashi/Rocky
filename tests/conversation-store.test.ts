@@ -10,7 +10,7 @@ import { WorkService } from "../apps/daemon/src/work-service.js";
 import { createApp } from "../apps/daemon/src/http.js";
 import {
   conversationPageSchema,
-  conversationSchema,
+  conversationViewSchema,
   executionSessionSchema,
 } from "../packages/contracts/src/conversation.js";
 function work(
@@ -49,6 +49,10 @@ test("one conversation persists separate execution sessions and atomic submissio
     expect(history.main().activeExecutionSessionId).toBe(
       main.executionSessionId,
     );
+    expect(history.view().activeSession?.graphThreadId).toBe(main.runId);
+    expect(history.view().cursor).toBe(
+      history.page().messages.at(-1)?.sequence,
+    );
     const background = work("background");
     store.add(background, "bg");
     background.status = "running";
@@ -74,6 +78,7 @@ test("one conversation persists separate execution sessions and atomic submissio
       history.page().messages.filter((m) => m.role === "assistant"),
     ).toHaveLength(1);
     expect(history.main().activeExecutionSessionId).toBeNull();
+    expect(history.view().activeSession).toBeNull();
     store.close();
     store = new Store(root);
     history = new ConversationStore(store);
@@ -148,7 +153,7 @@ test("conversation/history/session API validates DTOs and keeps current redactio
       conversationPageSchema.parse(await history.json()).messages[0]?.text,
     ).toBe(sample.text);
     expect(
-      conversationSchema.parse(
+      conversationViewSchema.parse(
         await (await app.request("/api/v1/conversation", { headers })).json(),
       ).id,
     ).toBe(new ConversationStore(service.store).main().id);
