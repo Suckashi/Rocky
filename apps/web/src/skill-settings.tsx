@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
+import { SkillImport } from "./skill-import.js";
 
 const revisionSchema = z.object({
   id: z.uuid(),
@@ -165,6 +166,11 @@ export function SkillSettings({
   return (
     <details className="model-settings skill-settings" open>
       <summary>{zh ? "技能" : "Skills"}</summary>
+      <SkillImport
+        locale={locale}
+        request={request}
+        onImported={() => void refresh()}
+      />
       <p>
         {zh
           ? "審查固定版本後再啟用。技能不會授予額外工具權限；新版本只影響新工作。"

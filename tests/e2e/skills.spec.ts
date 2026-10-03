@@ -1,5 +1,83 @@
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
+import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+test("owner imports a real local folder as untrusted snapshot", async ({
+  page,
+}) => {
+  const root = await mkdtemp(join(tmpdir(), "rocky-skill-browser-")),
+    name = "folder-" + randomUUID(),
+    folder = join(root, name);
+  try {
+    await mkdir(join(folder, "references"), { recursive: true });
+    await writeFile(
+      join(folder, "SKILL.md"),
+      `---\nname: ${name}\ndescription: Folder upload fixture\n---\n# Local instructions`,
+    );
+    await writeFile(
+      join(folder, "references", "guide.md"),
+      "SOURCE_BYTES_MUST_PERSIST",
+    );
+    await page.goto("/");
+    await page.getByRole("button", { name: "技能", exact: true }).click();
+    const ui = page.locator(".skill-settings"),
+      form = ui.locator(".skill-import");
+    await form.locator("summary").click();
+    await form.getByLabel("技能資料夾", { exact: true }).setInputFiles(folder);
+    await expect(form).toContainText("已選檔案：2");
+    await form
+      .getByLabel("授權聲明", { exact: true })
+      .fill("MIT fixture content");
+    for (const [width, height] of [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844],
+    ]) {
+      await page.setViewportSize({ width: width!, height: height! });
+      await form.scrollIntoViewIfNeeded();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: `test-results/skill-import-${width}.png`,
+        fullPage: true,
+      });
+    }
+    await form.getByRole("button", { name: "保存未信任套件" }).click();
+    await expect(form.getByRole("status")).toContainText("已匯入");
+    const card = ui.locator("article").filter({ hasText: name });
+    await card.getByRole("button", { name: "審查此版本" }).click();
+    await expect(card.getByRole("status")).toContainText("未信任");
+    await card.locator("summary").click();
+    await expect(card).toContainText("references/guide.md");
+    const catalog = await (await page.request.get("/api/v1/skills")).json();
+    const imported = catalog.skills.find(
+      (s: { metadata: { name: string } }) => s.metadata.name === name,
+    );
+    const selection = await (
+      await page.request.get(`/api/v1/skills/${imported.id}/selection`)
+    ).json();
+    expect(selection.selection).toBeNull();
+    const detail = await (
+      await page.request.get(`/api/v1/skills/${imported.id}/revisions/1`)
+    ).json();
+    expect(
+      Buffer.from(
+        detail.package.files.find(
+          (f: { path: string }) => f.path === "references/guide.md",
+        ).contentBase64,
+        "base64",
+      ).toString(),
+    ).toBe("SOURCE_BYTES_MUST_PERSIST");
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
 
 test("owner reviews pinned skill and enables, deactivates, quarantines", async ({
   page,
