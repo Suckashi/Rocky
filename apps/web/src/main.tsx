@@ -8,6 +8,7 @@ import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
 import { MemorySettings } from "./memory-settings.js";
 import { SkillSettings } from "./skill-settings.js";
+import { SkillRevocation } from "./skill-revocation.js";
 import { WriteProposal } from "./write-proposal.js";
 import { MemoryProposal } from "./memory-proposal.js";
 import { WorkArtifacts } from "./work-artifacts.js";
@@ -398,6 +399,7 @@ function App() {
                         : "Retry work · new execution"}
                     </small>
                   )}
+                  <SkillRevocation work={w} events={events} locale={locale} />
                   {w.approval?.status === "pending" && (
                     <section className="approval">
                       <h2>{t.approval}</h2>

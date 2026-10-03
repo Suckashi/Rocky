@@ -346,3 +346,127 @@ test("owner reviews pinned skill and enables, deactivates, quarantines", async (
     skillRevision: 1,
   });
 });
+
+// Uses real daemon events and a locally held provider; no fabricated UI event injection.
+test("quarantine notification follows the affected work and survives reload", async ({
+  page,
+}) => {
+  const { AIMessage } = await import("@langchain/core/messages");
+  const { startAgentProvider } =
+    await import("../../fixtures/models/agent-provider.js");
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const provider = await startAgentProvider({
+    reply: async () => {
+      await held;
+      return new AIMessage("No skill body loaded in this fixture");
+    },
+  });
+  try {
+    await page.goto("/");
+    const { token } = await (await page.request.get("/api/v1/session")).json();
+    const headers = { "x-rocky-session": token },
+      id = randomUUID(),
+      name = "revoke-" + id,
+      connectionId = randomUUID();
+    const post = async (path: string, data: unknown) => {
+      const response = await page.request.post("/api/v1" + path, {
+        headers,
+        data,
+      });
+      expect(response.ok()).toBe(true);
+      return response.json();
+    };
+    await post("/skills/import", {
+      requestId: randomUUID(),
+      id,
+      expectedRevision: 0,
+      scope: { kind: "user" },
+      source: {
+        type: "manual",
+        reference: "browser revoke fixture",
+        license: "MIT",
+      },
+      package: {
+        directoryName: name,
+        files: [
+          {
+            path: "SKILL.md",
+            contentBase64: Buffer.from(
+              `---\nname: ${name}\ndescription: Revoke fixture\n---\nDo not execute`,
+            ).toString("base64"),
+          },
+        ],
+      },
+    });
+    const imported = await (
+      await page.request.get(`/api/v1/skills/${id}/revisions/1`)
+    ).json();
+    await post(`/skills/${id}/selection`, {
+      requestId: randomUUID(),
+      expectedRevision: 0,
+      skillRevision: 1,
+      contentHash: imported.revision.contentHash,
+      action: "publish",
+    });
+    await post("/model-connections", {
+      requestId: randomUUID(),
+      id: connectionId,
+      expectedRevision: 0,
+      config: {
+        name: "Revocation browser fixture",
+        provider: "openai-compatible",
+        baseUrl: provider.baseUrl,
+        modelId: "fixture",
+        contextWindowTokens: 65536,
+        maxOutputTokens: 256,
+      },
+    });
+    const marker = "Revocation browser " + randomUUID();
+    await post("/conversation/messages", {
+      requestId: randomUUID(),
+      text: marker,
+      mode: "configured",
+      modelSelection: { connectionId, revision: 1 },
+    });
+    await expect.poll(() => provider.requests.length).toBeGreaterThan(0);
+    await page.reload();
+    const work = page.locator("article.work").filter({ hasText: marker });
+    await expect(work.locator(".skill-revocation")).toHaveCount(0);
+    await post(`/skills/${id}/selection`, {
+      requestId: randomUUID(),
+      expectedRevision: 1,
+      skillRevision: 1,
+      contentHash: imported.revision.contentHash,
+      action: "quarantine",
+    });
+    const notice = work.getByRole("region", { name: "技能撤銷通知" });
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText("若工作已載入");
+    await notice.locator("summary").click();
+    await expect(notice).toContainText(imported.revision.contentHash);
+    for (const [width, height] of [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844],
+    ]) {
+      await page.setViewportSize({ width: width!, height: height! });
+      await notice.scrollIntoViewIfNeeded();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({ path: `test-results/skill-revoke-${width}.png` });
+    }
+    await page.reload();
+    await expect(notice).toBeVisible();
+    await expect(notice.locator("details")).not.toHaveAttribute("open", "");
+  } finally {
+    release();
+    await provider.close();
+  }
+});
