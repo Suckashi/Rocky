@@ -4957,6 +4957,42 @@
             "Browser approval disabled until acknowledgment, then status truthfully says approved/reflection not started",
             "320 screenshot inspected; source evidence identifiers remain collapsed"
           ]
+        },
+        {
+          "commit": "998f75d8414edb284b49c6d8d97eba54aedeeaa7",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/learning-review.test.ts tests/reflection-authority.test.ts; npm run check; scoped eslint daemon learning/UI/tests; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts learning.spec.ts; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/learning-rereview.json",
+          "testFiles": [
+            "tests/learning-review.test.ts",
+            "tests/reflection-authority.test.ts",
+            "tests/e2e/learning.spec.ts"
+          ],
+          "tests": 2,
+          "seconds": 1.29,
+          "browserTests": 3,
+          "browserSeconds": 10,
+          "screenshots": [
+            "docs/implementation/evidence/2026-10-04/learning-rereview/after-320.png"
+          ],
+          "limitations": [
+            "Renewed-review browser scenario explicitly uses Playwright response fixtures; real redaction/reapproval authority is independently exercised by backend tests",
+            "UI refresh is explicit; other already-open clients do not receive immediate redaction invalidation",
+            "No worker reflection dispatch/queue/evaluation pipeline completed",
+            "Chinese/light320 screenshot only; full viewport/theme/focus/reference comparison pending",
+            "No Ubuntu/live provider/global AT completion claim"
+          ],
+          "assertions": [
+            "Approved record whose reviewed hash differs from current public view is projected needs_review",
+            "Reflection authority denies that state; fresh approve/reject requires current revision and current hash",
+            "Old receipt replay does not alter renewed-review state; wrong old hash rejected",
+            "Explicit new review advances revision and binds current redacted hash",
+            "UI shows changed-content state, gates approve on acknowledgment and submits new exact hash",
+            "320 fixture screenshot inspected and no full-page horizontal overflow"
+          ]
         }
       ],
       "blockedReason": null,

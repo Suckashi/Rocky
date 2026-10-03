@@ -207,3 +207,7 @@ Skill binary comparison follow-up (`fcf861d`): existing details/typography token
 ### Exact summary review — 2026-10-04
 
 Existing Learning cards now include an explicit acknowledgment and primary approve/secondary reject actions within expanded content. Saved status distinguishes pending/approved/rejected; approval explicitly excludes skill publication. No new upstream CSS or assets copied. [320px approved state](evidence/2026-10-04/learning-review/after-320.png), [test evidence](evidence/2026-10-04/learning-review.json). After-only fixture evidence; full controls/focus/theme/reference comparisons remain pending.
+
+### Renewed summary review — 2026-10-04
+
+Learning cards now distinguish content changed/needs review from approved status and reuse existing acknowledgment/actions. [320px fixture after](evidence/2026-10-04/learning-rereview/after-320.png), [test evidence](evidence/2026-10-04/learning-rereview.json). Screenshot uses explicit Playwright response fixture; backend authority tested separately. No additional upstream CSS/assets copied; full reference/focus/theme/viewport matrix remains open.
