@@ -566,6 +566,14 @@ input[type="checkbox"] {
   height: 16px;
   accent-color: var(--user);
 }
+.model-settings .model-vision-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.model-vision-toggle input {
+  flex-shrink: 0;
+}
 .model-card {
   border: 1px solid var(--border);
   border-radius: 12px;

@@ -14,7 +14,11 @@ const receiptMeta = z.strictObject({
   operationId: z.string().min(1).max(300),
   intentHash: z.string().regex(/^[a-f0-9]{64}$/),
 });
-export function fixtureServer(receiptRoot?: string, failAfterEffect = false) {
+export function fixtureServer(
+  receiptRoot?: string,
+  failAfterEffect = false,
+  includeVisual = false,
+) {
   if (receiptRoot) mkdirSync(receiptRoot, { recursive: true });
   const server = new McpServer({
     name: "rocky-synthetic-tools",
@@ -99,11 +103,50 @@ export function fixtureServer(receiptRoot?: string, failAfterEffect = false) {
       return failAfterEffect ? { ...result, isError: true } : result;
     },
   );
+  if (includeVisual)
+    server.registerTool(
+      "visual_sample",
+      {
+        inputSchema: { label: z.string() },
+        outputSchema: {
+          label: z.string(),
+          kind: z.literal("synthetic-image"),
+          credentials: z.object({ apiKey: z.string() }),
+        },
+      },
+      async ({ label }) => ({
+        content: [
+          {
+            type: "text",
+            text:
+              label === "large evidence"
+                ? "Synthetic large text evidence.\n".repeat(5000)
+                : "Synthetic one-pixel image; not a live screenshot.",
+          },
+          {
+            type: "image",
+            mimeType: "image/png",
+            data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA0sAAAAASUVORK5CYII=",
+          },
+          {
+            type: "resource_link",
+            uri: "https://unconfigured.invalid/never-fetch",
+            name: "untrusted reference",
+          },
+        ],
+        structuredContent: {
+          label,
+          kind: "synthetic-image",
+          credentials: { apiKey: "synthetic-visual-secret" },
+        },
+      }),
+    );
   return server;
 }
 export async function startHttpFixture(
   receiptRoot?: string,
   failAfterEffect = false,
+  includeVisual = false,
 ) {
   const active = new Set<StreamableHTTPServerTransport>();
   const http = createServer(async (req, res) => {
@@ -115,7 +158,7 @@ export async function startHttpFixture(
       res.writeHead(405).end();
       return;
     }
-    const server = fixtureServer(receiptRoot, failAfterEffect);
+    const server = fixtureServer(receiptRoot, failAfterEffect, includeVisual);
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });

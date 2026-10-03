@@ -58,14 +58,19 @@ export async function startAgentProvider(
                 id: z.string().optional(),
                 name: z.string().optional(),
                 tool_use_id: z.string().optional(),
-                content: z.string().optional(),
+                content: z
+                  .union([
+                    z.string(),
+                    z.array(z.record(z.string(), z.unknown())),
+                  ])
+                  .optional(),
               })
               .parse(block);
             if (b.type === "tool_use") names.set(b.id!, b.name!);
             else if (b.type === "tool_result")
               messages.push(
                 new ToolMessage({
-                  content: b.content!,
+                  content: b.content! as ToolMessage["content"],
                   tool_call_id: b.tool_use_id!,
                   name: names.get(b.tool_use_id!),
                 }),

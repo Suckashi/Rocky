@@ -6,6 +6,7 @@ import type { BaseMessage } from "@langchain/core/messages";
 import type { ChatResult } from "@langchain/core/outputs";
 import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
 import { createRockyAgent } from "../../../packages/agent-runtime/src/factory.js";
+import { runtimeToolReplySchema } from "../../../packages/contracts/src/mcp-result.js";
 import type { RuntimeHooks } from "../../../packages/agent-runtime/src/factory.js";
 import { WorkerModel } from "../../../packages/agent-runtime/src/worker-model.js";
 import { toModelWire } from "../../../packages/agent-runtime/src/model-wire.js";
@@ -389,7 +390,7 @@ process.on("message", (wire) => {
         event: (name, data) =>
           send(randomUUID(), { kind: "runtime_event", name, data }),
         call: async (name, args, callId) =>
-          String(
+          runtimeToolReplySchema.parse(
             await rpc({
               kind: "tool_request",
               logicalToolCallId: callId,
@@ -426,6 +427,7 @@ process.on("message", (wire) => {
         },
       };
       const maxInputTokens = message.payload.maxInputTokens;
+      const imageInputs = message.payload.imageInputs === true;
       const remote = (child: boolean) =>
         new WorkerModel(
           child,
@@ -438,6 +440,7 @@ process.on("message", (wire) => {
               ...(purpose === "summary" ? { purpose: "summary" as const } : {}),
             })) as { content: string; tool_calls?: AIMessage["tool_calls"] },
           maxInputTokens,
+          imageInputs,
         );
       agent = createRockyAgent(
         saver,

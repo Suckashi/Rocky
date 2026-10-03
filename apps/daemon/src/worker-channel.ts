@@ -35,6 +35,7 @@ type AgentOptions = {
   sourceGraphThreadId?: string;
   contextBatchId?: string;
   maxInputTokens?: number;
+  imageInputs?: boolean;
   steering?: boolean;
   testFixtureTools?: boolean;
   mode?: "fixture" | "configured";
@@ -186,6 +187,7 @@ export class WorkerChannel {
         text: this.owner.text,
         ...(agentOptions?.mode ? { mode: agentOptions.mode } : {}),
         ...(agentOptions?.testFixtureTools ? { testFixtureTools: true } : {}),
+        ...(agentOptions?.imageInputs ? { imageInputs: true } : {}),
         ...(agentOptions ? { graphPath: agentOptions.graphPath } : {}),
         ...(agentOptions?.sourceGraphThreadId
           ? { sourceGraphThreadId: agentOptions.sourceGraphThreadId }

@@ -24,6 +24,8 @@ import { SteeringStore } from "./steering.js";
 import { ModelRegistry } from "./model-registry.js";
 import { McpRegistry } from "./mcp-registry.js";
 import { McpManager } from "./mcp-manager.js";
+import { mcpDeliverySchema } from "../../../packages/contracts/src/mcp-result.js";
+import { mapMcpDelivery } from "../../../packages/agent-runtime/src/mcp-result.js";
 import {
   mcpCallSchema,
   mcpDiscoverSchema,
@@ -636,7 +638,10 @@ export class WorkService {
             this.fingerprint(current, name, args),
             ...(configuredTool ? [intentHash(configuredTool.identity)] : []),
           );
-          if (operation.outcome === "succeeded") return operation.result!;
+          if (operation.outcome === "succeeded")
+            return configuredTool
+              ? this.deliverMcp(configuredTool, JSON.parse(operation.result!))
+              : operation.result!;
           if (operation.phase !== "prepared")
             throw new RockyError(
               "unknown_effect",
@@ -746,6 +751,9 @@ export class WorkService {
                 "MCP tool returned an error; effects are unconfirmed",
               );
             const serialized = JSON.stringify(result);
+            const delivery = configuredTool
+              ? this.deliverMcp(configuredTool, result)
+              : undefined;
             operation = this.operations.transition(
               current,
               operation,
@@ -755,7 +763,7 @@ export class WorkService {
               { result },
             );
             this.flushOutbox();
-            return serialized;
+            return delivery ?? serialized;
           } catch (error) {
             if (operation.phase === "dispatched")
               this.operations.transition(
@@ -854,6 +862,7 @@ export class WorkService {
             ).sourceGraphThreadId,
             contextBatchId: contextBatch?.id,
             maxInputTokens: configuredModels?.root.profile.maxInputTokens,
+            imageInputs: configuredModels?.root.profile.imageInputs,
             steering: true,
             mode: work.mode,
             testFixtureTools: this.testFixtureTools,
@@ -916,6 +925,26 @@ export class WorkService {
       call.toolName,
       call.arguments,
     );
+  }
+  private deliverMcp(
+    prepared: ReturnType<McpManager["prepareTool"]>,
+    result: unknown,
+  ) {
+    const { serverId, configRevision, registryRevision, toolName, schemaHash } =
+      prepared.identity;
+    const delivery = mcpDeliverySchema.parse({
+      kind: "mcp_result",
+      source: {
+        serverId,
+        configRevision,
+        registryRevision,
+        toolName,
+        schemaHash,
+      },
+      result: this.models.redact(this.mcp.redact(result)),
+    });
+    mapMcpDelivery(delivery);
+    return delivery;
   }
   private async run(id: string, decision?: "approve" | "reject") {
     const active = this.active.get(id)!;

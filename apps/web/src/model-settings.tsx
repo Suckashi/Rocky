@@ -14,6 +14,7 @@ const initial = (): ModelConfig => ({
   caRef: null,
   contextWindowTokens: null,
   maxOutputTokens: 128,
+  visionEnabled: false,
   proxy: { mode: "direct" },
 });
 export function ModelSettings({
@@ -252,6 +253,18 @@ export function ModelSettings({
               onChange={(e) => field("maxOutputTokens", Number(e.target.value))}
             />
           </label>
+          <label className="model-vision-toggle">
+            <input
+              type="checkbox"
+              checked={config.visionEnabled}
+              onChange={(e) => field("visionEnabled", e.target.checked)}
+            />
+            <span>
+              {zh
+                ? "啟用模型影像輸入（需自行確認模型支援；不代表已通過測試）"
+                : "Enable model image input (confirm model support; not a passed probe)"}
+            </span>
+          </label>
           <details>
             <summary>{zh ? "代理與 CA" : "Proxy and CA"}</summary>
             <label>
@@ -346,6 +359,16 @@ export function ModelSettings({
                 : zh
                   ? "未配置"
                   : "Not configured"}
+          </p>
+          <p>
+            {zh ? "模型影像輸入" : "Model image input"}:{" "}
+            {model.config.visionEnabled
+              ? zh
+                ? "啟用（支援未驗證）"
+                : "Enabled (support unverified)"
+              : zh
+                ? "關閉"
+                : "Off"}
           </p>
           {model.probe ? (
             <>

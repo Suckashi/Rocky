@@ -13,6 +13,9 @@ import { HumanMessage } from "@langchain/core/messages";
 import type { ChatResult } from "@langchain/core/outputs";
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { ROCKY_PERSONA } from "./persona.js";
+import type { McpDelivery } from "../../contracts/src/mcp-result.js";
+import { mapMcpDelivery } from "./mcp-result.js";
+import { mcpOffloadMiddleware } from "./mcp-offload.js";
 import {
   mcpDiscoverSchema,
   mcpCallSchema,
@@ -29,7 +32,7 @@ export type RuntimeHooks = {
     name: string,
     args: Record<string, unknown>,
     callId: string,
-  ) => Promise<string>;
+  ) => Promise<string | McpDelivery>;
   modelRequest?: (
     messages: BaseMessage[],
     child: boolean,
@@ -126,10 +129,19 @@ export function createRockyAgent(
     },
   );
   const call = tool(
-    async (args, config) =>
-      hooks.call("mcp_call", args, config.toolCall?.id ?? ""),
+    async (args, config) => {
+      const result = await hooks.call(
+        "mcp_call",
+        args,
+        config.toolCall?.id ?? "",
+      );
+      if (typeof result === "string")
+        throw Error("Typed MCP delivery is required");
+      return mapMcpDelivery(result);
+    },
     {
       name: "mcp_call",
+      responseFormat: "content_and_artifact",
       description:
         "Call a discovered configured MCP tool using its exact serverId, registryRevision, toolName and original-schema arguments. Every call requires fresh exact owner approval. No automatic retry or permission from annotations.",
       schema: mcpCallSchema,
@@ -154,6 +166,7 @@ export function createRockyAgent(
       ...(models ? [discover, call] : []),
     ],
     middleware: [
+      mcpOffloadMiddleware(),
       createMiddleware({
         name: "RockySteering",
         beforeModel: async () => {

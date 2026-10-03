@@ -26,6 +26,7 @@ export const ipcMessageSchema = z
         sourceGraphThreadId: idSchema.optional(),
         contextBatchId: idSchema.optional(),
         maxInputTokens: z.number().int().positive().max(100000000).optional(),
+        imageInputs: z.boolean().optional(),
         steering: z.boolean().optional(),
         testFixtureTools: z.boolean().optional(),
       }),

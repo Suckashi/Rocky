@@ -26,6 +26,7 @@ export class WorkerModel extends BaseChatModel<Options> {
       purpose: "target" | "summary",
     ) => Promise<{ content: string; tool_calls?: AIMessage["tool_calls"] }>,
     private readonly maxInputTokens?: number,
+    private readonly imageInputs = false,
   ) {
     super({});
   }
@@ -37,7 +38,7 @@ export class WorkerModel extends BaseChatModel<Options> {
       ...(this.maxInputTokens === undefined
         ? {}
         : { maxInputTokens: this.maxInputTokens }),
-      imageInputs: false,
+      imageInputs: this.imageInputs,
     };
   }
   bindTools(tools: BindToolsInput[], kwargs?: Partial<Options>) {

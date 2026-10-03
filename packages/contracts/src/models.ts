@@ -47,6 +47,7 @@ export const modelConfigSchema = z
       .nullable()
       .default(null),
     maxOutputTokens: z.number().int().min(1).max(1000000),
+    visionEnabled: z.boolean().default(false),
     proxy: z
       .discriminatedUnion("mode", [
         z.strictObject({ mode: z.literal("direct") }),
