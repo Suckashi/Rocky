@@ -4,6 +4,11 @@ import {
   mcpConfigSnapshotSchema,
   type McpConfig,
 } from "../../../packages/contracts/src/mcp-config.js";
+import { z } from "zod";
+import {
+  mcpStateSchema,
+  type McpState,
+} from "../../../packages/contracts/src/mcp-runtime.js";
 export function McpSettings({
   locale,
   request,
@@ -18,6 +23,16 @@ export function McpSettings({
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [saved, setSaved] = useState(false);
+  const [states, setStates] = useState<McpState[]>([]),
+    [connecting, setConnecting] = useState<string | null>(null);
+  const lifecycleAttempts = useRef(new Map<string, string>());
+  const readStates = () =>
+    request("/mcp-servers").then((value) =>
+      setStates(
+        z.strictObject({ servers: z.array(mcpStateSchema) }).parse(value)
+          .servers,
+      ),
+    );
   const attempt = useRef<{ key: string; id: string } | null>(null);
   useEffect(() => {
     if (!open) return;
@@ -31,6 +46,16 @@ export function McpSettings({
           setText(JSON.stringify(snapshot.config, null, 2));
           setError("");
         }
+      })
+      .catch((e) => {
+        if (live) setError(String(e));
+      });
+    void request("/mcp-servers")
+      .then((value) => {
+        const parsed = z
+          .strictObject({ servers: z.array(mcpStateSchema) })
+          .parse(value);
+        if (live) setStates(parsed.servers);
       })
       .catch((e) => {
         if (live) setError(String(e));
@@ -49,8 +74,8 @@ export function McpSettings({
       </summary>
       <p>
         {locale === "zh"
-          ? "只使用自行配置的 MCP。保存不會啟動程序或連線，也不代表通過驗證；工具路由與連線管理尚未接上。"
-          : "Use explicitly configured MCP servers. Saving does not start a process/connect or prove verification. Transport management and tool routing are not connected yet."}
+          ? "只使用自行配置的 MCP。保存不會啟動程序或連線。就緒表示協定連線與工具探索完成，不代表工作成功；對話工具路由尚未接上。"
+          : "Saving does not start configured MCP servers. Ready means protocol connection and tool discovery, not Work success. Conversation tool routing is not connected yet."}
       </p>
       {open && (
         <>
@@ -68,18 +93,133 @@ export function McpSettings({
                 </p>
               ) : (
                 Object.entries(config.mcpServers).map(([id, server]) => (
-                  <p key={id}>
-                    {id} ·{" "}
-                    {server.enabled
-                      ? locale === "zh"
-                        ? "已配置，尚未連線"
-                        : "Configured; not connected"
-                      : locale === "zh"
-                        ? "已停用"
-                        : "Disabled"}
-                  </p>
+                  <div className="model-card" key={id}>
+                    <p>
+                      {id} ·{" "}
+                      {states.find((s) => s.serverId === id)?.status === "ready"
+                        ? locale === "zh"
+                          ? "連線就緒"
+                          : "Connection ready"
+                        : states.find((s) => s.serverId === id)?.status ===
+                            "failed"
+                          ? locale === "zh"
+                            ? "連線失敗"
+                            : "Connection failed"
+                          : server.enabled
+                            ? locale === "zh"
+                              ? "已配置，尚未連線"
+                              : "Configured; not connected"
+                            : locale === "zh"
+                              ? "已停用"
+                              : "Disabled"}
+                    </p>
+                    {states.find((s) => s.serverId === id)?.status ===
+                      "ready" && (
+                      <p>
+                        {locale === "zh" ? "已探索工具" : "Discovered tools"} ·{" "}
+                        {states.find((s) => s.serverId === id)?.toolsCount}
+                      </p>
+                    )}
+                    {states.find((s) => s.serverId === id) && (
+                      <small>
+                        {locale === "zh" ? "最後確認" : "Last confirmed"}:{" "}
+                        {states.find((s) => s.serverId === id)?.updatedAt}
+                      </small>
+                    )}
+                    {connecting === id && (
+                      <p role="status">
+                        {locale === "zh"
+                          ? "正在等待連線結果…"
+                          : "Waiting for connection result…"}
+                      </p>
+                    )}
+                    <div className="actions">
+                      <button
+                        disabled={
+                          !server.enabled ||
+                          revision === null ||
+                          connecting !== null ||
+                          states.find((s) => s.serverId === id)?.status ===
+                            "ready"
+                        }
+                        onClick={() => {
+                          const key = `${id}:${revision}:connect`;
+                          let requestId = lifecycleAttempts.current.get(key);
+                          if (!requestId) {
+                            requestId = crypto.randomUUID();
+                            lifecycleAttempts.current.set(key, requestId);
+                          }
+                          setConnecting(id);
+                          setSaved(false);
+                          setError("");
+                          void request(`/mcp-servers/${id}/connect`, {
+                            requestId,
+                            expectedRevision: revision,
+                          })
+                            .then((value) => {
+                              const result = mcpStateSchema.parse(value);
+                              setStates((old) => [
+                                ...old.filter((s) => s.serverId !== id),
+                                result,
+                              ]);
+                              lifecycleAttempts.current.delete(key);
+                            })
+                            .catch((e) => setError(String(e)))
+                            .finally(() => setConnecting(null));
+                        }}
+                      >
+                        {locale === "zh"
+                          ? "連線並探索"
+                          : "Connect and discover"}
+                      </button>
+                      <button
+                        disabled={
+                          !server.enabled ||
+                          revision === null ||
+                          (!connecting &&
+                            states.find((s) => s.serverId === id)?.status !==
+                              "ready")
+                        }
+                        onClick={() => {
+                          void request(`/mcp-servers/${id}/stop`, {
+                            requestId: crypto.randomUUID(),
+                            expectedRevision: revision,
+                          })
+                            .then(() => readStates())
+                            .catch((e) => setError(String(e)));
+                        }}
+                      >
+                        {locale === "zh" ? "停止連線" : "Stop connection"}
+                      </button>
+                    </div>
+                    {states.find((s) => s.serverId === id)?.error && (
+                      <p role="status">
+                        {states.find((s) => s.serverId === id)?.error}
+                      </p>
+                    )}
+                    <details>
+                      <summary>
+                        {locale === "zh"
+                          ? "連線診斷"
+                          : "Connection diagnostics"}
+                      </summary>
+                      <pre>
+                        {states
+                          .find((s) => s.serverId === id)
+                          ?.diagnostics.join("") ||
+                          (locale === "zh" ? "沒有診斷輸出" : "No diagnostics")}
+                      </pre>
+                    </details>
+                  </div>
                 ))
               )}
+              <button
+                onClick={() =>
+                  void readStates().catch((e) => setError(String(e)))
+                }
+              >
+                {locale === "zh" ? "更新連線狀態" : "Refresh connection status"}
+              </button>
             </section>
           )}
           <form
@@ -104,6 +244,7 @@ export function McpSettings({
                     setRevision(snapshot.revision);
                     setText(JSON.stringify(snapshot.config, null, 2));
                     setSaved(true);
+                    void readStates().catch((e) => setError(String(e)));
                   })
                   .catch((e) => setError(String(e)))
                   .finally(() => setBusy(false));

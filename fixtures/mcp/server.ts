@@ -104,8 +104,12 @@ export function fixtureServer(receiptRoot?: string) {
 export async function startHttpFixture(receiptRoot?: string) {
   const active = new Set<StreamableHTTPServerTransport>();
   const http = createServer(async (req, res) => {
-    if (req.url !== "/mcp" || req.method !== "POST") {
+    if (req.url !== "/mcp") {
       res.writeHead(404).end();
+      return;
+    }
+    if (req.method !== "POST") {
+      res.writeHead(405).end();
       return;
     }
     const server = fixtureServer(receiptRoot);

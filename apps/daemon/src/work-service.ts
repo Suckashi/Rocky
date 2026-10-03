@@ -23,6 +23,7 @@ import { ContextLedger } from "./context-ledger.js";
 import { SteeringStore } from "./steering.js";
 import { ModelRegistry } from "./model-registry.js";
 import { McpRegistry } from "./mcp-registry.js";
+import { McpManager } from "./mcp-manager.js";
 import { ModelBudgetLedger } from "./model-budget.js";
 import { intentHash } from "./intent.js";
 import { OperationLedger } from "./operation-ledger.js";
@@ -53,6 +54,7 @@ export class WorkService {
   readonly store: Store;
   readonly models: ModelRegistry;
   readonly mcp: McpRegistry;
+  readonly mcpManager: McpManager;
   readonly modelBudgets: ModelBudgetLedger;
   readonly operations: OperationLedger;
   readonly grants: GrantRegistry;
@@ -76,6 +78,7 @@ export class WorkService {
     try {
       this.models = new ModelRegistry(this.store);
       this.mcp = new McpRegistry(this.store);
+      this.mcpManager = new McpManager(this.store, this.mcp);
       this.store.publicEvidence = (value) =>
         this.models.redact(this.mcp.redact(value));
       this.modelBudgets = new ModelBudgetLedger(this.store);
@@ -1090,6 +1093,7 @@ export class WorkService {
       if (["queued", "running", "waiting_approval"].includes(work.status))
         this.cancelWork(work.id);
     await this.models.close();
+    await this.mcpManager.close();
     this.mcp.close();
     await Promise.all([...this.starting.values()].map((a) => a.promise));
     await Promise.all(

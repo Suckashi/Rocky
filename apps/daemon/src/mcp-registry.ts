@@ -9,11 +9,28 @@ import {
 import { RockyError } from "../../../packages/contracts/src/index.js";
 import type { Store } from "./store.js";
 import { intentHash } from "./intent.js";
-import { redactEvidence } from "./redaction.js";
+import { redactEvidence, createTextStreamRedactor } from "./redaction.js";
 export class McpRegistry {
   readonly configDirectory: string;
   private closed = false;
   private observedSecrets = new Set<string>();
+  private changeListeners = new Set<() => void>();
+  private envValue(name: string) {
+    return (
+      this.env[name] ??
+      (process.platform === "win32"
+        ? Object.entries(this.env).find(
+            ([key]) => key.toLowerCase() === name.toLowerCase(),
+          )?.[1]
+        : undefined)
+    );
+  }
+  onChanged(listener: () => void) {
+    this.changeListeners.add(listener);
+    return () => {
+      this.changeListeners.delete(listener);
+    };
+  }
   constructor(
     private readonly store: Store,
     private readonly env: NodeJS.ProcessEnv = process.env,
@@ -60,7 +77,7 @@ export class McpRegistry {
         "Use MCP credential references instead of plaintext secrets",
         400,
       );
-    return this.store.transaction(() => {
+    const saved = this.store.transaction(() => {
       const prior = this.store.db
         .prepare(
           "SELECT intent,data FROM mcp_config_receipts WHERE request_id=?",
@@ -95,6 +112,8 @@ export class McpRegistry {
         .run(command.requestId, intent, JSON.stringify(result));
       return result;
     });
+    for (const listener of this.changeListeners) listener();
+    return saved;
   }
   server(id: string, revision: number) {
     const snapshot = this.snapshot();
@@ -115,7 +134,7 @@ export class McpRegistry {
     if (!server.enabled)
       throw new RockyError("mcp_disabled", "MCP server is disabled", 409);
     const reference = (name: string) => {
-      const value = this.env[name];
+      const value = this.envValue(name);
       if (!value)
         throw new RockyError(
           "credential_unavailable",
@@ -128,7 +147,7 @@ export class McpRegistry {
       const env = {
         ...Object.fromEntries(
           options.envAllowlist.flatMap((name) =>
-            this.env[name] ? [[name, this.env[name]!]] : [],
+            this.envValue(name) ? [[name, this.envValue(name)!]] : [],
           ),
         ),
         ...server.env,
@@ -186,11 +205,20 @@ export class McpRegistry {
           ],
     );
     for (const ref of refs)
-      if (this.env[ref]) this.observedSecrets.add(this.env[ref]!);
+      if (this.envValue(ref)) this.observedSecrets.add(this.envValue(ref)!);
   }
   redact(value: unknown) {
     this.rememberSecrets(this.snapshot().config);
     return redactEvidence(value, [...this.observedSecrets]);
+  }
+  streamRedactor() {
+    this.rememberSecrets(this.snapshot().config);
+    return createTextStreamRedactor([...this.observedSecrets]);
+  }
+  containsSecret(value: unknown) {
+    this.rememberSecrets(this.snapshot().config);
+    const raw = JSON.stringify(value);
+    return [...this.observedSecrets].some((secret) => raw.includes(secret));
   }
   close() {
     this.closed = true;

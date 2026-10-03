@@ -223,6 +223,17 @@ export function createApp(service: WorkService) {
     c.json(service.store.get(c.req.param("id"))),
   );
   app.get("/api/v1/mcp-config", (c) => c.json(service.mcp.snapshot()));
+  app.get("/api/v1/mcp-servers", (c) =>
+    c.json({ servers: service.mcpManager.list() }),
+  );
+  app.post("/api/v1/mcp-servers/:id/connect", async (c) =>
+    c.json(
+      await service.mcpManager.connect(c.req.param("id"), await readJson(c)),
+    ),
+  );
+  app.post("/api/v1/mcp-servers/:id/stop", async (c) =>
+    c.json(await service.mcpManager.stop(c.req.param("id"), await readJson(c))),
+  );
   app.post("/api/v1/mcp-config", async (c) =>
     c.json(service.mcp.save(await readJson(c))),
   );
