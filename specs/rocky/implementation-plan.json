@@ -1704,6 +1704,28 @@
             "No actual power loss; restart test uses explicitly seeded crash-state fixture",
             "Ubuntu/live integration/pinned browser install not_run; no fresh visual comparison"
           ]
+        },
+        {
+          "commit": "84a5b4c27e15ebb3a79e6ad1a959473cfca66fdf",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/workspace-leases.test.ts tests/presence.test.ts tests/admission.test.ts; focused admission capacity assertion; ROCKY_TEST_BROWSER=installed chromium1223; npx playwright test --config playwright.production.config.ts background-presence.spec.ts; final workspace-wait browser capture; npm run check; npm run lint; npm run build; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/presence-wait/verification.json",
+          "testFiles": [
+            "tests/workspace-leases.test.ts",
+            "tests/admission.test.ts",
+            "tests/presence.test.ts",
+            "tests/e2e/background-presence.spec.ts"
+          ],
+          "limitations": [
+            "waitingFor is optional presentation detail on queued Work, not a new lifecycle state or authority; slot/resource admission behavior unchanged",
+            "Model-slot waits within an already-running Work are not yet classified by this field",
+            "Four-width captures show presence header; target Work label asserted in DOM and cancellation behavior verified, not every scrolled card state photographed",
+            "T-038 performance/bundle/cold-warm and complete hidden-tab/language/theme matrix remain open",
+            "No full global AT pass, Ubuntu/live provider or matched upstream reference comparison"
+          ]
         }
       ],
       "blockedReason": null,
@@ -4300,6 +4322,28 @@
             "Resource-wait detail, complete hidden-tab/English/dark/24px matrix and performance/bundle measurement remain pending",
             "Four-width Windows Chromium synthetic provider failure with real daemon Work; Ubuntu/live provider/full global AT not_run",
             "No fresh matched upstream reference/before/after visual comparison"
+          ]
+        },
+        {
+          "commit": "84a5b4c27e15ebb3a79e6ad1a959473cfca66fdf",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "mode": "fixture",
+          "command": "npx vitest run tests/workspace-leases.test.ts tests/presence.test.ts tests/admission.test.ts; focused admission capacity assertion; ROCKY_TEST_BROWSER=installed chromium1223; npx playwright test --config playwright.production.config.ts background-presence.spec.ts; final workspace-wait browser capture; npm run check; npm run lint; npm run build; scoped prettier --check; git diff --check",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/presence-wait/verification.json",
+          "testFiles": [
+            "tests/workspace-leases.test.ts",
+            "tests/admission.test.ts",
+            "tests/presence.test.ts",
+            "tests/e2e/background-presence.spec.ts"
+          ],
+          "limitations": [
+            "waitingFor is optional presentation detail on queued Work, not a new lifecycle state or authority; slot/resource admission behavior unchanged",
+            "Model-slot waits within an already-running Work are not yet classified by this field",
+            "Four-width captures show presence header; target Work label asserted in DOM and cancellation behavior verified, not every scrolled card state photographed",
+            "T-038 performance/bundle/cold-warm and complete hidden-tab/language/theme matrix remain open",
+            "No full global AT pass, Ubuntu/live provider or matched upstream reference comparison"
           ]
         }
       ],

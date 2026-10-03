@@ -37,3 +37,17 @@ Focused browser1 and full production-path8 pass (44.2s). A real daemon backgroun
 Screenshots: [1440](evidence/2026-10-04/background-presence/background-presence-1440.png), [1280](evidence/2026-10-04/background-presence/background-presence-1280.png), [390](evidence/2026-10-04/background-presence/background-presence-390.png), [320](evidence/2026-10-04/background-presence/background-presence-320.png).320 inspected. These are functional after captures, not full upstream comparison.
 
 T-038 remains in_progress for resource waiting, performance and remaining browser matrix. All70 global AT unchanged.
+
+## Persisted admission wait detail (84a5b4c27e15ebb3a79e6ad1a959473cfca66fdf)
+
+Daemon admission now records optional waitingFor workspace/capacity on queued Work using the existing atomic Work update/event path, only when reason changes. Workspace overlap takes precedence when both constraints apply. Dispatch clears the reason; normal updates leaving queued and exact cancellation also clear it. No new status, queue, lease or authority is introduced. Presence derives waiting_resource from the confirmed field, and Work labels distinguish workspace/slot waits. Background counts remain queued.
+
+18 related tests pass, plus focused capacity assertion1 and2 browser flows. Held real native background Work owns a registered root; main Work waits, reload restores workspace reason/static presence, exact cancellation clears it. Four-width header screenshots have no horizontal overflow;320 inspected. Type/lint/build/format/diff pass. [Evidence](evidence/2026-10-04/presence-wait/verification.json).
+
+Screenshots: [1440](evidence/2026-10-04/presence-wait/workspace-wait-1440.png), [1280](evidence/2026-10-04/presence-wait/workspace-wait-1280.png), [390](evidence/2026-10-04/presence-wait/workspace-wait-390.png), [320](evidence/2026-10-04/presence-wait/workspace-wait-320.png). Header is captured; existing history remains in the transcript viewport.
+
+- waitingFor is optional presentation detail on queued Work, not a new lifecycle state or authority; slot/resource admission behavior unchanged
+- Model-slot waits within an already-running Work are not yet classified by this field
+- Four-width captures show presence header; target Work label asserted in DOM and cancellation behavior verified, not every scrolled card state photographed
+- T-038 performance/bundle/cold-warm and complete hidden-tab/language/theme matrix remain open
+- No full global AT pass, Ubuntu/live provider or matched upstream reference comparison

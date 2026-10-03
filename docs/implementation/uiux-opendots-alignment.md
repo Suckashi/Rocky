@@ -147,3 +147,5 @@ Original Rocky50px avatar stays within existing compact conversation header; sho
 Presence feedback (05f77122594122b0be2eb3c9fb2933b4dc00af68) adds600ms2% scale only to confirmed fresh main completion and an offline last-sync label; original avatar and header geometry unchanged. Browser observes actual animation counts/reload/reconnect. This is an explicitly Rocky-specific adaptation, with no new upstream source copy or full fidelity claim.
 
 Background presence navigation (1f1dac70310d3253147d79aa7bccf1aefee459d0) uses an initially collapsed summary and bounded neutral list, matching the established progressive disclosure and semantic theme system. Keyboard Enter closes the list and focuses exact Work. No new upstream source copied. [Tests/screenshots](presence.md). Full matched comparison remains open.
+
+Admission wait presentation (84a5b4c27e15ebb3a79e6ad1a959473cfca66fdf) changes existing presence/Work label text using daemon waitingFor detail. No new panel, layout or upstream code. [Four-width header evidence](presence.md); no full reference comparison claim.
