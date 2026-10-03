@@ -70,3 +70,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 artifact recovery (9feaf7920138db6a9729071765697a741daac678): previous library-bootstrap dependency is resolved. Fault/retry tested independently of main conversation connection. Latest200 initial list/pagination and broader remaining product/visual scope still open.
 
 2026-10-04 presence (3d49ea33c52966c58b893e6bd128f49805c13ef7): previous fully-pending presence is now a partial confirmed-state implementation. Completion feedback/de-duplication, connection freshness timestamp, background navigation, resource waiting detail and performance/full browser matrix remain open. See presence.md.
+
+2026-10-04 presence feedback (05f77122594122b0be2eb3c9fb2933b4dc00af68): one-time completion deduplication and sync timestamp now implemented with browser offline/online evidence. Earlier absent-feedback/freshness notes are historical. Background navigation, waiting-resource detail, hidden-tab real-browser and performance matrix remain missing.

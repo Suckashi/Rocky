@@ -143,3 +143,5 @@ Artifact failure recovery (9feaf7920138db6a9729071765697a741daac678) adds truthf
 ## Rocky presence adaptation (3d49ea33c52966c58b893e6bd128f49805c13ef7)
 
 Original Rocky50px avatar stays within existing compact conversation header; short actual state text and a small keyboard motion preference replace generic status prose. Existing neutral tokens/typography retained; old header selectors removed. No additional upstream code/assets. [Evidence](presence.md). This is Rocky-specific presentation, not full fidelity/animation acceptance.
+
+Presence feedback (05f77122594122b0be2eb3c9fb2933b4dc00af68) adds600ms2% scale only to confirmed fresh main completion and an offline last-sync label; original avatar and header geometry unchanged. Browser observes actual animation counts/reload/reconnect. This is an explicitly Rocky-specific adaptation, with no new upstream source copy or full fidelity claim.

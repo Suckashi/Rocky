@@ -463,3 +463,9 @@ Shared adapter loads artifact metadata independently of conversation bootstrap; 
 ## Confirmed presence (3d49ea33c52966c58b893e6bd128f49805c13ef7)
 
 T-038 now in_progress: pure foreground/background/connection projection and bounded motion with persistent preference/reduced motion implemented.6 unit/projection tests and focused normal-daemon browser flow pass. [Presence report](presence.md) lists remaining completion/freshness/navigation/performance scope.
+
+## Completion feedback and sync freshness (05f77122594122b0be2eb3c9fb2933b4dc00af68)
+
+Snapshot cursor seeds the event watermark; completed Run identities seed suppression. Fresh matching main normal completed Work events can trigger one600ms2% scale response. Replayed/older events, repeated completed-run updates, background/evaluation work and unsuccessful states do not. Suppressed motion is consumed, not queued for later. Last-confirmed sync records receipt of validated snapshot/event independently from progress evidence. Browser offline closes the stream and preserves last state/time; online resnapshots.
+
+7 pure/projection tests and focused browser1 pass. Browser observed new completion animation count1, history reload0, offline timestamp with unchanged Work status and online reconnect0. Initial offline test exposed delayed SSE error; browser network events now handle it. Type/lint/build/format/diff pass. [Evidence](evidence/2026-10-04/presence-feedback.json). Completion/freshness gaps in the earlier section are superseded; remaining background/resource/performance/full-platform scope stays open.
