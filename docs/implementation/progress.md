@@ -451,3 +451,7 @@ Static HTML now renders in an opaque sandbox with daemon-side allowlisting and d
 ## Native artifact publication (0f31a2a4104566b42b9a56fd689d71c599caa59e)
 
 Agent now delivers confirmed same-Work file snapshots through artifact_publish; active ownership/cancellation and immutable receipt checks remain daemon-controlled.11 related tests and actual browser native delivery pass. See [artifact-native.md](artifact-native.md). T-020 remains in_progress.
+
+## Conversation result delivery (e1e3b62f68e5af31340af3df860cb73645c091b4)
+
+Native and owner-published artifacts now appear in the originating Work with direct open/download controls and shared event projection. Four-width browser/reload/focus checks and all7 production-path flows pass. See [artifact-cards.md](artifact-cards.md); fullV1 and visual comparison remain incomplete.

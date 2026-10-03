@@ -133,3 +133,7 @@ Existing ResultPane geometry, toolbar and neutral semantic tokens host the opaqu
 ## Native delivery into existing results (0f31a2a4104566b42b9a56fd689d71c599caa59e)
 
 No new presentation component/CSS; artifact_publish feeds the existing shared projection and ResultPane cards. Browser verifies actual native write/approval/publication before preview/download at four widths. [Evidence](artifact-native.md). This is a Rocky functional integration; fixed upstream reference and remaining comparison gaps unchanged.
+
+## Conversation delivery cards (e1e3b62f68e5af31340af3df860cb73645c091b4)
+
+WorkArtifacts adapts fixed upstream PageReviewCard/style.css3707+ geometry:16px radius,14/18px header/footer,18/22px body,20px title,9px action radius. Neutral theme tokens replace hardcoded review colors; controls open/download confirmed Rocky snapshots. Existing resultpane/focus and shared event projection retained. [Four-width after screenshots/tests](artifact-cards.md). No matched reference/before/after claim or global completion.

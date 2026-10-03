@@ -64,3 +64,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 HTML preview (cf53d927ce311aba5c8c4f83dfff8d0468f3d768): previous absent-rendered-HTML notes are historical. Restricted static preview now exists; interactive scripts/navigation/resources deliberately unsupported. Local canary/capability probes are not full host egress proof. Native tools, PNG/JPEG artifacts, context refs and full visual comparison remain pending. See html-preview.md.
 
 2026-10-04 native artifact delivery (0f31a2a4104566b42b9a56fd689d71c599caa59e): prior missing-all-native-publication statements are historical. Root normal Work can publish its own confirmed single-file write. Other-source/binary/bundle publication, document tools/context refs and remaining V1 scope are incomplete. See artifact-native.md.
+
+2026-10-04 artifact cards (e1e3b62f68e5af31340af3df860cb73645c091b4): results no longer require finding the sidebar library first. Shared collection restores latest200 artifacts and applies publication events. Full pagination, independent degraded library loading and matched visual/theme matrix remain gaps. See artifact-cards.md.
