@@ -132,7 +132,27 @@ export const domainPayloadSchema = z
       });
     if (
       payload.name === "rocky.work.updated" &&
-      !z.object({ work: workSchema }).strict().safeParse(payload.data).success
+      !z
+        .object({
+          work: workSchema,
+          historyRefs: z
+            .array(
+              z.strictObject({
+                id: z.string().min(1).max(200),
+                sequence: sequenceSchema,
+                workId: idSchema,
+              }),
+            )
+            .max(2)
+            .optional(),
+        })
+        .strict()
+        .refine(
+          (value) =>
+            value.historyRefs?.every((ref) => ref.workId === value.work.id) ??
+            true,
+        )
+        .safeParse(payload.data).success
     )
       ctx.addIssue({
         code: "custom",

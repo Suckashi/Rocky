@@ -34,8 +34,20 @@ test("initial snapshot failure reconnects to authoritative snapshot without inve
     page.getByText("Snapshot fixture unavailable", { exact: false }),
   ).toHaveCount(0);
   const state = await (await page.request.get("/api/v1/snapshot")).json();
-  await expect(page.locator("article.work")).toHaveCount(state.works.length);
-  for (const work of state.works) {
+  const history = await (
+    await page.request.get("/api/v1/conversation/history")
+  ).json();
+  const visibleIds = new Set(
+    history.messages.map((message: { workId: string }) => message.workId),
+  );
+  const visible = state.works.filter(
+    (work: { id: string; runMode: string; status: string }) =>
+      work.runMode === "normal" &&
+      (visibleIds.has(work.id) ||
+        ["queued", "running", "waiting_approval"].includes(work.status)),
+  );
+  await expect(page.locator("article.work")).toHaveCount(visible.length);
+  for (const work of visible) {
     await expect(
       page.locator("article.work").filter({ hasText: work.text }),
     ).toHaveCount(1);

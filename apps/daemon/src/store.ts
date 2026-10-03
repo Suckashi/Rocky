@@ -335,6 +335,14 @@ export class Store {
   event(work: Work, name: string, data: Record<string, unknown>): PublicEvent {
     if (!this.inTransaction)
       return this.transaction(() => this.event(work, name, data));
+    const historyRefs =
+      name === "rocky.work.updated"
+        ? this.db
+            .prepare(
+              "SELECT id,CAST(sequence AS TEXT) AS sequence,work_id AS workId FROM conversation_history WHERE work_id=? ORDER BY conversation_history.sequence",
+            )
+            .all(work.id)
+        : undefined;
     const base = publicEventSchema.omit({ sequence: true }).parse({
       schemaVersion: 1 as const,
       id: randomUUID(),
@@ -342,7 +350,14 @@ export class Store {
       workId: work.id,
       runId: work.runId,
       executionSessionId: work.executionSessionId,
-      payload: { kind: "domain", name, data: this.publicEvidence(data) },
+      payload: {
+        kind: "domain",
+        name,
+        data: this.publicEvidence({
+          ...data,
+          ...(historyRefs ? { historyRefs } : {}),
+        }),
+      },
     });
     this.db
       .prepare("INSERT INTO events(data) VALUES(?)")

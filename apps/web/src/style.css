@@ -243,6 +243,25 @@ h1 {
   min-height: 0;
   display: flex;
 }
+.history-load {
+  display: block;
+  margin: 0 auto 20px;
+  padding: 7px 12px;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font: inherit;
+  font-size: 12px;
+}
+.history-error {
+  color: var(--error);
+  font-size: 12px;
+}
+.chat-transcript:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
 .chat-transcript {
   overflow: auto;
   flex: 1;

@@ -263,6 +263,7 @@ export function Transcript({
     <div className="transcript-frame">
       <div
         id="works"
+        tabIndex={-1}
         ref={ref}
         className="chat-transcript works"
         onScroll={() => {

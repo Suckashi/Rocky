@@ -94,8 +94,18 @@ function App() {
     [theme, setTheme] = useState("light"),
     [enabled, setEnabled] = useState(false),
     [transport, setTransport] = useState<"stdio" | "http">("stdio");
-  const { works, events, streams, connected, connectionError, reconnect } =
-    useRockyProjection(request);
+  const {
+    works,
+    events,
+    streams,
+    connected,
+    connectionError,
+    reconnect,
+    historyCursor,
+    historyLoading,
+    historyError,
+    loadEarlier,
+  } = useRockyProjection(request);
   const [text, setText] = useState(""),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
@@ -225,11 +235,44 @@ function App() {
             </div>
             <Transcript
               revision={
-                works.map((w) => `${w.id}:${w.revision}`).join("|") +
+                `${works.at(-1)?.id ?? ""}:${works.at(-1)?.revision ?? 0}` +
                 ":" +
                 (events.at(-1)?.sequence ?? "0")
               }
             >
+              {historyCursor && (
+                <button
+                  type="button"
+                  className="history-load"
+                  disabled={historyLoading}
+                  onClick={(event) => {
+                    const button = event.currentTarget;
+                    void loadEarlier().then(() =>
+                      requestAnimationFrame(() => {
+                        if (button.isConnected)
+                          button.focus({ preventScroll: true });
+                        else
+                          document
+                            .getElementById("works")
+                            ?.focus({ preventScroll: true });
+                      }),
+                    );
+                  }}
+                >
+                  {historyLoading
+                    ? locale === "zh"
+                      ? "載入中…"
+                      : "Loading…"
+                    : locale === "zh"
+                      ? "載入較早的訊息"
+                      : "Load earlier messages"}
+                </button>
+              )}
+              {historyError && (
+                <p role="alert" className="history-error">
+                  {historyError}
+                </p>
+              )}
               {!works.length && <p className="empty">{t.empty}</p>}
               {works.map((w) => (
                 <article className="work" key={w.id}>

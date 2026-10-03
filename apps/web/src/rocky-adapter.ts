@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import {
   API_PREFIX,
   publicEventSchema,
@@ -7,6 +7,28 @@ import {
   type PublicEvent,
 } from "../../../packages/contracts/src/index.js";
 import { projectEvidence, projectWork } from "./projection.js";
+import {
+  conversationPageSchema,
+  conversationMessageSchema,
+} from "../../../packages/contracts/src/conversation.js";
+import type { z } from "zod";
+const historyReferenceSchema = conversationMessageSchema.pick({
+  id: true,
+  sequence: true,
+  workId: true,
+});
+type HistoryMessage = z.infer<typeof historyReferenceSchema>;
+function mergeHistory(old: HistoryMessage[], incoming: HistoryMessage[]) {
+  const messages = new Map(old.map((message) => [message.id, message]));
+  for (const message of incoming) messages.set(message.id, message);
+  return [...messages.values()].sort((a, b) =>
+    BigInt(a.sequence) < BigInt(b.sequence)
+      ? -1
+      : BigInt(a.sequence) > BigInt(b.sequence)
+        ? 1
+        : 0,
+  );
+}
 
 export type RockyRequest = (path: string, body?: unknown) => Promise<unknown>;
 
@@ -18,17 +40,50 @@ export function useRockyProjection(request: RockyRequest) {
   const [connected, setConnected] = useState(false);
   const [connectionError, setConnectionError] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const [history, setHistory] = useState<HistoryMessage[]>([]);
+  const [historyCursor, setHistoryCursor] = useState<string | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState("");
+  const generation = useRef(0);
+  const loadEarlier = useCallback(async () => {
+    if (!historyCursor || historyLoading) return;
+    setHistoryLoading(true);
+    setHistoryError("");
+    const owner = generation.current;
+    try {
+      const page = conversationPageSchema.parse(
+        await request("/conversation/history?before=" + historyCursor),
+      );
+      if (owner !== generation.current) return;
+      setHistory((old) => mergeHistory(old, page.messages));
+      setHistoryCursor(page.nextCursor);
+    } catch (error) {
+      if (owner !== generation.current) return;
+      setHistoryError(error instanceof Error ? error.message : String(error));
+    } finally {
+      if (owner === generation.current) setHistoryLoading(false);
+    }
+  }, [request, historyCursor, historyLoading]);
   const reconnect = useCallback(() => setAttempt((old) => old + 1), []);
   useEffect(() => {
+    generation.current++;
+    setHistoryLoading(false);
     let disposed = false;
     let stream: EventSource | undefined;
     setConnected(false);
     void request("/snapshot")
-      .then((data) => {
+      .then(async (data) => {
         if (disposed) return;
         const snapshot = snapshotSchema.parse(data);
         setWorks(snapshot.works);
         setEvents(snapshot.events);
+        const page = conversationPageSchema.parse(
+          await request("/conversation/history"),
+        );
+        if (disposed) return;
+        setHistory((old) => mergeHistory(old, page.messages));
+        setHistoryCursor(page.nextCursor);
+        setHistoryError("");
         setConnectionError("");
         stream = new EventSource(
           API_PREFIX + "/events?after=" + snapshot.cursor,
@@ -45,6 +100,16 @@ export function useRockyProjection(request: RockyRequest) {
             const event = publicEventSchema.parse(JSON.parse(message.data));
             setEvents((old) => projectEvidence(old, event));
             setWorks((old) => projectWork(old, event));
+            if (
+              event.payload.kind === "domain" &&
+              event.payload.name === "rocky.work.updated" &&
+              event.payload.data.historyRefs !== undefined
+            ) {
+              const records = historyReferenceSchema
+                .array()
+                .parse(event.payload.data.historyRefs);
+              setHistory((old) => mergeHistory(old, records));
+            }
           } catch {
             setConnected(false);
             setConnectionError(
@@ -61,6 +126,7 @@ export function useRockyProjection(request: RockyRequest) {
           );
       });
     return () => {
+      generation.current++;
       disposed = true;
       stream?.close();
     };
@@ -84,7 +150,27 @@ export function useRockyProjection(request: RockyRequest) {
     }
     return result;
   }, [events]);
-  return { works, events, streams, connected, connectionError, reconnect };
+  const visibleWorks = useMemo(() => {
+    const visible = new Set(history.map((message) => message.workId));
+    return works.filter(
+      (work) =>
+        work.runMode === "normal" &&
+        (visible.has(work.id) ||
+          ["queued", "running", "waiting_approval"].includes(work.status)),
+    );
+  }, [works, history]);
+  return {
+    works: visibleWorks,
+    events,
+    streams,
+    connected,
+    connectionError,
+    reconnect,
+    historyCursor,
+    historyLoading,
+    historyError,
+    loadEarlier,
+  };
 }
 
 export function workCommands(request: RockyRequest) {
