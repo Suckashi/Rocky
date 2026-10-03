@@ -1022,6 +1022,27 @@
             "Stop/restart can leave prepared not_executed records pending historical review; they are not dispatch authority",
             "Backend-only change; no browser, live endpoint or remote action"
           ]
+        },
+        {
+          "commit": "0fc06a483967c637b6f128b0d946dc61e47bc1d5",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npx vitest run tests/operation-ledger.test.ts tests/stop.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/policy/undispatched-recovery.json",
+          "testFiles": [
+            "tests/operation-ledger.test.ts",
+            "tests/stop.test.ts",
+            "tests/persistence.test.ts"
+          ],
+          "limitations": [
+            "T-008 remains in_progress for generic grants/target recheck, unknown reconciliation and redaction",
+            "No dispatched or unknown effect is reclassified as not_executed",
+            "Recovery still blocks interrupted Work and never auto-replays tools",
+            "No browser/live/remote action; existing Ubuntu/browser egress gates unchanged"
+          ]
         }
       ],
       "blockedReason": null,

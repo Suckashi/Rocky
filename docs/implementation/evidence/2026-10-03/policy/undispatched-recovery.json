@@ -1,0 +1,51 @@
+{
+  "commit": "0fc06a483967c637b6f128b0d946dc61e47bc1d5",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+  "mode": "fixture",
+  "command": "npx vitest run tests/operation-ledger.test.ts tests/stop.test.ts",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-03/policy/undispatched-recovery.json",
+  "testFiles": [
+    "tests/operation-ledger.test.ts",
+    "tests/stop.test.ts",
+    "tests/persistence.test.ts"
+  ],
+  "limitations": [
+    "T-008 remains in_progress for generic grants/target recheck, unknown reconciliation and redaction",
+    "No dispatched or unknown effect is reclassified as not_executed",
+    "Recovery still blocks interrupted Work and never auto-replays tools",
+    "No browser/live/remote action; existing Ubuntu/browser egress gates unchanged"
+  ],
+  "recordedAt": "2026-10-03T06:08:45.675Z",
+  "task": "T-008",
+  "passed": 6,
+  "priorRegression": {
+    "command": "npx vitest run tests/stop.test.ts tests/operation-ledger.test.ts tests/persistence.test.ts",
+    "exitCode": 0,
+    "passed": 11
+  },
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npx tsc -p tsconfig.build.json",
+      "exitCode": 0
+    }
+  ],
+  "coverage": [
+    "Only matching Work/run/session prepared or authorized records settle not_executed",
+    "Stop receipt and Work projection commit with cleanup",
+    "Another Work remains prepared",
+    "Dispatched unknown remains unchanged",
+    "Reopened WorkService performs recovery without dispatch",
+    "Injected Work write failure rolls back operation changes and events"
+  ]
+}

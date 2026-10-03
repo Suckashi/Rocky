@@ -136,3 +136,9 @@ Implementation `65e58958f620db27208afd64cac1977f075341bb` resolves the native in
 Twelve focused native/configured/ledger/stop tests passed. Final six-test native/ledger verification includes rejection settlement and injected receipt failure rollback. Typecheck, lint and server build passed. See [prepared approval evidence](evidence/2026-10-03/policy/prepared-approval.json).
 
 T-008 remains in_progress for generic grants, target recheck, unknown reconciliation and redaction. Stop/restart cleanup of unused prepared records remains pending; not_executed records do not authorize dispatch. Goal active; no global acceptance or remote action claim.
+
+## T-008 continuation: stop/restart operation cleanup
+
+Implementation `0fc06a483967c637b6f128b0d946dc61e47bc1d5` atomically settles only matching Work/run/session undispatched prepared/authorized records as not_executed during stop or restart recovery. Work projection, event and stop receipt remain in the same transaction. Dispatched unknown records are preserved, interrupted Work remains blocked, and no adapter is replayed.
+
+Six final ledger/stop tests passed, including actual Store close → WorkService recovery and injected Work commit failure rollback. Eleven preceding ledger/stop/persistence regressions passed. Typecheck, lint and server build passed. See [undispatched recovery evidence](evidence/2026-10-03/policy/undispatched-recovery.json). T-008 continues with grants, target recheck, evidence-based unknown reconciliation and audit redaction. Goal active; external gates unchanged.
