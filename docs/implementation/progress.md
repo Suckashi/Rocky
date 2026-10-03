@@ -188,3 +188,11 @@ Implementation `50b00b8f2d612c0b79afdd9d654b929d5635ac2e` adds a bounded regular
 Three real filesystem fixture tests passed on Windows, including junction creation/replacement and hard links. Typecheck, server build, lint, formatting and source guards passed. See [file target evidence](evidence/2026-10-03/policy/file-target.json).
 
 This core is not yet a workspace registration/write flow, and does not eliminate external OS races after checking. Target leases/adapter integration and concrete reconciliation remain pending. T-008 and Goal stay active; no foreign repository or private data touched.
+
+## T-008 continuation: durable target execution claims
+
+Implementation `3af73a864efeedca6009a590e3b239c40fd9a82e` adds domain v9 canonical target claims. Dispatch acquires a unique target claim in the same transaction as the operation CAS and evidence event. Another Work cannot dispatch to an already claimed identity. Successful settlement releases the claim; unknown results retain it through restart until a known reconciliation outcome commits. Prepared/authorized records hold no execution claim.
+
+Full Windows regression passed: 84 tests across 24 files, including restart, cross-Work exclusion, unknown observation retention and known-result release. Typecheck, server build, lint, formatting and source guards passed. See [target claim evidence](evidence/2026-10-03/policy/target-claims.json).
+
+These are daemon database claims, not OS locks. Synthetic broker identity is scoped per run; shared target exclusion uses an explicit synthetic identity in tests. Real workspace integration and concrete reconciliation API/UI remain pending. Historical records without target identity are not assigned inferred claims. T-008 and Goal remain active; no live/remote action or global acceptance promotion.

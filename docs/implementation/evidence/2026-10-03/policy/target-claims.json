@@ -1,0 +1,55 @@
+{
+  "commit": "3af73a864efeedca6009a590e3b239c40fd9a82e",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+  "mode": "fixture",
+  "command": "npm test",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-03/policy/target-claims.json",
+  "testFiles": [
+    "tests/operation-ledger.test.ts",
+    "tests/operation-reconciler.test.ts",
+    "tests/runtime.test.ts"
+  ],
+  "limitations": [
+    "Daemon database claims are not OS locks; real workspace adapter integration remains pending",
+    "Synthetic broker uses per-run target identity; cross-Work exclusion tested with explicit shared synthetic identity",
+    "Historical operations without canonical target identity are not assigned inferred claims",
+    "Concrete remote status adapters and owner reconciliation UI remain pending",
+    "Ubuntu and strict browser egress unverified; no live or remote action; global AT unchanged"
+  ],
+  "recordedAt": "2026-10-03T06:45:08.751Z",
+  "task": "T-008",
+  "passed": 84,
+  "testFileCount": 24,
+  "checks": [
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npx tsc -p tsconfig.build.json",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run format:check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:secrets",
+      "exitCode": 0
+    }
+  ],
+  "coverage": [
+    "Atomic dispatch claim and ledger CAS",
+    "Other Work denied while same target is active or unknown",
+    "Claim persists through Store restart",
+    "Unknown observation retains claim; known reconciliation releases atomically",
+    "Successful operation releases owned claim"
+  ]
+}

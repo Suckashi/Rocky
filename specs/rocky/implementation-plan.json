@@ -1175,6 +1175,28 @@
             "Only Windows local synthetic temp files tested; Ubuntu not run",
             "T-008 remains in_progress; no live/remote action or global AT promotion"
           ]
+        },
+        {
+          "commit": "3af73a864efeedca6009a590e3b239c40fd9a82e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/policy/target-claims.json",
+          "testFiles": [
+            "tests/operation-ledger.test.ts",
+            "tests/operation-reconciler.test.ts",
+            "tests/runtime.test.ts"
+          ],
+          "limitations": [
+            "Daemon database claims are not OS locks; real workspace adapter integration remains pending",
+            "Synthetic broker uses per-run target identity; cross-Work exclusion tested with explicit shared synthetic identity",
+            "Historical operations without canonical target identity are not assigned inferred claims",
+            "Concrete remote status adapters and owner reconciliation UI remain pending",
+            "Ubuntu and strict browser egress unverified; no live or remote action; global AT unchanged"
+          ]
         }
       ],
       "blockedReason": null,
