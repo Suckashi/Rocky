@@ -1654,6 +1654,29 @@
             "No new upstream visual comparison; browser regression covers current streaming/stop/read-history behavior",
             "No remote actions"
           ]
+        },
+        {
+          "commit": "7a6a98e",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "8f6dea9c1cb55981c6c865e2a38331de86c68afc968aeaa26e7ce6515406b68e",
+          "mode": "fixture",
+          "command": "npm run check; npm run lint; npm run build; npm test; focused native compaction; selected Playwright (initial failure corrected)",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/native-compaction.json",
+          "testFiles": [
+            "tests/native-compaction.test.ts",
+            "tests/inbox.test.ts",
+            "tests/e2e/streaming.spec.ts",
+            "tests/e2e/configured-work.spec.ts"
+          ],
+          "limitations": [
+            "Windows local scripted provider only; no paid/live semantic summary quality or Ubuntu claim",
+            "Child-agent compaction and complete recovery/power-loss matrix not yet covered",
+            "Large summary/target responses and tool results still need bounded result transport",
+            "No new OpenDots pixel comparison; existing UI flows were regression-tested",
+            "T-011 stays in_progress; all global AT remain not_run; no remote actions"
+          ]
         }
       ],
       "blockedReason": null,
@@ -4055,7 +4078,7 @@
     "remoteStatus": "not_created",
     "visibility": null,
     "creationRequiresSeparateAuthorization": true,
-    "implementationCommit": "a2d2ef1",
+    "implementationCommit": "7a6a98e",
     "strategy": "greenfield_no_fork_no_imported_git_history"
   },
   "referenceRepositories": [
