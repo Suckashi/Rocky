@@ -13,7 +13,21 @@ server.setRequestHandler(ListToolsRequestSchema, async (request) => {
     tools: [
       {
         name: request.params?.cursor ? "second_tool" : "first_tool",
-        inputSchema: { type: "object", properties: {} },
+        inputSchema:
+          mode === "unsafe-input"
+            ? {
+                type: "object",
+                properties: { value: { type: "string", pattern: "(a+)+$" } },
+              }
+            : { type: "object", properties: {} },
+        ...(mode === "unsafe-output"
+          ? {
+              outputSchema: {
+                type: "object",
+                $ref: "https://unconfigured.invalid/schema",
+              },
+            }
+          : {}),
       },
     ],
     ...(request.params?.cursor

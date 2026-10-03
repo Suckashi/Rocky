@@ -21,6 +21,7 @@ import type { McpRegistry } from "./mcp-registry.js";
 import { intentHash } from "./intent.js";
 import { StringDecoder } from "node:string_decoder";
 import { UnauthorizedError } from "@modelcontextprotocol/sdk/client/auth.js";
+import { McpSchemaValidator, mcpToolIdentity } from "./mcp-schema.js";
 type Connection = {
   client: Client;
   transport: Transport;
@@ -34,12 +35,15 @@ type Connection = {
 };
 export class McpManager {
   private failureMessage(error: unknown) {
-    return error instanceof UnauthorizedError
-      ? "MCP authorization unavailable; interactive OAuth is unsupported"
-      : error instanceof Error &&
-          /^MCP (discovery|duplicate)/.test(error.message)
-        ? error.message
-        : "MCP protocol/transport connection failed";
+    return error instanceof RockyError &&
+      error.code === "mcp_schema_unsupported"
+      ? error.message
+      : error instanceof UnauthorizedError
+        ? "MCP authorization unavailable; interactive OAuth is unsupported"
+        : error instanceof Error &&
+            /^MCP (discovery|duplicate)/.test(error.message)
+          ? error.message
+          : "MCP protocol/transport connection failed";
   }
   private active = new Map<string, Connection>();
   private closed = false;
@@ -174,7 +178,7 @@ export class McpManager {
     }
     const client = new Client(
         { name: "rocky-mcp-client", version: "1.0.0" },
-        { capabilities: {} },
+        { capabilities: {}, jsonSchemaValidator: new McpSchemaValidator() },
       ),
       abort = new AbortController();
     const state = mcpStateSchema.parse({
@@ -368,6 +372,17 @@ export class McpManager {
         if (cursor) throw Error("MCP discovery page limit exceeded");
         if (new Set(tools.map((tool) => tool.name)).size !== tools.length)
           throw Error("MCP duplicate tool names");
+        for (const tool of tools) {
+          new McpSchemaValidator().getValidator(tool.inputSchema);
+          if (tool.outputSchema)
+            new McpSchemaValidator().getValidator(tool.outputSchema);
+          mcpToolIdentity(
+            id,
+            state.configRevision,
+            state.registryRevision + 1,
+            tool,
+          );
+        }
         this.assertCurrent(id, connection);
         state.registryRevision++;
         state.toolsCount = tools.length;
@@ -470,6 +485,35 @@ export class McpManager {
       .prepare("SELECT data FROM mcp_catalog WHERE server_id=?")
       .get(id) as { data: string };
     return JSON.parse(row.data) as Tool[];
+  }
+  /** Validate before preparing any operation; this method never dispatches a tool. */
+  prepareTool(id: string, revision: number, name: string, args: unknown) {
+    const tool = this.catalog(id, revision).find((tool) => tool.name === name);
+    if (!tool)
+      throw new RockyError(
+        "mcp_tool_not_found",
+        "MCP tool is not in the current registry",
+        404,
+      );
+    const validated = new McpSchemaValidator().getValidator(tool.inputSchema)(
+      args,
+    );
+    if (!validated.valid)
+      throw new RockyError(
+        "mcp_arguments_invalid",
+        "MCP arguments do not match the original schema",
+        400,
+      );
+    return {
+      identity: mcpToolIdentity(
+        id,
+        this.registry.snapshot().revision,
+        revision,
+        tool,
+      ),
+      tool,
+      args: validated.data,
+    };
   }
   async close() {
     this.closed = true;

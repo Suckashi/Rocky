@@ -132,75 +132,87 @@ test("configured HTTP redirect cannot forward credentials or initialize an uncon
     rmSync(root, { recursive: true, force: true });
   }
 });
-test.each(["pages", "repeat", "diagnostics", "overflow"])(
-  "bounded actual stdio discovery/diagnostics: %s",
-  async (mode) => {
-    const root = mkdtempSync(join(tmpdir(), "rocky-mcp-pages-")),
-      store = new Store(root),
-      registry = new McpRegistry(store, {
-        ...process.env,
-        ROCKY_TEST_SERVER_TOKEN: "synthetic-split-credential",
-      }),
-      manager = new McpManager(store, registry);
-    try {
-      registry.save({
-        requestId: randomUUID(),
-        expectedRevision: 0,
-        config: {
-          mcpServers: {
-            tools: {
-              command: process.execPath,
-              args: [
-                "--import",
-                "tsx",
-                resolve("fixtures/mcp/lifecycle-server.ts"),
-                mode,
-              ],
-              cwd: process.cwd(),
-              enabled: true,
-            },
+test.each([
+  "pages",
+  "repeat",
+  "diagnostics",
+  "overflow",
+  "unsafe-input",
+  "unsafe-output",
+])("bounded actual stdio discovery/diagnostics: %s", async (mode) => {
+  const root = mkdtempSync(join(tmpdir(), "rocky-mcp-pages-")),
+    store = new Store(root),
+    registry = new McpRegistry(store, {
+      ...process.env,
+      ROCKY_TEST_SERVER_TOKEN: "synthetic-split-credential",
+    }),
+    manager = new McpManager(store, registry);
+  try {
+    registry.save({
+      requestId: randomUUID(),
+      expectedRevision: 0,
+      config: {
+        mcpServers: {
+          tools: {
+            command: process.execPath,
+            args: [
+              "--import",
+              "tsx",
+              resolve("fixtures/mcp/lifecycle-server.ts"),
+              mode,
+            ],
+            cwd: process.cwd(),
+            enabled: true,
           },
-          "x-rocky": {
-            version: 1,
-            servers: {
-              tools: {
-                transport: "stdio",
-                envRefs: { SERVER_TOKEN: "ROCKY_TEST_SERVER_TOKEN" },
-                startupTimeoutMs: 3000,
-              },
+        },
+        "x-rocky": {
+          version: 1,
+          servers: {
+            tools: {
+              transport: "stdio",
+              envRefs: { SERVER_TOKEN: "ROCKY_TEST_SERVER_TOKEN" },
+              startupTimeoutMs: 3000,
             },
           },
         },
-      });
-      const result = await manager.connect("tools", command());
-      if (mode === "repeat" || mode === "overflow") {
-        expect(result?.status).toBe("failed");
-        expect(result?.toolsCount).toBe(0);
-        expect(result?.error).toContain(
-          mode === "repeat" ? "cursor repeated" : "stderr limit",
-        );
-      } else {
-        expect(result?.status, JSON.stringify(result)).toBe("ready");
-        expect(result?.toolsCount).toBe(2);
-        expect(
-          manager.catalog("tools", result!.registryRevision).map((t) => t.name),
-        ).toEqual(["first_tool", "second_tool"]);
-      }
-      await manager.stop("tools", command());
-      if (mode === "diagnostics") {
-        const diagnostics = manager.list()[0]!.diagnostics.join("");
-        expect(diagnostics).toContain("[REDACTED]");
-        expect(diagnostics).not.toContain("synthetic-split-credential");
-        expect(diagnostics).toContain('"profile":""');
-        expect(diagnostics).toContain('"unrelated":""');
-      }
-    } finally {
-      await manager.close();
-      store.close();
-      rmSync(root, { recursive: true, force: true });
+      },
+    });
+    const result = await manager.connect("tools", command());
+    if (
+      mode === "repeat" ||
+      mode === "overflow" ||
+      mode.startsWith("unsafe-")
+    ) {
+      expect(result?.status).toBe("failed");
+      expect(result?.toolsCount).toBe(0);
+      expect(result?.error).toContain(
+        mode === "repeat"
+          ? "cursor repeated"
+          : mode === "overflow"
+            ? "stderr limit"
+            : "schema is invalid or unsupported",
+      );
+    } else {
+      expect(result?.status, JSON.stringify(result)).toBe("ready");
+      expect(result?.toolsCount).toBe(2);
+      expect(
+        manager.catalog("tools", result!.registryRevision).map((t) => t.name),
+      ).toEqual(["first_tool", "second_tool"]);
     }
-  },
-);
+    await manager.stop("tools", command());
+    if (mode === "diagnostics") {
+      const diagnostics = manager.list()[0]!.diagnostics.join("");
+      expect(diagnostics).toContain("[REDACTED]");
+      expect(diagnostics).not.toContain("synthetic-split-credential");
+      expect(diagnostics).toContain('"profile":""');
+      expect(diagnostics).toContain('"unrelated":""');
+    }
+  } finally {
+    await manager.close();
+    store.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 test.each(["stdio", "http"] as const)(
   "configured official MCP lifecycle lists actual tools and stops without replay: %s",
   async (kind) => {
@@ -252,6 +264,33 @@ test.each(["stdio", "http"] as const)(
         manager.catalog("tools", ready!.registryRevision).map((t) => t.name),
       ).toEqual(["inspect_sample", "write_sample"]);
       const pid = ready?.pid;
+      const prepared = manager.prepareTool(
+        "tools",
+        ready!.registryRevision,
+        "inspect_sample",
+        { label: "actual validation" },
+      );
+      expect(prepared.identity.effect).toBe("unknown");
+      expect(prepared.args).toEqual({ label: "actual validation" });
+      expect(() =>
+        manager.prepareTool(
+          "tools",
+          ready!.registryRevision,
+          "inspect_sample",
+          { label: 2 },
+        ),
+      ).toThrow("original schema");
+      expect(() =>
+        manager.prepareTool("tools", ready!.registryRevision, "missing", {}),
+      ).toThrow("current registry");
+      expect(() =>
+        manager.prepareTool(
+          "tools",
+          ready!.registryRevision + 1,
+          "inspect_sample",
+          { label: "x" },
+        ),
+      ).toThrow("registry changed");
       if (kind === "stdio") expect(pid).toBeGreaterThan(0);
       expect((await manager.connect("tools", input))?.registryRevision).toBe(
         ready?.registryRevision,
@@ -264,6 +303,14 @@ test.each(["stdio", "http"] as const)(
       expect(() => manager.catalog("tools", ready!.registryRevision)).toThrow(
         "not ready",
       );
+      expect(() =>
+        manager.prepareTool(
+          "tools",
+          ready!.registryRevision,
+          "inspect_sample",
+          { label: "x" },
+        ),
+      ).toThrow("not ready");
       if (pid)
         await expect
           .poll(
