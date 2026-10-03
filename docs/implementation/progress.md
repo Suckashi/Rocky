@@ -259,3 +259,11 @@ Implementation `deeae5c2c04501d902560d5a2a8b54f0c967e6ab` records main/backgroun
 The full Windows suite passed: 98 tests in 27 files. New integration tests cover four distinct sessions, main availability alongside two backgrounds, queued zero-call/zero-worker state, slot release, immutable kind and queued restart. Typecheck, build, lint, formatting, docs and source guards passed. Eight browser flows passed before the final backend-only queued-recovery change. See [admission evidence](evidence/2026-10-03/work/admission.json).
 
 T-010 remains `in_progress`: workspace reservation, a global model-call semaphore, configurable capacity bounds, Learning priority and complete setting/workspace snapshots are still required. The restart test uses an isolated seeded crash boundary rather than a power-loss test. Ubuntu and strict browser egress are still open; no global AT or remote action was claimed.
+
+## T-010 continuation: global model dispatch slots
+
+Implementation `55529d702acc3f09d5036a650cdc6b814fb59c54` adds one daemon-wide bounded model semaphore for configured and fixture Work. Waiting requests hold no model slot; cancellation removes their waiter. At a free dispatch boundary, main requests take priority over background, which takes priority over evaluation. An already-sent provider call is not forcibly preempted. The worker-to-daemon model RPC combines Work and request cancellation before acquiring a slot, and configured requests carry that signal into the provider adapter.
+
+The full Windows suite passed: 101 tests in 28 files, plus typecheck, production build, lint and formatting. Unit tests verify ordering and waiter cancellation. An integrated held-provider test confirms that two background calls occupy the slots, a main call remains unsent, and stopping a background Work lets the main request dispatch. See [model slot evidence](evidence/2026-10-03/work/model-slots.json).
+
+T-010 remains `in_progress` for workspace reservation, configurable slot bounds, wall time and complete setting/workspace snapshots. These slots are per-daemon, not provider-enforced or an OS resource limit. Ubuntu and strict browser egress are unverified; global acceptance remains unchanged.

@@ -1433,6 +1433,26 @@
             "Ubuntu and strict browser egress unverified; global AT unchanged",
             "No live paid model or remote action"
           ]
+        },
+        {
+          "commit": "55529d702acc3f09d5036a650cdc6b814fb59c54",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/work/model-slots.json",
+          "testFiles": [
+            "tests/model-slots.test.ts",
+            "tests/admission.test.ts",
+            "tests/configured-work.test.ts"
+          ],
+          "limitations": [
+            "Per-daemon model semaphore and priority proven; no distributed or provider-enforced quota",
+            "Workspace reservation, configurable bounds and full setting snapshots remain pending; T-010 in_progress",
+            "Ubuntu and strict browser egress not verified; no global AT promotion"
+          ]
         }
       ],
       "blockedReason": null,
