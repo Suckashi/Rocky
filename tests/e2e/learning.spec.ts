@@ -205,6 +205,13 @@ test("work Learning consent defaults excluded, saves review consent and withdraw
     await expect(episodeCard).toHaveCount(1);
     await episodeCard.getByText("檢視摘要內容", { exact: true }).click();
     await expect(episodeCard).toContainText("Observed plan update");
+    await expect(
+      episodeCard.getByRole("button", { name: "核准這份摘要" }),
+    ).toBeDisabled();
+    await episodeCard.getByLabel("我已審查這份摘要及來源").check();
+    await episodeCard.getByRole("button", { name: "核准這份摘要" }).click();
+    await expect(episodeCard).toContainText("已核准摘要，尚未反思");
+
     await page.setViewportSize({ width: 320, height: 844 });
     await episodeCard.scrollIntoViewIfNeeded();
     expect(

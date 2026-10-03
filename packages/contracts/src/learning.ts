@@ -66,3 +66,10 @@ export const learningEpisodeCommandSchema = z.strictObject({
   preconditions: z.array(z.string().max(2000)).max(10),
   evidenceEventIds: z.array(z.uuid()).min(1).max(30),
 });
+
+export const learningEpisodeReviewSchema = z.strictObject({
+  requestId: z.uuid(),
+  expectedRevision: z.number().int().positive(),
+  contentHash: z.string().regex(/^[a-f0-9]{64}$/),
+  decision: z.enum(["approve", "reject"]),
+});

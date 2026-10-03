@@ -4,6 +4,7 @@ import {
   learningWorkConsentSchema,
   learningWorkConsentCommandSchema,
   learningEpisodeCommandSchema,
+  learningEpisodeReviewSchema,
 } from "../../../packages/contracts/src/learning.js";
 import { RockyError } from "../../../packages/contracts/src/index.js";
 import { intentHash } from "./intent.js";
@@ -187,7 +188,7 @@ export class LearningRegistry {
           hash,
           JSON.stringify(episode),
         );
-      return episode;
+      return this.episode(episode.id);
     });
   }
   episode(id: string) {
@@ -196,7 +197,11 @@ export class LearningRegistry {
       .get(id) as { data: string } | undefined;
     if (!row)
       throw new RockyError("not_found", "Learning episode not found", 404);
-    const value = JSON.parse(row.data) as { workId: string; status: string };
+    const value = JSON.parse(row.data) as Record<string, unknown> & {
+      workId: string;
+      status: string;
+      revision?: number;
+    };
     this.assertSourceAllowed(value.workId, "manual");
     if (value.status === "withdrawn")
       throw new RockyError(
@@ -204,7 +209,72 @@ export class LearningRegistry {
         "Learning episode was withdrawn and its summary removed",
         410,
       );
-    return this.store.publicEvidence(value);
+    const safe = this.store.publicEvidence(value) as typeof value;
+    return {
+      ...safe,
+      id,
+      revision: safe.revision ?? 1,
+      contentHash: intentHash({
+        id,
+        workId: safe.workId,
+        sourceRunId: safe.sourceRunId,
+        terminalBoundarySequence: safe.terminalBoundarySequence,
+        learningPolicyRevision: safe.learningPolicyRevision,
+        consentRevision: safe.consentRevision,
+        summary: safe.summary,
+        evidence: safe.evidence,
+      }),
+    };
+  }
+  reviewEpisode(id: string, input: unknown) {
+    const command = learningEpisodeReviewSchema.parse(input),
+      hash = intentHash({ id, ...command });
+    return this.store.transaction(() => {
+      const prior = this.store.db
+        .prepare(
+          "SELECT intent,result FROM learning_review_receipts WHERE request_id=?",
+        )
+        .get(command.requestId) as
+        { intent: string; result: string } | undefined;
+      if (prior) {
+        if (prior.intent !== hash)
+          throw new RockyError(
+            "idempotency_conflict",
+            "Episode review request changed",
+            409,
+          );
+        return JSON.parse(prior.result);
+      }
+      const view = this.episode(id);
+      if (
+        view.revision !== command.expectedRevision ||
+        view.contentHash !== command.contentHash ||
+        view.status !== "pending_review"
+      )
+        throw new RockyError(
+          "learning_review_stale",
+          "Episode review content or status changed",
+          409,
+        );
+      const row = this.store.db
+        .prepare("SELECT data FROM learning_episodes WHERE id=?")
+        .get(id) as { data: string };
+      const data = JSON.parse(row.data) as Record<string, unknown>;
+      const result = {
+        id,
+        revision: view.revision + 1,
+        status: command.decision === "approve" ? "approved" : "rejected",
+        reviewedHash: view.contentHash,
+        reviewedAt: new Date().toISOString(),
+      };
+      this.store.db
+        .prepare("UPDATE learning_episodes SET data=? WHERE id=?")
+        .run(JSON.stringify({ ...data, ...result }), id);
+      this.store.db
+        .prepare("INSERT INTO learning_review_receipts VALUES(?,?,?)")
+        .run(command.requestId, hash, JSON.stringify(result));
+      return result;
+    });
   }
   workConsent(workId: string) {
     this.store.get(workId);

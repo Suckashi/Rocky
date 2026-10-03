@@ -289,6 +289,11 @@ export function createApp(service: WorkService) {
   app.post("/api/v1/learning/episodes", async (c) =>
     c.json(service.learning.createEpisode(await readJson(c))),
   );
+  app.post("/api/v1/learning/episodes/:id/review", async (c) =>
+    c.json(
+      service.learning.reviewEpisode(c.req.param("id"), await readJson(c)),
+    ),
+  );
   app.get("/api/v1/learning/episodes/:id", (c) =>
     c.json(service.learning.episode(c.req.param("id"))),
   );

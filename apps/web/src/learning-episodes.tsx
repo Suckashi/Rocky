@@ -4,9 +4,11 @@ const schema = z.object({
   items: z.array(
     z.object({
       id: z.uuid(),
+      revision: z.number(),
+      contentHash: z.string(),
       workId: z.uuid(),
       createdAt: z.string(),
-      status: z.literal("pending_review"),
+      status: z.enum(["pending_review", "approved", "rejected"]),
       summary: z.object({
         goal: z.string(),
         constraints: z.array(z.string()),
@@ -31,6 +33,8 @@ export function LearningEpisodes({
 }) {
   const zh = locale === "zh",
     alive = useRef(true);
+  const intent = useRef({ key: "", id: "" });
+  const [ack, setAck] = useState<string[]>([]);
   const [value, setValue] = useState<z.infer<typeof schema>>(),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -44,6 +48,7 @@ export function LearningEpisodes({
     setBusy(true);
     setError("");
     setValue(undefined);
+    setAck([]);
     try {
       const result = schema.parse(
         await request(
@@ -52,6 +57,32 @@ export function LearningEpisodes({
         ),
       );
       if (alive.current) setValue(result);
+    } catch (e) {
+      if (alive.current) setError(String(e));
+    } finally {
+      if (alive.current) setBusy(false);
+    }
+  }
+  async function decide(
+    item: z.infer<typeof schema>["items"][number],
+    decision: "approve" | "reject",
+  ) {
+    setBusy(true);
+    setError("");
+    try {
+      const body = {
+          expectedRevision: item.revision,
+          contentHash: item.contentHash,
+          decision,
+        },
+        key = JSON.stringify([item.id, body]);
+      if (intent.current.key !== key)
+        intent.current = { key, id: crypto.randomUUID() };
+      await request(`/learning/episodes/${item.id}/review`, {
+        ...body,
+        requestId: intent.current.id,
+      });
+      if (alive.current) await load();
     } catch (e) {
       if (alive.current) setError(String(e));
     } finally {
@@ -83,7 +114,18 @@ export function LearningEpisodes({
         <article key={item.id} className="model-card">
           <strong>{item.summary.goal}</strong>
           <p>
-            {zh ? "待審查" : "Pending review"} · {item.createdAt}
+            {item.status === "approved"
+              ? zh
+                ? "已核准摘要，尚未反思"
+                : "Summary approved, reflection not started"
+              : item.status === "rejected"
+                ? zh
+                  ? "已拒絕"
+                  : "Rejected"
+                : zh
+                  ? "待審查"
+                  : "Pending review"}{" "}
+            · {item.createdAt}
           </p>
           <details>
             <summary>{zh ? "檢視摘要內容" : "View summary"}</summary>
@@ -129,6 +171,46 @@ export function LearningEpisodes({
                 </p>
               ))}
             </details>
+            {item.status === "pending_review" && (
+              <>
+                <p>
+                  {zh
+                    ? "核准僅允許此摘要供後續反思使用，不代表驗證成功或授權發布技能。"
+                    : "Approval permits this summary for future reflection only, not a verified outcome or skill publication."}
+                </p>
+                <label>
+                  <input
+                    type="checkbox"
+                    disabled={busy}
+                    checked={ack.includes(item.id)}
+                    onChange={(e) =>
+                      setAck((old) =>
+                        e.target.checked
+                          ? [...old, item.id]
+                          : old.filter((id) => id !== item.id),
+                      )
+                    }
+                  />
+                  {zh
+                    ? "我已審查這份摘要及來源"
+                    : "I reviewed this summary and its sources"}
+                </label>
+                <div className="actions">
+                  <button
+                    disabled={busy || !ack.includes(item.id)}
+                    onClick={() => void decide(item, "approve")}
+                  >
+                    {zh ? "核准這份摘要" : "Approve this summary"}
+                  </button>
+                  <button
+                    disabled={busy}
+                    onClick={() => void decide(item, "reject")}
+                  >
+                    {zh ? "拒絕這份摘要" : "Reject this summary"}
+                  </button>
+                </div>
+              </>
+            )}
           </details>
         </article>
       ))}
