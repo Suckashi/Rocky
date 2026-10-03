@@ -16,6 +16,7 @@ import {
 import { Store } from "./store.js";
 import { ModelRegistry } from "./model-registry.js";
 import { ModelBudgetLedger } from "./model-budget.js";
+import { intentHash } from "./intent.js";
 import { startModelFixture } from "../../../fixtures/models/server.js";
 const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -252,7 +253,7 @@ export class WorkService {
                 current.modelSelection.revision,
               );
             const identity = work.runId + ":" + callId,
-              argsHash = hash({ name, args });
+              argsHash = intentHash({ name, args });
             const existing = this.store.db
               .prepare("SELECT * FROM operations WHERE id=?")
               .get(identity) as
@@ -350,9 +351,10 @@ export class WorkService {
     }
   }
   private fingerprint(work: Work, tool: string, args: Record<string, unknown>) {
-    return hash({
+    return intentHash({
       workId: work.id,
       runId: work.runId,
+      executionSessionId: work.executionSessionId,
       tool,
       args,
       transport: work.transport,
