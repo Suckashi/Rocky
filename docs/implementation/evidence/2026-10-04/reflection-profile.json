@@ -1,0 +1,34 @@
+{
+  "commit": "2c18dc9dc40267bfb987c46d7d60eb10edca5284",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/reflection-profile.test.ts tests/scratch-runtime.test.ts; npm run check; scoped eslint reflection contracts/profile/factory/tests; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/reflection-profile.json",
+  "testFiles": [
+    "tests/reflection-profile.test.ts",
+    "tests/scratch-runtime.test.ts"
+  ],
+  "tests": 9,
+  "seconds": 1.64,
+  "repairs": [
+    "Test spy typing fixed to accept named hooks",
+    "Existing scratch tests updated to acknowledge previously added read-only rocky_skill_check; all other unexpected effect calls still throw"
+  ],
+  "limitations": [
+    "Restricted native factory profile only; worker IPC/daemon authority port, budgets and reflection scheduling are not yet connected",
+    "Candidate tool schemas support structured draft/typed partial patch only; daemon materialization/proposal persistence/evaluation still unfinished",
+    "Delegation and filesystem access denied for this initial profile; optional restricted child analysis/private scratch support not implemented",
+    "Tests invoke actual Deep Agents graph with local deterministic model/hooks, not worker isolation or live provider evidence",
+    "No UI/browser/Ubuntu/global AT completion claim"
+  ],
+  "assertions": [
+    "Same createRockyAgent entry and Deep Agents runtime accept exact episode ID/revision/hash profile",
+    "Only read_learning_episode/list_allowed_skills/read_skill_revision/propose_skill_create/propose_skill_patch/mark_no_learning port tools offered",
+    "Before model/tool steps invoke dedicated daemon authority check; normal skill sources/fixture composition rejected",
+    "Actual native read-episode then no-learning graph completes through bound restricted port",
+    "Malicious write_file/task/mcp_call/memory_write attempts fail without authority tool dispatch",
+    "Existing scratch isolation/path guard regression passes"
+  ]
+}
