@@ -976,6 +976,30 @@
             "Existing interrupted work remains blocked on restart; no old approval or mutation replay",
             "No live calls, remote actions, browser changes or global AT promotion"
           ]
+        },
+        {
+          "commit": "ed6642bfcef19a2f2fa5259b872a5bdde65fd3cb",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "d90798fe96f8deb8d5fdd8e1393ac8173113afffa571cf643102dc967b90cdea",
+          "mode": "fixture",
+          "command": "npm test",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-03/policy/ledger.json",
+          "testFiles": [
+            "tests/operation-ledger.test.ts",
+            "tests/runtime.test.ts",
+            "tests/configured-work.test.ts",
+            "tests/persistence.test.ts",
+            "tests/stop.test.ts"
+          ],
+          "limitations": [
+            "T-008 remains in_progress for generic grants, target revision recheck, unknown reconciliation and audit redaction",
+            "Prepared currently begins at daemon tool dispatch boundary after native graph approval; pre-approval preparation remains pending",
+            "Only synthetic tool adapters integrated; no production side-effect authority claimed",
+            "Historical Rocky v4 operations keep null context and cannot gain new execution authority",
+            "No browser changes/live calls/remote actions; Ubuntu and strict browser egress gates unchanged"
+          ]
         }
       ],
       "blockedReason": null,

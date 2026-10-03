@@ -120,3 +120,11 @@ This is intentionally recorded as partial DNS evidence: pins do not persist acro
 Implementation `1b2f623c72d84ae89916124d935082b00b1cf778` establishes bounded canonical JSON intent and a versioned SHA-256 domain. Existing synthetic operation arguments and approval fingerprints use it; approvals also bind executionSessionId. Object insertion order cannot change meaning, while array order and typed values remain exact. Invalid/coercible inputs fail without executing getters or toJSON hooks. Serialized size, node count and nesting are bounded.
 
 Nine focused intent/native/configured Work tests passed; after tightening incremental size accounting, five intent/native tests passed again. Typecheck, lint and server build passed. See [intent evidence](evidence/2026-10-03/policy/intent.json). T-008 is in_progress, not complete: server-owned target resolution, full phases/effect outcomes, grants, reconciliation and redaction remain. T-007 remains independently in_progress. Goal active; no global AT promotion or remote action.
+
+## T-008 continuation: operation phases and effects
+
+Implementation `ed6642bfcef19a2f2fa5259b872a5bdde65fd3cb` upgrades Rocky domain storage to v5 and adds a daemon-owned OperationLedger. Synthetic tools now persist prepared → authorized → dispatched → settled with separate effect outcome. Dispatch records unknown before I/O; errors settle unknown rather than infer no effect. Revision/phase/context CAS and atomic events guard transitions. Work/session and current running status are rechecked before dispatch. Successful cached results return without another call.
+
+68 tests across 19 files and four full Agent evaluation cases passed. A final six-test ledger/native suite passed after preserving existing destination/result event evidence. Typecheck, server build, lint, format and source guards passed. Migration tests preserve v4 success/unknown with null historical context instead of invented ownership. See [ledger evidence](evidence/2026-10-03/policy/ledger.json).
+
+T-008 remains in_progress: preparation before native approval, generic grants/target revisions, reconciliation and audit redaction are still pending. The ledger currently guards synthetic adapters. No new live/remote action or global acceptance claim; Goal active.
