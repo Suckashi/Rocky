@@ -1,3 +1,4 @@
+import { LearningDraft } from "./learning-draft.js";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import {
@@ -243,10 +244,13 @@ export function LearningReflection({
                 ? "候選已保存，評測與發布流程尚未完成。"
                 : "Draft saved; evaluation and publication pipeline remains unfinished."}
           </p>
+          <LearningDraft
+            kind={output.kind}
+            payload={output.payload}
+            locale={locale}
+          />
           <details>
-            <summary>
-              {zh ? "候選資料與證據" : "Draft data and evidence"}
-            </summary>
+            <summary>{zh ? "原始候選資料" : "Raw draft data"}</summary>
             <pre>{JSON.stringify(output.payload, null, 2)}</pre>
           </details>
         </section>

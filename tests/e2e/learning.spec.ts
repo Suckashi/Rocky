@@ -384,3 +384,146 @@ test("explicit UI fixture renders renewed-review state and sends the new exact h
   await approve.click();
   await expect(card).toContainText("已核准摘要");
 });
+
+test("explicit UI fixture reads created and patched candidates without exposing raw JSON first", async ({
+  page,
+}) => {
+  const episodeId = randomUUID(),
+    workId = randomUUID(),
+    runId = randomUUID(),
+    hash = "c".repeat(64),
+    evidenceId = randomUUID();
+  const work = {
+    id: workId,
+    runId,
+    executionSessionId: randomUUID(),
+    requestId: randomUUID(),
+    text: "Reflection UI fixture",
+    transport: "http",
+    mode: "configured",
+    modelSelection: { connectionId: randomUUID(), revision: 1 },
+    runMode: "reflection",
+    reflection: { episodeId, episodeRevision: 2, episodeHash: hash },
+    status: "completed",
+    revision: 3,
+    answer: "Fixture only",
+    createdAt: "2026-10-04T00:00:00Z",
+  };
+  const draft = {
+    name: "verify-local-result",
+    description: "Read and verify local results",
+    goal: "Preserve actual evidence",
+    preconditions: ["Configured local fixture"],
+    triggers: ["Repeated verified task"],
+    steps: ["Read the result", "Compare observed output"],
+    stopConditions: ["Stop if uncertain"],
+    verification: ["Check immutable output hash"],
+    requiredCapabilities: ["Read source only"],
+    knownLimitations: ["Windows fixture only"],
+    evidenceRefs: [evidenceId],
+  };
+  await page.route("**/api/v1/learning/episodes", (route) =>
+    route.fulfill({
+      json: {
+        items: [
+          {
+            id: episodeId,
+            workId: randomUUID(),
+            revision: 2,
+            contentHash: hash,
+            createdAt: work.createdAt,
+            status: "approved",
+            summary: {
+              goal: "Candidate presentation fixture",
+              constraints: [],
+              corrections: [],
+              verification: [],
+              failuresAndRepairs: [],
+              preconditions: [],
+            },
+            evidence: [],
+          },
+        ],
+        nextCursor: null,
+      },
+    }),
+  );
+  await page.route("**/api/v1/works", (route) =>
+    route.fulfill({ json: { works: [work] } }),
+  );
+  await page.route(`**/api/v1/works/${workId}`, (route) =>
+    route.fulfill({ json: work }),
+  );
+  await page.route(
+    `**/api/v1/learning/reflections/${workId}/results`,
+    (route) =>
+      route.fulfill({
+        json: {
+          status: "completed",
+          nextCursor: null,
+          outputs: [
+            {
+              id: randomUUID(),
+              kind: "propose_skill_create",
+              status: "proposed",
+              payload: { candidate: draft },
+            },
+            {
+              id: randomUUID(),
+              kind: "propose_skill_patch",
+              status: "proposed",
+              payload: {
+                base: { skillId: randomUUID(), revision: 4, contentHash: hash },
+                reason: "Add explicit verification",
+                changes: { verification: ["Verify result before continuing"] },
+              },
+            },
+          ],
+        },
+      }),
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: "Learning", exact: true }).click();
+  const library = page.locator(".learning-episodes");
+  await library.locator(":scope > summary").click();
+  await library.getByRole("button", { name: "載入／重新整理摘要" }).click();
+  const reflection = library.locator(".learning-reflection");
+  await reflection.locator(":scope > summary").click();
+  await reflection.getByRole("button", { name: "載入模型與最近反思" }).click();
+  const drafts = reflection.locator(".learning-draft");
+  await expect(drafts).toHaveCount(2);
+  await expect(drafts.first()).toContainText("Preserve actual evidence");
+  for (const raw of await reflection.locator("pre").all())
+    await expect(raw).not.toBeVisible();
+  const details = drafts
+    .first()
+    .getByText("閱讀步驟與適用條件", { exact: true });
+  await details.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    drafts.first().getByText("Compare observed output", { exact: true }),
+  ).toBeVisible();
+  await expect(drafts.first()).toContainText("所需能力（不代表授權）");
+  await expect(drafts.nth(1)).toContainText("未列出的欄位保持原樣");
+  await drafts.nth(1).getByText("閱讀步驟與適用條件", { exact: true }).click();
+  await expect(
+    drafts.nth(1).getByText("Verify result before continuing", { exact: true }),
+  ).toBeVisible();
+  for (const [width, height] of [
+    [1440, 900],
+    [1280, 800],
+    [390, 844],
+    [320, 844],
+  ]) {
+    await page.setViewportSize({ width: width!, height: height! });
+    await drafts.first().scrollIntoViewIfNeeded();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: `test-results/reflection-draft-${width}.png`,
+    });
+  }
+});
