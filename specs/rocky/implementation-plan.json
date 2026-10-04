@@ -2885,7 +2885,8 @@
             "New workspace source linkage is in the immutable operation receipt; richer managed workspace metadata/library display remains pending"
           ]
         },
-        "docs/implementation/evidence/2026-10-04/workspace-command-proposal.json"
+        "docs/implementation/evidence/2026-10-04/workspace-command-proposal.json",
+        "docs/implementation/evidence/2026-10-04/workspace-command-dispatch.json"
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
@@ -3664,7 +3665,8 @@
       "evidence": [
         "docs/implementation/evidence/2026-10-04/computer-activity/verification.json",
         "docs/implementation/evidence/2026-10-04/native-environment.json",
-        "docs/implementation/evidence/2026-10-04/workspace-command-proposal.json"
+        "docs/implementation/evidence/2026-10-04/workspace-command-proposal.json",
+        "docs/implementation/evidence/2026-10-04/workspace-command-dispatch.json"
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
