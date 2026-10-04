@@ -1,6 +1,7 @@
 name: Verify
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -10,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verify:
-    timeout-minutes: 45
+    timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
@@ -23,11 +24,20 @@ jobs:
       PROMPTFOO_DISABLE_UPDATE: "1"
       ROCKY_DATA_DIR: .rocky-ci
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "24.12.0"
           cache: npm
+      - name: Use a canonical temporary directory on hosted Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $canonicalTemp = (& node -e 'console.log(require("node:fs").realpathSync.native(require("node:os").tmpdir()))').Trim()
+          if ($LASTEXITCODE -ne 0) { throw 'Could not canonicalize the runner temporary directory' }
+          # Fixtures compare approved canonical paths; RUNNER~1 is an alias of runneradmin.
+          "TEMP=$canonicalTemp" >> $env:GITHUB_ENV
+          "TMP=$canonicalTemp" >> $env:GITHUB_ENV
       - run: npm install --global npm@11.6.4
       - run: npm ci
       - run: npm run check
@@ -40,6 +50,26 @@ jobs:
       - name: Install Chromium OS dependencies on hosted Linux
         if: runner.os == 'Linux'
         run: npx playwright install-deps chromium
+      - name: Allow the pinned Chromium sandbox on the ephemeral Ubuntu runner
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { realpathSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          import { chromium } from 'playwright-core';
+          const browser = realpathSync(chromium.executablePath());
+          if (!/^\/home\/runner\/\.cache\/ms-playwright\/chromium-\d+\/chrome-linux64\/chrome$/.test(browser)) {
+            throw new Error('Unexpected pinned browser path; refusing to install a broad AppArmor rule');
+          }
+          // Exact downloaded binary only. Keep global userns restrictions and Chromium sandboxing.
+          // https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md
+          const profile = `abi <abi/4.0>,\ninclude <tunables/global>\nprofile rocky-ci-chromium "${browser}" flags=(unconfined) {\n  userns,\n}\n`;
+          execFileSync('sudo', ['tee', '/etc/apparmor.d/rocky-ci-chromium'], { input: profile, stdio: ['pipe', 'inherit', 'inherit'] });
+          execFileSync('sudo', ['apparmor_parser', '-r', '/etc/apparmor.d/rocky-ci-chromium'], { stdio: 'inherit' });
+          NODE
+      - name: Verify sandboxed native browser before full regression
+        run: npx vitest run tests/browser-native.test.ts
       - run: npm test
       - run: npm run build
       - run: npm run check:secrets -- --package
@@ -51,7 +81,7 @@ jobs:
         run: npm run test:e2e -- tests/e2e/empty-install.spec.ts
         env:
           ROCKY_E2E_EMPTY: "1"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:
           name: evidence-${{ matrix.os }}
@@ -66,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "24.12.0"

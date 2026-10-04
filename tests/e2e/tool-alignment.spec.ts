@@ -140,7 +140,11 @@ test("explicit activity fixture matches compact inline tool layout", async ({
     await expect(page.locator(".inline-tool").nth(3)).toContainText("已返回");
     await expect(page.locator(".inline-tool").nth(4)).toContainText("失敗");
     const firstCard = page.locator(".inline-tool").first();
-    await expect(firstCard).toHaveCSS("height", "70px");
+    // Line boxes follow the platform sans-serif font metrics.
+    const height = await firstCard.evaluate(
+      (el) => el.getBoundingClientRect().height,
+    );
+    expect(Math.abs(height - 70)).toBeLessThanOrEqual(3);
     await firstCard.locator(":scope > summary").focus();
     await page.keyboard.press("Enter");
     await expect(firstCard).toHaveAttribute("open", "");

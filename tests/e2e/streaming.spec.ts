@@ -5,7 +5,10 @@ test("real provider SSE is visible before completion and daemon stop cancels the
   page,
 }) => {
   test.setTimeout(60000);
-  const server = await startAgentProvider({ streamDelayMs: 300 });
+  const server = await startAgentProvider({
+    streamDelayMs: 300,
+    stallTextWhen: (prompt) => prompt.startsWith("Stream stop "),
+  });
   const name = `Streaming UI ${Date.now()}`;
   try {
     await page.goto("/");

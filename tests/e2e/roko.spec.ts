@@ -88,14 +88,21 @@ test("Roko follows production Presence with deterministic transport fixtures and
   });
   await page.goto("/");
   const sprite = page.locator(".rocky-presence canvas");
-  const send = async (value: PublicEvent) =>
-    page.evaluate(
+  const send = async (value: PublicEvent) => {
+    // After a reload the app opens its stream only once the snapshot loads.
+    await page.waitForFunction(
+      () =>
+        typeof (window as typeof window & { rokoEvents?: unknown })
+          .rokoEvents === "function",
+    );
+    return page.evaluate(
       (value) =>
         (
           window as typeof window & { rokoEvents: (v: unknown) => void }
         ).rokoEvents(value),
       value,
     );
+  };
   const update = async (status: Work["status"]) => {
     latest = { ...latest, status, revision: latest.revision + 1 };
     const e = event("rocky.work.updated", { work: latest });
