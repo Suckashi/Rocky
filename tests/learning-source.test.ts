@@ -62,6 +62,16 @@ test("Learning source consent excludes private, nonnormal, noncompleted and unau
     ).toEqual(accepted);
     for (const extra of [
       { runMode: "evaluation" },
+      {
+        runMode: "reflection",
+        mode: "configured",
+        modelSelection: { connectionId: randomUUID(), revision: 1 },
+        reflection: {
+          episodeId: randomUUID(),
+          episodeRevision: 2,
+          episodeHash: "a".repeat(64),
+        },
+      },
       { runMode: "unknown" },
       { status: "cancelled" },
       { status: "running" },
@@ -110,18 +120,16 @@ test("Learning source consent excludes private, nonnormal, noncompleted and unau
       ...command,
       requestId: randomUUID(),
     });
-    store.db
-      .prepare("INSERT INTO capability_grants VALUES(?,?,?,?)")
-      .run(
-        randomUUID(),
-        randomUUID(),
-        "fixture",
-        JSON.stringify({
-          workId: privateWork.id,
-          memory: { includePrivate: true },
-          revoked: true,
-        }),
-      );
+    store.db.prepare("INSERT INTO capability_grants VALUES(?,?,?,?)").run(
+      randomUUID(),
+      randomUUID(),
+      "fixture",
+      JSON.stringify({
+        workId: privateWork.id,
+        memory: { includePrivate: true },
+        revoked: true,
+      }),
+    );
     expect(() =>
       learning.assertSourceAllowed(privateWork.id, "manual"),
     ).toThrow("private memory");

@@ -95,6 +95,19 @@ export class WorkerChannel {
       );
     this.agentOptions = agentOptions;
     this.owner = store.get(workId);
+    if (
+      this.owner.reflection?.episodeId !==
+        agentOptions?.reflection?.episodeId ||
+      this.owner.reflection?.episodeRevision !==
+        agentOptions?.reflection?.episodeRevision ||
+      this.owner.reflection?.episodeHash !==
+        agentOptions?.reflection?.episodeHash
+    )
+      throw new RockyError(
+        "reflection_owner",
+        "Worker reflection binding must match its stored Work",
+        403,
+      );
     if (this.owner.status !== "running")
       throw new RockyError(
         "worker_owner",

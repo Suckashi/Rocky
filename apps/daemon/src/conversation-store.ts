@@ -74,7 +74,9 @@ export class ConversationStore {
       conversationId: this.main().id,
       workId: work.id,
       kind:
-        work.runMode === "evaluation" ? "evaluation" : (work.kind ?? "main"),
+        work.runMode === "evaluation" || work.runMode === "reflection"
+          ? work.runMode
+          : (work.kind ?? "main"),
       graphThreadId: work.runId,
       workspaceId: work.workspaceId ?? null,
       ...(work.workspaceRevision

@@ -17,7 +17,7 @@ export const executionSessionSchema = z.strictObject({
   id: idSchema,
   conversationId: idSchema,
   workId: idSchema,
-  kind: z.enum(["main", "background", "evaluation"]),
+  kind: z.enum(["main", "background", "evaluation", "reflection"]),
   graphThreadId: idSchema,
   sourceGraphThreadId: idSchema.optional(),
   workspaceId: idSchema.nullable(),

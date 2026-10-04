@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import { Store } from "../apps/daemon/src/store.js";
 import { WorkerChannel } from "../apps/daemon/src/worker-channel.js";
 import { workSchema } from "../packages/contracts/src/index.js";
+import { ConversationStore } from "../apps/daemon/src/conversation-store.js";
 import { parseIpcMessage } from "../packages/contracts/src/ipc.js";
 const binding = {
   episodeId: randomUUID(),
@@ -27,13 +28,40 @@ test("reflection profile traverses real worker IPC without normal skill discover
       transport: "http",
       mode: "configured",
       modelSelection: { connectionId: randomUUID(), revision: 1 },
-      runMode: "normal",
+      runMode: "reflection",
+      reflection: binding,
       status: "running",
       revision: 1,
       answer: "",
       createdAt: new Date().toISOString(),
     });
     store.add(work, work.id);
+    expect(new ConversationStore(store).session(work.id)).toMatchObject({
+      kind: "reflection",
+      graphThreadId: work.runId,
+    });
+    expect(
+      new ConversationStore(store).session(work.id).sourceGraphThreadId,
+    ).toBeUndefined();
+    for (const patch of [
+      { runMode: "normal" },
+      { reflection: undefined },
+      { workspaceRevision: 1 },
+      { workspaceRead: true },
+      { retryOf: randomUUID() },
+    ])
+      expect(workSchema.safeParse({ ...work, ...patch }).success).toBe(false);
+    expect(() =>
+      store.save(
+        {
+          ...work,
+          revision: 2,
+          reflection: { ...binding, episodeHash: "b".repeat(64) },
+        },
+        1,
+      ),
+    ).toThrow("revision changed");
+    expect(store.get(work.id).reflection).toEqual(binding);
     const entry = fileURLToPath(
         new URL("../apps/agent-worker/src/main.ts", import.meta.url),
       ),
@@ -53,6 +81,20 @@ test("reflection profile traverses real worker IPC without normal skill discover
           sourceGraphThreadId: randomUUID(),
         }),
     ).toThrow("inherit");
+    expect(
+      () =>
+        new WorkerChannel(store, work.id, entry, async () => null, {
+          ...options,
+          reflection: { ...binding, episodeRevision: 99 },
+        }),
+    ).toThrow("stored Work");
+    expect(
+      () =>
+        new WorkerChannel(store, work.id, entry, async () => null, {
+          ...options,
+          reflection: undefined,
+        }),
+    ).toThrow("stored Work");
     channel = new WorkerChannel(
       store,
       work.id,

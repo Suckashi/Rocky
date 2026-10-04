@@ -1,3 +1,4 @@
+import { reflectionBindingSchema } from "./reflection.js";
 import { worktreePreviewSchema } from "./workspaces.js";
 import { memoryReadSelectionSchema } from "./memory.js";
 import { z } from "zod";
@@ -137,7 +138,8 @@ export const workSchema = z
     wallBudgetMs: z.number().int().min(100).max(14400000).optional(),
     modelSelection: modelSelectionSchema.optional(),
     modelBudget: modelBudgetSchema.optional(),
-    runMode: z.enum(["normal", "evaluation", "unknown"]),
+    runMode: z.enum(["normal", "evaluation", "reflection", "unknown"]),
+    reflection: reflectionBindingSchema.optional(),
     status: workStatus,
     waitingFor: z.enum(["workspace", "capacity"]).optional(),
     revision: revisionSchema,
@@ -151,6 +153,21 @@ export const workSchema = z
     (value) =>
       (value.mode === "configured") === (value.modelSelection !== undefined),
     { message: "Work model selection does not match its mode" },
+  )
+  .refine(
+    (value) => (value.runMode === "reflection") === Boolean(value.reflection),
+    { message: "Reflection Work requires an exclusive episode binding" },
+  )
+  .refine(
+    (value) =>
+      value.runMode !== "reflection" ||
+      (value.mode === "configured" &&
+        !value.workspaceRevision &&
+        !value.workspaceRead &&
+        !value.retryOf),
+    {
+      message: "Reflection Work cannot inherit host workspace or retry context",
+    },
   );
 export const domainPayloadSchema = z
   .object({
