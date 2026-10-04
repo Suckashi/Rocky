@@ -1,0 +1,26 @@
+{
+  "commit": "61741adb78fe5a1e5ae3d140400224c32fa553a4",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/reflection-service.test.ts; npm run check; npx eslint tests/reflection-service.test.ts apps/daemon/src/work-service.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/reflection-lifecycle.json",
+  "testFiles": ["tests/reflection-service.test.ts"],
+  "tests": 6,
+  "seconds": 6.96,
+  "assertions": [
+    "Real HTTP owner middleware rejects unauthenticated reflection admission and accepts exact authorized command",
+    "Source withdrawal while model reply is in flight denies proposal tool and fails Work with daemon-derived authorization explanation",
+    "Withdrawal after no_learning removes stored payload and prevents final completion",
+    "Exact stop during held provider request cancels Work; stop receipt and admission retry do not dispatch again",
+    "Persisted result, text-only rejection and call-budget cases remain passing"
+  ],
+  "limitations": [
+    "Deterministic local provider and synthetic source; no live model evidence",
+    "Initial assertion exposed opaque worker error; daemon now rechecks source to explain authorization failure",
+    "Restart/crash recovery, queued withdrawal, UI controls and mixed-priority fairness remain pending",
+    "No secure disk erasure or checkpoint cleanup claim; historical private material cleanup still incomplete",
+    "No browser changes or global AT completion"
+  ]
+}

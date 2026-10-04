@@ -174,3 +174,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 - Reflection authority routing is now wired in WorkService and registry identity checks are fixture-tested. No production admission command sets that path yet; integrated lifecycle verification remains pending. See evidence/2026-10-04/reflection-dispatch.json.
 
 - Manual reflection WorkService admission now runs end-to-end with deterministic local provider, using existing evaluation-class low-priority slots and wall budget. Dedicated Learning budget UI, mixed-queue fairness, HTTP/browser launch and stop/restart/withdrawal matrix remain unverified; automatic triggering and candidate pipeline are unfinished. See evidence/2026-10-04/reflection-admission.json.
+
+- Reflection HTTP owner admission, active stop and source withdrawal before/after output now have local integration coverage. Restart/crash, queued withdrawal, UI lifecycle, mixed-priority fairness and checkpoint cleanup remain open. See evidence/2026-10-04/reflection-lifecycle.json.
