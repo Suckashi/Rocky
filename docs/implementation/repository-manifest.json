@@ -2,10 +2,10 @@
   "productId": "rocky",
   "specVersion": "2.0.0",
   "localRoot": ".",
-  "branch": "codex/opendots-ui-alignment",
+  "branch": "main",
   "strategy": "greenfield_no_fork_no_imported_git_history",
   "implementationCommit": "8f8ec1d73cc8730b571fc7d42c132847540bcce2",
-  "workingTreeChanges": true,
+  "workingTreeChanges": false,
   "recordedAt": "2026-10-04",
   "remote": {
     "status": "created",
@@ -13,8 +13,25 @@
     "url": "https://github.com/Suckashi/Rocky",
     "creationAuthorized": true,
     "visibility": "public",
-    "firstPush": "authorized_pending_execution",
-    "privateVulnerabilityReporting": true
+    "firstPush": "completed",
+    "privateVulnerabilityReporting": true,
+    "firstPushCommit": "1b11a14bf713b8a5659268fa15aa75bf93ab2a0e",
+    "defaultBranch": "main",
+    "branchProtection": {
+      "requiredPullRequest": true,
+      "requiredApprovals": 0,
+      "strictStatusChecks": true,
+      "requiredChecks": [
+        "verify (windows-latest)",
+        "verify (ubuntu-latest)",
+        "Dependency audit"
+      ],
+      "githubActionsAppId": 15368,
+      "enforceAdmins": true,
+      "resolvedConversations": true,
+      "forcePush": false,
+      "deletion": false
+    }
   },
   "references": {
     "sourceCopied": true,
@@ -24,14 +41,16 @@
   },
   "verificationReport": "docs/implementation/evidence/2026-10-04/publication-candidate/verification.json",
   "implementationSourceManifestHash": "8994442be812999df66353fcf459e2bb16491a80a89fade5c07bc22dfbf5d993",
-  "stateScope": "Pre-push GitHub bootstrap snapshot; see github-bootstrap.md for execution evidence.",
+  "stateScope": "Published main snapshot at first push; later receipt updates follow branch/PR/CI.",
   "localMain": {
     "branch": "main",
-    "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93",
-    "integration": "authorized_pending_execution"
+    "commit": "1b11a14bf713b8a5659268fa15aa75bf93ab2a0e",
+    "integration": "completed_fast_forward"
   },
   "userSuppliedAssets": {
     "manifest": "assets/roko/roko-manifest.json",
     "distributionRights": "owner-authorized-public-repository-inclusion; separate reuse license unspecified"
-  }
+  },
+  "publicationCommit": "1b11a14bf713b8a5659268fa15aa75bf93ab2a0e",
+  "bootstrapReceipt": "docs/implementation/evidence/2026-10-04/github-bootstrap/execution.json"
 }

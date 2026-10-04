@@ -247,7 +247,9 @@ test("confirmed native checkpoint context reaches next main worker, survives res
     rmSync(root, { recursive: true, force: true });
     rmSync(workspaceRoot, { recursive: true, force: true });
   }
-}, 30000);
+  // Ten sequential native workers share this scenario; each Work still has a 10s deadline.
+  // Hosted Windows exceeded the former 30s aggregate budget during the initial CI run.
+}, 90000);
 
 test("new native fixture turn requests fresh approval without replaying any completed operation", async () => {
   const root = mkdtempSync(join(tmpdir(), "rocky-context-effects-"));

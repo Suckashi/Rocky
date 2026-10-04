@@ -5,6 +5,7 @@ import {
   readFileSync,
   writeFileSync,
   existsSync,
+  realpathSync,
 } from "node:fs";
 import { resolve, join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -36,8 +37,9 @@ export class Store {
   private inTransaction = false;
   private closed = false;
   constructor(root: string, options?: { restoreRecovery?: boolean }) {
-    this.root = resolve(root);
-    mkdirSync(this.root, { recursive: true });
+    const absoluteRoot = resolve(root);
+    mkdirSync(absoluteRoot, { recursive: true });
+    this.root = realpathSync.native(absoluteRoot);
     if (
       existsSync(join(this.root, "rocky-backup.json")) ||
       existsSync(join(this.root, ".backup-incomplete")) ||

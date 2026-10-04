@@ -37,13 +37,20 @@ test.skipIf(!existsSync(browserExecutable))(
     const launch = chromium.launchPersistentContext.bind(chromium);
     const observed = vi
       .spyOn(chromium, "launchPersistentContext")
-      .mockImplementation((path, options) =>
-        launch(path, {
-          ...options,
-          headless: true,
-          executablePath: browserExecutable,
-        }),
-      );
+      .mockImplementation(async (path, options) => {
+        try {
+          return await launch(path, {
+            ...options,
+            headless: true,
+            executablePath: browserExecutable,
+          });
+        } catch (error) {
+          // Synthetic fixture only: retain browser diagnostics before the product
+          // converts them to its safe public unavailable error.
+          console.error("Native browser fixture launch failed:", error);
+          throw error;
+        }
+      });
     const work = workSchema.parse({
       id: randomUUID(),
       runId: randomUUID(),
