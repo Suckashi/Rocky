@@ -4,14 +4,20 @@ import { isAbsolute } from "node:path";
 import { z } from "zod";
 import { terminateProcessTree } from "./terminate-process-tree.js";
 
-const commandSchema = z.strictObject({
+export const nativeCommandSchema = z.strictObject({
   executable: z.string().min(1).refine(isAbsolute),
   cwd: z.string().min(1).refine(isAbsolute),
   args: z.array(z.string().max(65536)).max(256),
   timeoutMs: z.number().int().min(1).max(300000),
   maxOutputBytes: z.number().int().min(1).max(1048576),
 });
-export type NativeCommand = z.infer<typeof commandSchema>;
+export type NativeCommand = z.infer<typeof nativeCommandSchema>;
+export function nativeExecutionEnvironment(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {};
+  for (const name of ["PATH", "SystemRoot", "WINDIR", "TEMP", "TMP"])
+    if (process.env[name]) env[name] = process.env[name];
+  return env;
+}
 export type NativeCommandResult = {
   reason:
     | "exited"
@@ -45,7 +51,7 @@ export class NativeEnvironment {
     signal: AbortSignal,
   ): Promise<NativeCommandResult> {
     signal.throwIfAborted();
-    const command = commandSchema.parse(input);
+    const command = nativeCommandSchema.parse(input);
     // Do not resolve a PATH command or silently switch environment/cwd.
     const [executable, cwd] = await Promise.all([
       realpath(command.executable),
@@ -56,11 +62,9 @@ export class NativeEnvironment {
         "Native command executable or working directory is invalid",
       );
     signal.throwIfAborted();
-    const env: NodeJS.ProcessEnv = {};
     // Explicit OS plumbing only; no provider keys, NODE_OPTIONS, daemon credentials,
     // user configuration/home or arbitrary environment overrides are inherited.
-    for (const name of ["PATH", "SystemRoot", "WINDIR", "TEMP", "TMP"])
-      if (process.env[name]) env[name] = process.env[name];
+    const env = nativeExecutionEnvironment();
     return new Promise((resolve) => {
       const child = spawn(executable, command.args, {
         cwd,
