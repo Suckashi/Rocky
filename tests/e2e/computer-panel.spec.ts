@@ -58,6 +58,14 @@ test("Computer opens a reference-sized pane with actual registered files and hon
       });
     }
     await pane.getByRole("tab", { name: "Terminal", exact: true }).click();
+    // The pane defaults to the newest Work, which earlier specs may give
+    // command receipts; select a seeded Work that never runs commands.
+    const picker = pane.getByLabel("檢視工作");
+    const seeded = await picker
+      .locator("option", { hasText: "Reconciliation UI" })
+      .first()
+      .getAttribute("value");
+    await picker.selectOption(seeded!);
     await expect(pane).toContainText("此工作尚無命令收據");
     await page.screenshot({
       path: "test-results/computer-unavailable-320.png",

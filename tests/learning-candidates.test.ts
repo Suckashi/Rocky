@@ -10,6 +10,10 @@ import { skillCandidateDraftSchema } from "../packages/contracts/src/reflection.
 import { AIMessage } from "@langchain/core/messages";
 import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 
+// Hosted Windows runners need about twice the local time for the 108-run
+// synthetic evaluation; local runs keep the 240s wall budget.
+const evalMs = process.env.CI ? 480000 : 240000;
+
 async function fixture() {
   const root = await mkdtemp(join(tmpdir(), "rocky-candidate-fixture-")),
     service = new WorkService(root);
@@ -479,7 +483,7 @@ test("configured local provider evaluates all three frozen variants before exact
       maxRuns: 108,
       maxModelCalls: 432,
       maxTokens: 100000000,
-      wallBudgetMs: 240000,
+      wallBudgetMs: evalMs,
       reportByteBudget: 2097152,
       cases: Array.from({ length: 12 }, (_, i) => ({
         id: randomUUID(),
@@ -513,10 +517,15 @@ test("configured local provider evaluates all three frozen variants before exact
       },
     });
     await expect
-      .poll(() => f.service.evaluations.get(run.id).status, {
-        timeout: 240000,
-        interval: 500,
-      })
+      .poll(
+        () => {
+          const current = f.service.evaluations.get(run.id);
+          return current.status === "failed"
+            ? `failed: ${current.reason}`
+            : current.status;
+        },
+        { timeout: evalMs, interval: 500 },
+      )
       .toBe("completed");
     const report = f.service.evaluations.view(run.id);
     expect(
@@ -567,7 +576,7 @@ test("configured local provider evaluates all three frozen variants before exact
     await provider.close();
     await f.close();
   }
-}, 270000);
+}, 510000);
 
 test("scoped propose automatically turns a completed opted-in Work into a real candidate and evaluation without publishing", async () => {
   const f = await fixture();
