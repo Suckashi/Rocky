@@ -1,5 +1,7 @@
 # Implemented P0 architecture
 
+> Historical, incremental P0 notes. For current responsibilities and file placement, read [Architecture](../architecture.md). Later entries below may supersede earlier limitations.
+
 React/Vite + CopilotKit OSS runtimeUrl discovery sends AG-UI input to the Hono gateway. The gateway creates a durable Work; bounded admission launches a child worker using the single createRockyAgent factory. Daemon model/tool RPC retains provider credentials and authority. Native task, todo middleware and interrupt produce real SDK execution. Root/child policy hooks expose public evidence; all fixture tools call the official MCP client over stdio or Streamable HTTP.
 
 Domain state, receipts, decisions, operation outcomes and events live in node:sqlite. Official SqliteSaver persists graph checkpoints separately. SSE sends only persisted domain events. UI detach does not cancel Work. Explicit stop aborts the selected work; restart blocks unfinished work instead of replaying pending effects.

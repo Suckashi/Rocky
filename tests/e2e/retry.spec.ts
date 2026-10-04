@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { randomUUID } from "node:crypto";
 import { AIMessage } from "@langchain/core/messages";
 import { startAgentProvider } from "../../fixtures/models/agent-provider.js";

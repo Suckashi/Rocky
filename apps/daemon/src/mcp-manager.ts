@@ -2,10 +2,9 @@ import type { McpDataResult } from "../../../packages/contracts/src/mcp-result.j
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { UriTemplate } from "@modelcontextprotocol/sdk/shared/uriTemplate.js";
 import { mcpDataSchema } from "../../../packages/contracts/src/mcp-runtime.js";
-import {
-  StdioClientTransport,
-  DEFAULT_INHERITED_ENV_VARS,
-} from "@modelcontextprotocol/sdk/client/stdio.js";
+import { DEFAULT_INHERITED_ENV_VARS } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { OwnedStdioTransport } from "./owned-stdio-transport.js";
+import { observationSchema } from "./operation-reconciler.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import {
@@ -40,6 +39,7 @@ type Connection = {
   stderrDecoder?: StringDecoder;
   promise?: Promise<McpState>;
   closing?: Promise<void>;
+  closeNetwork?: () => Promise<void>;
   dataCatalog?: {
     resources: Resource[];
     resourceTemplates: ResourceTemplate[];
@@ -47,6 +47,83 @@ type Connection = {
   };
 };
 export class McpManager {
+  reconciliationBinding(serverId: string, configRevision: number) {
+    const { options } = this.registry.server(serverId, configRevision);
+    return options.receiptUriTemplate
+      ? {
+          serverId,
+          configRevision,
+          receiptUriTemplate: options.receiptUriTemplate,
+        }
+      : null;
+  }
+  async observeReceipt(
+    binding: {
+      serverId: string;
+      configRevision: number;
+      receiptUriTemplate: string;
+    },
+    operation: { id: string; args_hash: string },
+    signal: AbortSignal,
+  ) {
+    const current = this.reconciliationBinding(
+      binding.serverId,
+      binding.configRevision,
+    );
+    if (intentHash(current) !== intentHash(binding))
+      throw new RockyError(
+        "reconciliation_config",
+        "Receipt adapter configuration changed",
+        409,
+      );
+    const connection = this.active.get(binding.serverId);
+    if (!connection || connection.state.status !== "ready")
+      throw new RockyError(
+        "mcp_unavailable",
+        "Reconnect the same configured server before querying receipts",
+        409,
+      );
+    this.assertCurrent(binding.serverId, connection);
+    const uri = binding.receiptUriTemplate
+      .replaceAll("{operationId}", encodeURIComponent(operation.id))
+      .replaceAll("{intentHash}", operation.args_hash);
+    const result = await connection.client.readResource(
+      { uri },
+      {
+        signal: AbortSignal.any([signal, connection.abort.signal]),
+        timeout: 10000,
+      },
+    );
+    if (JSON.stringify(result).length > 131072 || result.contents.length !== 1)
+      throw new RockyError(
+        "reconciliation_receipt",
+        "Invalid receipt resource",
+        422,
+      );
+    const content = result.contents[0]!;
+    if (
+      content.uri !== uri ||
+      !("text" in content) ||
+      typeof content.text !== "string"
+    )
+      throw new RockyError(
+        "reconciliation_receipt",
+        "Receipt resource identity changed",
+        422,
+      );
+    const observation = observationSchema.parse(JSON.parse(content.text));
+    if (
+      JSON.stringify(this.registry.redact(observation)) !==
+      JSON.stringify(observation)
+    )
+      throw new RockyError(
+        "reconciliation_sensitive",
+        "Receipt contains protected content; outcome remains unknown",
+        422,
+      );
+    this.assertCurrent(binding.serverId, connection);
+    return observation;
+  }
   private failureMessage(error: unknown) {
     return error instanceof RockyError &&
       error.code === "mcp_schema_unsupported"
@@ -207,6 +284,7 @@ export class McpManager {
       diagnostics: [],
     });
     let transport: Transport;
+    let closeNetwork: (() => Promise<void>) | undefined;
     if (spec.transport === "stdio") {
       const env = Object.fromEntries(
         [
@@ -217,16 +295,36 @@ export class McpManager {
           value!,
         ]),
       );
-      transport = new StdioClientTransport({
+      transport = new OwnedStdioTransport({
         command: spec.command,
         args: spec.args,
         cwd: spec.cwd,
         env,
-        stderr: "pipe",
         maxBufferSize: 2097152,
       });
     } else {
-      const network = new ExplicitNetwork(new Map([["mcp:" + id, spec.url]]));
+      let configuredNetwork: ReturnType<McpRegistry["httpNetwork"]>;
+      try {
+        configuredNetwork = this.registry.httpNetwork(
+          id,
+          command.expectedRevision,
+        );
+      } catch {
+        state.status = "failed";
+        state.error = "MCP proxy or CA configuration is unavailable";
+        this.saveState(state);
+        this.store.db
+          .prepare(
+            "UPDATE mcp_lifecycle_receipts SET status='failed' WHERE request_id=?",
+          )
+          .run(command.requestId);
+        return state;
+      }
+      closeNetwork = configuredNetwork.close;
+      const network = new ExplicitNetwork(
+        new Map([["mcp:" + id, spec.url]]),
+        configuredNetwork.fetch,
+      );
       transport = new StreamableHTTPClientTransport(new URL(spec.url), {
         requestInit: { headers: spec.headers, redirect: "manual" },
         reconnectionOptions: {
@@ -287,6 +385,7 @@ export class McpManager {
       abort,
       state,
       stderrBytes: 0,
+      closeNetwork,
     };
     this.active.set(id, connection);
     this.saveState(state);
@@ -308,7 +407,7 @@ export class McpManager {
           "MCP connection closed unexpectedly",
         );
     };
-    if (transport instanceof StdioClientTransport) {
+    if (transport instanceof OwnedStdioTransport) {
       connection.stderrRedact = this.registry.streamRedactor();
       connection.stderrDecoder = new StringDecoder("utf8");
       transport.stderr?.on("data", (chunk: Buffer) => {
@@ -372,7 +471,7 @@ export class McpManager {
         });
         this.assertCurrent(id, connection);
         state.pid =
-          transport instanceof StdioClientTransport ? transport.pid : null;
+          transport instanceof OwnedStdioTransport ? transport.pid : null;
         this.saveState(state);
         const tools: Tool[] = [],
           cursors = new Set<string>();
@@ -468,7 +567,17 @@ export class McpManager {
     connection.state.status = "stopping";
     this.saveState(connection.state);
     connection.closing = Promise.resolve().then(async () => {
-      await connection.client.close().catch(() => {});
+      let closeFailed = false;
+      await connection.client.close().catch(() => {
+        closeFailed = true;
+      });
+      if (connection.transport instanceof OwnedStdioTransport) {
+        await connection.transport.close();
+        closeFailed ||= connection.transport.terminationError !== null;
+      }
+      await connection.closeNetwork?.().catch(() => {
+        closeFailed = true;
+      });
       const tail = connection.stderrRedact?.(
         connection.stderrDecoder?.end() ?? "",
         true,
@@ -479,12 +588,14 @@ export class McpManager {
         );
         connection.state.diagnostics = connection.state.diagnostics.slice(-16);
       }
-      connection.state.status = status;
+      connection.state.status = closeFailed ? "failed" : status;
       connection.state.pid = null;
       connection.state.toolsCount = 0;
-      connection.state.error = error
-        ? String(this.registry.redact(error)).slice(0, 8192)
-        : null;
+      connection.state.error = closeFailed
+        ? "MCP shutdown could not be confirmed; inspect owned processes before reconnecting"
+        : error
+          ? String(this.registry.redact(error)).slice(0, 8192)
+          : null;
       this.saveState(connection.state);
       if (this.active.get(id) === connection) this.active.delete(id);
     });

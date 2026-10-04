@@ -84,7 +84,22 @@ for (const args of [
   ["ci"],
   ["run", "check"],
   ["run", "build"],
-  ["test"],
+  // The Node-only baseline exercises core and Learning without requiring the
+  // optional Git executable, browser download, or container engine. The full
+  // integration matrix remains `npm test` and is recorded separately.
+  [
+    "test",
+    "--",
+    "tests/contracts.test.ts",
+    "tests/runtime.test.ts",
+    "tests/worker-channel.test.ts",
+    "tests/http.test.ts",
+    "tests/attachments.test.ts",
+    "tests/documents-new.test.ts",
+    "tests/model-budget.test.ts",
+    "tests/learning-candidates.test.ts",
+    "tests/backup.test.ts",
+  ],
   ["run", "test:learning"],
 ]) {
   const result = spawnSync(

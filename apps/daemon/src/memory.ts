@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SourceDependencies } from "./source-dependencies.js";
 import {
   memorySchema,
   memorySaveSchema,
@@ -32,6 +33,7 @@ export class MemoryRegistry {
     private workspaces: WorkspaceRegistry,
     private documents: DocumentStore,
     private grants: GrantRegistry,
+    private onInvalidate?: () => void,
   ) {}
   private readScope(work: Work, kind: "user" | "project" | "task") {
     if (work.mode !== "configured" || work.runMode !== "normal")
@@ -117,6 +119,20 @@ export class MemoryRegistry {
         "Memory response metadata exceeds token budget",
         422,
       );
+    this.store.transaction(() => {
+      for (const item of delivery.items)
+        new SourceDependencies(this.store).record(
+          work,
+          "memory",
+          item.id,
+          item.revision,
+        );
+      this.store.event(work, "rocky.memory.read", {
+        sources: delivery.items.map(({ id, revision }) => ({ id, revision })),
+        scope,
+        truncated: delivery.truncated,
+      });
+    });
     return { ...delivery, context, contextTokens: contextTokens(context) };
   }
   private scope(value: unknown) {
@@ -360,6 +376,14 @@ export class MemoryRegistry {
       this.store.db
         .prepare("INSERT INTO memory_fts(id,content) VALUES(?,?)")
         .run(memory.id, memory.content);
+      if (previous)
+        new SourceDependencies(this.store).invalidate(
+          "memory",
+          memory.id,
+          "memory_updated",
+          previous.revision,
+        );
+      if (previous) this.onInvalidate?.();
       return this.record(command.requestId, intent, {
         id: memory.id,
         revision: memory.revision,
@@ -380,6 +404,12 @@ export class MemoryRegistry {
         throw new RockyError("stale_memory", "Memory revision changed", 409);
       this.store.db.prepare("DELETE FROM memory_fts WHERE id=?").run(id);
       this.store.db.prepare("DELETE FROM memories WHERE id=?").run(id);
+      new SourceDependencies(this.store).invalidate(
+        "memory",
+        id,
+        "memory_deleted",
+      );
+      this.onInvalidate?.();
       return this.record(command.requestId, intent, {
         id,
         revision: memory.revision + 1,

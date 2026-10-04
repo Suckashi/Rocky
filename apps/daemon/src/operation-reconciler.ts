@@ -8,7 +8,7 @@ import {
   reconciliationCommandSchema as commandSchema,
   reconciliationReceiptSchema,
 } from "../../../packages/contracts/src/operations.js";
-const observationSchema = z
+export const observationSchema = z
   .strictObject({
     operationId: z.string(),
     intentHash: z.string().regex(/^[a-f0-9]{64}$/),
@@ -16,6 +16,7 @@ const observationSchema = z
     result: z.string().max(65536).nullable(),
     evidenceRef: z.uuid(),
     observedAt: z.iso.datetime(),
+    details: z.string().max(2000).optional(),
   })
   .refine((v) => (v.outcome === "succeeded") === (v.result !== null));
 export type OperationObservation = z.infer<typeof observationSchema>;
@@ -128,6 +129,10 @@ export class OperationReconciler {
       this.store.db
         .prepare("INSERT INTO operation_reconciliations VALUES(?,?,?)")
         .run(command.requestId, intent, JSON.stringify(receipt));
+      this.store.event(current, "rocky.operation.observed", {
+        ...observation,
+        observationHash: receipt.observationHash,
+      });
       this.store.event(current, "rocky.operation.reconciled", receipt);
       return receipt;
     });

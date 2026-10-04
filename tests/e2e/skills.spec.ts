@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { createHash, randomUUID } from "node:crypto";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -60,7 +60,7 @@ test("owner reviews all package files and selects an older immutable revision", 
   const card = ui.locator("article").filter({ hasText: name });
   await card.getByRole("button", { name: "審查此版本" }).click();
   await expect(card.locator("pre")).toContainText("BODY_REVISION_2");
-  await card.getByRole("button", { name: "比較上一版本" }).click();
+  await card.getByRole("button", { name: "比較所選版本" }).click();
   const diff = card.getByLabel("技能檔案差異", { exact: true });
   await expect(diff).toContainText("−BODY_REVISION_1");
   await expect(diff).toContainText("+BODY_REVISION_2");
@@ -83,7 +83,7 @@ test("owner reviews all package files and selects an older immutable revision", 
   await card.getByLabel("檢視套件檔案").selectOption("assets/binary.dat");
   await expect(card).toContainText("二進位檔案");
   await expect(card.locator("pre")).toHaveCount(0);
-  await card.getByRole("button", { name: "比較上一版本" }).click();
+  await card.getByRole("button", { name: "比較所選版本" }).click();
   await expect(card).toContainText("二進位檔案不提供文字差異");
   const binaryEvidence = card.locator(".skill-diff-evidence");
   await binaryEvidence.locator("summary").click();
@@ -108,6 +108,7 @@ test("owner reviews all package files and selects an older immutable revision", 
   await expect(card.locator("pre")).toContainText("BODY_REVISION_1");
   await card.getByLabel("我已檢視此版本內容及來源").check();
   await card.getByRole("button", { name: "信任並啟用此版本" }).click();
+  await expect(card).toContainText("審查版本 r1 · 已啟用");
   const selection = await (
     await page.request.get(`/api/v1/skills/${id}/selection`)
   ).json();

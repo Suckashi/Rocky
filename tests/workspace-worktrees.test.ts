@@ -18,6 +18,8 @@ import { startAgentProvider } from "../fixtures/models/agent-provider.js";
 const exec = promisify(execFile);
 test.each([
   "approve",
+  "adopt",
+  "directory",
   "reject",
   "stale",
   "child",
@@ -58,6 +60,7 @@ test.each([
     const head = (await git(["rev-parse", "HEAD"])).stdout.trim();
     await writeFile(join(root, "file.txt"), "DIRTY_SOURCE");
     const service = new WorkService(join(base, "data"));
+    const transitions = vi.spyOn(service.operations, "transition");
     const provider = await startAgentProvider({
       reply: async (messages) => {
         const last = messages.filter((m) => m.type === "tool").at(-1);
@@ -77,7 +80,14 @@ test.each([
                       subagent_type: "general-purpose",
                       description: "CHILD_TREE",
                     }
-                  : {},
+                  : ["adopt", "directory"].includes(mode)
+                    ? {
+                        useForCurrentWork: true,
+                        ...(mode === "directory"
+                          ? { isolation: "directory" }
+                          : {}),
+                      }
+                    : {},
               type: "tool_call",
             },
           ],
@@ -113,20 +123,30 @@ test.each([
         modelSelection: { connectionId, revision: 1 },
         workspaceId: workspace.id,
         workspaceRevision: 1,
-        workspaceRead: false,
+        workspaceRead: ["adopt", "directory"].includes(mode),
+        kind: ["adopt", "directory"].includes(mode) ? "background" : "main",
       });
       await expect
         .poll(() => service.store.get(work.id).status, { timeout: 15000 })
         .toBe(mode === "child" ? "failed" : "waiting_approval");
-      const destination = join(base, "rocky-worktree-" + work.runId);
+      const destination = join(
+        base,
+        (mode === "directory" ? "rocky-workspace-" : "rocky-worktree-") +
+          work.runId,
+      );
       await expect(stat(destination)).rejects.toThrow();
       if (mode !== "child") {
         const approval = service.store.get(work.id).approval!;
-        expect(approval.worktreePreview).toEqual({
+        expect(approval.worktreePreview).toMatchObject({
           destination,
-          head,
-          branch: "codex/rocky-" + work.runId,
+          head: mode === "directory" ? null : head,
+          branch: mode === "directory" ? null : "codex/rocky-" + work.runId,
         });
+        if (["adopt", "directory"].includes(mode))
+          expect(approval.worktreePreview).toMatchObject({
+            useForCurrentWork: true,
+            grantRead: true,
+          });
         if (mode === "stale") {
           await git(["add", "file.txt"]);
           await git(["commit", "-m", "changed"]);
@@ -169,14 +189,22 @@ test.each([
           )
           .toBe(true);
       }
-      if (mode === "approve") {
+      if (["approve", "adopt", "directory"].includes(mode)) {
         expect(
           service.store.get(work.id).status,
-          service.store.get(work.id).error,
+          service.store.get(work.id).error +
+            " " +
+            transitions.mock.results
+              .filter((r) => r.type === "throw")
+              .map((r) => String(r.value))
+              .join("; "),
         ).toBe("completed");
-        expect(await readFile(join(destination, "file.txt"), "utf8")).toBe(
-          "COMMITTED",
-        );
+        if (mode === "directory")
+          await expect(stat(join(destination, "file.txt"))).rejects.toThrow();
+        else
+          expect(await readFile(join(destination, "file.txt"), "utf8")).toBe(
+            "COMMITTED",
+          );
         const operation = service.operations.list(work.id)[0]!;
         expect(operation.outcome).toBe("succeeded");
         const receipt = JSON.parse(
@@ -184,12 +212,28 @@ test.each([
         );
         expect(receipt).toMatchObject({
           workspaceId: work.runId,
-          head,
-          readPermissionGranted: false,
-          currentWorkWorkspaceChanged: false,
+          head: mode === "directory" ? null : head,
+          readPermissionGranted: mode !== "approve",
+          currentWorkWorkspaceChanged: mode !== "approve",
         });
         expect(service.workspaces.get(work.runId).root).toBe(destination);
-        expect(service.store.get(work.id).workspaceId).toBe(workspace.id);
+        expect(service.store.get(work.id).workspaceId).toBe(
+          mode !== "approve" ? work.runId : workspace.id,
+        );
+        if (["adopt", "directory"].includes(mode)) {
+          expect(service.store.get(work.id).workspaceIsolation).toBe(
+            mode === "directory" ? "directory" : "worktree",
+          );
+          expect(
+            service.store
+              .eventsForWork(work.id)
+              .some(
+                (event) =>
+                  event.payload.kind === "domain" &&
+                  event.payload.name === "rocky.workspace.bound",
+              ),
+          ).toBe(true);
+        }
       } else if (mode === "registration-failure") {
         expect(service.store.get(work.id).status).toBe("blocked");
         expect(await readFile(join(destination, "file.txt"), "utf8")).toBe(

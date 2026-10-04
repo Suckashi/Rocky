@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { randomUUID } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -329,12 +329,20 @@ test("owner grants private memory in Work UI and native model receives only auth
     await expect(
       grants.getByRole("button", { name: "授權讀取此範圍" }),
     ).toHaveCount(0);
-    await grants.getByRole("button", { name: "撤銷此權限" }).click();
+    await grants
+      .locator(":scope > div")
+      .filter({ hasText: "讀取已授權記憶範圍" })
+      .getByRole("button", { name: "撤銷此權限" })
+      .click();
     await expect(grants).toContainText("已撤銷");
     const saved = await (
       await page.request.get("/api/v1/works/" + record.id + "/grants")
     ).json();
-    expect(saved.grants[0]).toMatchObject({
+    expect(
+      saved.grants.find(
+        (grant: { resource?: string }) => grant.resource === "memory",
+      ),
+    ).toMatchObject({
       revoked: true,
       memory: { scope: "user", includePrivate: true },
     });

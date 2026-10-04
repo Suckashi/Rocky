@@ -115,9 +115,9 @@ test.each([true, "child"] as const)(
         id: string;
         status: string;
       };
-    expect(receipt.status).toBe("accepted");
-    expect(f.service.steer(main.id, input)).toEqual(receipt);
-    f.service.steer(main.id, { ...input, requestId: randomUUID() });
+      expect(receipt.status).toBe("accepted");
+      expect(f.service.steer(main.id, input)).toEqual(receipt);
+      f.service.steer(main.id, { ...input, requestId: randomUUID() });
       expect(() =>
         f.service.steer(main.id, { ...input, text: "changed" }),
       ).toThrow("changed");
@@ -153,7 +153,7 @@ test.each([true, "child"] as const)(
       const history = new ConversationStore(f.service.store)
         .page()
         .messages.filter((m) => m.source === "steering");
-    expect(history).toHaveLength(2);
+      expect(history).toHaveLength(2);
       expect(history[0]!.text).toBe(input.text);
       expect(
         f.service.store.db

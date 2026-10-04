@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   documentContentSchema,
+  documentHistorySchema,
   type RockyDocument,
 } from "../../../packages/contracts/src/documents.js";
 type Value = { document: RockyDocument; content: string };
@@ -53,6 +54,36 @@ export function DocumentEditor({
   const receipt = useRef<{ intent: string; id: string } | undefined>(undefined);
   const [historyRevision, setHistoryRevision] = useState("1");
   const [historical, setHistorical] = useState<Value>();
+  const [history, setHistory] = useState<RockyDocument[]>([]);
+  const [nextBefore, setNextBefore] = useState<number | null>(null);
+  async function loadHistory(before?: number) {
+    setBusy(true);
+    setError("");
+    try {
+      const page = documentHistorySchema.parse(
+        await request(
+          `/documents/${value.document.id}/history${before === undefined ? "" : `?before=${before}`}`,
+        ),
+      );
+      setHistory((old) =>
+        before === undefined
+          ? page.revisions
+          : [
+              ...new Map(
+                [...old, ...page.revisions].map((item) => [
+                  item.revision,
+                  item,
+                ]),
+              ).values(),
+            ],
+      );
+      setNextBefore(page.nextBefore);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
   const validHistory =
     /^\d+$/.test(historyRevision) &&
     Number(historyRevision) >= 1 &&
@@ -200,6 +231,39 @@ export function DocumentEditor({
         <summary>
           {zh ? "版本紀錄與還原" : "Revision history and restore"}
         </summary>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void loadHistory()}
+        >
+          {zh ? "載入版本清單" : "Load revision list"}
+        </button>
+        <ul>
+          {history.map((item) => (
+            <li key={item.revision}>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  setHistoryRevision(String(item.revision));
+                  setHistorical(undefined);
+                }}
+              >
+                {item.revision} · {item.title}
+              </button>{" "}
+              <time dateTime={item.updatedAt}>{item.updatedAt}</time>
+            </li>
+          ))}
+        </ul>
+        {nextBefore !== null && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void loadHistory(nextBefore)}
+          >
+            {zh ? "較早版本" : "Earlier revisions"}
+          </button>
+        )}
         <label>
           {zh ? "查看版本" : "View revision"}
           <input

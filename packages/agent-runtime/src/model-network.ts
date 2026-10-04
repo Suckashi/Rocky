@@ -6,7 +6,7 @@ import {
 } from "../../contracts/src/models.js";
 import { RockyError } from "../../contracts/src/index.js";
 import { assertEvaluationEgress } from "./evaluation-egress.js";
-import { pinnedLookup, type HostResolver } from "./model-dns.js";
+import { ModelDnsPolicy, type HostResolver } from "./model-dns.js";
 
 export function bypassProxy(url: URL, patterns: string): boolean {
   const host = url.hostname.toLowerCase();
@@ -26,7 +26,7 @@ export function bypassProxy(url: URL, patterns: string): boolean {
 }
 
 export function resolveProxy(
-  config: ModelConfig,
+  config: Pick<ModelConfig, "baseUrl" | "proxy">,
   env: NodeJS.ProcessEnv,
 ): string | undefined {
   if (config.proxy.mode === "direct") return;
@@ -42,6 +42,42 @@ export function resolveProxy(
   return value ? endpointSchema.parse(value) : undefined;
 }
 
+export function createConnectionDispatcher(
+  config: Pick<ModelConfig, "baseUrl" | "proxy" | "caRef">,
+  env: NodeJS.ProcessEnv,
+  dnsPolicy = new ModelDnsPolicy(),
+  resolver?: HostResolver,
+): Dispatcher {
+  const base = endpointSchema.parse(config.baseUrl);
+  const ca = config.caRef ? env[config.caRef] : undefined;
+  if (config.caRef && !ca)
+    throw new RockyError(
+      "ca_unavailable",
+      "CA reference is unavailable in the daemon",
+      409,
+    );
+  const tls = {
+    rejectUnauthorized: true,
+    ...(ca ? { ca: [...getCACertificates("default"), ca] } : {}),
+  };
+  const proxy = resolveProxy(config, env);
+  return proxy
+    ? new ProxyAgent({
+        uri: proxy,
+        requestTls: tls,
+        proxyTls: {
+          ...tls,
+          lookup: dnsPolicy.lookup(new URL(proxy).hostname, resolver),
+        },
+      })
+    : new Agent({
+        connect: {
+          ...tls,
+          lookup: dnsPolicy.lookup(new URL(base).hostname, resolver),
+        },
+      });
+}
+
 /** One dispatcher per connection snapshot. Never changes global TLS/proxy state. */
 export class ModelNetwork {
   private readonly dispatcher: Dispatcher;
@@ -51,6 +87,7 @@ export class ModelNetwork {
     config: ModelConfig,
     env: NodeJS.ProcessEnv = process.env,
     resolver?: HostResolver,
+    dnsPolicy = new ModelDnsPolicy(),
   ) {
     const base = endpointSchema.parse(config.baseUrl);
     this.endpoint =
@@ -65,33 +102,12 @@ export class ModelNetwork {
         "Credential reference is unavailable in the daemon",
         409,
       );
-    const ca = config.caRef ? env[config.caRef] : undefined;
-    if (config.caRef && !ca)
-      throw new RockyError(
-        "ca_unavailable",
-        "CA reference is unavailable in the daemon",
-        409,
-      );
-    const tls = {
-      rejectUnauthorized: true,
-      ...(ca ? { ca: [...getCACertificates("default"), ca] } : {}),
-    };
-    const proxy = resolveProxy(config, env);
-    this.dispatcher = proxy
-      ? new ProxyAgent({
-          uri: proxy,
-          requestTls: tls,
-          proxyTls: {
-            rejectUnauthorized: true,
-            lookup: pinnedLookup(new URL(proxy).hostname, resolver),
-          },
-        })
-      : new Agent({
-          connect: {
-            ...tls,
-            lookup: pinnedLookup(new URL(base).hostname, resolver),
-          },
-        });
+    this.dispatcher = createConnectionDispatcher(
+      config,
+      env,
+      dnsPolicy,
+      resolver,
+    );
     this.headers = { "content-type": "application/json" };
     if (config.provider === "anthropic") {
       this.headers["anthropic-version"] = "2023-06-01";

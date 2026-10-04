@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { McpServerForm } from "./mcp-server-form.js";
 import {
   mcpConfigSchema,
   mcpConfigSnapshotSchema,
@@ -222,6 +223,15 @@ export function McpSettings({
               </button>
             </section>
           )}
+          <McpServerForm
+            text={text}
+            disabled={busy || revision === null}
+            locale={locale}
+            onChange={(value) => {
+              setText(value);
+              setSaved(false);
+            }}
+          />
           <form
             onSubmit={(e) => {
               e.preventDefault();

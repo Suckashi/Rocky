@@ -5,6 +5,31 @@ import { FixtureModel } from "../fixtures/models/model.js";
 import { createRockyAgent } from "../packages/agent-runtime/src/factory.js";
 import { validateScratchCall } from "../packages/agent-runtime/src/scratch-policy.js";
 
+test("native glob inputs are bounded before upstream pattern compilation", () => {
+  expect(() =>
+    validateScratchCall("glob", { path: "/scratch", pattern: "**/*.{ts,js}" }),
+  ).not.toThrow();
+  expect(() =>
+    validateScratchCall("glob", {
+      path: "/scratch",
+      pattern: "{".repeat(9) + "x" + "}".repeat(9),
+    }),
+  ).toThrow("nesting");
+  expect(() =>
+    validateScratchCall("grep", {
+      path: "/scratch",
+      pattern: "literal",
+      glob: "(".repeat(9) + "x" + ")".repeat(9),
+    }),
+  ).toThrow("nesting");
+  expect(() =>
+    validateScratchCall("glob", {
+      path: "/scratch",
+      pattern: "x".repeat(1025),
+    }),
+  ).toThrow("budget");
+});
+
 test("native scratch writes/edits/read survive checkpoints and stay isolated by execution thread", async () => {
   const events: Record<string, unknown>[] = [];
   const model = new FixtureModel(false, async (messages) => {
@@ -158,6 +183,6 @@ test("native guard refuses execute and out-of-scope tools before any public star
         { configurable: { thread_id: name } },
       ),
     ).rejects.toThrow(/denied/);
-    expect(events).toEqual([]);
+    expect(events).toEqual(["rocky.policy.denied"]);
   }
 });

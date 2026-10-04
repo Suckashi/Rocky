@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -164,12 +164,10 @@ test("explicit workspace selection and read scope reaches real native Work throu
     }
   } finally {
     if (requestFailures.length)
-      await test
-        .info()
-        .attach("request-failures", {
-          body: JSON.stringify(requestFailures),
-          contentType: "application/json",
-        });
+      await test.info().attach("request-failures", {
+        body: JSON.stringify(requestFailures),
+        contentType: "application/json",
+      });
     await provider.close();
     await rm(root, { recursive: true, force: true });
   }

@@ -1,6 +1,7 @@
 import { LearningReflection } from "./learning-reflection.js";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
+import { learningEpisodeEditSchema } from "../../../packages/contracts/src/learning.js";
 const schema = z.object({
   items: z.array(
     z.object({
@@ -118,6 +119,13 @@ export function LearningEpisodes({
       )}
       {value?.items.map((item) => (
         <article key={item.id} className="model-card">
+          <EpisodeEditor
+            key={`${item.id}:${item.revision}`}
+            item={item}
+            locale={locale}
+            request={request}
+            onSaved={() => void load()}
+          />
           <strong>{item.summary.goal}</strong>
           <p>
             {item.status === "needs_review"
@@ -236,6 +244,84 @@ export function LearningEpisodes({
           {zh ? "較早的摘要" : "Earlier summaries"}
         </button>
       )}
+    </details>
+  );
+}
+function EpisodeEditor({
+  item,
+  locale,
+  request,
+  onSaved,
+}: {
+  item: z.infer<typeof schema>["items"][number];
+  locale: "zh" | "en";
+  request: (path: string, body?: unknown) => Promise<unknown>;
+  onSaved: () => void;
+}) {
+  const [summary, setSummary] = useState(item.summary),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
+  const intent = useRef({ key: "", id: "" }),
+    zh = locale === "zh";
+  async function save() {
+    setBusy(true);
+    setError("");
+    try {
+      const key = JSON.stringify(summary);
+      if (intent.current.key !== key)
+        intent.current = { key, id: crypto.randomUUID() };
+      await request(
+        `/learning/episodes/${item.id}/edit`,
+        learningEpisodeEditSchema.parse({
+          requestId: intent.current.id,
+          expectedRevision: item.revision,
+          contentHash: item.contentHash,
+          summary,
+        }),
+      );
+      onSaved();
+    } catch (cause) {
+      setError(String(cause));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <details>
+      <summary>
+        {zh ? "編輯／重新提交來源摘要" : "Edit / resubmit source summary"}
+      </summary>
+      <p>
+        {zh
+          ? "修改會要求重新審查，撤回衍生候選並隔離由此發布的技能。來源證據的選取範圍不變。"
+          : "Edits require review again, withdraw derived candidates and quarantine skills published from this episode. Selected evidence scope stays unchanged."}
+      </p>
+      {(Object.keys(summary) as (keyof typeof summary)[]).map((key) => (
+        <label key={key}>
+          {key}
+          <textarea
+            disabled={busy}
+            value={
+              Array.isArray(summary[key])
+                ? summary[key].join("\n")
+                : summary[key]
+            }
+            onChange={(event) =>
+              setSummary({
+                ...summary,
+                [key]:
+                  key === "goal"
+                    ? event.target.value
+                    : event.target.value.split("\n").filter(Boolean),
+              })
+            }
+          />
+        </label>
+      ))}
+      <button disabled={busy} onClick={() => void save()}>
+        {zh ? "保存並重新提交審查" : "Save and resubmit for review"}
+      </button>
+      {error && <p role="alert">{error}</p>}
     </details>
   );
 }

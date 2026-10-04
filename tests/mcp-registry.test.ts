@@ -133,7 +133,9 @@ test("MCP settings use atomic CAS and persistent receipts, isolated launch env/p
       config: emptyMcpConfig(),
     });
     expect(registry.redact("synthetic-mcp-credential")).toBe("[REDACTED]");
-    expect(registry.redactDiagnosticTail("logged synthetic-mcp-")).toBe("logged [REDACTED]");
+    expect(registry.redactDiagnosticTail("logged synthetic-mcp-")).toBe(
+      "logged [REDACTED]",
+    );
     store.close();
     store = new Store(root);
     registry = new McpRegistry(store);

@@ -1,5 +1,5 @@
 import { mkdirSync, writeFileSync } from "node:fs";
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { randomUUID } from "node:crypto";
 test("explicit activity fixture matches compact inline tool layout", async ({
   page,
@@ -125,6 +125,14 @@ test("explicit activity fixture matches compact inline tool layout", async ({
       },
     }),
   );
+  await page.route("**/api/v1/works?ids=*", (route) => {
+    const ids = new Set(
+      new URL(route.request().url()).searchParams.get("ids")!.split(","),
+    );
+    return route.fulfill({
+      json: { works: [w].filter((work) => ids.has(work.id)) },
+    });
+  });
   await page.goto("/");
   await expect(page.locator("article.work")).toHaveCount(1);
   if (process.env.ROCKY_CAPTURE_PHASE !== "before") {

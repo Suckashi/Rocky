@@ -1,0 +1,27 @@
+{
+  "platform": "win32",
+  "node": "v24.12.0",
+  "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+  "totalMemoryBytes": 33453703168,
+  "mode": "fixture",
+  "navigationMs": [1816, 337, 298, 308, 299],
+  "submissionReceiptMs": [17, 14, 16, 15, 14, 13, 17, 15, 15, 16],
+  "eventToVisibleUpperBoundMs": [
+    143, 171, 147, 202, 162, 149, 152, 187, 198, 181
+  ],
+  "p95": {
+    "navigationMs": 1816,
+    "submissionMs": 17,
+    "projectionMs": 202
+  },
+  "targets": {
+    "navigationMs": 5000,
+    "submissionMs": 300,
+    "projectionMs": 500
+  },
+  "limitations": [
+    "Dev-server UI and scripted local model; polling adds measurement overhead.",
+    "Current hardware baseline only; no before/after speedup claim.",
+    "Installed compatibility Chromium, not pinned-browser or egress acceptance."
+  ]
+}

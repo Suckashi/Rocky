@@ -212,7 +212,11 @@ test("reflection authority pins reviewed source, restricts skills and persists o
       reflection.call(binding, "patch", "propose_skill_patch", {
         base: ref,
         reason: "Scoped fix",
-        changes: { steps: ["Read then verify"] },
+        changes: {
+          steps: ["Read then verify"],
+          verification: ["Check the observed receipt"],
+          evidenceRefs: [event.id],
+        },
       }),
     ).toMatchObject({ status: "proposed" });
     expect(

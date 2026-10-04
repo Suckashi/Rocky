@@ -15,8 +15,10 @@ import {
   ConfiguredModel,
   type ModelAccounting,
 } from "../../../packages/agent-runtime/src/configured-model.js";
+import { ModelDnsPolicy } from "../../../packages/agent-runtime/src/model-dns.js";
 
 export class ModelRegistry {
+  private readonly dnsPolicies = new Map<string, ModelDnsPolicy>();
   private secrets() {
     const rows = this.store.db
       .prepare("SELECT data FROM model_connections")
@@ -74,11 +76,24 @@ export class ModelRegistry {
     signal: AbortSignal,
   ) {
     const connection = this.assertRunnable(id, revision);
+    const dnsKey = `${id}:${revision}`;
+    let dnsPolicy = this.dnsPolicies.get(dnsKey);
+    if (!dnsPolicy) {
+      dnsPolicy = new ModelDnsPolicy();
+      this.dnsPolicies.set(dnsKey, dnsPolicy);
+    }
     const abort = new AbortController();
     const model = new ConfiguredModel(
       connection.config,
       {
         ...accounting,
+        // Reserve the entire configured input capacity, not a guessed token count.
+        // Actual usage settles the reservation; unknown usage keeps the full hold.
+        inputTokenBound:
+          accounting.inputTokenBound ??
+          (() =>
+            connection.config.contextWindowTokens! -
+            connection.config.maxOutputTokens),
         reserve: (...args) => {
           if (this.closed || this.get(id).revision !== revision)
             throw new RockyError(
@@ -91,6 +106,7 @@ export class ModelRegistry {
       },
       AbortSignal.any([abort.signal, signal]),
       this.env,
+      dnsPolicy,
     );
     const lease = { connectionId: id, revision, abort, model };
     this.leases.add(lease);
@@ -217,6 +233,12 @@ export class ModelRegistry {
         lease.revision !== this.get(command.id).revision
       )
         lease.abort.abort();
+    for (const key of this.dnsPolicies.keys())
+      if (
+        key.startsWith(command.id + ":") &&
+        key !== `${command.id}:${saved.revision}`
+      )
+        this.dnsPolicies.delete(key);
     return this.public(saved);
   }
   private record(probe: ModelProbe) {
@@ -294,6 +316,7 @@ export class ModelRegistry {
       () => this.record(result),
       AbortSignal.any([abort.signal, AbortSignal.timeout(15000)]),
       this.env,
+      this.connectionDns(connection.id, connection.revision),
     )
       .catch(() => {
         result.status = "failed";
@@ -307,6 +330,7 @@ export class ModelRegistry {
   }
   async close() {
     this.closed = true;
+    this.dnsPolicies.clear();
     const leases = [...this.leases];
     this.leases.clear();
     for (const lease of leases) lease.abort.abort();
@@ -314,5 +338,14 @@ export class ModelRegistry {
     const running = [...this.active.values()];
     for (const entry of running) entry.abort.abort();
     await Promise.allSettled(running.map((entry) => entry.promise));
+  }
+  private connectionDns(id: string, revision: number) {
+    const key = `${id}:${revision}`;
+    let policy = this.dnsPolicies.get(key);
+    if (!policy) {
+      policy = new ModelDnsPolicy();
+      this.dnsPolicies.set(key, policy);
+    }
+    return policy;
   }
 }

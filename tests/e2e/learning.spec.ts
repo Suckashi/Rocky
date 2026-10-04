@@ -1,11 +1,49 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 test("Learning UI requires scoped consent, preserves stale drafts and turns policy off", async ({
   page,
 }) => {
   await page.goto("/");
   const { token } = await (await page.request.get("/api/v1/session")).json();
   const headers = { "x-rocky-session": token };
+  // Configuration-only fixture. No source Work is opted in and no endpoint is called.
+  const connectionId = randomUUID(),
+    suiteId = randomUUID();
+  expect(
+    (
+      await page.request.post("/api/v1/model-connections", {
+        headers,
+        data: {
+          id: connectionId,
+          requestId: randomUUID(),
+          expectedRevision: 0,
+          config: {
+            name: "Learning policy configuration fixture",
+            provider: "openai-compatible",
+            baseUrl: "http://127.0.0.1:9/v1",
+            modelId: "configuration-only",
+            contextWindowTokens: 4096,
+            maxOutputTokens: 128,
+          },
+        },
+      })
+    ).ok(),
+  ).toBe(true);
+  expect(
+    (
+      await page.request.post("/api/v1/learning/suites", {
+        headers,
+        data: {
+          ...JSON.parse(
+            readFileSync("fixtures/eval/learning-suite.json", "utf8"),
+          ),
+          id: suiteId,
+          requestId: randomUUID(),
+        },
+      })
+    ).ok(),
+  ).toBe(true);
   const initial = await (
     await page.request.get("/api/v1/learning/policy")
   ).json();
@@ -25,8 +63,10 @@ test("Learning UI requires scoped consent, preserves stale drafts and turns poli
   await page.getByRole("button", { name: "Learning", exact: true }).click();
   const ui = page.locator(".learning-settings");
   await expect(ui.locator(':scope > [role="status"]')).toContainText("off");
-  await expect(ui).toContainText("尚未接通");
+  await expect(ui).toContainText("模型");
   await ui.getByLabel("Learning 模式").selectOption("propose");
+  await ui.getByLabel("反思模型", { exact: true }).selectOption(connectionId);
+  await ui.getByLabel("固定評測集", { exact: true }).selectOption(suiteId);
   const save = ui.getByRole("button", { name: "保存學習政策" });
   await expect(save).toBeDisabled();
   await ui.getByLabel("個人範圍（不包含專案）").check();
@@ -75,6 +115,8 @@ test("Learning UI requires scoped consent, preserves stale drafts and turns poli
     });
   }
   await ui.getByLabel("Learning 模式").selectOption("propose");
+  await ui.getByLabel("反思模型", { exact: true }).selectOption(connectionId);
+  await ui.getByLabel("固定評測集", { exact: true }).selectOption(suiteId);
   await ui.getByLabel("個人範圍（不包含專案）").check();
   await ui.getByLabel("我同意在以上範圍提出學習候選").check();
   await save.click();
@@ -174,7 +216,7 @@ test("work Learning consent defaults excluded, saves review consent and withdraw
     const created = await response.json();
     await page.reload();
     const work = page.locator("article.work").filter({ hasText: marker });
-    await work.locator(":scope > details > summary").click();
+    await work.getByText("工作詳情", { exact: true }).click();
     const ui = work.locator(".work-learning");
     await ui.locator("summary").click();
     await expect(ui.locator(':scope > [role="status"]')).toContainText(
@@ -312,7 +354,7 @@ test("work Learning consent defaults excluded, saves review consent and withdraw
       });
     }
     await page.reload();
-    await work.locator(":scope > details > summary").click();
+    await work.getByText("工作詳情", { exact: true }).click();
     await ui.locator("summary").click();
     await expect(ui.getByLabel("私人來源，不用於學習")).toBeChecked();
   } finally {
@@ -475,7 +517,11 @@ test("explicit UI fixture reads created and patched candidates without exposing 
               payload: {
                 base: { skillId: randomUUID(), revision: 4, contentHash: hash },
                 reason: "Add explicit verification",
-                changes: { verification: ["Verify result before continuing"] },
+                changes: {
+                  steps: ["Inspect evidence"],
+                  evidenceRefs: draft.evidenceRefs,
+                  verification: ["Verify result before continuing"],
+                },
               },
             },
           ],

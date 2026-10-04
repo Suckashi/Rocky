@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { startAgentProvider } from "../../fixtures/models/agent-provider.js";
 
 test("real provider SSE is visible before completion and daemon stop cancels the selected stream", async ({
@@ -30,7 +30,7 @@ test("real provider SSE is visible before completion and daemon stop cancels the
       const prompt =
         `Stream ${cancel ? "stop" : "complete"} ${Date.now()}` +
         (cancel ? "" : " 閱讀歷史驗證。".repeat(120));
-      await page.locator("textarea").fill(prompt);
+      await page.locator("#compose textarea").fill(prompt);
       await page.getByRole("button", { name: "傳送至模型" }).click();
       const work = page.locator("article.work").filter({ hasText: prompt });
       await work.getByRole("button", { name: "核准這次寫入" }).click();

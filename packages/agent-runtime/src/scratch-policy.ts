@@ -51,6 +51,29 @@ export function validateScratchCall(
   // Keep public worker IPC and checkpoint writes bounded; never serialize file contents into traces.
   if (Buffer.byteLength(JSON.stringify(args), "utf8") > 24 * 1024)
     throw Error("Rocky scratch tool arguments exceed 24 KiB");
+  // Upstream braces currently has no patched release for deeply nested input.
+  // Bound model-supplied glob syntax before native middleware reaches micromatch.
+  if (name === "glob" || name === "grep") {
+    for (const pattern of [path, name === "glob" ? args.pattern : args.glob]) {
+      if (pattern === undefined || pattern === null) continue;
+      if (typeof pattern !== "string" || pattern.length > 1024)
+        throw Error("Rocky glob pattern exceeds its bounded syntax budget");
+      let braces = 0,
+        parentheses = 0;
+      for (let i = 0; i < pattern.length; i++) {
+        if (pattern[i] === "\\") {
+          i++;
+          continue;
+        }
+        if (pattern[i] === "{" && ++braces > 8)
+          throw Error("Rocky glob nesting exceeds its bounded syntax budget");
+        if (pattern[i] === "}") braces = Math.max(0, braces - 1);
+        if (pattern[i] === "(" && ++parentheses > 8)
+          throw Error("Rocky glob nesting exceeds its bounded syntax budget");
+        if (pattern[i] === ")") parentheses = Math.max(0, parentheses - 1);
+      }
+    }
+  }
   return {
     path,
     storage: "run-private-graph-state",

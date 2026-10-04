@@ -1,0 +1,6 @@
+
+> rocky@0.1.0-dev.0 format:check
+> prettier --check apps packages fixtures tests scripts *.ts *.mjs *.json *.md docs .github
+
+Checking formatting...
+All matched files use Prettier code style!

@@ -1,6 +1,22 @@
-import { ComputerPanel } from "./computer-panel.js";
+import { WorkBudget } from "./work-budget.js";
+import { EnvironmentSelection } from "./environment-selection.js";
+import { BrowserScope } from "./browser-scope.js";
+import {
+  AttachmentPicker,
+  AttachmentLinks,
+  attachmentRefs,
+} from "./attachments.js";
+import type { Attachment } from "../../../packages/contracts/src/attachments.js";
+import { RoutineSettings } from "./routines.js";
+import { TrackingSettings } from "./tracked-work.js";
+import { WorkUsage } from "./work-usage.js";
+import { Diagnostics } from "./diagnostics.js";
+import {
+  modelBudgetSchema,
+  type ModelBudget,
+} from "../../../packages/contracts/src/model-budget.js";
 import { ToolActivity } from "./tool-activity.js";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { lazy, useEffect, useRef, useState, type FormEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { CopilotKitProvider, useAgent } from "@copilotkit/react-core/v2";
 import type { Work } from "../../../packages/contracts/src/index.js";
@@ -9,14 +25,13 @@ import { useRockyProjection, workCommands } from "./rocky-adapter.js";
 import { ModelSettings } from "./model-settings.js";
 import { McpSettings } from "./mcp-settings.js";
 import { MemorySettings } from "./memory-settings.js";
-import { LearningSettings } from "./learning-settings.js";
-import { SkillSettings } from "./skill-settings.js";
+
 import { SkillRevocation } from "./skill-revocation.js";
 import { WriteProposal } from "./write-proposal.js";
 import { MemoryProposal } from "./memory-proposal.js";
 import { WorkArtifacts } from "./work-artifacts.js";
 import type { Artifact } from "../../../packages/contracts/src/artifacts.js";
-import { Artifacts } from "./artifacts.js";
+
 import { Workspaces } from "./workspaces.js";
 import type { Workspace } from "../../../packages/contracts/src/workspaces.js";
 import { WorkOperations } from "./work-operations.js";
@@ -28,6 +43,24 @@ import { RockyPresence } from "./rocky-presence.js";
 import { Chrome, Transcript } from "./chrome.js";
 import ReactMarkdown from "react-markdown";
 import "./style.css";
+const ComputerPanel = lazy(() =>
+  import("./computer-panel.js").then((module) => ({
+    default: module.ComputerPanel,
+  })),
+);
+const LearningSettings = lazy(() =>
+  import("./learning-settings.js").then((module) => ({
+    default: module.LearningSettings,
+  })),
+);
+const SkillSettings = lazy(() =>
+  import("./skill-settings.js").then((module) => ({
+    default: module.SkillSettings,
+  })),
+);
+const Artifacts = lazy(() =>
+  import("./artifacts.js").then((module) => ({ default: module.Artifacts })),
+);
 let session = "";
 async function request(path: string, body?: unknown) {
   const response = await fetch(API_PREFIX + path, {
@@ -149,7 +182,9 @@ function App() {
     element?.focus({ preventScroll: true });
     element?.scrollIntoView({ block: "start" });
   }, [focusedWork]);
-  const [maxCalls, setMaxCalls] = useState("48");
+  const [modelBudget, setModelBudget] = useState<ModelBudget | null>(() =>
+    modelBudgetSchema.parse({}),
+  );
   const modelTools = useRef<HTMLDetailsElement>(null);
   const [memoryScope, setMemoryScope] = useState<"off" | "user" | "project">(
     "off",
@@ -157,10 +192,12 @@ function App() {
   const [memoryPrivate, setMemoryPrivate] = useState(false);
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace>(),
     [workspaceRead, setWorkspaceRead] = useState(false);
-  const validBudget =
-    /^\d+$/.test(maxCalls) &&
-    Number(maxCalls) >= 1 &&
-    Number(maxCalls) <= 10000;
+  const validBudget = modelBudget !== null;
+  const [environmentId, setEnvironmentId] = useState("");
+  const [browserOrigins, setBrowserOrigins] = useState("");
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [attachmentBusy, setAttachmentBusy] = useState(false);
+  const [browserProfileId, setBrowserProfileId] = useState("");
   const t = labels[locale];
   const [selectedModel, setSelectedModel] = useState<{
     connectionId: string;
@@ -177,6 +214,7 @@ function App() {
       !text.trim() ||
       (!enabled && !selectedModel) ||
       busy ||
+      attachmentBusy ||
       !validBudget ||
       !isReady ||
       !connected
@@ -200,6 +238,18 @@ function App() {
         forwardedProps: selectedModel
           ? {
               mode: "configured",
+              attachments: attachmentRefs(attachments),
+              ...(environmentId ? { environmentId } : {}),
+              ...(browserProfileId
+                ? { browserProfileId }
+                : browserOrigins.trim()
+                  ? {
+                      browserOrigins: browserOrigins
+                        .split(/\r?\n/)
+                        .map((value) => value.trim())
+                        .filter(Boolean),
+                    }
+                  : {}),
               ...(memoryScope !== "off"
                 ? {
                     memoryRead: [
@@ -215,7 +265,7 @@ function App() {
                   }
                 : {}),
               transport,
-              modelBudget: { maxCalls: Number(maxCalls) },
+              modelBudget,
               modelSelection: {
                 connectionId: selectedModel.connectionId,
                 revision: selectedModel.revision,
@@ -223,10 +273,12 @@ function App() {
             }
           : {
               mode: "fixture",
+              attachments: attachmentRefs(attachments),
               transport,
-              modelBudget: { maxCalls: Number(maxCalls) },
+              modelBudget,
             },
       });
+      setAttachments([]);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -310,6 +362,11 @@ function App() {
       }
       settings={
         <>
+          <p>
+            {locale === "zh"
+              ? "資料保存在本機；網路連線只使用你明確配置的模型、MCP 與核准的操作。保存設定不會啟動測試或連線。"
+              : "Data stays local. Network connections use your explicitly configured models, MCP servers and approved operations. Saving settings does not start a probe or connection."}
+          </p>
           <ModelSettings
             locale={locale}
             request={request}
@@ -321,6 +378,13 @@ function App() {
             }}
           />
           <McpSettings locale={locale} request={request} />
+          <Diagnostics locale={locale} request={request} />
+          <RoutineSettings locale={locale} request={request} />
+          <TrackingSettings
+            locale={locale}
+            works={presenceWorks}
+            request={request}
+          />
           <MemorySettings
             locale={locale}
             request={request}
@@ -429,11 +493,15 @@ function App() {
                               ? locale === "zh"
                                 ? "這將在選定工作區建立或完整取代一個檔案。"
                                 : "This creates or fully replaces one file in the selected workspace."
-                              : w.approval.tool === "workspace_worktree"
+                              : w.approval.tool === "workspace_command"
                                 ? locale === "zh"
-                                  ? "這將建立本地 Git 分支與獨立工作區，並修改來源 repository 的 Git 登記。"
-                                  : "This creates a local Git branch and worktree and updates the source repository Git registration."
-                                : t.impact}
+                                  ? "這會以你的本機 OS 權限，在選定工作區執行精確命令；沒有檔案或網路隔離。執行結果可能改變工作區以外的資料。"
+                                  : "This runs the exact command with your local OS permissions in the selected workspace. There is no filesystem or network isolation; it may affect data outside the workspace."
+                                : w.approval.tool === "workspace_worktree"
+                                  ? locale === "zh"
+                                    ? "這將建立本地 Git 分支與獨立工作區，並修改來源 repository 的 Git 登記。"
+                                    : "This creates a local Git branch and worktree and updates the source repository Git registration."
+                                  : t.impact}
                       </p>
                       {w.approval.tool === "memory_write" ? (
                         <>
@@ -469,6 +537,23 @@ function App() {
                             locale={locale}
                             request={request}
                           />
+                        </>
+                      ) : w.approval.tool === "document_write" ? (
+                        <>
+                          <p>
+                            {locale === "zh"
+                              ? "核准將保存完整內容為新文件版本，不會改動原始成果。"
+                              : "Approval saves the complete content as a new document revision without changing source artifacts."}
+                          </p>
+                          <p>
+                            {String(w.approval.args.title)} · r
+                            {Number(w.approval.args.expectedRevision)} → r
+                            {Number(w.approval.args.expectedRevision) + 1}
+                          </p>
+                          <code>{String(w.approval.args.id)}</code>
+                          <pre className="approval-proposal" tabIndex={0}>
+                            {String(w.approval.args.content)}
+                          </pre>
                         </>
                       ) : ["mcp_call", "mcp_data"].includes(w.approval.tool) ? (
                         <>
@@ -545,11 +630,56 @@ function App() {
                         w.approval.worktreePreview ? (
                         <>
                           <p>
-                            {locale === "zh"
-                              ? "只複製已提交的 HEAD；未提交與未追蹤檔案不會帶入。新工作區需要另開 Work 選取，讀取權限不會自動授予。"
-                              : "Checks out committed HEAD only; excludes dirty and untracked files. Select the new workspace in a future Work with fresh read permission."}
+                            {w.approval.worktreePreview.isolation ===
+                            "directory"
+                              ? locale === "zh"
+                                ? "建立全新空資料夾；不複製來源檔案，也不建立 Git 分支。"
+                                : "Creates a new empty directory; no source files or Git branch are copied."
+                              : locale === "zh"
+                                ? "只複製已提交的 HEAD；未提交與未追蹤檔案不會帶入。"
+                                : "Checks out committed HEAD only; excludes dirty and untracked files."}
+                          </p>
+                          <p>
+                            {w.approval.worktreePreview.useForCurrentWork
+                              ? locale === "zh"
+                                ? "核准後，此 Work 將切換到新工作區。"
+                                : "Approval also switches this Work to the new workspace."
+                              : locale === "zh"
+                                ? "此 Work 不會切換；新工作區供之後的 Work 選取。"
+                                : "This Work keeps its workspace; the new one is available for future Works."}
+                            {w.approval.worktreePreview.grantRead
+                              ? locale === "zh"
+                                ? "核准同時允許此 Work 讀取新工作區。"
+                                : "Approval also grants this Work read access to the new workspace."
+                              : locale === "zh"
+                                ? "不授予新工作區讀取權限。"
+                                : "No read access to the new workspace is granted."}
                           </p>
                           <dl className="worktree-proposal">
+                            {w.approval.worktreePreview.environmentTemplate && (
+                              <>
+                                <dt>
+                                  {locale === "zh"
+                                    ? "新容器設定"
+                                    : "New container configuration"}
+                                </dt>
+                                <dd>
+                                  <p>
+                                    {locale === "zh"
+                                      ? "核准也會複製以下容器設定，將掛載改為新工作區並切換此 Work。新容器仍須在 Computer 明確啟動；不會改用主機命令。"
+                                      : "Approval also clones this container configuration with the new workspace mount and switches this Work. Start the new environment explicitly in Computer; no host command fallback."}
+                                  </p>
+                                  <pre>
+                                    {JSON.stringify(
+                                      w.approval.worktreePreview
+                                        .environmentTemplate,
+                                      null,
+                                      2,
+                                    )}
+                                  </pre>
+                                </dd>
+                              </>
+                            )}
                             <dt>
                               {locale === "zh" ? "目的地" : "Destination"}
                             </dt>
@@ -562,11 +692,15 @@ function App() {
                               {locale === "zh" ? "本地分支" : "Local branch"}
                             </dt>
                             <dd>
-                              <code>{w.approval.worktreePreview.branch}</code>
+                              <code>
+                                {w.approval.worktreePreview.branch ?? "—"}
+                              </code>
                             </dd>
                             <dt>HEAD</dt>
                             <dd>
-                              <code>{w.approval.worktreePreview.head}</code>
+                              <code>
+                                {w.approval.worktreePreview.head ?? "—"}
+                              </code>
                             </dd>
                           </dl>
                         </>
@@ -577,6 +711,52 @@ function App() {
                           locale={locale}
                           request={request}
                         />
+                      ) : ["workspace_command", "computer_command"].includes(
+                          w.approval.tool,
+                        ) ? (
+                        <dl className="worktree-proposal">
+                          {w.approval.tool === "computer_command" && (
+                            <>
+                              <dt>
+                                {locale === "zh"
+                                  ? "隔離環境"
+                                  : "Isolated environment"}
+                              </dt>
+                              <dd>{w.environmentId} · /work</dd>
+                            </>
+                          )}
+                          <dt>{locale === "zh" ? "執行程式" : "Executable"}</dt>
+                          <dd>
+                            <code>
+                              {String(
+                                w.approval.targetPreview ??
+                                  w.approval.args.executable,
+                              )}
+                            </code>
+                          </dd>
+                          <dt>{locale === "zh" ? "參數" : "Arguments"}</dt>
+                          <dd>
+                            <pre>
+                              {JSON.stringify(w.approval.args.args, null, 2)}
+                            </pre>
+                          </dd>
+                          <dt>{locale === "zh" ? "時間上限" : "Time limit"}</dt>
+                          <dd>{String(w.approval.args.timeoutMs)} ms</dd>
+                          <dt>
+                            {locale === "zh" ? "輸出上限" : "Output limit"}
+                          </dt>
+                          <dd>
+                            {String(w.approval.args.maxOutputBytes)} bytes
+                          </dd>
+                          <dt>
+                            {locale === "zh" ? "執行範圍" : "Execution scope"}
+                          </dt>
+                          <dd>
+                            {locale === "zh"
+                              ? "本機 OS 權限；無 sandbox"
+                              : "Local OS permissions; no sandbox"}
+                          </dd>
+                        </dl>
                       ) : (
                         <code>
                           {w.approval.tool}({JSON.stringify(w.approval.args)})
@@ -591,6 +771,7 @@ function App() {
                             "mcp_call",
                             "mcp_data",
                             "workspace_write",
+                            "workspace_command",
                             "workspace_worktree",
                             "memory_write",
                           ].includes(w.approval.tool)
@@ -639,6 +820,7 @@ function App() {
                   <details>
                     <summary>{t.detail}</summary>
                     <WorkGrants work={w} locale={locale} request={request} />
+                    <AttachmentLinks refs={w.attachments} />
                     <WorkLearning
                       work={w}
                       events={events}
@@ -678,6 +860,19 @@ function App() {
                         : "Model call limit for this work"}
                       : {w.modelBudget?.maxCalls ?? 48}
                     </p>
+                    <WorkUsage
+                      workId={w.id}
+                      revision={
+                        events.findLast(
+                          (event) =>
+                            event.workId === w.id &&
+                            event.payload.kind === "domain" &&
+                            event.payload.name === "rocky.model.completed",
+                        )?.sequence ?? String(w.revision)
+                      }
+                      locale={locale}
+                      request={request}
+                    />
                     <ol>
                       {events
                         .filter(
@@ -868,32 +1063,50 @@ function App() {
                   </select>
                 </section>
               </details>
-              <details className="work-budget">
+              <WorkBudget locale={locale} onChange={setModelBudget} />
+              <details>
                 <summary>
-                  {locale === "zh" ? "工作預算" : "Work budget"} ·{" "}
-                  {maxCalls || "—"}
+                  {locale === "zh" ? "附件" : "Attachments"}
+                  {attachments.length ? ` · ${attachments.length}` : ""}
                 </summary>
-                <label htmlFor="max-model-calls">
-                  {locale === "zh" ? "模型呼叫上限" : "Maximum model calls"}
-                </label>{" "}
-                <input
-                  id="max-model-calls"
-                  form="compose"
-                  type="number"
-                  min="1"
-                  max="10000"
-                  step="1"
-                  required
-                  value={maxCalls}
-                  onChange={(event) => setMaxCalls(event.target.value)}
-                  aria-describedby="budget-help"
+                <AttachmentPicker
+                  value={attachments}
+                  onChange={setAttachments}
+                  onBusyChange={setAttachmentBusy}
+                  request={request}
+                  locale={locale}
+                  disabled={busy}
                 />
-                <p id="budget-help">
-                  {locale === "zh"
-                    ? "每個新工作與其子代理共用此上限。送出後固定；這不是金額或 token 上限。"
-                    : "Each new work shares this limit with its subagents. Fixed after sending; this is not a money or token limit."}
-                </p>
               </details>
+              {selectedModel && (
+                <details className="computer-scope">
+                  <summary>
+                    {locale === "zh"
+                      ? "執行環境與 Browser"
+                      : "Environment & Browser"}
+                  </summary>
+                  {selectedModel && (
+                    <EnvironmentSelection
+                      workspaceId={selectedWorkspace?.id}
+                      workspaceRevision={selectedWorkspace?.revision}
+                      value={environmentId}
+                      onChange={setEnvironmentId}
+                      locale={locale}
+                      request={request}
+                    />
+                  )}
+                  {selectedModel && (
+                    <BrowserScope
+                      locale={locale}
+                      origins={browserOrigins}
+                      onOrigins={setBrowserOrigins}
+                      selected={browserProfileId}
+                      onSelect={setBrowserProfileId}
+                      request={request}
+                    />
+                  )}
+                </details>
+              )}
             </div>
             <form id="compose" onSubmit={send}>
               <textarea
@@ -938,6 +1151,7 @@ function App() {
                   (!enabled && !selectedModel) ||
                   !text.trim() ||
                   busy ||
+                  attachmentBusy ||
                   !validBudget ||
                   !isReady ||
                   !connected

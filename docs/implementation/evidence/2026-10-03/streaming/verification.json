@@ -19,9 +19,7 @@
     {
       "command": "npm run build",
       "exitCode": 0,
-      "limitations": [
-        "Existing CopilotKit bundle size warnings"
-      ]
+      "limitations": ["Existing CopilotKit bundle size warnings"]
     },
     {
       "command": "npm test",

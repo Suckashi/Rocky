@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { startHttpFixture } from "../../fixtures/mcp/server.js";
 test("MCP settings connect/discover/stop an actual configured HTTP server and preserve honest state after reload", async ({
   page,

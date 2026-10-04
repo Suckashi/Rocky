@@ -12,6 +12,8 @@ import type { Store } from "./store.js";
 import type { LearningRegistry } from "./learning.js";
 import type { SkillRegistry } from "./skills.js";
 import { intentHash } from "./intent.js";
+import { SkillCandidates } from "./skill-candidates.js";
+import { assertAutomaticAuthorization } from "./learning-automation.js";
 export class ReflectionRegistry {
   constructor(
     private readonly store: Store,
@@ -74,6 +76,7 @@ export class ReflectionRegistry {
     });
   }
   checkWork(owner: Work) {
+    assertAutomaticAuthorization(this.store, { reflectionWorkId: owner.id });
     const current = this.store.get(owner.id);
     if (
       current.runMode !== "reflection" ||
@@ -247,6 +250,15 @@ export class ReflectionRegistry {
         return JSON.parse(prior.data);
       }
       const result = {
+        candidate: undefined as
+          | {
+              proposalId: string;
+              candidateRevision: number;
+              candidateHash: string;
+              status: string;
+              packageHash: string;
+            }
+          | undefined,
         id: randomUUID(),
         episodeId: binding.episodeId,
         sourceWorkId: episode.workId,
@@ -259,6 +271,20 @@ export class ReflectionRegistry {
         contentHash: hash,
         createdAt: new Date().toISOString(),
       };
+      if (name !== "mark_no_learning") {
+        const candidate = new SkillCandidates(
+          this.store,
+          this.learning,
+          this.skills,
+        ).fromReflection(result);
+        result.candidate = {
+          proposalId: candidate.proposalId,
+          candidateRevision: candidate.candidateRevision,
+          candidateHash: candidate.candidateHash,
+          status: candidate.status,
+          packageHash: candidate.packageHash,
+        };
+      }
       this.store.db
         .prepare("INSERT INTO learning_reflection_outputs VALUES(?,?,?,?)")
         .run(result.id, key, hash, JSON.stringify(result));

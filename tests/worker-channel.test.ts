@@ -40,6 +40,16 @@ test("large native checkpoint history reaches one daemon model dispatch through 
     f.work.id,
     fileURLToPath(new URL("../apps/agent-worker/src/main.ts", import.meta.url)),
     async (_work, payload) => {
+      if (
+        payload.kind === "tool_request" &&
+        payload.tool === "rocky_skill_backend"
+      )
+        return "[]";
+      if (
+        payload.kind === "tool_request" &&
+        payload.tool === "rocky_skill_check"
+      )
+        return "ok";
       if (payload.kind !== "model_request") throw Error("Unexpected RPC");
       calls++;
       expect(Buffer.byteLength(JSON.stringify(payload))).toBeGreaterThan(65536);
@@ -98,6 +108,16 @@ test("large model response and final native result cross both real child IPC dir
     f.work.id,
     fileURLToPath(new URL("../apps/agent-worker/src/main.ts", import.meta.url)),
     async (_work, payload) => {
+      if (
+        payload.kind === "tool_request" &&
+        payload.tool === "rocky_skill_backend"
+      )
+        return "[]";
+      if (
+        payload.kind === "tool_request" &&
+        payload.tool === "rocky_skill_check"
+      )
+        return "ok";
       if (payload.kind !== "model_request") throw Error("Unexpected RPC");
       calls++;
       return { content, tool_calls: [] };
@@ -141,6 +161,16 @@ test("large daemon tool receipt resumes exact native interrupt and offloads evid
     f.work.id,
     fileURLToPath(new URL("../apps/agent-worker/src/main.ts", import.meta.url)),
     async (_work, payload) => {
+      if (
+        payload.kind === "tool_request" &&
+        payload.tool === "rocky_skill_backend"
+      )
+        return "[]";
+      if (
+        payload.kind === "tool_request" &&
+        payload.tool === "rocky_skill_check"
+      )
+        return "ok";
       if (payload.kind === "tool_request") {
         expect(payload.tool).toBe("write_sample");
         tools++;

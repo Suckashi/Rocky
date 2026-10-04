@@ -1,5 +1,8 @@
 import { reflectionBindingSchema } from "./reflection.js";
 import { worktreePreviewSchema } from "./workspaces.js";
+import { browserOriginsSchema } from "./browser.js";
+import { attachmentRefsSchema } from "./attachments.js";
+import { evaluationBindingSchema } from "./learning-evaluation.js";
 import { memoryReadSelectionSchema } from "./memory.js";
 import { z } from "zod";
 import { EventSchemas } from "@ag-ui/core/schemas";
@@ -40,6 +43,10 @@ export const submissionSchema = z
     transport: z.enum(["stdio", "http"]).default("stdio"),
     mode: z.enum(["fixture", "configured"]),
     kind: z.enum(["main", "background"]).default("main"),
+    attachments: attachmentRefsSchema.optional(),
+    environmentId: idSchema.optional(),
+    browserOrigins: browserOriginsSchema.optional(),
+    browserProfileId: idSchema.optional(),
     workspaceId: idSchema.optional(),
     workspaceRevision: revisionSchema.optional(),
     workspaceRead: z.boolean().optional(),
@@ -48,6 +55,24 @@ export const submissionSchema = z
     modelBudget: modelBudgetSchema.optional(),
   })
   .strict()
+  .refine(
+    (value) =>
+      !value.environmentId ||
+      (value.mode === "configured" && !!value.workspaceRevision),
+    { message: "Environment requires a configured workspace Work" },
+  )
+  .refine((value) => !value.browserOrigins || value.mode === "configured", {
+    message: "Browser scope requires a configured Work",
+  })
+  .refine(
+    (value) =>
+      !value.browserProfileId ||
+      (value.mode === "configured" && !value.browserOrigins),
+    {
+      message:
+        "Select either a shared browser profile or clean profile origins",
+    },
+  )
   .refine((value) => !value.memoryRead?.length || value.mode === "configured", {
     message: "Memory scope requires configured mode",
   })
@@ -132,6 +157,13 @@ export const workSchema = z
     transport: z.enum(["stdio", "http"]),
     mode: z.enum(["fixture", "configured"]),
     kind: z.enum(["main", "background"]).optional(),
+    attachments: attachmentRefsSchema.optional(),
+    environmentId: idSchema.optional(),
+    browserProfileId: idSchema.optional(),
+    workspaceIsolation: z
+      .enum(["required", "worktree", "directory"])
+      .optional(),
+    sourceWorkspaceId: idSchema.optional(),
     workspaceId: idSchema.optional(),
     workspaceRevision: revisionSchema.optional(),
     workspaceRead: z.boolean().optional(),
@@ -140,8 +172,10 @@ export const workSchema = z
     modelBudget: modelBudgetSchema.optional(),
     runMode: z.enum(["normal", "evaluation", "reflection", "unknown"]),
     reflection: reflectionBindingSchema.optional(),
+    evaluation: evaluationBindingSchema.optional(),
     status: workStatus,
     waitingFor: z.enum(["workspace", "capacity"]).optional(),
+    modelWaitCount: z.number().int().nonnegative().optional(),
     revision: revisionSchema,
     answer: z.string(),
     approval: approvalSchema.optional(),
@@ -266,6 +300,16 @@ export const snapshotSchema = z
     cursor: sequenceSchema,
     works: z.array(workSchema),
     events: z.array(publicEventSchema),
+    nextCursor: z
+      .string()
+      .regex(/^\d+:\d+$/)
+      .refine((value) =>
+        value
+          .split(":")
+          .every((part) => sequenceSchema.safeParse(part).success),
+      )
+      .nullable()
+      .default(null),
   })
   .strict();
 export const errorSchema = z

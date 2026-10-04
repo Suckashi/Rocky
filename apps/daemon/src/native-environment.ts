@@ -1,17 +1,11 @@
 import { spawn } from "node:child_process";
 import { realpath, stat } from "node:fs/promises";
-import { isAbsolute } from "node:path";
-import { z } from "zod";
+import {
+  nativeCommandSchema,
+  type NativeCommand,
+} from "../../../packages/contracts/src/native-command.js";
 import { terminateProcessTree } from "./terminate-process-tree.js";
 
-export const nativeCommandSchema = z.strictObject({
-  executable: z.string().min(1).refine(isAbsolute),
-  cwd: z.string().min(1).refine(isAbsolute),
-  args: z.array(z.string().max(65536)).max(256),
-  timeoutMs: z.number().int().min(1).max(300000),
-  maxOutputBytes: z.number().int().min(1).max(1048576),
-});
-export type NativeCommand = z.infer<typeof nativeCommandSchema>;
 export function nativeExecutionEnvironment(): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   for (const name of ["PATH", "SystemRoot", "WINDIR", "TEMP", "TMP"])
@@ -36,7 +30,7 @@ export type NativeCommandResult = {
 
 /** Internal effect adapter, NOT an authorization boundary or OS sandbox.
  * Only the daemon's exact-approved operation dispatcher may call this in production.
- * No public route/native model tool is wired until that ledger integration exists.
+ * Configured Work commands reach this adapter only through the operation ledger.
  * Exit code describes this process, never proof that an external effect succeeded.
  */
 export class NativeEnvironment {

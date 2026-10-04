@@ -151,6 +151,31 @@ export function Artifacts({
       setBusy(false);
     }
   }
+  async function newDocument() {
+    setBusy(true);
+    setError("");
+    const requestId = createRequests.current.get("new") ?? crypto.randomUUID();
+    createRequests.current.set("new", requestId);
+    try {
+      const value = documentContentSchema.parse(
+        await request("/documents/new", {
+          requestId,
+          title: zh ? "未命名文件" : "Untitled document",
+          content: "",
+        }),
+      );
+      createRequests.current.delete("new");
+      setDocuments((old) => [
+        value.document,
+        ...old.filter((document) => document.id !== value.document.id),
+      ]);
+      setEditing(value);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
   if (editing)
     return (
       <DocumentEditor
@@ -284,6 +309,13 @@ export function Artifacts({
                 : "No results yet. Save a successful write from a Work’s Operations and reconciliation."}
             </p>
           )}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void newDocument()}
+          >
+            {zh ? "建立文件" : "New document"}
+          </button>
           {documents.map((document) => (
             <article className="artifact-card" key={document.id}>
               <FileText size={20} />

@@ -4,8 +4,13 @@ import {
   documentSchema,
   documentCreateSchema,
   documentSaveSchema,
+  documentNewSchema,
+  documentWriteToolSchema,
 } from "../../../packages/contracts/src/documents.js";
-import { RockyError } from "../../../packages/contracts/src/index.js";
+import {
+  RockyError,
+  type Work,
+} from "../../../packages/contracts/src/index.js";
 import { Store } from "./store.js";
 import { ArtifactStore } from "./artifacts.js";
 import { intentHash } from "./intent.js";
@@ -22,6 +27,139 @@ export class DocumentStore {
         .prepare("SELECT data FROM documents ORDER BY rowid DESC LIMIT 200")
         .all() as { data: string }[]
     ).map((row) => documentSchema.parse(JSON.parse(row.data)));
+  }
+  history(id: string, before?: number) {
+    this.get(id);
+    if (before !== undefined) z.number().int().positive().safe().parse(before);
+    const rows = this.store.db
+      .prepare(
+        "SELECT data FROM document_versions WHERE document_id=? AND revision<? ORDER BY revision DESC LIMIT 51",
+      )
+      .all(id, before ?? Number.MAX_SAFE_INTEGER) as { data: string }[];
+    const revisions = rows
+      .slice(0, 50)
+      .map((row) => documentSchema.parse(JSON.parse(row.data)));
+    return {
+      revisions,
+      nextBefore: rows.length > 50 ? revisions.at(-1)!.revision : null,
+    };
+  }
+  modelProposal(work: Work, input: unknown) {
+    const command = documentWriteToolSchema.parse(input);
+    if (work.runMode !== "normal" || work.mode !== "configured")
+      throw new RockyError(
+        "document_scope",
+        "Documents require a normal configured Work",
+        403,
+      );
+    this.validate(command.title);
+    this.validate(command.content);
+    const row = this.store.db
+      .prepare("SELECT id FROM documents WHERE id=?")
+      .get(command.id);
+    if (!row) {
+      if (command.expectedRevision !== 0)
+        throw new RockyError("document_missing", "Document is missing", 404);
+    } else {
+      const current = this.get(command.id).document;
+      if (
+        current.sourceWorkId !== work.id &&
+        (!work.workspaceId || current.scope.workspaceId !== work.workspaceId)
+      )
+        throw new RockyError(
+          "document_scope",
+          "Document is outside this Work scope",
+          403,
+        );
+      if (command.expectedRevision !== current.revision)
+        throw new RockyError(
+          "document_conflict",
+          "Document changed; prepare a fresh proposal",
+          409,
+        );
+    }
+    return command;
+  }
+  saveModel(work: Work, input: unknown, requestId: string) {
+    if (!this.store.db.isTransaction)
+      throw new RockyError(
+        "document_transaction",
+        "Document publication requires an operation transaction",
+        500,
+      );
+    const command = this.modelProposal(work, input);
+    const hash = intentHash({
+      kind: "model",
+      workId: work.id,
+      ...command,
+      content: sha(command.content),
+    });
+    const prior = this.replay(requestId, hash);
+    if (prior) return prior;
+    const now = new Date().toISOString();
+    const current = command.expectedRevision
+      ? this.get(command.id).document
+      : undefined;
+    const document = documentSchema.parse({
+      ...(current ?? {
+        id: command.id,
+        scope: work.workspaceId ? { workspaceId: work.workspaceId } : {},
+        sourceWorkId: work.id,
+        sourceRunId: work.runId,
+        createdAt: now,
+      }),
+      title: command.title,
+      contentBlobRef: sha(command.content),
+      revision: command.expectedRevision + 1,
+      updatedAt: now,
+    });
+    if (current)
+      this.store.db
+        .prepare(
+          "UPDATE documents SET revision=?,data=? WHERE id=? AND revision=?",
+        )
+        .run(
+          document.revision,
+          JSON.stringify(document),
+          document.id,
+          command.expectedRevision,
+        );
+    else
+      this.store.db
+        .prepare("INSERT INTO documents VALUES(?,?,?)")
+        .run(document.id, document.revision, JSON.stringify(document));
+    this.persist(document, command.content, requestId, hash);
+    return { document, content: command.content };
+  }
+  createNew(input: unknown) {
+    const command = documentNewSchema.parse(input);
+    this.validate(command.title);
+    this.validate(command.content);
+    const hash = intentHash({
+      kind: "new",
+      requestId: command.requestId,
+      title: command.title,
+      contentHash: sha(command.content),
+    });
+    return this.store.transaction(() => {
+      const prior = this.replay(command.requestId, hash);
+      if (prior) return prior;
+      const now = new Date().toISOString();
+      const document = documentSchema.parse({
+        id: command.requestId,
+        title: command.title,
+        contentBlobRef: sha(command.content),
+        revision: 1,
+        scope: {},
+        createdAt: now,
+        updatedAt: now,
+      });
+      this.store.db
+        .prepare("INSERT INTO documents VALUES(?,?,?)")
+        .run(document.id, 1, JSON.stringify(document));
+      this.persist(document, command.content, command.requestId, hash);
+      return { document, content: command.content };
+    });
   }
   get(id: string, revision?: number) {
     z.uuid().parse(id);
@@ -202,10 +340,11 @@ export class DocumentStore {
     this.store.db
       .prepare("INSERT INTO document_receipts VALUES(?,?,?,?)")
       .run(requestId, hash, document.id, document.revision);
-    this.store.event(
-      this.store.get(document.sourceWorkId),
-      "rocky.document.updated",
-      { document },
-    );
+    if (document.sourceWorkId)
+      this.store.event(
+        this.store.get(document.sourceWorkId),
+        "rocky.document.updated",
+        { document },
+      );
   }
 }

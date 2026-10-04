@@ -1,0 +1,67 @@
+{
+  "numTotalTestSuites": 1,
+  "numPassedTestSuites": 1,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 3,
+  "numPassedTests": 3,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791100946285,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "status": "passed",
+          "title": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "duration": 80.43029999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "status": "passed",
+          "title": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "duration": 76.19200000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "status": "passed",
+          "title": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "duration": 5347.754,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100947704,
+      "endTime": 1791100953207.754,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/learning-candidates.test.ts"
+    }
+  ]
+}

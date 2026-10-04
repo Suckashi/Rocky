@@ -6,16 +6,47 @@
   "npmVersion": "11.6.4",
   "mode": "fixture",
   "checks": [
-    {"command": "npm run check", "exitCode": 0},
-    {"command": "npm run lint", "exitCode": 0},
-    {"command": "npm run build", "exitCode": 0, "result": "14.09s; existing bundle size warning"},
-    {"command": "npm test", "exitCode": 0, "result": "41 files / 154 tests passed", "durationSeconds": 105.09},
-    {"command": "npx vitest run tests/retry.test.ts tests/operation-ledger.test.ts tests/operation-reconciler.test.ts tests/context-ledger.test.ts", "exitCode": 0, "result": "14 tests passed across3 existing matching files; context-ledger.test.ts does not exist and was not run; context-barrier and inbox ran in full suite", "durationSeconds": 7.10},
-    {"command": "$env:ROCKY_TEST_BROWSER=Join-Path $env:LOCALAPPDATA 'ms-playwright/chromium-1223/chrome-win64/chrome.exe'; npx playwright test tests/e2e/retry.spec.ts tests/e2e/steering.spec.ts", "exitCode": 0, "result": "2 passed", "durationSeconds": 14.1},
-    {"command": "npx playwright test tests/e2e/retry.spec.ts (same ROCKY_TEST_BROWSER)", "exitCode": 0, "result": "1 passed with added mobile focused-control/composer geometry assertion", "durationSeconds": 8.6},
-    {"command": "git diff --check", "exitCode": 0}
+    { "command": "npm run check", "exitCode": 0 },
+    { "command": "npm run lint", "exitCode": 0 },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "result": "14.09s; existing bundle size warning"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "result": "41 files / 154 tests passed",
+      "durationSeconds": 105.09
+    },
+    {
+      "command": "npx vitest run tests/retry.test.ts tests/operation-ledger.test.ts tests/operation-reconciler.test.ts tests/context-ledger.test.ts",
+      "exitCode": 0,
+      "result": "14 tests passed across3 existing matching files; context-ledger.test.ts does not exist and was not run; context-barrier and inbox ran in full suite",
+      "durationSeconds": 7.1
+    },
+    {
+      "command": "$env:ROCKY_TEST_BROWSER=Join-Path $env:LOCALAPPDATA 'ms-playwright/chromium-1223/chrome-win64/chrome.exe'; npx playwright test tests/e2e/retry.spec.ts tests/e2e/steering.spec.ts",
+      "exitCode": 0,
+      "result": "2 passed",
+      "durationSeconds": 14.1
+    },
+    {
+      "command": "npx playwright test tests/e2e/retry.spec.ts (same ROCKY_TEST_BROWSER)",
+      "exitCode": 0,
+      "result": "1 passed with added mobile focused-control/composer geometry assertion",
+      "durationSeconds": 8.6
+    },
+    { "command": "git diff --check", "exitCode": 0 }
   ],
-  "browser": {"version": "Chromium148.0.7778.96", "deviceScaleFactor": 1, "zoom": "100%", "language": "zh-TW", "theme": "light", "viewports": ["1440x900", "320x844"]},
+  "browser": {
+    "version": "Chromium148.0.7778.96",
+    "deviceScaleFactor": 1,
+    "zoom": "100%",
+    "language": "zh-TW",
+    "theme": "light",
+    "viewports": ["1440x900", "320x844"]
+  },
   "screenshots": ["review-1440.png", "mobile-320.png"],
   "verified": [
     "Retry creates distinct Work/run/session/budget with retryOf; original source remains unchanged",

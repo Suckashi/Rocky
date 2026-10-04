@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { startAgentProvider } from "../../fixtures/models/agent-provider.js";
 test("T-007 UI selected model → CopilotKit → configured Work → approval → recorded usage", async ({
   page,
@@ -24,7 +24,7 @@ test("T-007 UI selected model → CopilotKit → configured Work → approval �
       .click();
     expect(server.requests).toHaveLength(0);
     await page.keyboard.press("Escape");
-    await page.locator("textarea").fill(prompt);
+    await page.locator("#compose textarea").fill(prompt);
     await page
       .getByRole("button", { name: "傳送至模型", exact: false })
       .click();

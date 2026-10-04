@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 test("model image input is explicit, defaults off, persists without claiming a passed probe, and fits four widths", async ({
   page,
 }) => {

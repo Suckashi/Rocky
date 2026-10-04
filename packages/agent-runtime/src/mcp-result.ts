@@ -141,9 +141,7 @@ function projectMcpData(
     },
   };
 }
-export function mapMcpDelivery(
-  value: McpDelivery,
-): [
+export function mapMcpDelivery(value: McpDelivery): [
   EvidenceBlock[],
   {
     source: McpDelivery["source"];

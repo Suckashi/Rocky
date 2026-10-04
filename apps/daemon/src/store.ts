@@ -27,6 +27,7 @@ import { redactEvidence } from "./redaction.js";
 import { ConversationStore } from "./conversation-store.js";
 import { ContextLedger } from "./context-ledger.js";
 import { SteeringStore } from "./steering.js";
+import { STORE_SCHEMA_VERSION } from "./storage-metadata.js";
 export class Store {
   publicEvidence: (value: unknown) => unknown = redactEvidence;
   readonly db: DatabaseSync;
@@ -34,9 +35,20 @@ export class Store {
   private releaseLock: () => void;
   private inTransaction = false;
   private closed = false;
-  constructor(root: string) {
+  constructor(root: string, options?: { restoreRecovery?: boolean }) {
     this.root = resolve(root);
     mkdirSync(this.root, { recursive: true });
+    if (
+      existsSync(join(this.root, "rocky-backup.json")) ||
+      existsSync(join(this.root, ".backup-incomplete")) ||
+      (!options?.restoreRecovery &&
+        existsSync(join(this.root, ".restore-incomplete")))
+    )
+      throw new RockyError(
+        "store_not_ready",
+        "Backup or incomplete restore cannot be used as an active Rocky data directory",
+        409,
+      );
     const manifest = join(this.root, "manifest.json");
     if (existsSync(manifest)) {
       const m = JSON.parse(readFileSync(manifest, "utf8"));
@@ -70,7 +82,7 @@ export class Store {
       const version = (
         this.db.prepare("PRAGMA user_version").get() as { user_version: number }
       ).user_version;
-      if (version > 27)
+      if (version > STORE_SCHEMA_VERSION)
         throw new RockyError(
           "unsupported_store",
           "Rocky store version is newer than this application",
@@ -331,6 +343,60 @@ export class Store {
             "CREATE TABLE IF NOT EXISTS learning_reflection_outputs(id TEXT PRIMARY KEY,call_key TEXT UNIQUE NOT NULL,intent TEXT NOT NULL,data TEXT NOT NULL); PRAGMA user_version=27;",
           ),
         );
+      if (version < 28)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE environments(id TEXT PRIMARY KEY,data TEXT NOT NULL); CREATE TABLE environment_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,data TEXT NOT NULL); CREATE TABLE environment_events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,environment_id TEXT NOT NULL,data TEXT NOT NULL); PRAGMA user_version=28;",
+          ),
+        );
+      if (version < 29)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE browser_profiles(id TEXT PRIMARY KEY,work_id TEXT UNIQUE NOT NULL,data TEXT NOT NULL); CREATE TABLE browser_snapshots(id TEXT PRIMARY KEY,profile_id TEXT NOT NULL,data TEXT NOT NULL,image BLOB NOT NULL); CREATE TABLE browser_control_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,data TEXT NOT NULL); PRAGMA user_version=29;",
+          ),
+        );
+      if (version < 30)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE routines(id TEXT PRIMARY KEY,data TEXT NOT NULL); CREATE TABLE routine_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,data TEXT NOT NULL); CREATE TABLE routine_occurrences(id TEXT PRIMARY KEY,occurrence_key TEXT UNIQUE NOT NULL,data TEXT NOT NULL); PRAGMA user_version=30;",
+          ),
+        );
+      if (version < 31)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE tracked_works(id TEXT PRIMARY KEY,data TEXT NOT NULL); CREATE TABLE tracking_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,data TEXT NOT NULL); CREATE TABLE tracking_polls(id TEXT PRIMARY KEY,tracking_id TEXT NOT NULL,data TEXT NOT NULL); CREATE TABLE tracking_followups(id TEXT PRIMARY KEY,tracking_id TEXT NOT NULL,fingerprint TEXT NOT NULL,data TEXT NOT NULL,UNIQUE(tracking_id,fingerprint)); PRAGMA user_version=31;",
+          ),
+        );
+      if (version < 32)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE attachments(id TEXT PRIMARY KEY,data TEXT NOT NULL,bytes BLOB NOT NULL); CREATE TABLE attachment_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,attachment_id TEXT NOT NULL); PRAGMA user_version=32;",
+          ),
+        );
+      if (version < 33)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE source_dependencies(work_id TEXT NOT NULL,run_id TEXT NOT NULL,kind TEXT NOT NULL,source_id TEXT NOT NULL,revision INTEGER NOT NULL,invalidated INTEGER NOT NULL,PRIMARY KEY(work_id,kind,source_id,revision)); CREATE INDEX source_dependencies_source ON source_dependencies(kind,source_id); PRAGMA user_version=33;",
+          ),
+        );
+      if (version < 34)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE skill_candidates(id TEXT PRIMARY KEY,data TEXT NOT NULL); CREATE TABLE candidate_revisions(id TEXT NOT NULL,revision INTEGER NOT NULL,data TEXT NOT NULL,PRIMARY KEY(id,revision)); CREATE TABLE candidate_packages(hash TEXT PRIMARY KEY,data TEXT NOT NULL); CREATE TABLE candidate_events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,candidate_id TEXT NOT NULL,data TEXT NOT NULL); CREATE TABLE candidate_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,data TEXT NOT NULL); CREATE TABLE learning_evaluations(id TEXT PRIMARY KEY,candidate_id TEXT NOT NULL,data TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0); PRAGMA user_version=34;",
+          ),
+        );
+      if (version < 35)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE evaluation_suites(id TEXT NOT NULL,revision INTEGER NOT NULL,data TEXT NOT NULL,PRIMARY KEY(id,revision)); CREATE TABLE evaluation_suite_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,data TEXT NOT NULL); CREATE TABLE evaluation_receipts(request_id TEXT PRIMARY KEY,intent TEXT NOT NULL,evaluation_id TEXT NOT NULL); CREATE TABLE evaluation_holdout_exposure(candidate_id TEXT NOT NULL,candidate_hash TEXT NOT NULL,case_hash TEXT NOT NULL,PRIMARY KEY(candidate_id,candidate_hash,case_hash)); PRAGMA user_version=35;",
+          ),
+        );
+      if (version < 36)
+        this.transaction(() =>
+          this.db.exec(
+            "CREATE TABLE learning_automation(source_work_id TEXT NOT NULL,policy_revision INTEGER NOT NULL,data TEXT NOT NULL,PRIMARY KEY(source_work_id,policy_revision)); PRAGMA user_version=36;",
+          ),
+        );
     } catch (error) {
       database?.close();
       this.releaseLock();
@@ -351,7 +417,9 @@ export class Store {
       this.db.exec("COMMIT");
       return result;
     } catch (error) {
-      this.db.exec("ROLLBACK");
+      // SQLITE_FULL/IOERR can roll back the transaction automatically. Preserve
+      // the original failure rather than replacing it with "no transaction".
+      if (this.db.isTransaction) this.db.exec("ROLLBACK");
       throw error;
     } finally {
       this.inTransaction = false;
@@ -435,6 +503,57 @@ export class Store {
       throw new RockyError("revision_conflict", "Work revision changed", 409);
     new ConversationStore(this).update(work);
   }
+  adoptWorkspace(
+    work: Work,
+    expectedRevision: number,
+    operationId: string,
+  ): void {
+    if (!this.inTransaction)
+      throw new RockyError(
+        "workspace_transaction",
+        "Workspace adoption requires the effect settlement transaction",
+        409,
+      );
+    const operation = this.db
+      .prepare(
+        "SELECT context,result FROM operations WHERE id=? AND phase='settled' AND outcome='succeeded'",
+      )
+      .get(operationId) as { context: string; result: string } | undefined;
+    const context = operation ? JSON.parse(operation.context) : null;
+    const receipt = operation ? JSON.parse(operation.result) : null;
+    const previous = this.get(work.id);
+    if (
+      !context ||
+      context.workId !== work.id ||
+      context.name !== "workspace_worktree" ||
+      context.runId !== work.runId ||
+      context.executionSessionId !== work.executionSessionId ||
+      receipt.workspaceId !== work.workspaceId ||
+      receipt.workspaceRevision !== work.workspaceRevision ||
+      (receipt.environmentId ?? previous.environmentId) !==
+        work.environmentId ||
+      receipt.currentWorkWorkspaceChanged !== true ||
+      previous.revision !== expectedRevision ||
+      previous.status !== "running"
+    )
+      throw new RockyError(
+        "workspace_receipt",
+        "Workspace adoption requires the exact settled registration receipt",
+        409,
+      );
+    // Only this receipt-bound path can change the otherwise immutable workspace.
+    this.db
+      .prepare(
+        "UPDATE works SET data=json_set(data,'$.workspaceId',?,'$.workspaceRevision',?) WHERE id=? AND json_extract(data,'$.revision')=?",
+      )
+      .run(
+        work.workspaceId!,
+        work.workspaceRevision!,
+        work.id,
+        expectedRevision,
+      );
+    this.save(work, expectedRevision);
+  }
   event(work: Work, name: string, data: Record<string, unknown>): PublicEvent {
     if (!this.inTransaction)
       return this.transaction(() => this.event(work, name, data));
@@ -508,22 +627,60 @@ export class Store {
       }),
     );
   }
-  snapshot() {
+  snapshot(after?: string) {
+    if (
+      after !== undefined &&
+      (!/^\d+:\d+$/.test(after) ||
+        after
+          .split(":")
+          .some((part) => !sequenceSchema.safeParse(part).success))
+    )
+      throw new RockyError("invalid_cursor", "Invalid snapshot cursor", 400);
     return this.transaction(() => {
       const { cursor } = this.db
         .prepare(
           "SELECT CAST(COALESCE(MAX(sequence),0) AS TEXT) AS cursor FROM events",
         )
         .get() as { cursor: string };
-      const rows = this.db
+      const [beforeRow, originalCursor] = after?.split(":") ?? [];
+      const page = this.db
         .prepare(
-          "SELECT CAST(sequence AS TEXT) AS sequence,data FROM (SELECT sequence,data FROM events ORDER BY sequence DESC LIMIT 500) AS recent ORDER BY recent.sequence",
+          beforeRow
+            ? "SELECT CAST(rowid AS TEXT) AS position,data FROM works WHERE rowid<? ORDER BY rowid DESC LIMIT 101"
+            : "SELECT CAST(rowid AS TEXT) AS position,data FROM works ORDER BY rowid DESC LIMIT 101",
         )
-        .all() as { sequence: string; data: string }[];
+        .all(...(beforeRow ? [beforeRow] : [])) as {
+        position: string;
+        data: string;
+      }[];
+      const selected = page.slice(0, 100);
+      const active = after
+        ? []
+        : (this.db
+            .prepare(
+              "SELECT data FROM works WHERE json_extract(data,'$.status') IN ('queued','running','waiting_approval') ORDER BY rowid",
+            )
+            .all() as { data: string }[]);
+      const visibleWorks = new Map<string, Work>();
+      for (const row of [...[...selected].reverse(), ...active]) {
+        const work = workSchema.parse(JSON.parse(row.data));
+        visibleWorks.set(work.id, work);
+      }
+      const rows = after
+        ? []
+        : (this.db
+            .prepare(
+              "SELECT CAST(sequence AS TEXT) AS sequence,data FROM (SELECT sequence,data FROM events ORDER BY sequence DESC LIMIT 500) AS recent ORDER BY recent.sequence",
+            )
+            .all() as { sequence: string; data: string }[]);
       return snapshotSchema.parse({
         schemaVersion: 1,
-        cursor,
-        works: this.list(),
+        cursor: originalCursor ?? cursor,
+        works: [...visibleWorks.values()],
+        nextCursor:
+          page.length > 100
+            ? `${selected.at(-1)!.position}:${originalCursor ?? cursor}`
+            : null,
         events: rows.map((row) => ({
           ...JSON.parse(row.data),
           sequence: row.sequence,

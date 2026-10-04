@@ -59,6 +59,24 @@ export function deriveRockyPresence(input: PresenceInput, now: number) {
   if (state === "waiting_approval") state = "awaiting_approval";
   if (state === "queued" && foreground?.waitingFor === "workspace")
     state = "waiting_resource";
+  if (foreground?.status === "running") {
+    const waits = new Set<string>();
+    for (const event of input.events) {
+      if (
+        event.workId !== foreground.id ||
+        event.runId !== foreground.runId ||
+        event.executionSessionId !== foreground.executionSessionId ||
+        event.payload.kind !== "domain" ||
+        event.payload.name !== "rocky.model.wait"
+      )
+        continue;
+      const { requestId, waiting } = event.payload.data;
+      if (typeof requestId !== "string") continue;
+      if (waiting === true) waits.add(requestId);
+      else waits.delete(requestId);
+    }
+    if ((foreground.modelWaitCount ?? waits.size) > 0) state = "waiting_model";
+  }
   return {
     state,
     connected: input.connected,

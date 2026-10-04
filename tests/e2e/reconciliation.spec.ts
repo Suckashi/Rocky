@@ -1,15 +1,25 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 test("T-008 receipt reconciliation UI confirms known effects and preserves unknown without replay", async ({
   page,
 }) => {
   const seeds = JSON.parse(
-    readFileSync(".rocky-e2e/reconciliation-seed.json", "utf8"),
+    readFileSync(
+      join(
+        process.env.ROCKY_E2E_ROOT ?? ".rocky-e2e",
+        "reconciliation-seed.json",
+      ),
+      "utf8",
+    ),
   ) as { workId: string; text: string; recorded: boolean; runId: string }[];
   await page.goto("/");
   for (const seed of seeds) {
-    const root = join(".rocky-e2e", "synthetic-receipts", seed.runId);
+    const root = join(
+      process.env.ROCKY_E2E_ROOT ?? ".rocky-e2e",
+      "synthetic-receipts",
+      seed.runId,
+    );
     const before = seed.recorded
       ? readdirSync(root).map((name) => [
           name,

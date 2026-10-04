@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { AIMessage } from "@langchain/core/messages";
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { randomUUID } from "node:crypto";
 import { startAgentProvider } from "../../fixtures/models/agent-provider.js";
 test("background attention navigates to authoritative terminal Work without changing foreground", async ({
@@ -173,7 +173,7 @@ test("workspace wait is persisted, visible and cleared on exact cancel", async (
       expect(response.ok()).toBe(true);
       return response.json();
     };
-    const owner = await submit("background");
+    const owner = await submit("main");
     await expect
       .poll(
         async () =>

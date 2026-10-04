@@ -6,7 +6,7 @@ export const issueSchema = z.strictObject({
   effect: z.enum(["known_read", "local_new"]),
   policyRevision: z.number().int().positive(),
   expiresAt: z.iso.datetime().nullable(),
-  resource: z.literal("memory").optional(),
+  resource: z.enum(["memory", "workspace", "fixture"]).optional(),
   memory: z
     .strictObject({
       scope: z.enum(["user", "project", "task"]),

@@ -426,7 +426,8 @@ test("actual native read_file returns long tool evidence and keeps the source ch
     saver,
     {
       event: (name) => events.push(name),
-      call: async () => {
+      call: async (name) => {
+        if (name === "rocky_skill_check") return "ok";
         throw Error("No MCP effect");
       },
     },

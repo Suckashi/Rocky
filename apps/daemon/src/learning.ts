@@ -5,12 +5,14 @@ import {
   learningWorkConsentCommandSchema,
   learningEpisodeCommandSchema,
   learningEpisodeReviewSchema,
+  learningEpisodeEditSchema,
 } from "../../../packages/contracts/src/learning.js";
 import { RockyError } from "../../../packages/contracts/src/index.js";
 import { intentHash } from "./intent.js";
 import type { Store } from "./store.js";
 import type { WorkspaceRegistry } from "./workspaces.js";
 import { randomUUID } from "node:crypto";
+import { SourceDependencies } from "./source-dependencies.js";
 import {
   completionSchema,
   publicEventSchema,
@@ -47,12 +49,18 @@ export class LearningRegistry {
     }
     return { items, nextCursor: rows.length > 20 ? page.at(-1)!.cursor : null };
   }
-  createEpisode(input: unknown) {
+  createEpisode(input: unknown, mode: "manual" | "automatic" = "manual") {
     const command = learningEpisodeCommandSchema.parse(input);
+    if (mode === "manual" && command.trigger !== "manual_request")
+      throw new RockyError(
+        "learning_trigger",
+        "Automatic triggers require the daemon's scoped policy path",
+        403,
+      );
     return this.store.transaction(() => {
       const { work, consent, policy } = this.assertSourceAllowed(
         command.workId,
-        "manual",
+        mode,
       );
       const hash = intentHash(command);
       const prior = this.store.db
@@ -146,6 +154,32 @@ export class LearningRegistry {
           id: event.id,
           sequence: event.sequence,
           name: event.payload.name,
+          excerpt: JSON.stringify(
+            this.store.publicEvidence(
+              Object.fromEntries(
+                (event.payload.name === "rocky.steering.updated"
+                  ? ["receipt"]
+                  : event.payload.name.startsWith("rocky.operation.")
+                    ? ["name", "operationId", "outcome", "result", "reason"]
+                    : event.payload.name === "rocky.artifact.published"
+                      ? ["artifact"]
+                      : ["name", "callId", "child", "error"]
+                )
+                  .filter(
+                    (key) =>
+                      event.payload.kind === "domain" &&
+                      Object.hasOwn(event.payload.data, key),
+                  )
+                  .map((key) => [
+                    key,
+                    event.payload.kind === "domain"
+                      ? event.payload.data[key]
+                      : null,
+                  ]),
+              ),
+            ),
+          ).slice(0, 2000),
+          untrustedData: true,
         };
       });
       if (new Set(command.evidenceEventIds).size !== evidence.length)
@@ -188,6 +222,23 @@ export class LearningRegistry {
           hash,
           JSON.stringify(episode),
         );
+      if (mode === "automatic") {
+        const view = this.episode(episode.id);
+        this.store.db
+          .prepare("UPDATE learning_episodes SET data=? WHERE id=?")
+          .run(
+            JSON.stringify({
+              ...episode,
+              status: "approved",
+              revision: 1,
+              reviewedHash: view.contentHash,
+              reviewedAt: new Date().toISOString(),
+              reviewAuthority: "owner_scoped_propose_policy",
+              reviewedPolicyRevision: policy.revision,
+            }),
+            episode.id,
+          );
+      }
       return this.episode(episode.id);
     });
   }
@@ -240,6 +291,81 @@ export class LearningRegistry {
           : safe.status,
     };
   }
+  editEpisode(id: string, input: unknown) {
+    const command = learningEpisodeEditSchema.parse(input),
+      hash = intentHash({ edit: id, ...command });
+    return this.store.transaction(() => {
+      const prior = this.store.db
+        .prepare(
+          "SELECT intent,result FROM learning_review_receipts WHERE request_id=?",
+        )
+        .get(command.requestId) as
+        { intent: string; result: string } | undefined;
+      if (prior) {
+        if (prior.intent !== hash)
+          throw new RockyError(
+            "idempotency_conflict",
+            "Episode edit changed",
+            409,
+          );
+        return JSON.parse(prior.result);
+      }
+      const episode = this.episode(id);
+      if (
+        episode.revision !== command.expectedRevision ||
+        episode.contentHash !== command.contentHash
+      )
+        throw new RockyError(
+          "learning_stale",
+          "Episode changed; review the latest summary",
+          409,
+        );
+      const raw = JSON.parse(
+        (
+          this.store.db
+            .prepare("SELECT data FROM learning_episodes WHERE id=?")
+            .get(id) as { data: string }
+        ).data,
+      );
+      const next = {
+        ...raw,
+        summary: this.store.publicEvidence(command.summary),
+        revision: episode.revision + 1,
+        status: "pending_review",
+        reviewedHash: null,
+        reviewedAt: null,
+        reviewAuthority: null,
+      };
+      this.store.db
+        .prepare("UPDATE learning_episodes SET data=? WHERE id=?")
+        .run(JSON.stringify(next), id);
+      this.invalidateDerived(episode.workId, id, "Source episode edited");
+      const result = this.episode(id);
+      this.store.db
+        .prepare("INSERT INTO learning_review_receipts VALUES(?,?,?)")
+        .run(
+          command.requestId,
+          hash,
+          JSON.stringify({
+            id: result.id,
+            revision: result.revision,
+            contentHash: result.contentHash,
+            status: result.status,
+          }),
+        );
+      this.store.event(
+        this.store.get(episode.workId),
+        "rocky.learning.episode_edited",
+        {
+          episodeId: id,
+          revision: result.revision,
+          contentHash: result.contentHash,
+          priorApprovalInvalidated: true,
+        },
+      );
+      return result;
+    });
+  }
   reviewEpisode(id: string, input: unknown) {
     const command = learningEpisodeReviewSchema.parse(input),
       hash = intentHash({ id, ...command });
@@ -280,6 +406,7 @@ export class LearningRegistry {
         status: command.decision === "approve" ? "approved" : "rejected",
         reviewedHash: view.contentHash,
         reviewedAt: new Date().toISOString(),
+        reviewAuthority: "owner_exact_episode",
       };
       this.store.db
         .prepare("UPDATE learning_episodes SET data=? WHERE id=?")
@@ -362,14 +489,124 @@ export class LearningRegistry {
             "UPDATE learning_reflection_outputs SET data=json_remove(json_set(data,'$.status','withdrawn'),'$.payload') WHERE json_extract(data,'$.sourceWorkId')=?",
           )
           .run(workId);
+      if (result.private || result.excluded || !result.sourceReuseAllowed)
+        this.invalidateDerived(workId);
       return result;
     });
+  }
+  invalidateDerived(
+    workId: string,
+    episodeId?: string,
+    cause = "Source consent withdrawn",
+  ) {
+    this.store.db
+      .prepare(
+        "UPDATE learning_reflection_outputs SET data=json_remove(json_set(data,'$.status','withdrawn'),'$.payload') WHERE json_extract(data,'$.sourceWorkId')=? AND (? IS NULL OR json_extract(data,'$.episodeId')=?)",
+      )
+      .run(workId, episodeId ?? null, episodeId ?? null);
+    const candidates = this.store.db
+      .prepare(
+        "SELECT id,data FROM skill_candidates WHERE json_extract(data,'$.sourceWorkId')=? AND (? IS NULL OR json_extract(data,'$.binding.episodeId')=?)",
+      )
+      .all(workId, episodeId ?? null, episodeId ?? null) as {
+      id: string;
+      data: string;
+    }[];
+    for (const row of candidates) {
+      const candidate = JSON.parse(row.data);
+      if (String(candidate.reason ?? "").includes("derived content removed"))
+        continue;
+      this.store.db
+        .prepare(
+          "UPDATE learning_evaluations SET invalidated=1,data=json_set(data,'$.verdict','insufficient_evidence','$.reason','Source consent withdrawn','$.results',json('[]')) WHERE candidate_id=?",
+        )
+        .run(row.id);
+      const revisions = this.store.db
+        .prepare(
+          "SELECT id,revision,data FROM skill_revisions WHERE json_extract(data,'$.learning.proposalId')=?",
+        )
+        .all(row.id) as { id: string; revision: number; data: string }[];
+      for (const revision of revisions) {
+        const skill = JSON.parse(revision.data);
+        this.store.db
+          .prepare("INSERT OR IGNORE INTO skill_quarantine VALUES(?,?)")
+          .run(revision.id, skill.contentHash);
+        new SourceDependencies(this.store).invalidate(
+          "skill",
+          revision.id,
+          "learning_source_withdrawn",
+          revision.revision,
+        );
+        this.store.db
+          .prepare(
+            "UPDATE skill_selections SET data=json_set(data,'$.state','quarantined','$.revision',json_extract(data,'$.revision')+1,'$.updatedAt',?) WHERE id=? AND json_extract(data,'$.contentHash')=? AND json_extract(data,'$.state')!='quarantined'",
+          )
+          .run(new Date().toISOString(), revision.id, skill.contentHash);
+      }
+      // Retain only identities/hashes/governance receipts. Do not delete run checkpoints,
+      // operation evidence, formal immutable skills, or unrelated candidate packages.
+      const removed = {
+        ...candidate,
+        name: "withdrawn",
+        description: "Source removed",
+        goal: "Source removed",
+        preconditions: [],
+        triggers: [],
+        steps: ["Source removed"],
+        stopConditions: [],
+        verification: ["Source removed"],
+        requiredCapabilities: [],
+        knownLimitations: ["Source withdrawn; reuse prohibited"],
+        status: candidate.published ? "quarantined" : "withdrawn",
+        reason:
+          cause +
+          "; derived content removed; remote provider copies cannot be recalled",
+        revision: candidate.revision + 1,
+        updatedAt: new Date().toISOString(),
+      };
+      this.store.db
+        .prepare("UPDATE skill_candidates SET data=? WHERE id=?")
+        .run(JSON.stringify(removed), row.id);
+      const packageHashes = new Set([
+        candidate.packageHash,
+        ...(
+          this.store.db
+            .prepare(
+              "SELECT json_extract(data,'$.packageHash') AS hash FROM candidate_revisions WHERE id=?",
+            )
+            .all(row.id) as { hash: string }[]
+        ).map((entry) => entry.hash),
+      ]);
+      this.store.db
+        .prepare("DELETE FROM candidate_revisions WHERE id=?")
+        .run(row.id);
+      for (const hash of packageHashes)
+        this.store.db
+          .prepare(
+            "DELETE FROM candidate_packages WHERE hash=? AND NOT EXISTS(SELECT 1 FROM skill_candidates WHERE id!=? AND json_extract(data,'$.packageHash')=? AND json_extract(data,'$.status') NOT IN ('withdrawn','quarantined')) AND NOT EXISTS(SELECT 1 FROM candidate_revisions WHERE json_extract(data,'$.packageHash')=?)",
+          )
+          .run(hash, row.id, hash, hash);
+      this.store.event(
+        this.store.get(workId),
+        "rocky.learning.source_withdrawn",
+        {
+          proposalId: row.id,
+          affectedSkills: revisions.map((entry) => ({
+            skillId: entry.id,
+            revision: entry.revision,
+          })),
+          checkpointsRetained: true,
+          remoteDeletionConfirmed: false,
+        },
+      );
+    }
   }
   // Shared admission preflight, not proof that a reusable episode exists.
   assertSourceAllowed(workId: string, mode: "manual" | "automatic") {
     const work = this.store.get(workId),
       consent = this.workConsent(workId),
       policy = this.policy();
+    new SourceDependencies(this.store).assert(work);
     if (work.runMode !== "normal")
       throw new RockyError(
         "learning_source_mode",
@@ -457,6 +694,8 @@ export class LearningRegistry {
         revision: old.revision + 1,
         mode: command.mode,
         scopes: command.scopes,
+        automation:
+          command.mode === "off" ? null : (command.automation ?? null),
         updatedAt: new Date().toISOString(),
       });
       this.store.db

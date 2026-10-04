@@ -15,6 +15,7 @@ export async function readModelStream(
   },
   provider: "anthropic" | "openai",
   delta: (text: string) => void,
+  progress: () => void = () => {},
 ) {
   if (
     !response.headers.get("content-type")?.includes("text/event-stream") ||
@@ -49,7 +50,10 @@ export async function readModelStream(
   const textBlocks = new Set<number>();
   const emit = (value: string) => {
     text += value;
-    if (value) delta(value);
+    if (value) {
+      progress();
+      delta(value);
+    }
   };
   const record = (value: unknown) =>
     z.record(z.string(), z.unknown()).parse(value);
@@ -91,6 +95,7 @@ export async function readModelStream(
                 call.args += z.string().parse(f.arguments);
             }
             calls.set(index, call);
+            progress();
           }
       }
     } else {
@@ -123,7 +128,14 @@ export async function readModelStream(
           const call = calls.get(index);
           if (!call) throw Error("Unknown tool block");
           call.args += z.string().parse(d.partial_json);
+          progress();
         }
+        if (
+          d.type === "thinking_delta" &&
+          typeof d.thinking === "string" &&
+          d.thinking.length
+        )
+          progress();
       }
       if (type === "message_delta") {
         finish = z

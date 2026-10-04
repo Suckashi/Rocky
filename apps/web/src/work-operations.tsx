@@ -146,13 +146,28 @@ export function WorkOperations({
                 </button>
               )}
             {operation.canReconcile ? (
-              <button
-                type="button"
-                disabled={busy || loading}
-                onClick={() => void reconcile(operation)}
-              >
-                {zh ? "查詢結果" : "Check result"}
-              </button>
+              <div>
+                {operation.reconciliationQuery && (
+                  <p>
+                    {operation.reconciliationQuery.kind} ·{" "}
+                    {operation.reconciliationQuery.serverId}{" "}
+                    {operation.reconciliationQuery.configRevision
+                      ? `r${operation.reconciliationQuery.configRevision}`
+                      : ""}
+                    <br />
+                    <code style={{ overflowWrap: "anywhere" }}>
+                      {operation.reconciliationQuery.target}
+                    </code>
+                  </p>
+                )}
+                <button
+                  type="button"
+                  disabled={busy || loading}
+                  onClick={() => void reconcile(operation)}
+                >
+                  {zh ? "查詢結果" : "Check result"}
+                </button>
+              </div>
             ) : operation.outcome === "unknown" ? (
               <p>
                 {zh

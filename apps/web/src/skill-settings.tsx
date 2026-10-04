@@ -61,6 +61,17 @@ export function SkillSettings({
     path: string;
   }>();
   const [trusted, setTrusted] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [history, setHistory] = useState<{
+    id: string;
+    revisions: Revision[];
+    nextBefore: number | null;
+  }>();
+  const [selectionLog, setSelectionLog] = useState<{
+    id: string;
+    entries: { sequence: number; selection: Selection }[];
+    nextBefore: number | null;
+  }>();
   const [updating, setUpdating] = useState<Revision>();
   const epoch = useRef(0),
     intent = useRef({ key: "", requestId: "" });
@@ -70,7 +81,7 @@ export function SkillSettings({
     },
     [],
   );
-  async function refresh() {
+  async function refresh(after?: string) {
     const generation = ++epoch.current;
     setBusy(true);
     setError("");
@@ -78,10 +89,14 @@ export function SkillSettings({
     setTrusted(false);
     try {
       const result = z
-        .object({ skills: z.array(revisionSchema) })
-        .parse(await request("/skills"));
+        .object({
+          skills: z.array(revisionSchema),
+          nextCursor: z.string().nullable().optional(),
+        })
+        .parse(await request("/skills" + (after ? "?after=" + after : "")));
       if (generation === epoch.current) {
-        setItems(result.skills);
+        setItems((old) => (after ? [...old, ...result.skills] : result.skills));
+        setNextCursor(result.nextCursor ?? null);
         setLoaded(true);
       }
     } catch (e) {
@@ -164,6 +179,65 @@ export function SkillSettings({
     }
   }
   const state = review?.selection?.state;
+  async function loadHistory(id: string, before?: number) {
+    setBusy(true);
+    setError("");
+    try {
+      const page = z
+        .object({
+          revisions: z.array(revisionSchema),
+          nextBefore: z.number().nullable(),
+        })
+        .parse(
+          await request(
+            `/skills/${id}/history` + (before ? `?before=${before}` : ""),
+          ),
+        );
+      setHistory((old) => ({
+        id,
+        revisions:
+          before && old?.id === id
+            ? [...old.revisions, ...page.revisions]
+            : page.revisions,
+        nextBefore: page.nextBefore,
+      }));
+    } catch (reason) {
+      setError(String(reason));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function loadSelectionHistory(id: string, before?: number) {
+    setBusy(true);
+    setError("");
+    try {
+      const page = z
+        .object({
+          entries: z.array(
+            z.object({ sequence: z.number(), selection: selectionSchema }),
+          ),
+          nextBefore: z.number().nullable(),
+        })
+        .parse(
+          await request(
+            `/skills/${id}/selection-history` +
+              (before ? `?before=${before}` : ""),
+          ),
+        );
+      setSelectionLog((old) => ({
+        id,
+        entries:
+          before && old?.id === id
+            ? [...old.entries, ...page.entries]
+            : page.entries,
+        nextBefore: page.nextBefore,
+      }));
+    } catch (reason) {
+      setError(String(reason));
+    } finally {
+      setBusy(false);
+    }
+  }
   const current =
     review?.selection?.skillRevision === review?.revision.revision;
   const label = (value: string | undefined) =>
@@ -214,6 +288,11 @@ export function SkillSettings({
         {zh ? "載入／重新整理技能" : "Load / refresh skills"}
       </button>
       {error && <p role="alert">{error}</p>}
+      {nextCursor && (
+        <button disabled={busy} onClick={() => void refresh(nextCursor)}>
+          {zh ? "載入更多技能" : "Load more skills"}
+        </button>
+      )}
       {busy && <p role="status">{zh ? "處理中…" : "Working…"}</p>}
       {loaded && !items.length && (
         <p>{zh ? "尚無匯入的技能。" : "No imported skills yet."}</p>
@@ -238,6 +317,60 @@ export function SkillSettings({
           <button disabled={busy} onClick={() => setUpdating(item)}>
             {zh ? "匯入新版" : "Import new revision"}
           </button>
+          <button disabled={busy} onClick={() => void loadHistory(item.id)}>
+            {zh ? "版本歷史" : "Revision history"}
+          </button>
+          <button
+            disabled={busy}
+            onClick={() => void loadSelectionHistory(item.id)}
+          >
+            {zh
+              ? "發布／回滾／撤銷歷史"
+              : "Publication / rollback / revocation history"}
+          </button>
+          {history?.id === item.id && (
+            <div>
+              {history.revisions.map((entry) => (
+                <p key={entry.revision}>
+                  <button
+                    disabled={busy}
+                    onClick={() => void open(item, entry.revision)}
+                  >
+                    r{entry.revision} · {entry.contentHash.slice(0, 16)}
+                  </button>
+                </p>
+              ))}
+              {history.nextBefore && (
+                <button
+                  disabled={busy}
+                  onClick={() => void loadHistory(item.id, history.nextBefore!)}
+                >
+                  {zh ? "更早版本" : "Earlier revisions"}
+                </button>
+              )}
+            </div>
+          )}
+          {selectionLog?.id === item.id && (
+            <div>
+              {selectionLog.entries.map((entry) => (
+                <p key={entry.sequence}>
+                  #{entry.sequence} · r{entry.selection.skillRevision} ·{" "}
+                  {label(entry.selection.state)} ·{" "}
+                  {entry.selection.contentHash.slice(0, 16)}
+                </p>
+              ))}
+              {selectionLog.nextBefore && (
+                <button
+                  disabled={busy}
+                  onClick={() =>
+                    void loadSelectionHistory(item.id, selectionLog.nextBefore!)
+                  }
+                >
+                  {zh ? "更早操作" : "Earlier changes"}
+                </button>
+              )}
+            </div>
+          )}
           {review?.revision.id === item.id && (
             <section aria-label={zh ? "技能版本審查" : "Skill revision review"}>
               <p role="status">

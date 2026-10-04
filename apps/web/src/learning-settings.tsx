@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { LearningEpisodes } from "./learning-episodes.js";
+import { LearningInbox } from "./learning-inbox.js";
 import { z } from "zod";
-import { learningPolicySchema } from "../../../packages/contracts/src/learning.js";
+import {
+  learningPolicySchema,
+  learningAutomationSchema,
+} from "../../../packages/contracts/src/learning.js";
+import { LearningAutomationConfig } from "./learning-automation-config.js";
 export function LearningSettings({
   locale,
   request,
@@ -10,6 +15,9 @@ export function LearningSettings({
   request: (path: string, body?: unknown) => Promise<unknown>;
 }) {
   const zh = locale === "zh";
+  const [automation, setAutomation] = useState<z.infer<
+    typeof learningAutomationSchema
+  > | null>(null);
   const [policy, setPolicy] = useState<z.infer<typeof learningPolicySchema>>(),
     [workspaces, setWorkspaces] = useState<{ id: string; name: string }[]>([]),
     [mode, setMode] = useState<"off" | "propose">("off"),
@@ -35,6 +43,7 @@ export function LearningSettings({
           .parse(spaces);
       if (alive.current) {
         setPolicy(current);
+        setAutomation(current.automation ?? null);
         setMode(current.mode);
         setScopes(
           current.scopes.map((s) => (s.kind === "user" ? "user" : s.projectId)),
@@ -63,6 +72,7 @@ export function LearningSettings({
       const command = {
         expectedRevision: policy.revision,
         mode,
+        automation: mode === "propose" ? automation : null,
         scopes:
           mode === "off"
             ? []
@@ -102,8 +112,8 @@ export function LearningSettings({
       </p>
       <p>
         {zh
-          ? "自動反思與評測佇列尚未接通；目前只保存同意政策。"
-          : "Automatic reflection and evaluation queue are not connected yet; this currently saves consent policy only."}
+          ? "指定反思模型、固定評測集與預算後，合格的新工作會自動產生候選並評測；結果進入收件匣等待人工發布。"
+          : "Configure reflection, a fixed suite and budgets. Eligible new Works produce evaluated candidates in the Inbox for human publication."}
       </p>
       <button disabled={busy} onClick={() => void load()}>
         {zh ? "重新載入政策（放棄草稿）" : "Reload policy (discard draft)"}
@@ -131,6 +141,13 @@ export function LearningSettings({
         </label>
         {mode === "propose" && (
           <>
+            <LearningAutomationConfig
+              key={policy?.revision}
+              initial={policy?.automation}
+              onChange={setAutomation}
+              request={request}
+              locale={locale}
+            />
             <fieldset>
               <legend>
                 {zh ? "允許提出候選的範圍" : "Scopes allowed for proposals"}
@@ -174,13 +191,16 @@ export function LearningSettings({
           </>
         )}
         <button
-          disabled={mode === "propose" && (!consent || !scopes.length)}
+          disabled={
+            mode === "propose" && (!consent || !scopes.length || !automation)
+          }
           onClick={() => void save()}
         >
           {zh ? "保存學習政策" : "Save Learning policy"}
         </button>
       </fieldset>
       <LearningEpisodes locale={locale} request={request} />
+      <LearningInbox locale={locale} request={request} />
     </section>
   );
 }

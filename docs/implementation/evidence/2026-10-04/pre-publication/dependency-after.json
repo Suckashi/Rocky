@@ -1,0 +1,147 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "braces": {
+      "name": "braces",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1240992,
+          "name": "braces",
+          "dependency": "braces",
+          "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+          "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+          "severity": "high",
+          "cwe": ["CWE-674"],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": "<=3.0.3"
+        }
+      ],
+      "effects": ["micromatch"],
+      "range": "*",
+      "nodes": ["node_modules/braces"],
+      "fixAvailable": {
+        "name": "deepagents",
+        "version": "0.0.2",
+        "isSemVerMajor": true
+      }
+    },
+    "deepagents": {
+      "name": "deepagents",
+      "severity": "high",
+      "isDirect": true,
+      "via": ["fast-glob", "micromatch"],
+      "effects": [],
+      "range": ">=1.1.0",
+      "nodes": ["node_modules/deepagents"],
+      "fixAvailable": {
+        "name": "deepagents",
+        "version": "0.0.2",
+        "isSemVerMajor": true
+      }
+    },
+    "fast-glob": {
+      "name": "fast-glob",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["micromatch"],
+      "effects": [],
+      "range": "*",
+      "nodes": ["node_modules/fast-glob"],
+      "fixAvailable": true
+    },
+    "jks-js": {
+      "name": "jks-js",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["node-forge"],
+      "effects": ["promptfoo"],
+      "range": ">=1.0.0",
+      "nodes": ["node_modules/jks-js"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.116.7",
+        "isSemVerMajor": true
+      }
+    },
+    "micromatch": {
+      "name": "micromatch",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["braces"],
+      "effects": ["deepagents", "fast-glob"],
+      "range": ">=0.2.0",
+      "nodes": ["node_modules/micromatch"],
+      "fixAvailable": {
+        "name": "deepagents",
+        "version": "0.0.2",
+        "isSemVerMajor": true
+      }
+    },
+    "node-forge": {
+      "name": "node-forge",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1240912,
+          "name": "node-forge",
+          "dependency": "node-forge",
+          "title": "node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements",
+          "url": "https://github.com/advisories/GHSA-86w9-cpqp-85rv",
+          "severity": "high",
+          "cwe": ["CWE-347"],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+          },
+          "range": "<=1.4.0"
+        }
+      ],
+      "effects": ["jks-js"],
+      "range": "*",
+      "nodes": ["node_modules/node-forge"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.116.7",
+        "isSemVerMajor": true
+      }
+    },
+    "promptfoo": {
+      "name": "promptfoo",
+      "severity": "high",
+      "isDirect": true,
+      "via": ["jks-js"],
+      "effects": [],
+      "range": ">=0.117.0",
+      "nodes": ["node_modules/promptfoo"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.116.7",
+        "isSemVerMajor": true
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 7,
+      "critical": 0,
+      "total": 7
+    },
+    "dependencies": {
+      "prod": 980,
+      "dev": 176,
+      "optional": 404,
+      "peer": 8,
+      "peerOptional": 0,
+      "total": 1558
+    }
+  }
+}

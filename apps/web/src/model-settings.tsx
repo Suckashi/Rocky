@@ -265,6 +265,45 @@ export function ModelSettings({
                 : "Enable model image input (confirm model support; not a passed probe)"}
             </span>
           </label>
+          <label>
+            {zh ? "請求逾時（毫秒）" : "Request timeout (ms)"}
+            <input
+              type="number"
+              min="1000"
+              max="600000"
+              step="1000"
+              value={config.requestTimeoutMs ?? 120000}
+              onChange={(event) =>
+                field("requestTimeoutMs", Number(event.target.value))
+              }
+            />
+          </label>
+          <label>
+            {zh ? "首 token 逾時（毫秒）" : "First token timeout (ms)"}
+            <input
+              type="number"
+              min="1000"
+              max="600000"
+              step="1000"
+              value={config.firstTokenTimeoutMs ?? 60000}
+              onChange={(event) =>
+                field("firstTokenTimeoutMs", Number(event.target.value))
+              }
+            />
+          </label>
+          <label>
+            {zh ? "回應閒置逾時（毫秒）" : "Response idle timeout (ms)"}
+            <input
+              type="number"
+              min="1000"
+              max="600000"
+              step="1000"
+              value={config.idleTimeoutMs ?? 30000}
+              onChange={(event) =>
+                field("idleTimeoutMs", Number(event.target.value))
+              }
+            />
+          </label>
           <details>
             <summary>{zh ? "代理與 CA" : "Proxy and CA"}</summary>
             <label>

@@ -1,4 +1,9 @@
 import { z } from "zod";
+import { SourceDependencies } from "./source-dependencies.js";
+import {
+  candidateSchema,
+  type SkillCandidate,
+} from "../../../packages/contracts/src/learning-candidates.js";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { discoverSkillSources, snapshotSkillSource } from "./skill-sources.js";
@@ -68,6 +73,12 @@ type SkillCatalog = {
   version: string;
 };
 type SkillRevision = {
+  learning?: {
+    proposalId: string;
+    candidateRevision: number;
+    candidateHash: string;
+    evaluationId: string;
+  };
   id: string;
   revision: number;
   scope: z.infer<typeof importSchema>["scope"];
@@ -96,10 +107,21 @@ export class SkillRegistry {
   }
   async discover(input: unknown) {
     const command = z
-      .object({ scope: importSchema.shape.scope })
+      .object({
+        scope: importSchema.shape.scope,
+        after: z.string().max(255).optional(),
+      })
       .strict()
       .parse(input);
-    return discoverSkillSources(await this.sourceRoot(command.scope));
+    const root = await this.sourceRoot(command.scope);
+    const page = await discoverSkillSources(root, command.after);
+    return {
+      ...page,
+      items: page.items.map((item) => ({
+        ...item,
+        imported: this.sourceMapping(command.scope, join(root, item.name)),
+      })),
+    };
   }
   async sourceSnapshot(input: unknown) {
     const command = z
@@ -127,13 +149,39 @@ export class SkillRegistry {
         reference: join(root, command.name),
       },
       state: "untrusted",
+      imported: this.sourceMapping(command.scope, join(root, command.name)),
     };
   }
-  import(input: unknown) {
+  private sourceMapping(scope: SkillRevision["scope"], reference: string) {
+    const rows = this.store.db
+      .prepare(
+        "SELECT data FROM skill_heads WHERE json_extract(data,'$.source.type') IN ('global','project') AND json_extract(data,'$.source.reference')=?",
+      )
+      .all(reference) as { data: string }[];
+    const matches = rows
+      .map((row) => JSON.parse(row.data) as SkillRevision)
+      .filter((item) => intentHash(item.scope) === intentHash(scope));
+    if (matches.length > 1)
+      throw new RockyError(
+        "skill_source_ambiguous",
+        "Multiple imports map to this source; select an exact existing skill before updating",
+        409,
+      );
+    const head = matches[0];
+    return head
+      ? {
+          id: head.id,
+          revision: head.revision,
+          contentHash: head.contentHash,
+          license: head.source.license,
+        }
+      : null;
+  }
+  import(input: unknown, learning?: SkillRevision["learning"]) {
     const command = importSchema.parse(input);
     const snapshot = validateSkillPackage(command.package);
     const intent = intentHash({ ...command, package: snapshot.contentHash });
-    return this.store.transaction(() => {
+    const persist = () => {
       const prior = this.store.db
         .prepare(
           "SELECT intent,result FROM skill_import_receipts WHERE request_id=?",
@@ -155,10 +203,39 @@ export class SkillRegistry {
         .prepare("SELECT data FROM skill_heads WHERE id=?")
         .get(command.id) as { data: string } | undefined;
       const head = row ? (JSON.parse(row.data) as SkillRevision) : undefined;
+      if (head?.learning && !learning)
+        throw new RockyError(
+          "learning_gate",
+          "Learned skill revisions must be updated through the candidate evaluation gate",
+          403,
+        );
       if ((head?.revision ?? 0) !== command.expectedRevision)
         throw new RockyError("stale_skill", "Skill revision changed", 409);
       if (head && intentHash(head.scope) !== intentHash(command.scope))
         throw new RockyError("skill_scope", "Skill scope cannot change", 409);
+      if (
+        head &&
+        head.source.type !== "manual" &&
+        (head.source.type !== command.source.type ||
+          head.source.reference !== command.source.reference)
+      )
+        throw new RockyError(
+          "skill_source",
+          "An imported skill's source mapping cannot change",
+          409,
+        );
+      if (command.source.type !== "manual") {
+        const mapped = this.sourceMapping(
+          command.scope,
+          command.source.reference,
+        );
+        if (mapped && mapped.id !== command.id)
+          throw new RockyError(
+            "skill_source_existing",
+            "Update the existing skill identity for this source",
+            409,
+          );
+      }
       // Content is stored once per hash. Only registry commands may select active revisions later.
       const data = JSON.stringify(snapshot);
       const existing = this.store.db
@@ -174,6 +251,7 @@ export class SkillRegistry {
         .prepare("INSERT OR IGNORE INTO skill_packages VALUES(?,?)")
         .run(snapshot.contentHash, data);
       const revision: SkillRevision = {
+        ...(learning ? { learning } : {}),
         id: command.id,
         revision: command.expectedRevision + 1,
         scope: command.scope,
@@ -202,7 +280,68 @@ export class SkillRegistry {
         .prepare("INSERT INTO skill_import_receipts VALUES(?,?,?)")
         .run(command.requestId, intent, result);
       return revision;
+    };
+    return this.store.db.isTransaction
+      ? persist()
+      : this.store.transaction(persist);
+  }
+  publishCandidate(
+    candidate: SkillCandidate,
+    requestId: string,
+    packageData: unknown,
+  ) {
+    if (
+      !this.store.db.isTransaction ||
+      !candidate.evaluationId ||
+      candidate.status !== "published"
+    )
+      throw new RockyError(
+        "learning_gate",
+        "Publication requires an atomic exact candidate approval",
+        403,
+      );
+    const base = candidate.base
+      ? this.get(candidate.base.skillId, candidate.base.revision).revision
+      : null;
+    if (base && base.contentHash !== candidate.base!.contentHash)
+      throw new RockyError(
+        "candidate_base",
+        "Publication base hash changed",
+        409,
+      );
+    const revision = this.import(
+      {
+        requestId,
+        id: candidate.base?.skillId ?? candidate.proposalId,
+        expectedRevision: candidate.base?.revision ?? 0,
+        scope: candidate.scope,
+        source: base?.source ?? {
+          type: "manual",
+          reference: `rocky-learning:${candidate.proposalId}`,
+          license:
+            "Owner-approved generated procedure; source reuse consent recorded in episode",
+        },
+        package: packageData,
+      },
+      {
+        proposalId: candidate.proposalId,
+        candidateRevision: candidate.candidateRevision,
+        candidateHash: candidate.candidateHash,
+        evaluationId: candidate.evaluationId,
+      },
+    );
+    const selection = this.select(revision.id, {
+      requestId,
+      expectedRevision: candidate.baseSelectionRevision,
+      skillRevision: revision.revision,
+      contentHash: revision.contentHash,
+      action: "publish",
     });
+    return {
+      skillId: selection.id,
+      skillRevision: selection.skillRevision,
+      contentHash: selection.contentHash,
+    };
   }
   list() {
     return (
@@ -210,6 +349,48 @@ export class SkillRegistry {
         .prepare("SELECT data FROM skill_heads ORDER BY id LIMIT 200")
         .all() as { data: string }[]
     ).map((row) => JSON.parse(row.data) as SkillRevision);
+  }
+  page(after?: string) {
+    if (after) z.uuid().parse(after);
+    const rows = this.store.db
+      .prepare("SELECT data FROM skill_heads WHERE id>? ORDER BY id LIMIT 51")
+      .all(after ?? "") as { data: string }[];
+    const skills = rows
+      .slice(0, 50)
+      .map((row) => JSON.parse(row.data) as SkillRevision);
+    return { skills, nextCursor: rows.length > 50 ? skills.at(-1)!.id : null };
+  }
+  history(id: string, before?: number) {
+    z.uuid().parse(id);
+    if (before !== undefined) z.number().int().positive().parse(before);
+    const rows = this.store.db
+      .prepare(
+        "SELECT data FROM skill_revisions WHERE id=? AND revision<? ORDER BY revision DESC LIMIT 51",
+      )
+      .all(id, before ?? Number.MAX_SAFE_INTEGER) as { data: string }[];
+    const revisions = rows
+      .slice(0, 50)
+      .map((row) => JSON.parse(row.data) as SkillRevision);
+    return {
+      revisions,
+      nextBefore: rows.length > 50 ? revisions.at(-1)!.revision : null,
+    };
+  }
+  selectionHistory(id: string, before = Number.MAX_SAFE_INTEGER) {
+    z.uuid().parse(id);
+    z.number().int().positive().parse(before);
+    const rows = this.store.db
+      .prepare(
+        "SELECT rowid,intent,result FROM skill_selection_receipts WHERE json_extract(result,'$.id')=? AND rowid<? ORDER BY rowid DESC LIMIT 51",
+      )
+      .all(id, before) as { rowid: number; intent: string; result: string }[];
+    return {
+      entries: rows.slice(0, 50).map((row) => ({
+        sequence: row.rowid,
+        selection: JSON.parse(row.result) as SkillSelection,
+      })),
+      nextBefore: rows.length > 50 ? rows[49]!.rowid : null,
+    };
   }
   diff(id: string, from: number, to: number, path?: string) {
     const before = this.get(id, from),
@@ -339,6 +520,129 @@ export class SkillRegistry {
       .run(work.id, JSON.stringify(catalog));
     return catalog;
   }
+  freezeEvaluation(work: Work): SkillCatalog {
+    if (
+      !this.store.db.isTransaction ||
+      work.runMode !== "evaluation" ||
+      !work.evaluation
+    )
+      throw new RockyError(
+        "evaluation_scope",
+        "Evaluation catalog requires trusted admission",
+        403,
+      );
+    const binding = work.evaluation,
+      items: CatalogItem[] = [];
+    if (binding.variant === "candidate") {
+      const revision = this.evaluationCandidate(work).revision;
+      items.push({
+        id: revision.id,
+        revision: revision.revision,
+        contentHash: revision.contentHash,
+        name: revision.metadata.name,
+        description: revision.metadata.description,
+        scope: revision.scope,
+      });
+    } else if (binding.variant === "current" && binding.current) {
+      const revision = this.get(
+        binding.current.skillId,
+        binding.current.revision,
+      ).revision;
+      if (revision.contentHash !== binding.current.contentHash)
+        throw new RockyError(
+          "evaluation_skill",
+          "Current comparison skill changed",
+          409,
+        );
+      items.push({
+        id: revision.id,
+        revision: revision.revision,
+        contentHash: revision.contentHash,
+        name: revision.metadata.name,
+        description: revision.metadata.description,
+        scope: revision.scope,
+      });
+    }
+    const catalog: SkillCatalog = {
+      workId: work.id,
+      runId: work.runId,
+      items,
+      version: intentHash(items),
+    };
+    this.store.db
+      .prepare("INSERT INTO skill_catalogs VALUES(?,?)")
+      .run(work.id, JSON.stringify(catalog));
+    return catalog;
+  }
+  private evaluationCandidate(work: Work) {
+    const binding = work.evaluation!;
+    const row = this.store.db
+      .prepare("SELECT data FROM candidate_revisions WHERE id=? AND revision=?")
+      .get(binding.proposalId, binding.candidateRevision) as
+      { data: string } | undefined;
+    if (!row)
+      throw new RockyError(
+        "evaluation_candidate",
+        "Pinned evaluation candidate is missing",
+        409,
+      );
+    const candidate = candidateSchema.parse(JSON.parse(row.data));
+    if (candidate.candidateHash !== binding.candidateHash)
+      throw new RockyError(
+        "evaluation_candidate",
+        "Pinned candidate hash changed",
+        409,
+      );
+    const stored = this.store.db
+      .prepare("SELECT data FROM candidate_packages WHERE hash=?")
+      .get(candidate.packageHash) as { data: string } | undefined;
+    if (!stored)
+      throw new RockyError(
+        "evaluation_candidate",
+        "Candidate package is missing",
+        409,
+      );
+    const parsed = JSON.parse(stored.data),
+      snapshot = validateSkillPackage({
+        directoryName: candidate.name,
+        files: parsed.files.map(
+          ({
+            path,
+            contentBase64,
+          }: {
+            path: string;
+            contentBase64: string;
+          }) => ({ path, contentBase64 }),
+        ),
+      });
+    if (snapshot.contentHash !== candidate.packageHash)
+      throw new RockyError(
+        "evaluation_candidate",
+        "Candidate package integrity failed",
+        409,
+      );
+    const revision: SkillRevision = {
+      id: candidate.proposalId,
+      revision: candidate.candidateRevision,
+      scope: candidate.scope,
+      source: {
+        type: "manual",
+        reference: `candidate:${candidate.proposalId}`,
+        license: "Unpublished candidate; evaluation only",
+      },
+      state: "untrusted",
+      contentHash: snapshot.contentHash,
+      metadata: snapshot.metadata,
+      totalBytes: snapshot.totalBytes,
+      files: snapshot.files.map(({ path, bytes, sha256 }) => ({
+        path,
+        bytes,
+        sha256,
+      })),
+      createdAt: candidate.createdAt,
+    };
+    return { revision, package: snapshot };
+  }
   catalog(workId: string): SkillCatalog | null {
     z.uuid().parse(workId);
     const row = this.store.db
@@ -377,7 +681,10 @@ export class SkillRegistry {
         "Skill revision was quarantined",
         403,
       );
-    const result = this.get(item.id, item.revision);
+    const result =
+      work.evaluation?.variant === "candidate"
+        ? this.evaluationCandidate(work)
+        : this.get(item.id, item.revision);
     if (result.revision.contentHash !== item.contentHash)
       throw new RockyError("skill_integrity", "Frozen skill hash changed", 409);
     return result;
@@ -401,6 +708,7 @@ export class SkillRegistry {
         "A skill loaded by this Work was quarantined; stop and start a new Work with a reviewed catalog",
         403,
       );
+    new SourceDependencies(this.store).assert(work);
   }
   backend(work: Work, input: unknown) {
     const command = z
@@ -503,13 +811,20 @@ export class SkillRegistry {
         createdAt: result.revision.createdAt,
       };
     }
-    if (!command.metadata)
+    if (!command.metadata) {
+      new SourceDependencies(this.store).record(
+        current,
+        "skill",
+        id,
+        result.revision.revision,
+      );
       this.store.event(current, "rocky.skill.loaded", {
         skillId: id,
         revision: result.revision.revision,
         contentHash: result.revision.contentHash,
         path: relative,
       });
+    }
     return {
       contentBase64: file.contentBase64,
       createdAt: result.revision.createdAt,
@@ -519,7 +834,7 @@ export class SkillRegistry {
     z.uuid().parse(id);
     const command = selectionSchema.parse(input);
     const intent = intentHash({ id, ...command });
-    return this.store.transaction(() => {
+    const persist = () => {
       const prior = this.store.db
         .prepare(
           "SELECT intent,result FROM skill_selection_receipts WHERE request_id=?",
@@ -564,6 +879,34 @@ export class SkillRegistry {
           409,
         );
       if (command.action === "publish") {
+        if (revision.learning) {
+          const gate = this.store.db
+            .prepare(
+              "SELECT data,invalidated FROM learning_evaluations WHERE id=?",
+            )
+            .get(revision.learning.evaluationId) as
+            { data: string; invalidated: number } | undefined;
+          const approval = this.store.db
+            .prepare("SELECT data FROM skill_candidates WHERE id=?")
+            .get(revision.learning.proposalId) as { data: string } | undefined;
+          const evaluated = gate ? JSON.parse(gate.data) : null,
+            approved = approval
+              ? candidateSchema.parse(JSON.parse(approval.data))
+              : null;
+          if (
+            !gate ||
+            gate.invalidated ||
+            evaluated.verdict !== "passed" ||
+            evaluated.candidateHash !== revision.learning.candidateHash ||
+            approved?.status !== "published" ||
+            approved.candidateHash !== revision.learning.candidateHash
+          )
+            throw new RockyError(
+              "learning_gate",
+              "Learned revision requires a still-valid evaluation and exact owner approval",
+              403,
+            );
+        }
         const blocked = this.store.db
           .prepare("SELECT 1 FROM skill_quarantine WHERE id=? AND hash=?")
           .get(id, command.contentHash);
@@ -575,6 +918,12 @@ export class SkillRegistry {
           );
       }
       if (command.action === "quarantine") {
+        new SourceDependencies(this.store).invalidate(
+          "skill",
+          id,
+          "owner_quarantine",
+          command.skillRevision,
+        );
         this.store.db
           .prepare("INSERT OR IGNORE INTO skill_quarantine VALUES(?,?)")
           .run(id, command.contentHash);
@@ -617,7 +966,10 @@ export class SkillRegistry {
         .prepare("INSERT INTO skill_selection_receipts VALUES(?,?,?)")
         .run(command.requestId, intent, data);
       return result;
-    });
+    };
+    return this.store.db.isTransaction
+      ? persist()
+      : this.store.transaction(persist);
   }
   private revision(id: string, revision: number) {
     z.uuid().parse(id);

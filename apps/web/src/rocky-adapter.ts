@@ -3,6 +3,7 @@ import {
   API_PREFIX,
   publicEventSchema,
   snapshotSchema,
+  workSchema,
   type Work,
   type PublicEvent,
 } from "../../../packages/contracts/src/index.js";
@@ -40,6 +41,24 @@ function mergeHistory(old: HistoryMessage[], incoming: HistoryMessage[]) {
 
 export type RockyRequest = (path: string, body?: unknown) => Promise<unknown>;
 
+function mergeWorks(old: Work[], incoming: Work[]) {
+  const works = new Map(old.map((work) => [work.id, work]));
+  for (const work of incoming) {
+    if ((works.get(work.id)?.revision ?? 0) < work.revision)
+      works.set(work.id, work);
+  }
+  return [...works.values()].sort((a, b) =>
+    a.createdAt.localeCompare(b.createdAt),
+  );
+}
+async function historyWorks(request: RockyRequest, messages: HistoryMessage[]) {
+  const ids = [...new Set(messages.map((message) => message.workId))];
+  if (!ids.length) return [];
+  return z
+    .object({ works: z.array(workSchema) })
+    .parse(await request("/works?ids=" + ids.join(","))).works;
+}
+
 // One snapshot/event owner for every view. Cards never establish event sources.
 // Transport closure only changes connection state, never Work outcomes.
 export function useRockyProjection(request: RockyRequest) {
@@ -74,7 +93,9 @@ export function useRockyProjection(request: RockyRequest) {
       const page = conversationPageSchema.parse(
         await request("/conversation/history?before=" + historyCursor),
       );
+      const pageWorks = await historyWorks(request, page.messages);
       if (owner !== generation.current) return;
+      setWorks((old) => mergeWorks(old, pageWorks));
       setHistory((old) => mergeHistory(old, page.messages));
       setHistoryCursor(page.nextCursor);
     } catch (error) {
@@ -142,7 +163,9 @@ export function useRockyProjection(request: RockyRequest) {
         const page = conversationPageSchema.parse(
           await request("/conversation/history"),
         );
+        const pageWorks = await historyWorks(request, page.messages);
         if (disposed) return;
+        setWorks((old) => mergeWorks(old, pageWorks));
         setHistory((old) => mergeHistory(old, page.messages));
         setHistoryCursor(page.nextCursor);
         setHistoryError("");
@@ -157,6 +180,14 @@ export function useRockyProjection(request: RockyRequest) {
         stream.onerror = () => {
           if (!disposed) setConnected(false);
         };
+        stream.addEventListener("daemon_degraded", () => {
+          if (disposed) return;
+          setConnected(false);
+          setConnectionError(
+            "執行儲存或清理失敗；狀態可能尚未同步。請修復儲存問題並重啟 daemon，再確認操作結果。 / Execution storage or cleanup failed. Restart the daemon after repair, then reconcile operation outcomes.",
+          );
+          stream?.close();
+        });
         stream.onmessage = (message) => {
           if (disposed) return;
           try {

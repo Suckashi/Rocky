@@ -6,6 +6,12 @@
     "rootDir": ".",
     "sourceMap": true
   },
-  "include": ["apps/daemon", "packages", "fixtures", "scripts/evaluate.ts"],
+  "include": [
+    "apps/daemon",
+    "packages",
+    "fixtures",
+    "scripts/evaluate.ts",
+    "scripts/data-command.ts"
+  ],
   "exclude": ["**/*.test.ts", "apps/web"]
 }

@@ -27,6 +27,11 @@ export const endpointSchema = z
     }
   });
 const envRef = z.string().regex(/^[A-Za-z_][A-Za-z0-9_]{0,127}$/);
+export const proxySchema = z.discriminatedUnion("mode", [
+  z.strictObject({ mode: z.literal("direct") }),
+  z.strictObject({ mode: z.literal("environment") }),
+  z.strictObject({ mode: z.literal("explicit"), url: endpointSchema }),
+]);
 export const modelConfigSchema = z
   .strictObject({
     name: z.string().trim().min(1).max(80),
@@ -47,14 +52,11 @@ export const modelConfigSchema = z
       .nullable()
       .default(null),
     maxOutputTokens: z.number().int().min(1).max(1000000),
+    requestTimeoutMs: z.number().int().min(1000).max(600000).optional(),
+    firstTokenTimeoutMs: z.number().int().min(1000).max(600000).optional(),
+    idleTimeoutMs: z.number().int().min(1000).max(600000).optional(),
     visionEnabled: z.boolean().default(false),
-    proxy: z
-      .discriminatedUnion("mode", [
-        z.strictObject({ mode: z.literal("direct") }),
-        z.strictObject({ mode: z.literal("environment") }),
-        z.strictObject({ mode: z.literal("explicit"), url: endpointSchema }),
-      ])
-      .default({ mode: "direct" }),
+    proxy: proxySchema.default({ mode: "direct" }),
     caRef: envRef.nullable().default(null),
   })
   .refine(

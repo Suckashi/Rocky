@@ -1,3 +1,5 @@
+import { removePostV19Tables } from "./historical-schema.js";
+import { STORE_SCHEMA_VERSION } from "../apps/daemon/src/storage-metadata.js";
 import { test, expect, vi } from "vitest";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -142,13 +144,12 @@ test("schema 19 upgrades skill tables without changing owner memories", async ()
       content: "Preserve across upgrade",
     });
     // Reconstruct the previous schema in this isolated test database only.
-    service.store.db.exec(
-      "DROP TABLE skill_heads; DROP TABLE skill_revisions; DROP TABLE skill_packages; DROP TABLE skill_import_receipts; DROP TABLE skill_selections; DROP TABLE skill_selection_receipts; DROP TABLE skill_quarantine; DROP TABLE skill_catalogs; PRAGMA user_version=19;",
-    );
+    removePostV19Tables(service.store.db);
+    service.store.db.exec("PRAGMA user_version=19;");
     await service.close();
     service = new WorkService(root);
     expect(service.store.db.prepare("PRAGMA user_version").get()).toMatchObject(
-      { user_version: 27 },
+      { user_version: STORE_SCHEMA_VERSION },
     );
     expect(service.memories.get(id).content).toBe("Preserve across upgrade");
     expect(service.skills.list()).toEqual([]);

@@ -1,13 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
+const importedSchema = z
+  .object({
+    id: z.uuid(),
+    revision: z.number().int(),
+    contentHash: z.string(),
+    license: z.string(),
+  })
+  .nullable();
 const listing = z.object({
   available: z.boolean(),
   truncated: z.boolean(),
+  nextCursor: z.string().nullable().optional(),
   items: z.array(
     z.object({
       name: z.string(),
       contentHash: z.string().optional(),
       error: z.string().optional(),
+      imported: importedSchema.optional(),
       metadata: z
         .object({ description: z.string(), license: z.string().optional() })
         .passthrough()
@@ -19,6 +29,7 @@ const snapshotSchema = z.object({
   package: z.unknown(),
   contentHash: z.string(),
   scope: z.unknown(),
+  imported: importedSchema.optional(),
   source: z.object({
     type: z.enum(["global", "project"]),
     reference: z.string(),
@@ -69,18 +80,25 @@ export function SkillDiscovery({
   }, [request]);
   const selectedScope =
     scope === "user" ? { kind: "user" } : { kind: "project", projectId: scope };
-  async function discover() {
+  async function discover(after?: string) {
     setBusy(true);
     setError("");
-    setResult(undefined);
+    if (!after) setResult(undefined);
     intent.current = undefined;
     try {
       const value = listing.parse(
-        await request("/skills/discover", { scope: selectedScope }),
+        await request("/skills/discover", {
+          scope: selectedScope,
+          ...(after ? { after } : {}),
+        }),
       );
       if (alive.current) {
-        setResult(value);
-        setSaved([]);
+        setResult((old) =>
+          after && old
+            ? { ...value, items: [...old.items, ...value.items] }
+            : value,
+        );
+        if (!after) setSaved([]);
       }
     } catch (e) {
       if (alive.current) setError(String(e));
@@ -110,8 +128,8 @@ export function SkillDiscovery({
           key,
           body: {
             requestId: crypto.randomUUID(),
-            id: crypto.randomUUID(),
-            expectedRevision: 0,
+            id: snapshot.imported?.id ?? crypto.randomUUID(),
+            expectedRevision: snapshot.imported?.revision ?? 0,
             scope: selectedScope,
             source: { ...snapshot.source, license: license.trim() },
             package: snapshot.package,
@@ -188,9 +206,17 @@ export function SkillDiscovery({
             {result.truncated && (
               <p role="status">
                 {zh
-                  ? "僅列出前 50 個來源；其他套件可使用資料夾匯入。"
-                  : "Only the first 50 sources are listed; use folder import for additional packages."}
+                  ? "還有其他來源，可繼續載入。"
+                  : "More sources are available."}
               </p>
+            )}
+            {result.nextCursor && (
+              <button
+                disabled={busy}
+                onClick={() => void discover(result.nextCursor!)}
+              >
+                {zh ? "載入更多來源" : "Load more sources"}
+              </button>
             )}
             {!!result.items.length && (
               <label>
@@ -225,10 +251,20 @@ export function SkillDiscovery({
                       <code>{item.contentHash}</code>
                     </details>
                     <button
-                      disabled={!license.trim() || saved.includes(item.name)}
+                      disabled={
+                        !license.trim() ||
+                        saved.includes(item.name) ||
+                        item.imported?.contentHash === item.contentHash
+                      }
                       onClick={() => void importSource(item)}
                     >
-                      {zh ? "匯入未信任快照" : "Import untrusted snapshot"}
+                      {item.imported
+                        ? zh
+                          ? `更新既有技能 r${item.imported.revision}（尚不啟用）`
+                          : `Update existing r${item.imported.revision} (not enabled)`
+                        : zh
+                          ? "匯入未信任快照"
+                          : "Import untrusted snapshot"}
                     </button>
                     {saved.includes(item.name) && (
                       <p role="status">

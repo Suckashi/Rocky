@@ -1,9 +1,26 @@
 import { z } from "zod";
-export const workspaceWorktreeSchema = z.strictObject({});
+import { environmentConfigSchema } from "./environments.js";
+export const workspaceWorktreeSchema = z.strictObject({
+  useForCurrentWork: z.boolean().optional(),
+  isolation: z.enum(["worktree", "directory"]).optional(),
+});
 export const worktreePreviewSchema = z.strictObject({
+  environmentTemplate: z
+    .object({
+      id: z.uuid(),
+      revision: z.number().int().positive(),
+      config: environmentConfigSchema,
+    })
+    .optional(),
   destination: z.string().min(1).max(4096),
-  branch: z.string().min(1).max(128),
-  head: z.string().regex(/^[a-f0-9]{40,64}$/),
+  branch: z.string().min(1).max(128).nullable(),
+  head: z
+    .string()
+    .regex(/^[a-f0-9]{40,64}$/)
+    .nullable(),
+  isolation: z.enum(["worktree", "directory"]).optional(),
+  useForCurrentWork: z.boolean().optional(),
+  grantRead: z.boolean().optional(),
 });
 export const workspaceWriteSchema = z.strictObject({
   path: z.string().min(1).max(4096),

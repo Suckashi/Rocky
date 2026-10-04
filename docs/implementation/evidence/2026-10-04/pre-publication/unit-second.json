@@ -1,0 +1,2615 @@
+{
+  "runner": "Vitest 4.1.11",
+  "rawReportSha256": "097963e8ed21470cf70803c3657f395ebe98076f96129ffa8da2361c6862a734",
+  "startTime": "2026-10-04T10:16:41.328Z",
+  "success": false,
+  "counts": {
+    "total": 402,
+    "passed": 401,
+    "failed": 1,
+    "skipped": 0
+  },
+  "files": [
+    {
+      "file": "tests/admission.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-010 background submission receipt is stable across retry and restart",
+          "status": "passed",
+          "durationMs": 101.99069999999995
+        },
+        {
+          "name": "T-010 main admission remains available with two independent background sessions",
+          "status": "passed",
+          "durationMs": 2383.661
+        },
+        {
+          "name": "T-010 main model request waits for a global slot and dispatches when a background call stops",
+          "status": "passed",
+          "durationMs": 2105.3896999999997
+        },
+        {
+          "name": "T-010 restart re-admits only a durable queued command; prior running sessions stay terminal",
+          "status": "passed",
+          "durationMs": 1116.2763999999997
+        },
+        {
+          "name": "T-010 restart keeps a queued resource behind an interrupted owner",
+          "status": "passed",
+          "durationMs": 1071.5614999999998
+        },
+        {
+          "name": "T-010 bounded admission settings and Work settings snapshot are immutable",
+          "status": "passed",
+          "durationMs": 60.6243000000004
+        },
+        {
+          "name": "T-010 same resource waits before worker or model slot; unrelated background proceeds",
+          "status": "passed",
+          "durationMs": 2121.5657
+        },
+        {
+          "name": "T-010 queued model selection stays pinned and never adopts another Work's changed connection",
+          "status": "passed",
+          "durationMs": 108.86989999999969
+        },
+        {
+          "name": "T-010 active wall budget stops a held model request without claiming completion",
+          "status": "passed",
+          "durationMs": 1872.0264000000006
+        },
+        {
+          "name": "T-010 approval waiting does not consume active wall budget",
+          "status": "passed",
+          "durationMs": 4296.394
+        }
+      ]
+    },
+    {
+      "file": "tests/agui-stream.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "AG-UI replay drains all owned event pages before the terminal receipt",
+          "status": "passed",
+          "durationMs": 2420.9281
+        }
+      ]
+    },
+    {
+      "file": "tests/artifact-native.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native artifact delivery: changed=false",
+          "status": "passed",
+          "durationMs": 1186.2716999999998
+        },
+        {
+          "name": "native artifact delivery: changed=true",
+          "status": "passed",
+          "durationMs": 1107.8320999999999
+        }
+      ]
+    },
+    {
+      "file": "tests/artifacts.test.ts",
+      "status": "failed",
+      "tests": [
+        {
+          "name": "artifact publication: native receipt, atomic registry, immutable download, restart and corruption",
+          "status": "failed",
+          "durationMs": 1162.7759,
+          "errors": [
+            "Error: promise resolved \"{ …(10) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///<repo>/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///<repo>/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///<repo>/node_modules/chai/index.js:1696:22)\n    at <repo>/tests/artifacts.test.ts:96:61\n    at file:///<repo>/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "tests/attachments.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "attachments validate bytes, persist exact receipts and restrict Work reads",
+          "status": "passed",
+          "durationMs": 123.9581
+        }
+      ]
+    },
+    {
+      "file": "tests/backup.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Rocky backup verifies immutable content and restores with automation fenced",
+          "status": "passed",
+          "durationMs": 184.4669
+        },
+        {
+          "name": "backup rejects foreign product metadata before touching its database",
+          "status": "passed",
+          "durationMs": 4.226899999999887
+        }
+      ]
+    },
+    {
+      "file": "tests/browser-native.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "owned native browser snapshots, exact targets and manual control fence stale actions",
+          "status": "passed",
+          "durationMs": 1471.595
+        }
+      ]
+    },
+    {
+      "file": "tests/browser-profiles.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "browser profile changes after exact approval prevent dispatch and explicit retry needs fresh approval",
+          "status": "passed",
+          "durationMs": 2080.5675
+        },
+        {
+          "name": "browser profiles bind explicit origins and sharing; unavailable isolation never launches Native",
+          "status": "passed",
+          "durationMs": 54.14710000000014
+        }
+      ]
+    },
+    {
+      "file": "tests/configured-model.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-007 editing configuration aborts in-flight model I/O without retry or leaked credentials",
+          "status": "passed",
+          "durationMs": 121.30740000000003
+        },
+        {
+          "name": "T-007 registry model leases pin revision, require context, revoke on edits, and enforce bounds before dispatch",
+          "status": "passed",
+          "durationMs": 43.44290000000001
+        },
+        {
+          "name": "T-007 configured openai-compatible → native child/interrupt/resume shares root usage ledger",
+          "status": "passed",
+          "durationMs": 141.04140000000007
+        },
+        {
+          "name": "T-007 configured anthropic → native child/interrupt/resume shares root usage ledger",
+          "status": "passed",
+          "durationMs": 100.13079999999991
+        },
+        {
+          "name": "T-007 provider usage preserves missing/cache-priced uncertainty and validates negative counts",
+          "status": "passed",
+          "durationMs": 1.2731000000001131
+        }
+      ]
+    },
+    {
+      "file": "tests/configured-work.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-007 shutdown cancels configured model I/O and retains unknown usage without replay",
+          "status": "passed",
+          "durationMs": 1071.7053999999998
+        },
+        {
+          "name": "T-007 configured Work openai-compatible preserves daemon approval, native child, usage and persisted model selection",
+          "status": "passed",
+          "durationMs": 1208.906
+        },
+        {
+          "name": "T-007 configured Work anthropic preserves daemon approval, native child, usage and persisted model selection",
+          "status": "passed",
+          "durationMs": 1112.7788000000005
+        },
+        {
+          "name": "T-007 submission rejects implicit model selection and stale configured approvals cannot dispatch effects",
+          "status": "passed",
+          "durationMs": 1103.9547999999995
+        }
+      ]
+    },
+    {
+      "file": "tests/context-barrier.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "context ack cannot precede own native checkpoint and domain fault rolls back all membership/receipt writes",
+          "status": "passed",
+          "durationMs": 112.83850000000007
+        }
+      ]
+    },
+    {
+      "file": "tests/continuous-conversation.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "large configured fixture answer is delivered intact into daemon Work and durable visible history",
+          "status": "passed",
+          "durationMs": 1159.2272
+        },
+        {
+          "name": "confirmed native checkpoint context reaches next main worker, survives restart, and stays out of background/evaluation",
+          "status": "passed",
+          "durationMs": 9511.6502
+        },
+        {
+          "name": "new native fixture turn requests fresh approval without replaying any completed operation",
+          "status": "passed",
+          "durationMs": 2556.925800000001
+        }
+      ]
+    },
+    {
+      "file": "tests/contracts.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "fixture mode is explicit and forged permission fields are rejected",
+          "status": "passed",
+          "durationMs": 2.6714000000000055
+        },
+        {
+          "name": "submission memory grants require configured mode, exact project binding and unique explicit scopes",
+          "status": "passed",
+          "durationMs": 0.9831999999999823
+        },
+        {
+          "name": "T-005 IPC wire requires run identity and rejects owner fields, unknown commands and oversized UTF-8",
+          "status": "passed",
+          "durationMs": 1.9007000000000005
+        }
+      ]
+    },
+    {
+      "file": "tests/conversation-store.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "workspace revision/read scope isolates native checkpoint/history: revision 1",
+          "status": "passed",
+          "durationMs": 51.79219999999998
+        },
+        {
+          "name": "workspace revision/read scope isolates native checkpoint/history: revision 2",
+          "status": "passed",
+          "durationMs": 43.83769999999993
+        },
+        {
+          "name": "one conversation persists separate execution sessions and atomic submission/result history",
+          "status": "passed",
+          "durationMs": 53.867500000000064
+        },
+        {
+          "name": "Rocky v10 upgrade reconstructs chronological history and preserves only its own domain records",
+          "status": "passed",
+          "durationMs": 104.4043999999999
+        },
+        {
+          "name": "conversation/history/session API validates DTOs and keeps current redaction at the public boundary",
+          "status": "passed",
+          "durationMs": 55.030899999999974
+        },
+        {
+          "name": "history pagination uses numeric cursors, excludes evaluation and validates limits",
+          "status": "passed",
+          "durationMs": 129.78589999999986
+        }
+      ]
+    },
+    {
+      "file": "tests/documents-new.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "owner documents need no synthetic Work; revisions remain immutable and paginated",
+          "status": "passed",
+          "durationMs": 105.31050000000005
+        }
+      ]
+    },
+    {
+      "file": "tests/documents.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "document revisions: confirmed artifact source, concurrent CAS, immutable history and receipts, rollback and restart",
+          "status": "passed",
+          "durationMs": 1303.1226000000001
+        }
+      ]
+    },
+    {
+      "file": "tests/evaluation.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-007 configured evaluation approve: same native Work and budget, scoped endpoint revocation",
+          "status": "passed",
+          "durationMs": 1174.4924
+        },
+        {
+          "name": "T-007 configured evaluation reject: same native Work and budget, scoped endpoint revocation",
+          "status": "passed",
+          "durationMs": 1086.6312
+        }
+      ]
+    },
+    {
+      "file": "tests/file-target.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-008 real file target detects overwrite and new-file creation between prepare and dispatch",
+          "status": "passed",
+          "durationMs": 11.249200000000002
+        },
+        {
+          "name": "T-008 target scope rejects traversal, device/ADS aliases, junction escape and hard links",
+          "status": "passed",
+          "durationMs": 4.341199999999986
+        },
+        {
+          "name": "T-008 target recheck rejects parent replaced with junction; portable separators resolve consistently",
+          "status": "passed",
+          "durationMs": 6.11099999999999
+        }
+      ]
+    },
+    {
+      "file": "tests/git-worktree.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "real local Git worktree boundary: create",
+          "status": "passed",
+          "durationMs": 1063.4124000000002
+        },
+        {
+          "name": "real local Git worktree boundary: stale",
+          "status": "passed",
+          "durationMs": 647.1000000000001
+        },
+        {
+          "name": "real local Git worktree boundary: replaced",
+          "status": "passed",
+          "durationMs": 746.3719999999998
+        },
+        {
+          "name": "real local Git worktree boundary: existing",
+          "status": "passed",
+          "durationMs": 521.9267
+        },
+        {
+          "name": "real local Git worktree boundary: filters",
+          "status": "passed",
+          "durationMs": 373.71489999999994
+        },
+        {
+          "name": "real local Git worktree boundary: cancel",
+          "status": "passed",
+          "durationMs": 377.8182999999999
+        }
+      ]
+    },
+    {
+      "file": "tests/grants.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-008 durable grants are scoped, expire, revoke by CAS and cannot authorize critical effects",
+          "status": "passed",
+          "durationMs": 56.899
+        },
+        {
+          "name": "T-008 revoking submitted synthetic read scope prevents actual MCP read; submission replay does not regrant",
+          "status": "passed",
+          "durationMs": 1090.7110000000002
+        },
+        {
+          "name": "T-008 grant revoke API validates session and exact receipt, preserving idempotency after restart",
+          "status": "passed",
+          "durationMs": 96.4058
+        }
+      ]
+    },
+    {
+      "file": "tests/html-preview.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "HTML preview strips active/navigation content, keeps safe layout and installs restrictive CSP first",
+          "status": "passed",
+          "durationMs": 4.8492999999999995
+        },
+        {
+          "name": "HTML sanitizer bounds nested trees and input size",
+          "status": "passed",
+          "durationMs": 71.47749999999999
+        }
+      ]
+    },
+    {
+      "file": "tests/http.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-007 model API requires local session, rejects raw keys and preserves unknown context",
+          "status": "passed",
+          "durationMs": 74.87880000000007
+        },
+        {
+          "name": "local API validates Host, Origin and session before mutation",
+          "status": "passed",
+          "durationMs": 41.82280000000003
+        },
+        {
+          "name": "snapshot and SSE use persisted cursors; reconnect header wins over the initial query",
+          "status": "passed",
+          "durationMs": 55.51070000000004
+        },
+        {
+          "name": "API bounds real body bytes and returns safe JSON errors before creating work",
+          "status": "passed",
+          "durationMs": 43.57040000000006
+        }
+      ]
+    },
+    {
+      "file": "tests/identity.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-037 assets retain provenance, hashes and a bounded first-party vector source",
+          "status": "passed",
+          "durationMs": 1.8608999999999583
+        },
+        {
+          "name": "T-037 assistant identity persists and its public schema cannot carry policy or remote artwork",
+          "status": "passed",
+          "durationMs": 45.56310000000002
+        },
+        {
+          "name": "T-037 semantic text tokens meet 4.5:1 on both themes",
+          "status": "passed",
+          "durationMs": 0.6347000000000094
+        }
+      ]
+    },
+    {
+      "file": "tests/inbox.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "actual background inbox freezes its boundary and re-delivers checkpointed evidence from a failed main branch",
+          "status": "passed",
+          "durationMs": 8566.787499999999
+        }
+      ]
+    },
+    {
+      "file": "tests/intent.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-008 exact canonical intent ignores object insertion order but preserves arrays and values",
+          "status": "passed",
+          "durationMs": 1.7145999999999901
+        },
+        {
+          "name": "T-008 invalid/coerced/oversized intents fail before getters or serialization hooks execute",
+          "status": "passed",
+          "durationMs": 0.8710999999999842
+        }
+      ]
+    },
+    {
+      "file": "tests/isolated-environment.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "fixture engine lifecycle pins scope, image and resource policy; never pulls or removes",
+          "status": "passed",
+          "durationMs": 73.31270000000006
+        }
+      ]
+    },
+    {
+      "file": "tests/learning-candidates.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "evaluation rejects executable case extensions and quota exhaustion preserves sources without model calls",
+          "status": "passed",
+          "durationMs": 144.62040000000002
+        },
+        {
+          "name": "two reviewed patches on one base cannot overwrite each other and rollback retains history",
+          "status": "passed",
+          "durationMs": 85.92689999999993
+        },
+        {
+          "name": "configured local provider evaluates all three frozen variants before exact publication and next-Work loading",
+          "status": "passed",
+          "durationMs": 107967.8417
+        },
+        {
+          "name": "scoped propose automatically turns a completed opted-in Work into a real candidate and evaluation without publishing",
+          "status": "passed",
+          "durationMs": 5229.958299999998
+        },
+        {
+          "name": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "status": "passed",
+          "durationMs": 58.06909999999334
+        },
+        {
+          "name": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "status": "passed",
+          "durationMs": 71.72609999999986
+        },
+        {
+          "name": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "status": "passed",
+          "durationMs": 5260.3367
+        }
+      ]
+    },
+    {
+      "file": "tests/learning-episode.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "manual episodes retain bounded provenance, redact summaries, dedupe and obey withdrawal",
+          "status": "passed",
+          "durationMs": 105.20299999999997
+        }
+      ]
+    },
+    {
+      "file": "tests/learning-policy.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Learning policy defaults off and requires scoped owner consent with CAS and durable receipts",
+          "status": "passed",
+          "durationMs": 69.74509999999998
+        }
+      ]
+    },
+    {
+      "file": "tests/learning-review.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "episode review binds redacted view hash, source consent and durable decision receipt",
+          "status": "passed",
+          "durationMs": 75.94780000000003
+        }
+      ]
+    },
+    {
+      "file": "tests/learning-source.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Learning source consent excludes private, nonnormal, noncompleted and unauthorized scopes",
+          "status": "passed",
+          "durationMs": 76.46769999999998
+        }
+      ]
+    },
+    {
+      "file": "tests/mcp-data-catalog.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "bounded MCP resource/prompt metadata: normal",
+          "status": "passed",
+          "durationMs": 1125.8321
+        },
+        {
+          "name": "bounded MCP resource/prompt metadata: duplicate",
+          "status": "passed",
+          "durationMs": 63.816499999999905
+        },
+        {
+          "name": "bounded MCP resource/prompt metadata: cursor",
+          "status": "passed",
+          "durationMs": 55.93770000000018
+        },
+        {
+          "name": "bounded MCP resource/prompt metadata: oversize",
+          "status": "passed",
+          "durationMs": 58.89300000000003
+        },
+        {
+          "name": "native metadata lifecycle revokes stale resources catalog",
+          "status": "passed",
+          "durationMs": 861.9808999999996
+        },
+        {
+          "name": "native metadata lifecycle revokes stale prompts catalog",
+          "status": "passed",
+          "durationMs": 836.6280000000002
+        },
+        {
+          "name": "native metadata lifecycle revokes stale wait catalog",
+          "status": "passed",
+          "durationMs": 737.6311999999998
+        }
+      ]
+    },
+    {
+      "file": "tests/mcp-data-work.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "configured MCP task data exact approval: prompt",
+          "status": "passed",
+          "durationMs": 1182.4629
+        },
+        {
+          "name": "configured MCP task data exact approval: prompt-image",
+          "status": "passed",
+          "durationMs": 1077.7572999999998
+        },
+        {
+          "name": "configured MCP task data exact approval: resource-image",
+          "status": "passed",
+          "durationMs": 1115.1558999999997
+        },
+        {
+          "name": "configured MCP task data exact approval: resource-large-image",
+          "status": "passed",
+          "durationMs": 1394.4718000000003
+        },
+        {
+          "name": "configured MCP task data exact approval: reject",
+          "status": "passed",
+          "durationMs": 1096.3391000000001
+        },
+        {
+          "name": "configured MCP task data exact approval: revoke",
+          "status": "passed",
+          "durationMs": 1069.1206999999995
+        },
+        {
+          "name": "configured MCP task data exact approval: invalid",
+          "status": "passed",
+          "durationMs": 1025.2395000000006
+        },
+        {
+          "name": "configured MCP task data exact approval: resource",
+          "status": "passed",
+          "durationMs": 1091.8184
+        },
+        {
+          "name": "configured MCP task data exact approval: template",
+          "status": "passed",
+          "durationMs": 1076.8147000000008
+        },
+        {
+          "name": "configured MCP task data exact approval: uncertain",
+          "status": "passed",
+          "durationMs": 1082.3311999999987
+        }
+      ]
+    },
+    {
+      "file": "tests/mcp-manager.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Stop during native startup/discovery cancels only the owned process and old request does not restart it",
+          "status": "passed",
+          "durationMs": 457.8991000000001
+        },
+        {
+          "name": "configured HTTP redirect cannot forward credentials or initialize an unconfigured endpoint",
+          "status": "passed",
+          "durationMs": 68.58179999999993
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: pages",
+          "status": "passed",
+          "durationMs": 425.193
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: repeat",
+          "status": "passed",
+          "durationMs": 395.2805000000001
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: diagnostics",
+          "status": "passed",
+          "durationMs": 401.8711999999998
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: overflow",
+          "status": "passed",
+          "durationMs": 381.10699999999997
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: unsafe-input",
+          "status": "passed",
+          "durationMs": 382.9205999999999
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: unsafe-output",
+          "status": "passed",
+          "durationMs": 390.9831000000004
+        },
+        {
+          "name": "configured official MCP lifecycle lists actual tools and stops without replay: stdio",
+          "status": "passed",
+          "durationMs": 806.0843
+        },
+        {
+          "name": "configured official MCP lifecycle lists actual tools and stops without replay: http",
+          "status": "passed",
+          "durationMs": 120.15689999999995
+        },
+        {
+          "name": "failed configured stdio startup is bounded, reported and not retried by old receipt",
+          "status": "passed",
+          "durationMs": 183.02880000000005
+        }
+      ]
+    },
+    {
+      "file": "tests/mcp-registry.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Rocky MCP schema rejects foreign/mixed config and plaintext credentials; defaults disabled",
+          "status": "passed",
+          "durationMs": 4.448200000000043
+        },
+        {
+          "name": "MCP settings use atomic CAS and persistent receipts, isolated launch env/path and retired-secret redaction",
+          "status": "passed",
+          "durationMs": 53.92349999999999
+        },
+        {
+          "name": "MCP API requires owner session; config references remain references and failed input preserves stored settings",
+          "status": "passed",
+          "durationMs": 55.921299999999974
+        }
+      ]
+    },
+    {
+      "file": "tests/mcp-result.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "raw resource envelope stays in artifact, not model authority or metadata",
+          "status": "passed",
+          "durationMs": 3.9003000000000156
+        },
+        {
+          "name": "raw prompt envelope stays in artifact, not model authority or metadata",
+          "status": "passed",
+          "durationMs": 0.8704999999999927
+        },
+        {
+          "name": "MCP image, structured content and source retain types/artifact across model wire; resource links remain unfetched data",
+          "status": "passed",
+          "durationMs": 1.4635999999999854
+        },
+        {
+          "name": "unsupported binary types are retained as uninspected artifacts without becoming model text/base64 instructions",
+          "status": "passed",
+          "durationMs": 0.22019999999997708
+        },
+        {
+          "name": "image source is local bounded data only: https://unconfigured.invalid/image.png",
+          "status": "passed",
+          "durationMs": 0.12650000000002137
+        },
+        {
+          "name": "image source is local bounded data only: data:image/svg+xml;base64,PHN2Zy8+",
+          "status": "passed",
+          "durationMs": 0.08119999999996708
+        },
+        {
+          "name": "image source is local bounded data only: data:image/png;base64,bm90LWFuLWltYWdl",
+          "status": "passed",
+          "durationMs": 0.06749999999999545
+        },
+        {
+          "name": "image source is local bounded data only: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA0sAAAAASUVORK5CYII==",
+          "status": "passed",
+          "durationMs": 0.081799999999987
+        },
+        {
+          "name": "oversized image dimensions fail before decoder/provider",
+          "status": "passed",
+          "durationMs": 0.12779999999997926
+        }
+      ]
+    },
+    {
+      "file": "tests/mcp-schema.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "original nested schema validates refs, unions, required fields, limits and additional properties without coercion",
+          "status": "passed",
+          "durationMs": 25.539800000000014
+        },
+        {
+          "name": "duplicate schema IDs never reuse another server's validation; explicit draft 7 and 2020 formats are checked",
+          "status": "passed",
+          "durationMs": 27.2671
+        },
+        {
+          "name": "unsafe or unsupported schemas fail closed: {\"$ref\":\"https://unconfigured.invalid/schema\"}",
+          "status": "passed",
+          "durationMs": 0.4922000000000253
+        },
+        {
+          "name": "unsafe or unsupported schemas fail closed: {\"$ref\":\"#/missing\"}",
+          "status": "passed",
+          "durationMs": 0.1301000000000272
+        },
+        {
+          "name": "unsafe or unsupported schemas fail closed: {\"$defs\":{\"loop\":{\"$ref\":\"#/$defs/loop\"}},\"$ref\":\"#/$defs/loop\"}",
+          "status": "passed",
+          "durationMs": 0.12110000000001264
+        },
+        {
+          "name": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"pattern\":\"(a+)+$\"}}}",
+          "status": "passed",
+          "durationMs": 0.09390000000001919
+        },
+        {
+          "name": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"dependencies\":{\"a\":{\"pattern\":\".*\"}}}",
+          "status": "passed",
+          "durationMs": 0.09099999999995134
+        },
+        {
+          "name": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"properties\":{\"at\":{\"type\":\"string\",\"format\":\"unknown-format\"}}}",
+          "status": "passed",
+          "durationMs": 6.34190000000001
+        },
+        {
+          "name": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"required\":1}",
+          "status": "passed",
+          "durationMs": 6.019400000000019
+        },
+        {
+          "name": "unsafe or unsupported schemas fail closed: {\"$schema\":\"https://unconfigured.invalid/draft\"}",
+          "status": "passed",
+          "durationMs": 0.151299999999992
+        },
+        {
+          "name": "same upstream name cannot collide across servers, annotations never grant read authority, revisions change the exact identity",
+          "status": "passed",
+          "durationMs": 0.6658999999999651
+        }
+      ]
+    },
+    {
+      "file": "tests/mcp-vision-work.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native MCP image/structured artifact and openai-compatible wire format with vision=false, large=false",
+          "status": "passed",
+          "durationMs": 1222.8951
+        },
+        {
+          "name": "native MCP image/structured artifact and openai-compatible wire format with vision=false, large=true",
+          "status": "passed",
+          "durationMs": 1124.3942000000002
+        },
+        {
+          "name": "native MCP image/structured artifact and openai-compatible wire format with vision=true, large=false",
+          "status": "passed",
+          "durationMs": 1156.0919
+        },
+        {
+          "name": "native MCP image/structured artifact and openai-compatible wire format with vision=true, large=true",
+          "status": "passed",
+          "durationMs": 1132.8576000000003
+        },
+        {
+          "name": "native MCP image/structured artifact and anthropic wire format with vision=false, large=false",
+          "status": "passed",
+          "durationMs": 1079.3272000000006
+        },
+        {
+          "name": "native MCP image/structured artifact and anthropic wire format with vision=false, large=true",
+          "status": "passed",
+          "durationMs": 1110.6189999999997
+        },
+        {
+          "name": "native MCP image/structured artifact and anthropic wire format with vision=true, large=false",
+          "status": "passed",
+          "durationMs": 1117.4214000000002
+        },
+        {
+          "name": "native MCP image/structured artifact and anthropic wire format with vision=true, large=true",
+          "status": "passed",
+          "durationMs": 1123.2929000000004
+        }
+      ]
+    },
+    {
+      "file": "tests/mcp-work.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: approve",
+          "status": "passed",
+          "durationMs": 1278.7003
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: reject",
+          "status": "passed",
+          "durationMs": 1116.0957000000003
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: revoke",
+          "status": "passed",
+          "durationMs": 1104.6050999999998
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: invalid",
+          "status": "passed",
+          "durationMs": 1038.9277999999995
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: uncertain",
+          "status": "passed",
+          "durationMs": 1114.8120000000008
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: synthetic",
+          "status": "passed",
+          "durationMs": 1006.6235000000006
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: background",
+          "status": "passed",
+          "durationMs": 1115.6309999999994
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: schedule",
+          "status": "passed",
+          "durationMs": 1130.5064000000002
+        }
+      ]
+    },
+    {
+      "file": "tests/mcp.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "SDK discovery and full fixture schema rejects invalid args: stdio",
+          "status": "passed",
+          "durationMs": 279.03960000000006
+        },
+        {
+          "name": "SDK discovery and full fixture schema rejects invalid args: http",
+          "status": "passed",
+          "durationMs": 45.20639999999992
+        }
+      ]
+    },
+    {
+      "file": "tests/memory-native.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native memory boundary: granted",
+          "status": "passed",
+          "durationMs": 1213.519
+        },
+        {
+          "name": "native memory boundary: denied",
+          "status": "passed",
+          "durationMs": 995.9128000000001
+        },
+        {
+          "name": "native memory boundary: revoked",
+          "status": "passed",
+          "durationMs": 981.8927000000003
+        },
+        {
+          "name": "native memory boundary: private",
+          "status": "passed",
+          "durationMs": 1099.6188000000002
+        },
+        {
+          "name": "native memory boundary: escalated",
+          "status": "passed",
+          "durationMs": 985.9855000000007
+        },
+        {
+          "name": "native memory boundary: submitted",
+          "status": "passed",
+          "durationMs": 1109.3654000000006
+        },
+        {
+          "name": "native memory boundary: budget",
+          "status": "passed",
+          "durationMs": 1158.6715999999997
+        },
+        {
+          "name": "native memory boundary: empty",
+          "status": "passed",
+          "durationMs": 1047.9387000000006
+        },
+        {
+          "name": "native memory scope isolation: project",
+          "status": "passed",
+          "durationMs": 1022.8631999999998
+        },
+        {
+          "name": "native memory scope isolation: task",
+          "status": "passed",
+          "durationMs": 1069.2124000000003
+        },
+        {
+          "name": "native memory scope isolation: child",
+          "status": "passed",
+          "durationMs": 1009.2481000000007
+        },
+        {
+          "name": "native memory scope isolation: replay",
+          "status": "passed",
+          "durationMs": 975.6154000000006
+        },
+        {
+          "name": "native memory scope isolation: evaluation",
+          "status": "passed",
+          "durationMs": 49.3104000000003
+        }
+      ]
+    },
+    {
+      "file": "tests/memory-write.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native memory write exact approval: approve",
+          "status": "passed",
+          "durationMs": 1138.4808
+        },
+        {
+          "name": "native memory write exact approval: reject",
+          "status": "passed",
+          "durationMs": 1039.3532
+        },
+        {
+          "name": "native memory write exact approval: locked",
+          "status": "passed",
+          "durationMs": 966.0864000000001
+        },
+        {
+          "name": "native memory write exact approval: race",
+          "status": "passed",
+          "durationMs": 1022.3187000000003
+        },
+        {
+          "name": "native memory write exact approval: rollback",
+          "status": "passed",
+          "durationMs": 1064.1998000000003
+        },
+        {
+          "name": "native memory write exact approval: update",
+          "status": "passed",
+          "durationMs": 1120.1486000000004
+        },
+        {
+          "name": "native memory write exact approval: stop",
+          "status": "passed",
+          "durationMs": 998.9908000000005
+        },
+        {
+          "name": "native memory write exact approval: shutdown",
+          "status": "passed",
+          "durationMs": 1005.6322999999993
+        },
+        {
+          "name": "native memory write exact approval: reopen",
+          "status": "passed",
+          "durationMs": 1047.1807000000008
+        },
+        {
+          "name": "native memory write exact approval: missing-source",
+          "status": "passed",
+          "durationMs": 967.8904000000002
+        },
+        {
+          "name": "native memory write exact approval: invalid-content",
+          "status": "passed",
+          "durationMs": 994.4940000000006
+        }
+      ]
+    },
+    {
+      "file": "tests/memory.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "owner memory scopes, locks, CAS, bilingual search, atomic deletion and restart",
+          "status": "passed",
+          "durationMs": 260.8198
+        }
+      ]
+    },
+    {
+      "file": "tests/model-budget.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-007 R-048 root and native child share a durable dispatch cap; duplicate reservations never authorize resend",
+          "status": "passed",
+          "durationMs": 52.40250000000003
+        },
+        {
+          "name": "T-007 budget reservations hold unknown usage and only reported settlement releases token capacity",
+          "status": "passed",
+          "durationMs": 45.55179999999996
+        },
+        {
+          "name": "T-007 cost caps require explicit prices and trusted token bounds; integer pricing rounds up",
+          "status": "passed",
+          "durationMs": 41.64229999999998
+        },
+        {
+          "name": "T-007 provider-reported overrun is retained and prevents a subsequent dispatch",
+          "status": "passed",
+          "durationMs": 40.303499999999985
+        },
+        {
+          "name": "T-007 actual Work path refuses the next model dispatch when its root call budget is spent",
+          "status": "passed",
+          "durationMs": 1054.8049
+        },
+        {
+          "name": "T-007 submission freezes custom budget across receipts, CAS and restart",
+          "status": "passed",
+          "durationMs": 975.2040999999999
+        },
+        {
+          "name": "T-007 submitted token cap fails closed before dispatch when no trusted bounds exist",
+          "status": "passed",
+          "durationMs": 972.7502999999997
+        }
+      ]
+    },
+    {
+      "file": "tests/model-dns.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-007 DNS re-resolution refuses rebinding before sending a second model request",
+          "status": "passed",
+          "durationMs": 28.192200000000014
+        },
+        {
+          "name": "T-007 pinned DNS validates exact hostname and both address families; answer order is irrelevant",
+          "status": "passed",
+          "durationMs": 0.8381999999999721
+        }
+      ]
+    },
+    {
+      "file": "tests/model-network.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-007 AT-24: actual CONNECT proxy traffic and NO_PROXY bypass stay scoped to the connection",
+          "status": "passed",
+          "durationMs": 30.5856
+        },
+        {
+          "name": "T-007 AT-24: real TLS handshake requires explicit CA, does not relax other connections",
+          "status": "passed",
+          "durationMs": 77.27770000000004
+        }
+      ]
+    },
+    {
+      "file": "tests/model-slots.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-010 model slots prefer main, then background, then evaluation at dispatch boundaries",
+          "status": "passed",
+          "durationMs": 1.6736999999999966
+        },
+        {
+          "name": "T-010 cancelling a model waiter removes it without consuming a slot",
+          "status": "passed",
+          "durationMs": 0.8830999999999989
+        }
+      ]
+    },
+    {
+      "file": "tests/model-stream.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "OpenAI SSE decodes split UTF-8/CRLF and fragmented tool arguments without reasoning",
+          "status": "passed",
+          "durationMs": 16.1199
+        },
+        {
+          "name": "provider text arrives before stream termination, with no fabricated completion",
+          "status": "passed",
+          "durationMs": 1.868300000000005
+        },
+        {
+          "name": "truncated SSE, unconfirmed finish and provider error fail closed",
+          "status": "passed",
+          "durationMs": 1.6701999999999941
+        },
+        {
+          "name": "Anthropic incremental public text/tool JSON merge usage and omit thinking blocks",
+          "status": "passed",
+          "durationMs": 2.0966999999999985
+        },
+        {
+          "name": "non-SSE responses cancel their body and are not split into synthetic tokens",
+          "status": "passed",
+          "durationMs": 0.30179999999998586
+        }
+      ]
+    },
+    {
+      "file": "tests/model-transfer.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "large model history roundtrips through bounded frames without dropping messages or Unicode",
+          "status": "passed",
+          "durationMs": 10.11360000000002
+        },
+        {
+          "name": "interleaved root/child uploads preserve their distinct model calls",
+          "status": "passed",
+          "durationMs": 4.373699999999985
+        },
+        {
+          "name": "transfer rejects incomplete, altered, reordered, foreign and oversized requests",
+          "status": "passed",
+          "durationMs": 13.010400000000004
+        },
+        {
+          "name": "bounded upload capacity and shutdown clear prevent unbounded abandoned buffers",
+          "status": "passed",
+          "durationMs": 2.9951000000000363
+        }
+      ]
+    },
+    {
+      "file": "tests/models.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-007 R-022: explicit URL/context/ref validation never invents defaults or accepts raw keys",
+          "status": "passed",
+          "durationMs": 2.905599999999936
+        },
+        {
+          "name": "T-007 AT-22: registry CAS/idempotency, ref redaction, replacement and restart persistence",
+          "status": "passed",
+          "durationMs": 51.505100000000084
+        },
+        {
+          "name": "T-007 AT-03: openai-compatible text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "status": "passed",
+          "durationMs": 77.50759999999991
+        },
+        {
+          "name": "T-007 AT-03: anthropic text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "status": "passed",
+          "durationMs": 54.771799999999985
+        },
+        {
+          "name": "T-007 AT-03: openai text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "status": "passed",
+          "durationMs": 52.192999999999984
+        },
+        {
+          "name": "T-007 AT-03: ollama-compatible text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "status": "passed",
+          "durationMs": 52.28800000000001
+        },
+        {
+          "name": "T-007: auto tool selection must produce a real tool call, not a text-only false positive",
+          "status": "passed",
+          "durationMs": 45.31650000000002
+        },
+        {
+          "name": "T-007 AT-23: redirects never reach an unconfigured destination; invalid replies are redacted",
+          "status": "passed",
+          "durationMs": 48.915899999999965
+        },
+        {
+          "name": "T-007 AT-22: changing a connection cancels its outstanding probe and restart never replays it",
+          "status": "passed",
+          "durationMs": 107.75559999999996
+        },
+        {
+          "name": "T-007 AT-24: explicit/environment/direct proxy precedence and NO_PROXY host/port/IPv6 patterns",
+          "status": "passed",
+          "durationMs": 0.5325000000000273
+        }
+      ]
+    },
+    {
+      "file": "tests/native-command-receipts.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native reconciliation survives a new adapter instance, validates binding, and never treats missing/corrupt receipts as no-effect",
+          "status": "passed",
+          "durationMs": 12.757999999999981
+        }
+      ]
+    },
+    {
+      "file": "tests/native-compaction.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "three native compactions preserve goal/correction/todos/evidence, checkpoint and raw offload",
+          "status": "passed",
+          "durationMs": 234.2335999999999
+        },
+        {
+          "name": "summary failure retains checkpoint history/correction/todos without invoking target or effects",
+          "status": "passed",
+          "durationMs": 34.1937999999999
+        },
+        {
+          "name": "configured daemon worker preserves native compaction metadata across smaller-context turns and accounts summaries without reply projection",
+          "status": "passed",
+          "durationMs": 4461.331399999999
+        },
+        {
+          "name": "unbound native summary provenance is distinct from tool-bound target even with zero tools, and invalid summaries fail closed",
+          "status": "passed",
+          "durationMs": 0.7492999999994936
+        },
+        {
+          "name": "actual native read_file returns long tool evidence and keeps the source checkpoint readable",
+          "status": "passed",
+          "durationMs": 93.80010000000038
+        }
+      ]
+    },
+    {
+      "file": "tests/native-environment.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native adapter runs exact argv in the selected cwd without ambient credentials or shell expansion",
+          "status": "passed",
+          "durationMs": 48.88819999999998
+        },
+        {
+          "name": "native bounded execution: cancelled",
+          "status": "passed",
+          "durationMs": 620.832
+        },
+        {
+          "name": "native bounded execution: timed_out",
+          "status": "passed",
+          "durationMs": 616.9367000000001
+        },
+        {
+          "name": "native bounded execution: output_limit",
+          "status": "passed",
+          "durationMs": 147.48559999999998
+        },
+        {
+          "name": "native validation and pre-abort do not launch a process",
+          "status": "passed",
+          "durationMs": 4.4792999999999665
+        },
+        {
+          "name": "native cancellation terminates an owned descendant process",
+          "status": "passed",
+          "durationMs": 147.10979999999995
+        }
+      ]
+    },
+    {
+      "file": "tests/native-task-identity.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "parallel native tasks preserve parent identity even with repeated child tool IDs",
+          "status": "passed",
+          "durationMs": 56.21079999999995
+        }
+      ]
+    },
+    {
+      "file": "tests/network.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-007 concurrent evaluation endpoint leases revoke independently and never grant sibling routes",
+          "status": "passed",
+          "durationMs": 1.241599999999977
+        },
+        {
+          "name": "evaluation guard rejects unregistered endpoints before sending",
+          "status": "passed",
+          "durationMs": 0.7079999999999984
+        },
+        {
+          "name": "configured loopback endpoint allowed, unconfigured and redirect denied",
+          "status": "passed",
+          "durationMs": 23.956500000000005
+        }
+      ]
+    },
+    {
+      "file": "tests/operation-ledger.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "daemon-owned interrupted workspace reads settle with no mutation while dispatched MCP stays unknown",
+          "status": "passed",
+          "durationMs": 59.630600000000015
+        },
+        {
+          "name": "configured MCP reconnect revision cannot bypass confirmed-effect retry protection, while distinct server targets remain distinct",
+          "status": "passed",
+          "durationMs": 47.44369999999998
+        },
+        {
+          "name": "T-008 durable stages, exact intent, CAS and unknown never reset on restart",
+          "status": "passed",
+          "durationMs": 49.48400000000004
+        },
+        {
+          "name": "T-008 owner/session and active status are rechecked before dispatch; late known outcome can settle",
+          "status": "passed",
+          "durationMs": 50.85069999999996
+        },
+        {
+          "name": "T-008 own v4 operation migration preserves success and unknown without inventing context",
+          "status": "passed",
+          "durationMs": 98.5113
+        },
+        {
+          "name": "T-008 restart settles only undispatched owned operations and cleanup rolls back with Work failure",
+          "status": "passed",
+          "durationMs": 491.66819999999996
+        },
+        {
+          "name": "T-008 canonical target claim survives restart, blocks another Work and releases only on known reconciliation",
+          "status": "passed",
+          "durationMs": 55.104899999999816
+        }
+      ]
+    },
+    {
+      "file": "tests/operation-reconciler.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-008 lost synthetic result reconciles from durable receipt without replay; request persists across restart",
+          "status": "passed",
+          "durationMs": 62.23689999999999
+        },
+        {
+          "name": "T-008 mismatched evidence/cancelled query and stale concurrent reconciliation cannot overwrite unknown or newer results",
+          "status": "passed",
+          "durationMs": 45.92270000000002
+        },
+        {
+          "name": "T-008 inconclusive status remains unknown and cannot become permission to dispatch",
+          "status": "passed",
+          "durationMs": 45.21010000000001
+        },
+        {
+          "name": "T-008 MCP durable receipt resolves lost response after restart without resending: stdio",
+          "status": "passed",
+          "durationMs": 1079.8595
+        },
+        {
+          "name": "T-008 MCP durable receipt resolves lost response after restart without resending: http",
+          "status": "passed",
+          "durationMs": 102.95280000000002
+        },
+        {
+          "name": "T-008 missing MCP receipt remains unknown and keeps target claim",
+          "status": "passed",
+          "durationMs": 64.03680000000008
+        }
+      ]
+    },
+    {
+      "file": "tests/performance.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "measured local warm startup, receipts and retained storage stay within the documented fixture budget",
+          "status": "passed",
+          "durationMs": 88.54909999999995
+        }
+      ]
+    },
+    {
+      "file": "tests/persistence.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-006 stale CAS and transaction failure cannot partially change Work, events or outbox",
+          "status": "passed",
+          "durationMs": 55.08710000000008
+        },
+        {
+          "name": "T-006 outbox replay after acknowledgement failure creates one completion and no new operations",
+          "status": "passed",
+          "durationMs": 48.28609999999992
+        },
+        {
+          "name": "T-006 an outbox write failure rolls back the operation ledger and its event together",
+          "status": "passed",
+          "durationMs": 39.166000000000054
+        },
+        {
+          "name": "T-006 actual child exits roll back uncommitted writes and preserve committed pending delivery",
+          "status": "passed",
+          "durationMs": 1039.9198000000001
+        },
+        {
+          "name": "T-006 simultaneous daemons cannot both recover a stale PID lock",
+          "status": "passed",
+          "durationMs": 1078.9975999999997
+        },
+        {
+          "name": "T-006 durable completion API pages stable sequences without skipping or duplicating results",
+          "status": "passed",
+          "durationMs": 288.8303999999998
+        }
+      ]
+    },
+    {
+      "file": "tests/policy.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-008 deny-first owner/config/resource/revocation cannot be overridden by exact consent",
+          "status": "passed",
+          "durationMs": 3.7634999999999934
+        },
+        {
+          "name": "T-008 critical/unknown need exact consent and evaluation cannot acquire production write authority",
+          "status": "passed",
+          "durationMs": 1.0319000000000074
+        },
+        {
+          "name": "T-008 changed target/policy requires fresh preparation; local-new cannot overwrite without consent",
+          "status": "passed",
+          "durationMs": 0.3185000000000002
+        }
+      ]
+    },
+    {
+      "file": "tests/presence.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "model waiting survives snapshot without retained wait events and never animates",
+          "status": "passed",
+          "durationMs": 2.030099999999976
+        },
+        {
+          "name": "presence uses run progress, not heartbeat or connection, with deterministic sixty-second staleness",
+          "status": "passed",
+          "durationMs": 0.35499999999998977
+        },
+        {
+          "name": "foreground outcomes stay distinct from independent background counts and evaluation work",
+          "status": "passed",
+          "durationMs": 0.34969999999998436
+        },
+        {
+          "name": "completion feedback excludes history, replay, late catch-up, background and unsuccessful states",
+          "status": "passed",
+          "durationMs": 2.393499999999989
+        }
+      ]
+    },
+    {
+      "file": "tests/projection.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "snapshot pages preserve the event boundary and include older active Works on the first page",
+          "status": "passed",
+          "durationMs": 231.73760000000004
+        },
+        {
+          "name": "T-005 strict DTO and official AG-UI contracts reject invalid identities, private fields and cursors",
+          "status": "passed",
+          "durationMs": 2.4085000000000036
+        },
+        {
+          "name": "snapshot high water and replay preserve newer revisions and deduplicate evidence beyond safe-number precision",
+          "status": "passed",
+          "durationMs": 47.60559999999998
+        },
+        {
+          "name": "Rocky P0 event upgrade is transactional and retained across reopen",
+          "status": "passed",
+          "durationMs": 97.60170000000005
+        },
+        {
+          "name": "unsupported store version releases lock and preserves stored bytes",
+          "status": "passed",
+          "durationMs": 43.7278
+        }
+      ]
+    },
+    {
+      "file": "tests/redaction.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "stream redaction holds split configured credentials and preserves incremental public text",
+          "status": "passed",
+          "durationMs": 6.467200000000048
+        },
+        {
+          "name": "T-008 nested structured/text evidence masks credentials without hiding usage counts",
+          "status": "passed",
+          "durationMs": 0.2839000000000169
+        },
+        {
+          "name": "T-008 configured credential echoes are masked before event persistence and at HTTP projection; session remains usable",
+          "status": "passed",
+          "durationMs": 106.57730000000004
+        }
+      ]
+    },
+    {
+      "file": "tests/reflection-authority.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "reflection authority pins reviewed source, restricts skills and persists only scoped drafts",
+          "status": "passed",
+          "durationMs": 97.48250000000002
+        }
+      ]
+    },
+    {
+      "file": "tests/reflection-profile.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "same Deep Agents factory reflection reads bound evidence and marks no-learning through restricted port",
+          "status": "passed",
+          "durationMs": 36.574100000000044
+        },
+        {
+          "name": "reflection rejects write_file before authority dispatch",
+          "status": "passed",
+          "durationMs": 8.324100000000044
+        },
+        {
+          "name": "reflection rejects task before authority dispatch",
+          "status": "passed",
+          "durationMs": 6.757399999999961
+        },
+        {
+          "name": "reflection rejects mcp_call before authority dispatch",
+          "status": "passed",
+          "durationMs": 6.32890000000009
+        },
+        {
+          "name": "reflection rejects memory_write before authority dispatch",
+          "status": "passed",
+          "durationMs": 6.928899999999999
+        },
+        {
+          "name": "reflection refuses accidental normal-skill/fixture composition",
+          "status": "passed",
+          "durationMs": 0.25739999999996144
+        }
+      ]
+    },
+    {
+      "file": "tests/reflection-service.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "daemon reflection admission and terminal evidence: result",
+          "status": "passed",
+          "durationMs": 1103.4325
+        },
+        {
+          "name": "daemon reflection admission and terminal evidence: text-only",
+          "status": "passed",
+          "durationMs": 1008.0549000000001
+        },
+        {
+          "name": "daemon reflection admission and terminal evidence: budget",
+          "status": "passed",
+          "durationMs": 1007.1462999999999
+        },
+        {
+          "name": "daemon reflection admission and terminal evidence: withdraw",
+          "status": "passed",
+          "durationMs": 990.5299999999997
+        },
+        {
+          "name": "daemon reflection admission and terminal evidence: withdraw-output",
+          "status": "passed",
+          "durationMs": 981.1142
+        },
+        {
+          "name": "daemon reflection admission and terminal evidence: stop",
+          "status": "passed",
+          "durationMs": 1012.7161999999998
+        }
+      ]
+    },
+    {
+      "file": "tests/reflection-worker.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "reflection profile traverses real worker IPC without normal skill discovery or conversation inheritance",
+          "status": "passed",
+          "durationMs": 969.2142
+        },
+        {
+          "name": "reflection wire start rejects context, fixture, steering and unconfigured combinations",
+          "status": "passed",
+          "durationMs": 0.7766000000001441
+        }
+      ]
+    },
+    {
+      "file": "tests/result-transfer.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "model/tool/run results roundtrip Unicode in bounded frames with exact request and kind",
+          "status": "passed",
+          "durationMs": 18.630899999999997
+        },
+        {
+          "name": "incomplete, reordered, altered, expired and cross-request results never deliver",
+          "status": "passed",
+          "durationMs": 1.6521999999999935
+        },
+        {
+          "name": "result capacity and explicit size limits bound abandoned delivery",
+          "status": "passed",
+          "durationMs": 3.483300000000014
+        }
+      ]
+    },
+    {
+      "file": "tests/retry.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "retry creates new durable Work/run/session/budget, keeps source immutable and survives restart idempotently",
+          "status": "passed",
+          "durationMs": 2042.7974
+        },
+        {
+          "name": "retry rejects unknown effects and requires exact reconciliation refs: succeeded",
+          "status": "passed",
+          "durationMs": 994.9004
+        },
+        {
+          "name": "retry rejects unknown effects and requires exact reconciliation refs: failed_known_no_effect",
+          "status": "passed",
+          "durationMs": 1003.0772999999999
+        }
+      ]
+    },
+    {
+      "file": "tests/routines.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "durable interval occurrences, restart and dedupe: skip",
+          "status": "passed",
+          "durationMs": 72.06369999999998
+        },
+        {
+          "name": "durable interval occurrences, restart and dedupe: coalesce-one",
+          "status": "passed",
+          "durationMs": 52.24979999999999
+        },
+        {
+          "name": "cron uses IANA local time across DST and does not duplicate one occurrence",
+          "status": "passed",
+          "durationMs": 42.9917999999999
+        }
+      ]
+    },
+    {
+      "file": "tests/runtime.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-003 native task + interrupt + approval + MCP stdio",
+          "status": "passed",
+          "durationMs": 1410.201
+        },
+        {
+          "name": "T-003 native task + interrupt + approval + MCP http",
+          "status": "passed",
+          "durationMs": 1163.5274
+        },
+        {
+          "name": "T-003/T-037 persona bypass request still requires approval; rejection has no write",
+          "status": "passed",
+          "durationMs": 1384.3984999999998
+        }
+      ]
+    },
+    {
+      "file": "tests/scratch-runtime.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native glob inputs are bounded before upstream pattern compilation",
+          "status": "passed",
+          "durationMs": 1.4015999999999167
+        },
+        {
+          "name": "native scratch writes/edits/read survive checkpoints and stay isolated by execution thread",
+          "status": "passed",
+          "durationMs": 66.97119999999995
+        },
+        {
+          "name": "scratch scope denies traversal, host paths, context edits and oversized tool IPC",
+          "status": "passed",
+          "durationMs": 0.4498000000000957
+        },
+        {
+          "name": "native guard refuses execute and out-of-scope tools before any public start or MCP effect",
+          "status": "passed",
+          "durationMs": 20.53419999999994
+        }
+      ]
+    },
+    {
+      "file": "tests/skill-backend.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "read-only native skill backend preserves bytes, paginates and rechecks every read",
+          "status": "passed",
+          "durationMs": 3.0176999999999907
+        },
+        {
+          "name": "skill read size and binary boundaries",
+          "status": "passed",
+          "durationMs": 3.0382999999999356
+        }
+      ]
+    },
+    {
+      "file": "tests/skill-catalog.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "frozen catalog scope, newer selections, quarantine and reopened reads",
+          "status": "passed",
+          "durationMs": 79.06220000000002
+        }
+      ]
+    },
+    {
+      "file": "tests/skill-diff.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "immutable package diff covers additions/removals/binary and bounded text",
+          "status": "passed",
+          "durationMs": 63.48300000000006
+        }
+      ]
+    },
+    {
+      "file": "tests/skill-native.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native progressive skill read: published",
+          "status": "passed",
+          "durationMs": 1101.6064999999999
+        },
+        {
+          "name": "native progressive skill read: untrusted",
+          "status": "passed",
+          "durationMs": 1045.2525
+        },
+        {
+          "name": "native progressive skill read: quarantined",
+          "status": "passed",
+          "durationMs": 1029.5711999999999
+        },
+        {
+          "name": "native progressive skill read: same-name",
+          "status": "passed",
+          "durationMs": 1026.6953000000003
+        },
+        {
+          "name": "native progressive skill read: revoke-loaded",
+          "status": "passed",
+          "durationMs": 1058.8693000000003
+        },
+        {
+          "name": "native progressive skill read: revoke-pending",
+          "status": "passed",
+          "durationMs": 1102.6877000000004
+        }
+      ]
+    },
+    {
+      "file": "tests/skill-package.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "portable skill metadata, immutable file hashes, deterministic package identity and binary assets",
+          "status": "passed",
+          "durationMs": 7.878100000000018
+        },
+        {
+          "name": "reject unsafe path ../escape",
+          "status": "passed",
+          "durationMs": 0.4925000000000068
+        },
+        {
+          "name": "reject unsafe path /absolute",
+          "status": "passed",
+          "durationMs": 0.1448999999999785
+        },
+        {
+          "name": "reject unsafe path C:/escape",
+          "status": "passed",
+          "durationMs": 0.10310000000001196
+        },
+        {
+          "name": "reject unsafe path a\\b",
+          "status": "passed",
+          "durationMs": 0.10230000000001382
+        },
+        {
+          "name": "reject unsafe path a/./b",
+          "status": "passed",
+          "durationMs": 0.08480000000000132
+        },
+        {
+          "name": "reject unsafe path a//b",
+          "status": "passed",
+          "durationMs": 0.08610000000001605
+        },
+        {
+          "name": "reject unsafe path a/NUL.txt",
+          "status": "passed",
+          "durationMs": 0.08250000000001023
+        },
+        {
+          "name": "reject unsafe path x:stream",
+          "status": "passed",
+          "durationMs": 0.08959999999999013
+        },
+        {
+          "name": "reject unsafe path x.",
+          "status": "passed",
+          "durationMs": 0.15699999999998226
+        },
+        {
+          "name": "reject unsafe path manifest.json",
+          "status": "passed",
+          "durationMs": 0.10810000000000741
+        },
+        {
+          "name": "reject unsafe path .git/config",
+          "status": "passed",
+          "durationMs": 0.08369999999999322
+        },
+        {
+          "name": "reject collisions, malformed data and oversized packages",
+          "status": "passed",
+          "durationMs": 10.942700000000002
+        },
+        {
+          "name": "reject invalid metadata: name: other\ndescription: Wrong name",
+          "status": "passed",
+          "durationMs": 0.34850000000000136
+        },
+        {
+          "name": "reject invalid metadata: name: example-skill\nname: duplicate\ndescription: Duplicate",
+          "status": "passed",
+          "durationMs": 0.46810000000002105
+        },
+        {
+          "name": "reject invalid metadata: name: example-skill\ndescription: !unknown value",
+          "status": "passed",
+          "durationMs": 0.4911000000000172
+        },
+        {
+          "name": "reject invalid metadata: name: example-skill\ndescription: &a text\nlicense: *a",
+          "status": "passed",
+          "durationMs": 0.4946999999999946
+        },
+        {
+          "name": "reject invalid metadata: name: example-skill\ndescription: 123",
+          "status": "passed",
+          "durationMs": 0.5846000000000231
+        }
+      ]
+    },
+    {
+      "file": "tests/skill-selection.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "exact owner selection, independent import head, rollback, quarantine and durable replay",
+          "status": "passed",
+          "durationMs": 81.69749999999999
+        }
+      ]
+    },
+    {
+      "file": "tests/skill-sources.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "project discovery is owner-only, untrusted, hash-pinned and imports immutable bytes",
+          "status": "passed",
+          "durationMs": 103.12220000000002
+        },
+        {
+          "name": "filesystem sources reject junctions, hard links, oversized files and invalid packages",
+          "status": "passed",
+          "durationMs": 20.904999999999973
+        }
+      ]
+    },
+    {
+      "file": "tests/skills.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "owner imports untrusted immutable skill revisions with CAS, receipts, rollback and reopen",
+          "status": "passed",
+          "durationMs": 84.3931
+        },
+        {
+          "name": "schema 19 upgrades skill tables without changing owner memories",
+          "status": "passed",
+          "durationMs": 87.79380000000003
+        }
+      ]
+    },
+    {
+      "file": "tests/steering.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (true)",
+          "status": "passed",
+          "durationMs": 2138.6405
+        },
+        {
+          "name": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (child)",
+          "status": "passed",
+          "durationMs": 2015.0193000000004
+        },
+        {
+          "name": "pending steering is not_applied when terminal before next boundary, with no ghost history",
+          "status": "passed",
+          "durationMs": 1029.0777000000007
+        },
+        {
+          "name": "pending steering is not_applied when stopped, with no ghost history",
+          "status": "passed",
+          "durationMs": 1012.9486000000006
+        }
+      ]
+    },
+    {
+      "file": "tests/stop.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "stale stop cannot cancel another run/session or a newer revision; receipt survives restart",
+          "status": "passed",
+          "durationMs": 1197.4097000000002
+        },
+        {
+          "name": "stopping with a dispatched unknown effect requires reconciliation",
+          "status": "passed",
+          "durationMs": 1052.2524
+        }
+      ]
+    },
+    {
+      "file": "tests/storage-faults.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "storage full cannot commit a partial completed Work or outbox",
+          "status": "passed",
+          "durationMs": 52.688899999999876
+        },
+        {
+          "name": "storage busy cannot commit a partial completed Work or outbox",
+          "status": "passed",
+          "durationMs": 47.21690000000012
+        },
+        {
+          "name": "storage journal cannot commit a partial completed Work or outbox",
+          "status": "passed",
+          "durationMs": 42.72479999999996
+        },
+        {
+          "name": "terminal persistence failure stops further execution and reports volatile degradation instead of success",
+          "status": "passed",
+          "durationMs": 1049.6483999999998
+        }
+      ]
+    },
+    {
+      "file": "tests/store.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "fresh Rocky ignores synthetic foreign home stores and refuses unknown or newer stores without conversion",
+          "status": "passed",
+          "durationMs": 949.5323
+        },
+        {
+          "name": "foreign store refusal leaves synthetic private bytes unchanged",
+          "status": "passed",
+          "durationMs": 1.936100000000124
+        },
+        {
+          "name": "single writer rejects duplicate daemon and receipts survive restart",
+          "status": "passed",
+          "durationMs": 367.1721
+        }
+      ]
+    },
+    {
+      "file": "tests/stream-work.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "truncated openai-compatible SSE never completes Work or dispatches tool effects",
+          "status": "passed",
+          "durationMs": 1037.3852000000002
+        },
+        {
+          "name": "truncated anthropic SSE never completes Work or dispatches tool effects",
+          "status": "passed",
+          "durationMs": 987.6577000000002
+        }
+      ]
+    },
+    {
+      "file": "tests/terminate-process-tree.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "terminates an owned process and its live descendant, leaving another process alive",
+          "status": "passed",
+          "durationMs": 255.21110000000002
+        }
+      ]
+    },
+    {
+      "file": "tests/tracked-work.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "background MCP tracking dedupes status, bounds follow-ups, pins schema and stops unknown queries",
+          "status": "passed",
+          "durationMs": 69.92439999999999
+        }
+      ]
+    },
+    {
+      "file": "tests/worker-channel.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "large native checkpoint history reaches one daemon model dispatch through real bounded child IPC",
+          "status": "passed",
+          "durationMs": 1300.7102
+        },
+        {
+          "name": "large model response and final native result cross both real child IPC directions intact",
+          "status": "passed",
+          "durationMs": 960.5907000000002
+        },
+        {
+          "name": "large daemon tool receipt resumes exact native interrupt and offloads evidence without repeating the tool",
+          "status": "passed",
+          "durationMs": 993.4679000000001
+        },
+        {
+          "name": "T-009 real child IPC verifies ownership and correlates tool result with daemon-resolved scope",
+          "status": "passed",
+          "durationMs": 242.31089999999995
+        },
+        {
+          "name": "T-009 capability, queue and forced shutdown: badcap",
+          "status": "passed",
+          "durationMs": 229.2564000000002
+        },
+        {
+          "name": "T-009 capability, queue and forced shutdown: flood",
+          "status": "passed",
+          "durationMs": 233.3083999999999
+        },
+        {
+          "name": "T-009 capability, queue and forced shutdown: stubborn",
+          "status": "passed",
+          "durationMs": 855.5154000000002
+        },
+        {
+          "name": "incomplete or wrong-kind final result never completes native invocation: partial-run",
+          "status": "passed",
+          "durationMs": 245.22630000000026
+        },
+        {
+          "name": "incomplete or wrong-kind final result never completes native invocation: incomplete-run",
+          "status": "passed",
+          "durationMs": 228.9894000000004
+        },
+        {
+          "name": "incomplete or wrong-kind final result never completes native invocation: foreign-result",
+          "status": "passed",
+          "durationMs": 232.1786000000002
+        },
+        {
+          "name": "T-009 shutdown bounds a handler that ignores cancellation",
+          "status": "passed",
+          "durationMs": 832.5635000000002
+        },
+        {
+          "name": "T-009 forced shutdown reaps a stubborn worker and its real descendant",
+          "status": "passed",
+          "durationMs": 851.0962
+        },
+        {
+          "name": "T-009 restart marks an unfinished worker interrupted without completing its Work or respawning",
+          "status": "passed",
+          "durationMs": 459.3768
+        },
+        {
+          "name": "T-009 native Deep Agents fixture runs in child and resumes exact interrupt through daemon RPC",
+          "status": "passed",
+          "durationMs": 968.6808999999994
+        }
+      ]
+    },
+    {
+      "file": "tests/worker-network-guard.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-009 worker preload denies direct fetch, TCP, TLS, HTTP and UDP APIs",
+          "status": "passed",
+          "durationMs": 67.7034
+        }
+      ]
+    },
+    {
+      "file": "tests/workspace-command-dispatch.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native ledger dispatch: approved",
+          "status": "passed",
+          "durationMs": 391.063
+        },
+        {
+          "name": "native ledger dispatch: rejected",
+          "status": "passed",
+          "durationMs": 243.76139999999998
+        },
+        {
+          "name": "native ledger dispatch: wrong_hash",
+          "status": "passed",
+          "durationMs": 243.53009999999995
+        },
+        {
+          "name": "native ledger dispatch: nonzero",
+          "status": "passed",
+          "durationMs": 385.4531000000002
+        },
+        {
+          "name": "native ledger dispatch: cancelled",
+          "status": "passed",
+          "durationMs": 504.38200000000006
+        },
+        {
+          "name": "native ledger dispatch: configuration_revoked",
+          "status": "passed",
+          "durationMs": 243.38110000000006
+        }
+      ]
+    },
+    {
+      "file": "tests/workspace-command-work.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "configured Work native command: approve",
+          "status": "passed",
+          "durationMs": 1355.4360000000001
+        },
+        {
+          "name": "configured Work native command: reject",
+          "status": "passed",
+          "durationMs": 1173.3984
+        },
+        {
+          "name": "configured Work native command: child",
+          "status": "passed",
+          "durationMs": 992.4286000000002
+        },
+        {
+          "name": "configured Work native command: steer",
+          "status": "passed",
+          "durationMs": 1108.6530999999995
+        }
+      ]
+    },
+    {
+      "file": "tests/workspace-commands.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "command consent binds executable bytes, owner, limits, workspace and OS environment without execution",
+          "status": "passed",
+          "durationMs": 76.25619999999998
+        }
+      ]
+    },
+    {
+      "file": "tests/workspace-leases.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "canonical overlap checks both ancestors and descendants without prefix collisions",
+          "status": "passed",
+          "durationMs": 0.9150000000000773
+        },
+        {
+          "name": "root-owned admission for nested registrations: release",
+          "status": "passed",
+          "durationMs": 2943.2024
+        },
+        {
+          "name": "root-owned admission for nested registrations: reverse",
+          "status": "passed",
+          "durationMs": 2861.7073
+        },
+        {
+          "name": "root-owned admission for nested registrations: cancel-waiter",
+          "status": "passed",
+          "durationMs": 1988.7115999999996
+        },
+        {
+          "name": "root-owned admission for nested registrations: blocked",
+          "status": "passed",
+          "durationMs": 1980.5638999999992
+        }
+      ]
+    },
+    {
+      "file": "tests/workspace-work.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "configured native workspace read boundary: read",
+          "status": "passed",
+          "durationMs": 1085.3345
+        },
+        {
+          "name": "configured native workspace read boundary: denied",
+          "status": "passed",
+          "durationMs": 993.2550999999999
+        },
+        {
+          "name": "configured native workspace read boundary: traversal",
+          "status": "passed",
+          "durationMs": 1028.2437
+        },
+        {
+          "name": "configured native workspace read boundary: revoked",
+          "status": "passed",
+          "durationMs": 982.0802999999996
+        },
+        {
+          "name": "configured native workspace read boundary: replacement",
+          "status": "passed",
+          "durationMs": 992.5526
+        },
+        {
+          "name": "configured native workspace read boundary: child",
+          "status": "passed",
+          "durationMs": 1208.2495
+        },
+        {
+          "name": "configured native workspace read boundary: shell",
+          "status": "passed",
+          "durationMs": 988.2667000000001
+        },
+        {
+          "name": "configured native workspace read boundary: paged",
+          "status": "passed",
+          "durationMs": 1188.300000000001
+        },
+        {
+          "name": "configured native workspace read boundary: changed-page",
+          "status": "passed",
+          "durationMs": 1028.1155999999992
+        }
+      ]
+    },
+    {
+      "file": "tests/workspace-worktrees.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native worktree exact consent: approve",
+          "status": "passed",
+          "durationMs": 2048.2151999999996
+        },
+        {
+          "name": "native worktree exact consent: adopt",
+          "status": "passed",
+          "durationMs": 1951.1572999999999
+        },
+        {
+          "name": "native worktree exact consent: directory",
+          "status": "passed",
+          "durationMs": 1263.3090000000002
+        },
+        {
+          "name": "native worktree exact consent: reject",
+          "status": "passed",
+          "durationMs": 1422.8507
+        },
+        {
+          "name": "native worktree exact consent: stale",
+          "status": "passed",
+          "durationMs": 1727.5357999999997
+        },
+        {
+          "name": "native worktree exact consent: child",
+          "status": "passed",
+          "durationMs": 1230.6118999999999
+        },
+        {
+          "name": "native worktree exact consent: cancel",
+          "status": "passed",
+          "durationMs": 1385.1702999999998
+        },
+        {
+          "name": "native worktree exact consent: registration-failure",
+          "status": "passed",
+          "durationMs": 1915.4025000000001
+        }
+      ]
+    },
+    {
+      "file": "tests/workspace-writes.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "native exact workspace write: new",
+          "status": "passed",
+          "durationMs": 1195.7448
+        },
+        {
+          "name": "native exact workspace write: replace",
+          "status": "passed",
+          "durationMs": 1188.5668
+        },
+        {
+          "name": "native exact workspace write: reject",
+          "status": "passed",
+          "durationMs": 1066.603
+        },
+        {
+          "name": "native exact workspace write: stale",
+          "status": "passed",
+          "durationMs": 1051.4582
+        },
+        {
+          "name": "native exact workspace write: cancel",
+          "status": "passed",
+          "durationMs": 1007.2142999999996
+        },
+        {
+          "name": "native exact workspace write: private",
+          "status": "passed",
+          "durationMs": 988.1724999999997
+        },
+        {
+          "name": "native exact workspace write: child",
+          "status": "passed",
+          "durationMs": 997.9008000000003
+        },
+        {
+          "name": "writer rejects cancelled, stale, unsafe and oversized proposals without changing files",
+          "status": "passed",
+          "durationMs": 315.4756000000016
+        }
+      ]
+    },
+    {
+      "file": "tests/workspaces.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "directory limits are truthful and unfinished workspace reservations prevent rebinding",
+          "status": "passed",
+          "durationMs": 109.64670000000001
+        },
+        {
+          "name": "workspace registration persists, replays parallel requests, enforces CAS and canonical duplicate roots",
+          "status": "passed",
+          "durationMs": 48.59599999999989
+        },
+        {
+          "name": "registered previews reject traversal, junctions, hardlinks, private data, binary and root replacement",
+          "status": "passed",
+          "durationMs": 112.72429999999997
+        },
+        {
+          "name": "workspace owner HTTP commands require session; read API reports actual content and revision",
+          "status": "passed",
+          "durationMs": 92.59390000000008
+        }
+      ]
+    },
+    {
+      "file": "tests/write-diff.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "replacement hunk preserves exact changed lines, context, CRLF and trailing newline state",
+          "status": "passed",
+          "durationMs": 2.131699999999995
+        },
+        {
+          "name": "large and very long differences explicitly report bounded incomplete preview",
+          "status": "passed",
+          "durationMs": 1.1841000000000008
+        }
+      ]
+    }
+  ]
+}

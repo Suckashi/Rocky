@@ -46,6 +46,18 @@ function input(works: Work[], events: PublicEvent[] = []): PresenceInput {
     hidden: false,
   };
 }
+
+test("model waiting survives snapshot without retained wait events and never animates", () => {
+  const waiting = { ...work("running"), modelWaitCount: 1 };
+  expect(deriveRockyPresence(input([waiting]), now)).toMatchObject({
+    state: "waiting_model",
+    moving: false,
+  });
+  expect(
+    deriveRockyPresence(input([{ ...waiting, status: "cancelled" }]), now)
+      .state,
+  ).toBe("cancelled");
+});
 test("presence uses run progress, not heartbeat or connection, with deterministic sixty-second staleness", () => {
   const w = work("running"),
     i = input([w], [event(w, "rocky.model.started")]);

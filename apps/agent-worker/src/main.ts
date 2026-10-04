@@ -262,7 +262,8 @@ async function invoke(requestId: string, decision?: "approve" | "reject") {
                   ? { type: "approve" }
                   : {
                       type: "reject",
-                      message: "Owner rejected synthetic write",
+                      message:
+                        "Owner rejected this operation. It was not executed. Do not retry or use another tool to bypass the rejection.",
                     },
               ],
             },

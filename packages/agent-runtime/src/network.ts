@@ -1,7 +1,10 @@
 import { RockyError } from "../../contracts/src/index.js";
 export class ExplicitNetwork {
   readonly trace: { url: string; purpose: string; allowed: boolean }[] = [];
-  constructor(private readonly endpoints: ReadonlyMap<string, string>) {}
+  constructor(
+    private readonly endpoints: ReadonlyMap<string, string>,
+    private readonly fetcher: typeof globalThis.fetch = globalThis.fetch,
+  ) {}
   async request(url: string, purpose: string, init: RequestInit = {}) {
     const parsed = new URL(url),
       configured = this.endpoints.get(purpose);
@@ -17,17 +20,19 @@ export class ExplicitNetwork {
         "Destination is not explicitly configured",
         403,
       );
-    const response = await fetch(parsed, {
+    const response = await this.fetcher(parsed, {
       ...init,
       redirect: "manual",
       signal: init.signal ?? AbortSignal.timeout(10000),
     });
-    if (response.status >= 300 && response.status < 400)
+    if (response.status >= 300 && response.status < 400) {
+      await response.body?.cancel();
       throw new RockyError(
         "redirect_denied",
         "Redirect requires a separate configured destination",
         403,
       );
+    }
     return response;
   }
 }

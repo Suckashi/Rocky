@@ -7,6 +7,7 @@ const labels: Record<string, [string, string]> = {
   idle: ["你想先處理哪件事？", "What would you like to work on?"],
   queued: ["已排入佇列", "Queued"],
   waiting_resource: ["等待工作區可用", "Waiting for workspace availability"],
+  waiting_model: ["等待模型資源可用", "Waiting for model capacity"],
   running: ["正在處理工作", "Working"],
   stale: ["尚未收到新的進度", "No recent progress received"],
   awaiting_approval: [

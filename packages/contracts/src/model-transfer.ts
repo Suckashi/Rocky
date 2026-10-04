@@ -1,7 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { z } from "zod";
 
-export const MODEL_TRANSFER_LIMIT = 2 * 1024 * 1024;
+// Eight sanitized owner images plus bounded text/tool schemas; framing remains private.
+export const MODEL_TRANSFER_LIMIT = 8 * 1024 * 1024;
 export const modelRequestSchema = z.strictObject({
   kind: z.literal("model_request"),
   child: z.boolean(),

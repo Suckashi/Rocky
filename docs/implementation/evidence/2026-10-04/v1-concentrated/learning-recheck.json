@@ -1,0 +1,69 @@
+{
+  "numTotalTestSuites": 1,
+  "numPassedTestSuites": 0,
+  "numFailedTestSuites": 1,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 3,
+  "numPassedTests": 2,
+  "numFailedTests": 1,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791100904712,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "status": "passed",
+          "title": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "duration": 82.4025999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "status": "passed",
+          "title": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "duration": 87.39820000000009,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "status": "failed",
+          "title": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "duration": 5330.7008000000005,
+          "failureMessages": [
+            "AssertionError: expected 'failed' to be 'insufficient_evidence' // Object.is equality\n    at D:\\Code\\Rocky\\tests\\learning-candidates.test.ts:341:28\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100906121,
+      "endTime": 1791100911621.7007,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/learning-candidates.test.ts"
+    }
+  ]
+}

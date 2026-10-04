@@ -1,0 +1,157 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 12,
+  "numPassedTests": 12,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791104554750,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: approve",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: approve",
+          "duration": 1294.6764,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: reject",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: reject",
+          "duration": 1116.1248,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: revoke",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: revoke",
+          "duration": 1125.0379999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: invalid",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: invalid",
+          "duration": 1045.634,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: uncertain",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: uncertain",
+          "duration": 1107.8331000000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: synthetic",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: synthetic",
+          "duration": 998.8923999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: background",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: background",
+          "duration": 1131.0015000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: schedule",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: schedule",
+          "duration": 1110.684799999999,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791104556204,
+      "endTime": 1791104565134.6848,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp-work.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "storage full cannot commit a partial completed Work or outbox",
+          "status": "passed",
+          "title": "storage full cannot commit a partial completed Work or outbox",
+          "duration": 55.98890000000006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "storage busy cannot commit a partial completed Work or outbox",
+          "status": "passed",
+          "title": "storage busy cannot commit a partial completed Work or outbox",
+          "duration": 49.28970000000015,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "storage journal cannot commit a partial completed Work or outbox",
+          "status": "passed",
+          "title": "storage journal cannot commit a partial completed Work or outbox",
+          "duration": 47.19540000000006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "terminal persistence failure stops further execution and reports volatile degradation instead of success",
+          "status": "passed",
+          "title": "terminal persistence failure stops further execution and reports volatile degradation instead of success",
+          "duration": 1047.1389000000001,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791104566141,
+      "endTime": 1791104567341.139,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/storage-faults.test.ts"
+    }
+  ]
+}

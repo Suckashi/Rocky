@@ -5,6 +5,20 @@ export type HostResolver = (host: string) => Promise<LookupAddress[]>;
 const resolveHost: HostResolver = (host) =>
   lookup(host, { all: true, order: "verbatim" });
 
+/** Shared by all leases of one configured connection revision in this daemon. */
+export class ModelDnsPolicy {
+  private readonly lookups = new Map<string, LookupFunction>();
+  lookup(host: string, resolver?: HostResolver) {
+    const key = host.toLowerCase();
+    let value = this.lookups.get(key);
+    if (!value) {
+      value = pinnedLookup(host, resolver);
+      this.lookups.set(key, value);
+    }
+    return value;
+  }
+}
+
 /** Revalidate DNS on each new socket, and never follow a changed answer set in this lease. */
 export function pinnedLookup(
   expectedHost: string,

@@ -35,7 +35,11 @@ export class SteeringStore {
       receipt: this.store.publicEvidence(receipt),
     });
   }
-  accept(workId: string, input: unknown) {
+  accept(
+    workId: string,
+    input: unknown,
+    commit?: (persist: () => SteeringReceipt) => SteeringReceipt,
+  ) {
     const command = steerCommandSchema.parse(input),
       intent = intentHash({ workId, ...command });
     const prior = this.store.db
@@ -83,7 +87,7 @@ export class SteeringStore {
       status: "accepted",
       createdAt: new Date().toISOString(),
     });
-    return this.store.transaction(() => {
+    const persist = () => {
       this.store.db
         .prepare(
           "INSERT INTO steering(request_id,work_id,intent,data) VALUES(?,?,?,?)",
@@ -93,7 +97,8 @@ export class SteeringStore {
         receipt: this.store.publicEvidence(receipt),
       });
       return receipt;
-    });
+    };
+    return commit ? commit(persist) : this.store.transaction(persist);
   }
   private owned(work: Work) {
     const current = this.store.get(work.id);

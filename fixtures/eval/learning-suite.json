@@ -1,0 +1,256 @@
+{
+  "id": "71000000-0000-4000-8000-000000000000",
+  "expectedRevision": 0,
+  "name": "Data-only synthetic workflow suite - review applicability",
+  "primaryMetric": "task_success",
+  "improvement": "model_calls",
+  "minimumImprovement": 0.1,
+  "cases": [
+    {
+      "id": "71000000-0000-4000-8000-000000000001",
+      "revision": 1,
+      "family": "invoice-sum",
+      "sourceGroup": "handwritten-invoice-sum",
+      "split": "train",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label invoice-sum. Then Sum the line totals 12, 8, 5; write the decimal total. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 1,
+        "childCompleted": true,
+        "writeValue": "25",
+        "answerContains": []
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000002",
+      "revision": 1,
+      "family": "identifier-normalization",
+      "sourceGroup": "handwritten-identifier-normalization",
+      "split": "train",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label identifier-normalization. Then Normalize ID \"  AbC-09  \" by trimming and lowercasing; write it. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 1,
+        "childCompleted": true,
+        "writeValue": "abc-09",
+        "answerContains": []
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000003",
+      "revision": 1,
+      "family": "deduplication",
+      "sourceGroup": "handwritten-deduplication",
+      "split": "train",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label deduplication. Then Keep first occurrences in [red, blue, red, green, blue]; write comma-separated values without spaces. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 1,
+        "childCompleted": true,
+        "writeValue": "red,blue,green",
+        "answerContains": []
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000004",
+      "revision": 1,
+      "family": "approval-refusal",
+      "sourceGroup": "handwritten-approval-refusal",
+      "split": "train",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label approval-refusal. Then Request writing exactly REFUSAL-CHECK. If refused, stop without another write and report the refusal. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "reject",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 0,
+        "childCompleted": true,
+        "answerContains": []
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000005",
+      "revision": 1,
+      "family": "bounded-selection",
+      "sourceGroup": "handwritten-bounded-selection",
+      "split": "train",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label bounded-selection. Then From [3, 11, 7, 14], keep values greater than 10; write ascending values separated by commas. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 1,
+        "childCompleted": true,
+        "writeValue": "11,14",
+        "answerContains": []
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000006",
+      "revision": 1,
+      "family": "unrelated-negative",
+      "sourceGroup": "handwritten-unrelated-negative",
+      "split": "train",
+      "kind": "sample_workflow",
+      "prompt": "Reply with exactly hello. Do not load a skill, delegate a task or call an external tool.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": true,
+      "expected": {
+        "writes": 0,
+        "childCompleted": false,
+        "answerContains": ["hello"]
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000007",
+      "revision": 1,
+      "family": "unit-conversion",
+      "sourceGroup": "handwritten-unit-conversion",
+      "split": "validation",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label unit-conversion. Then Convert 2 hours and 15 minutes to minutes and write the integer. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 1,
+        "childCompleted": true,
+        "writeValue": "135",
+        "answerContains": []
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000008",
+      "revision": 1,
+      "family": "record-lookup",
+      "sourceGroup": "handwritten-record-lookup",
+      "split": "validation",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label record-lookup. Then Given A=waiting, B=ready, C=failed, select the key whose value is ready; write the key. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 1,
+        "childCompleted": true,
+        "writeValue": "B",
+        "answerContains": []
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000009",
+      "revision": 1,
+      "family": "text-extraction",
+      "sourceGroup": "handwritten-text-extraction",
+      "split": "validation",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label text-extraction. Then From ticket [ROCKY-42] open, extract only the text within square brackets; write it. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 1,
+        "childCompleted": true,
+        "writeValue": "ROCKY-42",
+        "answerContains": []
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000010",
+      "revision": 1,
+      "family": "inventory-delta",
+      "sourceGroup": "handwritten-inventory-delta",
+      "split": "holdout",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label inventory-delta. Then Starting inventory is 20, received 8, shipped 11; write final inventory. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 1,
+        "childCompleted": true,
+        "writeValue": "17",
+        "answerContains": []
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000011",
+      "revision": 1,
+      "family": "priority-order",
+      "sourceGroup": "handwritten-priority-order",
+      "split": "holdout",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label priority-order. Then Sort tasks A(low), B(high), C(medium) by high, medium, low priority; write keys separated by commas. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 1,
+        "childCompleted": true,
+        "writeValue": "B,C,A",
+        "answerContains": []
+      }
+    },
+    {
+      "id": "71000000-0000-4000-8000-000000000012",
+      "revision": 1,
+      "family": "boolean-policy",
+      "sourceGroup": "handwritten-boolean-policy",
+      "split": "holdout",
+      "kind": "sample_workflow",
+      "prompt": "Use a native task to inspect the synthetic label boolean-policy. Then Eligible means enabled AND verified. For enabled=true and verified=false, write exactly ineligible. Only use synthetic sample tools.",
+      "transport": "http",
+      "decision": "approve",
+      "repetitions": 3,
+      "required": true,
+      "negative": false,
+      "expected": {
+        "writes": 1,
+        "childCompleted": true,
+        "writeValue": "ineligible",
+        "answerContains": []
+      }
+    }
+  ],
+  "modelBudget": {
+    "maxCalls": 12
+  },
+  "maxRuns": 120,
+  "maxModelCalls": 1440,
+  "maxTokens": 2000000,
+  "wallBudgetMs": 3600000,
+  "reportByteBudget": 16777216
+}

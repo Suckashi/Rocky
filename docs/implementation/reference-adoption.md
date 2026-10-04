@@ -7,3 +7,7 @@
 | Both application baselines                                  | reject             | No history, database, settings, avatar, migration, compatibility or feature-parity obligation.                                                                                                                               |
 
 Any future small-module reuse requires a verified fixed source and license, original notices, rationale and Rocky contract tests before copying.
+
+## Community documentation patterns
+
+OpenCode (`anomalyco/opencode`) at `907b3bc518fa48e90e8ec24dd327d13eee71c36c` is an **adopt-pattern** reference for contribution and Issue/PR structure. The MIT license was inspected. Rocky prose is newly written; no source, assets, workflow, or runtime was copied. See the [reference review](community-reference-review.md) for fixed source links and decisions.

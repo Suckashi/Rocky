@@ -1,3 +1,4 @@
+import { removePostV19Tables } from "./historical-schema.js";
 import { expect, test } from "vitest";
 import { randomUUID } from "node:crypto";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -29,6 +30,40 @@ function fixture(): Work {
     createdAt: new Date().toISOString(),
   };
 }
+
+test("snapshot pages preserve the event boundary and include older active Works on the first page", () => {
+  const root = mkdtempSync(join(tmpdir(), "rocky-snapshot-pages-"));
+  const store = new Store(root);
+  try {
+    const oldest = fixture();
+    store.add(oldest, "oldest-active");
+    for (let index = 0; index < 205; index++)
+      store.add({ ...fixture(), status: "completed" }, String(index));
+    const first = store.snapshot();
+    expect(first.works).toHaveLength(101);
+    expect(first.works.some((work) => work.id === oldest.id)).toBe(true);
+    expect(first.nextCursor).not.toBeNull();
+    const later = fixture();
+    store.add(later, "added-between-pages");
+    store.event(later, "rocky.work.updated", { work: later });
+    const seen = new Set(first.works.map((work) => work.id));
+    let cursor = first.nextCursor;
+    while (cursor) {
+      const page = store.snapshot(cursor);
+      expect(page.cursor).toBe(first.cursor);
+      expect(page.events).toEqual([]);
+      expect(page.works).toHaveLength(cursor === first.nextCursor ? 100 : 6);
+      for (const work of page.works) seen.add(work.id);
+      cursor = page.nextCursor;
+    }
+    expect(seen.size).toBe(206);
+    expect(seen.has(later.id)).toBe(false);
+    expect(() => store.snapshot("99999999999999999999:0")).toThrow("cursor");
+  } finally {
+    store.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 
 test("T-005 strict DTO and official AG-UI contracts reject invalid identities, private fields and cursors", () => {
   const work = fixture();
@@ -148,6 +183,7 @@ test("Rocky P0 event upgrade is transactional and retained across reopen", () =>
     store.db
       .prepare("INSERT INTO events(data) VALUES(?)")
       .run(JSON.stringify(old));
+    removePostV19Tables(store.db);
     store.db.exec("PRAGMA user_version=0");
     store.close();
     store = new Store(root);

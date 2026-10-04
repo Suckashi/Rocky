@@ -1,3 +1,4 @@
+import { removePostV19Tables } from "./historical-schema.js";
 import { test, expect } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -179,6 +180,7 @@ test("Rocky v10 upgrade reconstructs chronological history and preserves only it
     const second = work();
     second.createdAt = new Date(Date.now() + 86400000).toISOString();
     store.add(second, "two");
+    removePostV19Tables(store.db);
     store.db.exec(
       "DROP TABLE conversation_history; DROP TABLE execution_sessions; DROP TABLE conversations; PRAGMA user_version=10;",
     );

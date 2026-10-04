@@ -213,7 +213,7 @@ test.each([
         });
         await expect
           .poll(() => service.store.get(work.id).status, { timeout: 15000 })
-          .toBe("completed");
+          .toBe("failed");
         expect(service.store.get(work.id).approval?.status).toBe("rejected");
         expect(service.operations.list(work.id)[0]?.outcome).toBe(
           "not_executed",

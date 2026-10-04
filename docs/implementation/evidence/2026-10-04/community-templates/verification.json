@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-10-04",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "commit": "dbf5c475ce9c66c995c25aca81a0b7185923ded4+working-tree",
+  "lockfileHash": "f4983e33a8c611b665ac8beb6a4873c5e6f0e5f297691cf0a93eafbd36bb0032",
+  "tasks": ["T-001", "T-036"],
+  "reference": {
+    "repository": "https://github.com/anomalyco/opencode",
+    "commit": "907b3bc518fa48e90e8ec24dd327d13eee71c36c",
+    "license": "MIT",
+    "decision": "adopt-pattern; original Rocky wording; no source, assets, workflows or runtime copied"
+  },
+  "checks": [
+    {
+      "command": "npm run check:docs",
+      "mode": "static",
+      "exitCode": 0,
+      "output": "> rocky@0.1.0-dev.0 check:docs\n> node scripts/check-docs.mjs\n\n{\"tasks\":38,\"requirements\":56,\"acceptance\":70,\"dag\":\"valid\",\"publicDocs\":27,\"localLinks\":150}"
+    },
+    {
+      "command": "npm run lint",
+      "mode": "static",
+      "exitCode": 0,
+      "output": "> rocky@0.1.0-dev.0 lint\n> eslint apps packages fixtures tests scripts *.ts"
+    },
+    {
+      "command": "npm run format:check",
+      "mode": "static",
+      "exitCode": 0,
+      "output": "> rocky@0.1.0-dev.0 format:check\n> prettier --check apps packages fixtures tests scripts *.ts *.mjs *.json *.md docs .github\n\nChecking formatting...\nAll matched files use Prettier code style!"
+    },
+    {
+      "command": "npm run check:secrets",
+      "mode": "static",
+      "exitCode": 0,
+      "output": "> rocky@0.1.0-dev.0 check:secrets\n> node scripts/repo-guards.mjs\n\n{\"files\":895,\"failures\":[],\"warnings\":[],\"historyObjects\":null,\"packageFiles\":null,\"scope\":\"Source worktree; optional --history checks local Git objects and --package checks the actual npm dry-run inventory. Pattern scan is not a universal secret detector.\"}"
+    },
+    {
+      "command": "git diff --check",
+      "mode": "static",
+      "exitCode": 0,
+      "output": ""
+    }
+  ],
+  "limitations": [
+    "Documentation and template changes only; no runtime tests or build rerun.",
+    "Local YAML/Markdown checks do not prove hosted GitHub form rendering or submission.",
+    "Product acceptance statuses unchanged; existing release and security gaps remain.",
+    "No remote creation, push, commit, tag, merge, deployment, or external message."
+  ]
+}

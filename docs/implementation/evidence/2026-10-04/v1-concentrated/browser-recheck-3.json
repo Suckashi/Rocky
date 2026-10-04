@@ -1,0 +1,256 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\Code\\Rocky\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--grep",
+      "owner grants private memory|owner reviews all package files|CopilotKit → native task → MCP|explicit workspace selection and read scope"
+    ],
+    "configFile": "D:\\Code\\Rocky\\playwright.config.ts",
+    "rootDir": "D:/Code/Rocky/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Code/Rocky/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "D:/Code/Rocky/tests/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      ["list", null],
+      [
+        "json",
+        {
+          "outputFile": "test-results/e2e.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": {
+      "command": "node --import tsx tests/e2e/seed-reconciliation.ts && node tests/e2e/dev.mjs",
+      "url": "http://127.0.0.1:3210/api/v1/health",
+      "reuseExistingServer": false,
+      "env": {
+        "ROCKY_DATA_DIR": "C:\\Users\\sam46\\AppData\\Local\\Temp\\rocky-browser-9894984e-6614-4f7f-8a9c-dc8730a6f4f3\\.rocky-e2e"
+      },
+      "timeout": 60000
+    }
+  },
+  "suites": [
+    {
+      "title": "memory.spec.ts",
+      "file": "memory.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "owner grants private memory in Work UI and native model receives only authorized search",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4337,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:22:06.661Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7ae46fcbe7df2182c676-0c830fbef7b938213bc8",
+          "file": "memory.spec.ts",
+          "line": 209,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "skills.spec.ts",
+      "file": "skills.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "owner reviews all package files and selects an older immutable revision",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2033,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:22:11.188Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "024b5a36f2868d8a0332-15ce42e185bc3e7ee98a",
+          "file": "skills.spec.ts",
+          "line": 7,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "work.spec.ts",
+      "file": "work.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "CopilotKit → native task → MCP → approval, reload and mobile",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3421,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:22:13.234Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "observed-network",
+                      "contentType": "application/json",
+                      "body": "eyJleHRlcm5hbCI6WyJodHRwOi8vbG9jYWwuYWRndWFyZC5vcmcvP3RzPTE3OTEwOTU4NTQwMjAmdHlwZT1jb250ZW50LXNjcmlwdCZkbW49MTI3LjAuMC4xOjMyMTAmdXJsPWh0dHAlM0ElMkYlMkYxMjcuMC4wLjElM0EzMjEwJTJGJmFwcD1jaHJvbWUuZXhlJmNzcz0yJmpzPTEmcmVsPTEmcmppPTEmc2JlPTEiLCJodHRwOi8vbG9jYWwuYWRndWFyZC5vcmcvP3RzPTE3OTEwOTU4NTQwMjAmbmFtZT1BZEd1YXJkJTIwRXh0cmEmbmFtZT1BZEd1YXJkJTIwUG9wdXAlMjBCbG9ja2VyJnR5cGU9dXNlci1zY3JpcHQiLCJodHRwOi8vbG9jYWwuYWRndWFyZC5vcmcvP3RzPTE3OTEwOTU4NTQwMjAmdHlwZT1jb250ZW50LXNjcmlwdCZkbW49MTI3LjAuMC4xOjMyMTAmdXJsPWh0dHAlM0ElMkYlMkYxMjcuMC4wLjElM0EzMjEwJTJGJmFwcD1jaHJvbWUuZXhlJmNzcz0yJmpzPTEmcmVsPTEmcmppPTEmc2JlPTEiLCJodHRwOi8vbG9jYWwuYWRndWFyZC5vcmcvP3RzPTE3OTEwOTU4NTQwMjAmbmFtZT1BZEd1YXJkJTIwRXh0cmEmbmFtZT1BZEd1YXJkJTIwUG9wdXAlMjBCbG9ja2VyJnR5cGU9dXNlci1zY3JpcHQiXSwibGltaXRhdGlvbiI6IkZ1bmN0aW9uYWwgdGVzdCByZWNvcmRzIHRyYWZmaWM7IHNlcGFyYXRlIGVncmVzcyB0ZXN0IGFzc2VydHMgemVybyBleHRlcm5hbCByZXF1ZXN0cy4ifQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "be04682d07593334d24e-547a9d0c90673410b1eb",
+          "file": "work.spec.ts",
+          "line": 2,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "workspace-read.spec.ts",
+      "file": "workspace-read.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "explicit workspace selection and read scope reaches real native Work through composer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2986,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:22:16.671Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bd863d55ef182cbc4f00-993b67ac4431cdd0164e",
+          "file": "workspace-read.spec.ts",
+          "line": 9,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-04T08:22:02.370Z",
+    "duration": 17571.081000000002,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

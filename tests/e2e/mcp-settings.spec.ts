@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 test("MCP settings persist valid Rocky config, reject foreign extensions and remain usable at four widths", async ({
   page,
 }) => {

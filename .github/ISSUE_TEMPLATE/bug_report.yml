@@ -1,0 +1,69 @@
+name: Bug report / 錯誤回報
+description: Report a reproducible problem using sanitized data.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "For vulnerabilities, use the private route in SECURITY.md. Do not include credentials, browser profiles, user data, or private diagnostics. English and Traditional Chinese are welcome."
+  - type: textarea
+    id: problem
+    attributes:
+      label: What went wrong?
+      description: Describe the behavior you observed in your own words. A short, concrete example is enough.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where did it happen?
+      options:
+        - Conversation or background Work
+        - Model connection or MCP
+        - Workspace, Terminal, or Browser
+        - Documents or attachments
+        - Memory, Skills, or Learning
+        - Installation, backup, or updates
+        - Unsure
+  - type: input
+    id: version
+    attributes:
+      label: Rocky version or commit
+      placeholder: "0.1.0-dev.0 / commit hash"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: "Share relevant OS, Node/npm, browser, model/provider, or MCP versions. Remove private URLs and paths. Do not attach your full configuration."
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Use a minimal public example or synthetic fixture.
+      placeholder: |
+        1. Start Rocky with...
+        2. Select or submit...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What should have happened?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized logs or screenshots
+      description: Include the relevant error and Work status, if available. Small excerpts help; avoid full agent transcripts or generated summaries.
+  - type: checkboxes
+    id: review
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked existing issues and the known gaps in docs/ROADMAP.md.
+          required: true
+        - label: I removed secrets and private user data from this report.
+          required: true

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 
@@ -69,6 +69,14 @@ test("explicit routed history fixture pages stable Work cards without full-page 
     });
   });
   await page.setViewportSize({ width: 1440, height: 900 });
+  await page.route("**/api/v1/works?ids=*", (route) => {
+    const ids = new Set(
+      new URL(route.request().url()).searchParams.get("ids")!.split(","),
+    );
+    return route.fulfill({
+      json: { works: works.filter((w) => ids.has(w.id)) },
+    });
+  });
   await page.goto("/");
   await expect(page.locator("article.work")).toHaveCount(25);
   mkdirSync(".rocky-reports/history-ui", { recursive: true });

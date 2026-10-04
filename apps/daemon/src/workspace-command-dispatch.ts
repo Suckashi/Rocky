@@ -9,6 +9,7 @@ import { NativeEnvironment } from "./native-environment.js";
 import { OperationLedger } from "./operation-ledger.js";
 import { authorizeOperation } from "./policy.js";
 import { intentHash } from "./intent.js";
+import { NativeCommandReceipts } from "./native-command-receipts.js";
 
 type Proposal = Awaited<ReturnType<WorkspaceCommands["prepare"]>>;
 
@@ -115,6 +116,11 @@ export class WorkspaceCommandDispatch {
       {
         destination: "native-workspace:" + fresh.workspace.id,
         isolation: "none",
+        command: {
+          executable: fresh.command.executable,
+          args: fresh.command.args,
+          cwd: fresh.command.cwd,
+        },
       },
     );
     try {
@@ -131,6 +137,10 @@ export class WorkspaceCommandDispatch {
         networkEnforcement: "application_only",
       });
       const serialized = JSON.stringify(publicResult);
+      await new NativeCommandReceipts(this.store.root).save(
+        operation,
+        publicResult,
+      );
       if (result.reason === "exited" && result.exitCode === 0) {
         this.operations.transition(
           current,

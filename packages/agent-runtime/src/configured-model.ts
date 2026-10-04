@@ -24,6 +24,7 @@ import {
 } from "../../contracts/src/model-budget.js";
 import { RockyError } from "../../contracts/src/index.js";
 import { ModelNetwork } from "./model-network.js";
+import type { ModelDnsPolicy } from "./model-dns.js";
 import { readModelStream } from "./model-stream.js";
 import { validateInlineImage } from "./mcp-result.js";
 
@@ -153,10 +154,11 @@ export class ConfiguredModel extends BaseChatModel<Options> {
     private readonly accounting: ModelAccounting,
     private readonly runSignal: AbortSignal,
     env: NodeJS.ProcessEnv = process.env,
+    dnsPolicy?: ModelDnsPolicy,
   ) {
     super({});
     this.config = modelConfigSchema.parse(config);
-    this.network = new ModelNetwork(this.config, env);
+    this.network = new ModelNetwork(this.config, env, undefined, dnsPolicy);
   }
   _llmType() {
     return "rocky-configured";
@@ -197,7 +199,7 @@ export class ConfiguredModel extends BaseChatModel<Options> {
     const signal = AbortSignal.any([
       this.runSignal,
       ...(options.signal ? [options.signal] : []),
-      AbortSignal.timeout(60000),
+      AbortSignal.timeout(this.config.requestTimeoutMs ?? 120000),
     ]);
     signal.throwIfAborted();
     if (options.tool_choice !== undefined)
@@ -369,7 +371,7 @@ export class ConfiguredModel extends BaseChatModel<Options> {
           429,
         );
     }
-    if (Buffer.byteLength(JSON.stringify(body)) > 1048576)
+    if (Buffer.byteLength(JSON.stringify(body)) > 8 * 1048576)
       throw new RockyError(
         "model_input_limit",
         "Model request exceeds its byte limit",
@@ -381,8 +383,27 @@ export class ConfiguredModel extends BaseChatModel<Options> {
       inputTokenBound,
       this.config.maxOutputTokens,
     );
+    const deadline = new AbortController();
+    let deadlineKind = "first_token_timeout";
+    let timer = setTimeout(
+      () => deadline.abort(),
+      this.config.firstTokenTimeoutMs ?? 60000,
+    );
+    timer.unref();
+    const progress = () => {
+      clearTimeout(timer);
+      deadlineKind = "model_idle_timeout";
+      timer = setTimeout(
+        () => deadline.abort(),
+        this.config.idleTimeoutMs ?? 30000,
+      );
+      timer.unref();
+    };
     try {
-      const response = await this.network.post(body, signal);
+      const response = await this.network.post(
+        body,
+        AbortSignal.any([signal, deadline.signal]),
+      );
       let data: unknown;
       if (this.accounting.onStream) {
         if (response.headers.get("content-type")?.includes("text/event-stream"))
@@ -391,6 +412,7 @@ export class ConfiguredModel extends BaseChatModel<Options> {
           response,
           anthropic ? "anthropic" : "openai",
           (delta) => this.accounting.onStream?.(requestId, "delta", delta),
+          progress,
         );
       } else {
         const reader = response.body!.getReader();
@@ -400,6 +422,7 @@ export class ConfiguredModel extends BaseChatModel<Options> {
           for (;;) {
             const { done, value } = await reader.read();
             if (done) break;
+            progress();
             bytes += value.byteLength;
             if (bytes > 1048576)
               throw new RockyError(
@@ -417,6 +440,16 @@ export class ConfiguredModel extends BaseChatModel<Options> {
       }
       const usage = providerUsage(data, this.config.provider);
       this.accounting.settle(requestId, usage);
+      if (
+        usage &&
+        ((inputTokenBound !== null && usage.inputTokens > inputTokenBound) ||
+          usage.outputTokens > this.config.maxOutputTokens)
+      )
+        throw new RockyError(
+          "model_usage_exceeded",
+          "Provider usage exceeded the configured capacity; usage was recorded and tool dispatch is stopped",
+          502,
+        );
       let content: string;
       let calls: NonNullable<AIMessage["tool_calls"]> = [];
       if (anthropic) {
@@ -496,12 +529,20 @@ export class ConfiguredModel extends BaseChatModel<Options> {
       this.accounting.onStream?.(requestId, "end");
       return { generations: [{ text: content, message }] };
     } catch (error) {
+      if (deadline.signal.aborted)
+        throw new RockyError(
+          deadlineKind,
+          "Model response deadline exceeded; request was not retried",
+          504,
+        );
       if (error instanceof RockyError) throw error;
       throw new RockyError(
         signal.aborted ? "model_cancelled" : "invalid_model_response",
         "Configured model request did not return a usable response",
         502,
       );
+    } finally {
+      clearTimeout(timer);
     }
   }
   async close() {

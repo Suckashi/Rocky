@@ -1,4 +1,10 @@
 import { useEffect, useState } from "react";
+import {
+  AttachmentPicker,
+  AttachmentLinks,
+  attachmentRefs,
+} from "./attachments.js";
+import type { Attachment } from "../../../packages/contracts/src/attachments.js";
 import { z } from "zod";
 import type {
   Work,
@@ -23,6 +29,8 @@ export function WorkSteering({
 }) {
   const [open, setOpen] = useState(false),
     [text, setText] = useState(""),
+    [attachments, setAttachments] = useState<Attachment[]>([]),
+    [attachmentBusy, setAttachmentBusy] = useState(false),
     [receipts, setReceipts] = useState<SteeringReceipt[]>([]),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -79,7 +87,7 @@ export function WorkSteering({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (!connected || busy || !text.trim()) return;
+            if (!connected || busy || attachmentBusy || !text.trim()) return;
             setBusy(true);
             setError("");
             void request(`/works/${work.id}/steer`, {
@@ -88,6 +96,7 @@ export function WorkSteering({
               executionSessionId: work.executionSessionId,
               expectedRevision: work.revision,
               text: text.trim(),
+              attachments: attachmentRefs(attachments),
             })
               .then((value) => {
                 const receipt = steeringReceiptSchema.parse(value);
@@ -96,6 +105,7 @@ export function WorkSteering({
                   receipt,
                 ]);
                 setText("");
+                setAttachments([]);
               })
               .catch((e) => setError(String(e)))
               .finally(() => setBusy(false));
@@ -110,7 +120,17 @@ export function WorkSteering({
               disabled={!connected || busy}
             />
           </label>
-          <button disabled={!connected || busy || !text.trim()}>
+          <AttachmentPicker
+            value={attachments}
+            onChange={setAttachments}
+            onBusyChange={setAttachmentBusy}
+            request={request}
+            locale={locale}
+            disabled={!connected || busy}
+          />
+          <button
+            disabled={!connected || busy || attachmentBusy || !text.trim()}
+          >
             {busy
               ? locale === "zh"
                 ? "傳送中…"
@@ -137,6 +157,7 @@ export function WorkSteering({
                 }[receipt.status]}
           </small>
           <p>{receipt.text}</p>
+          <AttachmentLinks refs={receipt.attachments} />
         </div>
       ))}
       {error && <p role="alert">{error}</p>}

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 test("CopilotKit → native task → MCP → approval, reload and mobile", async ({
   page,
 }, testInfo) => {
@@ -26,7 +26,7 @@ test("CopilotKit → native task → MCP → approval, reload and mobile", async
   const restored = page.locator("article").filter({ hasText: title });
   await restored.getByRole("button", { name: "核准這次寫入" }).click();
   await expect(restored.getByText("已完成", { exact: true })).toBeVisible();
-  await restored.locator("summary").first().click();
+  await restored.getByText("工作詳情", { exact: true }).click();
   await expect(
     restored.getByText("subagent.completed", { exact: true }),
   ).toBeVisible();

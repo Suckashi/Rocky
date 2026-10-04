@@ -1,0 +1,4428 @@
+{
+  "numTotalTestSuites": 95,
+  "numPassedTestSuites": 79,
+  "numFailedTestSuites": 16,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 386,
+  "numPassedTests": 352,
+  "numFailedTests": 34,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791099822752,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 background submission receipt is stable across retry and restart",
+          "status": "passed",
+          "title": "T-010 background submission receipt is stable across retry and restart",
+          "duration": 113.31130000000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 main admission remains available with two independent background sessions",
+          "status": "passed",
+          "title": "T-010 main admission remains available with two independent background sessions",
+          "duration": 2409.8849999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 main model request waits for a global slot and dispatches when a background call stops",
+          "status": "passed",
+          "title": "T-010 main model request waits for a global slot and dispatches when a background call stops",
+          "duration": 2134.8632000000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 restart re-admits only a durable queued command; prior running sessions stay terminal",
+          "status": "passed",
+          "title": "T-010 restart re-admits only a durable queued command; prior running sessions stay terminal",
+          "duration": 1147.0455000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 restart keeps a queued resource behind an interrupted owner",
+          "status": "failed",
+          "title": "T-010 restart keeps a queued resource behind an interrupted owner",
+          "duration": 1182.3999999999996,
+          "failureMessages": [
+            "AssertionError: expected 'waiting_approval' to be 'queued' // Object.is equality\n    at D:\\Code\\Rocky\\tests\\admission.test.ts:241:50\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 bounded admission settings and Work settings snapshot are immutable",
+          "status": "passed",
+          "title": "T-010 bounded admission settings and Work settings snapshot are immutable",
+          "duration": 64.88660000000164,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 same resource waits before worker or model slot; unrelated background proceeds",
+          "status": "failed",
+          "title": "T-010 same resource waits before worker or model slot; unrelated background proceeds",
+          "duration": 10095.279999999999,
+          "failureMessages": [
+            "Error: Matcher did not succeed in time.\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/vitest/dist/chunks/vi.bdSIJ99Y.js:43:31)\n    at D:\\Code\\Rocky\\tests\\admission.test.ts:357:8\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at runSuite (file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 queued model selection stays pinned and never adopts another Work's changed connection",
+          "status": "passed",
+          "title": "T-010 queued model selection stays pinned and never adopts another Work's changed connection",
+          "duration": 123.88420000000042,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 active wall budget stops a held model request without claiming completion",
+          "status": "passed",
+          "title": "T-010 active wall budget stops a held model request without claiming completion",
+          "duration": 1880.3868000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 approval waiting does not consume active wall budget",
+          "status": "passed",
+          "title": "T-010 approval waiting does not consume active wall budget",
+          "duration": 4371.076699999998,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791099824390,
+      "endTime": 1791099847914.0767,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/admission.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "AG-UI replay drains all owned event pages before the terminal receipt",
+          "status": "passed",
+          "title": "AG-UI replay drains all owned event pages before the terminal receipt",
+          "duration": 2446.9071999999996,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100124925,
+      "endTime": 1791100127371.9072,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/agui-stream.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native artifact delivery: changed=false",
+          "status": "passed",
+          "title": "native artifact delivery: changed=false",
+          "duration": 1115.5803,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native artifact delivery: changed=true",
+          "status": "passed",
+          "title": "native artifact delivery: changed=true",
+          "duration": 1146.0249,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100131946,
+      "endTime": 1791100134208.025,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/artifact-native.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "artifact publication: native receipt, atomic registry, immutable download, restart and corruption",
+          "status": "passed",
+          "title": "artifact publication: native receipt, atomic registry, immutable download, restart and corruption",
+          "duration": 1230.6580999999999,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100149040,
+      "endTime": 1791100150270.6582,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/artifacts.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "attachments validate bytes, persist exact receipts and restrict Work reads",
+          "status": "passed",
+          "title": "attachments validate bytes, persist exact receipts and restrict Work reads",
+          "duration": 117.18609999999995,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100192098,
+      "endTime": 1791100192215.186,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/attachments.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "Rocky backup verifies immutable content and restores with automation fenced",
+          "status": "failed",
+          "title": "Rocky backup verifies immutable content and restores with automation fenced",
+          "duration": 135.2890000000001,
+          "failureMessages": [
+            "Error: Backup contains missing or unexpected files\n    at fail (D:\\Code\\Rocky\\apps\\daemon\\src\\backup.ts:64:9)\n    at verifyBackup (D:\\Code\\Rocky\\apps\\daemon\\src\\backup.ts:391:5)\n    at restoreBackup (D:\\Code\\Rocky\\apps\\daemon\\src\\backup.ts:417:20)\n    at D:\\Code\\Rocky\\tests\\backup.test.ts:43:21\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "backup rejects foreign product metadata before touching its database",
+          "status": "passed",
+          "title": "backup rejects foreign product metadata before touching its database",
+          "duration": 4.65930000000003,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100184420,
+      "endTime": 1791100184559.6592,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/backup.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "browser profiles bind explicit origins and sharing; unavailable isolation never launches Native",
+          "status": "passed",
+          "title": "browser profiles bind explicit origins and sharing; unavailable isolation never launches Native",
+          "duration": 70.97320000000002,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100191542,
+      "endTime": 1791100191612.9731,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/browser-profiles.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 editing configuration aborts in-flight model I/O without retry or leaked credentials",
+          "status": "passed",
+          "title": "T-007 editing configuration aborts in-flight model I/O without retry or leaked credentials",
+          "duration": 118.904,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 registry model leases pin revision, require context, revoke on edits, and enforce bounds before dispatch",
+          "status": "passed",
+          "title": "T-007 registry model leases pin revision, require context, revoke on edits, and enforce bounds before dispatch",
+          "duration": 45.45950000000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 configured openai-compatible → native child/interrupt/resume shares root usage ledger",
+          "status": "passed",
+          "title": "T-007 configured openai-compatible → native child/interrupt/resume shares root usage ledger",
+          "duration": 146.923,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 configured anthropic → native child/interrupt/resume shares root usage ledger",
+          "status": "passed",
+          "title": "T-007 configured anthropic → native child/interrupt/resume shares root usage ledger",
+          "duration": 101.36500000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 provider usage preserves missing/cache-priced uncertainty and validates negative counts",
+          "status": "passed",
+          "title": "T-007 provider usage preserves missing/cache-priced uncertainty and validates negative counts",
+          "duration": 1.3338000000001102,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100162549,
+      "endTime": 1791100162963.3337,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/configured-model.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 shutdown cancels configured model I/O and retains unknown usage without replay",
+          "status": "passed",
+          "title": "T-007 shutdown cancels configured model I/O and retains unknown usage without replay",
+          "duration": 1075.0165000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 configured Work openai-compatible preserves daemon approval, native child, usage and persisted model selection",
+          "status": "passed",
+          "title": "T-007 configured Work openai-compatible preserves daemon approval, native child, usage and persisted model selection",
+          "duration": 1205.5949999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 configured Work anthropic preserves daemon approval, native child, usage and persisted model selection",
+          "status": "passed",
+          "title": "T-007 configured Work anthropic preserves daemon approval, native child, usage and persisted model selection",
+          "duration": 1198.8222000000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 submission rejects implicit model selection and stale configured approvals cannot dispatch effects",
+          "status": "passed",
+          "title": "T-007 submission rejects implicit model selection and stale configured approvals cannot dispatch effects",
+          "duration": 1100.1033000000007,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100097639,
+      "endTime": 1791100102219.1033,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/configured-work.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "context ack cannot precede own native checkpoint and domain fault rolls back all membership/receipt writes",
+          "status": "passed",
+          "title": "context ack cannot precede own native checkpoint and domain fault rolls back all membership/receipt writes",
+          "duration": 109.18540000000007,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100174427,
+      "endTime": 1791100174536.1853,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/context-barrier.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "large configured fixture answer is delivered intact into daemon Work and durable visible history",
+          "status": "passed",
+          "title": "large configured fixture answer is delivered intact into daemon Work and durable visible history",
+          "duration": 1176.5086999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "confirmed native checkpoint context reaches next main worker, survives restart, and stays out of background/evaluation",
+          "status": "passed",
+          "title": "confirmed native checkpoint context reaches next main worker, survives restart, and stays out of background/evaluation",
+          "duration": 9880.3819,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "new native fixture turn requests fresh approval without replaying any completed operation",
+          "status": "passed",
+          "title": "new native fixture turn requests fresh approval without replaying any completed operation",
+          "duration": 2711.0941000000003,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791099850159,
+      "endTime": 1791099863927.094,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/continuous-conversation.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "fixture mode is explicit and forged permission fields are rejected",
+          "status": "passed",
+          "title": "fixture mode is explicit and forged permission fields are rejected",
+          "duration": 2.3906000000000063,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "submission memory grants require configured mode, exact project binding and unique explicit scopes",
+          "status": "passed",
+          "title": "submission memory grants require configured mode, exact project binding and unique explicit scopes",
+          "duration": 0.7981000000000051,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-005 IPC wire requires run identity and rejects owner fields, unknown commands and oversized UTF-8",
+          "status": "passed",
+          "title": "T-005 IPC wire requires run identity and rejects owner fields, unknown commands and oversized UTF-8",
+          "duration": 1.7609999999999957,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100194103,
+      "endTime": 1791100194108.761,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/contracts.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "workspace revision/read scope isolates native checkpoint/history: revision 1",
+          "status": "passed",
+          "title": "workspace revision/read scope isolates native checkpoint/history: revision 1",
+          "duration": 55.74339999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "workspace revision/read scope isolates native checkpoint/history: revision 2",
+          "status": "passed",
+          "title": "workspace revision/read scope isolates native checkpoint/history: revision 2",
+          "duration": 44.728000000000065,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "one conversation persists separate execution sessions and atomic submission/result history",
+          "status": "passed",
+          "title": "one conversation persists separate execution sessions and atomic submission/result history",
+          "duration": 53.62209999999993,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Rocky v10 upgrade reconstructs chronological history and preserves only its own domain records",
+          "status": "failed",
+          "title": "Rocky v10 upgrade reconstructs chronological history and preserves only its own domain records",
+          "duration": 64.2632000000001,
+          "failureMessages": [
+            "Error: table skill_heads already exists\n    at D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:300:19\n    at Store.transaction (D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:416:22)\n    at new Store (D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:299:14)\n    at D:\\Code\\Rocky\\tests\\conversation-store.test.ts:186:13\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "conversation/history/session API validates DTOs and keeps current redaction at the public boundary",
+          "status": "passed",
+          "title": "conversation/history/session API validates DTOs and keeps current redaction at the public boundary",
+          "duration": 55.93679999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "history pagination uses numeric cursors, excludes evaluation and validates limits",
+          "status": "passed",
+          "title": "history pagination uses numeric cursors, excludes evaluation and validates limits",
+          "duration": 133.21260000000007,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100164563,
+      "endTime": 1791100164971.2126,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/conversation-store.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "owner documents need no synthetic Work; revisions remain immutable and paginated",
+          "status": "passed",
+          "title": "owner documents need no synthetic Work; revisions remain immutable and paginated",
+          "duration": 107.37540000000001,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100195950,
+      "endTime": 1791100196057.3755,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/documents-new.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "document revisions: confirmed artifact source, concurrent CAS, immutable history and receipts, rollback and restart",
+          "status": "passed",
+          "title": "document revisions: confirmed artifact source, concurrent CAS, immutable history and receipts, rollback and restart",
+          "duration": 1288.9565000000002,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100151227,
+      "endTime": 1791100152515.9565,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/documents.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 configured evaluation approve: same native Work and budget, scoped endpoint revocation",
+          "status": "passed",
+          "title": "T-007 configured evaluation approve: same native Work and budget, scoped endpoint revocation",
+          "duration": 1177.7685000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 configured evaluation reject: same native Work and budget, scoped endpoint revocation",
+          "status": "passed",
+          "title": "T-007 configured evaluation reject: same native Work and budget, scoped endpoint revocation",
+          "duration": 1094.795,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100135152,
+      "endTime": 1791100137424.795,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/evaluation.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 real file target detects overwrite and new-file creation between prepare and dispatch",
+          "status": "passed",
+          "title": "T-008 real file target detects overwrite and new-file creation between prepare and dispatch",
+          "duration": 11.052999999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 target scope rejects traversal, device/ADS aliases, junction escape and hard links",
+          "status": "passed",
+          "title": "T-008 target scope rejects traversal, device/ADS aliases, junction escape and hard links",
+          "duration": 4.5423000000000116,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 target recheck rejects parent replaced with junction; portable separators resolve consistently",
+          "status": "passed",
+          "title": "T-008 target recheck rejects parent replaced with junction; portable separators resolve consistently",
+          "duration": 9.167200000000008,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100189928,
+      "endTime": 1791100189953.1672,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/file-target.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "real local Git worktree boundary: create",
+          "status": "failed",
+          "title": "real local Git worktree boundary: create",
+          "duration": 286.19450000000006,
+          "failureMessages": [
+            "Error: Git metadata must be a canonical local directory\n    at GitWorktree.prepare (D:\\Code\\Rocky\\apps\\daemon\\src\\git-worktree.ts:216:15)\n    at D:\\Code\\Rocky\\tests\\git-worktree.test.ts:84:22\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "real local Git worktree boundary: stale",
+          "status": "failed",
+          "title": "real local Git worktree boundary: stale",
+          "duration": 234.66200000000003,
+          "failureMessages": [
+            "Error: Git metadata must be a canonical local directory\n    at GitWorktree.prepare (D:\\Code\\Rocky\\apps\\daemon\\src\\git-worktree.ts:216:15)\n    at D:\\Code\\Rocky\\tests\\git-worktree.test.ts:84:22\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "real local Git worktree boundary: replaced",
+          "status": "failed",
+          "title": "real local Git worktree boundary: replaced",
+          "duration": 231.77820000000008,
+          "failureMessages": [
+            "Error: Git metadata must be a canonical local directory\n    at GitWorktree.prepare (D:\\Code\\Rocky\\apps\\daemon\\src\\git-worktree.ts:216:15)\n    at D:\\Code\\Rocky\\tests\\git-worktree.test.ts:84:22\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "real local Git worktree boundary: existing",
+          "status": "failed",
+          "title": "real local Git worktree boundary: existing",
+          "duration": 240.8963000000001,
+          "failureMessages": [
+            "Error: Git metadata must be a canonical local directory\n    at GitWorktree.prepare (D:\\Code\\Rocky\\apps\\daemon\\src\\git-worktree.ts:216:15)\n    at D:\\Code\\Rocky\\tests\\git-worktree.test.ts:84:22\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "real local Git worktree boundary: filters",
+          "status": "failed",
+          "title": "real local Git worktree boundary: filters",
+          "duration": 285.578,
+          "failureMessages": [
+            "AssertionError: expected [Function] to throw error including 'filters' but got 'Git metadata must be a canonical loca…'\n    at _Assertion.<anonymous> (file:///D:/Code/Rocky/node_modules/@vitest/expect/dist/index.js:1420:16)\n    at _Assertion.<anonymous> (file:///D:/Code/Rocky/node_modules/@vitest/expect/dist/index.js:1029:14)\n    at _Assertion.methodWrapper (file:///D:/Code/Rocky/node_modules/chai/index.js:1686:25)\n    at file:///D:/Code/Rocky/node_modules/@vitest/expect/dist/index.js:1639:20\n    at D:\\Code\\Rocky\\tests\\git-worktree.test.ts:79:7\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "real local Git worktree boundary: cancel",
+          "status": "failed",
+          "title": "real local Git worktree boundary: cancel",
+          "duration": 234.41099999999983,
+          "failureMessages": [
+            "Error: Git metadata must be a canonical local directory\n    at GitWorktree.prepare (D:\\Code\\Rocky\\apps\\daemon\\src\\git-worktree.ts:216:15)\n    at D:\\Code\\Rocky\\tests\\git-worktree.test.ts:84:22\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100122455,
+      "endTime": 1791100123968.411,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/git-worktree.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 durable grants are scoped, expire, revoke by CAS and cannot authorize critical effects",
+          "status": "passed",
+          "title": "T-008 durable grants are scoped, expire, revoke by CAS and cannot authorize critical effects",
+          "duration": 59.17920000000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 revoking submitted synthetic read scope prevents actual MCP read; submission replay does not regrant",
+          "status": "passed",
+          "title": "T-008 revoking submitted synthetic read scope prevents actual MCP read; submission replay does not regrant",
+          "duration": 1090.7207,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 grant revoke API validates session and exact receipt, preserving idempotency after restart",
+          "status": "passed",
+          "title": "T-008 grant revoke API validates session and exact receipt, preserving idempotency after restart",
+          "duration": 96.04100000000017,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100153441,
+      "endTime": 1791100154687.041,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/grants.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "HTML preview strips active/navigation content, keeps safe layout and installs restrictive CSP first",
+          "status": "passed",
+          "title": "HTML preview strips active/navigation content, keeps safe layout and installs restrictive CSP first",
+          "duration": 4.731900000000024,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "HTML sanitizer bounds nested trees and input size",
+          "status": "passed",
+          "title": "HTML sanitizer bounds nested trees and input size",
+          "duration": 72.77820000000003,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100184809,
+      "endTime": 1791100184886.7783,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/html-preview.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 model API requires local session, rejects raw keys and preserves unknown context",
+          "status": "passed",
+          "title": "T-007 model API requires local session, rejects raw keys and preserves unknown context",
+          "duration": 62.664499999999975,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "local API validates Host, Origin and session before mutation",
+          "status": "passed",
+          "title": "local API validates Host, Origin and session before mutation",
+          "duration": 43.42610000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "snapshot and SSE use persisted cursors; reconnect header wins over the initial query",
+          "status": "passed",
+          "title": "snapshot and SSE use persisted cursors; reconnect header wins over the initial query",
+          "duration": 55.85919999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "API bounds real body bytes and returns safe JSON errors before creating work",
+          "status": "passed",
+          "title": "API bounds real body bytes and returns safe JSON errors before creating work",
+          "duration": 44.398800000000165,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100168910,
+      "endTime": 1791100169117.3987,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/http.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-037 assets retain provenance, hashes and a bounded first-party vector source",
+          "status": "passed",
+          "title": "T-037 assets retain provenance, hashes and a bounded first-party vector source",
+          "duration": 1.7962999999999738,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-037 assistant identity persists and its public schema cannot carry policy or remote artwork",
+          "status": "passed",
+          "title": "T-037 assistant identity persists and its public schema cannot carry policy or remote artwork",
+          "duration": 47.30579999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-037 semantic text tokens meet 4.5:1 on both themes",
+          "status": "passed",
+          "title": "T-037 semantic text tokens meet 4.5:1 on both themes",
+          "duration": 0.6173000000000002,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100189112,
+      "endTime": 1791100189161.6172,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/identity.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "actual background inbox freezes its boundary and re-delivers checkpointed evidence from a failed main branch",
+          "status": "passed",
+          "title": "actual background inbox freezes its boundary and re-delivers checkpointed evidence from a failed main branch",
+          "duration": 8583.6544,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100026564,
+      "endTime": 1791100035147.6543,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/inbox.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 exact canonical intent ignores object insertion order but preserves arrays and values",
+          "status": "passed",
+          "title": "T-008 exact canonical intent ignores object insertion order but preserves arrays and values",
+          "duration": 1.4651000000000067,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 invalid/coerced/oversized intents fail before getters or serialization hooks execute",
+          "status": "passed",
+          "title": "T-008 invalid/coerced/oversized intents fail before getters or serialization hooks execute",
+          "duration": 0.8703999999999894,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100196454,
+      "endTime": 1791100196456.8704,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/intent.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "fixture engine lifecycle pins scope, image and resource policy; never pulls or removes",
+          "status": "passed",
+          "title": "fixture engine lifecycle pins scope, image and resource policy; never pulls or removes",
+          "duration": 77.38549999999998,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100182835,
+      "endTime": 1791100182912.3855,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/isolated-environment.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "status": "passed",
+          "title": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "duration": 84.62580000000014,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "status": "failed",
+          "title": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "duration": 78.11349999999993,
+          "failureMessages": [
+            "AssertionError: expected '{\"workId\":\"ae5ec4f5-447b-4c19-b9a5-5d…' to contain 'dc25943ab3a9f7507a6dde039aee1aa911e1d…'\n    at D:\\Code\\Rocky\\tests\\learning-candidates.test.ts:253:63\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "status": "failed",
+          "title": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "duration": 60.49790000000007,
+          "failureMessages": [
+            "Error: Operation intent must be bounded JSON data\n    at invalid (D:\\Code\\Rocky\\apps\\daemon\\src\\intent.ts:10:5)\n    at read (D:\\Code\\Rocky\\apps\\daemon\\src\\intent.ts:43:17)\n    at D:\\Code\\Rocky\\apps\\daemon\\src\\intent.ts:64:61\n    at Array.map (<anonymous>)\n    at visit (D:\\Code\\Rocky\\apps\\daemon\\src\\intent.ts:64:12)\n    at canonicalIntent (D:\\Code\\Rocky\\apps\\daemon\\src\\intent.ts:72:18)\n    at intentHash (D:\\Code\\Rocky\\apps\\daemon\\src\\intent.ts:79:13)\n    at LearningEvaluations.start (D:\\Code\\Rocky\\apps\\daemon\\src\\learning-evaluations.ts:265:37)\n    at D:\\Code\\Rocky\\tests\\learning-candidates.test.ts:320:39\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791099848957,
+      "endTime": 1791099849179.4978,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/learning-candidates.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "manual episodes retain bounded provenance, redact summaries, dedupe and obey withdrawal",
+          "status": "passed",
+          "title": "manual episodes retain bounded provenance, redact summaries, dedupe and obey withdrawal",
+          "duration": 114.67210000000006,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100175016,
+      "endTime": 1791100175130.672,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/learning-episode.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "Learning policy defaults off and requires scoped owner consent with CAS and durable receipts",
+          "status": "passed",
+          "title": "Learning policy defaults off and requires scoped owner consent with CAS and durable receipts",
+          "duration": 67.97520000000009,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100187566,
+      "endTime": 1791100187633.975,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/learning-policy.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "episode review binds redacted view hash, source consent and durable decision receipt",
+          "status": "passed",
+          "title": "episode review binds redacted view hash, source consent and durable decision receipt",
+          "duration": 75.06779999999998,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100180648,
+      "endTime": 1791100180723.0679,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/learning-review.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "Learning source consent excludes private, nonnormal, noncompleted and unauthorized scopes",
+          "status": "passed",
+          "title": "Learning source consent excludes private, nonnormal, noncompleted and unauthorized scopes",
+          "duration": 80.48509999999999,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100178092,
+      "endTime": 1791100178172.485,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/learning-source.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded MCP resource/prompt metadata: normal",
+          "status": "passed",
+          "title": "bounded MCP resource/prompt metadata: normal",
+          "duration": 1157.5544,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded MCP resource/prompt metadata: duplicate",
+          "status": "passed",
+          "title": "bounded MCP resource/prompt metadata: duplicate",
+          "duration": 58.532500000000255,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded MCP resource/prompt metadata: cursor",
+          "status": "passed",
+          "title": "bounded MCP resource/prompt metadata: cursor",
+          "duration": 54.66010000000006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded MCP resource/prompt metadata: oversize",
+          "status": "passed",
+          "title": "bounded MCP resource/prompt metadata: oversize",
+          "duration": 59.26310000000012,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native metadata lifecycle revokes stale resources catalog",
+          "status": "passed",
+          "title": "native metadata lifecycle revokes stale resources catalog",
+          "duration": 867.1543999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native metadata lifecycle revokes stale prompts catalog",
+          "status": "passed",
+          "title": "native metadata lifecycle revokes stale prompts catalog",
+          "duration": 864.7253999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native metadata lifecycle revokes stale wait catalog",
+          "status": "passed",
+          "title": "native metadata lifecycle revokes stale wait catalog",
+          "duration": 721.8607000000002,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100082760,
+      "endTime": 1791100086543.8606,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp-data-catalog.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP task data exact approval: prompt",
+          "status": "passed",
+          "title": "configured MCP task data exact approval: prompt",
+          "duration": 1247.1021999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP task data exact approval: prompt-image",
+          "status": "passed",
+          "title": "configured MCP task data exact approval: prompt-image",
+          "duration": 1114.4279999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP task data exact approval: resource-image",
+          "status": "passed",
+          "title": "configured MCP task data exact approval: resource-image",
+          "duration": 1103.3932999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP task data exact approval: resource-large-image",
+          "status": "passed",
+          "title": "configured MCP task data exact approval: resource-large-image",
+          "duration": 1407.1767,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP task data exact approval: reject",
+          "status": "passed",
+          "title": "configured MCP task data exact approval: reject",
+          "duration": 1118.5973000000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP task data exact approval: revoke",
+          "status": "passed",
+          "title": "configured MCP task data exact approval: revoke",
+          "duration": 1075.0599999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP task data exact approval: invalid",
+          "status": "passed",
+          "title": "configured MCP task data exact approval: invalid",
+          "duration": 1039.0130000000008,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP task data exact approval: resource",
+          "status": "passed",
+          "title": "configured MCP task data exact approval: resource",
+          "duration": 1097.285899999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP task data exact approval: template",
+          "status": "passed",
+          "title": "configured MCP task data exact approval: template",
+          "duration": 1110.5926,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP task data exact approval: uncertain",
+          "status": "passed",
+          "title": "configured MCP task data exact approval: uncertain",
+          "duration": 1100.4084999999995,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791099891753,
+      "endTime": 1791099903167.4084,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp-data-work.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "Stop during native startup/discovery cancels only the owned process and old request does not restart it",
+          "status": "passed",
+          "title": "Stop during native startup/discovery cancels only the owned process and old request does not restart it",
+          "duration": 462.8631999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured HTTP redirect cannot forward credentials or initialize an unconfigured endpoint",
+          "status": "passed",
+          "title": "configured HTTP redirect cannot forward credentials or initialize an unconfigured endpoint",
+          "duration": 85.75080000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: pages",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: pages",
+          "duration": 438.374,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: repeat",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: repeat",
+          "duration": 386.5359000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: diagnostics",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: diagnostics",
+          "duration": 400.5906,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: overflow",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: overflow",
+          "duration": 386.40189999999984,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: unsafe-input",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: unsafe-input",
+          "duration": 389.37969999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: unsafe-output",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: unsafe-output",
+          "duration": 395.52369999999974,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured official MCP lifecycle lists actual tools and stops without replay: stdio",
+          "status": "passed",
+          "title": "configured official MCP lifecycle lists actual tools and stops without replay: stdio",
+          "duration": 795.8130000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured official MCP lifecycle lists actual tools and stops without replay: http",
+          "status": "passed",
+          "title": "configured official MCP lifecycle lists actual tools and stops without replay: http",
+          "duration": 127.01730000000043,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "failed configured stdio startup is bounded, reported and not retried by old receipt",
+          "status": "passed",
+          "title": "failed configured stdio startup is bounded, reported and not retried by old receipt",
+          "duration": 175.46140000000014,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100087194,
+      "endTime": 1791100091239.4614,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp-manager.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "Rocky MCP schema rejects foreign/mixed config and plaintext credentials; defaults disabled",
+          "status": "passed",
+          "title": "Rocky MCP schema rejects foreign/mixed config and plaintext credentials; defaults disabled",
+          "duration": 4.573100000000068,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "MCP settings use atomic CAS and persistent receipts, isolated launch env/path and retired-secret redaction",
+          "status": "passed",
+          "title": "MCP settings use atomic CAS and persistent receipts, isolated launch env/path and retired-secret redaction",
+          "duration": 58.02070000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "MCP API requires owner session; config references remain references and failed input preserves stored settings",
+          "status": "passed",
+          "title": "MCP API requires owner session; config references remain references and failed input preserves stored settings",
+          "duration": 55.89650000000006,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100176889,
+      "endTime": 1791100177006.8965,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp-registry.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "raw resource envelope stays in artifact, not model authority or metadata",
+          "status": "passed",
+          "title": "raw resource envelope stays in artifact, not model authority or metadata",
+          "duration": 3.668100000000038,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "raw prompt envelope stays in artifact, not model authority or metadata",
+          "status": "passed",
+          "title": "raw prompt envelope stays in artifact, not model authority or metadata",
+          "duration": 0.8555999999999813,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "MCP image, structured content and source retain types/artifact across model wire; resource links remain unfetched data",
+          "status": "passed",
+          "title": "MCP image, structured content and source retain types/artifact across model wire; resource links remain unfetched data",
+          "duration": 1.3552000000000248,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unsupported binary types are retained as uninspected artifacts without becoming model text/base64 instructions",
+          "status": "passed",
+          "title": "unsupported binary types are retained as uninspected artifacts without becoming model text/base64 instructions",
+          "duration": 0.192799999999977,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "image source is local bounded data only: https://unconfigured.invalid/image.png",
+          "status": "passed",
+          "title": "image source is local bounded data only: https://unconfigured.invalid/image.png",
+          "duration": 0.10539999999997463,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "image source is local bounded data only: data:image/svg+xml;base64,PHN2Zy8+",
+          "status": "passed",
+          "title": "image source is local bounded data only: data:image/svg+xml;base64,PHN2Zy8+",
+          "duration": 0.08940000000001191,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "image source is local bounded data only: data:image/png;base64,bm90LWFuLWltYWdl",
+          "status": "passed",
+          "title": "image source is local bounded data only: data:image/png;base64,bm90LWFuLWltYWdl",
+          "duration": 0.06819999999999027,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "image source is local bounded data only: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA0sAAAAASUVORK5CYII==",
+          "status": "passed",
+          "title": "image source is local bounded data only: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA0sAAAAASUVORK5CYII==",
+          "duration": 0.04750000000001364,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "oversized image dimensions fail before decoder/provider",
+          "status": "passed",
+          "title": "oversized image dimensions fail before decoder/provider",
+          "duration": 0.11009999999998854,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100190575,
+      "endTime": 1791100190581.11,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp-result.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "original nested schema validates refs, unions, required fields, limits and additional properties without coercion",
+          "status": "passed",
+          "title": "original nested schema validates refs, unions, required fields, limits and additional properties without coercion",
+          "duration": 24.73750000000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "duplicate schema IDs never reuse another server's validation; explicit draft 7 and 2020 formats are checked",
+          "status": "passed",
+          "title": "duplicate schema IDs never reuse another server's validation; explicit draft 7 and 2020 formats are checked",
+          "duration": 28.975600000000043,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unsafe or unsupported schemas fail closed: {\"undefined\":\"https://unconfigured.invalid/schema\"}",
+          "status": "passed",
+          "title": "unsafe or unsupported schemas fail closed: {\"undefined\":\"https://unconfigured.invalid/schema\"}",
+          "duration": 0.44700000000000273,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unsafe or unsupported schemas fail closed: {\"undefined\":\"#/missing\"}",
+          "status": "passed",
+          "title": "unsafe or unsupported schemas fail closed: {\"undefined\":\"#/missing\"}",
+          "duration": 0.09890000000001464,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unsafe or unsupported schemas fail closed: {\"undefined\":{\"loop\":{\"undefined\":\"#/undefined/loop\"}},\"undefined\":\"#/undefined/loop\"}",
+          "status": "passed",
+          "title": "unsafe or unsupported schemas fail closed: {\"undefined\":{\"loop\":{\"undefined\":\"#/undefined/loop\"}},\"undefined\":\"#/undefined/loop\"}",
+          "duration": 0.103999999999985,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"pattern\":\"(a+)+$\"}}}",
+          "status": "passed",
+          "title": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"pattern\":\"(a+)+$\"}}}",
+          "duration": 0.10070000000001755,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"dependencies\":{\"a\":{\"pattern\":\".*\"}}}",
+          "status": "passed",
+          "title": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"dependencies\":{\"a\":{\"pattern\":\".*\"}}}",
+          "duration": 0.09159999999997126,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"properties\":{\"at\":{\"type\":\"string\",\"format\":\"unknown-format\"}}}",
+          "status": "passed",
+          "title": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"properties\":{\"at\":{\"type\":\"string\",\"format\":\"unknown-format\"}}}",
+          "duration": 6.251799999999946,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"required\":1}",
+          "status": "passed",
+          "title": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"required\":1}",
+          "duration": 6.47120000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unsafe or unsupported schemas fail closed: {\"undefined\":\"https://unconfigured.invalid/draft\"}",
+          "status": "passed",
+          "title": "unsafe or unsupported schemas fail closed: {\"undefined\":\"https://unconfigured.invalid/draft\"}",
+          "duration": 0.1168999999999869,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "same upstream name cannot collide across servers, annotations never grant read authority, revisions change the exact identity",
+          "status": "passed",
+          "title": "same upstream name cannot collide across servers, annotations never grant read authority, revisions change the exact identity",
+          "duration": 0.5290999999999713,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100179505,
+      "endTime": 1791100179573.529,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp-schema.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native MCP image/structured artifact and openai-compatible wire format with vision=false, large=false",
+          "status": "passed",
+          "title": "native MCP image/structured artifact and openai-compatible wire format with vision=false, large=false",
+          "duration": 1207.4537999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native MCP image/structured artifact and openai-compatible wire format with vision=false, large=true",
+          "status": "passed",
+          "title": "native MCP image/structured artifact and openai-compatible wire format with vision=false, large=true",
+          "duration": 1198.2931000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native MCP image/structured artifact and openai-compatible wire format with vision=true, large=false",
+          "status": "passed",
+          "title": "native MCP image/structured artifact and openai-compatible wire format with vision=true, large=false",
+          "duration": 1200.7848,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native MCP image/structured artifact and openai-compatible wire format with vision=true, large=true",
+          "status": "passed",
+          "title": "native MCP image/structured artifact and openai-compatible wire format with vision=true, large=true",
+          "duration": 1372.9959,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native MCP image/structured artifact and anthropic wire format with vision=false, large=false",
+          "status": "passed",
+          "title": "native MCP image/structured artifact and anthropic wire format with vision=false, large=false",
+          "duration": 1141.5625,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native MCP image/structured artifact and anthropic wire format with vision=false, large=true",
+          "status": "passed",
+          "title": "native MCP image/structured artifact and anthropic wire format with vision=false, large=true",
+          "duration": 1210.4035000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native MCP image/structured artifact and anthropic wire format with vision=true, large=false",
+          "status": "passed",
+          "title": "native MCP image/structured artifact and anthropic wire format with vision=true, large=false",
+          "duration": 1096.4452999999994,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native MCP image/structured artifact and anthropic wire format with vision=true, large=true",
+          "status": "passed",
+          "title": "native MCP image/structured artifact and anthropic wire format with vision=true, large=true",
+          "duration": 1125.3080999999984,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100016073,
+      "endTime": 1791100025626.308,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp-vision-work.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: approve",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: approve",
+          "duration": 1247.5828000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: reject",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: reject",
+          "duration": 1109.3522000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: revoke",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: revoke",
+          "duration": 1147.3883,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: invalid",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: invalid",
+          "duration": 1059.1471000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: uncertain",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: uncertain",
+          "duration": 1115.1556,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native worker uses discovered MCP schema and exact approval: synthetic",
+          "status": "passed",
+          "title": "configured native worker uses discovered MCP schema and exact approval: synthetic",
+          "duration": 1042.2912999999999,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100053741,
+      "endTime": 1791100060462.2913,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp-work.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "SDK discovery and full fixture schema rejects invalid args: stdio",
+          "status": "passed",
+          "title": "SDK discovery and full fixture schema rejects invalid args: stdio",
+          "duration": 281.2644,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "SDK discovery and full fixture schema rejects invalid args: http",
+          "status": "passed",
+          "title": "SDK discovery and full fixture schema rejects invalid args: http",
+          "duration": 47.67660000000001,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100163275,
+      "endTime": 1791100163603.6765,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory boundary: granted",
+          "status": "passed",
+          "title": "native memory boundary: granted",
+          "duration": 1244.3274000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory boundary: denied",
+          "status": "passed",
+          "title": "native memory boundary: denied",
+          "duration": 1005.9789999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory boundary: revoked",
+          "status": "passed",
+          "title": "native memory boundary: revoked",
+          "duration": 1042.7462999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory boundary: private",
+          "status": "passed",
+          "title": "native memory boundary: private",
+          "duration": 1112.4442,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory boundary: escalated",
+          "status": "passed",
+          "title": "native memory boundary: escalated",
+          "duration": 1015.7969999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory boundary: submitted",
+          "status": "passed",
+          "title": "native memory boundary: submitted",
+          "duration": 1122.5725999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory boundary: budget",
+          "status": "passed",
+          "title": "native memory boundary: budget",
+          "duration": 1214.9198999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory boundary: empty",
+          "status": "passed",
+          "title": "native memory boundary: empty",
+          "duration": 1114.6095000000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory scope isolation: project",
+          "status": "passed",
+          "title": "native memory scope isolation: project",
+          "duration": 1046.7248,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory scope isolation: task",
+          "status": "passed",
+          "title": "native memory scope isolation: task",
+          "duration": 1116.2720000000008,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory scope isolation: child",
+          "status": "passed",
+          "title": "native memory scope isolation: child",
+          "duration": 1045.0168999999987,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory scope isolation: replay",
+          "status": "passed",
+          "title": "native memory scope isolation: replay",
+          "duration": 1036.059000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory scope isolation: evaluation",
+          "status": "passed",
+          "title": "native memory scope isolation: evaluation",
+          "duration": 49.23840000000018,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791099864964,
+      "endTime": 1791099878132.2383,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/memory-native.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: approve",
+          "status": "passed",
+          "title": "native memory write exact approval: approve",
+          "duration": 1141.8496,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: reject",
+          "status": "passed",
+          "title": "native memory write exact approval: reject",
+          "duration": 1054.6543,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: locked",
+          "status": "passed",
+          "title": "native memory write exact approval: locked",
+          "duration": 1044.9029,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: race",
+          "status": "passed",
+          "title": "native memory write exact approval: race",
+          "duration": 1059.9102000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: rollback",
+          "status": "passed",
+          "title": "native memory write exact approval: rollback",
+          "duration": 1106.9862999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: update",
+          "status": "passed",
+          "title": "native memory write exact approval: update",
+          "duration": 1112.8632000000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: stop",
+          "status": "passed",
+          "title": "native memory write exact approval: stop",
+          "duration": 1052.2821999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: shutdown",
+          "status": "passed",
+          "title": "native memory write exact approval: shutdown",
+          "duration": 1010.0910000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: reopen",
+          "status": "passed",
+          "title": "native memory write exact approval: reopen",
+          "duration": 1098.381800000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: missing-source",
+          "status": "passed",
+          "title": "native memory write exact approval: missing-source",
+          "duration": 1010.8675000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native memory write exact approval: invalid-content",
+          "status": "passed",
+          "title": "native memory write exact approval: invalid-content",
+          "duration": 1010.3550000000014,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791099879092,
+      "endTime": 1791099890796.355,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/memory-write.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "owner memory scopes, locks, CAS, bilingual search, atomic deletion and restart",
+          "status": "passed",
+          "title": "owner memory scopes, locks, CAS, bilingual search, atomic deletion and restart",
+          "duration": 265.35490000000004,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100167264,
+      "endTime": 1791100167529.355,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/memory.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 R-048 root and native child share a durable dispatch cap; duplicate reservations never authorize resend",
+          "status": "passed",
+          "title": "T-007 R-048 root and native child share a durable dispatch cap; duplicate reservations never authorize resend",
+          "duration": 50.371099999999956,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 budget reservations hold unknown usage and only reported settlement releases token capacity",
+          "status": "passed",
+          "title": "T-007 budget reservations hold unknown usage and only reported settlement releases token capacity",
+          "duration": 43.301199999999994,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 cost caps require explicit prices and trusted token bounds; integer pricing rounds up",
+          "status": "passed",
+          "title": "T-007 cost caps require explicit prices and trusted token bounds; integer pricing rounds up",
+          "duration": 41.339399999999955,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 provider-reported overrun is retained and prevents a subsequent dispatch",
+          "status": "passed",
+          "title": "T-007 provider-reported overrun is retained and prevents a subsequent dispatch",
+          "duration": 41.677599999999984,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 actual Work path refuses the next model dispatch when its root call budget is spent",
+          "status": "passed",
+          "title": "T-007 actual Work path refuses the next model dispatch when its root call budget is spent",
+          "duration": 1097.8285999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 submission freezes custom budget across receipts, CAS and restart",
+          "status": "passed",
+          "title": "T-007 submission freezes custom budget across receipts, CAS and restart",
+          "duration": 980.7981,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 submitted token cap fails closed before dispatch when no trusted bounds exist",
+          "status": "passed",
+          "title": "T-007 submitted token cap fails closed before dispatch when no trusted bounds exist",
+          "duration": 978.8829000000001,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100118974,
+      "endTime": 1791100122208.8828,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/model-budget.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 DNS re-resolution refuses rebinding before sending a second model request",
+          "status": "passed",
+          "title": "T-007 DNS re-resolution refuses rebinding before sending a second model request",
+          "duration": 26.424699999999973,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 pinned DNS validates exact hostname and both address families; answer order is irrelevant",
+          "status": "passed",
+          "title": "T-007 pinned DNS validates exact hostname and both address families; answer order is irrelevant",
+          "duration": 0.7729999999999677,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100192521,
+      "endTime": 1791100192547.773,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/model-dns.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 AT-24: actual CONNECT proxy traffic and NO_PROXY bypass stay scoped to the connection",
+          "status": "passed",
+          "title": "T-007 AT-24: actual CONNECT proxy traffic and NO_PROXY bypass stay scoped to the connection",
+          "duration": 35.52859999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 AT-24: real TLS handshake requires explicit CA, does not relax other connections",
+          "status": "passed",
+          "title": "T-007 AT-24: real TLS handshake requires explicit CA, does not relax other connections",
+          "duration": 61.16500000000002,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100171455,
+      "endTime": 1791100171551.165,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/model-network.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 model slots prefer main, then background, then evaluation at dispatch boundaries",
+          "status": "passed",
+          "title": "T-010 model slots prefer main, then background, then evaluation at dispatch boundaries",
+          "duration": 1.4989000000000061,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-010 cancelling a model waiter removes it without consuming a slot",
+          "status": "passed",
+          "title": "T-010 cancelling a model waiter removes it without consuming a slot",
+          "duration": 0.8856999999999999,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100194730,
+      "endTime": 1791100194732.8857,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/model-slots.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "OpenAI SSE decodes split UTF-8/CRLF and fragmented tool arguments without reasoning",
+          "status": "passed",
+          "title": "OpenAI SSE decodes split UTF-8/CRLF and fragmented tool arguments without reasoning",
+          "duration": 8.045500000000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "provider text arrives before stream termination, with no fabricated completion",
+          "status": "passed",
+          "title": "provider text arrives before stream termination, with no fabricated completion",
+          "duration": 0.7038000000000011,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "truncated SSE, unconfirmed finish and provider error fail closed",
+          "status": "passed",
+          "title": "truncated SSE, unconfirmed finish and provider error fail closed",
+          "duration": 1.5731999999999857,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Anthropic incremental public text/tool JSON merge usage and omit thinking blocks",
+          "status": "passed",
+          "title": "Anthropic incremental public text/tool JSON merge usage and omit thinking blocks",
+          "duration": 2.0464000000000055,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "non-SSE responses cancel their body and are not split into synthetic tokens",
+          "status": "passed",
+          "title": "non-SSE responses cancel their body and are not split into synthetic tokens",
+          "duration": 0.2955000000000041,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100193185,
+      "endTime": 1791100193197.2954,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/model-stream.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "large model history roundtrips through bounded frames without dropping messages or Unicode",
+          "status": "passed",
+          "title": "large model history roundtrips through bounded frames without dropping messages or Unicode",
+          "duration": 9.942800000000034,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "interleaved root/child uploads preserve their distinct model calls",
+          "status": "passed",
+          "title": "interleaved root/child uploads preserve their distinct model calls",
+          "duration": 5.1521999999999935,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "transfer rejects incomplete, altered, reordered, foreign and oversized requests",
+          "status": "passed",
+          "title": "transfer rejects incomplete, altered, reordered, foreign and oversized requests",
+          "duration": 12.129400000000032,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded upload capacity and shutdown clear prevent unbounded abandoned buffers",
+          "status": "passed",
+          "title": "bounded upload capacity and shutdown clear prevent unbounded abandoned buffers",
+          "duration": 3.718900000000019,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100192917,
+      "endTime": 1791100192947.719,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/model-transfer.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 R-022: explicit URL/context/ref validation never invents defaults or accepts raw keys",
+          "status": "passed",
+          "title": "T-007 R-022: explicit URL/context/ref validation never invents defaults or accepts raw keys",
+          "duration": 2.800299999999993,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 AT-22: registry CAS/idempotency, ref redaction, replacement and restart persistence",
+          "status": "passed",
+          "title": "T-007 AT-22: registry CAS/idempotency, ref redaction, replacement and restart persistence",
+          "duration": 51.0055000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 AT-03: openai-compatible text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "status": "passed",
+          "title": "T-007 AT-03: openai-compatible text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "duration": 80.0145,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 AT-03: anthropic text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "status": "passed",
+          "title": "T-007 AT-03: anthropic text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "duration": 54.41039999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 AT-03: openai text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "status": "passed",
+          "title": "T-007 AT-03: openai text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "duration": 52.29819999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 AT-03: ollama-compatible text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "status": "passed",
+          "title": "T-007 AT-03: ollama-compatible text/tool roundtrip/stream/cancel use only configured local endpoint",
+          "duration": 52.15649999999994,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007: auto tool selection must produce a real tool call, not a text-only false positive",
+          "status": "passed",
+          "title": "T-007: auto tool selection must produce a real tool call, not a text-only false positive",
+          "duration": 45.30899999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 AT-23: redirects never reach an unconfigured destination; invalid replies are redacted",
+          "status": "passed",
+          "title": "T-007 AT-23: redirects never reach an unconfigured destination; invalid replies are redacted",
+          "duration": 48.03970000000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 AT-22: changing a connection cancels its outstanding probe and restart never replays it",
+          "status": "passed",
+          "title": "T-007 AT-22: changing a connection cancels its outstanding probe and restart never replays it",
+          "duration": 98.85199999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 AT-24: explicit/environment/direct proxy precedence and NO_PROXY host/port/IPv6 patterns",
+          "status": "passed",
+          "title": "T-007 AT-24: explicit/environment/direct proxy precedence and NO_PROXY host/port/IPv6 patterns",
+          "duration": 0.5167000000000144,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100159966,
+      "endTime": 1791100160451.5166,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/models.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native reconciliation survives a new adapter instance, validates binding, and never treats missing/corrupt receipts as no-effect",
+          "status": "passed",
+          "title": "native reconciliation survives a new adapter instance, validates binding, and never treats missing/corrupt receipts as no-effect",
+          "duration": 14.914499999999975,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100194969,
+      "endTime": 1791100194983.9146,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/native-command-receipts.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "three native compactions preserve goal/correction/todos/evidence, checkpoint and raw offload",
+          "status": "passed",
+          "title": "three native compactions preserve goal/correction/todos/evidence, checkpoint and raw offload",
+          "duration": 231.28660000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "summary failure retains checkpoint history/correction/todos without invoking target or effects",
+          "status": "passed",
+          "title": "summary failure retains checkpoint history/correction/todos without invoking target or effects",
+          "duration": 30.09439999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured daemon worker preserves native compaction metadata across smaller-context turns and accounts summaries without reply projection",
+          "status": "passed",
+          "title": "configured daemon worker preserves native compaction metadata across smaller-context turns and accounts summaries without reply projection",
+          "duration": 4399.8561,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unbound native summary provenance is distinct from tool-bound target even with zero tools, and invalid summaries fail closed",
+          "status": "passed",
+          "title": "unbound native summary provenance is distinct from tool-bound target even with zero tools, and invalid summaries fail closed",
+          "duration": 0.7505000000001019,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "actual native read_file returns long tool evidence and keeps the source checkpoint readable",
+          "status": "failed",
+          "title": "actual native read_file returns long tool evidence and keeps the source checkpoint readable",
+          "duration": 56.445299999999406,
+          "failureMessages": [
+            "Error: No MCP effect\n    at MiddlewareError.wrap (file:///D:/Code/Rocky/node_modules/langchain/src/agents/errors.ts:127:12)\n    at wrappedHandler (file:///D:/Code/Rocky/node_modules/langchain/src/agents/utils.ts:632:33)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at wrappedInnerHandler (file:///D:/Code/Rocky/node_modules/langchain/src/agents/utils.ts:590:20)\n    at wrappedHandler (file:///D:/Code/Rocky/node_modules/langchain/src/agents/utils.ts:601:26)\n    at ToolNode.runTool (file:///D:/Code/Rocky/node_modules/langchain/src/agents/nodes/ToolNode.ts:437:16)\n    at ToolNode.run (file:///D:/Code/Rocky/node_modules/langchain/src/agents/nodes/ToolNode.ts:480:18)\n    at ToolNode.invoke (file:///D:/Code/Rocky/node_modules/langchain/src/agents/RunnableCallable.ts:71:25)\n    at RunnableSequence.invoke (file:///D:/Code/Rocky/node_modules/@langchain/core/src/runnables/base.ts:1988:25)\n    at _runWithRetry (file:///D:/Code/Rocky/node_modules/@langchain/langgraph/src/pregel/retry.ts:123:18)"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100091981,
+      "endTime": 1791100096699.4453,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/native-compaction.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native adapter runs exact argv in the selected cwd without ambient credentials or shell expansion",
+          "status": "passed",
+          "title": "native adapter runs exact argv in the selected cwd without ambient credentials or shell expansion",
+          "duration": 52.39080000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native bounded execution: cancelled",
+          "status": "passed",
+          "title": "native bounded execution: cancelled",
+          "duration": 607.3703,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native bounded execution: timed_out",
+          "status": "passed",
+          "title": "native bounded execution: timed_out",
+          "duration": 624.5927,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native bounded execution: output_limit",
+          "status": "passed",
+          "title": "native bounded execution: output_limit",
+          "duration": 152.25879999999984,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native validation and pre-abort do not launch a process",
+          "status": "passed",
+          "title": "native validation and pre-abort do not launch a process",
+          "duration": 4.841200000000072,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native cancellation terminates an owned descendant process",
+          "status": "passed",
+          "title": "native cancellation terminates an owned descendant process",
+          "duration": 149.2451000000001,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100146453,
+      "endTime": 1791100148044.245,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/native-environment.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "parallel native tasks preserve parent identity even with repeated child tool IDs",
+          "status": "passed",
+          "title": "parallel native tasks preserve parent identity even with repeated child tool IDs",
+          "duration": 57.01400000000001,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100186547,
+      "endTime": 1791100186604.014,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/native-task-identity.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-007 concurrent evaluation endpoint leases revoke independently and never grant sibling routes",
+          "status": "passed",
+          "title": "T-007 concurrent evaluation endpoint leases revoke independently and never grant sibling routes",
+          "duration": 1.0296000000000163,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "evaluation guard rejects unregistered endpoints before sending",
+          "status": "passed",
+          "title": "evaluation guard rejects unregistered endpoints before sending",
+          "duration": 0.6103999999999985,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured loopback endpoint allowed, unconfigured and redirect denied",
+          "status": "passed",
+          "title": "configured loopback endpoint allowed, unconfigured and redirect denied",
+          "duration": 23.859499999999997,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100189400,
+      "endTime": 1791100189425.8596,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/network.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "daemon-owned interrupted workspace reads settle with no mutation while dispatched MCP stays unknown",
+          "status": "passed",
+          "title": "daemon-owned interrupted workspace reads settle with no mutation while dispatched MCP stays unknown",
+          "duration": 59.54599999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured MCP reconnect revision cannot bypass confirmed-effect retry protection, while distinct server targets remain distinct",
+          "status": "passed",
+          "title": "configured MCP reconnect revision cannot bypass confirmed-effect retry protection, while distinct server targets remain distinct",
+          "duration": 46.633200000000045,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 durable stages, exact intent, CAS and unknown never reset on restart",
+          "status": "passed",
+          "title": "T-008 durable stages, exact intent, CAS and unknown never reset on restart",
+          "duration": 57.33759999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 owner/session and active status are rechecked before dispatch; late known outcome can settle",
+          "status": "passed",
+          "title": "T-008 owner/session and active status are rechecked before dispatch; late known outcome can settle",
+          "duration": 45.54179999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 own v4 operation migration preserves success and unknown without inventing context",
+          "status": "failed",
+          "title": "T-008 own v4 operation migration preserves success and unknown without inventing context",
+          "duration": 57.9203,
+          "failureMessages": [
+            "Error: table skill_heads already exists\n    at D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:300:19\n    at Store.transaction (D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:416:22)\n    at new Store (D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:299:14)\n    at D:\\Code\\Rocky\\tests\\operation-ledger.test.ts:269:22\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 restart settles only undispatched owned operations and cleanup rolls back with Work failure",
+          "status": "passed",
+          "title": "T-008 restart settles only undispatched owned operations and cleanup rolls back with Work failure",
+          "duration": 536.9921999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 canonical target claim survives restart, blocks another Work and releases only on known reconciliation",
+          "status": "passed",
+          "title": "T-008 canonical target claim survives restart, blocks another Work and releases only on known reconciliation",
+          "duration": 54.84210000000007,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100158539,
+      "endTime": 1791100159397.842,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/operation-ledger.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 lost synthetic result reconciles from durable receipt without replay; request persists across restart",
+          "status": "passed",
+          "title": "T-008 lost synthetic result reconciles from durable receipt without replay; request persists across restart",
+          "duration": 58.4033,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 mismatched evidence/cancelled query and stale concurrent reconciliation cannot overwrite unknown or newer results",
+          "status": "passed",
+          "title": "T-008 mismatched evidence/cancelled query and stale concurrent reconciliation cannot overwrite unknown or newer results",
+          "duration": 45.84100000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 inconclusive status remains unknown and cannot become permission to dispatch",
+          "status": "passed",
+          "title": "T-008 inconclusive status remains unknown and cannot become permission to dispatch",
+          "duration": 44.77379999999994,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 MCP durable receipt resolves lost response after restart without resending: stdio",
+          "status": "passed",
+          "title": "T-008 MCP durable receipt resolves lost response after restart without resending: stdio",
+          "duration": 1109.5926,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 MCP durable receipt resolves lost response after restart without resending: http",
+          "status": "passed",
+          "title": "T-008 MCP durable receipt resolves lost response after restart without resending: http",
+          "duration": 100.20260000000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 missing MCP receipt remains unknown and keeps target claim",
+          "status": "passed",
+          "title": "T-008 missing MCP receipt remains unknown and keeps target claim",
+          "duration": 66.45100000000002,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100155167,
+      "endTime": 1791100156592.451,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/operation-reconciler.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 stale CAS and transaction failure cannot partially change Work, events or outbox",
+          "status": "passed",
+          "title": "T-006 stale CAS and transaction failure cannot partially change Work, events or outbox",
+          "duration": 51.83749999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 outbox replay after acknowledgement failure creates one completion and no new operations",
+          "status": "passed",
+          "title": "T-006 outbox replay after acknowledgement failure creates one completion and no new operations",
+          "duration": 49.00310000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 an outbox write failure rolls back the operation ledger and its event together",
+          "status": "passed",
+          "title": "T-006 an outbox write failure rolls back the operation ledger and its event together",
+          "duration": 40.980800000000045,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 actual child exits roll back uncommitted writes and preserve committed pending delivery",
+          "status": "passed",
+          "title": "T-006 actual child exits roll back uncommitted writes and preserve committed pending delivery",
+          "duration": 1174.4860999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 simultaneous daemons cannot both recover a stale PID lock",
+          "status": "passed",
+          "title": "T-006 simultaneous daemons cannot both recover a stale PID lock",
+          "duration": 1057.8140999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 durable completion API pages stable sequences without skipping or duplicating results",
+          "status": "passed",
+          "title": "T-006 durable completion API pages stable sequences without skipping or duplicating results",
+          "duration": 288.2040999999999,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100128359,
+      "endTime": 1791100131021.204,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/persistence.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 deny-first owner/config/resource/revocation cannot be overridden by exact consent",
+          "status": "passed",
+          "title": "T-008 deny-first owner/config/resource/revocation cannot be overridden by exact consent",
+          "duration": 3.1794000000000153,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 critical/unknown need exact consent and evaluation cannot acquire production write authority",
+          "status": "passed",
+          "title": "T-008 critical/unknown need exact consent and evaluation cannot acquire production write authority",
+          "duration": 0.97229999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 changed target/policy requires fresh preparation; local-new cannot overwrite without consent",
+          "status": "passed",
+          "title": "T-008 changed target/policy requires fresh preparation; local-new cannot overwrite without consent",
+          "duration": 0.31279999999998154,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100194332,
+      "endTime": 1791100194337.3127,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/policy.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "model waiting survives snapshot without retained wait events and never animates",
+          "status": "passed",
+          "title": "model waiting survives snapshot without retained wait events and never animates",
+          "duration": 1.8769000000000062,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "presence uses run progress, not heartbeat or connection, with deterministic sixty-second staleness",
+          "status": "passed",
+          "title": "presence uses run progress, not heartbeat or connection, with deterministic sixty-second staleness",
+          "duration": 0.34969999999998436,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "foreground outcomes stay distinct from independent background counts and evaluation work",
+          "status": "passed",
+          "title": "foreground outcomes stay distinct from independent background counts and evaluation work",
+          "duration": 0.3751000000000033,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "completion feedback excludes history, replay, late catch-up, background and unsuccessful states",
+          "status": "passed",
+          "title": "completion feedback excludes history, replay, late catch-up, background and unsuccessful states",
+          "duration": 2.0784000000000162,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100194580,
+      "endTime": 1791100194585.0784,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/presence.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "snapshot pages preserve the event boundary and include older active Works on the first page",
+          "status": "passed",
+          "title": "snapshot pages preserve the event boundary and include older active Works on the first page",
+          "duration": 245.5134,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-005 strict DTO and official AG-UI contracts reject invalid identities, private fields and cursors",
+          "status": "passed",
+          "title": "T-005 strict DTO and official AG-UI contracts reject invalid identities, private fields and cursors",
+          "duration": 2.1014000000000124,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "snapshot high water and replay preserve newer revisions and deduplicate evidence beyond safe-number precision",
+          "status": "passed",
+          "title": "snapshot high water and replay preserve newer revisions and deduplicate evidence beyond safe-number precision",
+          "duration": 49.29849999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Rocky P0 event upgrade is transactional and retained across reopen",
+          "status": "failed",
+          "title": "Rocky P0 event upgrade is transactional and retained across reopen",
+          "duration": 64.79139999999995,
+          "failureMessages": [
+            "Error: table skill_heads already exists\n    at D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:300:19\n    at Store.transaction (D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:416:22)\n    at new Store (D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:299:14)\n    at D:\\Code\\Rocky\\tests\\projection.test.ts:187:13\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unsupported store version releases lock and preserves stored bytes",
+          "status": "passed",
+          "title": "unsupported store version releases lock and preserves stored bytes",
+          "duration": 49.30600000000004,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100170701,
+      "endTime": 1791100171112.306,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/projection.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "stream redaction holds split configured credentials and preserves incremental public text",
+          "status": "passed",
+          "title": "stream redaction holds split configured credentials and preserves incremental public text",
+          "duration": 7.698999999999955,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 nested structured/text evidence masks credentials without hiding usage counts",
+          "status": "passed",
+          "title": "T-008 nested structured/text evidence masks credentials without hiding usage counts",
+          "duration": 0.24709999999993215,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-008 configured credential echoes are masked before event persistence and at HTTP projection; session remains usable",
+          "status": "passed",
+          "title": "T-008 configured credential echoes are masked before event persistence and at HTTP projection; session remains usable",
+          "duration": 109.69719999999995,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100172536,
+      "endTime": 1791100172653.6973,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/redaction.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "reflection authority pins reviewed source, restricts skills and persists only scoped drafts",
+          "status": "passed",
+          "title": "reflection authority pins reviewed source, restricts skills and persists only scoped drafts",
+          "duration": 93.8845,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100177525,
+      "endTime": 1791100177618.8845,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/reflection-authority.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "same Deep Agents factory reflection reads bound evidence and marks no-learning through restricted port",
+          "status": "passed",
+          "title": "same Deep Agents factory reflection reads bound evidence and marks no-learning through restricted port",
+          "duration": 39.55860000000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reflection rejects write_file before authority dispatch",
+          "status": "passed",
+          "title": "reflection rejects write_file before authority dispatch",
+          "duration": 8.262200000000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reflection rejects task before authority dispatch",
+          "status": "passed",
+          "title": "reflection rejects task before authority dispatch",
+          "duration": 6.629000000000019,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reflection rejects mcp_call before authority dispatch",
+          "status": "passed",
+          "title": "reflection rejects mcp_call before authority dispatch",
+          "duration": 7.040300000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reflection rejects memory_write before authority dispatch",
+          "status": "passed",
+          "title": "reflection rejects memory_write before authority dispatch",
+          "duration": 6.332199999999943,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reflection refuses accidental normal-skill/fixture composition",
+          "status": "passed",
+          "title": "reflection refuses accidental normal-skill/fixture composition",
+          "duration": 0.2515000000000782,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100185781,
+      "endTime": 1791100185849.3323,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/reflection-profile.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "daemon reflection admission and terminal evidence: result",
+          "status": "passed",
+          "title": "daemon reflection admission and terminal evidence: result",
+          "duration": 1060.3928999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "daemon reflection admission and terminal evidence: text-only",
+          "status": "passed",
+          "title": "daemon reflection admission and terminal evidence: text-only",
+          "duration": 995.3111000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "daemon reflection admission and terminal evidence: budget",
+          "status": "passed",
+          "title": "daemon reflection admission and terminal evidence: budget",
+          "duration": 1046.2896,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "daemon reflection admission and terminal evidence: withdraw",
+          "status": "passed",
+          "title": "daemon reflection admission and terminal evidence: withdraw",
+          "duration": 1001.1881999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "daemon reflection admission and terminal evidence: withdraw-output",
+          "status": "passed",
+          "title": "daemon reflection admission and terminal evidence: withdraw-output",
+          "duration": 1000.2299999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "daemon reflection admission and terminal evidence: stop",
+          "status": "passed",
+          "title": "daemon reflection admission and terminal evidence: stop",
+          "duration": 974.1651999999995,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100068661,
+      "endTime": 1791100074739.1653,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/reflection-service.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "reflection profile traverses real worker IPC without normal skill discovery or conversation inheritance",
+          "status": "passed",
+          "title": "reflection profile traverses real worker IPC without normal skill discovery or conversation inheritance",
+          "duration": 969.8377,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reflection wire start rejects context, fixture, steering and unconfigured combinations",
+          "status": "passed",
+          "title": "reflection wire start rejects context, fixture, steering and unconfigured combinations",
+          "duration": 0.7260000000001128,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100157089,
+      "endTime": 1791100158059.726,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/reflection-worker.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "model/tool/run results roundtrip Unicode in bounded frames with exact request and kind",
+          "status": "passed",
+          "title": "model/tool/run results roundtrip Unicode in bounded frames with exact request and kind",
+          "duration": 16.146299999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "incomplete, reordered, altered, expired and cross-request results never deliver",
+          "status": "passed",
+          "title": "incomplete, reordered, altered, expired and cross-request results never deliver",
+          "duration": 1.6275000000000261,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "result capacity and explicit size limits bound abandoned delivery",
+          "status": "passed",
+          "title": "result capacity and explicit size limits bound abandoned delivery",
+          "duration": 3.109199999999987,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100190183,
+      "endTime": 1791100190204.1091,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/result-transfer.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "retry creates new durable Work/run/session/budget, keeps source immutable and survives restart idempotently",
+          "status": "passed",
+          "title": "retry creates new durable Work/run/session/budget, keeps source immutable and survives restart idempotently",
+          "duration": 2028.1102,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "retry rejects unknown effects and requires exact reconciliation refs: succeeded",
+          "status": "passed",
+          "title": "retry rejects unknown effects and requires exact reconciliation refs: succeeded",
+          "duration": 1114.3339999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "retry rejects unknown effects and requires exact reconciliation refs: failed_known_no_effect",
+          "status": "passed",
+          "title": "retry rejects unknown effects and requires exact reconciliation refs: failed_known_no_effect",
+          "duration": 1079.7588999999998,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100103148,
+      "endTime": 1791100107369.7588,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/retry.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "durable interval occurrences, restart and dedupe: skip",
+          "status": "passed",
+          "title": "durable interval occurrences, restart and dedupe: skip",
+          "duration": 70.9889,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "durable interval occurrences, restart and dedupe: coalesce-one",
+          "status": "passed",
+          "title": "durable interval occurrences, restart and dedupe: coalesce-one",
+          "duration": 52.80739999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "cron uses IANA local time across DST and does not duplicate one occurrence",
+          "status": "passed",
+          "title": "cron uses IANA local time across DST and does not duplicate one occurrence",
+          "duration": 44.79329999999993,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100181202,
+      "endTime": 1791100181370.7932,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/routines.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-003 native task + interrupt + approval + MCP stdio",
+          "status": "passed",
+          "title": "T-003 native task + interrupt + approval + MCP stdio",
+          "duration": 1409.1374,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-003 native task + interrupt + approval + MCP http",
+          "status": "passed",
+          "title": "T-003 native task + interrupt + approval + MCP http",
+          "duration": 1097.3161,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-003/T-037 persona bypass request still requires approval; rejection has no write",
+          "status": "passed",
+          "title": "T-003/T-037 persona bypass request still requires approval; rejection has no write",
+          "duration": 1341.6322999999998,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100108382,
+      "endTime": 1791100112230.6323,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/runtime.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native scratch writes/edits/read survive checkpoints and stay isolated by execution thread",
+          "status": "passed",
+          "title": "native scratch writes/edits/read survive checkpoints and stay isolated by execution thread",
+          "duration": 73.60680000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "scratch scope denies traversal, host paths, context edits and oversized tool IPC",
+          "status": "passed",
+          "title": "scratch scope denies traversal, host paths, context edits and oversized tool IPC",
+          "duration": 0.7677999999999656,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native guard refuses execute and out-of-scope tools before any public start or MCP effect",
+          "status": "failed",
+          "title": "native guard refuses execute and out-of-scope tools before any public start or MCP effect",
+          "duration": 13.37340000000006,
+          "failureMessages": [
+            "AssertionError: expected [ 'rocky.policy.denied' ] to deeply equal []\n    at D:\\Code\\Rocky\\tests\\scratch-runtime.test.ts:161:20\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100175852,
+      "endTime": 1791100175939.3733,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/scratch-runtime.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "read-only native skill backend preserves bytes, paginates and rechecks every read",
+          "status": "passed",
+          "title": "read-only native skill backend preserves bytes, paginates and rechecks every read",
+          "duration": 2.755200000000059,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "skill read size and binary boundaries",
+          "status": "passed",
+          "title": "skill read size and binary boundaries",
+          "duration": 0.419399999999996,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100193857,
+      "endTime": 1791100193860.4194,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/skill-backend.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "frozen catalog scope, newer selections, quarantine and reopened reads",
+          "status": "passed",
+          "title": "frozen catalog scope, newer selections, quarantine and reopened reads",
+          "duration": 80.17190000000005,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100180075,
+      "endTime": 1791100180155.1719,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/skill-catalog.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "immutable package diff covers additions/removals/binary and bounded text",
+          "status": "passed",
+          "title": "immutable package diff covers additions/removals/binary and bounded text",
+          "duration": 65.51969999999994,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100188559,
+      "endTime": 1791100188624.5198,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/skill-diff.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: published",
+          "status": "passed",
+          "title": "native progressive skill read: published",
+          "duration": 1075.4586000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: untrusted",
+          "status": "passed",
+          "title": "native progressive skill read: untrusted",
+          "duration": 1028.6934999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: quarantined",
+          "status": "passed",
+          "title": "native progressive skill read: quarantined",
+          "duration": 1037.9227,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: same-name",
+          "status": "passed",
+          "title": "native progressive skill read: same-name",
+          "duration": 1032.7450000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: revoke-loaded",
+          "status": "failed",
+          "title": "native progressive skill read: revoke-loaded",
+          "duration": 1038.6686,
+          "failureMessages": [
+            "AssertionError: expected [Function] to throw error including 'quarantined' but got 'A source used by this execution was c…'\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/@vitest/expect/dist/index.js:1420:16)\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/@vitest/expect/dist/index.js:1029:14)\n    at Proxy.methodWrapper (file:///D:/Code/Rocky/node_modules/chai/index.js:1686:25)\n    at D:\\Code\\Rocky\\tests\\skill-native.test.ts:247:63\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: revoke-pending",
+          "status": "failed",
+          "title": "native progressive skill read: revoke-pending",
+          "duration": 1069.4143999999997,
+          "failureMessages": [
+            "AssertionError: expected [Function] to throw error including 'quarantined' but got 'A source used by this execution was c…'\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/@vitest/expect/dist/index.js:1420:16)\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/@vitest/expect/dist/index.js:1029:14)\n    at Proxy.methodWrapper (file:///D:/Code/Rocky/node_modules/chai/index.js:1686:25)\n    at D:\\Code\\Rocky\\tests\\skill-native.test.ts:201:57\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100061388,
+      "endTime": 1791100067671.4143,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/skill-native.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "portable skill metadata, immutable file hashes, deterministic package identity and binary assets",
+          "status": "passed",
+          "title": "portable skill metadata, immutable file hashes, deterministic package identity and binary assets",
+          "duration": 7.338100000000026,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path ../escape",
+          "status": "passed",
+          "title": "reject unsafe path ../escape",
+          "duration": 0.46520000000001005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path /absolute",
+          "status": "passed",
+          "title": "reject unsafe path /absolute",
+          "duration": 0.13109999999997513,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path C:/escape",
+          "status": "passed",
+          "title": "reject unsafe path C:/escape",
+          "duration": 0.08910000000000196,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path a\\b",
+          "status": "passed",
+          "title": "reject unsafe path a\\b",
+          "duration": 0.09450000000001069,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path a/./b",
+          "status": "passed",
+          "title": "reject unsafe path a/./b",
+          "duration": 0.08019999999999072,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path a//b",
+          "status": "passed",
+          "title": "reject unsafe path a//b",
+          "duration": 0.08740000000000236,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path a/NUL.txt",
+          "status": "passed",
+          "title": "reject unsafe path a/NUL.txt",
+          "duration": 0.07580000000001519,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path x:stream",
+          "status": "passed",
+          "title": "reject unsafe path x:stream",
+          "duration": 0.08770000000001232,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path x.",
+          "status": "passed",
+          "title": "reject unsafe path x.",
+          "duration": 0.09919999999999618,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path manifest.json",
+          "status": "passed",
+          "title": "reject unsafe path manifest.json",
+          "duration": 0.08080000000001064,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject unsafe path .git/config",
+          "status": "passed",
+          "title": "reject unsafe path .git/config",
+          "duration": 0.05670000000000641,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject collisions, malformed data and oversized packages",
+          "status": "passed",
+          "title": "reject collisions, malformed data and oversized packages",
+          "duration": 10.5659,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject invalid metadata: name: other\ndescription: Wrong name",
+          "status": "passed",
+          "title": "reject invalid metadata: name: other\ndescription: Wrong name",
+          "duration": 0.28950000000000387,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject invalid metadata: name: example-skill\nname: duplicate\ndescription: Duplicate",
+          "status": "passed",
+          "title": "reject invalid metadata: name: example-skill\nname: duplicate\ndescription: Duplicate",
+          "duration": 0.477800000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject invalid metadata: name: example-skill\ndescription: !unknown value",
+          "status": "passed",
+          "title": "reject invalid metadata: name: example-skill\ndescription: !unknown value",
+          "duration": 0.45289999999999964,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject invalid metadata: name: example-skill\ndescription: &a text\nlicense: *a",
+          "status": "passed",
+          "title": "reject invalid metadata: name: example-skill\ndescription: &a text\nlicense: *a",
+          "duration": 0.43559999999999377,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reject invalid metadata: name: example-skill\ndescription: 123",
+          "status": "passed",
+          "title": "reject invalid metadata: name: example-skill\ndescription: 123",
+          "duration": 0.6105000000000018,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100189680,
+      "endTime": 1791100189701.6106,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/skill-package.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "exact owner selection, independent import head, rollback, quarantine and durable replay",
+          "status": "passed",
+          "title": "exact owner selection, independent import head, rollback, quarantine and durable replay",
+          "duration": 88.03819999999996,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100179127,
+      "endTime": 1791100179215.038,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/skill-selection.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "project discovery is owner-only, untrusted, hash-pinned and imports immutable bytes",
+          "status": "passed",
+          "title": "project discovery is owner-only, untrusted, hash-pinned and imports immutable bytes",
+          "duration": 93.39289999999994,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "filesystem sources reject junctions, hard links, oversized files and invalid packages",
+          "status": "failed",
+          "title": "filesystem sources reject junctions, hard links, oversized files and invalid packages",
+          "duration": 22.84120000000007,
+          "failureMessages": [
+            "AssertionError: expected { items: [], truncated: false, …(2) } to deeply equal { items: [], truncated: false, …(1) }\n    at D:\\Code\\Rocky\\tests\\skill-sources.test.ts:132:63\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100173587,
+      "endTime": 1791100173703.8413,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/skill-sources.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "owner imports untrusted immutable skill revisions with CAS, receipts, rollback and reopen",
+          "status": "passed",
+          "title": "owner imports untrusted immutable skill revisions with CAS, receipts, rollback and reopen",
+          "duration": 80.05110000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "schema 19 upgrades skill tables without changing owner memories",
+          "status": "failed",
+          "title": "schema 19 upgrades skill tables without changing owner memories",
+          "duration": 60.64350000000013,
+          "failureMessages": [
+            "Error: database is not open\n    at Store.list (D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:428:15)\n    at WorkService.close (D:\\Code\\Rocky\\apps\\daemon\\src\\work-service.ts:3065:35)\n    at D:\\Code\\Rocky\\tests\\skills.test.ts:156:5\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100170078,
+      "endTime": 1791100170218.6436,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/skills.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (true)",
+          "status": "passed",
+          "title": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (true)",
+          "duration": 2091.2166,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (child)",
+          "status": "passed",
+          "title": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (child)",
+          "duration": 2016.1603,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "pending steering is not_applied when terminal before next boundary, with no ghost history",
+          "status": "passed",
+          "title": "pending steering is not_applied when terminal before next boundary, with no ghost history",
+          "duration": 1043.6572999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "pending steering is not_applied when stopped, with no ghost history",
+          "status": "passed",
+          "title": "pending steering is not_applied when stopped, with no ghost history",
+          "duration": 1009.1105000000007,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100075673,
+      "endTime": 1791100081833.1106,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/steering.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "stale stop cannot cancel another run/session or a newer revision; receipt survives restart",
+          "status": "passed",
+          "title": "stale stop cannot cancel another run/session or a newer revision; receipt survives restart",
+          "duration": 1213.3894,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "stopping with a dispatched unknown effect requires reconciliation",
+          "status": "passed",
+          "title": "stopping with a dispatched unknown effect requires reconciliation",
+          "duration": 1050.5443,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100138353,
+      "endTime": 1791100140617.5442,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/stop.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "foreign store refusal leaves synthetic private bytes unchanged",
+          "status": "passed",
+          "title": "foreign store refusal leaves synthetic private bytes unchanged",
+          "duration": 2.8916000000000395,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "single writer rejects duplicate daemon and receipts survive restart",
+          "status": "passed",
+          "title": "single writer rejects duplicate daemon and receipts survive restart",
+          "duration": 374.5489,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100161359,
+      "endTime": 1791100161736.5488,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/store.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "truncated openai-compatible SSE never completes Work or dispatches tool effects",
+          "status": "passed",
+          "title": "truncated openai-compatible SSE never completes Work or dispatches tool effects",
+          "duration": 1052.4762,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "truncated anthropic SSE never completes Work or dispatches tool effects",
+          "status": "passed",
+          "title": "truncated anthropic SSE never completes Work or dispatches tool effects",
+          "duration": 975.6528000000003,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100144216,
+      "endTime": 1791100146244.6528,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/stream-work.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "terminates an owned process and its live descendant, leaving another process alive",
+          "status": "passed",
+          "title": "terminates an owned process and its live descendant, leaving another process alive",
+          "duration": 257.1349,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100167709,
+      "endTime": 1791100167966.135,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/terminate-process-tree.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "background MCP tracking dedupes status, bounds follow-ups, pins schema and stops unknown queries",
+          "status": "passed",
+          "title": "background MCP tracking dedupes status, bounds follow-ups, pins schema and stops unknown queries",
+          "duration": 67.23259999999993,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100183413,
+      "endTime": 1791100183480.2327,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/tracked-work.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "large native checkpoint history reaches one daemon model dispatch through real bounded child IPC",
+          "status": "failed",
+          "title": "large native checkpoint history reaches one daemon model dispatch through real bounded child IPC",
+          "duration": 1224.9517,
+          "failureMessages": [
+            "Error: Worker process stopped before Agent result\n    at WorkerChannel.abortAll (D:\\Code\\Rocky\\apps\\daemon\\src\\worker-channel.ts:502:7)\n    at ChildProcess.<anonymous> (D:\\Code\\Rocky\\apps\\daemon\\src\\worker-channel.ts:160:14)\n    at Object.onceWrapper (node:events:623:26)\n    at ChildProcess.emit (node:events:508:28)\n    at Process.ChildProcess._handle.onexit (node:internal/child_process:294:12)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "large model response and final native result cross both real child IPC directions intact",
+          "status": "failed",
+          "title": "large model response and final native result cross both real child IPC directions intact",
+          "duration": 889.4157000000002,
+          "failureMessages": [
+            "Error: Worker process stopped before Agent result\n    at WorkerChannel.abortAll (D:\\Code\\Rocky\\apps\\daemon\\src\\worker-channel.ts:502:7)\n    at ChildProcess.<anonymous> (D:\\Code\\Rocky\\apps\\daemon\\src\\worker-channel.ts:160:14)\n    at Object.onceWrapper (node:events:623:26)\n    at ChildProcess.emit (node:events:508:28)\n    at Process.ChildProcess._handle.onexit (node:internal/child_process:294:12)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "large daemon tool receipt resumes exact native interrupt and offloads evidence without repeating the tool",
+          "status": "failed",
+          "title": "large daemon tool receipt resumes exact native interrupt and offloads evidence without repeating the tool",
+          "duration": 948.2031999999999,
+          "failureMessages": [
+            "Error: Worker process stopped before Agent result\n    at WorkerChannel.abortAll (D:\\Code\\Rocky\\apps\\daemon\\src\\worker-channel.ts:502:7)\n    at ChildProcess.<anonymous> (D:\\Code\\Rocky\\apps\\daemon\\src\\worker-channel.ts:160:14)\n    at Object.onceWrapper (node:events:623:26)\n    at ChildProcess.emit (node:events:508:28)\n    at Process.ChildProcess._handle.onexit (node:internal/child_process:294:12)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 real child IPC verifies ownership and correlates tool result with daemon-resolved scope",
+          "status": "passed",
+          "title": "T-009 real child IPC verifies ownership and correlates tool result with daemon-resolved scope",
+          "duration": 258.0636999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 capability, queue and forced shutdown: badcap",
+          "status": "passed",
+          "title": "T-009 capability, queue and forced shutdown: badcap",
+          "duration": 241.33140000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 capability, queue and forced shutdown: flood",
+          "status": "passed",
+          "title": "T-009 capability, queue and forced shutdown: flood",
+          "duration": 234.8391999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 capability, queue and forced shutdown: stubborn",
+          "status": "passed",
+          "title": "T-009 capability, queue and forced shutdown: stubborn",
+          "duration": 853.2784000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "incomplete or wrong-kind final result never completes native invocation: partial-run",
+          "status": "passed",
+          "title": "incomplete or wrong-kind final result never completes native invocation: partial-run",
+          "duration": 231.4989000000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "incomplete or wrong-kind final result never completes native invocation: incomplete-run",
+          "status": "passed",
+          "title": "incomplete or wrong-kind final result never completes native invocation: incomplete-run",
+          "duration": 227.59230000000025,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "incomplete or wrong-kind final result never completes native invocation: foreign-result",
+          "status": "passed",
+          "title": "incomplete or wrong-kind final result never completes native invocation: foreign-result",
+          "duration": 241.73469999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 shutdown bounds a handler that ignores cancellation",
+          "status": "passed",
+          "title": "T-009 shutdown bounds a handler that ignores cancellation",
+          "duration": 824.1460999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 forced shutdown reaps a stubborn worker and its real descendant",
+          "status": "passed",
+          "title": "T-009 forced shutdown reaps a stubborn worker and its real descendant",
+          "duration": 842.6350999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 restart marks an unfinished worker interrupted without completing its Work or respawning",
+          "status": "passed",
+          "title": "T-009 restart marks an unfinished worker interrupted without completing its Work or respawning",
+          "duration": 488.72699999999986,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 native Deep Agents fixture runs in child and resumes exact interrupt through daemon RPC",
+          "status": "passed",
+          "title": "T-009 native Deep Agents fixture runs in child and resumes exact interrupt through daemon RPC",
+          "duration": 974.3370999999988,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100035641,
+      "endTime": 1791100044123.3372,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/worker-channel.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 worker preload denies direct fetch, TCP, TLS, HTTP and UDP APIs",
+          "status": "passed",
+          "title": "T-009 worker preload denies direct fetch, TCP, TLS, HTTP and UDP APIs",
+          "duration": 68.96480000000001,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100185039,
+      "endTime": 1791100185107.9648,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/worker-network-guard.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native ledger dispatch: approved",
+          "status": "passed",
+          "title": "native ledger dispatch: approved",
+          "duration": 427.70889999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native ledger dispatch: rejected",
+          "status": "passed",
+          "title": "native ledger dispatch: rejected",
+          "duration": 332.9090000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native ledger dispatch: wrong_hash",
+          "status": "passed",
+          "title": "native ledger dispatch: wrong_hash",
+          "duration": 256.13559999999984,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native ledger dispatch: nonzero",
+          "status": "passed",
+          "title": "native ledger dispatch: nonzero",
+          "duration": 374.9854,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native ledger dispatch: cancelled",
+          "status": "passed",
+          "title": "native ledger dispatch: cancelled",
+          "duration": 524.2071999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native ledger dispatch: configuration_revoked",
+          "status": "passed",
+          "title": "native ledger dispatch: configuration_revoked",
+          "duration": 247.91740000000027,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100141113,
+      "endTime": 1791100143277.9175,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/workspace-command-dispatch.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "configured Work native command: approve",
+          "status": "passed",
+          "title": "configured Work native command: approve",
+          "duration": 1362.0628000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured Work native command: reject",
+          "status": "passed",
+          "title": "configured Work native command: reject",
+          "duration": 1207.5684999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured Work native command: child",
+          "status": "passed",
+          "title": "configured Work native command: child",
+          "duration": 1049.3276999999994,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured Work native command: steer",
+          "status": "passed",
+          "title": "configured Work native command: steer",
+          "duration": 1169.438,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100113225,
+      "endTime": 1791100118013.438,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/workspace-command-work.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "command consent binds executable bytes, owner, limits, workspace and OS environment without execution",
+          "status": "passed",
+          "title": "command consent binds executable bytes, owner, limits, workspace and OS environment without execution",
+          "duration": 76.61509999999998,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100181844,
+      "endTime": 1791100181920.615,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/workspace-commands.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "canonical overlap checks both ancestors and descendants without prefix collisions",
+          "status": "passed",
+          "title": "canonical overlap checks both ancestors and descendants without prefix collisions",
+          "duration": 0.7792000000000598,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "root-owned admission for nested registrations: release",
+          "status": "failed",
+          "title": "root-owned admission for nested registrations: release",
+          "duration": 1765.3229999999999,
+          "failureMessages": [
+            "AssertionError: expected 'running' to be 'queued' // Object.is equality\n    at unstarted (D:\\Code\\Rocky\\tests\\workspace-leases.test.ts:101:54)\n    at D:\\Code\\Rocky\\tests\\workspace-leases.test.ts:110:7\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "root-owned admission for nested registrations: reverse",
+          "status": "failed",
+          "title": "root-owned admission for nested registrations: reverse",
+          "duration": 1654.3995,
+          "failureMessages": [
+            "AssertionError: expected 'running' to be 'queued' // Object.is equality\n    at unstarted (D:\\Code\\Rocky\\tests\\workspace-leases.test.ts:101:54)\n    at D:\\Code\\Rocky\\tests\\workspace-leases.test.ts:110:7\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "root-owned admission for nested registrations: cancel-waiter",
+          "status": "failed",
+          "title": "root-owned admission for nested registrations: cancel-waiter",
+          "duration": 1656.1349999999993,
+          "failureMessages": [
+            "AssertionError: expected 'running' to be 'queued' // Object.is equality\n    at unstarted (D:\\Code\\Rocky\\tests\\workspace-leases.test.ts:101:54)\n    at D:\\Code\\Rocky\\tests\\workspace-leases.test.ts:110:7\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "root-owned admission for nested registrations: blocked",
+          "status": "failed",
+          "title": "root-owned admission for nested registrations: blocked",
+          "duration": 1668.54,
+          "failureMessages": [
+            "AssertionError: expected 'running' to be 'queued' // Object.is equality\n    at unstarted (D:\\Code\\Rocky\\tests\\workspace-leases.test.ts:101:54)\n    at D:\\Code\\Rocky\\tests\\workspace-leases.test.ts:110:7\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791099904132,
+      "endTime": 1791099910877.54,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/workspace-leases.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native workspace read boundary: read",
+          "status": "passed",
+          "title": "configured native workspace read boundary: read",
+          "duration": 1083.9953,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native workspace read boundary: denied",
+          "status": "passed",
+          "title": "configured native workspace read boundary: denied",
+          "duration": 996.8504999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native workspace read boundary: traversal",
+          "status": "passed",
+          "title": "configured native workspace read boundary: traversal",
+          "duration": 1008.3455000000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native workspace read boundary: revoked",
+          "status": "passed",
+          "title": "configured native workspace read boundary: revoked",
+          "duration": 969.6206999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native workspace read boundary: replacement",
+          "status": "passed",
+          "title": "configured native workspace read boundary: replacement",
+          "duration": 1043.3370999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native workspace read boundary: child",
+          "status": "passed",
+          "title": "configured native workspace read boundary: child",
+          "duration": 1050.7549,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native workspace read boundary: shell",
+          "status": "passed",
+          "title": "configured native workspace read boundary: shell",
+          "duration": 970.8609999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native workspace read boundary: paged",
+          "status": "passed",
+          "title": "configured native workspace read boundary: paged",
+          "duration": 1187.1466,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured native workspace read boundary: changed-page",
+          "status": "passed",
+          "title": "configured native workspace read boundary: changed-page",
+          "duration": 1039.2099000000017,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791099911793,
+      "endTime": 1791099921144.21,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/workspace-work.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: approve",
+          "status": "failed",
+          "title": "native worktree exact consent: approve",
+          "duration": 15328.804999999998,
+          "failureMessages": [
+            "Error: Matcher did not succeed in time.\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/vitest/dist/chunks/vi.bdSIJ99Y.js:43:31)\n    at D:\\Code\\Rocky\\tests\\workspace-worktrees.test.ts:124:10\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: adopt",
+          "status": "failed",
+          "title": "native worktree exact consent: adopt",
+          "duration": 15287.143300000002,
+          "failureMessages": [
+            "Error: Matcher did not succeed in time.\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/vitest/dist/chunks/vi.bdSIJ99Y.js:43:31)\n    at D:\\Code\\Rocky\\tests\\workspace-worktrees.test.ts:124:10\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: reject",
+          "status": "failed",
+          "title": "native worktree exact consent: reject",
+          "duration": 15292.602199999998,
+          "failureMessages": [
+            "Error: Matcher did not succeed in time.\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/vitest/dist/chunks/vi.bdSIJ99Y.js:43:31)\n    at D:\\Code\\Rocky\\tests\\workspace-worktrees.test.ts:124:10\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: stale",
+          "status": "failed",
+          "title": "native worktree exact consent: stale",
+          "duration": 15323.354599999999,
+          "failureMessages": [
+            "Error: Matcher did not succeed in time.\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/vitest/dist/chunks/vi.bdSIJ99Y.js:43:31)\n    at D:\\Code\\Rocky\\tests\\workspace-worktrees.test.ts:124:10\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: child",
+          "status": "passed",
+          "title": "native worktree exact consent: child",
+          "duration": 1263.5889000000025,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: cancel",
+          "status": "failed",
+          "title": "native worktree exact consent: cancel",
+          "duration": 15262.196700000008,
+          "failureMessages": [
+            "Error: Matcher did not succeed in time.\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/vitest/dist/chunks/vi.bdSIJ99Y.js:43:31)\n    at D:\\Code\\Rocky\\tests\\workspace-worktrees.test.ts:124:10\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: registration-failure",
+          "status": "failed",
+          "title": "native worktree exact consent: registration-failure",
+          "duration": 15303.111399999994,
+          "failureMessages": [
+            "Error: Matcher did not succeed in time.\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/vitest/dist/chunks/vi.bdSIJ99Y.js:43:31)\n    at D:\\Code\\Rocky\\tests\\workspace-worktrees.test.ts:124:10\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791099922062,
+      "endTime": 1791100015121.1113,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/workspace-worktrees.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native exact workspace write: new",
+          "status": "passed",
+          "title": "native exact workspace write: new",
+          "duration": 1200.506,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native exact workspace write: replace",
+          "status": "passed",
+          "title": "native exact workspace write: replace",
+          "duration": 1070.8635999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native exact workspace write: reject",
+          "status": "passed",
+          "title": "native exact workspace write: reject",
+          "duration": 1046.9924,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native exact workspace write: stale",
+          "status": "passed",
+          "title": "native exact workspace write: stale",
+          "duration": 1061.232,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native exact workspace write: cancel",
+          "status": "passed",
+          "title": "native exact workspace write: cancel",
+          "duration": 1013.5118999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native exact workspace write: private",
+          "status": "passed",
+          "title": "native exact workspace write: private",
+          "duration": 974.1687999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native exact workspace write: child",
+          "status": "passed",
+          "title": "native exact workspace write: child",
+          "duration": 1042.6852999999992,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "writer rejects cancelled, stale, unsafe and oversized proposals without changing files",
+          "status": "passed",
+          "title": "writer rejects cancelled, stale, unsafe and oversized proposals without changing files",
+          "duration": 328.4441999999999,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100045075,
+      "endTime": 1791100052813.444,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/workspace-writes.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "directory limits are truthful and unfinished workspace reservations prevent rebinding",
+          "status": "passed",
+          "title": "directory limits are truthful and unfinished workspace reservations prevent rebinding",
+          "duration": 113.74030000000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "workspace registration persists, replays parallel requests, enforces CAS and canonical duplicate roots",
+          "status": "failed",
+          "title": "workspace registration persists, replays parallel requests, enforces CAS and canonical duplicate roots",
+          "duration": 51.70769999999993,
+          "failureMessages": [
+            "AssertionError: expected 36 to be 19 // Object.is equality\n    at D:\\Code\\Rocky\\tests\\workspaces.test.ts:123:7\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "registered previews reject traversal, junctions, hardlinks, private data, binary and root replacement",
+          "status": "passed",
+          "title": "registered previews reject traversal, junctions, hardlinks, private data, binary and root replacement",
+          "duration": 115.58879999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "workspace owner HTTP commands require session; read API reports actual content and revision",
+          "status": "passed",
+          "title": "workspace owner HTTP commands require session; read API reports actual content and revision",
+          "duration": 61.0476000000001,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100165932,
+      "endTime": 1791100166274.0476,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/workspaces.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "replacement hunk preserves exact changed lines, context, CRLF and trailing newline state",
+          "status": "passed",
+          "title": "replacement hunk preserves exact changed lines, context, CRLF and trailing newline state",
+          "duration": 1.456700000000012,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "large and very long differences explicitly report bounded incomplete preview",
+          "status": "passed",
+          "title": "large and very long differences explicitly report bounded incomplete preview",
+          "duration": 1.7218999999999909,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100196233,
+      "endTime": 1791100196236.722,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/write-diff.test.ts"
+    }
+  ]
+}

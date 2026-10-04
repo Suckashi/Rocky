@@ -9,7 +9,7 @@ import {
   BookOpen,
   Monitor,
 } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 
 export function Chrome({
   locale,
@@ -341,7 +341,11 @@ export function Chrome({
               </button>
             </div>
             <div className="pane-body">
-              {panel === "6" ? computer : artifacts}
+              <Suspense
+                fallback={<p role="status">{zh ? "載入中…" : "Loading…"}</p>}
+              >
+                {panel === "6" ? computer : artifacts}
+              </Suspense>
             </div>
           </aside>
         </>
@@ -369,21 +373,25 @@ export function Chrome({
           </button>
         </div>
         <div className="pane-body">
-          {panel === "7" ? (
-            settings
-          ) : panel === "5" ? (
-            learning
-          ) : panel === "4" ? (
-            skills
-          ) : panel === "3" ? (
-            workspaces
-          ) : (
-            <p role="status">
-              {zh
-                ? "此能力尚未實作；沒有正在執行的外部服務或合成成果。"
-                : "This capability is not implemented yet. No external service or synthetic result is running."}
-            </p>
-          )}
+          <Suspense
+            fallback={<p role="status">{zh ? "載入中…" : "Loading…"}</p>}
+          >
+            {panel === "7" ? (
+              settings
+            ) : panel === "5" ? (
+              learning
+            ) : panel === "4" ? (
+              skills
+            ) : panel === "3" ? (
+              workspaces
+            ) : (
+              <p role="status">
+                {zh
+                  ? "此能力尚未實作；沒有正在執行的外部服務或合成成果。"
+                  : "This capability is not implemented yet. No external service or synthetic result is running."}
+              </p>
+            )}
+          </Suspense>
         </div>
       </dialog>
     </div>

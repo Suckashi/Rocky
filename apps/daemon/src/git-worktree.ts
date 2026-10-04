@@ -9,12 +9,15 @@ import {
   isAbsolute,
   relative,
   sep,
+  normalize,
 } from "node:path";
 import { createHash } from "node:crypto";
 import { RockyError } from "../../../packages/contracts/src/index.js";
 import { resolveFileTarget, recheckFileTarget } from "./file-target.js";
 const same = (a: string, b: string) =>
-  process.platform === "win32" ? a.toLowerCase() === b.toLowerCase() : a === b;
+  process.platform === "win32"
+    ? normalize(a).toLowerCase() === normalize(b).toLowerCase()
+    : a === b;
 const inside = (root: string, path: string) => {
   const rel = relative(root, path);
   return (
@@ -165,13 +168,14 @@ export class GitWorktree {
         403,
       );
     if (
-      !(await lstat(join(root, ".git"))).isDirectory() ||
+      (!(await lstat(join(root, ".git"))).isDirectory() &&
+        !(await lstat(join(root, ".git"))).isFile()) ||
       (await lstat(join(root, ".git"))).isSymbolicLink() ||
       !same(await realpath(root), root)
     )
       throw new RockyError(
         "git_scope",
-        "A canonical main Git workspace is required",
+        "A canonical Git workspace is required",
         422,
       );
     const rootStat = await lstat(root, { bigint: true }),
@@ -189,6 +193,35 @@ export class GitWorktree {
       )
       .digest("hex");
     const executable = await this.executable(root);
+    const metadata = (
+      await this.run(
+        executable,
+        root,
+        ["rev-parse", "--absolute-git-dir"],
+        signal,
+      )
+    ).trim();
+    const common = (
+      await this.run(
+        executable,
+        root,
+        ["rev-parse", "--path-format=absolute", "--git-common-dir"],
+        signal,
+      )
+    ).trim();
+    for (const path of [metadata, common]) {
+      if (
+        !isAbsolute(path) ||
+        !(await lstat(path)).isDirectory() ||
+        (await lstat(path)).isSymbolicLink() ||
+        !same(await realpath(path), path)
+      )
+        throw new RockyError(
+          "git_scope",
+          "Git metadata must be a canonical local directory",
+          403,
+        );
+    }
     const top = (
       await this.run(executable, root, ["rev-parse", "--show-toplevel"], signal)
     ).trim();
@@ -237,6 +270,23 @@ export class GitWorktree {
       executable,
       head,
       repoIdentity,
+      metadataIdentity: createHash("sha256")
+        .update(
+          JSON.stringify(
+            await Promise.all(
+              [metadata, common].map(async (path) => {
+                const stat = await lstat(path, { bigint: true });
+                return [
+                  path,
+                  stat.dev.toString(),
+                  stat.ino.toString(),
+                  stat.birthtimeNs.toString(),
+                ];
+              }),
+            ),
+          ),
+        )
+        .digest("hex"),
       configHash: createHash("sha256").update(config).digest("hex"),
       target,
     };
@@ -254,6 +304,7 @@ export class GitWorktree {
     );
     if (
       fresh.repoIdentity !== prepared.repoIdentity ||
+      fresh.metadataIdentity !== prepared.metadataIdentity ||
       fresh.head !== prepared.head ||
       fresh.configHash !== prepared.configHash ||
       fresh.executable !== prepared.executable

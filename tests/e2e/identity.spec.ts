@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 
 test("T-037 original avatar in app and all sizes/themes render without remote assets", async ({
   page,

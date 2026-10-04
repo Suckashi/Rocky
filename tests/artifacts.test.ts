@@ -90,9 +90,15 @@ test("artifact publication: native receipt, atomic registry, immutable download,
     ).rejects.toThrow("Cancelled before commit");
     expect(checks).toBe(2);
     expect(service.artifacts.list()).toHaveLength(0);
-    const fail = vi.spyOn(service.store, "event").mockImplementationOnce(() => {
-      throw Error("Injected registry commit failure");
-    });
+    const recordEvent = service.store.event.bind(service.store);
+    const fail = vi
+      .spyOn(service.store, "event")
+      .mockImplementation((work, name, data) => {
+        // A late worker cleanup event must not consume the publication fault.
+        if (name === "rocky.artifact.published")
+          throw Error("Injected registry commit failure");
+        return recordEvent(work, name, data);
+      });
     await expect(service.artifacts.publish(work.id, command)).rejects.toThrow(
       "Injected",
     );

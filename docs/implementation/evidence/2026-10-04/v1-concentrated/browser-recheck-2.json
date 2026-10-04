@@ -1,0 +1,972 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\Code\\Rocky\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--grep",
+      "T-007 UI selected model → CopilotKit → configured Work → approval → recorded usage|work Learning consent defaults excluded, saves review consent and withdraws|explicit UI fixture reads created and patched candidates without exposing raw JSON first|configured MCP approval is readable at four widths and executes exactly once through the real daemon|configured MCP data approval displays exact template target at four widths|owner grants private memory in Work UI and native model receives only authorized search|composer grants memory before native execution and clears one-Work selection|native memory proposal is visible before exact approval and persists model provenance|T-007 connection settings save without traffic, probe, reload and mobile edit|retry UI reviews receipts and creates a distinct Work; mobile controls remain operable|owner reviews all package files and selects an older immutable revision|quarantine notification follows the affected work and survives reload|owner steering shows accepted then checkpoint-applied and survives reload on mobile|real provider SSE is visible before completion and daemon stop cancels the selected stream|CopilotKit → native task → MCP → approval, reload and mobile|stop from the UI expires only the selected work approval and persists after reload|explicit workspace selection and read scope reaches real native Work through composer|worktree exact approval and registration at four widths|real workspace approval card: responsive preview, reject, approve and stale file"
+    ],
+    "configFile": "D:\\Code\\Rocky\\playwright.config.ts",
+    "rootDir": "D:/Code/Rocky/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Code/Rocky/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "D:/Code/Rocky/tests/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      ["list", null],
+      [
+        "json",
+        {
+          "outputFile": "test-results/e2e.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": {
+      "command": "node --import tsx tests/e2e/seed-reconciliation.ts && node tests/e2e/dev.mjs",
+      "url": "http://127.0.0.1:3210/api/v1/health",
+      "reuseExistingServer": false,
+      "env": {
+        "ROCKY_DATA_DIR": "C:\\Users\\sam46\\AppData\\Local\\Temp\\rocky-browser-b43be5dc-631d-45f7-8740-4ad5ca0ee457\\.rocky-e2e"
+      },
+      "timeout": 60000
+    }
+  },
+  "suites": [
+    {
+      "title": "configured-work.spec.ts",
+      "file": "configured-work.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "T-007 UI selected model → CopilotKit → configured Work → approval → recorded usage",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4303,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:03.216Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c5dd6f2bd29ece744f4-cafdbb1c8b6a3b709434",
+          "file": "configured-work.spec.ts",
+          "line": 3,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "learning.spec.ts",
+      "file": "learning.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "work Learning consent defaults excluded, saves review consent and withdraws",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6090,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:07.700Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e0ec79b0c4f511f16424-333fc37853e593fb54e7",
+          "file": "learning.spec.ts",
+          "line": 134,
+          "column": 1
+        },
+        {
+          "title": "explicit UI fixture reads created and patched candidates without exposing raw JSON first",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2005,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:13.796Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e0ec79b0c4f511f16424-387707d24422daca87da",
+          "file": "learning.spec.ts",
+          "line": 430,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "mcp-work.spec.ts",
+      "file": "mcp-work.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "configured MCP approval is readable at four widths and executes exactly once through the real daemon",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3776,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:15.920Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e5d019f1ce410fdd2fe-62f8536a0da878cc26c9",
+          "file": "mcp-work.spec.ts",
+          "line": 10,
+          "column": 3
+        },
+        {
+          "title": "configured MCP data approval displays exact template target at four widths",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4893,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:19.701Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e5d019f1ce410fdd2fe-b54f687e53e3303bedcf",
+          "file": "mcp-work.spec.ts",
+          "line": 10,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "memory.spec.ts",
+      "file": "memory.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "owner grants private memory in Work UI and native model receives only authorized search",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 2876,
+                  "error": {
+                    "message": "Error: locator.click: Error: strict mode violation: locator('article.work').filter({ hasText: 'Grant browser 3a892092-38b0-4a73-80c3-abab30f5751c' }).locator('.work-grants').getByRole('button', { name: '撤銷此權限' }) resolved to 2 elements:\n    1) <button type=\"button\">撤銷此權限</button> aka getByRole('button', { name: '撤銷此權限' }).first()\n    2) <button type=\"button\">撤銷此權限</button> aka getByRole('button', { name: '撤銷此權限' }).nth(1)\n\nCall log:\n\u001b[2m  - waiting for locator('article.work').filter({ hasText: 'Grant browser 3a892092-38b0-4a73-80c3-abab30f5751c' }).locator('.work-grants').getByRole('button', { name: '撤銷此權限' })\u001b[22m\n",
+                    "stack": "Error: locator.click: Error: strict mode violation: locator('article.work').filter({ hasText: 'Grant browser 3a892092-38b0-4a73-80c3-abab30f5751c' }).locator('.work-grants').getByRole('button', { name: '撤銷此權限' }) resolved to 2 elements:\n    1) <button type=\"button\">撤銷此權限</button> aka getByRole('button', { name: '撤銷此權限' }).first()\n    2) <button type=\"button\">撤銷此權限</button> aka getByRole('button', { name: '撤銷此權限' }).nth(1)\n\nCall log:\n\u001b[2m  - waiting for locator('article.work').filter({ hasText: 'Grant browser 3a892092-38b0-4a73-80c3-abab30f5751c' }).locator('.work-grants').getByRole('button', { name: '撤銷此權限' })\u001b[22m\n\n    at D:\\Code\\Rocky\\tests\\e2e\\memory.spec.ts:332:57",
+                    "location": {
+                      "file": "D:\\Code\\Rocky\\tests\\e2e\\memory.spec.ts",
+                      "column": 57,
+                      "line": 332
+                    },
+                    "snippet": "  330 |       grants.getByRole(\"button\", { name: \"授權讀取此範圍\" }),\n  331 |     ).toHaveCount(0);\n> 332 |     await grants.getByRole(\"button\", { name: \"撤銷此權限\" }).click();\n      |                                                         ^\n  333 |     await expect(grants).toContainText(\"已撤銷\");\n  334 |     const saved = await (\n  335 |       await page.request.get(\"/api/v1/works/\" + record.id + \"/grants\")"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\Code\\Rocky\\tests\\e2e\\memory.spec.ts",
+                        "column": 57,
+                        "line": 332
+                      },
+                      "message": "Error: locator.click: Error: strict mode violation: locator('article.work').filter({ hasText: 'Grant browser 3a892092-38b0-4a73-80c3-abab30f5751c' }).locator('.work-grants').getByRole('button', { name: '撤銷此權限' }) resolved to 2 elements:\n    1) <button type=\"button\">撤銷此權限</button> aka getByRole('button', { name: '撤銷此權限' }).first()\n    2) <button type=\"button\">撤銷此權限</button> aka getByRole('button', { name: '撤銷此權限' }).nth(1)\n\nCall log:\n\u001b[2m  - waiting for locator('article.work').filter({ hasText: 'Grant browser 3a892092-38b0-4a73-80c3-abab30f5751c' }).locator('.work-grants').getByRole('button', { name: '撤銷此權限' })\u001b[22m\n\n\n  330 |       grants.getByRole(\"button\", { name: \"授權讀取此範圍\" }),\n  331 |     ).toHaveCount(0);\n> 332 |     await grants.getByRole(\"button\", { name: \"撤銷此權限\" }).click();\n      |                                                         ^\n  333 |     await expect(grants).toContainText(\"已撤銷\");\n  334 |     const saved = await (\n  335 |       await page.request.get(\"/api/v1/works/\" + record.id + \"/grants\")\n    at D:\\Code\\Rocky\\tests\\e2e\\memory.spec.ts:332:57"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:24.622Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\Code\\Rocky\\test-results\\memory-owner-grants-privat-147cd-ives-only-authorized-search\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\Code\\Rocky\\test-results\\memory-owner-grants-privat-147cd-ives-only-authorized-search\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\Code\\Rocky\\tests\\e2e\\memory.spec.ts",
+                    "column": 57,
+                    "line": 332
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "7ae46fcbe7df2182c676-0c830fbef7b938213bc8",
+          "file": "memory.spec.ts",
+          "line": 209,
+          "column": 1
+        },
+        {
+          "title": "composer grants memory before native execution and clears one-Work selection",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3955,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:28.112Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7ae46fcbe7df2182c676-c6b7905e485c1487db01",
+          "file": "memory.spec.ts",
+          "line": 347,
+          "column": 1
+        },
+        {
+          "title": "native memory proposal is visible before exact approval and persists model provenance",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3914,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:32.226Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7ae46fcbe7df2182c676-8fbf5ce7829720b76bc6",
+          "file": "memory.spec.ts",
+          "line": 466,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "models.spec.ts",
+      "file": "models.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "T-007 connection settings save without traffic, probe, reload and mobile edit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3070,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:36.155Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "af584f329435f7cf0183-911a29181fe7de38d69a",
+          "file": "models.spec.ts",
+          "line": 3,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "retry.spec.ts",
+      "file": "retry.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "retry UI reviews receipts and creates a distinct Work; mobile controls remain operable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5608,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:39.240Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1d4db9983fd58b264f38-2dfbaeb3a1379218d3b2",
+          "file": "retry.spec.ts",
+          "line": 5,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "skills.spec.ts",
+      "file": "skills.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "owner reviews all package files and selects an older immutable revision",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6446,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.skill-settings').locator('article').filter({ hasText: 'history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1' })\nTimeout: 5000ms\n\u001b[32m- Expected substring  - 1\u001b[39m\n\u001b[31m+ Received string     + 5\u001b[39m\n\n\u001b[32m- 目前選擇 r1\u001b[39m\n\u001b[31m+ history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1Historical package個人 · r2審查此版本匯入新版版本歷史發布／回滾／撤銷歷史審查版本 r1 · 已啟用上一版本下一版本來源：fixture/history授權聲明：MIT檢視套件檔案SKILL.mdassets/binary.datscripts/example.js---\u001b[39m\n\u001b[31m+ name: history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1\u001b[39m\n\u001b[31m+ description: Historical package\u001b[39m\n\u001b[31m+ ---\u001b[39m\n\u001b[31m+ BODY_REVISION_1檔案與版本證據f32432d00f7919472312fe2ecdcc0b23370f20df59943c5c3e302451edff9e8bSKILL.md · 106 B7009f6a119d9239d52fd55b0c58be1162282f0366e49adf2e2b36dcb090f38beassets/binary.dat · 4 Bf11b18659845b5c27e6040a28586bbe79db7c24d4eda7930381151bd4602490dscripts/example.js · 48 B2b5ec9a5a699fb8db7447f530e55be43d74395747125c6973f9606f1527236dd我已檢視此版本內容及來源信任並啟用此版本停用隔離此版本隔離會阻止受影響工作後續使用；不會撤回已完成的操作。\u001b[39m\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" locator('.skill-settings').locator('article').filter({ hasText: 'history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1' }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.skill-settings').locator('article').filter({ hasText: 'history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1' })\u001b[22m\n\u001b[2m    - locator resolved to <article class=\"model-card\">…</article>\u001b[22m\n\u001b[2m    - unexpected value \"history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1Historical package個人 · r2審查此版本匯入新版版本歷史發布／回滾／撤銷歷史審查版本 r1 · 未信任上一版本下一版本來源：fixture/history授權聲明：MIT檢視套件檔案SKILL.mdassets/binary.datscripts/example.js---\u001b[22m\n\u001b[2mname: history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1\u001b[22m\n\u001b[2mdescription: Historical package\u001b[22m\n\u001b[2m---\u001b[22m\n\u001b[2mBODY_REVISION_1檔案與版本證據f32432d00f7919472312fe2ecdcc0b23370f20df59943c5c3e302451edff9e8bSKILL.md · 106 B7009f6a119d9239d52fd55b0c58be1162282f0366e49adf2e2b36dcb090f38beassets/binary.dat · 4 Bf11b18659845b5c27e6040a28586bbe79db7c24d4eda7930381151bd4602490dscripts/example.js · 48 B2b5ec9a5a699fb8db7447f530e55be43d74395747125c6973f9606f1527236dd我已檢視此版本內容及來源信任並啟用此版本停用隔離此版本隔離會阻止受影響工作後續使用；不會撤回已完成的操作。\"\u001b[22m\n\u001b[2m    13 × locator resolved to <article class=\"model-card\">…</article>\u001b[22m\n\u001b[2m       - unexpected value \"history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1Historical package個人 · r2審查此版本匯入新版版本歷史發布／回滾／撤銷歷史審查版本 r1 · 已啟用上一版本下一版本來源：fixture/history授權聲明：MIT檢視套件檔案SKILL.mdassets/binary.datscripts/example.js---\u001b[22m\n\u001b[2mname: history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1\u001b[22m\n\u001b[2mdescription: Historical package\u001b[22m\n\u001b[2m---\u001b[22m\n\u001b[2mBODY_REVISION_1檔案與版本證據f32432d00f7919472312fe2ecdcc0b23370f20df59943c5c3e302451edff9e8bSKILL.md · 106 B7009f6a119d9239d52fd55b0c58be1162282f0366e49adf2e2b36dcb090f38beassets/binary.dat · 4 Bf11b18659845b5c27e6040a28586bbe79db7c24d4eda7930381151bd4602490dscripts/example.js · 48 B2b5ec9a5a699fb8db7447f530e55be43d74395747125c6973f9606f1527236dd我已檢視此版本內容及來源信任並啟用此版本停用隔離此版本隔離會阻止受影響工作後續使用；不會撤回已完成的操作。\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.skill-settings').locator('article').filter({ hasText: 'history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1' })\nTimeout: 5000ms\n\u001b[32m- Expected substring  - 1\u001b[39m\n\u001b[31m+ Received string     + 5\u001b[39m\n\n\u001b[32m- 目前選擇 r1\u001b[39m\n\u001b[31m+ history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1Historical package個人 · r2審查此版本匯入新版版本歷史發布／回滾／撤銷歷史審查版本 r1 · 已啟用上一版本下一版本來源：fixture/history授權聲明：MIT檢視套件檔案SKILL.mdassets/binary.datscripts/example.js---\u001b[39m\n\u001b[31m+ name: history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1\u001b[39m\n\u001b[31m+ description: Historical package\u001b[39m\n\u001b[31m+ ---\u001b[39m\n\u001b[31m+ BODY_REVISION_1檔案與版本證據f32432d00f7919472312fe2ecdcc0b23370f20df59943c5c3e302451edff9e8bSKILL.md · 106 B7009f6a119d9239d52fd55b0c58be1162282f0366e49adf2e2b36dcb090f38beassets/binary.dat · 4 Bf11b18659845b5c27e6040a28586bbe79db7c24d4eda7930381151bd4602490dscripts/example.js · 48 B2b5ec9a5a699fb8db7447f530e55be43d74395747125c6973f9606f1527236dd我已檢視此版本內容及來源信任並啟用此版本停用隔離此版本隔離會阻止受影響工作後續使用；不會撤回已完成的操作。\u001b[39m\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" locator('.skill-settings').locator('article').filter({ hasText: 'history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1' }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.skill-settings').locator('article').filter({ hasText: 'history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1' })\u001b[22m\n\u001b[2m    - locator resolved to <article class=\"model-card\">…</article>\u001b[22m\n\u001b[2m    - unexpected value \"history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1Historical package個人 · r2審查此版本匯入新版版本歷史發布／回滾／撤銷歷史審查版本 r1 · 未信任上一版本下一版本來源：fixture/history授權聲明：MIT檢視套件檔案SKILL.mdassets/binary.datscripts/example.js---\u001b[22m\n\u001b[2mname: history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1\u001b[22m\n\u001b[2mdescription: Historical package\u001b[22m\n\u001b[2m---\u001b[22m\n\u001b[2mBODY_REVISION_1檔案與版本證據f32432d00f7919472312fe2ecdcc0b23370f20df59943c5c3e302451edff9e8bSKILL.md · 106 B7009f6a119d9239d52fd55b0c58be1162282f0366e49adf2e2b36dcb090f38beassets/binary.dat · 4 Bf11b18659845b5c27e6040a28586bbe79db7c24d4eda7930381151bd4602490dscripts/example.js · 48 B2b5ec9a5a699fb8db7447f530e55be43d74395747125c6973f9606f1527236dd我已檢視此版本內容及來源信任並啟用此版本停用隔離此版本隔離會阻止受影響工作後續使用；不會撤回已完成的操作。\"\u001b[22m\n\u001b[2m    13 × locator resolved to <article class=\"model-card\">…</article>\u001b[22m\n\u001b[2m       - unexpected value \"history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1Historical package個人 · r2審查此版本匯入新版版本歷史發布／回滾／撤銷歷史審查版本 r1 · 已啟用上一版本下一版本來源：fixture/history授權聲明：MIT檢視套件檔案SKILL.mdassets/binary.datscripts/example.js---\u001b[22m\n\u001b[2mname: history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1\u001b[22m\n\u001b[2mdescription: Historical package\u001b[22m\n\u001b[2m---\u001b[22m\n\u001b[2mBODY_REVISION_1檔案與版本證據f32432d00f7919472312fe2ecdcc0b23370f20df59943c5c3e302451edff9e8bSKILL.md · 106 B7009f6a119d9239d52fd55b0c58be1162282f0366e49adf2e2b36dcb090f38beassets/binary.dat · 4 Bf11b18659845b5c27e6040a28586bbe79db7c24d4eda7930381151bd4602490dscripts/example.js · 48 B2b5ec9a5a699fb8db7447f530e55be43d74395747125c6973f9606f1527236dd我已檢視此版本內容及來源信任並啟用此版本停用隔離此版本隔離會阻止受影響工作後續使用；不會撤回已完成的操作。\"\u001b[22m\n\n    at D:\\Code\\Rocky\\tests\\e2e\\skills.spec.ts:111:22",
+                    "location": {
+                      "file": "D:\\Code\\Rocky\\tests\\e2e\\skills.spec.ts",
+                      "column": 22,
+                      "line": 111
+                    },
+                    "snippet": "  109 |   await card.getByLabel(\"我已檢視此版本內容及來源\").check();\n  110 |   await card.getByRole(\"button\", { name: \"信任並啟用此版本\" }).click();\n> 111 |   await expect(card).toContainText(\"目前選擇 r1\");\n      |                      ^\n  112 |   const selection = await (\n  113 |     await page.request.get(`/api/v1/skills/${id}/selection`)\n  114 |   ).json();"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\Code\\Rocky\\tests\\e2e\\skills.spec.ts",
+                        "column": 22,
+                        "line": 111
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.skill-settings').locator('article').filter({ hasText: 'history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1' })\nTimeout: 5000ms\n\u001b[32m- Expected substring  - 1\u001b[39m\n\u001b[31m+ Received string     + 5\u001b[39m\n\n\u001b[32m- 目前選擇 r1\u001b[39m\n\u001b[31m+ history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1Historical package個人 · r2審查此版本匯入新版版本歷史發布／回滾／撤銷歷史審查版本 r1 · 已啟用上一版本下一版本來源：fixture/history授權聲明：MIT檢視套件檔案SKILL.mdassets/binary.datscripts/example.js---\u001b[39m\n\u001b[31m+ name: history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1\u001b[39m\n\u001b[31m+ description: Historical package\u001b[39m\n\u001b[31m+ ---\u001b[39m\n\u001b[31m+ BODY_REVISION_1檔案與版本證據f32432d00f7919472312fe2ecdcc0b23370f20df59943c5c3e302451edff9e8bSKILL.md · 106 B7009f6a119d9239d52fd55b0c58be1162282f0366e49adf2e2b36dcb090f38beassets/binary.dat · 4 Bf11b18659845b5c27e6040a28586bbe79db7c24d4eda7930381151bd4602490dscripts/example.js · 48 B2b5ec9a5a699fb8db7447f530e55be43d74395747125c6973f9606f1527236dd我已檢視此版本內容及來源信任並啟用此版本停用隔離此版本隔離會阻止受影響工作後續使用；不會撤回已完成的操作。\u001b[39m\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" locator('.skill-settings').locator('article').filter({ hasText: 'history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1' }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.skill-settings').locator('article').filter({ hasText: 'history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1' })\u001b[22m\n\u001b[2m    - locator resolved to <article class=\"model-card\">…</article>\u001b[22m\n\u001b[2m    - unexpected value \"history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1Historical package個人 · r2審查此版本匯入新版版本歷史發布／回滾／撤銷歷史審查版本 r1 · 未信任上一版本下一版本來源：fixture/history授權聲明：MIT檢視套件檔案SKILL.mdassets/binary.datscripts/example.js---\u001b[22m\n\u001b[2mname: history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1\u001b[22m\n\u001b[2mdescription: Historical package\u001b[22m\n\u001b[2m---\u001b[22m\n\u001b[2mBODY_REVISION_1檔案與版本證據f32432d00f7919472312fe2ecdcc0b23370f20df59943c5c3e302451edff9e8bSKILL.md · 106 B7009f6a119d9239d52fd55b0c58be1162282f0366e49adf2e2b36dcb090f38beassets/binary.dat · 4 Bf11b18659845b5c27e6040a28586bbe79db7c24d4eda7930381151bd4602490dscripts/example.js · 48 B2b5ec9a5a699fb8db7447f530e55be43d74395747125c6973f9606f1527236dd我已檢視此版本內容及來源信任並啟用此版本停用隔離此版本隔離會阻止受影響工作後續使用；不會撤回已完成的操作。\"\u001b[22m\n\u001b[2m    13 × locator resolved to <article class=\"model-card\">…</article>\u001b[22m\n\u001b[2m       - unexpected value \"history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1Historical package個人 · r2審查此版本匯入新版版本歷史發布／回滾／撤銷歷史審查版本 r1 · 已啟用上一版本下一版本來源：fixture/history授權聲明：MIT檢視套件檔案SKILL.mdassets/binary.datscripts/example.js---\u001b[22m\n\u001b[2mname: history-2f9256f8-4b8c-45f7-b2ba-40926f69fec1\u001b[22m\n\u001b[2mdescription: Historical package\u001b[22m\n\u001b[2m---\u001b[22m\n\u001b[2mBODY_REVISION_1檔案與版本證據f32432d00f7919472312fe2ecdcc0b23370f20df59943c5c3e302451edff9e8bSKILL.md · 106 B7009f6a119d9239d52fd55b0c58be1162282f0366e49adf2e2b36dcb090f38beassets/binary.dat · 4 Bf11b18659845b5c27e6040a28586bbe79db7c24d4eda7930381151bd4602490dscripts/example.js · 48 B2b5ec9a5a699fb8db7447f530e55be43d74395747125c6973f9606f1527236dd我已檢視此版本內容及來源信任並啟用此版本停用隔離此版本隔離會阻止受影響工作後續使用；不會撤回已完成的操作。\"\u001b[22m\n\n\n  109 |   await card.getByLabel(\"我已檢視此版本內容及來源\").check();\n  110 |   await card.getByRole(\"button\", { name: \"信任並啟用此版本\" }).click();\n> 111 |   await expect(card).toContainText(\"目前選擇 r1\");\n      |                      ^\n  112 |   const selection = await (\n  113 |     await page.request.get(`/api/v1/skills/${id}/selection`)\n  114 |   ).json();\n    at D:\\Code\\Rocky\\tests\\e2e\\skills.spec.ts:111:22"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:44.864Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\Code\\Rocky\\test-results\\skills-owner-reviews-all-p-30bb3-an-older-immutable-revision\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\Code\\Rocky\\test-results\\skills-owner-reviews-all-p-30bb3-an-older-immutable-revision\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\Code\\Rocky\\tests\\e2e\\skills.spec.ts",
+                    "column": 22,
+                    "line": 111
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "024b5a36f2868d8a0332-15ce42e185bc3e7ee98a",
+          "file": "skills.spec.ts",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "quarantine notification follows the affected work and survives reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4385,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:51.698Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "024b5a36f2868d8a0332-c7ccf96a7f296cebec28",
+          "file": "skills.spec.ts",
+          "line": 352,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "steering.spec.ts",
+      "file": "steering.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "owner steering shows accepted then checkpoint-applied and survives reload on mobile",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4464,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:16:56.253Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "124c19d93fabe7b58637-95ad43a4cf8fd918d900",
+          "file": "steering.spec.ts",
+          "line": 4,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "streaming.spec.ts",
+      "file": "streaming.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "real provider SSE is visible before completion and daemon stop cancels the selected stream",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19749,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:17:00.731Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8dbd7e6b4f7b40e877-7d49d4e01212a9677658",
+          "file": "streaming.spec.ts",
+          "line": 4,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "work.spec.ts",
+      "file": "work.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "CopilotKit → native task → MCP → approval, reload and mobile",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 9138,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('article').filter({ hasText: 'E2E synthetic 1791101842274' }).getByText('subagent.completed', { exact: true })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('article').filter({ hasText: 'E2E synthetic 1791101842274' }).getByText('subagent.completed', { exact: true }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('article').filter({ hasText: 'E2E synthetic 1791101842274' }).getByText('subagent.completed', { exact: true })\u001b[22m\n\u001b[2m    14 × locator resolved to <span>subagent.completed</span>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('article').filter({ hasText: 'E2E synthetic 1791101842274' }).getByText('subagent.completed', { exact: true })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('article').filter({ hasText: 'E2E synthetic 1791101842274' }).getByText('subagent.completed', { exact: true }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('article').filter({ hasText: 'E2E synthetic 1791101842274' }).getByText('subagent.completed', { exact: true })\u001b[22m\n\u001b[2m    14 × locator resolved to <span>subagent.completed</span>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n    at D:\\Code\\Rocky\\tests\\e2e\\work.spec.ts:32:5",
+                    "location": {
+                      "file": "D:\\Code\\Rocky\\tests\\e2e\\work.spec.ts",
+                      "column": 5,
+                      "line": 32
+                    },
+                    "snippet": "  30 |   await expect(\n  31 |     restored.getByText(\"subagent.completed\", { exact: true }),\n> 32 |   ).toBeVisible();\n     |     ^\n  33 |   await page.screenshot({\n  34 |     path: \"test-results/rocky-desktop.png\",\n  35 |     fullPage: true,"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\Code\\Rocky\\tests\\e2e\\work.spec.ts",
+                        "column": 5,
+                        "line": 32
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('article').filter({ hasText: 'E2E synthetic 1791101842274' }).getByText('subagent.completed', { exact: true })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('article').filter({ hasText: 'E2E synthetic 1791101842274' }).getByText('subagent.completed', { exact: true }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('article').filter({ hasText: 'E2E synthetic 1791101842274' }).getByText('subagent.completed', { exact: true })\u001b[22m\n\u001b[2m    14 × locator resolved to <span>subagent.completed</span>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n\n  30 |   await expect(\n  31 |     restored.getByText(\"subagent.completed\", { exact: true }),\n> 32 |   ).toBeVisible();\n     |     ^\n  33 |   await page.screenshot({\n  34 |     path: \"test-results/rocky-desktop.png\",\n  35 |     fullPage: true,\n    at D:\\Code\\Rocky\\tests\\e2e\\work.spec.ts:32:5"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:17:20.504Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\Code\\Rocky\\test-results\\work-CopilotKit-→-native-t-81691--approval-reload-and-mobile\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\Code\\Rocky\\test-results\\work-CopilotKit-→-native-t-81691--approval-reload-and-mobile\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\Code\\Rocky\\tests\\e2e\\work.spec.ts",
+                    "column": 5,
+                    "line": 32
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "be04682d07593334d24e-547a9d0c90673410b1eb",
+          "file": "work.spec.ts",
+          "line": 2,
+          "column": 1
+        },
+        {
+          "title": "stop from the UI expires only the selected work approval and persists after reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4669,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:17:30.018Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "be04682d07593334d24e-15b587beef41929c4f37",
+          "file": "work.spec.ts",
+          "line": 74,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "workspace-read.spec.ts",
+      "file": "workspace-read.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "explicit workspace selection and read scope reaches real native Work through composer",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3407,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true })\nExpected: visible\nError: strict mode violation: locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true }) resolved to 2 elements:\n    1) <span>讀取綁定的工作區</span> aka getByText('讀取綁定的工作區').first()\n    2) <span>讀取綁定的工作區</span> aka getByText('讀取綁定的工作區').nth(1)\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true })\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true })\nExpected: visible\nError: strict mode violation: locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true }) resolved to 2 elements:\n    1) <span>讀取綁定的工作區</span> aka getByText('讀取綁定的工作區').first()\n    2) <span>讀取綁定的工作區</span> aka getByText('讀取綁定的工作區').nth(1)\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true })\u001b[22m\n\n    at D:\\Code\\Rocky\\tests\\e2e\\workspace-read.spec.ts:145:7",
+                    "location": {
+                      "file": "D:\\Code\\Rocky\\tests\\e2e\\workspace-read.spec.ts",
+                      "column": 7,
+                      "line": 145
+                    },
+                    "snippet": "  143 |     await expect(\n  144 |       work.getByText(\"讀取綁定的工作區\", { exact: true }),\n> 145 |     ).toBeVisible();\n      |       ^\n  146 |     await page.getByText(\"模型與工具\", { exact: true }).click();\n  147 |     await expect(scope).not.toBeChecked();\n  148 |     for (const [width, height] of ["
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\Code\\Rocky\\tests\\e2e\\workspace-read.spec.ts",
+                        "column": 7,
+                        "line": 145
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true })\nExpected: visible\nError: strict mode violation: locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true }) resolved to 2 elements:\n    1) <span>讀取綁定的工作區</span> aka getByText('讀取綁定的工作區').first()\n    2) <span>讀取綁定的工作區</span> aka getByText('讀取綁定的工作區').nth(1)\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('article.work').filter({ hasText: 'Workspace browser read 1791101856811' }).getByText('讀取綁定的工作區', { exact: true })\u001b[22m\n\n\n  143 |     await expect(\n  144 |       work.getByText(\"讀取綁定的工作區\", { exact: true }),\n> 145 |     ).toBeVisible();\n      |       ^\n  146 |     await page.getByText(\"模型與工具\", { exact: true }).click();\n  147 |     await expect(scope).not.toBeChecked();\n  148 |     for (const [width, height] of [\n    at D:\\Code\\Rocky\\tests\\e2e\\workspace-read.spec.ts:145:7"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:17:35.128Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\Code\\Rocky\\test-results\\workspace-read-explicit-wo-db442-ative-Work-through-composer\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\Code\\Rocky\\test-results\\workspace-read-explicit-wo-db442-ative-Work-through-composer\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\Code\\Rocky\\tests\\e2e\\workspace-read.spec.ts",
+                    "column": 7,
+                    "line": 145
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "bd863d55ef182cbc4f00-993b67ac4431cdd0164e",
+          "file": "workspace-read.spec.ts",
+          "line": 9,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "workspace-worktree.spec.ts",
+      "file": "workspace-worktree.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "worktree exact approval and registration at four widths",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7310,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:17:39.103Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e0f74c40eedcfa8143a4-bd1794ad115bdabc0818",
+          "file": "workspace-worktree.spec.ts",
+          "line": 18,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "workspace-write.spec.ts",
+      "file": "workspace-write.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "real workspace approval card: responsive preview, reject, approve and stale file",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14570,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:17:46.584Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0cef49c5e83181808fb1-d7153b2611f2b58edd6f",
+          "file": "workspace-write.spec.ts",
+          "line": 9,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-04T08:16:00.030Z",
+    "duration": 121378.45899999999,
+    "expected": 15,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

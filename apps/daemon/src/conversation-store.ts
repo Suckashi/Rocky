@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { SourceDependencies } from "./source-dependencies.js";
 import type { Store } from "./store.js";
 import {
   RockyError,
@@ -115,7 +116,8 @@ export class ConversationStore {
           item.mode === work.mode &&
           item.workspaceId === work.workspaceId &&
           item.workspaceRevision === work.workspaceRevision &&
-          item.workspaceRead === work.workspaceRead,
+          item.workspaceRead === work.workspaceRead &&
+          !new SourceDependencies(this.store).invalid(item.id),
       );
       if (
         previous?.status === "completed" &&

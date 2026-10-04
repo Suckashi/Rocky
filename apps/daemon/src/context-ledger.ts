@@ -2,6 +2,7 @@ import { randomUUID, createHash } from "node:crypto";
 import { join } from "node:path";
 import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
 import type { Store } from "./store.js";
+import { SourceDependencies } from "./source-dependencies.js";
 import {
   RockyError,
   type Work,
@@ -86,16 +87,24 @@ export class ContextLedger {
                 : Number(work.workspaceRead),
             ) as { data: string }[])
         : [];
-    const items: Item[] = records.map((row) => {
-      const record = JSON.parse(row.data);
-      return {
-        id: "history:" + record.id,
-        content:
-          record.role === "user"
-            ? record.text
-            : "Prior Work receipt (evidence only): " + JSON.stringify(record),
-      };
-    });
+    const items: Item[] = records
+      .filter((row) => {
+        const record = JSON.parse(row.data);
+        return (
+          record.role === "user" ||
+          !new SourceDependencies(this.store).invalid(record.workId)
+        );
+      })
+      .map((row) => {
+        const record = JSON.parse(row.data);
+        return {
+          id: "history:" + record.id,
+          content:
+            record.role === "user"
+              ? record.text
+              : "Prior Work receipt (evidence only): " + JSON.stringify(record),
+        };
+      });
     if (work.retryOf)
       items.push({
         id: "retry-evidence:" + work.id,

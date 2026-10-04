@@ -27,6 +27,19 @@ function effectArgsHash(name: string, args: Record<string, unknown>) {
 }
 export class OperationLedger {
   constructor(private readonly store: Store) {}
+  assertNoRefusedEffects(work: Work) {
+    const rejected = this.store.db
+      .prepare(
+        "SELECT sequence FROM events WHERE json_extract(data,'$.workId')=? AND json_extract(data,'$.runId')=? AND json_extract(data,'$.executionSessionId')=? AND json_extract(data,'$.payload.name')='rocky.operation.not_executed' AND json_extract(data,'$.payload.data.reason')='owner_rejected' LIMIT 1",
+      )
+      .get(work.id, work.runId, work.executionSessionId);
+    if (rejected)
+      throw new RockyError(
+        "owner_rejected",
+        "The owner rejected an effect in this run. Further effectful tools are stopped to prevent bypass. Report the incomplete action; a new owner-requested Work is required for further effects.",
+        403,
+      );
+  }
   retryAncestors(work: Work) {
     const ancestors: Work[] = [],
       seen = new Set([work.id]);
@@ -252,16 +265,103 @@ export class OperationLedger {
       .all(work.id, work.runId, work.executionSessionId) as Operation[];
     return rows.map((row) => {
       const context = JSON.parse(row.context!);
+      const dispatched = this.store.db
+        .prepare(
+          "SELECT data FROM events WHERE json_extract(data,'$.workId')=? AND json_extract(data,'$.payload.data.operationId')=? AND json_extract(data,'$.payload.name')='rocky.operation.dispatched' ORDER BY sequence DESC LIMIT 1",
+        )
+        .get(work.id, row.id) as { data: string } | undefined;
+      const binding = dispatched
+        ? JSON.parse(dispatched.data).payload.data.reconciliation
+        : null;
+      const reconciliationQuery = [
+        "workspace_command",
+        "write_sample",
+      ].includes(context.name)
+        ? {
+            kind: "local_receipt",
+            target: `Operation ${row.id}; intent ${row.args_hash}`,
+          }
+        : binding && ["mcp_call", "mcp_data"].includes(context.name)
+          ? {
+              kind: "mcp_resource",
+              target: this.store.publicEvidence(
+                binding.receiptUriTemplate
+                  .replaceAll("{operationId}", encodeURIComponent(row.id))
+                  .replaceAll("{intentHash}", row.args_hash),
+              ),
+              serverId: binding.serverId,
+              configRevision: binding.configRevision,
+            }
+          : {
+              kind: "unavailable",
+              target:
+                "No receipt query was pinned at dispatch; no external call will be sent.",
+            };
       return operationSummarySchema.parse({
         id: row.id,
         revision: row.revision,
         tool: context.name,
         phase: row.phase,
         outcome: row.outcome,
+        ...(row.outcome === "unknown" ? { reconciliationQuery } : {}),
         canReconcile:
-          row.outcome === "unknown" && context.name === "write_sample",
+          row.outcome === "unknown" &&
+          [
+            "write_sample",
+            "workspace_command",
+            "mcp_call",
+            "mcp_data",
+          ].includes(context.name),
       });
     });
+  }
+  commandReceipts(workId: string) {
+    const work = this.store.get(workId);
+    return this.list(workId)
+      .filter((operation) =>
+        ["workspace_command", "computer_command"].includes(operation.tool),
+      )
+      .map((operation) => {
+        const row = this.store.db
+          .prepare(
+            "SELECT data FROM events WHERE json_extract(data,'$.workId')=? AND json_extract(data,'$.runId')=? AND json_extract(data,'$.executionSessionId')=? AND json_extract(data,'$.payload.data.operationId')=? AND json_type(data,'$.payload.data.result')='object' ORDER BY sequence DESC LIMIT 1",
+          )
+          .get(work.id, work.runId, work.executionSessionId, operation.id) as
+          { data: string } | undefined;
+        const commandRow = this.store.db
+          .prepare(
+            "SELECT data FROM events WHERE json_extract(data,'$.workId')=? AND json_extract(data,'$.payload.data.operationId')=? AND json_type(data,'$.payload.data.command')='object' ORDER BY sequence DESC LIMIT 1",
+          )
+          .get(work.id, operation.id) as { data: string } | undefined;
+        const reasonRow = this.store.db
+          .prepare(
+            "SELECT data FROM events WHERE json_extract(data,'$.workId')=? AND json_extract(data,'$.payload.data.operationId')=? AND json_type(data,'$.payload.data.reason')='text' ORDER BY sequence DESC LIMIT 1",
+          )
+          .get(work.id, operation.id) as { data: string } | undefined;
+        return {
+          ...operation,
+          workId: work.id,
+          runId: work.runId,
+          executionSessionId: work.executionSessionId,
+          reason: reasonRow
+            ? JSON.parse(reasonRow.data).payload.data.reason
+            : null,
+          command: commandRow
+            ? this.store.publicEvidence(
+                JSON.parse(commandRow.data).payload.data.command,
+              )
+            : null,
+          result: row
+            ? this.store.publicEvidence(
+                JSON.parse(row.data).payload.data.result,
+              )
+            : this.get(operation.id)?.result
+              ? this.store.publicEvidence(
+                  JSON.parse(this.get(operation.id)!.result!),
+                )
+              : null,
+        };
+      });
   }
   get(id: string): Operation | undefined {
     return this.store.db

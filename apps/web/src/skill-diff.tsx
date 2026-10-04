@@ -42,6 +42,7 @@ export function SkillDiff({
   const zh = locale === "zh",
     alive = useRef(true);
   const [value, setValue] = useState<z.infer<typeof schema>>(),
+    [baseRevision, setBaseRevision] = useState(Math.max(1, revision - 1)),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -56,7 +57,7 @@ export function SkillDiff({
     try {
       const result = schema.parse(
         await request(
-          `/skills/${id}/diff?from=${revision - 1}&to=${revision}&path=${encodeURIComponent(selectedPath)}`,
+          `/skills/${id}/diff?from=${baseRevision}&to=${revision}&path=${encodeURIComponent(selectedPath)}`,
         ),
       );
       if (alive.current) setValue(result);
@@ -70,14 +71,36 @@ export function SkillDiff({
   const selected = value?.files.find((file) => file.path === value.path);
   return (
     <div className="skill-diff">
-      <button disabled={busy} onClick={() => void load()}>
-        {zh ? "比較上一版本" : "Compare previous revision"}
+      <label>
+        {zh ? "比較基底修訂" : "Base revision"}
+        <input
+          type="number"
+          min={1}
+          max={revision - 1}
+          value={baseRevision}
+          disabled={busy}
+          onChange={(event) => {
+            setBaseRevision(Number(event.target.value));
+            setValue(undefined);
+          }}
+        />
+      </label>
+      <button
+        disabled={
+          busy ||
+          !Number.isSafeInteger(baseRevision) ||
+          baseRevision < 1 ||
+          baseRevision >= revision
+        }
+        onClick={() => void load()}
+      >
+        {zh ? "比較所選版本" : "Compare selected revision"}
       </button>
       {error && <p role="alert">{error}</p>}
       {value && (
         <>
           <p>
-            r{revision - 1} → r{revision} · {value.path}
+            r{baseRevision} → r{revision} · {value.path}
           </p>
           <details>
             <summary>

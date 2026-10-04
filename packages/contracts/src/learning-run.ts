@@ -6,10 +6,15 @@ export const reflectionSubmissionSchema = z.strictObject({
   requestId: z.uuid(),
   binding: reflectionBindingSchema,
   modelSelection: modelSelectionSchema,
-  modelBudget: modelBudgetSchema.default({
-    maxCalls: 12,
-    maxTokens: null,
-    maxMicroUsd: null,
-    pricing: null,
-  }),
+  modelBudget: modelBudgetSchema
+    .refine(
+      (value) => value.maxCalls <= 12,
+      "Reflection is limited to twelve model calls",
+    )
+    .default({
+      maxCalls: 12,
+      maxTokens: null,
+      maxMicroUsd: null,
+      pricing: null,
+    }),
 });

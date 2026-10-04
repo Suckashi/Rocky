@@ -6,6 +6,10 @@ import {
   type PublicEvent,
 } from "../../../packages/contracts/src/index.js";
 import { retryReviewSchema } from "../../../packages/contracts/src/operations.js";
+import {
+  publicModelSchema,
+  type PublicModel,
+} from "../../../packages/contracts/src/models.js";
 export function WorkRetry({
   work,
   events,
@@ -28,6 +32,8 @@ export function WorkRetry({
     [error, setError] = useState(""),
     [created, setCreated] = useState<Work | null>(null);
   const attempt = useRef<{ key: string; requestId: string } | null>(null);
+  const [models, setModels] = useState<PublicModel[]>([]);
+  const [modelOverride, setModelOverride] = useState("");
   const reconciliationSequence = events.findLast(
     (e) =>
       e.payload.kind === "domain" &&
@@ -47,6 +53,18 @@ export function WorkRetry({
       .catch((e) => {
         if (live) setError(String(e));
       });
+    if (work.mode === "configured")
+      void request("/model-connections")
+        .then((value) => {
+          if (live)
+            setModels(
+              z.object({ connections: z.array(publicModelSchema) }).parse(value)
+                .connections,
+            );
+        })
+        .catch((cause: unknown) => {
+          if (live) setError(String(cause));
+        });
     return () => {
       live = false;
     };
@@ -83,6 +101,30 @@ export function WorkRetry({
           )}
           {review && (
             <>
+              {work.mode === "configured" && (
+                <label>
+                  {locale === "zh" ? "新工作的模型" : "Model for the new Work"}
+                  <select
+                    value={modelOverride}
+                    disabled={busy}
+                    onChange={(event) => {
+                      setModelOverride(event.target.value);
+                      setConfirmed(false);
+                    }}
+                  >
+                    <option value="">
+                      {locale === "zh"
+                        ? "沿用原設定"
+                        : "Keep original configuration"}
+                    </option>
+                    {models.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.config.name} · r{model.revision}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               {review.effects.length === 0 && (
                 <p>
                   {locale === "zh"
@@ -146,6 +188,16 @@ export function WorkRetry({
                 }
                 onClick={() => {
                   const body = {
+                    ...(modelOverride
+                      ? {
+                          modelSelection: {
+                            connectionId: modelOverride,
+                            revision: models.find(
+                              (model) => model.id === modelOverride,
+                            )!.revision,
+                          },
+                        }
+                      : {}),
                     runId: work.runId,
                     executionSessionId: work.executionSessionId,
                     expectedRevision: work.revision,

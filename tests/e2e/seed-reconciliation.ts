@@ -6,12 +6,15 @@ import { Store } from "../../apps/daemon/src/store.js";
 import { OperationLedger } from "../../apps/daemon/src/operation-ledger.js";
 import { workSchema } from "../../packages/contracts/src/index.js";
 import { connectFixture } from "../../packages/agent-runtime/src/mcp.js";
-const root = resolve(".rocky-e2e");
+const root = resolve(process.env.ROCKY_DATA_DIR ?? ".rocky-e2e");
+if (!root.endsWith(".rocky-e2e")) throw Error("Isolated E2E root required");
 const store = new Store(root),
   ledger = new OperationLedger(store);
 const seeds = [];
 try {
-  for (const recorded of [true, false]) {
+  for (const recorded of process.env.ROCKY_E2E_EMPTY === "1"
+    ? []
+    : [true, false]) {
     const work = workSchema.parse({
       id: randomUUID(),
       runId: randomUUID(),

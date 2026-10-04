@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 test("T-008 Work permission revocation persists through UI reload", async ({
   page,
 }) => {
@@ -7,7 +7,7 @@ test("T-008 Work permission revocation persists through UI reload", async ({
   await page.getByText("模型與工具", { exact: true }).click();
   await page.getByLabel("啟用合成測試").check();
   await page.getByText("模型與工具", { exact: true }).click();
-  await page.locator("textarea").fill(prompt);
+  await page.locator("#compose textarea").fill(prompt);
   await page.getByRole("button", { name: /開始驗證/ }).click();
   const work = page.locator("article.work").filter({ hasText: prompt });
   await expect(

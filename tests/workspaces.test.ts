@@ -1,3 +1,4 @@
+import { STORE_SCHEMA_VERSION } from "../apps/daemon/src/storage-metadata.js";
 import { test, expect } from "vitest";
 import {
   mkdtemp,
@@ -120,7 +121,7 @@ test("workspace registration persists, replays parallel requests, enforces CAS a
     expect(new WorkspaceRegistry(restarted).list()[0]?.name).toBe("Renamed");
     expect(
       restarted.db.prepare("PRAGMA user_version").get()?.user_version,
-    ).toBe(19);
+    ).toBe(STORE_SCHEMA_VERSION);
   } finally {
     restarted.close();
     await rm(base, { recursive: true, force: true });

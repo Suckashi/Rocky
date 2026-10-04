@@ -7,13 +7,10 @@ import {
 } from "../../../packages/contracts/src/index.js";
 import { WorkspaceRegistry } from "./workspaces.js";
 import { intentHash } from "./intent.js";
-import {
-  nativeCommandSchema,
-  nativeExecutionEnvironment,
-} from "./native-environment.js";
+import { workspaceCommandSchema } from "../../../packages/contracts/src/native-command.js";
+import { nativeExecutionEnvironment } from "./native-environment.js";
 
 // Cwd is daemon-owned from the registered Work workspace, never model supplied.
-export const workspaceCommandSchema = nativeCommandSchema.omit({ cwd: true });
 
 async function executableIdentity(path: string) {
   const canonicalPath = await realpath(path);

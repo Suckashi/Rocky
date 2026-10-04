@@ -24,7 +24,11 @@
       "durationSeconds": 6.98
     },
     { "command": "git diff --check", "exitCode": 0 },
-    { "command": "npm run check:docs", "exitCode": 0, "result": "38 tasks / 56 requirements / 70 acceptance entries; valid DAG" }
+    {
+      "command": "npm run check:docs",
+      "exitCode": 0,
+      "result": "38 tasks / 56 requirements / 70 acceptance entries; valid DAG"
+    }
   ],
   "corrections": [
     "Initial focused run: 19 passed / 1 failed because duplicate-ID test used an invalid URN; corrected fixture ID and reran successfully"

@@ -5,6 +5,9 @@ import type {
 } from "../../../packages/contracts/src/index.js";
 import { Workspaces } from "./workspaces.js";
 import { ToolActivity } from "./tool-activity.js";
+import { CommandTerminal } from "./command-terminal.js";
+import { Environments } from "./environments.js";
+import { BrowserPanel } from "./browser-panel.js";
 export function ComputerPanel({
   locale,
   works,
@@ -26,9 +29,10 @@ export function ComputerPanel({
       <div className="computer-status">
         <strong>{zh ? "本機能力" : "Local capabilities"}</strong>
         <span>
-          {zh ? "隔離環境尚未實作" : "Isolated environment not implemented"}
+          {zh ? "Native／選配本機容器" : "Native / optional local containers"}
         </span>
       </div>
+      <Environments locale={locale} request={request} />
       <div
         className="computer-tool-tabs"
         role="tablist"
@@ -72,25 +76,57 @@ export function ComputerPanel({
         aria-labelledby={"computer-tab-" + tab}
         className="computer-section"
       >
+        {(tab === "Terminal" || tab === "Activity" || tab === "Browser") && (
+          <label>
+            {zh ? "檢視工作" : "Inspect Work"}
+            <select
+              value={work?.id ?? ""}
+              onChange={(event) => setSelected(event.target.value)}
+            >
+              {!works.length && (
+                <option value="">{zh ? "尚無工作" : "No work"}</option>
+              )}
+              {works.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.text.slice(0, 100)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {tab === "Browser" && (
-          <div className="computer-setup">
-            <h3>{zh ? "Browser 尚不可用" : "Browser unavailable"}</h3>
-            <p>
-              {zh
-                ? "尚未實作受控 browser profile 與精確接管；沒有正在執行的瀏覽器或即時畫面。"
-                : "Owned browser profiles and scoped takeover are not implemented. No browser or live screen is running here."}
-            </p>
-          </div>
+          <BrowserPanel
+            work={work}
+            cursor={
+              events
+                .filter(
+                  (event) =>
+                    event.workId === work?.id &&
+                    event.payload.kind === "domain" &&
+                    event.payload.name.startsWith("rocky.browser."),
+                )
+                .at(-1)?.sequence ?? "0"
+            }
+            locale={locale}
+            request={request}
+          />
         )}
         {tab === "Terminal" && (
-          <div className="computer-setup">
-            <h3>{zh ? "Terminal 尚不可用" : "Terminal unavailable"}</h3>
-            <p>
-              {zh
-                ? "受控命令執行 adapter 尚未實作；不會改用未授權主機 shell。"
-                : "The controlled execution adapter is not implemented; this panel does not fall back to an unauthorized host shell."}
-            </p>
-          </div>
+          <CommandTerminal
+            work={work}
+            cursor={
+              events
+                .filter(
+                  (event) =>
+                    event.workId === work?.id &&
+                    event.payload.kind === "domain" &&
+                    event.payload.name.startsWith("rocky.operation."),
+                )
+                .at(-1)?.sequence ?? "0"
+            }
+            locale={locale}
+            request={request}
+          />
         )}
         {tab === "Files" && (
           <>
@@ -104,22 +140,6 @@ export function ComputerPanel({
         )}
         {tab === "Activity" && (
           <>
-            <label>
-              {zh ? "檢視工作" : "Inspect Work"}
-              <select
-                value={work?.id ?? ""}
-                onChange={(e) => setSelected(e.target.value)}
-              >
-                {!works.length && (
-                  <option value="">{zh ? "尚無工作" : "No work"}</option>
-                )}
-                {works.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.text.slice(0, 100)}
-                  </option>
-                ))}
-              </select>
-            </label>
             <p>
               {zh
                 ? "以下為共用事件中的已確認工具活動，不代表目前畫面或外部操作已成功。"

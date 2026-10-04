@@ -47,10 +47,7 @@
     "version": "148.0.7778.96",
     "deviceScaleFactor": 1,
     "zoom": "100%",
-    "viewports": [
-      "1440x900",
-      "390x844"
-    ],
+    "viewports": ["1440x900", "390x844"],
     "language": "zh-TW",
     "theme": "light",
     "captureType": "Work element; not full viewport"

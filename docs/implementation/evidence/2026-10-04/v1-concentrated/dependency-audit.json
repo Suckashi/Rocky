@@ -1,0 +1,400 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@modelcontextprotocol/sdk": {
+      "name": "@modelcontextprotocol/sdk",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1113080,
+          "name": "@modelcontextprotocol/sdk",
+          "dependency": "@modelcontextprotocol/sdk",
+          "title": "@modelcontextprotocol/sdk has cross-client data leak via shared server/transport instance reuse",
+          "url": "https://github.com/advisories/GHSA-345p-7cg4-v4c7",
+          "severity": "high",
+          "cwe": ["CWE-362"],
+          "cvss": {
+            "score": 7.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:N"
+          },
+          "range": ">=1.10.0 <=1.25.3"
+        },
+        {
+          "source": 1123467,
+          "name": "@modelcontextprotocol/sdk",
+          "dependency": "@modelcontextprotocol/sdk",
+          "title": "Anthropic's MCP TypeScript SDK has a ReDoS vulnerability",
+          "url": "https://github.com/advisories/GHSA-8r9q-7v3j-jr4g",
+          "severity": "high",
+          "cwe": ["CWE-1333"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=1.3.0 <1.25.2"
+        }
+      ],
+      "effects": ["promptfoo"],
+      "range": "1.3.0 - 1.25.3",
+      "nodes": [
+        "node_modules/promptfoo/node_modules/@modelcontextprotocol/sdk"
+      ],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.120.27",
+        "isSemVerMajor": false
+      }
+    },
+    "@vitest/mocker": {
+      "name": "@vitest/mocker",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1193684,
+          "name": "@vitest/mocker",
+          "dependency": "@vitest/mocker",
+          "title": "Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock",
+          "url": "https://github.com/advisories/GHSA-82fw-gwwq-j7x9",
+          "severity": "moderate",
+          "cwe": ["CWE-22"],
+          "cvss": {
+            "score": 5.9,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+          },
+          "range": ">=2.1.0 <4.1.11"
+        }
+      ],
+      "effects": ["vitest"],
+      "range": "2.1.0 - 4.1.10",
+      "nodes": ["node_modules/@vitest/mocker"],
+      "fixAvailable": {
+        "name": "vitest",
+        "version": "3.2.7",
+        "isSemVerMajor": false
+      }
+    },
+    "basic-ftp": {
+      "name": "basic-ftp",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1240853,
+          "name": "basic-ftp",
+          "dependency": "basic-ftp",
+          "title": "basic-ftp: Quadratic-time CPU denial of service in Client.list() Unix directory-listing parser (RE_LINE backtracking)",
+          "url": "https://github.com/advisories/GHSA-c475-qrg2-pj4r",
+          "severity": "high",
+          "cwe": ["CWE-1333"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<=6.2.0"
+        }
+      ],
+      "effects": ["get-uri"],
+      "range": "<=6.2.0",
+      "nodes": ["node_modules/basic-ftp"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.120.27",
+        "isSemVerMajor": false
+      }
+    },
+    "braces": {
+      "name": "braces",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1240992,
+          "name": "braces",
+          "dependency": "braces",
+          "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+          "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+          "severity": "high",
+          "cwe": ["CWE-674"],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": "<=3.0.3"
+        }
+      ],
+      "effects": ["micromatch"],
+      "range": "*",
+      "nodes": ["node_modules/braces"],
+      "fixAvailable": {
+        "name": "deepagents",
+        "version": "0.0.2",
+        "isSemVerMajor": true
+      }
+    },
+    "csv-parse": {
+      "name": "csv-parse",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1193670,
+          "name": "csv-parse",
+          "dependency": "csv-parse",
+          "title": "node-csv: Prototype replacement still reachable via columns path",
+          "url": "https://github.com/advisories/GHSA-8cw4-87c7-c6xx",
+          "severity": "moderate",
+          "cwe": ["CWE-1321"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<7.0.2"
+        }
+      ],
+      "effects": ["promptfoo"],
+      "range": "<7.0.2",
+      "nodes": ["node_modules/csv-parse"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.120.27",
+        "isSemVerMajor": false
+      }
+    },
+    "deepagents": {
+      "name": "deepagents",
+      "severity": "high",
+      "isDirect": true,
+      "via": ["fast-glob", "micromatch"],
+      "effects": [],
+      "range": ">=1.1.0",
+      "nodes": ["node_modules/deepagents"],
+      "fixAvailable": {
+        "name": "deepagents",
+        "version": "0.0.2",
+        "isSemVerMajor": true
+      }
+    },
+    "drizzle-orm": {
+      "name": "drizzle-orm",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1116251,
+          "name": "drizzle-orm",
+          "dependency": "drizzle-orm",
+          "title": "Drizzle ORM has SQL injection via improperly escaped SQL identifiers",
+          "url": "https://github.com/advisories/GHSA-gpj5-g38j-94v9",
+          "severity": "high",
+          "cwe": ["CWE-89"],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+          },
+          "range": "<0.45.2"
+        }
+      ],
+      "effects": ["promptfoo"],
+      "range": "<0.45.2",
+      "nodes": ["node_modules/drizzle-orm"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.120.27",
+        "isSemVerMajor": false
+      }
+    },
+    "fast-glob": {
+      "name": "fast-glob",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["micromatch"],
+      "effects": [],
+      "range": "*",
+      "nodes": ["node_modules/fast-glob"],
+      "fixAvailable": true
+    },
+    "get-uri": {
+      "name": "get-uri",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["basic-ftp"],
+      "effects": ["pac-proxy-agent"],
+      "range": ">=5.0.0",
+      "nodes": ["node_modules/get-uri"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.120.27",
+        "isSemVerMajor": false
+      }
+    },
+    "jks-js": {
+      "name": "jks-js",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["node-forge"],
+      "effects": ["promptfoo"],
+      "range": ">=1.0.0",
+      "nodes": ["node_modules/jks-js"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.120.27",
+        "isSemVerMajor": false
+      }
+    },
+    "micromatch": {
+      "name": "micromatch",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["braces"],
+      "effects": ["deepagents", "fast-glob"],
+      "range": ">=0.2.0",
+      "nodes": ["node_modules/micromatch"],
+      "fixAvailable": {
+        "name": "deepagents",
+        "version": "0.0.2",
+        "isSemVerMajor": true
+      }
+    },
+    "node-forge": {
+      "name": "node-forge",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1240912,
+          "name": "node-forge",
+          "dependency": "node-forge",
+          "title": "node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements",
+          "url": "https://github.com/advisories/GHSA-86w9-cpqp-85rv",
+          "severity": "high",
+          "cwe": ["CWE-347"],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+          },
+          "range": "<=1.4.0"
+        }
+      ],
+      "effects": ["jks-js"],
+      "range": "*",
+      "nodes": ["node_modules/node-forge"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.120.27",
+        "isSemVerMajor": false
+      }
+    },
+    "pac-proxy-agent": {
+      "name": "pac-proxy-agent",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["get-uri"],
+      "effects": ["proxy-agent"],
+      "range": ">=6.0.0",
+      "nodes": ["node_modules/pac-proxy-agent"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.120.27",
+        "isSemVerMajor": false
+      }
+    },
+    "promptfoo": {
+      "name": "promptfoo",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "@modelcontextprotocol/sdk",
+        "csv-parse",
+        "drizzle-orm",
+        "jks-js",
+        "proxy-agent"
+      ],
+      "effects": [],
+      "range": "*",
+      "nodes": ["node_modules/promptfoo"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.120.27",
+        "isSemVerMajor": false
+      }
+    },
+    "proxy-agent": {
+      "name": "proxy-agent",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["pac-proxy-agent"],
+      "effects": ["promptfoo"],
+      "range": ">=6.0.0",
+      "nodes": ["node_modules/proxy-agent"],
+      "fixAvailable": {
+        "name": "promptfoo",
+        "version": "0.120.27",
+        "isSemVerMajor": false
+      }
+    },
+    "vitest": {
+      "name": "vitest",
+      "severity": "critical",
+      "isDirect": true,
+      "via": [
+        "@vitest/mocker",
+        {
+          "source": 1139528,
+          "name": "vitest",
+          "dependency": "vitest",
+          "title": "When Vitest UI server is listening, arbitrary file can be read and executed",
+          "url": "https://github.com/advisories/GHSA-5xrq-8626-4rwp",
+          "severity": "critical",
+          "cwe": ["CWE-22", "CWE-862"],
+          "cvss": {
+            "score": 9.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "range": "<3.2.6"
+        },
+        {
+          "source": 1193683,
+          "name": "vitest",
+          "dependency": "vitest",
+          "title": "Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock",
+          "url": "https://github.com/advisories/GHSA-82fw-gwwq-j7x9",
+          "severity": "moderate",
+          "cwe": ["CWE-22"],
+          "cvss": {
+            "score": 5.9,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+          },
+          "range": ">=2.1.0 <4.1.11"
+        }
+      ],
+      "effects": [],
+      "range": "<=4.1.10",
+      "nodes": ["node_modules/vitest"],
+      "fixAvailable": {
+        "name": "vitest",
+        "version": "3.2.7",
+        "isSemVerMajor": false
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 2,
+      "high": 13,
+      "critical": 1,
+      "total": 16
+    },
+    "dependencies": {
+      "prod": 982,
+      "dev": 188,
+      "optional": 404,
+      "peer": 8,
+      "peerOptional": 0,
+      "total": 1572
+    }
+  }
+}

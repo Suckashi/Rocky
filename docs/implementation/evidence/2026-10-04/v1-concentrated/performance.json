@@ -1,0 +1,36 @@
+{
+  "mode": "fixture",
+  "platform": "win32",
+  "osRelease": "10.0.26200",
+  "node": "v24.12.0",
+  "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+  "logicalCpus": 16,
+  "totalMemoryBytes": 33453703168,
+  "startupMs": [
+    45.89470000000006, 2.4203999999999724, 2.212300000000141,
+    2.4465000000000146, 2.221499999999878
+  ],
+  "receiptMs": [
+    2.0873999999998887, 0.9175000000000182, 0.8718000000001211,
+    0.8609999999998763, 2.322400000000016, 0.8655999999998585,
+    0.8234999999999673, 0.8722000000000207, 2.317700000000059,
+    0.9002000000000407, 0.821100000000115, 0.8102000000001226,
+    2.317199999999957, 0.9260999999999058, 0.8701000000000931,
+    0.8749000000000251, 2.1923000000001593, 0.8609000000001288,
+    0.8764000000001033, 0.8251000000000204
+  ],
+  "heapBytes": [140158232, 140556360, 140958184, 141327368, 141705400],
+  "retainedDiskBytes": 786510,
+  "startupP95Ms": 45.89470000000006,
+  "receiptP95Ms": 2.317700000000059,
+  "thresholds": {
+    "warmStartupMs": 5000,
+    "localReceiptMs": 300,
+    "twentySmallDocumentsDiskBytes": 16777216
+  },
+  "limitations": [
+    "In-process warm service construction after imports; UI and event lag measured separately.",
+    "Current machine fixture baseline, not a pristine or low-end hardware claim; no prior comparable baseline exists.",
+    "Heap samples include the Vitest process; not isolated daemon RSS. No paid model calls."
+  ]
+}

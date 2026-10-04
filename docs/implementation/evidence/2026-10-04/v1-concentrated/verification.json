@@ -1,0 +1,4211 @@
+{
+  "commit": "dbf5c475ce9c66c995c25aca81a0b7185923ded4+working-tree",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "lockfileHash": "f4983e33a8c611b665ac8beb6a4873c5e6f0e5f297691cf0a93eafbd36bb0032",
+  "generatedAt": "2026-10-04T09:16:54.063Z",
+  "branch": "codex/opendots-ui-alignment",
+  "hardware": {
+    "os": "10.0.26200",
+    "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+    "logicalCpus": 16,
+    "memoryBytes": 33453703168
+  },
+  "implementation": "V1 required paths connected; optional optimize and unsafe executors remain explicitly unavailable.",
+  "verification": "Concentrated runs plus root-cause repairs and scoped reruns; initial reports retained. Aggregation is not a second full green suite.",
+  "aggregationCommand": "node .rocky-reports/finalize-v1.mjs",
+  "aggregationExitCode": 0,
+  "limitations": [
+    "Windows x64 controlled fixtures; Ubuntu and live external provider/MCP acceptance not run.",
+    "Chromium 1223 compatibility override; pinned Chromium 1243 and strict egress not accepted.",
+    "Real container engine/enforcement not verified; no host fallback.",
+    "No commit, remote, paid endpoint, security software or global system setting change."
+  ],
+  "unit": {
+    "latestCaseCounts": { "passed": 402 },
+    "cases": [
+      {
+        "file": "tests/admission.test.ts",
+        "name": "T-010 background submission receipt is stable across retry and restart",
+        "status": "passed",
+        "report": "storage-faults-2.json"
+      },
+      {
+        "file": "tests/admission.test.ts",
+        "name": "T-010 main admission remains available with two independent background sessions",
+        "status": "passed",
+        "report": "storage-faults-2.json"
+      },
+      {
+        "file": "tests/admission.test.ts",
+        "name": "T-010 main model request waits for a global slot and dispatches when a background call stops",
+        "status": "passed",
+        "report": "storage-faults-2.json"
+      },
+      {
+        "file": "tests/admission.test.ts",
+        "name": "T-010 restart re-admits only a durable queued command; prior running sessions stay terminal",
+        "status": "passed",
+        "report": "storage-faults-2.json"
+      },
+      {
+        "file": "tests/admission.test.ts",
+        "name": "T-010 restart keeps a queued resource behind an interrupted owner",
+        "status": "passed",
+        "report": "storage-faults-2.json"
+      },
+      {
+        "file": "tests/admission.test.ts",
+        "name": "T-010 bounded admission settings and Work settings snapshot are immutable",
+        "status": "passed",
+        "report": "storage-faults-2.json"
+      },
+      {
+        "file": "tests/admission.test.ts",
+        "name": "T-010 same resource waits before worker or model slot; unrelated background proceeds",
+        "status": "passed",
+        "report": "storage-faults-2.json"
+      },
+      {
+        "file": "tests/admission.test.ts",
+        "name": "T-010 queued model selection stays pinned and never adopts another Work's changed connection",
+        "status": "passed",
+        "report": "storage-faults-2.json"
+      },
+      {
+        "file": "tests/admission.test.ts",
+        "name": "T-010 active wall budget stops a held model request without claiming completion",
+        "status": "passed",
+        "report": "storage-faults-2.json"
+      },
+      {
+        "file": "tests/admission.test.ts",
+        "name": "T-010 approval waiting does not consume active wall budget",
+        "status": "passed",
+        "report": "storage-faults-2.json"
+      },
+      {
+        "file": "tests/agui-stream.test.ts",
+        "name": "AG-UI replay drains all owned event pages before the terminal receipt",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/artifact-native.test.ts",
+        "name": "native artifact delivery: changed=false",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/artifact-native.test.ts",
+        "name": "native artifact delivery: changed=true",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/artifacts.test.ts",
+        "name": "artifact publication: native receipt, atomic registry, immutable download, restart and corruption",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/attachments.test.ts",
+        "name": "attachments validate bytes, persist exact receipts and restrict Work reads",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/backup.test.ts",
+        "name": "Rocky backup verifies immutable content and restores with automation fenced",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/backup.test.ts",
+        "name": "backup rejects foreign product metadata before touching its database",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/browser-profiles.test.ts",
+        "name": "browser profiles bind explicit origins and sharing; unavailable isolation never launches Native",
+        "status": "passed",
+        "report": "browser-approval-race.json"
+      },
+      {
+        "file": "tests/configured-model.test.ts",
+        "name": "T-007 editing configuration aborts in-flight model I/O without retry or leaked credentials",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/configured-model.test.ts",
+        "name": "T-007 registry model leases pin revision, require context, revoke on edits, and enforce bounds before dispatch",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/configured-model.test.ts",
+        "name": "T-007 configured openai-compatible → native child/interrupt/resume shares root usage ledger",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/configured-model.test.ts",
+        "name": "T-007 configured anthropic → native child/interrupt/resume shares root usage ledger",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/configured-model.test.ts",
+        "name": "T-007 provider usage preserves missing/cache-priced uncertainty and validates negative counts",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/configured-work.test.ts",
+        "name": "T-007 shutdown cancels configured model I/O and retains unknown usage without replay",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/configured-work.test.ts",
+        "name": "T-007 configured Work openai-compatible preserves daemon approval, native child, usage and persisted model selection",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/configured-work.test.ts",
+        "name": "T-007 configured Work anthropic preserves daemon approval, native child, usage and persisted model selection",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/configured-work.test.ts",
+        "name": "T-007 submission rejects implicit model selection and stale configured approvals cannot dispatch effects",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/context-barrier.test.ts",
+        "name": "context ack cannot precede own native checkpoint and domain fault rolls back all membership/receipt writes",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/continuous-conversation.test.ts",
+        "name": "large configured fixture answer is delivered intact into daemon Work and durable visible history",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/continuous-conversation.test.ts",
+        "name": "confirmed native checkpoint context reaches next main worker, survives restart, and stays out of background/evaluation",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/continuous-conversation.test.ts",
+        "name": "new native fixture turn requests fresh approval without replaying any completed operation",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/contracts.test.ts",
+        "name": "fixture mode is explicit and forged permission fields are rejected",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/contracts.test.ts",
+        "name": "submission memory grants require configured mode, exact project binding and unique explicit scopes",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/contracts.test.ts",
+        "name": "T-005 IPC wire requires run identity and rejects owner fields, unknown commands and oversized UTF-8",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/conversation-store.test.ts",
+        "name": "workspace revision/read scope isolates native checkpoint/history: revision 1",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/conversation-store.test.ts",
+        "name": "workspace revision/read scope isolates native checkpoint/history: revision 2",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/conversation-store.test.ts",
+        "name": "one conversation persists separate execution sessions and atomic submission/result history",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/conversation-store.test.ts",
+        "name": "Rocky v10 upgrade reconstructs chronological history and preserves only its own domain records",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/conversation-store.test.ts",
+        "name": "conversation/history/session API validates DTOs and keeps current redaction at the public boundary",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/conversation-store.test.ts",
+        "name": "history pagination uses numeric cursors, excludes evaluation and validates limits",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/documents-new.test.ts",
+        "name": "owner documents need no synthetic Work; revisions remain immutable and paginated",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/documents.test.ts",
+        "name": "document revisions: confirmed artifact source, concurrent CAS, immutable history and receipts, rollback and restart",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/evaluation.test.ts",
+        "name": "T-007 configured evaluation approve: same native Work and budget, scoped endpoint revocation",
+        "status": "passed",
+        "report": "dependency-recheck.json"
+      },
+      {
+        "file": "tests/evaluation.test.ts",
+        "name": "T-007 configured evaluation reject: same native Work and budget, scoped endpoint revocation",
+        "status": "passed",
+        "report": "dependency-recheck.json"
+      },
+      {
+        "file": "tests/file-target.test.ts",
+        "name": "T-008 real file target detects overwrite and new-file creation between prepare and dispatch",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/file-target.test.ts",
+        "name": "T-008 target scope rejects traversal, device/ADS aliases, junction escape and hard links",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/file-target.test.ts",
+        "name": "T-008 target recheck rejects parent replaced with junction; portable separators resolve consistently",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/git-worktree.test.ts",
+        "name": "real local Git worktree boundary: create",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/git-worktree.test.ts",
+        "name": "real local Git worktree boundary: stale",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/git-worktree.test.ts",
+        "name": "real local Git worktree boundary: replaced",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/git-worktree.test.ts",
+        "name": "real local Git worktree boundary: existing",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/git-worktree.test.ts",
+        "name": "real local Git worktree boundary: filters",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/git-worktree.test.ts",
+        "name": "real local Git worktree boundary: cancel",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/grants.test.ts",
+        "name": "T-008 durable grants are scoped, expire, revoke by CAS and cannot authorize critical effects",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/grants.test.ts",
+        "name": "T-008 revoking submitted synthetic read scope prevents actual MCP read; submission replay does not regrant",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/grants.test.ts",
+        "name": "T-008 grant revoke API validates session and exact receipt, preserving idempotency after restart",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/html-preview.test.ts",
+        "name": "HTML preview strips active/navigation content, keeps safe layout and installs restrictive CSP first",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/html-preview.test.ts",
+        "name": "HTML sanitizer bounds nested trees and input size",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/http.test.ts",
+        "name": "T-007 model API requires local session, rejects raw keys and preserves unknown context",
+        "status": "passed",
+        "report": "browser-isolation.json"
+      },
+      {
+        "file": "tests/http.test.ts",
+        "name": "local API validates Host, Origin and session before mutation",
+        "status": "passed",
+        "report": "browser-isolation.json"
+      },
+      {
+        "file": "tests/http.test.ts",
+        "name": "snapshot and SSE use persisted cursors; reconnect header wins over the initial query",
+        "status": "passed",
+        "report": "browser-isolation.json"
+      },
+      {
+        "file": "tests/http.test.ts",
+        "name": "API bounds real body bytes and returns safe JSON errors before creating work",
+        "status": "passed",
+        "report": "browser-isolation.json"
+      },
+      {
+        "file": "tests/identity.test.ts",
+        "name": "T-037 assets retain provenance, hashes and a bounded first-party vector source",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/identity.test.ts",
+        "name": "T-037 assistant identity persists and its public schema cannot carry policy or remote artwork",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/identity.test.ts",
+        "name": "T-037 semantic text tokens meet 4.5:1 on both themes",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/inbox.test.ts",
+        "name": "actual background inbox freezes its boundary and re-delivers checkpointed evidence from a failed main branch",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/intent.test.ts",
+        "name": "T-008 exact canonical intent ignores object insertion order but preserves arrays and values",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/intent.test.ts",
+        "name": "T-008 invalid/coerced/oversized intents fail before getters or serialization hooks execute",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/isolated-environment.test.ts",
+        "name": "fixture engine lifecycle pins scope, image and resource policy; never pulls or removes",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/learning-candidates.test.ts",
+        "name": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+        "status": "passed",
+        "report": "learning-recheck-2.json"
+      },
+      {
+        "file": "tests/learning-candidates.test.ts",
+        "name": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+        "status": "passed",
+        "report": "learning-recheck-2.json"
+      },
+      {
+        "file": "tests/learning-candidates.test.ts",
+        "name": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+        "status": "passed",
+        "report": "learning-recheck-2.json"
+      },
+      {
+        "file": "tests/learning-episode.test.ts",
+        "name": "manual episodes retain bounded provenance, redact summaries, dedupe and obey withdrawal",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/learning-policy.test.ts",
+        "name": "Learning policy defaults off and requires scoped owner consent with CAS and durable receipts",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/learning-review.test.ts",
+        "name": "episode review binds redacted view hash, source consent and durable decision receipt",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/learning-source.test.ts",
+        "name": "Learning source consent excludes private, nonnormal, noncompleted and unauthorized scopes",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-catalog.test.ts",
+        "name": "bounded MCP resource/prompt metadata: normal",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-catalog.test.ts",
+        "name": "bounded MCP resource/prompt metadata: duplicate",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-catalog.test.ts",
+        "name": "bounded MCP resource/prompt metadata: cursor",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-catalog.test.ts",
+        "name": "bounded MCP resource/prompt metadata: oversize",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-catalog.test.ts",
+        "name": "native metadata lifecycle revokes stale resources catalog",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-catalog.test.ts",
+        "name": "native metadata lifecycle revokes stale prompts catalog",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-catalog.test.ts",
+        "name": "native metadata lifecycle revokes stale wait catalog",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-work.test.ts",
+        "name": "configured MCP task data exact approval: prompt",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-work.test.ts",
+        "name": "configured MCP task data exact approval: prompt-image",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-work.test.ts",
+        "name": "configured MCP task data exact approval: resource-image",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-work.test.ts",
+        "name": "configured MCP task data exact approval: resource-large-image",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-work.test.ts",
+        "name": "configured MCP task data exact approval: reject",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-work.test.ts",
+        "name": "configured MCP task data exact approval: revoke",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-work.test.ts",
+        "name": "configured MCP task data exact approval: invalid",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-work.test.ts",
+        "name": "configured MCP task data exact approval: resource",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-work.test.ts",
+        "name": "configured MCP task data exact approval: template",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-data-work.test.ts",
+        "name": "configured MCP task data exact approval: uncertain",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "Stop during native startup/discovery cancels only the owned process and old request does not restart it",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "configured HTTP redirect cannot forward credentials or initialize an unconfigured endpoint",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "bounded actual stdio discovery/diagnostics: pages",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "bounded actual stdio discovery/diagnostics: repeat",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "bounded actual stdio discovery/diagnostics: diagnostics",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "bounded actual stdio discovery/diagnostics: overflow",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "bounded actual stdio discovery/diagnostics: unsafe-input",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "bounded actual stdio discovery/diagnostics: unsafe-output",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "configured official MCP lifecycle lists actual tools and stops without replay: stdio",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "configured official MCP lifecycle lists actual tools and stops without replay: http",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-manager.test.ts",
+        "name": "failed configured stdio startup is bounded, reported and not retried by old receipt",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/mcp-registry.test.ts",
+        "name": "Rocky MCP schema rejects foreign/mixed config and plaintext credentials; defaults disabled",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-registry.test.ts",
+        "name": "MCP settings use atomic CAS and persistent receipts, isolated launch env/path and retired-secret redaction",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-registry.test.ts",
+        "name": "MCP API requires owner session; config references remain references and failed input preserves stored settings",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-result.test.ts",
+        "name": "raw resource envelope stays in artifact, not model authority or metadata",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-result.test.ts",
+        "name": "raw prompt envelope stays in artifact, not model authority or metadata",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-result.test.ts",
+        "name": "MCP image, structured content and source retain types/artifact across model wire; resource links remain unfetched data",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-result.test.ts",
+        "name": "unsupported binary types are retained as uninspected artifacts without becoming model text/base64 instructions",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-result.test.ts",
+        "name": "image source is local bounded data only: https://unconfigured.invalid/image.png",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-result.test.ts",
+        "name": "image source is local bounded data only: data:image/svg+xml;base64,PHN2Zy8+",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-result.test.ts",
+        "name": "image source is local bounded data only: data:image/png;base64,bm90LWFuLWltYWdl",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-result.test.ts",
+        "name": "image source is local bounded data only: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA0sAAAAASUVORK5CYII==",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-result.test.ts",
+        "name": "oversized image dimensions fail before decoder/provider",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "original nested schema validates refs, unions, required fields, limits and additional properties without coercion",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "duplicate schema IDs never reuse another server's validation; explicit draft 7 and 2020 formats are checked",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "unsafe or unsupported schemas fail closed: {\"undefined\":\"https://unconfigured.invalid/schema\"}",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "unsafe or unsupported schemas fail closed: {\"undefined\":\"#/missing\"}",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "unsafe or unsupported schemas fail closed: {\"undefined\":{\"loop\":{\"undefined\":\"#/undefined/loop\"}},\"undefined\":\"#/undefined/loop\"}",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"pattern\":\"(a+)+$\"}}}",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"dependencies\":{\"a\":{\"pattern\":\".*\"}}}",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"properties\":{\"at\":{\"type\":\"string\",\"format\":\"unknown-format\"}}}",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "unsafe or unsupported schemas fail closed: {\"type\":\"object\",\"required\":1}",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "unsafe or unsupported schemas fail closed: {\"undefined\":\"https://unconfigured.invalid/draft\"}",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-schema.test.ts",
+        "name": "same upstream name cannot collide across servers, annotations never grant read authority, revisions change the exact identity",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-vision-work.test.ts",
+        "name": "native MCP image/structured artifact and openai-compatible wire format with vision=false, large=false",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-vision-work.test.ts",
+        "name": "native MCP image/structured artifact and openai-compatible wire format with vision=false, large=true",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-vision-work.test.ts",
+        "name": "native MCP image/structured artifact and openai-compatible wire format with vision=true, large=false",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-vision-work.test.ts",
+        "name": "native MCP image/structured artifact and openai-compatible wire format with vision=true, large=true",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-vision-work.test.ts",
+        "name": "native MCP image/structured artifact and anthropic wire format with vision=false, large=false",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-vision-work.test.ts",
+        "name": "native MCP image/structured artifact and anthropic wire format with vision=false, large=true",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-vision-work.test.ts",
+        "name": "native MCP image/structured artifact and anthropic wire format with vision=true, large=false",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-vision-work.test.ts",
+        "name": "native MCP image/structured artifact and anthropic wire format with vision=true, large=true",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/mcp-work.test.ts",
+        "name": "configured native worker uses discovered MCP schema and exact approval: approve",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/mcp-work.test.ts",
+        "name": "configured native worker uses discovered MCP schema and exact approval: reject",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/mcp-work.test.ts",
+        "name": "configured native worker uses discovered MCP schema and exact approval: revoke",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/mcp-work.test.ts",
+        "name": "configured native worker uses discovered MCP schema and exact approval: invalid",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/mcp-work.test.ts",
+        "name": "configured native worker uses discovered MCP schema and exact approval: uncertain",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/mcp-work.test.ts",
+        "name": "configured native worker uses discovered MCP schema and exact approval: synthetic",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/mcp.test.ts",
+        "name": "SDK discovery and full fixture schema rejects invalid args: stdio",
+        "status": "passed",
+        "report": "dependency-recheck.json"
+      },
+      {
+        "file": "tests/mcp.test.ts",
+        "name": "SDK discovery and full fixture schema rejects invalid args: http",
+        "status": "passed",
+        "report": "dependency-recheck.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory boundary: granted",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory boundary: denied",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory boundary: revoked",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory boundary: private",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory boundary: escalated",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory boundary: submitted",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory boundary: budget",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory boundary: empty",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory scope isolation: project",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory scope isolation: task",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory scope isolation: child",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory scope isolation: replay",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-native.test.ts",
+        "name": "native memory scope isolation: evaluation",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: approve",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: reject",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: locked",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: race",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: rollback",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: update",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: stop",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: shutdown",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: reopen",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: missing-source",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory-write.test.ts",
+        "name": "native memory write exact approval: invalid-content",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/memory.test.ts",
+        "name": "owner memory scopes, locks, CAS, bilingual search, atomic deletion and restart",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-budget.test.ts",
+        "name": "T-007 R-048 root and native child share a durable dispatch cap; duplicate reservations never authorize resend",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-budget.test.ts",
+        "name": "T-007 budget reservations hold unknown usage and only reported settlement releases token capacity",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-budget.test.ts",
+        "name": "T-007 cost caps require explicit prices and trusted token bounds; integer pricing rounds up",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-budget.test.ts",
+        "name": "T-007 provider-reported overrun is retained and prevents a subsequent dispatch",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-budget.test.ts",
+        "name": "T-007 actual Work path refuses the next model dispatch when its root call budget is spent",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-budget.test.ts",
+        "name": "T-007 submission freezes custom budget across receipts, CAS and restart",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-budget.test.ts",
+        "name": "T-007 submitted token cap fails closed before dispatch when no trusted bounds exist",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-dns.test.ts",
+        "name": "T-007 DNS re-resolution refuses rebinding before sending a second model request",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-dns.test.ts",
+        "name": "T-007 pinned DNS validates exact hostname and both address families; answer order is irrelevant",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-network.test.ts",
+        "name": "T-007 AT-24: actual CONNECT proxy traffic and NO_PROXY bypass stay scoped to the connection",
+        "status": "passed",
+        "report": "dependency-recheck.json"
+      },
+      {
+        "file": "tests/model-network.test.ts",
+        "name": "T-007 AT-24: real TLS handshake requires explicit CA, does not relax other connections",
+        "status": "passed",
+        "report": "dependency-recheck.json"
+      },
+      {
+        "file": "tests/model-slots.test.ts",
+        "name": "T-010 model slots prefer main, then background, then evaluation at dispatch boundaries",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-slots.test.ts",
+        "name": "T-010 cancelling a model waiter removes it without consuming a slot",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-stream.test.ts",
+        "name": "OpenAI SSE decodes split UTF-8/CRLF and fragmented tool arguments without reasoning",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-stream.test.ts",
+        "name": "provider text arrives before stream termination, with no fabricated completion",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-stream.test.ts",
+        "name": "truncated SSE, unconfirmed finish and provider error fail closed",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-stream.test.ts",
+        "name": "Anthropic incremental public text/tool JSON merge usage and omit thinking blocks",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-stream.test.ts",
+        "name": "non-SSE responses cancel their body and are not split into synthetic tokens",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-transfer.test.ts",
+        "name": "large model history roundtrips through bounded frames without dropping messages or Unicode",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-transfer.test.ts",
+        "name": "interleaved root/child uploads preserve their distinct model calls",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-transfer.test.ts",
+        "name": "transfer rejects incomplete, altered, reordered, foreign and oversized requests",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/model-transfer.test.ts",
+        "name": "bounded upload capacity and shutdown clear prevent unbounded abandoned buffers",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/models.test.ts",
+        "name": "T-007 R-022: explicit URL/context/ref validation never invents defaults or accepts raw keys",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/models.test.ts",
+        "name": "T-007 AT-22: registry CAS/idempotency, ref redaction, replacement and restart persistence",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/models.test.ts",
+        "name": "T-007 AT-03: openai-compatible text/tool roundtrip/stream/cancel use only configured local endpoint",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/models.test.ts",
+        "name": "T-007 AT-03: anthropic text/tool roundtrip/stream/cancel use only configured local endpoint",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/models.test.ts",
+        "name": "T-007 AT-03: openai text/tool roundtrip/stream/cancel use only configured local endpoint",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/models.test.ts",
+        "name": "T-007 AT-03: ollama-compatible text/tool roundtrip/stream/cancel use only configured local endpoint",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/models.test.ts",
+        "name": "T-007: auto tool selection must produce a real tool call, not a text-only false positive",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/models.test.ts",
+        "name": "T-007 AT-23: redirects never reach an unconfigured destination; invalid replies are redacted",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/models.test.ts",
+        "name": "T-007 AT-22: changing a connection cancels its outstanding probe and restart never replays it",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/models.test.ts",
+        "name": "T-007 AT-24: explicit/environment/direct proxy precedence and NO_PROXY host/port/IPv6 patterns",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/native-command-receipts.test.ts",
+        "name": "native reconciliation survives a new adapter instance, validates binding, and never treats missing/corrupt receipts as no-effect",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/native-compaction.test.ts",
+        "name": "three native compactions preserve goal/correction/todos/evidence, checkpoint and raw offload",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/native-compaction.test.ts",
+        "name": "summary failure retains checkpoint history/correction/todos without invoking target or effects",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/native-compaction.test.ts",
+        "name": "configured daemon worker preserves native compaction metadata across smaller-context turns and accounts summaries without reply projection",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/native-compaction.test.ts",
+        "name": "unbound native summary provenance is distinct from tool-bound target even with zero tools, and invalid summaries fail closed",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/native-compaction.test.ts",
+        "name": "actual native read_file returns long tool evidence and keeps the source checkpoint readable",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/native-environment.test.ts",
+        "name": "native adapter runs exact argv in the selected cwd without ambient credentials or shell expansion",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/native-environment.test.ts",
+        "name": "native bounded execution: cancelled",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/native-environment.test.ts",
+        "name": "native bounded execution: timed_out",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/native-environment.test.ts",
+        "name": "native bounded execution: output_limit",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/native-environment.test.ts",
+        "name": "native validation and pre-abort do not launch a process",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/native-environment.test.ts",
+        "name": "native cancellation terminates an owned descendant process",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/native-task-identity.test.ts",
+        "name": "parallel native tasks preserve parent identity even with repeated child tool IDs",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/network.test.ts",
+        "name": "T-007 concurrent evaluation endpoint leases revoke independently and never grant sibling routes",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/network.test.ts",
+        "name": "evaluation guard rejects unregistered endpoints before sending",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/network.test.ts",
+        "name": "configured loopback endpoint allowed, unconfigured and redirect denied",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/operation-ledger.test.ts",
+        "name": "daemon-owned interrupted workspace reads settle with no mutation while dispatched MCP stays unknown",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/operation-ledger.test.ts",
+        "name": "configured MCP reconnect revision cannot bypass confirmed-effect retry protection, while distinct server targets remain distinct",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/operation-ledger.test.ts",
+        "name": "T-008 durable stages, exact intent, CAS and unknown never reset on restart",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/operation-ledger.test.ts",
+        "name": "T-008 owner/session and active status are rechecked before dispatch; late known outcome can settle",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/operation-ledger.test.ts",
+        "name": "T-008 own v4 operation migration preserves success and unknown without inventing context",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/operation-ledger.test.ts",
+        "name": "T-008 restart settles only undispatched owned operations and cleanup rolls back with Work failure",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/operation-ledger.test.ts",
+        "name": "T-008 canonical target claim survives restart, blocks another Work and releases only on known reconciliation",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/operation-reconciler.test.ts",
+        "name": "T-008 lost synthetic result reconciles from durable receipt without replay; request persists across restart",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/operation-reconciler.test.ts",
+        "name": "T-008 mismatched evidence/cancelled query and stale concurrent reconciliation cannot overwrite unknown or newer results",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/operation-reconciler.test.ts",
+        "name": "T-008 inconclusive status remains unknown and cannot become permission to dispatch",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/operation-reconciler.test.ts",
+        "name": "T-008 MCP durable receipt resolves lost response after restart without resending: stdio",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/operation-reconciler.test.ts",
+        "name": "T-008 MCP durable receipt resolves lost response after restart without resending: http",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/operation-reconciler.test.ts",
+        "name": "T-008 missing MCP receipt remains unknown and keeps target claim",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/persistence.test.ts",
+        "name": "T-006 stale CAS and transaction failure cannot partially change Work, events or outbox",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/persistence.test.ts",
+        "name": "T-006 outbox replay after acknowledgement failure creates one completion and no new operations",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/persistence.test.ts",
+        "name": "T-006 an outbox write failure rolls back the operation ledger and its event together",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/persistence.test.ts",
+        "name": "T-006 actual child exits roll back uncommitted writes and preserve committed pending delivery",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/persistence.test.ts",
+        "name": "T-006 simultaneous daemons cannot both recover a stale PID lock",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/persistence.test.ts",
+        "name": "T-006 durable completion API pages stable sequences without skipping or duplicating results",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/policy.test.ts",
+        "name": "T-008 deny-first owner/config/resource/revocation cannot be overridden by exact consent",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/policy.test.ts",
+        "name": "T-008 critical/unknown need exact consent and evaluation cannot acquire production write authority",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/policy.test.ts",
+        "name": "T-008 changed target/policy requires fresh preparation; local-new cannot overwrite without consent",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/presence.test.ts",
+        "name": "model waiting survives snapshot without retained wait events and never animates",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/presence.test.ts",
+        "name": "presence uses run progress, not heartbeat or connection, with deterministic sixty-second staleness",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/presence.test.ts",
+        "name": "foreground outcomes stay distinct from independent background counts and evaluation work",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/presence.test.ts",
+        "name": "completion feedback excludes history, replay, late catch-up, background and unsuccessful states",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/projection.test.ts",
+        "name": "snapshot pages preserve the event boundary and include older active Works on the first page",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/projection.test.ts",
+        "name": "T-005 strict DTO and official AG-UI contracts reject invalid identities, private fields and cursors",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/projection.test.ts",
+        "name": "snapshot high water and replay preserve newer revisions and deduplicate evidence beyond safe-number precision",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/projection.test.ts",
+        "name": "Rocky P0 event upgrade is transactional and retained across reopen",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/projection.test.ts",
+        "name": "unsupported store version releases lock and preserves stored bytes",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/redaction.test.ts",
+        "name": "stream redaction holds split configured credentials and preserves incremental public text",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/redaction.test.ts",
+        "name": "T-008 nested structured/text evidence masks credentials without hiding usage counts",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/redaction.test.ts",
+        "name": "T-008 configured credential echoes are masked before event persistence and at HTTP projection; session remains usable",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-authority.test.ts",
+        "name": "reflection authority pins reviewed source, restricts skills and persists only scoped drafts",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-profile.test.ts",
+        "name": "same Deep Agents factory reflection reads bound evidence and marks no-learning through restricted port",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-profile.test.ts",
+        "name": "reflection rejects write_file before authority dispatch",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-profile.test.ts",
+        "name": "reflection rejects task before authority dispatch",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-profile.test.ts",
+        "name": "reflection rejects mcp_call before authority dispatch",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-profile.test.ts",
+        "name": "reflection rejects memory_write before authority dispatch",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-profile.test.ts",
+        "name": "reflection refuses accidental normal-skill/fixture composition",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-service.test.ts",
+        "name": "daemon reflection admission and terminal evidence: result",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-service.test.ts",
+        "name": "daemon reflection admission and terminal evidence: text-only",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-service.test.ts",
+        "name": "daemon reflection admission and terminal evidence: budget",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-service.test.ts",
+        "name": "daemon reflection admission and terminal evidence: withdraw",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-service.test.ts",
+        "name": "daemon reflection admission and terminal evidence: withdraw-output",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-service.test.ts",
+        "name": "daemon reflection admission and terminal evidence: stop",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-worker.test.ts",
+        "name": "reflection profile traverses real worker IPC without normal skill discovery or conversation inheritance",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/reflection-worker.test.ts",
+        "name": "reflection wire start rejects context, fixture, steering and unconfigured combinations",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/result-transfer.test.ts",
+        "name": "model/tool/run results roundtrip Unicode in bounded frames with exact request and kind",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/result-transfer.test.ts",
+        "name": "incomplete, reordered, altered, expired and cross-request results never deliver",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/result-transfer.test.ts",
+        "name": "result capacity and explicit size limits bound abandoned delivery",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/retry.test.ts",
+        "name": "retry creates new durable Work/run/session/budget, keeps source immutable and survives restart idempotently",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/retry.test.ts",
+        "name": "retry rejects unknown effects and requires exact reconciliation refs: succeeded",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/retry.test.ts",
+        "name": "retry rejects unknown effects and requires exact reconciliation refs: failed_known_no_effect",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/routines.test.ts",
+        "name": "durable interval occurrences, restart and dedupe: skip",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/routines.test.ts",
+        "name": "durable interval occurrences, restart and dedupe: coalesce-one",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/routines.test.ts",
+        "name": "cron uses IANA local time across DST and does not duplicate one occurrence",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/runtime.test.ts",
+        "name": "T-003 native task + interrupt + approval + MCP stdio",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/runtime.test.ts",
+        "name": "T-003 native task + interrupt + approval + MCP http",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/runtime.test.ts",
+        "name": "T-003/T-037 persona bypass request still requires approval; rejection has no write",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/scratch-runtime.test.ts",
+        "name": "native scratch writes/edits/read survive checkpoints and stay isolated by execution thread",
+        "status": "passed",
+        "report": "dependency-recheck.json"
+      },
+      {
+        "file": "tests/scratch-runtime.test.ts",
+        "name": "scratch scope denies traversal, host paths, context edits and oversized tool IPC",
+        "status": "passed",
+        "report": "dependency-recheck.json"
+      },
+      {
+        "file": "tests/scratch-runtime.test.ts",
+        "name": "native guard refuses execute and out-of-scope tools before any public start or MCP effect",
+        "status": "passed",
+        "report": "dependency-recheck.json"
+      },
+      {
+        "file": "tests/skill-backend.test.ts",
+        "name": "read-only native skill backend preserves bytes, paginates and rechecks every read",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-backend.test.ts",
+        "name": "skill read size and binary boundaries",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-catalog.test.ts",
+        "name": "frozen catalog scope, newer selections, quarantine and reopened reads",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-diff.test.ts",
+        "name": "immutable package diff covers additions/removals/binary and bounded text",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-native.test.ts",
+        "name": "native progressive skill read: published",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/skill-native.test.ts",
+        "name": "native progressive skill read: untrusted",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/skill-native.test.ts",
+        "name": "native progressive skill read: quarantined",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/skill-native.test.ts",
+        "name": "native progressive skill read: same-name",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/skill-native.test.ts",
+        "name": "native progressive skill read: revoke-loaded",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/skill-native.test.ts",
+        "name": "native progressive skill read: revoke-pending",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "portable skill metadata, immutable file hashes, deterministic package identity and binary assets",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path ../escape",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path /absolute",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path C:/escape",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path a\\b",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path a/./b",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path a//b",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path a/NUL.txt",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path x:stream",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path x.",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path manifest.json",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject unsafe path .git/config",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject collisions, malformed data and oversized packages",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject invalid metadata: name: other\ndescription: Wrong name",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject invalid metadata: name: example-skill\nname: duplicate\ndescription: Duplicate",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject invalid metadata: name: example-skill\ndescription: !unknown value",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject invalid metadata: name: example-skill\ndescription: &a text\nlicense: *a",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-package.test.ts",
+        "name": "reject invalid metadata: name: example-skill\ndescription: 123",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-selection.test.ts",
+        "name": "exact owner selection, independent import head, rollback, quarantine and durable replay",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/skill-sources.test.ts",
+        "name": "project discovery is owner-only, untrusted, hash-pinned and imports immutable bytes",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/skill-sources.test.ts",
+        "name": "filesystem sources reject junctions, hard links, oversized files and invalid packages",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/skills.test.ts",
+        "name": "owner imports untrusted immutable skill revisions with CAS, receipts, rollback and reopen",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/skills.test.ts",
+        "name": "schema 19 upgrades skill tables without changing owner memories",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/steering.test.ts",
+        "name": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (true)",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/steering.test.ts",
+        "name": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (child)",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/steering.test.ts",
+        "name": "pending steering is not_applied when terminal before next boundary, with no ghost history",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/steering.test.ts",
+        "name": "pending steering is not_applied when stopped, with no ghost history",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/stop.test.ts",
+        "name": "stale stop cannot cancel another run/session or a newer revision; receipt survives restart",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/stop.test.ts",
+        "name": "stopping with a dispatched unknown effect requires reconciliation",
+        "status": "passed",
+        "report": "storage-faults.json"
+      },
+      {
+        "file": "tests/store.test.ts",
+        "name": "foreign store refusal leaves synthetic private bytes unchanged",
+        "status": "passed",
+        "report": "fresh-store-final.json"
+      },
+      {
+        "file": "tests/store.test.ts",
+        "name": "single writer rejects duplicate daemon and receipts survive restart",
+        "status": "passed",
+        "report": "fresh-store-final.json"
+      },
+      {
+        "file": "tests/stream-work.test.ts",
+        "name": "truncated openai-compatible SSE never completes Work or dispatches tool effects",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/stream-work.test.ts",
+        "name": "truncated anthropic SSE never completes Work or dispatches tool effects",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/terminate-process-tree.test.ts",
+        "name": "terminates an owned process and its live descendant, leaving another process alive",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/tracked-work.test.ts",
+        "name": "background MCP tracking dedupes status, bounds follow-ups, pins schema and stops unknown queries",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "large native checkpoint history reaches one daemon model dispatch through real bounded child IPC",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "large model response and final native result cross both real child IPC directions intact",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "large daemon tool receipt resumes exact native interrupt and offloads evidence without repeating the tool",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "T-009 real child IPC verifies ownership and correlates tool result with daemon-resolved scope",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "T-009 capability, queue and forced shutdown: badcap",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "T-009 capability, queue and forced shutdown: flood",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "T-009 capability, queue and forced shutdown: stubborn",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "incomplete or wrong-kind final result never completes native invocation: partial-run",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "incomplete or wrong-kind final result never completes native invocation: incomplete-run",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "incomplete or wrong-kind final result never completes native invocation: foreign-result",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "T-009 shutdown bounds a handler that ignores cancellation",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "T-009 forced shutdown reaps a stubborn worker and its real descendant",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "T-009 restart marks an unfinished worker interrupted without completing its Work or respawning",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-channel.test.ts",
+        "name": "T-009 native Deep Agents fixture runs in child and resumes exact interrupt through daemon RPC",
+        "status": "passed",
+        "report": "affected-2.json"
+      },
+      {
+        "file": "tests/worker-network-guard.test.ts",
+        "name": "T-009 worker preload denies direct fetch, TCP, TLS, HTTP and UDP APIs",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-command-dispatch.test.ts",
+        "name": "native ledger dispatch: approved",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-command-dispatch.test.ts",
+        "name": "native ledger dispatch: rejected",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-command-dispatch.test.ts",
+        "name": "native ledger dispatch: wrong_hash",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-command-dispatch.test.ts",
+        "name": "native ledger dispatch: nonzero",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-command-dispatch.test.ts",
+        "name": "native ledger dispatch: cancelled",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-command-dispatch.test.ts",
+        "name": "native ledger dispatch: configuration_revoked",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-command-work.test.ts",
+        "name": "configured Work native command: approve",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-command-work.test.ts",
+        "name": "configured Work native command: reject",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-command-work.test.ts",
+        "name": "configured Work native command: child",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-command-work.test.ts",
+        "name": "configured Work native command: steer",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-commands.test.ts",
+        "name": "command consent binds executable bytes, owner, limits, workspace and OS environment without execution",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-leases.test.ts",
+        "name": "canonical overlap checks both ancestors and descendants without prefix collisions",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/workspace-leases.test.ts",
+        "name": "root-owned admission for nested registrations: release",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/workspace-leases.test.ts",
+        "name": "root-owned admission for nested registrations: reverse",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/workspace-leases.test.ts",
+        "name": "root-owned admission for nested registrations: cancel-waiter",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/workspace-leases.test.ts",
+        "name": "root-owned admission for nested registrations: blocked",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/workspace-work.test.ts",
+        "name": "configured native workspace read boundary: read",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-work.test.ts",
+        "name": "configured native workspace read boundary: denied",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-work.test.ts",
+        "name": "configured native workspace read boundary: traversal",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-work.test.ts",
+        "name": "configured native workspace read boundary: revoked",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-work.test.ts",
+        "name": "configured native workspace read boundary: replacement",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-work.test.ts",
+        "name": "configured native workspace read boundary: child",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-work.test.ts",
+        "name": "configured native workspace read boundary: shell",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-work.test.ts",
+        "name": "configured native workspace read boundary: paged",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-work.test.ts",
+        "name": "configured native workspace read boundary: changed-page",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-worktrees.test.ts",
+        "name": "native worktree exact consent: approve",
+        "status": "passed",
+        "report": "browser-adapter.json"
+      },
+      {
+        "file": "tests/workspace-worktrees.test.ts",
+        "name": "native worktree exact consent: adopt",
+        "status": "passed",
+        "report": "browser-adapter.json"
+      },
+      {
+        "file": "tests/workspace-worktrees.test.ts",
+        "name": "native worktree exact consent: reject",
+        "status": "passed",
+        "report": "browser-adapter.json"
+      },
+      {
+        "file": "tests/workspace-worktrees.test.ts",
+        "name": "native worktree exact consent: stale",
+        "status": "passed",
+        "report": "browser-adapter.json"
+      },
+      {
+        "file": "tests/workspace-worktrees.test.ts",
+        "name": "native worktree exact consent: child",
+        "status": "passed",
+        "report": "browser-adapter.json"
+      },
+      {
+        "file": "tests/workspace-worktrees.test.ts",
+        "name": "native worktree exact consent: cancel",
+        "status": "passed",
+        "report": "browser-adapter.json"
+      },
+      {
+        "file": "tests/workspace-worktrees.test.ts",
+        "name": "native worktree exact consent: registration-failure",
+        "status": "passed",
+        "report": "browser-adapter.json"
+      },
+      {
+        "file": "tests/workspace-writes.test.ts",
+        "name": "native exact workspace write: new",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-writes.test.ts",
+        "name": "native exact workspace write: replace",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-writes.test.ts",
+        "name": "native exact workspace write: reject",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-writes.test.ts",
+        "name": "native exact workspace write: stale",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-writes.test.ts",
+        "name": "native exact workspace write: cancel",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-writes.test.ts",
+        "name": "native exact workspace write: private",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-writes.test.ts",
+        "name": "native exact workspace write: child",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspace-writes.test.ts",
+        "name": "writer rejects cancelled, stale, unsafe and oversized proposals without changing files",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/workspaces.test.ts",
+        "name": "directory limits are truthful and unfinished workspace reservations prevent rebinding",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/workspaces.test.ts",
+        "name": "workspace registration persists, replays parallel requests, enforces CAS and canonical duplicate roots",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/workspaces.test.ts",
+        "name": "registered previews reject traversal, junctions, hardlinks, private data, binary and root replacement",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/workspaces.test.ts",
+        "name": "workspace owner HTTP commands require session; read API reports actual content and revision",
+        "status": "passed",
+        "report": "affected-1.json"
+      },
+      {
+        "file": "tests/write-diff.test.ts",
+        "name": "replacement hunk preserves exact changed lines, context, CRLF and trailing newline state",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/write-diff.test.ts",
+        "name": "large and very long differences explicitly report bounded incomplete preview",
+        "status": "passed",
+        "report": "unit.json"
+      },
+      {
+        "file": "tests/browser-native.test.ts",
+        "name": "owned native browser snapshots, exact targets and manual control fence stale actions",
+        "status": "passed",
+        "report": "browser-isolation.json"
+      },
+      {
+        "file": "tests/workspace-worktrees.test.ts",
+        "name": "native worktree exact consent: directory",
+        "status": "passed",
+        "report": "browser-adapter.json"
+      },
+      {
+        "file": "tests/learning-candidates.test.ts",
+        "name": "configured local provider evaluates all three frozen variants before exact publication and next-Work loading",
+        "status": "passed",
+        "report": "learning-full-pipeline-2.json"
+      },
+      {
+        "file": "tests/learning-candidates.test.ts",
+        "name": "scoped propose automatically turns a completed opted-in Work into a real candidate and evaluation without publishing",
+        "status": "passed",
+        "report": "learning-automatic-2.json"
+      },
+      {
+        "file": "tests/performance.test.ts",
+        "name": "measured local warm startup, receipts and retained storage stay within the documented fixture budget",
+        "status": "passed",
+        "report": "performance-tests.json"
+      },
+      {
+        "file": "tests/learning-candidates.test.ts",
+        "name": "evaluation rejects executable case extensions and quota exhaustion preserves sources without model calls",
+        "status": "passed",
+        "report": "learning-gates.json"
+      },
+      {
+        "file": "tests/learning-candidates.test.ts",
+        "name": "two reviewed patches on one base cannot overwrite each other and rollback retains history",
+        "status": "passed",
+        "report": "learning-gates-3.json"
+      },
+      {
+        "file": "tests/scratch-runtime.test.ts",
+        "name": "native glob inputs are bounded before upstream pattern compilation",
+        "status": "passed",
+        "report": "dependency-recheck.json"
+      },
+      {
+        "file": "tests/storage-faults.test.ts",
+        "name": "storage full cannot commit a partial completed Work or outbox",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/storage-faults.test.ts",
+        "name": "storage busy cannot commit a partial completed Work or outbox",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/storage-faults.test.ts",
+        "name": "storage journal cannot commit a partial completed Work or outbox",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/storage-faults.test.ts",
+        "name": "terminal persistence failure stops further execution and reports volatile degradation instead of success",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/mcp-work.test.ts",
+        "name": "configured native worker uses discovered MCP schema and exact approval: background",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/mcp-work.test.ts",
+        "name": "configured native worker uses discovered MCP schema and exact approval: schedule",
+        "status": "passed",
+        "report": "approval-storage-final.json"
+      },
+      {
+        "file": "tests/store.test.ts",
+        "name": "fresh Rocky ignores synthetic foreign home stores and refuses unknown or newer stores without conversion",
+        "status": "passed",
+        "report": "fresh-store-final.json"
+      },
+      {
+        "file": "tests/browser-profiles.test.ts",
+        "name": "browser profile changes after exact approval prevent dispatch and explicit retry needs fresh approval",
+        "status": "passed",
+        "report": "browser-approval-race.json"
+      }
+    ]
+  },
+  "browser": {
+    "latestCaseCounts": { "passed": 50, "failed": 1 },
+    "cases": [
+      {
+        "file": "tests/e2e/alignment.spec.ts",
+        "name": "OpenDots geometry, responsive navigation and keyboard focus",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/background-presence.spec.ts",
+        "name": "background attention navigates to authoritative terminal Work without changing foreground",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/background-presence.spec.ts",
+        "name": "workspace wait is persisted, visible and cleared on exact cancel",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/budget.spec.ts",
+        "name": "T-007 editable call cap is pinned through CopilotKit and visible after reload",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/command-terminal.spec.ts",
+        "name": "exact owner command approval, refusal and unknown receipt reach the same Computer Work",
+        "status": "passed",
+        "report": "browser-initial.json"
+      },
+      {
+        "file": "tests/e2e/computer-panel.spec.ts",
+        "name": "Computer opens a reference-sized pane with actual registered files and honest unavailable adapters",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/computer-panel.spec.ts",
+        "name": "explicit Computer activity fixture isolates Work identity and traps compact keyboard focus",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/configured-work.spec.ts",
+        "name": "T-007 UI selected model → CopilotKit → configured Work → approval → recorded usage",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/grants.spec.ts",
+        "name": "T-008 Work permission revocation persists through UI reload",
+        "status": "passed",
+        "report": "browser-initial.json"
+      },
+      {
+        "file": "tests/e2e/history.spec.ts",
+        "name": "explicit routed history fixture pages stable Work cards without full-page overflow or fake server effects",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/html-preview.spec.ts",
+        "name": "restricted HTML artifact renders without script, storage, API or network authority",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/identity.spec.ts",
+        "name": "T-037 original avatar in app and all sizes/themes render without remote assets",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/learning.spec.ts",
+        "name": "Learning UI requires scoped consent, preserves stale drafts and turns policy off",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/learning.spec.ts",
+        "name": "work Learning consent defaults excluded, saves review consent and withdraws",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/learning.spec.ts",
+        "name": "explicit UI fixture renders renewed-review state and sends the new exact hash",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/learning.spec.ts",
+        "name": "explicit UI fixture reads created and patched candidates without exposing raw JSON first",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/mcp-lifecycle.spec.ts",
+        "name": "MCP settings connect/discover/stop an actual configured HTTP server and preserve honest state after reload",
+        "status": "passed",
+        "report": "browser-initial.json"
+      },
+      {
+        "file": "tests/e2e/mcp-settings.spec.ts",
+        "name": "MCP settings persist valid Rocky config, reject foreign extensions and remain usable at four widths",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/mcp-work.spec.ts",
+        "name": "configured MCP approval is readable at four widths and executes exactly once through the real daemon",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/mcp-work.spec.ts",
+        "name": "configured MCP data approval displays exact template target at four widths",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/memory.spec.ts",
+        "name": "owner memory UI preserves stale drafts, persists edits and deletes search entries",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/memory.spec.ts",
+        "name": "memory scope isolation, private flags, error recovery and keyboard controls in dark English settings",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/memory.spec.ts",
+        "name": "owner grants private memory in Work UI and native model receives only authorized search",
+        "status": "passed",
+        "report": "browser-recheck-3.json"
+      },
+      {
+        "file": "tests/e2e/memory.spec.ts",
+        "name": "composer grants memory before native execution and clears one-Work selection",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/memory.spec.ts",
+        "name": "native memory proposal is visible before exact approval and persists model provenance",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/models.spec.ts",
+        "name": "T-007 connection settings save without traffic, probe, reload and mobile edit",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/reconciliation.spec.ts",
+        "name": "T-008 receipt reconciliation UI confirms known effects and preserves unknown without replay",
+        "status": "passed",
+        "report": "browser-initial.json"
+      },
+      {
+        "file": "tests/e2e/reconnect.spec.ts",
+        "name": "initial snapshot failure reconnects to authoritative snapshot without inventing Work",
+        "status": "passed",
+        "report": "browser-initial.json"
+      },
+      {
+        "file": "tests/e2e/retry.spec.ts",
+        "name": "retry UI reviews receipts and creates a distinct Work; mobile controls remain operable",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/skills.spec.ts",
+        "name": "owner reviews all package files and selects an older immutable revision",
+        "status": "passed",
+        "report": "browser-recheck-3.json"
+      },
+      {
+        "file": "tests/e2e/skills.spec.ts",
+        "name": "owner imports a real local folder as untrusted snapshot",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/skills.spec.ts",
+        "name": "owner reviews pinned skill and enables, deactivates, quarantines",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/skills.spec.ts",
+        "name": "quarantine notification follows the affected work and survives reload",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/skills.spec.ts",
+        "name": "owner discovers project skills, rejects changed source and imports untrusted snapshot",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/steering.spec.ts",
+        "name": "owner steering shows accepted then checkpoint-applied and survives reload on mobile",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/streaming.spec.ts",
+        "name": "real provider SSE is visible before completion and daemon stop cancels the selected stream",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/tool-alignment.spec.ts",
+        "name": "explicit activity fixture matches compact inline tool layout",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/vision-setting.spec.ts",
+        "name": "model image input is explicit, defaults off, persists without claiming a passed probe, and fits four widths",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/work.spec.ts",
+        "name": "CopilotKit → native task → MCP → approval, reload and mobile",
+        "status": "passed",
+        "report": "browser-recheck-3.json"
+      },
+      {
+        "file": "tests/e2e/work.spec.ts",
+        "name": "browser egress: no unconfigured destinations",
+        "status": "failed",
+        "report": "browser-initial.json"
+      },
+      {
+        "file": "tests/e2e/work.spec.ts",
+        "name": "stop from the UI expires only the selected work approval and persists after reload",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/workspace-read.spec.ts",
+        "name": "explicit workspace selection and read scope reaches real native Work through composer",
+        "status": "passed",
+        "report": "browser-recheck-3.json"
+      },
+      {
+        "file": "tests/e2e/workspace-worktree.spec.ts",
+        "name": "worktree exact approval and registration at four widths",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/workspace-write.spec.ts",
+        "name": "real workspace approval card: responsive preview, reject, approve and stale file",
+        "status": "passed",
+        "report": "browser-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/workspaces.spec.ts",
+        "name": "owner registers actual workspace, browses text, rejects traversal and restores drawer focus at four widths",
+        "status": "passed",
+        "report": "browser-recheck-1.json"
+      },
+      {
+        "file": "tests/e2e/v1-workflows.spec.ts",
+        "name": "new document revisions and restore preserve previous content",
+        "status": "passed",
+        "report": "browser-v1-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/v1-workflows.spec.ts",
+        "name": "PNG upload is sanitized, bound to the submitted Work and delivered to the selected vision model",
+        "status": "passed",
+        "report": "browser-v1-recheck-2.json"
+      },
+      {
+        "file": "tests/e2e/v1-workflows.spec.ts",
+        "name": "Learning Inbox edits, evaluates and withdraws a real reflected candidate without bypassing publication",
+        "status": "passed",
+        "report": "browser-fields-final.json"
+      },
+      {
+        "file": "tests/e2e/v1-workflows.spec.ts",
+        "name": "measured warm UI and durable terminal-event projection",
+        "status": "passed",
+        "report": "browser-final.json"
+      },
+      {
+        "file": "tests/e2e/reconnect.spec.ts",
+        "name": "volatile daemon degradation preserves prior Work state and disables the connected claim",
+        "status": "passed",
+        "report": "browser-degraded.json"
+      },
+      {
+        "file": "tests/e2e/empty-install.spec.ts",
+        "name": "empty owned installation offers setup without accounts, imported history or synthetic success",
+        "status": "passed",
+        "report": "browser-fields-final.json"
+      }
+    ]
+  },
+  "dependencyAudit": {
+    "exitCode": 1,
+    "info": 0,
+    "low": 0,
+    "moderate": 2,
+    "high": 7,
+    "critical": 0,
+    "total": 9,
+    "report": "dependency-audit-final.json"
+  },
+  "acceptanceCounts": { "not_run": 4, "passed": 64, "failed": 2 },
+  "taskCounts": { "done": 32, "blocked": 3, "in_progress": 3 },
+  "acceptance": [
+    {
+      "id": "AT-01",
+      "status": "not_run",
+      "notes": "Windows constrained-PATH clean npm ci/build/typecheck/core tests/Promptfoo fixture all exited 0 without forbidden tools. Ubuntu and pristine-machine proof are unavailable.",
+      "testFiles": [
+        "tests/backup.test.ts",
+        "tests/contracts.test.ts",
+        "tests/learning-candidates.test.ts"
+      ],
+      "sourceReports": [
+        "affected-1.json",
+        "unit.json",
+        "learning-recheck-2.json",
+        "learning-full-pipeline-2.json",
+        "learning-automatic-2.json",
+        "learning-gates.json",
+        "learning-gates-3.json",
+        "no-python-windows-final.json"
+      ]
+    },
+    {
+      "id": "AT-02",
+      "status": "passed",
+      "notes": "Empty owned installation, local documents and actual configured local provider Work require no cloud platform account. Fixture endpoints only.",
+      "testFiles": [
+        "tests/configured-work.test.ts",
+        "tests/documents-new.test.ts",
+        "tests/e2e/v1-workflows.spec.ts",
+        "tests/e2e/empty-install.spec.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "browser-empty-final.json",
+        "browser-v1-recheck-2.json"
+      ]
+    },
+    {
+      "id": "AT-03",
+      "status": "failed",
+      "notes": "Configured local model/MCP and deny/redirect contracts pass; strict browser egress observed an unconfigured request. Preserve the host-injection blocker; do not attribute every unknown destination to AdGuard. Clean environment required.",
+      "testFiles": [
+        "tests/network.test.ts",
+        "tests/model-network.test.ts",
+        "tests/mcp-manager.test.ts",
+        "tests/e2e/alignment.spec.ts",
+        "tests/e2e/background-presence.spec.ts",
+        "tests/e2e/budget.spec.ts",
+        "tests/e2e/command-terminal.spec.ts",
+        "tests/e2e/computer-panel.spec.ts",
+        "tests/e2e/configured-work.spec.ts",
+        "tests/e2e/grants.spec.ts",
+        "tests/e2e/history.spec.ts",
+        "tests/e2e/html-preview.spec.ts",
+        "tests/e2e/identity.spec.ts",
+        "tests/e2e/learning.spec.ts",
+        "tests/e2e/mcp-lifecycle.spec.ts",
+        "tests/e2e/mcp-settings.spec.ts",
+        "tests/e2e/mcp-work.spec.ts",
+        "tests/e2e/memory.spec.ts",
+        "tests/e2e/models.spec.ts",
+        "tests/e2e/reconciliation.spec.ts",
+        "tests/e2e/reconnect.spec.ts",
+        "tests/e2e/retry.spec.ts",
+        "tests/e2e/skills.spec.ts",
+        "tests/e2e/steering.spec.ts",
+        "tests/e2e/streaming.spec.ts",
+        "tests/e2e/tool-alignment.spec.ts",
+        "tests/e2e/vision-setting.spec.ts",
+        "tests/e2e/work.spec.ts",
+        "tests/e2e/workspace-read.spec.ts",
+        "tests/e2e/workspace-worktree.spec.ts",
+        "tests/e2e/workspace-write.spec.ts",
+        "tests/e2e/workspaces.spec.ts"
+      ],
+      "sourceReports": [
+        "affected-2.json",
+        "dependency-recheck.json",
+        "unit.json",
+        "browser-initial.json"
+      ]
+    },
+    {
+      "id": "AT-04",
+      "status": "not_run",
+      "notes": "Actual official SDK stdio lifecycle/cancellation/owned-process tests pass on Windows. Required Ubuntu roundtrip has not run.",
+      "testFiles": [
+        "tests/mcp.test.ts",
+        "tests/mcp-manager.test.ts",
+        "tests/terminate-process-tree.test.ts"
+      ],
+      "sourceReports": [
+        "affected-2.json",
+        "dependency-recheck.json",
+        "unit.json"
+      ]
+    },
+    {
+      "id": "AT-05",
+      "status": "passed",
+      "notes": "Actual local HTTP fixture, official SDK transport, protocol and redirect rejection; no public MCP endpoint claim.",
+      "testFiles": ["tests/mcp.test.ts", "tests/mcp-manager.test.ts"],
+      "sourceReports": ["affected-2.json", "dependency-recheck.json"]
+    },
+    {
+      "id": "AT-06",
+      "status": "passed",
+      "notes": "Scoped env/credential references, redacted evidence and cwd guards verified against synthetic secrets. Native processes are not an OS security sandbox.",
+      "testFiles": [
+        "tests/mcp.test.ts",
+        "tests/mcp-registry.test.ts",
+        "tests/redaction.test.ts",
+        "tests/workspace-commands.test.ts"
+      ],
+      "sourceReports": ["unit.json", "dependency-recheck.json"]
+    },
+    {
+      "id": "AT-07",
+      "status": "passed",
+      "notes": "Duplicate names/schema IDs, schema revision invalidation and bounded complete pagination are covered. Unsupported schemas fail closed.",
+      "testFiles": [
+        "tests/mcp-schema.test.ts",
+        "tests/mcp-manager.test.ts",
+        "tests/mcp-registry.test.ts"
+      ],
+      "sourceReports": ["affected-2.json", "unit.json"]
+    },
+    {
+      "id": "AT-08",
+      "status": "passed",
+      "notes": "Annotations, prompts and data content cannot grant authority; daemon policy remains authoritative.",
+      "testFiles": [
+        "tests/mcp-schema.test.ts",
+        "tests/policy.test.ts",
+        "tests/mcp-data-work.test.ts"
+      ],
+      "sourceReports": ["unit.json"]
+    },
+    {
+      "id": "AT-09",
+      "status": "passed",
+      "notes": "Exact receipt replay, changed-payload rejection and persisted restart tested.",
+      "testFiles": [
+        "tests/store.test.ts",
+        "tests/admission.test.ts",
+        "tests/intent.test.ts"
+      ],
+      "sourceReports": [
+        "storage-faults-2.json",
+        "unit.json",
+        "fresh-store-final.json"
+      ]
+    },
+    {
+      "id": "AT-10",
+      "status": "passed",
+      "notes": "Independent execution sessions/configuration and simultaneous background/main projection covered with local fixtures.",
+      "testFiles": [
+        "tests/admission.test.ts",
+        "tests/continuous-conversation.test.ts",
+        "tests/conversation-store.test.ts",
+        "tests/model-slots.test.ts",
+        "tests/e2e/configured-work.spec.ts",
+        "tests/e2e/learning.spec.ts",
+        "tests/e2e/mcp-work.spec.ts",
+        "tests/e2e/memory.spec.ts",
+        "tests/e2e/models.spec.ts",
+        "tests/e2e/retry.spec.ts",
+        "tests/e2e/skills.spec.ts",
+        "tests/e2e/steering.spec.ts",
+        "tests/e2e/streaming.spec.ts",
+        "tests/e2e/work.spec.ts",
+        "tests/e2e/workspace-read.spec.ts",
+        "tests/e2e/workspace-worktree.spec.ts",
+        "tests/e2e/workspace-write.spec.ts"
+      ],
+      "sourceReports": [
+        "storage-faults-2.json",
+        "unit.json",
+        "affected-1.json",
+        "browser-recheck-2.json"
+      ]
+    },
+    {
+      "id": "AT-11",
+      "status": "passed",
+      "notes": "Exact run/session/revision control, separate background stop and applied/not_applied steering receipts.",
+      "testFiles": [
+        "tests/stop.test.ts",
+        "tests/steering.test.ts",
+        "tests/e2e/configured-work.spec.ts",
+        "tests/e2e/learning.spec.ts",
+        "tests/e2e/mcp-work.spec.ts",
+        "tests/e2e/memory.spec.ts",
+        "tests/e2e/models.spec.ts",
+        "tests/e2e/retry.spec.ts",
+        "tests/e2e/skills.spec.ts",
+        "tests/e2e/steering.spec.ts",
+        "tests/e2e/streaming.spec.ts",
+        "tests/e2e/work.spec.ts",
+        "tests/e2e/workspace-read.spec.ts",
+        "tests/e2e/workspace-worktree.spec.ts",
+        "tests/e2e/workspace-write.spec.ts"
+      ],
+      "sourceReports": ["storage-faults.json", "browser-recheck-2.json"]
+    },
+    {
+      "id": "AT-12",
+      "status": "passed",
+      "notes": "Durable cursor replay/snapshot gap and UI detach/reconnect covered; no external network reliability claim.",
+      "testFiles": [
+        "tests/agui-stream.test.ts",
+        "tests/projection.test.ts",
+        "tests/stream-work.test.ts",
+        "tests/e2e/configured-work.spec.ts",
+        "tests/e2e/learning.spec.ts",
+        "tests/e2e/mcp-work.spec.ts",
+        "tests/e2e/memory.spec.ts",
+        "tests/e2e/models.spec.ts",
+        "tests/e2e/retry.spec.ts",
+        "tests/e2e/skills.spec.ts",
+        "tests/e2e/steering.spec.ts",
+        "tests/e2e/streaming.spec.ts",
+        "tests/e2e/work.spec.ts",
+        "tests/e2e/workspace-read.spec.ts",
+        "tests/e2e/workspace-worktree.spec.ts",
+        "tests/e2e/workspace-write.spec.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "affected-1.json",
+        "browser-recheck-2.json"
+      ]
+    },
+    {
+      "id": "AT-13",
+      "status": "passed",
+      "notes": "Actual native task/todos middleware and owned child IPC plus distinct UI event ancestry.",
+      "testFiles": [
+        "tests/runtime.test.ts",
+        "tests/native-task-identity.test.ts",
+        "tests/worker-channel.test.ts",
+        "tests/e2e/memory.spec.ts",
+        "tests/e2e/skills.spec.ts",
+        "tests/e2e/work.spec.ts",
+        "tests/e2e/workspace-read.spec.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "affected-2.json",
+        "browser-recheck-3.json"
+      ]
+    },
+    {
+      "id": "AT-14",
+      "status": "passed",
+      "notes": "Actual foreground/background and scheduled configured MCP writes wait for approval and rejection produces zero receipts; native command child denial and forged owner HTTP rejection are separately covered.",
+      "testFiles": [
+        "tests/policy.test.ts",
+        "tests/configured-work.test.ts",
+        "tests/mcp-work.test.ts",
+        "tests/workspace-command-work.test.ts"
+      ],
+      "sourceReports": ["unit.json", "approval-storage-final.json"]
+    },
+    {
+      "id": "AT-15",
+      "status": "passed",
+      "notes": "File/policy/MCP fingerprints plus actual browser stale-target fences pass. Configured Work profile authority changed synchronously after owner approval and before asynchronous dispatch: no browser launch, settled not_executed, explicit retry obtains a fresh fingerprint and requires approval again. No silent automatic retry.",
+      "testFiles": [
+        "tests/policy.test.ts",
+        "tests/file-target.test.ts",
+        "tests/mcp-schema.test.ts",
+        "tests/workspace-commands.test.ts",
+        "tests/browser-profiles.test.ts"
+      ],
+      "sourceReports": [
+        "browser-approval-race.json",
+        "unit.json",
+        "browser-isolation.json"
+      ]
+    },
+    {
+      "id": "AT-16",
+      "status": "passed",
+      "notes": "Create/create races, traversal/junction/hardlink and canonical target checks pass on Windows. Executable hashes do not bind interpreter dependencies or eliminate external OS execution-time races.",
+      "testFiles": [
+        "tests/file-target.test.ts",
+        "tests/workspaces.test.ts",
+        "tests/workspace-writes.test.ts",
+        "tests/workspace-leases.test.ts"
+      ],
+      "sourceReports": ["unit.json", "affected-1.json", "browser-adapter.json"]
+    },
+    {
+      "id": "AT-17",
+      "status": "passed",
+      "notes": "Native checkpoint interrupt/resume, denied tool result pairing and persisted effect receipt replay covered.",
+      "testFiles": [
+        "tests/configured-work.test.ts",
+        "tests/worker-channel.test.ts",
+        "tests/workspace-command-work.test.ts",
+        "tests/operation-ledger.test.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "affected-1.json",
+        "affected-2.json",
+        "approval-storage-final.json"
+      ]
+    },
+    {
+      "id": "AT-18",
+      "status": "passed",
+      "notes": "Dispatched effects without results remain unknown across worker/recovery fixtures, block retry, and require reconciliation; no guessed success or automatic resend.",
+      "testFiles": [
+        "tests/operation-ledger.test.ts",
+        "tests/operation-reconciler.test.ts",
+        "tests/worker-channel.test.ts",
+        "tests/mcp-work.test.ts",
+        "tests/native-command-receipts.test.ts"
+      ],
+      "sourceReports": [
+        "approval-storage-final.json",
+        "unit.json",
+        "affected-1.json",
+        "affected-2.json"
+      ]
+    },
+    {
+      "id": "AT-19",
+      "status": "passed",
+      "notes": "Actual child exit and injected transaction/outbox windows preserve one completion delivery without repeating effects.",
+      "testFiles": [
+        "tests/persistence.test.ts",
+        "tests/result-transfer.test.ts"
+      ],
+      "sourceReports": ["storage-faults.json", "unit.json"]
+    },
+    {
+      "id": "AT-20",
+      "status": "passed",
+      "notes": "Late background completion cursor/checkpoint and paginated history covered.",
+      "testFiles": [
+        "tests/inbox.test.ts",
+        "tests/context-barrier.test.ts",
+        "tests/conversation-store.test.ts"
+      ],
+      "sourceReports": ["unit.json", "affected-1.json"]
+    },
+    {
+      "id": "AT-21",
+      "status": "passed",
+      "notes": "Three real native compactions, long read evidence, smaller context and failing/unbound summaries preserve required source/checkpoint context.",
+      "testFiles": [
+        "tests/native-compaction.test.ts",
+        "tests/context-barrier.test.ts"
+      ],
+      "sourceReports": ["unit.json", "affected-1.json", "affected-2.json"]
+    },
+    {
+      "id": "AT-22",
+      "status": "passed",
+      "notes": "Structured/text/image mapping, vision capability rejection and actual owner PNG upload to model image read covered.",
+      "testFiles": [
+        "tests/mcp-result.test.ts",
+        "tests/mcp-vision-work.test.ts",
+        "tests/model-transfer.test.ts",
+        "tests/attachments.test.ts",
+        "tests/e2e/v1-workflows.spec.ts"
+      ],
+      "sourceReports": ["unit.json", "browser-v1-recheck-2.json"]
+    },
+    {
+      "id": "AT-23",
+      "status": "passed",
+      "notes": "Timeout/429/partial stream, shared reservation/usage, cancellation and no implicit provider fallback. Cost without credible pricing remains unknown.",
+      "testFiles": [
+        "tests/model-budget.test.ts",
+        "tests/model-stream.test.ts",
+        "tests/model-slots.test.ts",
+        "tests/configured-work.test.ts"
+      ],
+      "sourceReports": ["unit.json"]
+    },
+    {
+      "id": "AT-24",
+      "status": "passed",
+      "notes": "Actual CONNECT proxy, NO_PROXY and TLS CA handshake fixtures; connection-scoped DNS/policy, no global configuration changes.",
+      "testFiles": ["tests/model-network.test.ts", "tests/model-dns.test.ts"],
+      "sourceReports": ["unit.json", "dependency-recheck.json"]
+    },
+    {
+      "id": "AT-25",
+      "status": "passed",
+      "notes": "Wrong Host/Origin and missing owner session rejected; token is not placed in URL.",
+      "testFiles": [
+        "tests/http.test.ts",
+        "tests/grants.test.ts",
+        "tests/workspace-command-work.test.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "browser-isolation.json",
+        "storage-faults-2.json"
+      ]
+    },
+    {
+      "id": "AT-26",
+      "status": "passed",
+      "notes": "Sandboxed HTML preview, bounded artifact bytes/hash/download and origin separation. Strict whole-browser egress remains AT-03 failed.",
+      "testFiles": [
+        "tests/html-preview.test.ts",
+        "tests/artifacts.test.ts",
+        "tests/artifact-native.test.ts",
+        "tests/e2e/alignment.spec.ts",
+        "tests/e2e/background-presence.spec.ts",
+        "tests/e2e/budget.spec.ts",
+        "tests/e2e/computer-panel.spec.ts",
+        "tests/e2e/configured-work.spec.ts",
+        "tests/e2e/history.spec.ts",
+        "tests/e2e/html-preview.spec.ts",
+        "tests/e2e/identity.spec.ts",
+        "tests/e2e/learning.spec.ts",
+        "tests/e2e/mcp-settings.spec.ts",
+        "tests/e2e/mcp-work.spec.ts",
+        "tests/e2e/memory.spec.ts",
+        "tests/e2e/models.spec.ts",
+        "tests/e2e/retry.spec.ts",
+        "tests/e2e/skills.spec.ts",
+        "tests/e2e/steering.spec.ts",
+        "tests/e2e/streaming.spec.ts",
+        "tests/e2e/tool-alignment.spec.ts",
+        "tests/e2e/vision-setting.spec.ts",
+        "tests/e2e/work.spec.ts",
+        "tests/e2e/workspace-read.spec.ts",
+        "tests/e2e/workspace-worktree.spec.ts",
+        "tests/e2e/workspace-write.spec.ts",
+        "tests/e2e/workspaces.spec.ts"
+      ],
+      "sourceReports": ["unit.json", "browser-recheck-1.json"]
+    },
+    {
+      "id": "AT-27",
+      "status": "passed",
+      "notes": "Document create/revisions/restore, stale revision CAS and draft retention.",
+      "testFiles": [
+        "tests/documents.test.ts",
+        "tests/documents-new.test.ts",
+        "tests/e2e/v1-workflows.spec.ts"
+      ],
+      "sourceReports": ["unit.json", "browser-v1-recheck-2.json"]
+    },
+    {
+      "id": "AT-28",
+      "status": "passed",
+      "notes": "Two actual owned profiles: cookie isolation, taking A preserves B, denied file target and stale snapshot after handover. Installed Chromium 1223 compatibility override, not pinned 1243 or OS sandbox evidence.",
+      "testFiles": [
+        "tests/browser-profiles.test.ts",
+        "tests/browser-native.test.ts"
+      ],
+      "sourceReports": ["browser-approval-race.json", "browser-isolation.json"]
+    },
+    {
+      "id": "AT-29",
+      "status": "passed",
+      "notes": "Engine-unavailable and isolated-browser-unavailable paths never fall back to Native shell/files/browser. Container API lifecycle uses controlled adapter fixtures.",
+      "testFiles": [
+        "tests/isolated-environment.test.ts",
+        "tests/browser-profiles.test.ts"
+      ],
+      "sourceReports": ["browser-approval-race.json", "unit.json"]
+    },
+    {
+      "id": "AT-30",
+      "status": "not_run",
+      "notes": "Native explicitly reports no sandbox; container settings request network none and report unverified enforcement. Real container/DNS/redirect/private-IP allow/deny matrix requires unavailable engine/clean environment.",
+      "testFiles": [
+        "tests/isolated-environment.test.ts",
+        "tests/browser-profiles.test.ts"
+      ],
+      "sourceReports": ["browser-approval-race.json", "unit.json"]
+    },
+    {
+      "id": "AT-31",
+      "status": "passed",
+      "notes": "Leases, canonical overlap, waiter cancellation and model-slot separation; background isolated worktree or explicitly adopted empty directory.",
+      "testFiles": [
+        "tests/workspace-leases.test.ts",
+        "tests/workspace-worktrees.test.ts",
+        "tests/admission.test.ts"
+      ],
+      "sourceReports": [
+        "storage-faults-2.json",
+        "affected-1.json",
+        "browser-adapter.json"
+      ]
+    },
+    {
+      "id": "AT-32",
+      "status": "passed",
+      "notes": "Fake-clock IANA DST/misfire/restart/deduplication plus real scheduled configured Work admission and exact MCP approval. Daemon-off execution is not claimed.",
+      "testFiles": ["tests/routines.test.ts", "tests/mcp-work.test.ts"],
+      "sourceReports": ["approval-storage-final.json", "unit.json"]
+    },
+    {
+      "id": "AT-33",
+      "status": "passed",
+      "notes": "Configured MCP background tracking uses exact schema/args, fingerprint dedupe, bounded polling/follow-ups and unknown-query stop. No direct provider-specific connector.",
+      "testFiles": ["tests/tracked-work.test.ts"],
+      "sourceReports": ["unit.json"]
+    },
+    {
+      "id": "AT-34",
+      "status": "passed",
+      "notes": "Manual import/update maps source/license/hash, preserves explicit versions and never executes imported scripts.",
+      "testFiles": [
+        "tests/skill-sources.test.ts",
+        "tests/skill-package.test.ts",
+        "tests/skills.test.ts"
+      ],
+      "sourceReports": ["unit.json", "affected-1.json"]
+    },
+    {
+      "id": "AT-35",
+      "status": "passed",
+      "notes": "Frozen scoped catalog and actual native read_file load provenance, including published candidate loaded by the next real configured Work.",
+      "testFiles": [
+        "tests/skill-native.test.ts",
+        "tests/skill-selection.test.ts",
+        "tests/skill-catalog.test.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "affected-2.json",
+        "learning-full-pipeline-2.json"
+      ]
+    },
+    {
+      "id": "AT-36",
+      "status": "passed",
+      "notes": "Scope/private isolation, owner locks/CAS, bilingual FTS and atomic deletion/restart.",
+      "testFiles": [
+        "tests/memory.test.ts",
+        "tests/memory-native.test.ts",
+        "tests/memory-write.test.ts"
+      ],
+      "sourceReports": ["unit.json"]
+    },
+    {
+      "id": "AT-37",
+      "status": "passed",
+      "notes": "Actual completed opted-in configured Work automatically produces episode/reflection/candidate/evaluation; off and ineligible/self-generated/private sources excluded.",
+      "testFiles": [
+        "tests/learning-policy.test.ts",
+        "tests/learning-source.test.ts",
+        "tests/learning-episode.test.ts",
+        "tests/learning-candidates.test.ts"
+      ],
+      "sourceReports": [
+        "learning-recheck-2.json",
+        "unit.json",
+        "learning-full-pipeline-2.json",
+        "learning-automatic-2.json",
+        "learning-gates.json",
+        "learning-gates-3.json"
+      ]
+    },
+    {
+      "id": "AT-38",
+      "status": "passed",
+      "notes": "Restricted tools/middleware/backend reject file/shell/MCP/subagent/active-publication authority; not prompt-only denial.",
+      "testFiles": [
+        "tests/reflection-profile.test.ts",
+        "tests/reflection-worker.test.ts",
+        "tests/reflection-authority.test.ts"
+      ],
+      "sourceReports": ["unit.json"]
+    },
+    {
+      "id": "AT-39",
+      "status": "passed",
+      "notes": "Scoped source review/redaction, configured target and trusted local evaluator; private holdout contents excluded from generator. Controlled local endpoints only, no live provider privacy guarantee.",
+      "testFiles": [
+        "tests/learning-review.test.ts",
+        "tests/reflection-service.test.ts",
+        "tests/redaction.test.ts",
+        "tests/network.test.ts",
+        "tests/evaluation.test.ts"
+      ],
+      "sourceReports": [
+        "dependency-recheck.json",
+        "unit.json",
+        "learning-full-pipeline-2.json"
+      ]
+    },
+    {
+      "id": "AT-40",
+      "status": "passed",
+      "notes": "108 actual local configured full-Work runs compare baseline/current/candidate across 12 cases and 3 repeats. Promptfoo receipt/child/file assertions also run. Synthetic efficacy only; generated-code execution without safe executor is skipped_unsafe_environment.",
+      "testFiles": [
+        "tests/learning-candidates.test.ts",
+        "tests/evaluation.test.ts"
+      ],
+      "sourceReports": [
+        "dependency-recheck.json",
+        "learning-recheck-2.json",
+        "learning-full-pipeline-2.json",
+        "learning-automatic-2.json",
+        "learning-gates.json",
+        "learning-gates-3.json",
+        "no-python-windows-final.json"
+      ]
+    },
+    {
+      "id": "AT-41",
+      "status": "passed",
+      "notes": "Data-only suite validation rejects executable hooks/provider extensions; only trusted application provider executes.",
+      "testFiles": [
+        "tests/learning-candidates.test.ts",
+        "tests/reflection-profile.test.ts"
+      ],
+      "sourceReports": [
+        "learning-recheck-2.json",
+        "unit.json",
+        "learning-full-pipeline-2.json",
+        "learning-automatic-2.json",
+        "learning-gates.json",
+        "learning-gates-3.json"
+      ]
+    },
+    {
+      "id": "AT-42",
+      "status": "passed",
+      "notes": "Insufficient/unknown usage/unsafe executor cannot publish; hard gate and exact manifest required. Train/validation/holdout manifests are separate; no live skill efficacy claim.",
+      "testFiles": [
+        "tests/learning-candidates.test.ts",
+        "tests/e2e/v1-workflows.spec.ts"
+      ],
+      "sourceReports": [
+        "learning-recheck-2.json",
+        "learning-full-pipeline-2.json",
+        "learning-automatic-2.json",
+        "learning-gates.json",
+        "learning-gates-3.json",
+        "browser-final.json"
+      ]
+    },
+    {
+      "id": "AT-43",
+      "status": "passed",
+      "notes": "Competing same-base publication CAS, edit invalidation and rollback/history covered. CAS test explicitly uses synthetic evaluation evidence; actual evaluation is separately covered by full pipeline.",
+      "testFiles": [
+        "tests/learning-candidates.test.ts",
+        "tests/skill-selection.test.ts"
+      ],
+      "sourceReports": [
+        "learning-recheck-2.json",
+        "unit.json",
+        "learning-full-pipeline-2.json",
+        "learning-automatic-2.json",
+        "learning-gates.json",
+        "learning-gates-3.json"
+      ]
+    },
+    {
+      "id": "AT-44",
+      "status": "passed",
+      "notes": "Run-frozen revisions, revoked loading/effects fences and source-derived quarantine preserve original effect evidence.",
+      "testFiles": [
+        "tests/skill-native.test.ts",
+        "tests/skill-selection.test.ts",
+        "tests/skill-backend.test.ts",
+        "tests/learning-candidates.test.ts"
+      ],
+      "sourceReports": [
+        "learning-recheck-2.json",
+        "unit.json",
+        "affected-2.json",
+        "learning-full-pipeline-2.json",
+        "learning-automatic-2.json",
+        "learning-gates.json",
+        "learning-gates-3.json"
+      ]
+    },
+    {
+      "id": "AT-45",
+      "status": "passed",
+      "notes": "Low-priority slots, candidate/call/token/wall/report quotas enforced. Deterministic fixture token accounting is N/A and cannot produce publishable evidence; unknown configured usage fails gate.",
+      "testFiles": [
+        "tests/model-slots.test.ts",
+        "tests/model-budget.test.ts",
+        "tests/learning-candidates.test.ts",
+        "tests/reflection-service.test.ts"
+      ],
+      "sourceReports": [
+        "learning-recheck-2.json",
+        "unit.json",
+        "learning-full-pipeline-2.json",
+        "learning-automatic-2.json",
+        "learning-gates.json",
+        "learning-gates-3.json"
+      ]
+    },
+    {
+      "id": "AT-46",
+      "status": "passed",
+      "notes": "Source withdrawal cleans only derived payload/index/cache references and quarantines derived skills while retaining unrelated checkpoints/effect receipts. No remote deletion claim.",
+      "testFiles": [
+        "tests/learning-candidates.test.ts",
+        "tests/learning-episode.test.ts",
+        "tests/memory.test.ts"
+      ],
+      "sourceReports": [
+        "learning-recheck-2.json",
+        "unit.json",
+        "learning-full-pipeline-2.json",
+        "learning-automatic-2.json",
+        "learning-gates.json",
+        "learning-gates-3.json"
+      ]
+    },
+    {
+      "id": "AT-47",
+      "status": "passed",
+      "notes": "Fresh WorkService under synthetic foreign home/APSIS_DATA_DIR does not enumerate/read foreign stores; unknown nonempty and future-schema roots reject without changing private bytes. Filesystem spies cover synchronous reads/enumeration, not a kernel-level access audit.",
+      "testFiles": ["tests/store.test.ts", "tests/backup.test.ts"],
+      "sourceReports": ["affected-1.json", "fresh-store-final.json"]
+    },
+    {
+      "id": "AT-48",
+      "status": "passed",
+      "notes": "Quiesced own-store backup/manifest checksums and fresh restore tested; source/tampered/foreign/active roots reject, automation/grants/effect replay fenced.",
+      "testFiles": ["tests/backup.test.ts"],
+      "sourceReports": [
+        "affected-1.json",
+        "unit.json",
+        "no-python-windows-final.json"
+      ]
+    },
+    {
+      "id": "AT-49",
+      "status": "passed",
+      "notes": "Existing bilingual/theme/keyboard/focus/reduced-motion/320px/scroll regression and actual new flows pass after selector and overflow repairs. Scoped automated checks, not exhaustive accessibility certification or new whole-site redesign.",
+      "testFiles": [
+        "tests/identity.test.ts",
+        "tests/presence.test.ts",
+        "tests/e2e/alignment.spec.ts",
+        "tests/e2e/background-presence.spec.ts",
+        "tests/e2e/budget.spec.ts",
+        "tests/e2e/computer-panel.spec.ts",
+        "tests/e2e/configured-work.spec.ts",
+        "tests/e2e/history.spec.ts",
+        "tests/e2e/html-preview.spec.ts",
+        "tests/e2e/identity.spec.ts",
+        "tests/e2e/learning.spec.ts",
+        "tests/e2e/mcp-settings.spec.ts",
+        "tests/e2e/mcp-work.spec.ts",
+        "tests/e2e/memory.spec.ts",
+        "tests/e2e/models.spec.ts",
+        "tests/e2e/retry.spec.ts",
+        "tests/e2e/skills.spec.ts",
+        "tests/e2e/steering.spec.ts",
+        "tests/e2e/streaming.spec.ts",
+        "tests/e2e/tool-alignment.spec.ts",
+        "tests/e2e/vision-setting.spec.ts",
+        "tests/e2e/work.spec.ts",
+        "tests/e2e/workspace-read.spec.ts",
+        "tests/e2e/workspace-worktree.spec.ts",
+        "tests/e2e/workspace-write.spec.ts",
+        "tests/e2e/workspaces.spec.ts",
+        "tests/e2e/v1-workflows.spec.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "browser-recheck-1.json",
+        "browser-recheck-2.json",
+        "browser-recheck-3.json",
+        "browser-v1-recheck-2.json"
+      ]
+    },
+    {
+      "id": "AT-50",
+      "status": "passed",
+      "notes": "Actual npm dry-run package inventory and local Git object size/private-path/secret pattern guards pass. Lockfile and small fixtures retained; no remote artifacts created.",
+      "testFiles": ["tests/identity.test.ts"],
+      "sourceReports": ["unit.json", "package-final.txt"]
+    },
+    {
+      "id": "AT-51",
+      "status": "failed",
+      "notes": "License inventory/SBOM/source notices/secret patterns pass; npm audit still reports 7 high and 2 moderate advisories (0 critical). No waiver/downgrade/disabled CI. Remote CI/protection not run or changed.",
+      "testFiles": ["tests/identity.test.ts"],
+      "sourceReports": [
+        "unit.json",
+        "dependency-audit-final.json",
+        "sbom.json",
+        "package-final.txt"
+      ]
+    },
+    {
+      "id": "AT-52",
+      "status": "passed",
+      "notes": "All 70 AT entries now have scoped evidence/limitations; initial failed runs retained, unavailable platforms/live not promoted. Aggregate latest-case pass counts are not a second monolithic green suite.",
+      "testFiles": [],
+      "sourceReports": ["verification.json"]
+    },
+    {
+      "id": "AT-53",
+      "status": "not_run",
+      "notes": "Hardware, warm startup, receipt, UI/event-lag, heap and disk measurements recorded and absolute fixture targets pass. No prior comparable baseline or isolated daemon RSS; the full relative-performance acceptance condition is not established.",
+      "testFiles": [
+        "tests/performance.test.ts",
+        "tests/e2e/v1-workflows.spec.ts"
+      ],
+      "sourceReports": [
+        "performance-tests.json",
+        "performance.json",
+        "browser-final.json"
+      ]
+    },
+    {
+      "id": "AT-54",
+      "status": "passed",
+      "notes": "Clean copied Rocky source installs/builds/runs Node-only core/Learning paths. Static first-party scan has only acknowledged OpenDots CSS provenance comments, no upstream app/runtime imports or extra agent loop.",
+      "testFiles": [
+        "tests/runtime.test.ts",
+        "tests/worker-channel.test.ts",
+        "tests/configured-work.test.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "affected-2.json",
+        "no-python-windows-final.json"
+      ]
+    },
+    {
+      "id": "AT-55",
+      "status": "passed",
+      "notes": "Optional optimize remains absent/disabled; restricted reflection plus trusted Promptfoo evaluation completes the standard pipeline without it.",
+      "testFiles": [
+        "tests/learning-candidates.test.ts",
+        "tests/evaluation.test.ts"
+      ],
+      "sourceReports": [
+        "dependency-recheck.json",
+        "learning-recheck-2.json",
+        "learning-full-pipeline-2.json",
+        "learning-automatic-2.json",
+        "learning-gates.json",
+        "learning-gates-3.json"
+      ]
+    },
+    {
+      "id": "AT-56",
+      "status": "passed",
+      "notes": "Core runs on local daemon with explicitly configured model/MCP; no mandatory Slack/voice/managed channel service or cloud storage.",
+      "testFiles": ["tests/http.test.ts", "tests/mcp-work.test.ts"],
+      "sourceReports": [
+        "browser-isolation.json",
+        "approval-storage-final.json",
+        "no-python-windows-final.json"
+      ]
+    },
+    {
+      "id": "AT-57",
+      "status": "passed",
+      "notes": "Actual bounded SQLite FULL/BUSY and injected COMMIT journal failure, child crash and single-writer tests; volatile named degradation event has no durable cursor and never fabricates completed. Not a destructive physical-disk failure test.",
+      "testFiles": [
+        "tests/storage-faults.test.ts",
+        "tests/persistence.test.ts",
+        "tests/worker-channel.test.ts",
+        "tests/store.test.ts",
+        "tests/e2e/reconnect.spec.ts"
+      ],
+      "sourceReports": [
+        "storage-faults.json",
+        "fresh-store-final.json",
+        "affected-2.json",
+        "approval-storage-final.json",
+        "browser-degraded.json"
+      ]
+    },
+    {
+      "id": "AT-58",
+      "status": "passed",
+      "notes": "Missing model/browser/engine has truthful setup/unavailable state; local settings/documents stay usable and no simulated successful tools.",
+      "testFiles": [
+        "tests/models.test.ts",
+        "tests/isolated-environment.test.ts",
+        "tests/browser-profiles.test.ts",
+        "tests/e2e/empty-install.spec.ts"
+      ],
+      "sourceReports": [
+        "browser-approval-race.json",
+        "unit.json",
+        "browser-empty-final.json"
+      ]
+    },
+    {
+      "id": "AT-59",
+      "status": "passed",
+      "notes": "Read-only Git inspection confirms D:/Code/Rocky independent root, root commit 322186bdee19dc15d1c01c242e54ca7cfccde52b, and no configured remotes. No old repo touched.",
+      "testFiles": [],
+      "sourceReports": ["verification.json"]
+    },
+    {
+      "id": "AT-60",
+      "status": "passed",
+      "notes": "First-party apps/packages/scripts/package/CI rg scan: only six OpenDots CSS provenance comments; no legacy API namespaces or foreign runtime adapters.",
+      "testFiles": [],
+      "sourceReports": ["verification.json"]
+    },
+    {
+      "id": "AT-61",
+      "status": "passed",
+      "notes": "Reference adoption/notices retained; clean source install does not clone/start upstream products or migrate their data.",
+      "testFiles": [],
+      "sourceReports": ["no-python-windows-final.json"]
+    },
+    {
+      "id": "AT-62",
+      "status": "passed",
+      "notes": "Original authored asset manifest/hash/source/size fixtures and earlier identity rendering evidence retained; no avatar redesign or inherited assets. Final art/brand rights approval is not asserted.",
+      "testFiles": ["tests/identity.test.ts"],
+      "sourceReports": [
+        "unit.json",
+        "../../2026-10-03/p1/verification.json",
+        "../tool-component/verification.json"
+      ]
+    },
+    {
+      "id": "AT-63",
+      "status": "passed",
+      "notes": "Persisted event/fake-clock projection covers waiting, terminal/stale and deduplicated celebration; no independent animation job state.",
+      "testFiles": [
+        "tests/presence.test.ts",
+        "tests/projection.test.ts",
+        "tests/e2e/memory.spec.ts",
+        "tests/e2e/skills.spec.ts",
+        "tests/e2e/work.spec.ts",
+        "tests/e2e/workspace-read.spec.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "affected-1.json",
+        "browser-recheck-3.json"
+      ]
+    },
+    {
+      "id": "AT-64",
+      "status": "passed",
+      "notes": "Background badges and exact Work state remain separate from main interaction; disconnect/degradation retains last confirmed state without reporting stopped.",
+      "testFiles": [
+        "tests/presence.test.ts",
+        "tests/admission.test.ts",
+        "tests/e2e/configured-work.spec.ts",
+        "tests/e2e/learning.spec.ts",
+        "tests/e2e/mcp-work.spec.ts",
+        "tests/e2e/memory.spec.ts",
+        "tests/e2e/models.spec.ts",
+        "tests/e2e/retry.spec.ts",
+        "tests/e2e/skills.spec.ts",
+        "tests/e2e/steering.spec.ts",
+        "tests/e2e/streaming.spec.ts",
+        "tests/e2e/work.spec.ts",
+        "tests/e2e/workspace-read.spec.ts",
+        "tests/e2e/workspace-worktree.spec.ts",
+        "tests/e2e/workspace-write.spec.ts",
+        "tests/e2e/reconnect.spec.ts"
+      ],
+      "sourceReports": [
+        "storage-faults-2.json",
+        "unit.json",
+        "browser-recheck-2.json",
+        "browser-degraded.json"
+      ]
+    },
+    {
+      "id": "AT-65",
+      "status": "passed",
+      "notes": "Existing reduced-motion/hidden-page/keyboard/small-width/zoom and bilingual identity checks retained; status has textual labels.",
+      "testFiles": [
+        "tests/identity.test.ts",
+        "tests/presence.test.ts",
+        "tests/e2e/alignment.spec.ts",
+        "tests/e2e/background-presence.spec.ts",
+        "tests/e2e/budget.spec.ts",
+        "tests/e2e/computer-panel.spec.ts",
+        "tests/e2e/configured-work.spec.ts",
+        "tests/e2e/history.spec.ts",
+        "tests/e2e/html-preview.spec.ts",
+        "tests/e2e/identity.spec.ts",
+        "tests/e2e/learning.spec.ts",
+        "tests/e2e/mcp-settings.spec.ts",
+        "tests/e2e/mcp-work.spec.ts",
+        "tests/e2e/memory.spec.ts",
+        "tests/e2e/models.spec.ts",
+        "tests/e2e/retry.spec.ts",
+        "tests/e2e/skills.spec.ts",
+        "tests/e2e/steering.spec.ts",
+        "tests/e2e/streaming.spec.ts",
+        "tests/e2e/tool-alignment.spec.ts",
+        "tests/e2e/vision-setting.spec.ts",
+        "tests/e2e/work.spec.ts",
+        "tests/e2e/workspace-read.spec.ts",
+        "tests/e2e/workspace-worktree.spec.ts",
+        "tests/e2e/workspace-write.spec.ts",
+        "tests/e2e/workspaces.spec.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "browser-recheck-1.json",
+        "browser-recheck-2.json"
+      ]
+    },
+    {
+      "id": "AT-66",
+      "status": "passed",
+      "notes": "Persona schema excludes authority; server policy cannot be bypassed by tone/name/model-supplied risk claims.",
+      "testFiles": [
+        "tests/identity.test.ts",
+        "tests/policy.test.ts",
+        "tests/runtime.test.ts"
+      ],
+      "sourceReports": ["unit.json"]
+    },
+    {
+      "id": "AT-67",
+      "status": "passed",
+      "notes": "Asset hashes/source/license/rights-review fields and notices retained; brand/trademark/final-art review remains pending rather than invented permission.",
+      "testFiles": ["tests/identity.test.ts"],
+      "sourceReports": ["unit.json", "package-final.txt"]
+    },
+    {
+      "id": "AT-68",
+      "status": "passed",
+      "notes": "Actually empty owned fixture root exposes model/MCP setup and explicit-network explanation, no fake Work/history or foreign-product importer.",
+      "testFiles": ["tests/e2e/empty-install.spec.ts"],
+      "sourceReports": ["browser-empty-final.json"]
+    },
+    {
+      "id": "AT-69",
+      "status": "passed",
+      "notes": "Existing Spec/entry/plan contracts and R/T/AT DAG checked; README/guides/system-tool descriptions aligned with implementation and external limits.",
+      "testFiles": ["tests/contracts.test.ts"],
+      "sourceReports": ["unit.json", "verification.json"]
+    },
+    {
+      "id": "AT-70",
+      "status": "passed",
+      "notes": "Own stores/profiles, foreign refusal, tarball exclusion and avatar-source budget checked. No reference repositories/private browser data packaged.",
+      "testFiles": [
+        "tests/identity.test.ts",
+        "tests/store.test.ts",
+        "tests/browser-native.test.ts"
+      ],
+      "sourceReports": [
+        "unit.json",
+        "fresh-store-final.json",
+        "browser-isolation.json",
+        "package-final.txt"
+      ]
+    }
+  ],
+  "reportIndex": [
+    {
+      "path": "affected-1.json",
+      "runner": "vitest run",
+      "exitCode": 1,
+      "startTime": 1791100574594,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "affected-2.json",
+      "runner": "vitest run",
+      "exitCode": 1,
+      "startTime": 1791100786144,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "approval-storage-final.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791104554750,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-adapter.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791101539967,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-approval-race.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791105093840,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-degraded.json",
+      "runner": "playwright test",
+      "exitCode": 0,
+      "startTime": "2026-10-04T08:52:20.070Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-empty-final.json",
+      "runner": "playwright test",
+      "exitCode": 0,
+      "startTime": "2026-10-04T09:00:26.037Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-empty-initial.json",
+      "runner": "playwright test",
+      "exitCode": 1,
+      "startTime": "2026-10-04T08:53:20.806Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-empty-recheck-1.json",
+      "runner": "playwright test",
+      "exitCode": 1,
+      "startTime": "2026-10-04T08:54:03.770Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-empty-recheck-2.json",
+      "runner": "playwright test",
+      "exitCode": 1,
+      "startTime": "2026-10-04T08:59:18.890Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-fields-final.json",
+      "runner": "playwright test",
+      "exitCode": 0,
+      "startTime": "2026-10-04T09:14:20.589Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-final.json",
+      "runner": "playwright test",
+      "exitCode": 0,
+      "startTime": "2026-10-04T08:39:56.153Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-initial.json",
+      "runner": "playwright test",
+      "exitCode": 1,
+      "startTime": "2026-10-04T08:02:53.065Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-isolation.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791103038746,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-recheck-1.json",
+      "runner": "playwright test",
+      "exitCode": 1,
+      "startTime": "2026-10-04T08:10:05.879Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-recheck-2.json",
+      "runner": "playwright test",
+      "exitCode": 1,
+      "startTime": "2026-10-04T08:16:00.030Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-recheck-3.json",
+      "runner": "playwright test",
+      "exitCode": 0,
+      "startTime": "2026-10-04T08:22:02.370Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-v1-initial.json",
+      "runner": "playwright test",
+      "exitCode": 1,
+      "startTime": "2026-10-04T08:32:00.285Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-v1-recheck-1.json",
+      "runner": "playwright test",
+      "exitCode": 1,
+      "startTime": "2026-10-04T08:33:40.114Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "browser-v1-recheck-2.json",
+      "runner": "playwright test",
+      "exitCode": 0,
+      "startTime": "2026-10-04T08:36:24.609Z",
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "dependency-recheck.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791103589965,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "fresh-store-final.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791104631090,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "learning-automatic-2.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791102547211,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "learning-automatic.json",
+      "runner": "vitest run",
+      "exitCode": 1,
+      "startTime": 1791102215551,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "learning-full-pipeline-2.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791101992728,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "learning-full-pipeline.json",
+      "runner": "vitest run",
+      "exitCode": 1,
+      "startTime": 1791101972112,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "learning-gates-2.json",
+      "runner": "vitest run",
+      "exitCode": 1,
+      "startTime": 1791103322541,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "learning-gates-3.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791103336967,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "learning-gates.json",
+      "runner": "vitest run",
+      "exitCode": 1,
+      "startTime": 1791103263493,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "learning-recheck-2.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791100946285,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "learning-recheck.json",
+      "runner": "vitest run",
+      "exitCode": 1,
+      "startTime": 1791100904712,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "performance-tests.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791103118455,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "storage-faults-2.json",
+      "runner": "vitest run",
+      "exitCode": 0,
+      "startTime": 1791103900955,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "storage-faults.json",
+      "runner": "vitest run",
+      "exitCode": 1,
+      "startTime": 1791103837470,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    },
+    {
+      "path": "unit.json",
+      "runner": "vitest run",
+      "exitCode": 1,
+      "startTime": 1791099822752,
+      "notes": "Runner identifies the executable. Original runner output is preserved; reproduction scope is the report test list. No invented exact historical shell argument string."
+    }
+  ],
+  "staticChecks": {
+    "platform": "win32",
+    "node": "v24.12.0",
+    "steps": [
+      {
+        "command": "npm run check",
+        "startedAt": "2026-10-04T09:09:15.391Z",
+        "durationMs": 5089,
+        "exitCode": 0,
+        "signal": null,
+        "output": "\n> rocky@0.1.0-dev.0 check\n> tsc --noEmit\n\n"
+      },
+      {
+        "command": "npm run check:docs",
+        "startedAt": "2026-10-04T09:09:20.481Z",
+        "durationMs": 345,
+        "exitCode": 0,
+        "signal": null,
+        "output": "\n> rocky@0.1.0-dev.0 check:docs\n> node scripts/check-docs.mjs\n\n{\"tasks\":38,\"requirements\":56,\"acceptance\":70,\"dag\":\"valid\"}\n"
+      },
+      {
+        "command": "npm run lint",
+        "startedAt": "2026-10-04T09:09:20.826Z",
+        "durationMs": 2368,
+        "exitCode": 0,
+        "signal": null,
+        "output": "\n> rocky@0.1.0-dev.0 lint\n> eslint apps packages fixtures tests scripts *.ts\n\n"
+      },
+      {
+        "command": "npm run build",
+        "startedAt": "2026-10-04T09:09:23.194Z",
+        "durationMs": 17755,
+        "exitCode": 0,
+        "signal": null,
+        "output": "\n> rocky@0.1.0-dev.0 build\n> tsc -p tsconfig.build.json && node scripts/copy-runtime-assets.mjs && vite build --config apps/web/vite.config.ts\n\nvite v7.3.6 building client environment for production...\ntransforming...\n✓ 9237 modules transformed.\nrendering chunks...\n../../dist/web/index.html                                           0.54 kB\n../../dist/web/assets/KaTeX_Size3-Regular-CTq5MqoE.woff             4.42 kB\n../../dist/web/assets/KaTeX_Size4-Regular-Dl5lxZxV.woff2            4.93 kB\n../../dist/web/assets/KaTeX_Size2-Regular-Dy4dx90m.woff2            5.21 kB\n../../dist/web/assets/KaTeX_Size1-Regular-mCD8mA8B.woff2            5.47 kB\n../../dist/web/assets/KaTeX_Size4-Regular-BF-4gkZK.woff             5.98 kB\n../../dist/web/assets/KaTeX_Size2-Regular-oD1tc_U0.woff             6.19 kB\n../../dist/web/assets/KaTeX_Size1-Regular-C195tn64.woff             6.50 kB\n../../dist/web/assets/KaTeX_Caligraphic-Regular-Di6jR-x-.woff2      6.91 kB\n../../dist/web/assets/KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2         6.91 kB\n../../dist/web/assets/KaTeX_Size3-Regular-DgpXs0kz.ttf              7.59 kB\n../../dist/web/assets/KaTeX_Caligraphic-Regular-CTRA-rTL.woff       7.66 kB\n../../dist/web/assets/KaTeX_Caligraphic-Bold-BEiXGLvX.woff          7.72 kB\n../../dist/web/assets/KaTeX_Script-Regular-D3wIWfF6.woff2           9.64 kB\n../../dist/web/assets/KaTeX_SansSerif-Regular-DDBCnlJ7.woff2       10.34 kB\n../../dist/web/assets/KaTeX_Size4-Regular-DWFBv043.ttf             10.36 kB\n../../dist/web/assets/KaTeX_Script-Regular-D5yQViql.woff           10.59 kB\n../../dist/web/assets/KaTeX_Fraktur-Regular-CTYiF6lA.woff2         11.32 kB\n../../dist/web/assets/KaTeX_Fraktur-Bold-CL6g_b3V.woff2            11.35 kB\n../../dist/web/assets/KaTeX_Size2-Regular-B7gKUWhC.ttf             11.51 kB\n../../dist/web/assets/KaTeX_SansSerif-Italic-C3H0VqGB.woff2        12.03 kB\n../../dist/web/assets/KaTeX_SansSerif-Bold-D1sUS0GD.woff2          12.22 kB\n../../dist/web/assets/KaTeX_Size1-Regular-Dbsnue_I.ttf             12.23 kB\n../../dist/web/assets/KaTeX_SansSerif-Regular-CS6fqUqJ.woff        12.32 kB\n../../dist/web/assets/KaTeX_Caligraphic-Regular-wX97UBjC.ttf       12.34 kB\n../../dist/web/assets/KaTeX_Caligraphic-Bold-ATXxdsX0.ttf          12.37 kB\n../../dist/web/assets/KaTeX_Fraktur-Regular-Dxdc4cR9.woff          13.21 kB\n../../dist/web/assets/KaTeX_Fraktur-Bold-BsDP51OF.woff             13.30 kB\n../../dist/web/assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2      13.57 kB\n../../dist/web/assets/KaTeX_SansSerif-Italic-DN2j7dab.woff         14.11 kB\n../../dist/web/assets/KaTeX_SansSerif-Bold-DbIhKOiC.woff           14.41 kB\n../../dist/web/assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff       16.03 kB\n../../dist/web/assets/KaTeX_Math-BoldItalic-CZnvNsCZ.woff2         16.40 kB\n../../dist/web/assets/KaTeX_Math-Italic-t53AETM-.woff2             16.44 kB\n../../dist/web/assets/KaTeX_Script-Regular-C5JkGWo-.ttf            16.65 kB\n../../dist/web/assets/KaTeX_Main-BoldItalic-DxDJ3AOS.woff2         16.78 kB\n../../dist/web/assets/KaTeX_Main-Italic-NWA7e6Wa.woff2             16.99 kB\n../../dist/web/assets/KaTeX_Math-BoldItalic-iY-2wyZ7.woff          18.67 kB\n../../dist/web/assets/KaTeX_Math-Italic-DA0__PXp.woff              18.75 kB\n../../dist/web/assets/KaTeX_Main-BoldItalic-SpSLRI95.woff          19.41 kB\n../../dist/web/assets/KaTeX_SansSerif-Regular-BNo7hRIc.ttf         19.44 kB\n../../dist/web/assets/KaTeX_Fraktur-Regular-CB_wures.ttf           19.57 kB\n../../dist/web/assets/KaTeX_Fraktur-Bold-BdnERNNW.ttf              19.58 kB\n../../dist/web/assets/KaTeX_Main-Italic-BMLOBm91.woff              19.68 kB\n../../dist/web/assets/KaTeX_SansSerif-Italic-YYjJ1zSn.ttf          22.36 kB\n../../dist/web/assets/KaTeX_SansSerif-Bold-CFMepnvq.ttf            24.50 kB\n../../dist/web/assets/KaTeX_Main-Bold-Cx986IdX.woff2               25.32 kB\n../../dist/web/assets/KaTeX_Main-Regular-B22Nviop.woff2            26.27 kB\n../../dist/web/assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf        27.56 kB\n../../dist/web/assets/KaTeX_AMS-Regular-BQhdFMY1.woff2             28.08 kB\n../../dist/web/assets/KaTeX_Main-Bold-Jm3AIy58.woff                29.91 kB\n../../dist/web/assets/KaTeX_Main-Regular-Dr94JaBh.woff             30.77 kB\n../../dist/web/assets/KaTeX_Math-BoldItalic-B3XSjfu4.ttf           31.20 kB\n../../dist/web/assets/KaTeX_Math-Italic-flOr_0UB.ttf               31.31 kB\n../../dist/web/assets/KaTeX_Main-BoldItalic-DzxPMmG6.ttf           32.97 kB\n../../dist/web/assets/KaTeX_AMS-Regular-DMm9YOAa.woff              33.52 kB\n../../dist/web/assets/KaTeX_Main-Italic-3WenGoN9.ttf               33.58 kB\n../../dist/web/assets/KaTeX_Main-Bold-waoOVXN0.ttf                 51.34 kB\n../../dist/web/assets/KaTeX_Main-Regular-ypZvNtVU.ttf              53.58 kB\n../../dist/web/assets/KaTeX_AMS-Regular-DRggAlZN.ttf               63.63 kB\n../../dist/web/assets/katex-BYZTj3zW.css                           29.29 kB\n../../dist/web/assets/index-DZgcy_uM.css                          107.61 kB\n../../dist/web/assets/channel-BxXBA5ak.js                           0.12 kB\n../../dist/web/assets/init-Gi6I4Gst.js                              0.15 kB\n../../dist/web/assets/chunk-2Q5K7J3B-CGsMwCZ7.js                    0.19 kB\n../../dist/web/assets/chunk-JWPE2WC7-yqTGmsVi.js                    0.23 kB\n../../dist/web/assets/chunk-XXDRQBXY-DK0h2Yzk.js                    0.23 kB\n../../dist/web/assets/chunk-5VM5RSS4-Cb8y37YN.js                    0.37 kB\n../../dist/web/assets/stateDiagram-v2-MP3YSRHH-0rbS_X-n.js          0.43 kB\n../../dist/web/assets/classDiagram-ZZMXUADV-nm4o_lNC.js             0.47 kB\n../../dist/web/assets/classDiagram-v2-VYDZK3BY-nm4o_lNC.js          0.47 kB\n../../dist/web/assets/chunk-POPQ4Y6H-BztYvWsm.js                    0.51 kB\n../../dist/web/assets/codeowners-Bp6g37R7.js                        0.55 kB\n../../dist/web/assets/swimlanesDiagram-VR7AAH4N-QRxrr4kd.js         0.55 kB\n../../dist/web/assets/infoDiagram-27XIBGKW-rF0np01O.js              0.59 kB\n../../dist/web/assets/shellsession-BADoaaVG.js                      0.71 kB\n../../dist/web/assets/tsv-B_m7g4N7.js                               0.74 kB\n../../dist/web/assets/html-derivative-BFtXZ54Q.js                   0.90 kB\n../../dist/web/assets/sizeCapture-INFHLROL-DxBBlQ4K.js              0.94 kB\n../../dist/web/assets/git-rebase-r7XF79zn.js                        0.98 kB\n../../dist/web/assets/qmldir-C8lEn-DE.js                            1.00 kB\n../../dist/web/assets/csv-fuZLfV_i.js                               1.14 kB\n../../dist/web/assets/ordinal-Cboi1Yqb.js                           1.19 kB\n../../dist/web/assets/git-commit-F4YmCXRG.js                        1.23 kB\n../../dist/web/assets/xsl-CtQFsRM5.js                               1.39 kB\n../../dist/web/assets/dotenv-Da5cRb03.js                            1.42 kB\n../../dist/web/assets/sparql-rVzFXLq3.js                            1.48 kB\n../../dist/web/assets/ini-BEwlwnbL.js                               1.53 kB\n../../dist/web/assets/railroadDiagram-O6MQD6OU-DsrNEP_u.js          1.61 kB\n../../dist/web/assets/fortran-fixed-form-CkoXwp7k.js                1.67 kB\n../../dist/web/assets/docker-BcOcwvcX.js                            1.74 kB\n../../dist/web/assets/hxml-Bvhsp5Yf.js                              1.74 kB\n../../dist/web/assets/abnfDiagram-VCTEODGH-BFCV8IZI.js              1.81 kB\n../../dist/web/assets/desktop-BmXAJ9_W.js                           1.83 kB\n../../dist/web/assets/chunk-F27PBJKO-CUTd_z6-.js                    1.88 kB\n../../dist/web/assets/pegDiagram-XKGWAZYB-DTnBCejF.js               1.96 kB\n../../dist/web/assets/ebnfDiagram-PWID7BFC-Cq-BfbyV.js              2.01 kB\n../../dist/web/assets/wenyan-BV7otONQ.js                            2.16 kB\n../../dist/web/assets/jssm-C2t-YnRu.js                              2.24 kB\n../../dist/web/assets/reg-C-SQnVFl.js                               2.35 kB\n../../dist/web/assets/edge-BkV0erSs.js                              2.36 kB\n../../dist/web/assets/diff-D97Zzqfu.js                              2.57 kB\n../../dist/web/assets/gleam-BspZqrRM.js                             2.58 kB\n../../dist/web/assets/erb-B12qg9BL.js                               2.61 kB\n../../dist/web/assets/hy-DFXneXwc.js                                2.65 kB\n../../dist/web/assets/json-Cp-IABpG.js                              2.82 kB\n../../dist/web/assets/openscad-C4EeE6gA.js                          2.82 kB\n../../dist/web/assets/log-2UxHyX5q.js                               2.85 kB\n../../dist/web/assets/cairo-KRGpt6FW.js                             2.94 kB\n../../dist/web/assets/berry-uYugtg8r.js                             3.01 kB\n../../dist/web/assets/jsonl-DcaNXYhu.js                             3.01 kB\n../../dist/web/assets/jsonc-Des-eS-w.js                             3.11 kB\n../../dist/web/assets/logo-BtOb2qkB.js                              3.13 kB\n../../dist/web/assets/po-BTJTHyun.js                                3.24 kB\n../../dist/web/assets/json5-C9tS-k6U.js                             3.25 kB\n../../dist/web/assets/mipsasm-CKIfxQSi.js                           3.26 kB\n../../dist/web/assets/tasl-QIJgUcNo.js                              3.29 kB\n../../dist/web/assets/genie-D0YGMca9.js                             3.36 kB\n../../dist/web/assets/rel-C3B-1QV4.js                               3.37 kB\n../../dist/web/assets/vala-CsfeWuGM.js                              3.37 kB\n../../dist/web/assets/splunk-BtCnVYZw.js                            3.44 kB\n../../dist/web/assets/arc-D4K3a3SJ.js                               3.44 kB\n../../dist/web/assets/fluent-C4IJs8-o.js                            3.61 kB\n../../dist/web/assets/ssh-config-_ykCGR6B.js                        3.62 kB\n../../dist/web/assets/jsonnet-DFQXde-d.js                           3.62 kB\n../../dist/web/assets/kdl-DV7GczEv.js                               3.63 kB\n../../dist/web/assets/glsl-DplSGwfg.js                              3.63 kB\n../../dist/web/assets/hurl-irOxFIW8.js                              3.65 kB\n../../dist/web/assets/narrat-DRg8JJMk.js                            3.67 kB\n../../dist/web/assets/turtle-BsS91CYL.js                            3.70 kB\n../../dist/web/assets/zenscript-DVFEvuxE.js                         3.91 kB\n../../dist/web/assets/ron-D8l8udqQ.js                               3.91 kB\n../../dist/web/assets/gn-n2N0HUVH.js                                4.00 kB\n../../dist/web/assets/pascal-D93ZcfNL.js                            4.15 kB\n../../dist/web/assets/diagram-Z3DM3KII-DGL3M0aZ.js                  4.21 kB\n../../dist/web/assets/tcl-dwOrl1Do.js                               4.43 kB\n../../dist/web/assets/nextflow-Zz6hmt5N.js                          4.51 kB\n../../dist/web/assets/rosmsg-BJDFO7_C.js                            4.52 kB\n../../dist/web/assets/http-jrhK8wxY.js                              4.55 kB\n../../dist/web/assets/polar-C0HS_06l.js                             4.67 kB\n../../dist/web/assets/defaultLocale-DX6XiGOO.js                     4.69 kB\n../../dist/web/assets/sdbl-DVxCFoDh.js                              4.70 kB\n../../dist/web/assets/fennel-BYunw83y.js                            4.77 kB\n../../dist/web/assets/bibtex-CHM0blh-.js                            4.80 kB\n../../dist/web/assets/llvm-DjAJT7YJ.js                              5.05 kB\n../../dist/web/assets/wgsl-Dx-B1_4e.js                              5.14 kB\n../../dist/web/assets/gdresource-BOOCDP_w.js                        5.29 kB\n../../dist/web/assets/qml-3beO22l8.js                               5.34 kB\n../../dist/web/assets/zig-VOosw3JB.js                               5.34 kB\n../../dist/web/assets/dax-CEL-wOlO.js                               5.37 kB\n../../dist/web/assets/bicep-Bmn6On1c.js                             5.38 kB\n../../dist/web/assets/xml-sdJ4AIDG.js                               5.38 kB\n../../dist/web/assets/awk-DMzUqQB5.js                               5.46 kB\n../../dist/web/assets/coq-DkFqJrB1.js                               5.53 kB\n../../dist/web/assets/linear-C_Ls3rqb.js                            5.66 kB\n../../dist/web/assets/jinja-4LBKfQ-Z.js                             5.69 kB\n../../dist/web/assets/lean-BZvkOJ9d.js                              5.78 kB\n../../dist/web/assets/moonbit-_H4v1dQx.js                           5.90 kB\n../../dist/web/assets/powerquery-CEu0bR-o.js                        5.90 kB\n../../dist/web/assets/shaderlab-Dg9Lc6iA.js                         5.92 kB\n../../dist/web/assets/verilog-BQ8w6xss.js                           5.93 kB\n../../dist/web/assets/cypher-COkxafJQ.js                            5.96 kB\n../../dist/web/assets/diagram-UQ7AKVKN-B5o8WcjA.js                  6.08 kB\n../../dist/web/assets/vb-D17OF-Vu.js                                6.09 kB\n../../dist/web/assets/red-bN70gL4F.js                               6.26 kB\n../../dist/web/assets/min-dark-CafNBF8u.js                          6.29 kB\n../../dist/web/assets/pieDiagram-E7YTZNPT-DvT9aiKg.js               6.29 kB\n../../dist/web/assets/gdshader-DkwncUOv.js                          6.33 kB\n../../dist/web/assets/prisma-Dd19v3D-.js                            6.33 kB\n../../dist/web/assets/ara-BRHolxvo.js                               6.36 kB\n../../dist/web/assets/clojure-P80f7IUj.js                           6.41 kB\n../../dist/web/assets/postcss-CXtECtnM.js                           6.42 kB\n../../dist/web/assets/toml-vGWfd6FD.js                              6.43 kB\n../../dist/web/assets/solarized-light-L9t79GZl.js                   6.48 kB\n../../dist/web/assets/r-Dspwwk_N.js                                 6.54 kB\n../../dist/web/assets/proto-C7zT0LnQ.js                             6.55 kB\n../../dist/web/assets/smalltalk-BERRCDM3.js                         6.59 kB\n../../dist/web/assets/talonscript-CkByrt1z.js                       6.76 kB\n../../dist/web/assets/solarized-dark-DXbdFlpD.js                    6.85 kB\n../../dist/web/assets/riscv-BM1_JUlF.js                             6.91 kB\n../../dist/web/assets/min-light-CTRr51gU.js                         6.97 kB\n../../dist/web/assets/soy-Brmx7dQM.js                               6.98 kB\n../../dist/web/assets/scheme-C98Dy4si.js                            7.17 kB\n../../dist/web/assets/hlsl-D3lLCCz7.js                              7.26 kB\n../../dist/web/assets/qss-IeuSbFQv.js                               7.47 kB\n../../dist/web/assets/dart-CF10PKvl.js                              7.81 kB\n../../dist/web/assets/systemd-4A_iFExJ.js                           7.87 kB\n../../dist/web/assets/monokai-D4h5O-jR.js                           7.88 kB\n../../dist/web/assets/regexp-CDVJQ6XC.js                            7.99 kB\n../../dist/web/assets/diagram-S7CK7UJ4-DeB9BD3I.js                  8.22 kB\n../../dist/web/assets/haml-B8DHNrY2.js                              8.26 kB\n../../dist/web/assets/typst-DHCkPAjA.js                             8.39 kB\n../../dist/web/assets/vue-html-AaS7Mt5G.js                          8.47 kB\n../../dist/web/assets/plsql-ChMvpjG-.js                             8.51 kB\n../../dist/web/assets/horizon-BUw7H-hv.js                           8.78 kB\n../../dist/web/assets/kotlin-BdnUsdx6.js                            8.79 kB\n../../dist/web/assets/horizon-bright-Cn-bp-IR.js                    8.79 kB\n../../dist/web/assets/ts-tags-zn1MmPIZ.js                           8.95 kB\n../../dist/web/assets/make-CHLpvVh8.js                              8.96 kB\n../../dist/web/assets/andromeeda-C4gqWexZ.js                        9.02 kB\n../../dist/web/assets/sas-cz2c8ADy.js                               9.06 kB\n../../dist/web/assets/dark-plus-C3mMm8J8.js                         9.10 kB\n../../dist/web/assets/slack-dark-BthQWCQV.js                        9.12 kB\n../../dist/web/assets/sass-Cj5Yp3dK.js                              9.29 kB\n../../dist/web/assets/plastic-3e1v2bzS.js                           9.30 kB\n../../dist/web/assets/slack-ochin-DqwNpetd.js                       9.43 kB\n../../dist/web/assets/tex-idrVyKtj.js                               9.67 kB\n../../dist/web/assets/jison-wvAkD_A8.js                             9.69 kB\n../../dist/web/assets/cmake-D1j8_8rp.js                             9.86 kB\n../../dist/web/assets/light-plus-B7mTdjB0.js                        9.94 kB\n../../dist/web/assets/hcl-BWvSN4gD.js                              10.05 kB\n../../dist/web/assets/cynefinDiagram-5FMLGOSQ-Bqknx2cu.js          10.10 kB\n../../dist/web/assets/stateDiagram-D77RDMKH-XR5O6fj1.js            10.36 kB\n../../dist/web/assets/pkl-u5AG7uiY.js                              10.37 kB\n../../dist/web/assets/beancount-k_qm7-4y.js                        10.37 kB\n../../dist/web/assets/nextflow-groovy-BeH2EWoN.js                  10.41 kB\n../../dist/web/assets/dream-maker-BtqSS_iP.js                      10.47 kB\n../../dist/web/assets/raku-DXvB9xmW.js                             10.47 kB\n../../dist/web/assets/yaml-Buea-lGh.js                             10.51 kB\n../../dist/web/assets/rst-BrH8l1NY.js                              10.67 kB\n../../dist/web/assets/dagre-GXQ25YYZ-COQFEZNG.js                   10.68 kB\n../../dist/web/assets/diagram-VSXAHHWV-Dsxqpr0B.js                 10.72 kB\n../../dist/web/assets/elm-DbKCFpqz.js                              10.97 kB\n../../dist/web/assets/just-Cw27pwNe.js                             11.16 kB\n../../dist/web/assets/github-light-DAi9KRSo.js                     11.18 kB\n../../dist/web/assets/prolog-CbFg5uaA.js                           11.36 kB\n../../dist/web/assets/terraform-BETggiCN.js                        11.39 kB\n../../dist/web/assets/github-dark-DHJKELXO.js                      11.41 kB\n../../dist/web/assets/puppet-BMWR74SV.js                           11.44 kB\n../../dist/web/assets/laserwave-DUszq2jm.js                        11.50 kB\n../../dist/web/assets/gherkin-DyxjwDmM.js                          11.95 kB\n../../dist/web/assets/artifacts-Cc2M31s5.js                        12.00 kB\n../../dist/web/assets/wasm-MzD3tlZU.js                             12.01 kB\n../../dist/web/assets/hjson-D5-asLiD.js                            12.05 kB\n../../dist/web/assets/handlebars-BL8al0AC.js                       12.15 kB\n../../dist/web/assets/websandbox-a66Qkawp.js                       12.37 kB\n../../dist/web/assets/apache-Pmp26Uib.js                           12.46 kB\n../../dist/web/assets/vesper-DU1UobuO.js                           12.69 kB\n../../dist/web/assets/bat-BkioyH1T.js                              12.89 kB\n../../dist/web/assets/fish-BvzEVeQv.js                             13.04 kB\n../../dist/web/assets/v-BcVCzyr7.js                                13.21 kB\n../../dist/web/assets/vitesse-light-CVO1_9PV.js                    13.62 kB\n../../dist/web/assets/aurora-x-D-2ljcwZ.js                         13.66 kB\n../../dist/web/assets/vitesse-black-Bkuqu6BP.js                    13.68 kB\n../../dist/web/assets/vitesse-dark-D0r3Knsf.js                     13.76 kB\n../../dist/web/assets/pug-CGlum2m_.js                              13.84 kB\n../../dist/web/assets/luau-C-HG3fhB.js                             13.96 kB\n../../dist/web/assets/synthwave-84-CbfX1IO0.js                     14.04 kB\n../../dist/web/assets/github-light-default-D7oLnXFd.js             14.16 kB\n../../dist/web/assets/clarity-D53aC0YG.js                          14.28 kB\n../../dist/web/assets/github-light-high-contrast-BfjtVDDH.js       14.28 kB\n../../dist/web/assets/github-dark-dimmed-DH5Ifo-i.js               14.43 kB\n../../dist/web/assets/github-dark-default-Cuk6v7N8.js              14.44 kB\n../../dist/web/assets/github-dark-high-contrast-E3gJ1_iC.js        14.60 kB\n../../dist/web/assets/gnuplot-DdkO51Og.js                          14.78 kB\n../../dist/web/assets/computer-panel-SV4VXCUv.js                   14.85 kB\n../../dist/web/assets/rust-B1yitclQ.js                             15.07 kB\n../../dist/web/assets/kusto-DZf3V79B.js                            15.17 kB\n../../dist/web/assets/actionscript-3-CoDkCxhg.js                   15.21 kB\n../../dist/web/assets/nix-CwoSXNpI.js                              15.51 kB\n../../dist/web/assets/lua-BaeVxFsk.js                              15.54 kB\n../../dist/web/assets/chunk-SVP7TREG-CCKgZr3C.js                   15.74 kB\n../../dist/web/assets/abap-BdImnpbu.js                             15.85 kB\n../../dist/web/assets/diagram-VX7I27RA-BvJCMYBO.js                 15.96 kB\n../../dist/web/assets/solidity-rGO070M0.js                         16.07 kB\n../../dist/web/assets/matlab-D7o27uSR.js                           16.09 kB\n../../dist/web/assets/cue-D82EKSYY.js                              16.20 kB\n../../dist/web/assets/elixir-CDX3lj18.js                           16.32 kB\n../../dist/web/assets/odin-BBf5iR-q.js                             16.51 kB\n../../dist/web/assets/bird2-DPOp833l.js                            16.97 kB\n../../dist/web/assets/kanagawa-wave-DWedfzmr.js                    17.12 kB\n../../dist/web/assets/kanagawa-lotus-CfQXZHmo.js                   17.13 kB\n../../dist/web/assets/kanagawa-dragon-CkXjmgJE.js                  17.13 kB\n../../dist/web/assets/ishikawaDiagram-5VMMS53U-vhWJ7Sv5.js         17.47 kB\n../../dist/web/assets/move-IF9eRakj.js                             17.51 kB\n../../dist/web/assets/graphql-ChdNCCLP.js                          18.00 kB\n../../dist/web/assets/liquid-DYVedYrR.js                           18.09 kB\n../../dist/web/assets/svelte-C_ipcX3V.js                           18.24 kB\n../../dist/web/assets/material-theme-D5KoaKCx.js                   18.62 kB\n../../dist/web/assets/material-theme-darker-BfHTSMKl.js            18.63 kB\n../../dist/web/assets/material-theme-ocean-CyktbL80.js             18.63 kB\n../../dist/web/assets/material-theme-lighter-B0m2ddpp.js           18.63 kB\n../../dist/web/assets/material-theme-palenight-Csfq5Kiy.js         18.64 kB\n../../dist/web/assets/gdscript-C5YyOfLZ.js                         18.99 kB\n../../dist/web/assets/groovy-gcz8RCvz.js                           19.18 kB\n../../dist/web/assets/skill-settings-DtI9HsvF.js                   19.62 kB\n../../dist/web/assets/mdc-BMNejdWA.js                              19.63 kB\n../../dist/web/assets/glimmer-js-Rg0-pVw9.js                       20.07 kB\n../../dist/web/assets/glimmer-ts-U6CK756n.js                       20.07 kB\n../../dist/web/assets/ayu-dark-DYE7WIF3.js                         20.08 kB\n../../dist/web/assets/ayu-mirage-32ctXXKs.js                       20.09 kB\n../../dist/web/assets/powershell-Dpen1YoG.js                       20.15 kB\n../../dist/web/assets/ayu-light-BA47KaF1.js                        20.15 kB\n../../dist/web/assets/kanban-definition-UXKFOSKX-BrZAI5nX.js       20.29 kB\n../../dist/web/assets/viml-CJc9bBzg.js                             20.37 kB\n../../dist/web/assets/nushell-Cz2AlsmD.js                          20.41 kB\n../../dist/web/assets/snazzy-light-Bw305WKR.js                     20.77 kB\n../../dist/web/assets/dracula-BzJJZx-M.js                          21.07 kB\n../../dist/web/assets/dracula-soft-BXkSAIEj.js                     21.08 kB\n../../dist/web/assets/twig-DNn4PbVi.js                             21.36 kB\n../../dist/web/assets/wit-5i3qLPDT.js                              21.47 kB\n../../dist/web/assets/rose-pine-qdsjHGoJ.js                        21.74 kB\n../../dist/web/assets/rose-pine-moon-D4_iv3hh.js                   21.75 kB\n../../dist/web/assets/rose-pine-dawn-DHQR4-dF.js                   21.75 kB\n../../dist/web/assets/nim-CVrawwO9.js                              22.46 kB\n../../dist/web/assets/mindmap-definition-YA3MSWOX-ChPbZ_kG.js      22.57 kB\n../../dist/web/assets/common-lisp-Cg-RD9OK.js                      22.58 kB\n../../dist/web/assets/surrealql-Bq5Q-fJD.js                        22.58 kB\n../../dist/web/assets/gruvbox-dark-hard-CFHQjOhq.js                22.63 kB\n../../dist/web/assets/gruvbox-dark-soft-CVdnzihN.js                22.63 kB\n../../dist/web/assets/gruvbox-light-hard-CH1njM8p.js               22.64 kB\n../../dist/web/assets/gruvbox-light-soft-hJgmCMqR.js               22.64 kB\n../../dist/web/assets/gruvbox-dark-medium-GsRaNv29.js              22.64 kB\n../../dist/web/assets/gruvbox-light-medium-DRw_LuNl.js             22.64 kB\n../../dist/web/assets/sankeyDiagram-P5KCCOFB-DdpXtyFn.js           23.20 kB\n../../dist/web/assets/sql-BLtJtn59.js                              23.41 kB\n../../dist/web/assets/journeyDiagram-3NMN7TZE--r-YXVas.js          23.57 kB\n../../dist/web/assets/cadence-Bv_4Rxtq.js                          23.67 kB\n../../dist/web/assets/astro-CbQHKStN.js                            24.01 kB\n../../dist/web/assets/typespec-BGHnOYBU.js                         24.02 kB\n../../dist/web/assets/apl-dKokRX4l.js                              24.04 kB\n../../dist/web/assets/templ-P3uqSqPl.js                            24.06 kB\n../../dist/web/assets/vhdl-CeAyd5Ju.js                             24.26 kB\n../../dist/web/assets/angular-html-CU67Zn6k.js                     24.29 kB\n../../dist/web/assets/vue-DN_0RTcg.js                              24.48 kB\n../../dist/web/assets/purescript-CklMAg4u.js                       24.69 kB\n../../dist/web/assets/one-light-C3Wv6jpd.js                        25.30 kB\n../../dist/web/assets/fsharp-CXgrBDvD.js                           25.31 kB\n../../dist/web/assets/marko-CnJfTvn9.js                            25.48 kB\n../../dist/web/assets/wardleyDiagram-VM6X3IG4-kLyee1Dr.js          25.50 kB\n../../dist/web/assets/c3-eo99z4R2.js                               25.63 kB\n../../dist/web/assets/night-owl-light-CMTm3GFP.js                  25.90 kB\n../../dist/web/assets/system-verilog-CnnmHF94.js                   26.20 kB\n../../dist/web/assets/nord-Ddv68eIx.js                             26.72 kB\n../../dist/web/assets/codeql-DsOJ9woJ.js                           26.88 kB\n../../dist/web/assets/scss-OYdSNvt2.js                             27.20 kB\n../../dist/web/assets/java-CylS5w8V.js                             27.22 kB\n../../dist/web/assets/coffee-Ch7k5sss.js                           27.42 kB\n../../dist/web/assets/razor-Uh8Bk_45.js                            27.51 kB\n../../dist/web/assets/scala-C151Ov-r.js                            28.88 kB\n../../dist/web/assets/night-owl-C39BiMTA.js                        28.91 kB\n../../dist/web/assets/crystal-tKQVLTB8.js                          29.39 kB\n../../dist/web/assets/gitGraphDiagram-WWUBYQGX-LAgt71R5.js         29.42 kB\n../../dist/web/assets/mermaid-mWjccvbQ.js                          29.51 kB\n../../dist/web/assets/applescript-Co6uUVPk.js                      29.57 kB\n../../dist/web/assets/erDiagram-RLTQ6QDP-CRSvq0Dl.js               30.79 kB\n../../dist/web/assets/timeline-definition-24CTP7MA-BTJAMg_X.js     30.83 kB\n../../dist/web/assets/requirementDiagram-BXWQKSXE-CnARP_Z2.js      31.00 kB\n../../dist/web/assets/julia-CxzCAyBv.js                            31.07 kB\n../../dist/web/assets/stylus-BEDo0Tqx.js                           31.07 kB\n../../dist/web/assets/learning-settings-CMS6tUbl.js                33.26 kB\n../../dist/web/assets/poimandres-CS3Unz2-.js                       33.49 kB\n../../dist/web/assets/one-dark-pro-DVMEJ2y_.js                     33.79 kB\n../../dist/web/assets/bsl-BO_Y6i37.js                              33.87 kB\n../../dist/web/assets/quadrantDiagram-AXDQQJYC-4uzJN1DD.js         34.01 kB\n../../dist/web/assets/haxe-CzTSHFRz.js                             35.16 kB\n../../dist/web/assets/nginx-BpAMiNFr.js                            35.37 kB\n../../dist/web/assets/houston-DnULxvSX.js                          35.42 kB\n../../dist/web/assets/layout-JFLb2f2L.js                           35.44 kB\n../../dist/web/assets/tokyo-night-hegEt444.js                      35.67 kB\n../../dist/web/assets/erlang-DsQrWhSR.js                           37.48 kB\n../../dist/web/assets/chunk-IMKFNOWR-DsCyAfZA.js                   38.08 kB\n../../dist/web/assets/cobol-nwyudZeR.js                            39.15 kB\n../../dist/web/assets/asm-D_Q5rh1f.js                              40.72 kB\n../../dist/web/assets/shellscript-Yzrsuije.js                      41.48 kB\n../../dist/web/assets/haskell-Df6bDoY_.js                          41.49 kB\n../../dist/web/assets/blockDiagram-I7D4REHJ-Drpysom-.js            41.76 kB\n../../dist/web/assets/vennDiagram-4TSXK5OY-BhEtMZlJ.js             41.96 kB\n../../dist/web/assets/perl-C0TMdlhV.js                             43.16 kB\n../../dist/web/assets/d-85-TOEBH.js                                43.80 kB\n../../dist/web/assets/xychartDiagram-S5SC5T6Z-Dba8p-Oo.js          44.51 kB\n../../dist/web/assets/ruby-Dw2BHqvy.js                             45.95 kB\n../../dist/web/assets/go-CxLEBnE3.js                               46.81 kB\n../../dist/web/assets/apex-D8_7TLub.js                             46.99 kB\n../../dist/web/assets/catppuccin-mocha-D87Tk5Gz.js                 47.26 kB\n../../dist/web/assets/catppuccin-latte-C9dUb6Cb.js                 47.26 kB\n../../dist/web/assets/catppuccin-frappe-DFWUc33u.js                47.26 kB\n../../dist/web/assets/catppuccin-macchiato-DQyhUUbL.js             47.26 kB\n../../dist/web/assets/ada-bCR0ucgS.js                              48.08 kB\n../../dist/web/assets/css-DPfMkruS.js                              49.02 kB\n../../dist/web/assets/chunk-TICWLB2K-C4uYAH5Q.js                   49.18 kB\n../../dist/web/assets/imba-DGztddWO.js                             49.93 kB\n../../dist/web/assets/everforest-dark-BgDCqdQA.js                  53.75 kB\n../../dist/web/assets/everforest-light-C8M2exoo.js                 53.75 kB\n../../dist/web/assets/wikitext-BhOHFoWU.js                         55.89 kB\n../../dist/web/assets/stata-BH5u7GGu.js                            56.99 kB\n../../dist/web/assets/html-GMplVEZG.js                             57.25 kB\n../../dist/web/assets/ballerina-BFfxhgS-.js                        58.69 kB\n../../dist/web/assets/markdown-Cvjx9yec.js                         59.34 kB\n../../dist/web/assets/flowDiagram-HODETNUW-Bv2VnZtp.js             61.85 kB\n../../dist/web/assets/ocaml-C0hk2d4L.js                            62.45 kB\n../../dist/web/assets/c4Diagram-7LVT6UL2-amPoeTyZ.js               65.47 kB\n../../dist/web/assets/index-B0ZqKVC3.js                            67.56 kB\n../../dist/web/assets/ganttDiagram-EL5Y4UJY-DDmgcTuQ.js            69.70 kB\n../../dist/web/assets/mojo-rZm6bMo-.js                             69.80 kB\n../../dist/web/assets/python-B6aJPvgy.js                           69.95 kB\n../../dist/web/assets/c-BIGW1oBm.js                                72.11 kB\n../../dist/web/assets/latex-CWtU0Tv5.js                            72.64 kB\n../../dist/web/assets/vyper-CDx5xZoG.js                            74.65 kB\n../../dist/web/assets/hack-CaT9iCJl.js                             80.24 kB\n../../dist/web/assets/cose-bilkent-JH36ORCC-B5fv2J1Z.js            81.70 kB\n../../dist/web/assets/swift-D82vCrfD.js                            86.69 kB\n../../dist/web/assets/fortran-free-form-BxgE0vQu.js                88.97 kB\n../../dist/web/assets/csharp-COcwbKMJ.js                           89.69 kB\n../../dist/web/assets/racket-BqYA7rlc.js                           92.39 kB\n../../dist/web/assets/less-B1dDrJ26.js                             97.63 kB\n../../dist/web/assets/blade-D4QpJJKB.js                           104.98 kB\n../../dist/web/assets/objective-c-DXmwc3jG.js                     105.41 kB\n../../dist/web/assets/php-Dhbhpdrm.js                             111.06 kB\n../../dist/web/assets/swimlanes-42K2YHIH-CcgR6uk1.js              115.79 kB\n../../dist/web/assets/sequenceDiagram-WJ2MYXX4-CWt9M6JQ.js        116.96 kB\n../../dist/web/assets/asciidoc-Ve4PFQV2.js                        131.53 kB\n../../dist/web/assets/mdx-Cmh6b_Ma.js                             136.11 kB\n../../dist/web/assets/architectureDiagram-5GKGNRK7-CjaXImxP.js    151.83 kB\n../../dist/web/assets/objective-cpp-CLxacb5B.js                   171.97 kB\n../../dist/web/assets/javascript-wDzz0qaB.js                      174.83 kB\n../../dist/web/assets/tsx-COt5Ahok.js                             175.54 kB\n../../dist/web/assets/jsx-g9-lgVsj.js                             177.79 kB\n../../dist/web/assets/typescript-BPQ3VLAy.js                      181.08 kB\n../../dist/web/assets/angular-ts-BwZT4LLn.js                      183.82 kB\n../../dist/web/assets/vue-vine-CQOfvN7w.js                        190.05 kB\n../../dist/web/assets/code-block-IT6T5CEO-CTYjDHSl.js             208.11 kB\n../../dist/web/assets/wolfram-lXgVvXCa.js                         262.39 kB\n../../dist/web/assets/cytoscape.esm-BB4DxJjf.js                   443.04 kB\n../../dist/web/assets/wasm-CG6Dc4jp.js                            622.34 kB\n../../dist/web/assets/cpp-CofmeUqb.js                             626.08 kB\n../../dist/web/assets/mermaid.core-DYczZxZ9.js                    683.02 kB\n../../dist/web/assets/cynefin-OW5HDTMX-edapkkzT.js                687.91 kB\n../../dist/web/assets/emacs-lisp-C9XAeP06.js                      779.85 kB\n../../dist/web/assets/index-D532_JdI.js                         1,100.71 kB\n../../dist/web/assets/index-BqA-vYEw.js                         2,349.37 kB\n✓ built in 14.44s\n\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n"
+      },
+      {
+        "command": "node scripts/repo-guards.mjs --package",
+        "startedAt": "2026-10-04T09:09:40.949Z",
+        "durationMs": 164,
+        "exitCode": 1,
+        "signal": null,
+        "output": "file:///D:/Code/Rocky/scripts/repo-guards.mjs:84\r\n  if (!process.env.npm_execpath) throw Error(\"Run package guard through npm\");\r\n                                       ^\r\n\r\nError: Run package guard through npm\r\n    at file:///D:/Code/Rocky/scripts/repo-guards.mjs:84:40\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:413:25)\r\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:660:26)\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n\r\nNode.js v24.12.0\r\n"
+      },
+      {
+        "command": "git diff --check",
+        "startedAt": "2026-10-04T09:09:41.113Z",
+        "durationMs": 118,
+        "exitCode": 0,
+        "signal": null,
+        "output": ""
+      },
+      {
+        "command": "npm run check",
+        "startedAt": "2026-10-04T09:13:01.024Z",
+        "durationMs": 5057,
+        "exitCode": 0,
+        "signal": null,
+        "output": "\n> rocky@0.1.0-dev.0 check\n> tsc --noEmit\n\n"
+      },
+      {
+        "command": "npm run lint",
+        "startedAt": "2026-10-04T09:13:06.083Z",
+        "durationMs": 2417,
+        "exitCode": 0,
+        "signal": null,
+        "output": "\n> rocky@0.1.0-dev.0 lint\n> eslint apps packages fixtures tests scripts *.ts\n\n"
+      },
+      {
+        "command": "npm run check:docs",
+        "startedAt": "2026-10-04T09:13:08.500Z",
+        "durationMs": 348,
+        "exitCode": 0,
+        "signal": null,
+        "output": "\n> rocky@0.1.0-dev.0 check:docs\n> node scripts/check-docs.mjs\n\n{\"tasks\":38,\"requirements\":56,\"acceptance\":70,\"dag\":\"valid\"}\n"
+      },
+      {
+        "command": "npm run check:secrets -- --package",
+        "startedAt": "2026-10-04T09:13:08.849Z",
+        "durationMs": 2104,
+        "exitCode": 0,
+        "signal": null,
+        "output": "\n> rocky@0.1.0-dev.0 check:secrets\n> node scripts/repo-guards.mjs --package\n\n{\"files\":870,\"failures\":[],\"warnings\":[],\"historyObjects\":null,\"packageFiles\":701,\"scope\":\"Source worktree; optional --history checks local Git objects and --package checks the actual npm dry-run inventory. Pattern scan is not a universal secret detector.\"}\n"
+      }
+    ]
+  },
+  "git": {
+    "root": "D:/Code/Rocky",
+    "rootCommit": "322186bdee19dc15d1c01c242e54ca7cfccde52b",
+    "remoteOutput": "",
+    "unchangedReferenceRepositories": true
+  },
+  "finalChecks": [
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "report": "build-final.txt",
+      "limitations": [
+        "Vite warns about a chunk larger than 500 kB; no threshold was raised."
+      ]
+    },
+    {
+      "command": "npm run format:check",
+      "exitCode": 0,
+      "report": "format-check.txt"
+    },
+    {
+      "command": "npm run check:docs",
+      "exitCode": 0,
+      "result": {
+        "tasks": 38,
+        "requirements": 56,
+        "acceptance": 70,
+        "dag": "valid"
+      }
+    },
+    { "command": "git diff --check", "exitCode": 0 },
+    {
+      "command": "npm run check:secrets -- --package",
+      "exitCode": 0,
+      "report": "package-recheck.txt"
+    }
+  ],
+  "reviewedScreenshots": [
+    "empty-install-setup.png",
+    "learning-inbox-evaluated.png",
+    "document-revisions.png",
+    "attachment-work-320.png"
+  ],
+  "evidenceNotes": [
+    "Earlier tracked evidence JSON received formatting-only changes to satisfy the existing format gate. Test outcomes, timestamps and limitations were retained.",
+    "Failed package check through direct node invocation lacked npm_execpath; the corrected npm invocation passed. Both are retained in static-checks.json.",
+    "The aggregation helper is a local .rocky-reports utility; source runner JSON and test files remain the durable reproduction inputs. The aggregation exit code is not a claim that every source runner passed.",
+    "Final shared field layout uses existing control styling for Routine, tracking and Inbox inputs; no App shell, palette or avatar redesign."
+  ]
+}

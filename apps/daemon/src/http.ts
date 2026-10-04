@@ -15,6 +15,7 @@ import {
 import { WorkService } from "./work-service.js";
 import { htmlPreview } from "./html-preview.js";
 import { modelBudgetSchema } from "../../../packages/contracts/src/model-budget.js";
+import { attachmentRefsSchema } from "../../../packages/contracts/src/attachments.js";
 import { memoryReadSelectionSchema } from "../../../packages/contracts/src/memory.js";
 async function readJson(c: Context): Promise<unknown> {
   try {
@@ -80,11 +81,21 @@ export function createApp(service: WorkService) {
       );
     // Document text still has a 64KiB decoded-byte cap; allow bounded JSON escaping.
     const bodyLimit =
-      c.req.path === "/api/v1/skills/import"
-        ? 6291456
-        : /^\/api\/v1\/documents(?:\/[a-f0-9-]{36})?$/i.test(c.req.path)
+      c.req.path === "/api/v1/learning/suites"
+        ? 1200000
+        : /^\/api\/v1\/learning\/candidates\/[^/]+\/edit$/.test(c.req.path)
           ? 524288
-          : 65536;
+          : c.req.path === "/api/v1/attachments"
+            ? 2900000
+            : c.req.path === "/api/v1/skills/import"
+              ? 6291456
+              : c.req.path.startsWith("/api/v1/learning/")
+                ? 1048576
+                : /^\/api\/v1\/documents(?:\/(?:new|[a-f0-9-]{36}))?$/i.test(
+                      c.req.path,
+                    )
+                  ? 524288
+                  : 65536;
     if (Number(c.req.header("content-length") ?? 0) > bodyLimit)
       return c.json({ code: "too_large", message: "Request too large" }, 413);
     // Enforce bytes actually received, including chunked bodies without Content-Length.
@@ -152,7 +163,9 @@ export function createApp(service: WorkService) {
   app.get("/api/v1/health", (c) =>
     c.json({
       productId: "rocky",
-      status: service.deliveryError ? "degraded" : "ready",
+      status:
+        service.deliveryError || service.executionError ? "degraded" : "ready",
+      execution: { error: service.executionError },
       mode: "fixture-capable",
       delivery: {
         pending: service.store.pendingDeliveries(),
@@ -169,13 +182,33 @@ export function createApp(service: WorkService) {
         connectionProbing: true,
       },
       fixture: { available: true },
-      learning: { mode: "off" },
+      learning: { mode: service.learning.policy().mode },
       remote: { created: false },
     }),
   );
-  app.get("/api/v1/works", (c) => c.json({ works: service.store.list() }));
+  app.get("/api/v1/works", (c) => {
+    const ids = c.req.query("ids");
+    return c.json({
+      works:
+        ids === undefined
+          ? service.store.list()
+          : z
+              .array(z.uuid())
+              .min(1)
+              .max(50)
+              .parse(ids.split(","))
+              .map((id) => service.store.get(id)),
+    });
+  });
+  app.get("/api/v1/diagnostics/preview", (c) => {
+    c.header("Cache-Control", "no-store");
+    return c.json(diagnosticPreview(service.store));
+  });
   app.get("/api/v1/works/:id/operations", (c) =>
     c.json({ operations: service.operations.list(c.req.param("id")) }),
+  );
+  app.get("/api/v1/works/:id/commands", (c) =>
+    c.json({ commands: service.operations.commandReceipts(c.req.param("id")) }),
   );
   app.post("/api/v1/works/:id/reconcile", async (c) =>
     c.json(
@@ -232,7 +265,7 @@ export function createApp(service: WorkService) {
   app.get("/api/v1/snapshot", (c) => {
     if (c.req.query("after") !== undefined)
       sequenceSchema.parse(c.req.query("after"));
-    return c.json(service.store.snapshot());
+    return c.json(service.store.snapshot(c.req.query("page")));
   });
   app.get("/api/v1/works/:id", (c) =>
     c.json(service.store.get(c.req.param("id"))),
@@ -241,8 +274,112 @@ export function createApp(service: WorkService) {
   app.get("/api/v1/documents", (c) =>
     c.json({ documents: service.documents.list() }),
   );
+  app.get("/api/v1/environments", (c) =>
+    c.json({ environments: service.environments.list() }),
+  );
+  app.get("/api/v1/routines", (c) =>
+    c.json({
+      routines: service.routines.list(),
+      schedulerError: service.routines.lastError,
+      requiresOnlineDaemon: true,
+    }),
+  );
+  app.get("/api/v1/tracking", (c) =>
+    c.json({
+      tracking: service.tracking.list(),
+      schedulerError: service.tracking.lastError,
+    }),
+  );
+  app.post("/api/v1/tracking", async (c) =>
+    c.json(service.tracking.save(await readJson(c))),
+  );
+  app.get("/api/v1/tracking/:id/history", (c) =>
+    c.json(service.tracking.history(c.req.param("id"))),
+  );
+  app.post("/api/v1/routines", async (c) =>
+    c.json(service.routines.save(await readJson(c))),
+  );
+  app.get("/api/v1/routines/:id/occurrences", (c) =>
+    c.json(
+      service.routines.occurrences(c.req.param("id"), c.req.query("before")),
+    ),
+  );
+  app.get("/api/v1/browser-profiles", (c) =>
+    c.json({ profiles: service.browsers.list() }),
+  );
+  app.get("/api/v1/browser-profiles/:id", (c) =>
+    c.json(service.browsers.view(c.req.param("id"))),
+  );
+  app.post("/api/v1/browser-profiles/:id/sharing", async (c) =>
+    c.json(service.browsers.share(c.req.param("id"), await readJson(c))),
+  );
+  app.post("/api/v1/browser-profiles/:id/control", async (c) =>
+    c.json(
+      await service.browsers.control(c.req.param("id"), await readJson(c)),
+    ),
+  );
+  app.post("/api/v1/browser-profiles/:id/snapshot", async (c) =>
+    c.json(
+      await service.browsers.snapshot(
+        service.store.get(service.browsers.get(c.req.param("id")).workId),
+      ),
+    ),
+  );
+  app.get("/api/v1/browser-snapshots/:id", (c) =>
+    c.json(service.browsers.readSnapshot(c.req.param("id")).snapshot),
+  );
+  app.get("/api/v1/browser-snapshots/:id/image", (c) => {
+    const value = service.browsers.readSnapshot(c.req.param("id"));
+    c.header("Content-Type", "image/png");
+    c.header("Cache-Control", "no-store");
+    c.header("X-Content-Type-Options", "nosniff");
+    return c.body(new Uint8Array(value.image));
+  });
+  app.post("/api/v1/environments", async (c) =>
+    c.json(await service.environments.create(await readJson(c))),
+  );
+  app.post("/api/v1/environments/:id/control", async (c) =>
+    c.json(
+      await service.environments.command(
+        c.req.param("id"),
+        await readJson(c),
+        AbortSignal.any([c.req.raw.signal, AbortSignal.timeout(60000)]),
+      ),
+    ),
+  );
+  app.post("/api/v1/attachments", async (c) =>
+    c.json(await service.attachments.upload(await readJson(c))),
+  );
+  app.get("/api/v1/attachments/:id", (c) =>
+    c.json(service.attachments.get(c.req.param("id")).metadata),
+  );
+  app.get("/api/v1/attachments/:id/content", (c) => {
+    const { metadata, bytes } = service.attachments.get(c.req.param("id"));
+    c.header("Content-Type", metadata.mimeType);
+    c.header("Cache-Control", "no-store");
+    c.header("X-Content-Type-Options", "nosniff");
+    c.header("Content-Security-Policy", "default-src 'none'; sandbox");
+    c.header(
+      "Content-Disposition",
+      `attachment; filename*=UTF-8''${encodeURIComponent(metadata.name)}`,
+    );
+    return c.body(bytes);
+  });
   app.post("/api/v1/documents", async (c) =>
     c.json(await service.documents.create(await readJson(c))),
+  );
+  app.post("/api/v1/documents/new", async (c) =>
+    c.json(service.documents.createNew(await readJson(c))),
+  );
+  app.get("/api/v1/documents/:id/history", (c) =>
+    c.json(
+      service.documents.history(
+        c.req.param("id"),
+        c.req.query("before") === undefined
+          ? undefined
+          : Number(c.req.query("before")),
+      ),
+    ),
   );
   app.get("/api/v1/documents/:id", (c) =>
     c.json(
@@ -289,6 +426,9 @@ export function createApp(service: WorkService) {
   app.post("/api/v1/learning/episodes", async (c) =>
     c.json(service.learning.createEpisode(await readJson(c))),
   );
+  app.post("/api/v1/learning/episodes/:id/edit", async (c) =>
+    c.json(service.learning.editEpisode(c.req.param("id"), await readJson(c))),
+  );
   app.post("/api/v1/learning/episodes/:id/review", async (c) =>
     c.json(
       service.learning.reviewEpisode(c.req.param("id"), await readJson(c)),
@@ -305,11 +445,90 @@ export function createApp(service: WorkService) {
   app.get("/api/v1/learning/episodes/:id", (c) =>
     c.json(service.learning.episode(c.req.param("id"))),
   );
+  app.get("/api/v1/learning/candidates", (c) =>
+    c.json(
+      service.candidates.page(
+        c.req.query("before") ? Number(c.req.query("before")) : undefined,
+      ),
+    ),
+  );
+  app.get("/api/v1/learning/suites", (c) =>
+    c.json({ suites: service.evaluations.suites.list() }),
+  );
+  app.get("/api/v1/learning/automation", (c) =>
+    c.json(service.learningAutomation.list(c.req.query("before"))),
+  );
+  app.post("/api/v1/learning/suites", async (c) =>
+    c.json(service.evaluations.suites.save(await readJson(c))),
+  );
+  app.get("/api/v1/learning/suites/:id/:revision", (c) =>
+    c.json(
+      service.evaluations.suites.get(
+        c.req.param("id"),
+        Number(c.req.param("revision")),
+      ),
+    ),
+  );
+  app.post("/api/v1/learning/candidates/:id/evaluate", async (c) =>
+    c.json(service.evaluations.start(c.req.param("id"), await readJson(c))),
+  );
+  app.get("/api/v1/learning/evaluations/:id", (c) =>
+    c.json(service.evaluations.view(c.req.param("id"))),
+  );
+  app.post("/api/v1/learning/evaluations/:id/stop", async (c) =>
+    c.json(await service.evaluations.stop(c.req.param("id"))),
+  );
+  app.get("/api/v1/learning/candidates/:id", (c) => {
+    const candidate = service.candidates.get(c.req.param("id"));
+    const episode = service.candidates.source(candidate);
+    return c.json({
+      candidate,
+      package: service.candidates.package(candidate),
+      basePackage: candidate.base
+        ? service.skills.get(candidate.base.skillId, candidate.base.revision)
+            .package
+        : null,
+      sourceSummary: episode,
+      policyRevision: service.learning.policy().revision,
+    });
+  });
+  app.get("/api/v1/learning/candidates/:id/history", (c) =>
+    c.json(
+      service.candidates.history(
+        c.req.param("id"),
+        c.req.query("before") ? Number(c.req.query("before")) : undefined,
+      ),
+    ),
+  );
+  app.post("/api/v1/learning/candidates/:id/edit", async (c) =>
+    c.json(service.candidates.edit(c.req.param("id"), await readJson(c))),
+  );
+  app.post("/api/v1/learning/candidates/:id/command", async (c) =>
+    c.json(service.candidates.command(c.req.param("id"), await readJson(c))),
+  );
   app.get("/api/v1/learning/policy", (c) => c.json(service.learning.policy()));
   app.post("/api/v1/learning/policy", async (c) =>
     c.json(service.learning.savePolicy(await readJson(c))),
   );
-  app.get("/api/v1/skills", (c) => c.json({ skills: service.skills.list() }));
+  app.get("/api/v1/skills", (c) =>
+    c.json(service.skills.page(c.req.query("after"))),
+  );
+  app.get("/api/v1/skills/:id/history", (c) =>
+    c.json(
+      service.skills.history(
+        c.req.param("id"),
+        c.req.query("before") ? Number(c.req.query("before")) : undefined,
+      ),
+    ),
+  );
+  app.get("/api/v1/skills/:id/selection-history", (c) =>
+    c.json(
+      service.skills.selectionHistory(
+        c.req.param("id"),
+        c.req.query("before") ? Number(c.req.query("before")) : undefined,
+      ),
+    ),
+  );
   app.post("/api/v1/skills/discover", async (c) =>
     c.json(await service.skills.discover(await readJson(c))),
   );
@@ -416,6 +635,24 @@ export function createApp(service: WorkService) {
   app.get("/api/v1/mcp-servers", (c) =>
     c.json({ servers: service.mcpManager.list() }),
   );
+  app.get("/api/v1/mcp-servers/:id/tools", (c) => {
+    const revision = z.coerce
+      .number()
+      .int()
+      .positive()
+      .parse(c.req.query("revision"));
+    const offset = z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(1000)
+      .parse(c.req.query("offset") ?? "0");
+    const catalog = service.mcpManager.catalog(c.req.param("id"), revision);
+    return c.json({
+      tools: catalog.slice(offset, offset + 50),
+      nextOffset: offset + 50 < catalog.length ? offset + 50 : null,
+    });
+  });
   app.post("/api/v1/mcp-servers/:id/connect", async (c) =>
     c.json(
       await service.mcpManager.connect(c.req.param("id"), await readJson(c)),
@@ -474,6 +711,17 @@ export function createApp(service: WorkService) {
         done = true;
       });
       while (!done) {
+        if (service.executionError) {
+          // Transport health is not a durable Work event and never advances its cursor.
+          await stream.writeSSE({
+            event: "daemon_degraded",
+            data: JSON.stringify({
+              message: service.executionError,
+              persisted: false,
+            }),
+          });
+          break;
+        }
         for (const event of service.store.events(after)) {
           after = event.sequence;
           await stream.writeSSE({
@@ -501,9 +749,13 @@ export function createApp(service: WorkService) {
         mode: z.enum(["fixture", "configured"]),
         modelSelection: modelSelectionSchema.optional(),
         modelBudget: modelBudgetSchema.optional(),
+        attachments: attachmentRefsSchema.optional(),
         workspaceId: z.uuid().optional(),
         workspaceRevision: z.number().int().positive().optional(),
         workspaceRead: z.boolean().optional(),
+        environmentId: z.uuid().optional(),
+        browserOrigins: z.array(z.string()).min(1).max(20).optional(),
+        browserProfileId: z.uuid().optional(),
         memoryRead: memoryReadSelectionSchema.optional(),
         transport: z.enum(["stdio", "http"]),
       })
@@ -642,3 +894,4 @@ export function createApp(service: WorkService) {
   app.get("*", serveStatic({ path: "dist/web/index.html" }));
   return app;
 }
+import { diagnosticPreview } from "./diagnostics.js";

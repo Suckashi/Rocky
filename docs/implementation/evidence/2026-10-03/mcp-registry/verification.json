@@ -56,12 +56,7 @@
     "zoom": "100%",
     "language": "zh-TW",
     "theme": "light",
-    "viewports": [
-      "1440x900",
-      "1280x800",
-      "390x844",
-      "320x844"
-    ]
+    "viewports": ["1440x900", "1280x800", "390x844", "320x844"]
   },
   "screenshots": [
     "settings-1440.png",

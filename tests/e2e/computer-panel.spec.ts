@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -15,7 +15,7 @@ test("Computer opens a reference-sized pane with actual registered files and hon
     await opener.click();
     const pane = page.locator(".result-pane");
     await expect(pane).toBeVisible();
-    await expect(pane).toContainText("Browser 尚不可用");
+    await expect(pane).toContainText("此 Work 未授予 Browser 範圍");
     await pane.getByRole("tab", { name: "Browser", exact: true }).focus();
     await page.keyboard.press("ArrowRight");
     await expect(
@@ -58,7 +58,7 @@ test("Computer opens a reference-sized pane with actual registered files and hon
       });
     }
     await pane.getByRole("tab", { name: "Terminal", exact: true }).click();
-    await expect(pane).toContainText("Terminal 尚不可用");
+    await expect(pane).toContainText("此工作尚無命令收據");
     await page.screenshot({
       path: "test-results/computer-unavailable-320.png",
     });

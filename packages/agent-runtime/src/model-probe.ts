@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { ModelConfig, ModelProbe } from "../../contracts/src/models.js";
 import { RockyError } from "../../contracts/src/index.js";
 import { ModelNetwork } from "./model-network.js";
+import { ModelDnsPolicy } from "./model-dns.js";
 
 const oaReply = z.object({
   choices: z
@@ -71,8 +72,9 @@ export async function runModelProbe(
   record: () => void,
   signal: AbortSignal,
   env: NodeJS.ProcessEnv = process.env,
+  dnsPolicy?: ModelDnsPolicy,
 ) {
-  const network = new ModelNetwork(config, env);
+  const network = new ModelNetwork(config, env, undefined, dnsPolicy);
   const nonce = randomUUID();
   const anthropic = config.provider === "anthropic";
   const messages: unknown[] = [

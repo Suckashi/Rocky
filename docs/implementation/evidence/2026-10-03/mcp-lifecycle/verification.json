@@ -55,17 +55,9 @@
     "zoom": "100%",
     "language": "zh-TW",
     "theme": "light",
-    "viewports": [
-      "1440x900",
-      "1280x800",
-      "390x844",
-      "320x844"
-    ]
+    "viewports": ["1440x900", "1280x800", "390x844", "320x844"]
   },
-  "screenshots": [
-    "ready-1440.png",
-    "ready-390.png"
-  ],
+  "screenshots": ["ready-1440.png", "ready-390.png"],
   "verified": [
     "Official SDK actual configured Node/HTTP connect/list/stop; direct child PID disappearance",
     "Full two-page discovery; repeated cursor denied with exact reason; no partial ready catalog",

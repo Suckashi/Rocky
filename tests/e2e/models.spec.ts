@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 import { startProbeFixture } from "../../fixtures/models/probe-server.js";
 test("T-007 connection settings save without traffic, probe, reload and mobile edit", async ({
   page,
@@ -56,7 +56,10 @@ test("T-007 connection settings save without traffic, probe, reload and mobile e
     await page
       .getByRole("button", { name: "Toggle theme", exact: true })
       .click();
-    await page.locator(".model-settings").scrollIntoViewIfNeeded();
+    await page
+      .locator("details.model-settings")
+      .first()
+      .scrollIntoViewIfNeeded();
     await page.screenshot({
       path: "test-results/rocky-model-settings-desktop.png",
       fullPage: true,

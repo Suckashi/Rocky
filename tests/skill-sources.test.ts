@@ -133,6 +133,7 @@ test("filesystem sources reject junctions, hard links, oversized files and inval
       items: [],
       truncated: false,
       available: false,
+      nextCursor: null,
     });
   } finally {
     await rm(root, { recursive: true, force: true });

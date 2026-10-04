@@ -42,6 +42,7 @@ export const reflectionToolSchemas = {
     reason: text,
     changes: skillCandidateDraftSchema
       .partial()
+      .required({ steps: true, verification: true, evidenceRefs: true })
       .refine((value) => Object.keys(value).length > 0, "Empty patch"),
   }),
   mark_no_learning: z.strictObject({ reason: text }),

@@ -101,12 +101,17 @@ export async function snapshotSkillSource(root: string, name: string) {
   return { package: packageData, ...validateSkillPackage(packageData) };
 }
 
-export async function discoverSkillSources(root: string) {
+export async function discoverSkillSources(root: string, after?: string) {
   try {
     if (!(await checked(root)).isDirectory()) throw denied();
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT")
-      return { items: [], truncated: false, available: false };
+      return {
+        items: [],
+        truncated: false,
+        available: false,
+        nextCursor: null,
+      };
     throw error;
   }
   const items: Array<{
@@ -116,28 +121,40 @@ export async function discoverSkillSources(root: string) {
     contentHash?: string;
     error?: string;
   }> = [];
-  let truncated = false;
+  const names: string[] = [];
+  let scanned = 0;
   const directory = await opendir(root);
   for await (const entry of directory) {
-    if (items.length >= 50) {
-      truncated = true;
-      break;
-    }
+    if (++scanned > 10000)
+      throw new RockyError(
+        "skill_discovery_capacity",
+        "Skill directory exceeds the supported 10000-entry discovery bound",
+        413,
+      );
+    if (!after || entry.name > after) names.push(entry.name);
+  }
+  names.sort();
+  for (const name of names.slice(0, 50)) {
     try {
-      const snapshot = await snapshotSkillSource(root, entry.name);
+      const snapshot = await snapshotSkillSource(root, name);
       items.push({
-        name: entry.name,
+        name,
         state: "untrusted",
         metadata: snapshot.metadata,
         contentHash: snapshot.contentHash,
       });
     } catch {
       items.push({
-        name: entry.name,
+        name,
         state: "untrusted",
         error: "Source is not a readable, valid, unlinked skill package",
       });
     }
   }
-  return { items, truncated, available: true };
+  return {
+    items,
+    truncated: names.length > 50,
+    available: true,
+    nextCursor: names.length > 50 ? names[49]! : null,
+  };
 }

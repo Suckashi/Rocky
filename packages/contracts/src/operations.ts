@@ -17,6 +17,14 @@ export const operationSummarySchema = z.strictObject({
     "unknown",
   ]),
   canReconcile: z.boolean(),
+  reconciliationQuery: z
+    .object({
+      kind: z.enum(["local_receipt", "mcp_resource", "unavailable"]),
+      target: z.string().max(8192),
+      serverId: z.string().optional(),
+      configRevision: z.number().int().positive().optional(),
+    })
+    .optional(),
 });
 export const reconciliationReceiptSchema = z.strictObject({
   id: z.uuid(),

@@ -1,4 +1,13 @@
 import { defineConfig } from "@playwright/test";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { randomUUID } from "node:crypto";
+// Each run owns fresh fixture data; retain prior runs for diagnosis.
+const dataRoot = (process.env.ROCKY_E2E_ROOT ??= join(
+  tmpdir(),
+  "rocky-browser-" + randomUUID(),
+  ".rocky-e2e",
+));
 export default defineConfig({
   testDir: "tests/e2e",
   workers: 1,
@@ -8,7 +17,7 @@ export default defineConfig({
       "node --import tsx tests/e2e/seed-reconciliation.ts && node tests/e2e/dev.mjs",
     url: "http://127.0.0.1:3210/api/v1/health",
     reuseExistingServer: false,
-    env: { ROCKY_DATA_DIR: ".rocky-e2e" },
+    env: { ROCKY_DATA_DIR: dataRoot },
     timeout: 60000,
   },
   use: {

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixture.js";
 
 test("T-007 editable call cap is pinned through CopilotKit and visible after reload", async ({
   page,
@@ -11,7 +11,7 @@ test("T-007 editable call cap is pinned through CopilotKit and visible after rel
   await page.getByText("工作預算 · 48", { exact: true }).click();
   const input = page.getByLabel("模型呼叫上限", { exact: true });
   await input.fill("0");
-  await page.locator("textarea").fill(prompt);
+  await page.locator("#compose textarea").fill(prompt);
   const send = page.getByRole("button", { name: /開始驗證/ });
   await expect(send).toBeDisabled();
   await input.fill("1");
@@ -29,7 +29,7 @@ test("T-007 editable call cap is pinned through CopilotKit and visible after rel
   expect(usage.calls).toBe(1);
   await input.fill("48");
   await page.reload();
-  await work.locator("summary").first().click();
+  await work.getByText("工作詳情", { exact: true }).click();
   await expect(
     work.getByText("此工作模型呼叫上限: 1", { exact: true }),
   ).toBeVisible();
@@ -52,7 +52,7 @@ test("T-007 editable call cap is pinned through CopilotKit and visible after rel
   ).toBeVisible();
   await expect(
     page.getByText(
-      "Each new work shares this limit with its subagents. Fixed after sending; this is not a money or token limit.",
+      "Root, children and summaries share one budget. Each request reserves the configured context capacity, then settles reported usage; missing usage keeps the reservation. Without trusted prices cost is unknown. Estimates are not provider invoices or spending guarantees.",
       { exact: true },
     ),
   ).toBeVisible();

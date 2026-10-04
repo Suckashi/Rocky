@@ -45,10 +45,17 @@ test("T-010 cancelling a model waiter removes it without consuming a slot", asyn
   );
   await expect.poll(() => slots.snapshot.active).toBe(1);
   const cancel = new AbortController();
-  const waiting = slots.run("main", cancel.signal, async () => {});
+  const waits: boolean[] = [];
+  const waiting = slots.run(
+    "main",
+    cancel.signal,
+    async () => {},
+    (value) => waits.push(value),
+  );
   expect(slots.snapshot.waiting).toBe(1);
   cancel.abort(Error("stopped"));
   await expect(waiting).rejects.toThrow("stopped");
+  expect(waits).toEqual([true, false]);
   expect(slots.snapshot).toEqual({ active: 1, waiting: 0 });
   releaseFirst();
   await first;

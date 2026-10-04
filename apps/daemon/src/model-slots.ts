@@ -64,9 +64,19 @@ export class ModelSlots {
     priority: Priority,
     signal: AbortSignal,
     task: () => Promise<T>,
+    onWait?: (waiting: boolean) => void,
   ) {
-    const release = await this.acquire(priority, signal);
+    const waiting = this.active >= this.capacity;
+    if (waiting) onWait?.(true);
+    let release: () => void;
     try {
+      release = await this.acquire(priority, signal);
+    } catch (error) {
+      if (waiting) onWait?.(false);
+      throw error;
+    }
+    try {
+      if (waiting) onWait?.(false);
       signal.throwIfAborted();
       return await task();
     } finally {

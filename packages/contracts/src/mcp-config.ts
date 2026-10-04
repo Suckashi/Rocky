@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { endpointSchema } from "./models.js";
+import { endpointSchema, proxySchema } from "./models.js";
 const serverId = z.string().regex(/^[a-z][a-z0-9-]{0,63}$/);
 const envName = z.string().regex(/^[A-Za-z_][A-Za-z0-9_]{0,127}$/);
 const ordinaryEnvName = envName.refine(
@@ -37,6 +37,16 @@ const httpServer = z.strictObject({
 const timeouts = {
   startupTimeoutMs: z.number().int().min(100).max(120000).default(30000),
   toolTimeoutMs: z.number().int().min(100).max(300000).default(60000),
+  receiptUriTemplate: z
+    .string()
+    .min(1)
+    .max(2048)
+    .refine(
+      (value) =>
+        value.includes("{operationId}") && value.includes("{intentHash}"),
+      "Receipt URI must bind operationId and intentHash",
+    )
+    .optional(),
 };
 const extension = z.discriminatedUnion("transport", [
   z.strictObject({
@@ -67,6 +77,8 @@ const extension = z.discriminatedUnion("transport", [
       )
       .default({}),
     networkPolicyId: z.string().min(1).max(128),
+    proxy: proxySchema.optional(),
+    caRef: envName.optional(),
     ...timeouts,
   }),
 ]);

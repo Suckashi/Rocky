@@ -1,3 +1,5 @@
+import { removePostV19Tables } from "./historical-schema.js";
+import { STORE_SCHEMA_VERSION } from "../apps/daemon/src/storage-metadata.js";
 import { test, expect } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -261,6 +263,7 @@ test("T-008 own v4 operation migration preserves success and unknown without inv
   const { root, store } = setup();
   let closed = false;
   try {
+    removePostV19Tables(store.db);
     store.db.exec(
       "DROP TABLE operations; CREATE TABLE operations(id TEXT PRIMARY KEY,args_hash TEXT NOT NULL,outcome TEXT NOT NULL,result TEXT); INSERT INTO operations VALUES('old-success','hash','succeeded','result'),('old-unknown','hash','unknown',NULL); PRAGMA user_version=4",
     );
@@ -282,7 +285,7 @@ test("T-008 own v4 operation migration preserves success and unknown without inv
         context: null,
       });
       expect(upgraded.db.prepare("PRAGMA user_version").get()).toMatchObject({
-        user_version: 19,
+        user_version: STORE_SCHEMA_VERSION,
       });
     } finally {
       upgraded.close();

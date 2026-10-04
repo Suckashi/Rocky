@@ -1,0 +1,483 @@
+{
+  "numTotalTestSuites": 6,
+  "numPassedTestSuites": 5,
+  "numFailedTestSuites": 1,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 44,
+  "numPassedTests": 43,
+  "numFailedTests": 1,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791100786144,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "status": "passed",
+          "title": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "duration": 81.13620000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "status": "passed",
+          "title": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "duration": 78.88509999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "status": "failed",
+          "title": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "duration": 4934.4948,
+          "failureMessages": [
+            "AssertionError: [{\"caseId\":\"e7047922-9292-4a10-bcc6-3ad6bb742d02\",\"caseHash\":\"3338c67e941c096c6ed99002f7d53112db27904ec554f69ea9d163fbd67cd575\",\"repetition\":0,\"split\":\"train\",\"variant\":\"baseline\",\"result\":{\"status\":\"failed\",\"passed\":false,\"safetyPassed\":true,\"workId\":\"fabac211-35c2-4b46-b3b6-e6481327e17c\",\"runId\":\"7965d834-5598-4c05-a7e4-343784a41656\",\"writes\":0,\"childCompleted\":false,\"calls\":0,\"tokens\":0,\"unknownUsage\":false,\"costMicroUsd\":null,\"artifactHashes\":[],\"eventIds\":[\"363f184d-2c9c-4b08-95be-7810032b2324\",\"408a0fcd-eb17-42c5-ad8c-25ba9fd32676\",\"55170353-287b-49a6-9a4e-2b5e34f78113\",\"fe3c23ad-a30a-4e93-b221-7536f08a0c68\",\"8790171b-57dd-414d-8893-fd9304250189\",\"928b851e-f061-4e21-adce-7985970ca89e\",\"abd18862-3e77-4ca7-9aa7-1e5297aabea7\",\"f05825e2-7798-4897-a9f9-af0b118f8a79\",\"9b14564b-d835-45fd-8abc-863f75bd517b\"],\"error\":\"Agent worker invocation failed\",\"loadedSkills\":[]}},{\"caseId\":\"e7047922-9292-4a10-bcc6-3ad6bb742d02\",\"caseHash\":\"3338c67e941c096c6ed99002f7d53112db27904ec554f69ea9d163fbd67cd575\",\"repetition\":0,\"split\":\"train\",\"variant\":\"candidate\",\"result\":{\"status\":\"failed\",\"passed\":false,\"safetyPassed\":true,\"workId\":\"9fe25991-21fd-4912-8bdc-cc1f395353e5\",\"runId\":\"9a88310c-eee3-4f88-b134-ea3b1001ec26\",\"writes\":0,\"childCompleted\":false,\"calls\":0,\"tokens\":0,\"unknownUsage\":false,\"costMicroUsd\":null,\"artifactHashes\":[],\"eventIds\":[\"86bc64d8-0cc0-4f01-b58e-5b1c363fdf98\",\"63f5d135-1068-462b-9664-662d5d4d22cd\",\"fa6bbfea-b140-40b8-9039-0bbd23b8efd6\",\"2f74aa37-3dfb-46b0-8f4d-ff5c2149fa0d\",\"1045cc4d-152d-44fb-bee8-1f73d852721d\",\"2a5351f4-60bf-4484-ab76-e0e55e6900f5\",\"f12c0ff1-b71a-47ab-b21d-0ecb33f749aa\",\"1bce6f73-d48d-434d-9b6a-8e363229ee7c\"],\"error\":\"Agent worker invocation failed\",\"loadedSkills\":[]}},{\"caseId\":\"5be9d6b3-4814-4165-95c6-1f4c855eea94\",\"caseHash\":\"d5a85f8c114e39e7f788045a7a1baa982448cfa11eda74fedcea1e0fb02b0fbb\",\"repetition\":0,\"split\":\"validation\",\"variant\":\"baseline\",\"result\":{\"status\":\"failed\",\"passed\":false,\"safetyPassed\":true,\"workId\":\"1f1bc714-eb40-4bcc-af46-51a139b9fcaa\",\"runId\":\"0b293351-3b40-485d-8a29-f4b0e34ce268\",\"writes\":0,\"childCompleted\":false,\"calls\":0,\"tokens\":0,\"unknownUsage\":false,\"costMicroUsd\":null,\"artifactHashes\":[],\"eventIds\":[\"9550606d-5d9c-4447-a942-1fd316cbb199\",\"92af2f53-748d-4d51-ae8f-fd26cf52d8bb\",\"329c8899-8ad7-481c-b57b-5edae6a3420c\",\"4f39b371-6d66-4526-9ecf-7e6783101b9b\",\"689cbcbc-f3bc-4bcb-96c0-6c56a4c99d27\",\"992ae6ee-afc7-44a7-8e4e-7e3d6784e292\",\"5e68e121-635d-4317-b0c4-fb67b1eeed2a\",\"0e81730b-6744-49f9-9e1a-b04d622b1442\"],\"error\":\"Agent worker invocation failed\",\"loadedSkills\":[]}},{\"caseId\":\"5be9d6b3-4814-4165-95c6-1f4c855eea94\",\"caseHash\":\"d5a85f8c114e39e7f788045a7a1baa982448cfa11eda74fedcea1e0fb02b0fbb\",\"repetition\":0,\"split\":\"validation\",\"variant\":\"candidate\",\"result\":{\"status\":\"failed\",\"passed\":false,\"safetyPassed\":true,\"workId\":\"5639ca13-3fc5-4639-a8cf-d6ce8436e3d7\",\"runId\":\"bb78ecdd-c74c-4be7-ac9f-a0686fcf0a2c\",\"writes\":0,\"childCompleted\":false,\"calls\":0,\"tokens\":0,\"unknownUsage\":false,\"costMicroUsd\":null,\"artifactHashes\":[],\"eventIds\":[\"ce567c68-d0d8-4e3d-8fc9-4b767b612e2d\",\"0471d7ff-fb2a-498f-a244-53b9b0334b7d\",\"213242be-6d43-4b00-bce3-b7c2a91e0481\",\"8cdcc753-b236-46fa-9f9c-432e8abaeab8\",\"fe3d4359-cf71-4566-9dfa-289323bde0fc\",\"10f34b4f-e353-4d88-a71a-5abf0b09b98d\",\"70e03fac-dd0a-4a39-8555-b202808fe6f9\",\"85c93f8d-6563-463a-8406-ec0b842dd880\"],\"error\":\"Agent worker invocation failed\",\"loadedSkills\":[]}}]: expected false to be true // Object.is equality\n    at D:\\Code\\Rocky\\tests\\learning-candidates.test.ts:352:7\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100804022,
+      "endTime": 1791100809116.4949,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/learning-candidates.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "Stop during native startup/discovery cancels only the owned process and old request does not restart it",
+          "status": "passed",
+          "title": "Stop during native startup/discovery cancels only the owned process and old request does not restart it",
+          "duration": 466.7501000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured HTTP redirect cannot forward credentials or initialize an unconfigured endpoint",
+          "status": "passed",
+          "title": "configured HTTP redirect cannot forward credentials or initialize an unconfigured endpoint",
+          "duration": 69.11640000000011,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: pages",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: pages",
+          "duration": 420.2858000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: repeat",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: repeat",
+          "duration": 393.36159999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: diagnostics",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: diagnostics",
+          "duration": 402.52379999999994,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: overflow",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: overflow",
+          "duration": 388.9697000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: unsafe-input",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: unsafe-input",
+          "duration": 387.3380000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bounded actual stdio discovery/diagnostics: unsafe-output",
+          "status": "passed",
+          "title": "bounded actual stdio discovery/diagnostics: unsafe-output",
+          "duration": 384.1819999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured official MCP lifecycle lists actual tools and stops without replay: stdio",
+          "status": "passed",
+          "title": "configured official MCP lifecycle lists actual tools and stops without replay: stdio",
+          "duration": 797.8492999999994,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "configured official MCP lifecycle lists actual tools and stops without replay: http",
+          "status": "passed",
+          "title": "configured official MCP lifecycle lists actual tools and stops without replay: http",
+          "duration": 119.5650999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "failed configured stdio startup is bounded, reported and not retried by old receipt",
+          "status": "passed",
+          "title": "failed configured stdio startup is bounded, reported and not retried by old receipt",
+          "duration": 175.39120000000003,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100823221,
+      "endTime": 1791100827227.391,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/mcp-manager.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native scratch writes/edits/read survive checkpoints and stay isolated by execution thread",
+          "status": "passed",
+          "title": "native scratch writes/edits/read survive checkpoints and stay isolated by execution thread",
+          "duration": 71.97710000000006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "scratch scope denies traversal, host paths, context edits and oversized tool IPC",
+          "status": "passed",
+          "title": "scratch scope denies traversal, host paths, context edits and oversized tool IPC",
+          "duration": 0.7799999999999727,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native guard refuses execute and out-of-scope tools before any public start or MCP effect",
+          "status": "passed",
+          "title": "native guard refuses execute and out-of-scope tools before any public start or MCP effect",
+          "duration": 20.988899999999944,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100822455,
+      "endTime": 1791100822548.989,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/scratch-runtime.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: published",
+          "status": "passed",
+          "title": "native progressive skill read: published",
+          "duration": 1126.1639999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: untrusted",
+          "status": "passed",
+          "title": "native progressive skill read: untrusted",
+          "duration": 1031.7444999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: quarantined",
+          "status": "passed",
+          "title": "native progressive skill read: quarantined",
+          "duration": 1000.5462999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: same-name",
+          "status": "passed",
+          "title": "native progressive skill read: same-name",
+          "duration": 1026.0180999999993,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: revoke-loaded",
+          "status": "passed",
+          "title": "native progressive skill read: revoke-loaded",
+          "duration": 1032.2052999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native progressive skill read: revoke-pending",
+          "status": "passed",
+          "title": "native progressive skill read: revoke-pending",
+          "duration": 1081.7806,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100787601,
+      "endTime": 1791100793900.7805,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/skill-native.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "large native checkpoint history reaches one daemon model dispatch through real bounded child IPC",
+          "status": "passed",
+          "title": "large native checkpoint history reaches one daemon model dispatch through real bounded child IPC",
+          "duration": 1355.3783999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "large model response and final native result cross both real child IPC directions intact",
+          "status": "passed",
+          "title": "large model response and final native result cross both real child IPC directions intact",
+          "duration": 952.2840000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "large daemon tool receipt resumes exact native interrupt and offloads evidence without repeating the tool",
+          "status": "passed",
+          "title": "large daemon tool receipt resumes exact native interrupt and offloads evidence without repeating the tool",
+          "duration": 989.0599000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 real child IPC verifies ownership and correlates tool result with daemon-resolved scope",
+          "status": "passed",
+          "title": "T-009 real child IPC verifies ownership and correlates tool result with daemon-resolved scope",
+          "duration": 234.3506000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 capability, queue and forced shutdown: badcap",
+          "status": "passed",
+          "title": "T-009 capability, queue and forced shutdown: badcap",
+          "duration": 235.16579999999976,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 capability, queue and forced shutdown: flood",
+          "status": "passed",
+          "title": "T-009 capability, queue and forced shutdown: flood",
+          "duration": 229.9422000000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 capability, queue and forced shutdown: stubborn",
+          "status": "passed",
+          "title": "T-009 capability, queue and forced shutdown: stubborn",
+          "duration": 830.5724,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "incomplete or wrong-kind final result never completes native invocation: partial-run",
+          "status": "passed",
+          "title": "incomplete or wrong-kind final result never completes native invocation: partial-run",
+          "duration": 232.7475000000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "incomplete or wrong-kind final result never completes native invocation: incomplete-run",
+          "status": "passed",
+          "title": "incomplete or wrong-kind final result never completes native invocation: incomplete-run",
+          "duration": 233.09090000000015,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "incomplete or wrong-kind final result never completes native invocation: foreign-result",
+          "status": "passed",
+          "title": "incomplete or wrong-kind final result never completes native invocation: foreign-result",
+          "duration": 234.34649999999965,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 shutdown bounds a handler that ignores cancellation",
+          "status": "passed",
+          "title": "T-009 shutdown bounds a handler that ignores cancellation",
+          "duration": 829.8059000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 forced shutdown reaps a stubborn worker and its real descendant",
+          "status": "passed",
+          "title": "T-009 forced shutdown reaps a stubborn worker and its real descendant",
+          "duration": 839.0042000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 restart marks an unfinished worker interrupted without completing its Work or respawning",
+          "status": "passed",
+          "title": "T-009 restart marks an unfinished worker interrupted without completing its Work or respawning",
+          "duration": 486.5124999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-009 native Deep Agents fixture runs in child and resumes exact interrupt through daemon RPC",
+          "status": "passed",
+          "title": "T-009 native Deep Agents fixture runs in child and resumes exact interrupt through daemon RPC",
+          "duration": 984.5150000000003,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100794398,
+      "endTime": 1791100803066.515,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/worker-channel.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: approve",
+          "status": "passed",
+          "title": "native worktree exact consent: approve",
+          "duration": 2018.5150999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: adopt",
+          "status": "passed",
+          "title": "native worktree exact consent: adopt",
+          "duration": 1973.9661,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: reject",
+          "status": "passed",
+          "title": "native worktree exact consent: reject",
+          "duration": 1411.2043000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: stale",
+          "status": "passed",
+          "title": "native worktree exact consent: stale",
+          "duration": 1717.4974000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: child",
+          "status": "passed",
+          "title": "native worktree exact consent: child",
+          "duration": 1236.7053000000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: cancel",
+          "status": "passed",
+          "title": "native worktree exact consent: cancel",
+          "duration": 1447.7240000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "native worktree exact consent: registration-failure",
+          "status": "passed",
+          "title": "native worktree exact consent: registration-failure",
+          "duration": 1916.2889999999989,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791100810027,
+      "endTime": 1791100821749.289,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/workspace-worktrees.test.ts"
+    }
+  ]
+}

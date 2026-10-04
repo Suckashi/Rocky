@@ -1,0 +1,118 @@
+{
+  "recordedAt": "2026-10-04",
+  "scope": "Open-source source repository preparation; T-001, T-034, T-036",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "npmVersion": "11.6.4",
+  "commit": "dbf5c475ce9c66c995c25aca81a0b7185923ded4+working-tree",
+  "lockfileHash": "f4983e33a8c611b665ac8beb6a4873c5e6f0e5f297691cf0a93eafbd36bb0032",
+  "checks": [
+    {
+      "command": "npm run docs:status",
+      "mode": "static",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check:docs",
+      "mode": "static",
+      "exitCode": 0,
+      "result": {
+        "tasks": 38,
+        "requirements": 56,
+        "acceptance": 70,
+        "publicDocs": 27,
+        "localLinks": 148
+      }
+    },
+    {
+      "command": "npm run lint",
+      "mode": "static",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run format:check",
+      "mode": "static",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "mode": "static",
+      "exitCode": 0,
+      "limitations": [
+        "Vite retains existing chunks larger than 500 kB; no threshold changed."
+      ]
+    },
+    {
+      "command": "npm run test:contract",
+      "mode": "fixture",
+      "exitCode": 0,
+      "result": {
+        "filesPassed": 3,
+        "testsPassed": 12
+      }
+    },
+    {
+      "command": "npm run check:secrets",
+      "mode": "static",
+      "exitCode": 0,
+      "result": {
+        "failures": [],
+        "warnings": []
+      }
+    },
+    {
+      "command": "npm run check:package",
+      "mode": "static",
+      "exitCode": 0,
+      "result": {
+        "historyObjects": 4443,
+        "packageFiles": 707,
+        "failures": [],
+        "warnings": []
+      }
+    },
+    {
+      "command": "git diff --check",
+      "mode": "static",
+      "exitCode": 0
+    }
+  ],
+  "documentationGuardSmoke": {
+    "command": "node --input-type=module (temporary source copy; baseline and deliberate negative mutations)",
+    "mode": "static",
+    "exitCode": 0,
+    "baseline": "passed",
+    "negativeCasesRejected": [
+      "Missing local documentation target",
+      "Stale generated acceptance table",
+      "NOTICE removed from package allowlist",
+      "Action changed from SHA to mutable branch"
+    ],
+    "sourceModified": false
+  },
+  "finalPackageCheck": {
+    "command": "npm run check:secrets -- --package",
+    "mode": "static",
+    "exitCode": 0,
+    "sourceFiles": 893,
+    "packageFiles": 707,
+    "failures": [],
+    "warnings": []
+  },
+  "changes": [
+    "Bilingual project entry, architecture and documentation indexes, contributor/support/conduct policies, changelog and bootstrap/release checklist.",
+    "Issue/PR templates, weekly Dependabot configuration and independently visible dependency audit job; no auto-merge/deployment.",
+    "Missing NOTICE added; THIRD_PARTY_NOTICES and dependency inventory included in actual package and required by guard.",
+    "Acceptance summary generated from existing ledger and checked for drift; historical snapshots labeled.",
+    "Runtime layout and existing working-tree changes preserved; no task or acceptance verdict promoted."
+  ],
+  "limitations": [
+    "Local static/fixture checks only; full suite and browser suite not rerun for this repository-documentation change.",
+    "GitHub workflows, Issue forms and Dependabot have local syntax/structural checks only; hosted execution has not occurred.",
+    "Dependency audit not rerun in this turn; existing failed security acceptance remains open.",
+    "Ubuntu, strict browser egress, live endpoints, real container enforcement and performance baseline remain separately tracked.",
+    "Pattern scan is not a comprehensive secret or PII audit; historical screenshots were not all manually reviewed.",
+    "No local commit, remote creation, visibility change, push, tag, merge, deployment, or external message.",
+    "Repository identity and private reporting contact remain to be configured at authorized bootstrap."
+  ]
+}

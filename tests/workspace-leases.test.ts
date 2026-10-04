@@ -94,7 +94,7 @@ test.each(["release", "reverse", "cancel-waiter", "blocked"] as const)(
       const waiting = submit(
           mode === "reverse" ? parent.id : nested.id,
           "NESTED_WAITER",
-          "background",
+          "main",
         ),
         free = submit(unrelated.id, "UNRELATED_RUN", "background");
       const unstarted = () => {

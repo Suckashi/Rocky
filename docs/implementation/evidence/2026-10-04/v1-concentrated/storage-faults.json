@@ -1,0 +1,213 @@
+{
+  "numTotalTestSuites": 4,
+  "numPassedTestSuites": 3,
+  "numFailedTestSuites": 1,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 16,
+  "numPassedTests": 15,
+  "numFailedTests": 1,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791103837470,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 stale CAS and transaction failure cannot partially change Work, events or outbox",
+          "status": "passed",
+          "title": "T-006 stale CAS and transaction failure cannot partially change Work, events or outbox",
+          "duration": 56.491100000000074,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 outbox replay after acknowledgement failure creates one completion and no new operations",
+          "status": "passed",
+          "title": "T-006 outbox replay after acknowledgement failure creates one completion and no new operations",
+          "duration": 49.77170000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 an outbox write failure rolls back the operation ledger and its event together",
+          "status": "passed",
+          "title": "T-006 an outbox write failure rolls back the operation ledger and its event together",
+          "duration": 41.04230000000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 actual child exits roll back uncommitted writes and preserve committed pending delivery",
+          "status": "passed",
+          "title": "T-006 actual child exits roll back uncommitted writes and preserve committed pending delivery",
+          "duration": 1143.5776,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 simultaneous daemons cannot both recover a stale PID lock",
+          "status": "passed",
+          "title": "T-006 simultaneous daemons cannot both recover a stale PID lock",
+          "duration": 1044.0837999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "T-006 durable completion API pages stable sequences without skipping or duplicating results",
+          "status": "passed",
+          "title": "T-006 durable completion API pages stable sequences without skipping or duplicating results",
+          "duration": 291.19209999999975,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791103846136,
+      "endTime": 1791103848763.1921,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/persistence.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (true)",
+          "status": "passed",
+          "title": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (true)",
+          "duration": 2157.1419,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (child)",
+          "status": "passed",
+          "title": "steering is accepted idempotently and becomes applied only in its owned root checkpoint boundary (child)",
+          "duration": 1983.8371000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "pending steering is not_applied when terminal before next boundary, with no ghost history",
+          "status": "passed",
+          "title": "pending steering is not_applied when terminal before next boundary, with no ghost history",
+          "duration": 1033.3279000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "pending steering is not_applied when stopped, with no ghost history",
+          "status": "passed",
+          "title": "pending steering is not_applied when stopped, with no ghost history",
+          "duration": 1033.6144000000004,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791103838896,
+      "endTime": 1791103845104.6145,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/steering.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "stale stop cannot cancel another run/session or a newer revision; receipt survives restart",
+          "status": "passed",
+          "title": "stale stop cannot cancel another run/session or a newer revision; receipt survives restart",
+          "duration": 1198.3917,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "stopping with a dispatched unknown effect requires reconciliation",
+          "status": "passed",
+          "title": "stopping with a dispatched unknown effect requires reconciliation",
+          "duration": 1060.2633,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791103851866,
+      "endTime": 1791103854124.2632,
+      "status": "passed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/stop.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "storage full cannot commit a partial completed Work or outbox",
+          "status": "passed",
+          "title": "storage full cannot commit a partial completed Work or outbox",
+          "duration": 58.62540000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "storage busy cannot commit a partial completed Work or outbox",
+          "status": "passed",
+          "title": "storage busy cannot commit a partial completed Work or outbox",
+          "duration": 52.487399999999866,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "storage journal cannot commit a partial completed Work or outbox",
+          "status": "passed",
+          "title": "storage journal cannot commit a partial completed Work or outbox",
+          "duration": 48.20569999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "terminal persistence failure stops further execution and reports volatile degradation instead of success",
+          "status": "failed",
+          "title": "terminal persistence failure stops further execution and reports volatile degradation instead of success",
+          "duration": 1051.5208000000002,
+          "failureMessages": [
+            "AssertionError: expected { code: 'host_denied', …(1) } to match object { status: 'degraded', …(1) }\n(2 matching properties omitted from actual)\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/@vitest/expect/dist/index.js:1155:10)\n    at Proxy.<anonymous> (file:///D:/Code/Rocky/node_modules/@vitest/expect/dist/index.js:1029:14)\n    at Proxy.methodWrapper (file:///D:/Code/Rocky/node_modules/chai/index.js:1686:25)\n    at D:\\Code\\Rocky\\tests\\storage-faults.test.ts:161:35\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791103849728,
+      "endTime": 1791103850938.5208,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/storage-faults.test.ts"
+    }
+  ]
+}

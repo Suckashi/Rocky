@@ -1,0 +1,13 @@
+Rocky
+
+Original Rocky source is distributed under the Apache License, Version 2.0.
+See LICENSE for the license text.
+
+This product includes presentation code adapted from OpenDots:
+Copyright (c) Atai Barkai
+Licensed under the MIT License.
+
+See THIRD_PARTY_NOTICES.md for the complete notices, attribution, fixed
+source revision, and descriptions of adapted material. Dependency licenses
+remain with their respective packages. This notice does not grant trademark
+rights or imply endorsement by referenced projects.

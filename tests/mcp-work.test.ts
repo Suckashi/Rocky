@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, vi } from "vitest";
 import { randomUUID } from "node:crypto";
 import { mkdtempSync, readdirSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -15,6 +15,8 @@ test.each([
   "invalid",
   "uncertain",
   "synthetic",
+  "background",
+  "schedule",
 ] as const)(
   "configured native worker uses discovered MCP schema and exact approval: %s",
   async (mode) => {
@@ -107,13 +109,50 @@ test.each([
           maxOutputTokens: 256,
         },
       });
-      const work = service.submit({
+      const submission = {
         requestId: randomUUID(),
         text: "Use explicitly configured MCP",
         mode: "configured",
         transport: "http",
+        kind: mode === "background" ? "background" : "main",
         modelSelection: { connectionId: id, revision: 1 },
-      });
+      };
+      const work =
+        mode === "schedule"
+          ? (() => {
+              let now = Date.now();
+              const clock = vi.spyOn(Date, "now").mockImplementation(() => now);
+              try {
+                const routine = service.routines.save({
+                  requestId: randomUUID(),
+                  id: randomUUID(),
+                  expectedRevision: 0,
+                  config: {
+                    name: "Exact approval schedule fixture",
+                    prompt: submission.text,
+                    timezone: "Asia/Taipei",
+                    schedule: { kind: "interval", seconds: 60 },
+                    misfirePolicy: "skip",
+                    enabled: true,
+                    modelSelection: submission.modelSelection,
+                    modelBudget: {},
+                  },
+                });
+                now += 60000;
+                service.routines.tick();
+                service.routines.tick();
+                const occurrences = service.routines.occurrences(
+                  routine.id,
+                ).occurrences;
+                expect(occurrences).toHaveLength(1);
+                return service.store.get(occurrences[0]!.workId!);
+              } finally {
+                clock.mockRestore();
+              }
+            })()
+          : service.submit(submission);
+      if (mode === "schedule" || mode === "background")
+        expect(work.kind).toBe("background");
       await expect
         .poll(() => service.store.get(work.id).status, { timeout: 15000 })
         .toBe(

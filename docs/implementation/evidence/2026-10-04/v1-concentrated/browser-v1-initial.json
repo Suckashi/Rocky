@@ -1,0 +1,280 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\Code\\Rocky\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/v1-workflows.spec.ts"
+    ],
+    "configFile": "D:\\Code\\Rocky\\playwright.config.ts",
+    "rootDir": "D:/Code/Rocky/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Code/Rocky/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "D:/Code/Rocky/tests/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      ["list", null],
+      [
+        "json",
+        {
+          "outputFile": "test-results/e2e.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": {
+      "command": "node --import tsx tests/e2e/seed-reconciliation.ts && node tests/e2e/dev.mjs",
+      "url": "http://127.0.0.1:3210/api/v1/health",
+      "reuseExistingServer": false,
+      "env": {
+        "ROCKY_DATA_DIR": "C:\\Users\\sam46\\AppData\\Local\\Temp\\rocky-browser-1a904c91-8a0c-4347-a0b1-20c07d576a0f\\.rocky-e2e"
+      },
+      "timeout": 60000
+    }
+  },
+  "suites": [
+    {
+      "title": "v1-workflows.spec.ts",
+      "file": "v1-workflows.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "new document revisions and restore preserve previous content",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 30068,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts",
+                        "column": 63,
+                        "line": 11
+                      },
+                      "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '成果', exact: true })\u001b[22m\n\n\n   9 | test(\"new document revisions and restore preserve previous content\", async ({ page }) => {\n  10 |   await page.goto(\"/\");\n> 11 |   await page.getByRole(\"button\", { name: \"成果\", exact: true }).click();\n     |                                                               ^\n  12 |   await page.getByRole(\"button\", { name: \"建立文件\", exact: true }).click();\n  13 |   await page.getByLabel(\"文件標題\", { exact: true }).fill(\"Browser revision fixture\");\n  14 |   await page.getByLabel(\"Markdown 原始內容\", { exact: true }).fill(\"# First saved revision\");\n    at D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts:11:63"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:32:02.950Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\Code\\Rocky\\test-results\\v1-workflows-new-document--24025-e-preserve-previous-content\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\Code\\Rocky\\test-results\\v1-workflows-new-document--24025-e-preserve-previous-content\\error-context.md"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "d89094490748a2768935-78c8e88543fadfad39ee",
+          "file": "v1-workflows.spec.ts",
+          "line": 9,
+          "column": 1
+        },
+        {
+          "title": "PNG upload is sanitized, bound to the submitted Work and delivered to the selected vision model",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 30080,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts",
+                        "column": 66,
+                        "line": 48
+                      },
+                      "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#compose').locator('summary').filter({ hasText: /^附件/ })\u001b[22m\n\n\n  46 |     await page.keyboard.press(\"Escape\");\n  47 |     const composer = page.locator(\"#compose\");\n> 48 |     await composer.locator(\"summary\").filter({ hasText: /^附件/ }).click();\n     |                                                                  ^\n  49 |     const png = new PNG({ width: 2, height: 2 });\n  50 |     png.data.fill(255);\n  51 |     await composer.locator('input[type=\"file\"]').setInputFiles({ name: \"fixture.png\", mimeType: \"image/png\", buffer: PNG.sync.write(png) });\n    at D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts:48:66"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:32:33.766Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\Code\\Rocky\\test-results\\v1-workflows-PNG-upload-is-9261d-o-the-selected-vision-model\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\Code\\Rocky\\test-results\\v1-workflows-PNG-upload-is-9261d-o-the-selected-vision-model\\error-context.md"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "d89094490748a2768935-b28f27f10523c3b167b7",
+          "file": "v1-workflows.spec.ts",
+          "line": 35,
+          "column": 1
+        },
+        {
+          "title": "Learning Inbox edits, evaluates and withdraws a real reflected candidate without bypassing publication",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3963,
+                  "error": {
+                    "message": "Error: {\"code\":\"invalid_request\",\"message\":\"Request does not match the supported schema\"}\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+                    "stack": "Error: {\"code\":\"invalid_request\",\"message\":\"Request does not match the supported schema\"}\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n    at post (D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts:79:213)\n    at D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts:95:24",
+                    "location": {
+                      "file": "D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts",
+                      "column": 213,
+                      "line": 79
+                    },
+                    "snippet": "  77 |     await page.goto(\"/\");\n  78 |     const { token } = await (await page.request.get(\"/api/v1/session\")).json();\n> 79 |     const post = async (path: string, data: unknown) => { const response = await page.request.post(\"/api/v1\" + path, { headers: { \"x-rocky-session\": token }, data }); expect(response.ok(), await response.text()).toBe(true); return response.json(); };\n     |                                                                                                                                                                                                                     ^\n  80 |     const source = await post(\"/conversation/messages\", { requestId: randomUUID(), text: \"Inbox source fixture \" + randomUUID(), mode: \"fixture\", transport: \"http\", kind: \"background\" });\n  81 |     const getWork = async (id: string) => (await page.request.get(`/api/v1/works/${id}`)).json();\n  82 |     await expect.poll(async () => (await getWork(source.id)).status).toBe(\"waiting_approval\");"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts",
+                        "column": 213,
+                        "line": 79
+                      },
+                      "message": "Error: {\"code\":\"invalid_request\",\"message\":\"Request does not match the supported schema\"}\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\n  77 |     await page.goto(\"/\");\n  78 |     const { token } = await (await page.request.get(\"/api/v1/session\")).json();\n> 79 |     const post = async (path: string, data: unknown) => { const response = await page.request.post(\"/api/v1\" + path, { headers: { \"x-rocky-session\": token }, data }); expect(response.ok(), await response.text()).toBe(true); return response.json(); };\n     |                                                                                                                                                                                                                     ^\n  80 |     const source = await post(\"/conversation/messages\", { requestId: randomUUID(), text: \"Inbox source fixture \" + randomUUID(), mode: \"fixture\", transport: \"http\", kind: \"background\" });\n  81 |     const getWork = async (id: string) => (await page.request.get(`/api/v1/works/${id}`)).json();\n  82 |     await expect.poll(async () => (await getWork(source.id)).status).toBe(\"waiting_approval\");\n    at post (D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts:79:213)\n    at D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts:95:24"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T08:33:04.563Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\Code\\Rocky\\test-results\\v1-workflows-Learning-Inbo-21fbb-thout-bypassing-publication\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\Code\\Rocky\\test-results\\v1-workflows-Learning-Inbo-21fbb-thout-bypassing-publication\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\Code\\Rocky\\tests\\e2e\\v1-workflows.spec.ts",
+                    "column": 213,
+                    "line": 79
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "d89094490748a2768935-1814cd529ac4cc13d74c",
+          "file": "v1-workflows.spec.ts",
+          "line": 72,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-04T08:32:00.285Z",
+    "duration": 68647.744,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

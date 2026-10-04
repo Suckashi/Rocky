@@ -1,0 +1,75 @@
+{
+  "numTotalTestSuites": 1,
+  "numPassedTestSuites": 0,
+  "numFailedTestSuites": 1,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 4,
+  "numPassedTests": 0,
+  "numFailedTests": 1,
+  "numPendingTests": 3,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791101972112,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "configured local provider evaluates all three frozen variants before exact publication and next-Work loading",
+          "status": "failed",
+          "title": "configured local provider evaluates all three frozen variants before exact publication and next-Work loading",
+          "duration": 85.57330000000002,
+          "failureMessages": [
+            "Error: Patch base hash or name changed\n    at SkillCandidates.materialize (D:\\Code\\Rocky\\apps\\daemon\\src\\skill-candidates.ts:179:15)\n    at SkillCandidates.fromReflection (D:\\Code\\Rocky\\apps\\daemon\\src\\skill-candidates.ts:330:31)\n    at D:\\Code\\Rocky\\tests\\learning-candidates.test.ts:128:78\n    at Store.transaction (D:\\Code\\Rocky\\apps\\daemon\\src\\store.ts:416:22)\n    at D:\\Code\\Rocky\\tests\\learning-candidates.test.ts:128:39\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at file:///D:/Code/Rocky/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "status": "skipped",
+          "title": "candidate edit invalidates evaluation and source withdrawal removes only its derived packages",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "status": "skipped",
+          "title": "publication CAS requires exact manifest, base and policy; registry load is pinned and source edit revokes it",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "status": "skipped",
+          "title": "Promptfoo executes full local fixture Works but cannot publish an insufficient fixture-only evaluation",
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1791101973525,
+      "endTime": 1791101973610.5732,
+      "status": "failed",
+      "message": "",
+      "name": "D:/Code/Rocky/tests/learning-candidates.test.ts"
+    }
+  ]
+}

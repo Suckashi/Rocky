@@ -163,8 +163,8 @@ export function MemorySettings({
       <summary>{zh ? "記憶" : "Memory"}</summary>
       <p>
         {zh
-          ? "管理本地記憶。手動記憶會鎖定；模型讀取需另行授權給工作，Learning 尚未接入。"
-          : "Manage local memory. Manual entries are locked; model reads require a separate Work grant. Learning is not connected yet."}
+          ? "管理本地記憶。手動記憶會鎖定；模型讀取需另行授權給工作，Learning 使用來源前仍需你的同意。"
+          : "Manage local memory. Manual entries are locked; model reads require a separate Work grant, and Learning requires your source consent."}
       </p>
       <fieldset disabled={busy || !!draft}>
         <label>

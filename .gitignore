@@ -14,3 +14,12 @@ learning-runs/
 *.log
 *.sqlite
 *.sqlite-*
+*.db
+*.db-*
+*.tgz
+*.tsbuildinfo
+browser-profiles/
+learning-evaluations/
+rocky-backup.json
+.DS_Store
+Thumbs.db

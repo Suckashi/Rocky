@@ -10,7 +10,29 @@ import { RockyError } from "../../../packages/contracts/src/index.js";
 import type { Store } from "./store.js";
 import { intentHash } from "./intent.js";
 import { redactEvidence, createTextStreamRedactor } from "./redaction.js";
+import { ModelDnsPolicy } from "../../../packages/agent-runtime/src/model-dns.js";
+import { configuredFetch } from "../../../packages/agent-runtime/src/configured-fetch.js";
 export class McpRegistry {
+  private readonly dnsPolicies = new Map<string, ModelDnsPolicy>();
+  httpNetwork(id: string, revision: number) {
+    const { server, options } = this.server(id, revision);
+    if (!("url" in server) || options.transport !== "streamable-http")
+      throw new RockyError("mcp_transport", "HTTP connection required", 409);
+    const key = `${id}:${revision}`;
+    for (const old of this.dnsPolicies.keys())
+      if (old.startsWith(id + ":") && old !== key) this.dnsPolicies.delete(old);
+    const policy = this.dnsPolicies.get(key) ?? new ModelDnsPolicy();
+    this.dnsPolicies.set(key, policy);
+    return configuredFetch(
+      {
+        baseUrl: server.url,
+        proxy: options.proxy ?? { mode: "direct" },
+        caRef: options.caRef ?? null,
+      },
+      this.env,
+      policy,
+    );
+  }
   readonly configDirectory: string;
   private closed = false;
   private observedSecrets = new Set<string>();
@@ -238,5 +260,6 @@ export class McpRegistry {
   }
   close() {
     this.closed = true;
+    this.dnsPolicies.clear();
   }
 }

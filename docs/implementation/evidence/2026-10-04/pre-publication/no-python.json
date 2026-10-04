@@ -1,0 +1,35 @@
+{
+  "platform": "win32",
+  "arch": "x64",
+  "node": "v24.12.0",
+  "npm": "11.6.4",
+  "mode": "fixture",
+  "steps": [
+    {
+      "command": "npm ci",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "command": "npm test -- tests/contracts.test.ts tests/runtime.test.ts tests/worker-channel.test.ts tests/http.test.ts tests/attachments.test.ts tests/documents-new.test.ts tests/model-budget.test.ts tests/learning-candidates.test.ts tests/backup.test.ts",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run test:learning",
+      "exitCode": 0
+    }
+  ],
+  "forbiddenToolAttempts": [],
+  "limitations": [
+    "Constrained-PATH clean-copy install on this host; not an Ubuntu or pristine-machine result.",
+    "Temporary evidence retained for inspection."
+  ],
+  "rawReportSha256": "42a2e835980387497c0fb399de8bfaf200f9bab235305acf8803696ad76d02e3"
+}
