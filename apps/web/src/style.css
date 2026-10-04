@@ -1106,3 +1106,53 @@ input[type="checkbox"] {
   max-width: 120px;
   font-size: 14px;
 }
+/* OpenDots inline-computer geometry, c2569bb6; MIT notice in THIRD_PARTY_NOTICES.md. */
+.inline-tool {
+  line-height: normal;
+  flex: 0 0 auto;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--canvas);
+  margin: 10px 0;
+  overflow: hidden;
+  color: var(--text);
+}
+.inline-tool header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 14px;
+  font-size: 12px;
+}
+.inline-tool header strong {
+  font-weight: 550;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.inline-tool header svg {
+  flex-shrink: 0;
+}
+.inline-tool .tool-state {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.inline-tool .tool-state.failed {
+  color: var(--error);
+}
+.inline-tool-detail {
+  padding: 0 14px 12px;
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.inline-tool > details {
+  padding: 0 14px 12px;
+}
+.inline-tool p {
+  font-size: 12px;
+}

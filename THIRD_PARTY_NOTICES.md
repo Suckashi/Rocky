@@ -52,3 +52,5 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
 OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
+
+ComputerToolCard inline-computer presentation from the same fixed OpenDots commit is adapted in apps/web/src/tool-activity.tsx and style.css: 14px radius, 12px/14px header padding, 9px gap and 12px type. Rocky uses shared daemon events, semantic theme colors, separate returned/failed/unconfirmed states and collapsed evidence; no upstream screenshot polling or API is copied.

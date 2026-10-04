@@ -1,3 +1,4 @@
+import { ToolActivity } from "./tool-activity.js";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { CopilotKitProvider, useAgent } from "@copilotkit/react-core/v2";
@@ -619,6 +620,7 @@ function App() {
                       </ReactMarkdown>
                     </div>
                   )}
+                  <ToolActivity work={w} events={events} locale={locale} />
                   <WorkArtifacts
                     items={artifacts.filter((a) => a.workId === w.id)}
                     locale={locale}
