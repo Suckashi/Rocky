@@ -41,6 +41,7 @@ import { OperationReconciler } from "./operation-reconciler.js";
 import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
 import { DocumentStore } from "./documents.js";
+import { reflectionSubmissionSchema } from "../../../packages/contracts/src/learning-run.js";
 import { ReflectionRegistry } from "./reflection.js";
 import { LearningRegistry } from "./learning.js";
 import { SkillRegistry } from "./skills.js";
@@ -269,6 +270,39 @@ export class WorkService {
     }
     return this.admit(parsed, intent, runMode);
   }
+  reflect(input: unknown) {
+    if (this.stopping)
+      throw new RockyError("stopping", "Daemon is stopping", 503);
+    const command = reflectionSubmissionSchema.parse(input);
+    const intent = intentHash({ reflection: command });
+    const prior = this.store.receipt(command.requestId);
+    if (prior) {
+      if (prior.intent !== intent)
+        throw new RockyError(
+          "idempotency_conflict",
+          "Reflection request changed",
+          409,
+        );
+      return this.store.get(prior.id);
+    }
+    this.reflection.check(command.binding);
+    return this.admit(
+      submissionSchema.parse({
+        requestId: command.requestId,
+        text: "Read the reviewed episode, assess reusable evidence, and propose a scoped skill or mark no learning.",
+        transport: "http",
+        mode: "configured",
+        kind: "background",
+        modelSelection: command.modelSelection,
+        modelBudget: command.modelBudget,
+      }),
+      intent,
+      "reflection",
+      undefined,
+      undefined,
+      command.binding,
+    );
+  }
   retry(id: string, input: unknown) {
     if (this.stopping)
       throw new RockyError("stopping", "Daemon is stopping", 503);
@@ -323,9 +357,10 @@ export class WorkService {
   private admit(
     parsed: ReturnType<typeof submissionSchema.parse>,
     intent: string,
-    runMode: "normal" | "evaluation",
+    runMode: "normal" | "evaluation" | "reflection",
     retryOf?: string,
     retryEffectRefs?: ReturnType<typeof retrySchema.parse>["effectRefs"],
+    reflection?: Work["reflection"],
   ) {
     if (
       this.store.list().filter((w) => w.status === "queued").length >=
@@ -372,7 +407,7 @@ export class WorkService {
           }
         : {}),
       wallBudgetMs:
-        runMode === "evaluation"
+        runMode === "evaluation" || runMode === "reflection"
           ? this.admissionConfig.evaluationWallBudgetMs
           : parsed.kind === "background"
             ? this.admissionConfig.backgroundWallBudgetMs
@@ -382,6 +417,7 @@ export class WorkService {
         ? { modelSelection: parsed.modelSelection }
         : {}),
       runMode,
+      ...(reflection ? { reflection } : {}),
       status: "queued",
       revision: 1,
       answer: "",
@@ -408,7 +444,10 @@ export class WorkService {
         });
     });
     this.flushOutbox();
-    if (work.mode === "fixture" || this.testFixtureTools)
+    if (
+      work.mode === "fixture" ||
+      (this.testFixtureTools && work.runMode !== "reflection")
+    )
       this.grants.issue({
         requestId: randomUUID(),
         workId: work.id,
@@ -428,7 +467,9 @@ export class WorkService {
     { abort: AbortController; promise: Promise<void> }
   >();
   private admissionClass(work: Work) {
-    return work.runMode === "evaluation" ? "evaluation" : (work.kind ?? "main");
+    return work.runMode === "evaluation" || work.runMode === "reflection"
+      ? "evaluation"
+      : (work.kind ?? "main");
   }
   private resourcesOverlap(a: Work, b: Work) {
     if ((a.workspaceId ?? a.id) === (b.workspaceId ?? b.id)) return true;
@@ -504,8 +545,10 @@ export class WorkService {
     const cleanup: Array<() => Promise<void>> = [];
     let handedOff = false;
     try {
+      if (work.reflection) this.reflection.check(work.reflection);
       const connection =
-        work.mode === "fixture" || this.testFixtureTools
+        work.mode === "fixture" ||
+        (this.testFixtureTools && work.runMode !== "reflection")
           ? await connectFixture(
               work.transport,
               join(this.store.root, "synthetic-receipts", work.runId),
@@ -654,11 +697,13 @@ export class WorkService {
         purpose: "target",
         mode: work.mode,
         toolScope:
-          work.mode === "configured"
-            ? this.testFixtureTools
-              ? "TEST HARNESS: configured MCP plus synthetic samples"
-              : "configured MCP via exact approval"
-            : "synthetic",
+          work.runMode === "reflection"
+            ? "reviewed episode and scoped reflection proposals"
+            : work.mode === "configured"
+              ? this.testFixtureTools
+                ? "TEST HARNESS: configured MCP plus synthetic samples"
+                : "configured MCP via exact approval"
+              : "synthetic",
       });
       const hooks: RuntimeHooks = {
         modelRequest: fixtureModel
@@ -1937,6 +1982,21 @@ export class WorkService {
         this.update(work);
         this.emit(work, "rocky.approval.required", { approval: work.approval });
         return;
+      }
+      if (work.runMode === "reflection") {
+        this.reflection.checkWork(work);
+        if (
+          !this.store.db
+            .prepare(
+              "SELECT id FROM learning_reflection_outputs WHERE json_extract(data,'$.execution.runId')=? AND json_extract(data,'$.status') IN ('proposed','no_learning') LIMIT 1",
+            )
+            .get(work.runId)
+        )
+          throw new RockyError(
+            "reflection_result",
+            "Reflection ended without a persisted proposal or no_learning result",
+            409,
+          );
       }
       const last = raw.messages?.at(-1);
       work.answer =

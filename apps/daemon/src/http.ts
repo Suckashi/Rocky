@@ -294,6 +294,9 @@ export function createApp(service: WorkService) {
       service.learning.reviewEpisode(c.req.param("id"), await readJson(c)),
     ),
   );
+  app.post("/api/v1/learning/reflections", async (c) =>
+    c.json(service.reflect(await readJson(c))),
+  );
   app.get("/api/v1/learning/episodes/:id", (c) =>
     c.json(service.learning.episode(c.req.param("id"))),
   );
