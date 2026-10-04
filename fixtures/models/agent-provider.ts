@@ -26,6 +26,9 @@ export async function startAgentProvider(
     hold?: boolean;
     streamDelayMs?: number;
     truncateStream?: boolean;
+    // Keeps a matching prompt's final text stream open after its text deltas
+    // until the client disconnects, so stop tests never race completion.
+    stallTextWhen?: (prompt: string) => boolean;
     reply?: (messages: BaseMessage[], child: boolean) => Promise<AIMessage>;
   } = {},
 ) {
@@ -117,6 +120,15 @@ export async function startAgentProvider(
           if (options.streamDelayMs)
             await new Promise((r) => setTimeout(r, options.streamDelayMs));
         };
+        const stall =
+          !calls.length &&
+          options.stallTextWhen?.(
+            String(
+              messages.findLast((m) => m instanceof HumanMessage)?.content ??
+                "",
+            ),
+          );
+        const closed = new Promise<void>((r) => res.once("close", () => r()));
         const text = String(message.content);
         const pieces = text
           ? [
@@ -139,12 +151,14 @@ export async function startAgentProvider(
               index,
               content_block: { type: "text", text: "" },
             });
-            for (const piece of pieces)
+            // Trailing spaces push the text past the daemon's redaction window.
+            for (const piece of stall ? [...pieces, " ".repeat(40)] : pieces)
               await send({
                 type: "content_block_delta",
                 index,
                 delta: { type: "text_delta", text: piece },
               });
+            if (stall) return await closed;
             await send({ type: "content_block_stop", index: index++ });
           }
           for (const call of calls) {
@@ -179,7 +193,10 @@ export async function startAgentProvider(
             delta: unknown,
             finish_reason: string | null = null,
           ) => send({ choices: [{ index: 0, delta, finish_reason }] });
-          for (const content of pieces) await sendChoice({ content });
+          // Trailing spaces push the text past the daemon's redaction window.
+          for (const content of stall ? [...pieces, " ".repeat(40)] : pieces)
+            await sendChoice({ content });
+          if (stall) return await closed;
           for (const [index, call] of calls.entries()) {
             const args = JSON.stringify(call.args),
               midpoint = Math.ceil(args.length / 2);
