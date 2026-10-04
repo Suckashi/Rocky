@@ -186,3 +186,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 - Inline tool cards now match measured OpenDots card geometry and show truthful returned/failed/unconfirmed states. This closes hidden-only summary presentation, not full Computer/tool results or global UI fidelity. Reference comparisons are explicitly local card-region CSS reconstruction. See evidence/2026-10-04/tool-alignment/verification.json.
 
 - Tool-card reference now mounts actual unmodified OpenDots ComputerToolCard in isolated fixture; collapsed density corrected70px. Full shell comparison remains incomplete, and fixture uses local Rocky dependency versions. See evidence/2026-10-04/tool-component/verification.json.
+
+- New native child evidence includes parent task call identity and prevents repeated child call IDs merging in inline cards. Existing events lacking ancestry cannot reconstruct it; daemon restart/resume propagation still needs coverage. See evidence/2026-10-04/native-task-identity.json.

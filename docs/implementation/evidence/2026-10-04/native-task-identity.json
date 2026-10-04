@@ -1,0 +1,31 @@
+{
+  "commit": "60cb7480c303a4f9229e6f8d98fc3c924d971b15",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/native-task-identity.test.ts tests/scratch-runtime.test.ts; npm run check; scoped eslint runtime/tool-card/tests; ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test tests/e2e/tool-alignment.spec.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/native-task-identity.json",
+  "testFiles": [
+    "tests/native-task-identity.test.ts",
+    "tests/scratch-runtime.test.ts",
+    "tests/e2e/tool-alignment.spec.ts"
+  ],
+  "tests": 4,
+  "seconds": 1.61,
+  "browserTests": 1,
+  "browserSeconds": 4.6,
+  "assertions": [
+    "Existing Deep Agents native task handler scopes parent call ID through AsyncLocalStorage; no alternate task runtime",
+    "Two actual parallel native children reuse same child tool ID yet emit distinct parentCallId on start/terminal events",
+    "Root task events remain root; scratch checkpoint tests stay passing",
+    "UI groups by exact execution, parent identity, event category, tool name and call ID; repeated child ID cards preserve separate returned/failed states"
+  ],
+  "limitations": [
+    "Initial fixture callback returned AIMessage instead of ChatResult; corrected before final passing tests",
+    "Native ancestry test and explicit routed browser projection test are separate evidence, not live daemon child replay proof",
+    "Preexisting events without parentCallId cannot reconstruct missing ancestry; restart/resume propagation matrix pending",
+    "No layout change or new OpenDots fidelity claim; prior card measurements remain scoped evidence",
+    "No external live model/Ubuntu/global AT completion"
+  ]
+}

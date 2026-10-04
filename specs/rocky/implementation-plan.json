@@ -2323,7 +2323,8 @@
             "Current synthetic replay guard requires actual connector/target binding in future MCP/workspace adapters",
             "T-013/T-019 in_progress; global AT unchanged; Goal active; no remote actions"
           ]
-        }
+        },
+        "docs/implementation/evidence/2026-10-04/native-task-identity.json"
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
@@ -3365,7 +3366,8 @@
           ]
         },
         "docs/implementation/evidence/2026-10-04/tool-alignment/verification.json",
-        "docs/implementation/evidence/2026-10-04/tool-component/verification.json"
+        "docs/implementation/evidence/2026-10-04/tool-component/verification.json",
+        "docs/implementation/evidence/2026-10-04/native-task-identity.json"
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
