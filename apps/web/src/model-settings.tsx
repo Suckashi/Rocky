@@ -21,6 +21,7 @@ export function ModelSettings({
   locale,
   request,
   onSelect,
+  onSaved,
 }: {
   locale: "zh" | "en";
   request: (path: string, body?: unknown) => Promise<unknown>;
@@ -29,6 +30,7 @@ export function ModelSettings({
     revision: number;
     name: string;
   }) => void;
+  onSaved?: () => void;
 }) {
   const zh = locale === "zh";
   const [models, setModels] = useState<PublicModel[]>([]),
@@ -110,6 +112,7 @@ export function ModelSettings({
       setConfig(initial());
       setEditing(null);
       await refresh();
+      onSaved?.();
       setMessage(
         zh ? "已保存；尚未發送模型請求。" : "Saved; no model request was sent.",
       );

@@ -31,6 +31,7 @@ export function RoutineSettings({
   const [items, setItems] = useState<Routine[]>([]),
     [models, setModels] = useState<PublicModel[]>([]),
     [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Routine>(),
     [name, setName] = useState(""),
     [prompt, setPrompt] = useState("");
@@ -89,6 +90,7 @@ export function RoutineSettings({
     };
   }, [request, refresh]);
   function edit(value?: Routine) {
+    setFormOpen(true);
     setEditing(value);
     setName(value?.config.name ?? "");
     setPrompt(value?.config.prompt ?? "");
@@ -177,175 +179,177 @@ export function RoutineSettings({
       >
         {zh ? "重新載入" : "Refresh"}
       </button>
-      <form
-        className="settings-fields"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const model = models.find((item) => item.id === modelId),
-            workspace = workspaces.find((item) => item.id === workspaceId);
-          try {
-            if (!model || !budget)
-              throw new Error(
-                zh
-                  ? "請選擇模型並設定有效預算"
-                  : "Choose a model and valid budget",
+      {formOpen && (
+        <form
+          className="settings-fields"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const model = models.find((item) => item.id === modelId),
+              workspace = workspaces.find((item) => item.id === workspaceId);
+            try {
+              if (!model || !budget)
+                throw new Error(
+                  zh
+                    ? "請選擇模型並設定有效預算"
+                    : "Choose a model and valid budget",
+                );
+              void save(
+                routineConfigSchema.parse({
+                  name,
+                  prompt,
+                  timezone,
+                  schedule:
+                    kind === "cron"
+                      ? { kind, expression: schedule }
+                      : { kind, seconds: Number(schedule) },
+                  misfirePolicy: misfire,
+                  enabled,
+                  modelSelection: {
+                    connectionId: model.id,
+                    revision: model.revision,
+                  },
+                  modelBudget: budget,
+                  ...(workspace
+                    ? {
+                        workspaceId: workspace.id,
+                        workspaceRevision: workspace.revision,
+                        workspaceRead,
+                      }
+                    : {}),
+                }),
               );
-            void save(
-              routineConfigSchema.parse({
-                name,
-                prompt,
-                timezone,
-                schedule:
-                  kind === "cron"
-                    ? { kind, expression: schedule }
-                    : { kind, seconds: Number(schedule) },
-                misfirePolicy: misfire,
-                enabled,
-                modelSelection: {
-                  connectionId: model.id,
-                  revision: model.revision,
-                },
-                modelBudget: budget,
-                ...(workspace
-                  ? {
-                      workspaceId: workspace.id,
-                      workspaceRevision: workspace.revision,
-                      workspaceRead,
-                    }
-                  : {}),
-              }),
-            );
-          } catch (e) {
-            setError(String(e));
-          }
-        }}
-      >
-        <label>
-          {zh ? "排程名稱" : "Routine name"}
-          <input
-            required
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-        </label>
-        <label>
-          {zh ? "工作指令" : "Work prompt"}
-          <textarea
-            required
-            value={prompt}
-            maxLength={8000}
-            onChange={(event) => setPrompt(event.target.value)}
-          />
-        </label>
-        <label>
-          {zh ? "IANA 時區" : "IANA timezone"}
-          <input
-            required
-            value={timezone}
-            onChange={(event) => setTimezone(event.target.value)}
-          />
-        </label>
-        <label>
-          {zh ? "排程種類" : "Schedule type"}
-          <select
-            value={kind}
-            onChange={(event) => {
-              const value = event.target.value as "cron" | "interval";
-              setKind(value);
-              setSchedule(value === "cron" ? "0 9 * * 1-5" : "3600");
-            }}
-          >
-            <option value="cron">Cron</option>
-            <option value="interval">Interval</option>
-          </select>
-        </label>
-        <label>
-          {kind === "cron"
-            ? zh
-              ? "Cron（分 時 日 月 星期）"
-              : "Cron (minute hour day month weekday)"
-            : zh
-              ? "間隔秒數，至少 60"
-              : "Interval seconds, at least 60"}
-          <input
-            required
-            value={schedule}
-            onChange={(event) => setSchedule(event.target.value)}
-          />
-        </label>
-        <label>
-          {zh ? "錯過執行時" : "Missed executions"}
-          <select
-            value={misfire}
-            onChange={(event) =>
-              setMisfire(event.target.value as typeof misfire)
+            } catch (e) {
+              setError(String(e));
             }
-          >
-            <option value="skip">{zh ? "跳過" : "Skip"}</option>
-            <option value="coalesce-one">
-              {zh ? "最多補跑一次" : "Coalesce one"}
-            </option>
-          </select>
-        </label>
-        <label>
-          {zh ? "模型" : "Model"}
-          <select
-            required
-            value={modelId}
-            onChange={(event) => setModelId(event.target.value)}
-          >
-            <option value="">—</option>
-            {models.map((model) => (
-              <option key={model.id} value={model.id}>
-                {model.config.name} · r{model.revision}
+          }}
+        >
+          <label>
+            {zh ? "排程名稱" : "Routine name"}
+            <input
+              required
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </label>
+          <label>
+            {zh ? "工作指令" : "Work prompt"}
+            <textarea
+              required
+              value={prompt}
+              maxLength={8000}
+              onChange={(event) => setPrompt(event.target.value)}
+            />
+          </label>
+          <label>
+            {zh ? "IANA 時區" : "IANA timezone"}
+            <input
+              required
+              value={timezone}
+              onChange={(event) => setTimezone(event.target.value)}
+            />
+          </label>
+          <label>
+            {zh ? "排程種類" : "Schedule type"}
+            <select
+              value={kind}
+              onChange={(event) => {
+                const value = event.target.value as "cron" | "interval";
+                setKind(value);
+                setSchedule(value === "cron" ? "0 9 * * 1-5" : "3600");
+              }}
+            >
+              <option value="cron">Cron</option>
+              <option value="interval">Interval</option>
+            </select>
+          </label>
+          <label>
+            {kind === "cron"
+              ? zh
+                ? "Cron（分 時 日 月 星期）"
+                : "Cron (minute hour day month weekday)"
+              : zh
+                ? "間隔秒數，至少 60"
+                : "Interval seconds, at least 60"}
+            <input
+              required
+              value={schedule}
+              onChange={(event) => setSchedule(event.target.value)}
+            />
+          </label>
+          <label>
+            {zh ? "錯過執行時" : "Missed executions"}
+            <select
+              value={misfire}
+              onChange={(event) =>
+                setMisfire(event.target.value as typeof misfire)
+              }
+            >
+              <option value="skip">{zh ? "跳過" : "Skip"}</option>
+              <option value="coalesce-one">
+                {zh ? "最多補跑一次" : "Coalesce one"}
               </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {zh ? "工作區" : "Workspace"}
-          <select
-            value={workspaceId}
-            onChange={(event) => setWorkspaceId(event.target.value)}
-          >
-            <option value="">{zh ? "無" : "None"}</option>
-            {workspaces.map((workspace) => (
-              <option key={workspace.id} value={workspace.id}>
-                {workspace.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        {workspaceId && (
+            </select>
+          </label>
+          <label>
+            {zh ? "模型" : "Model"}
+            <select
+              required
+              value={modelId}
+              onChange={(event) => setModelId(event.target.value)}
+            >
+              <option value="">—</option>
+              {models.map((model) => (
+                <option key={model.id} value={model.id}>
+                  {model.config.name} · r{model.revision}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            {zh ? "工作區" : "Workspace"}
+            <select
+              value={workspaceId}
+              onChange={(event) => setWorkspaceId(event.target.value)}
+            >
+              <option value="">{zh ? "無" : "None"}</option>
+              {workspaces.map((workspace) => (
+                <option key={workspace.id} value={workspace.id}>
+                  {workspace.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {workspaceId && (
+            <label>
+              <input
+                type="checkbox"
+                checked={workspaceRead}
+                onChange={(event) => setWorkspaceRead(event.target.checked)}
+              />
+              {zh ? "允許讀取該工作區" : "Allow workspace reads"}
+            </label>
+          )}
+          <WorkBudget
+            key={`${editing?.id ?? "new"}:${editing?.revision ?? 0}`}
+            locale={locale}
+            initialBudget={editing?.config.modelBudget}
+            onChange={setBudget}
+          />
           <label>
             <input
               type="checkbox"
-              checked={workspaceRead}
-              onChange={(event) => setWorkspaceRead(event.target.checked)}
+              checked={enabled}
+              onChange={(event) => setEnabled(event.target.checked)}
             />
-            {zh ? "允許讀取該工作區" : "Allow workspace reads"}
+            {zh
+              ? "啟用並允許以上模型排程呼叫"
+              : "Enable and authorize scheduled calls to this model"}
           </label>
-        )}
-        <WorkBudget
-          key={`${editing?.id ?? "new"}:${editing?.revision ?? 0}`}
-          locale={locale}
-          initialBudget={editing?.config.modelBudget}
-          onChange={setBudget}
-        />
-        <label>
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(event) => setEnabled(event.target.checked)}
-          />
-          {zh
-            ? "啟用並允許以上模型排程呼叫"
-            : "Enable and authorize scheduled calls to this model"}
-        </label>
-        <button disabled={busy || !budget}>
-          {zh ? "保存排程" : "Save routine"}
-        </button>
-      </form>
+          <button disabled={busy || !budget}>
+            {zh ? "保存排程" : "Save routine"}
+          </button>
+        </form>
+      )}
       {items.map((item) => (
         <article key={item.id}>
           <strong>{item.config.name}</strong>

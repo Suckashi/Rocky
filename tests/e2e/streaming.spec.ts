@@ -31,7 +31,7 @@ test("real provider SSE is visible before completion and daemon stop cancels the
         `Stream ${cancel ? "stop" : "complete"} ${Date.now()}` +
         (cancel ? "" : " 閱讀歷史驗證。".repeat(120));
       await page.locator("#compose textarea").fill(prompt);
-      await page.getByRole("button", { name: "傳送至模型" }).click();
+      await page.getByRole("button", { name: "送出", exact: true }).click();
       const work = page.locator("article.work").filter({ hasText: prompt });
       await work.getByRole("button", { name: "核准這次寫入" }).click();
       await expect(work.locator(".stream-label")).toBeVisible();

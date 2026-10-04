@@ -433,7 +433,7 @@ test("composer grants memory before native execution and clears one-Work selecti
       .getByRole("button", { name: "使用此模型", exact: true })
       .click();
     await page.keyboard.press("Escape");
-    await page.getByText("模型與工具", { exact: true }).click();
+    await page.getByText("進階選項", { exact: true }).click();
     const scope = page.getByLabel("本次工作可讀取的記憶");
     await expect(scope).toHaveValue("off");
     await scope.selectOption("user");
@@ -456,11 +456,11 @@ test("composer grants memory before native execution and clears one-Work selecti
       });
     }
     await page.locator("#compose textarea").fill(marker);
-    await page.getByRole("button", { name: "傳送至模型" }).click();
+    await page.getByRole("button", { name: "送出", exact: true }).click();
     await expect(
       page.locator("article.work").filter({ hasText: marker }),
     ).toContainText("PREGRANTED_MEMORY_OK");
-    await page.getByText("模型與工具", { exact: true }).click();
+    await page.getByText("進階選項", { exact: true }).click();
     await expect(scope).toHaveValue("off");
     await scope.selectOption("user");
     await expect(

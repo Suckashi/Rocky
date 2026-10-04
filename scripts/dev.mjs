@@ -1,6 +1,10 @@
 import { spawn } from "node:child_process";
 import { pathToFileURL } from "node:url";
-export function runDev(daemonEntry = "apps/daemon/src/main.ts") {
+/** `loadEnvFile` reads a local .env into the dev daemon only; test harnesses opt out. */
+export function runDev(
+  daemonEntry = "apps/daemon/src/main.ts",
+  { loadEnvFile = true } = {},
+) {
   const env = {
     ...process.env,
     ROCKY_DATA_DIR: process.env.ROCKY_DATA_DIR || ".rocky-dev",
@@ -12,10 +16,19 @@ export function runDev(daemonEntry = "apps/daemon/src/main.ts") {
     LANGCHAIN_TRACING_V2: "false",
   };
   const children = [
-    spawn(process.execPath, ["--import", "tsx", daemonEntry], {
-      stdio: "inherit",
-      env,
-    }),
+    spawn(
+      process.execPath,
+      [
+        ...(loadEnvFile ? ["--env-file-if-exists=.env"] : []),
+        "--import",
+        "tsx",
+        daemonEntry,
+      ],
+      {
+        stdio: "inherit",
+        env,
+      },
+    ),
     spawn(
       process.execPath,
       ["node_modules/vite/bin/vite.js", "--config", "apps/web/vite.config.ts"],

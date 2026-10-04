@@ -5,14 +5,14 @@ test("T-007 editable call cap is pinned through CopilotKit and visible after rel
 }) => {
   const prompt = `Budget UI ${Date.now()}`;
   await page.goto("/");
-  await page.getByText("模型與工具", { exact: true }).click();
+  await page.getByText("進階選項", { exact: true }).click();
   await page.getByLabel("啟用合成測試").check();
-  await page.getByText("模型與工具", { exact: true }).click();
+  // The budget lives inside the advanced options popover.
   await page.getByText("工作預算 · 48", { exact: true }).click();
   const input = page.getByLabel("模型呼叫上限", { exact: true });
   await input.fill("0");
   await page.locator("#compose textarea").fill(prompt);
-  const send = page.getByRole("button", { name: /開始驗證/ });
+  const send = page.getByRole("button", { name: "送出", exact: true });
   await expect(send).toBeDisabled();
   await input.fill("1");
   await expect(send).toBeEnabled();
@@ -27,6 +27,8 @@ test("T-007 editable call cap is pinned through CopilotKit and visible after rel
     await page.request.get(`/api/v1/works/${saved.id}/model-usage`)
   ).json();
   expect(usage.calls).toBe(1);
+  // Sending closes the options popover; reopen it to reset the budget.
+  await page.getByText("進階選項", { exact: true }).click();
   await input.fill("48");
   await page.reload();
   await work.getByText("工作詳情", { exact: true }).click();
@@ -34,6 +36,7 @@ test("T-007 editable call cap is pinned through CopilotKit and visible after rel
     work.getByText("此工作模型呼叫上限: 1", { exact: true }),
   ).toBeVisible();
   await page.setViewportSize({ width: 320, height: 800 });
+  await page.getByText("進階選項", { exact: true }).click();
   await page.getByText("工作預算 · 48", { exact: true }).click();
   await expect(input).toBeVisible();
   expect(

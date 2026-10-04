@@ -25,9 +25,7 @@ test("T-007 UI selected model → CopilotKit → configured Work → approval �
     expect(server.requests).toHaveLength(0);
     await page.keyboard.press("Escape");
     await page.locator("#compose textarea").fill(prompt);
-    await page
-      .getByRole("button", { name: "傳送至模型", exact: false })
-      .click();
+    await page.getByRole("button", { name: "送出", exact: true }).click();
     const work = page.locator("article.work").filter({ hasText: prompt });
     await expect(
       work.getByRole("button", { name: "核准這次寫入", exact: true }),

@@ -128,9 +128,7 @@ test("PNG upload is sanitized, bound to the submitted Work and delivered to the 
     ).toBeVisible();
     const prompt = "Inspect uploaded PNG " + randomUUID();
     await page.locator("#compose textarea").fill(prompt);
-    await page
-      .getByRole("button", { name: "傳送至模型", exact: false })
-      .click();
+    await page.getByRole("button", { name: "送出", exact: true }).click();
     const work = page.locator("article.work").filter({ hasText: prompt });
     await expect(work.getByText("已完成", { exact: true })).toBeVisible();
     const works = (await (await page.request.get("/api/v1/works")).json())

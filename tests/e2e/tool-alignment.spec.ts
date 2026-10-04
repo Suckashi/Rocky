@@ -140,7 +140,7 @@ test("explicit activity fixture matches compact inline tool layout", async ({
     await expect(page.locator(".inline-tool").nth(3)).toContainText("已返回");
     await expect(page.locator(".inline-tool").nth(4)).toContainText("失敗");
     const firstCard = page.locator(".inline-tool").first();
-    await expect(firstCard).toHaveCSS("height", "70px");
+    await expect(firstCard).toHaveCSS("height", "60px");
     await firstCard.locator(":scope > summary").focus();
     await page.keyboard.press("Enter");
     await expect(firstCard).toHaveAttribute("open", "");
@@ -153,15 +153,15 @@ test("explicit activity fixture matches compact inline tool layout", async ({
     await expect(firstCard).not.toHaveAttribute("open");
     await expect(page.locator(".inline-tool header").first()).toHaveCSS(
       "padding",
-      "12px 14px",
+      "9px 14px",
     );
     await expect(page.locator(".inline-tool header").first()).toHaveCSS(
       "font-size",
-      "12px",
+      "13px",
     );
     await expect(page.locator(".inline-tool header").first()).toHaveCSS(
       "gap",
-      "9px",
+      "10px",
     );
     await expect(page.locator(".inline-tool").nth(0)).toContainText("已返回");
     await expect(page.locator(".inline-tool").nth(1)).toContainText("失敗");
@@ -170,7 +170,7 @@ test("explicit activity fixture matches compact inline tool layout", async ({
     );
     await expect(page.locator(".inline-tool").first()).toHaveCSS(
       "border-radius",
-      "14px",
+      "12px",
     );
   }
   for (const [width, height] of [

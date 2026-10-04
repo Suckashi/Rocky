@@ -58,15 +58,18 @@ test("initial snapshot failure reconnects to authoritative snapshot without inve
   await expect(
     page.getByText("Snapshot fixture unavailable", { exact: false }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "開始驗證" })).toBeDisabled();
+  // Without a snapshot there are no Works, so first run shows only setup.
+  await page
+    .getByRole("button", { name: "先用合成測試試試看", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "送出", exact: true }),
+  ).toBeDisabled();
   const submissions: string[] = [];
   page.on("request", (request) => {
     if (request.url().endsWith("/copilotkit/agent/rocky/run"))
       submissions.push(request.url());
   });
-  await page.getByText("模型與工具", { exact: true }).click();
-  await page.getByLabel("啟用合成測試").check();
-  await page.getByText("模型與工具", { exact: true }).click();
   await page
     .locator("#compose textarea")
     .fill("Must not submit while disconnected");

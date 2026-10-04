@@ -172,11 +172,11 @@ export function Chrome({
         inert={isSidePanel && compact ? true : undefined}
         aria-label={zh ? "應用程式導覽" : "Application navigation"}
       >
-        <img src="/rocky/mark.svg" width="28" height="28" alt="" />
+        <img src="/rocky/mark.svg" width="26" height="26" alt="" />
         <button
-          aria-label={zh ? "收合導覽" : "Collapse navigation"}
+          aria-label={zh ? "展開導覽" : "Expand navigation"}
           aria-expanded={!collapsed}
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => setCollapsed(false)}
         >
           <PanelLeft size={18} />
         </button>
@@ -219,39 +219,69 @@ export function Chrome({
         inert={isSidePanel && compact ? true : undefined}
         aria-label={zh ? "主要導覽" : "Main navigation"}
       >
-        <div className="wordmark">Rocky</div>
-        <div className="nav-label">{zh ? "助手" : "ASSISTANT"}</div>
-        <button className="nav-item selected" onClick={() => open(0)}>
-          <RokoSprite width={20} />
+        <div className="sidebar-brand">
+          <img src="/rocky/mark.svg" width="26" height="26" alt="" />
+          <span className="wordmark">Rocky</span>
+          <button
+            className="sidebar-collapse"
+            aria-label={zh ? "收合導覽" : "Collapse navigation"}
+            aria-expanded={!collapsed}
+            onClick={() => setCollapsed(true)}
+          >
+            <PanelLeft size={17} />
+          </button>
+        </div>
+        <button
+          className={`nav-item nav-chat ${panel ? "" : "selected"}`}
+          aria-current={panel ? undefined : "page"}
+          onClick={() => open(0)}
+        >
+          <RokoSprite width={22} />
           <span>Rocky</span>
         </button>
-        <div className="nav-label">{zh ? "工作空間" : "WORKSPACE"}</div>
-        {names.slice(1, 6).map((name, i) => (
-          <button className="nav-item" key={name} onClick={() => open(i + 1)}>
-            <span aria-hidden="true">
-              {
-                [
-                  <Clock size={16} />,
-                  <FileText size={16} />,
-                  <Folder size={16} />,
-                  <Sparkles size={16} />,
-                  <BookOpen size={16} />,
-                ][i]
-              }
-            </span>
-            <span>{name}</span>
-            {i === 0 && <small>{count}</small>}
-          </button>
+        {[
+          {
+            label: zh ? "工作" : "Work",
+            items: [
+              [1, <Clock size={16} />],
+              [2, <FileText size={16} />],
+              [3, <Folder size={16} />],
+            ] as const,
+          },
+          {
+            label: zh ? "進階" : "Advanced",
+            items: [
+              [4, <Sparkles size={16} />],
+              [5, <BookOpen size={16} />],
+              [6, <Monitor size={16} />],
+            ] as const,
+          },
+        ].map((group) => (
+          <div className="nav-group" key={group.label}>
+            <div className="nav-label">{group.label}</div>
+            {group.items.map(([index, icon]) => (
+              <button
+                className={`nav-item ${panel === String(index) ? "selected" : ""}`}
+                key={index}
+                onClick={() => open(index)}
+              >
+                <span aria-hidden="true">{icon}</span>
+                <span>{names[index]}</span>
+                {index === 1 && count > 0 && <small>{count}</small>}
+              </button>
+            ))}
+          </div>
         ))}
         <div className="sidebar-bottom">
-          {names.slice(6).map((name, i) => (
-            <button className="nav-item" key={name} onClick={() => open(i + 6)}>
-              <span aria-hidden="true">
-                {i ? <Settings size={16} /> : <Monitor size={16} />}
-              </span>
-              <span>{name}</span>
-            </button>
-          ))}
+          <button
+            className={`nav-item ${panel === "7" ? "selected" : ""}`}
+            onClick={() => open(7)}
+          >
+            <span aria-hidden="true">
+              <Settings size={16} />
+            </span>
+            <span>{names[7]}</span>
+          </button>
         </div>
       </aside>
       <main

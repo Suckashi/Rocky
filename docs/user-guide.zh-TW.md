@@ -12,7 +12,7 @@ Rocky 在本機保存工作、核准、文件、記憶、技能與學習資料�
 
 ## 模型、工作與核准
 
-在設定選擇 provider、精確 endpoint、model ID、context window 與輸出上限。秘密只填程序環境變數的名稱參照，實際值留在 daemon 環境。proxy／CA 以連線為單位配置；不改系統 DNS／proxy／TLS。Probe 會真的呼叫指定端點並可能計費。沒有可信單價時，費用保持 unknown；可分別設定呼叫、token 與費用預算。
+在設定選擇 provider、精確 endpoint、model ID、context window 與輸出上限。秘密只填程序環境變數的名稱參照，實際值留在 daemon 環境。首次設定也可把金鑰存入資料目錄下選用的 `secrets.env`（未加密、權限 0600）；明確設定的程序環境變數永遠優先，API 只回傳名稱、不回傳值。proxy／CA 以連線為單位配置；不改系統 DNS／proxy／TLS。Probe 會真的呼叫指定端點並可能計費。沒有可信單價時，費用保持 unknown；可分別設定呼叫、token 與費用預算。
 
 送出前選定 workspace、讀取授權、可選的隔離環境與 browser origins／已明確共用的 profile。工作和原生子工作共用 root 預算及權限邊界。核准卡顯示確切工具、參數與目標；拒絕後不會自動換工具繞過。取消不保證撤回已發生的外部效果。遇到 unknown，先查看回條並使用對帳；沒有可信觀察來源時會維持 unknown。
 
