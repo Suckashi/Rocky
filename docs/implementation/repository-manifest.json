@@ -4,7 +4,7 @@
   "localRoot": ".",
   "branch": "codex/opendots-ui-alignment",
   "strategy": "greenfield_no_fork_no_imported_git_history",
-  "implementationCommit": "d28aac0906f609ae388173a8e648cdd654ed30e0",
+  "implementationCommit": "8f8ec1d73cc8730b571fc7d42c132847540bcce2",
   "workingTreeChanges": false,
   "recordedAt": "2026-10-04",
   "remote": {
@@ -20,6 +20,16 @@
     "assetsCopied": false,
     "historyImported": false
   },
-  "verificationReport": "docs/implementation/evidence/2026-10-04/pre-publication/verification.json",
-  "implementationSourceManifestHash": "396f60461c879bc25e2704390106ab5d1a0a203a1d9793423f517b340ea8e48c"
+  "verificationReport": "docs/implementation/evidence/2026-10-04/publication-candidate/verification.json",
+  "implementationSourceManifestHash": "8994442be812999df66353fcf459e2bb16491a80a89fade5c07bc22dfbf5d993",
+  "stateScope": "State immediately after the implementation commit; subsequent documentation-only evidence binding is recorded in Git history.",
+  "localMain": {
+    "branch": "main",
+    "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93",
+    "integration": "pending_explicit_authorization"
+  },
+  "userSuppliedAssets": {
+    "manifest": "assets/roko/roko-manifest.json",
+    "distributionRights": "pending_owner_clarification"
+  }
 }

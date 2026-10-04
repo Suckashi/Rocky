@@ -1,14 +1,14 @@
 {
   "recordedAt": "2026-10-04T12:43:25.878Z",
   "baseCommit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93",
-  "implementationCommit": null,
+  "implementationCommit": "8f8ec1d73cc8730b571fc7d42c132847540bcce2",
   "branch": "codex/opendots-ui-alignment",
   "localMain": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93",
   "platform": "Windows x64",
   "nodeVersion": "v24.12.0",
   "npm": "11.6.4",
   "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
-  "sourceManifestHash": "f1d45aec2417eba4795d4dfab77b17a4633a8c46977c2a241615c045e7400612",
+  "sourceManifestHash": "8994442be812999df66353fcf459e2bb16491a80a89fade5c07bc22dfbf5d993",
   "commands": [
     {
       "command": "npm run check",
@@ -100,5 +100,10 @@
       "exitCode": 0,
       "mode": "static"
     }
-  ]
+  ],
+  "sourceBinding": {
+    "files": 372,
+    "lineEndingNormalizedFiles": 1,
+    "otherDifferences": 0
+  }
 }

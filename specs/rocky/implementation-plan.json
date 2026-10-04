@@ -464,7 +464,7 @@
           "exitCode": 0
         },
         {
-          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "commit": "8f8ec1d73cc8730b571fc7d42c132847540bcce2",
           "platform": "Windows x64",
           "nodeVersion": "v24.12.0",
           "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
@@ -6689,7 +6689,7 @@
           ]
         },
         {
-          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "commit": "8f8ec1d73cc8730b571fc7d42c132847540bcce2",
           "platform": "Windows x64",
           "nodeVersion": "v24.12.0",
           "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
@@ -7193,7 +7193,7 @@
           ]
         },
         {
-          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "commit": "8f8ec1d73cc8730b571fc7d42c132847540bcce2",
           "platform": "Windows x64",
           "nodeVersion": "v24.12.0",
           "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
@@ -7420,7 +7420,7 @@
           ]
         },
         {
-          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "commit": "8f8ec1d73cc8730b571fc7d42c132847540bcce2",
           "platform": "Windows x64",
           "nodeVersion": "v24.12.0",
           "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
