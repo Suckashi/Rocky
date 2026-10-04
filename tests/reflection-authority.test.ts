@@ -100,6 +100,49 @@ test("reflection authority pins reviewed source, restricts skills and persists o
       decision: "approve",
     });
     expect(reflection.check(binding).episode.status).toBe("approved");
+    const owner = workSchema.parse({
+      ...work,
+      id: randomUUID(),
+      runId: randomUUID(),
+      executionSessionId: randomUUID(),
+      requestId: randomUUID(),
+      runMode: "reflection",
+      reflection: binding,
+      status: "running",
+    });
+    store.add(owner, owner.id);
+    const rpc = { binding, name: "read_learning_episode", args: {} };
+    expect(
+      JSON.parse(
+        reflection.dispatch(owner, "rocky_reflection_tool", rpc, "read-owned"),
+      ),
+    ).toMatchObject({ id: episode.id });
+    expect(
+      reflection.dispatch(owner, "rocky_reflection_check", { binding }),
+    ).toBe("ok");
+    expect(() =>
+      reflection.dispatch(work, "rocky_reflection_check", { binding }),
+    ).toThrow("running owned");
+    expect(() =>
+      reflection.dispatch(
+        { ...owner, runId: randomUUID() },
+        "rocky_reflection_check",
+        { binding },
+      ),
+    ).toThrow("running owned");
+    expect(() =>
+      reflection.dispatch(owner, "rocky_reflection_check", {
+        binding: { ...binding, episodeId: randomUUID() },
+      }),
+    ).toThrow("stored episode");
+    expect(() => reflection.dispatch(owner, "mcp_call", rpc, "denied")).toThrow(
+      "not allowed",
+    );
+    store.save({ ...owner, revision: 2, status: "cancelled" }, 1);
+    expect(() =>
+      reflection.dispatch(owner, "rocky_reflection_check", { binding }),
+    ).toThrow("running owned");
+    store.save({ ...owner, revision: 3 }, 2);
     expect(
       reflection.call(binding, "list", "list_allowed_skills", {}),
     ).toMatchObject({ skills: [{ id: skill.id }] });
@@ -173,10 +216,26 @@ test("reflection authority pins reviewed source, restricts skills and persists o
       }),
     ).toMatchObject({ status: "proposed" });
     expect(
-      reflection.call(binding, "none", "mark_no_learning", {
-        reason: "No broader evidence",
-      }),
-    ).toMatchObject({ status: "no_learning" });
+      JSON.parse(
+        reflection.dispatch(
+          owner,
+          "rocky_reflection_tool",
+          {
+            binding,
+            name: "mark_no_learning",
+            args: { reason: "No broader evidence" },
+          },
+          "none",
+        ),
+      ),
+    ).toMatchObject({
+      status: "no_learning",
+      execution: {
+        workId: owner.id,
+        runId: owner.runId,
+        executionSessionId: owner.executionSessionId,
+      },
+    });
     expect(skills.list()).toHaveLength(1);
     expect(skills.selection(skill.id)?.skillRevision).toBe(1);
     skills.select(skill.id, {
@@ -200,6 +259,9 @@ test("reflection authority pins reviewed source, restricts skills and persists o
       reflection.call(binding, "proposal", "propose_skill_create", {
         candidate,
       }),
+    ).toThrow("consent");
+    expect(() =>
+      reflection.dispatch(owner, "rocky_reflection_check", { binding }),
     ).toThrow("consent");
     const rows = store.db
       .prepare("SELECT data FROM learning_reflection_outputs")

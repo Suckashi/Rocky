@@ -41,6 +41,7 @@ import { OperationReconciler } from "./operation-reconciler.js";
 import { observeFixtureOperation } from "./fixture-reconciliation.js";
 import { GrantRegistry } from "./grants.js";
 import { DocumentStore } from "./documents.js";
+import { ReflectionRegistry } from "./reflection.js";
 import { LearningRegistry } from "./learning.js";
 import { SkillRegistry } from "./skills.js";
 import { MemoryRegistry } from "./memory.js";
@@ -88,6 +89,7 @@ export class WorkService {
   readonly memories: MemoryRegistry;
   readonly skills: SkillRegistry;
   readonly learning: LearningRegistry;
+  readonly reflection: ReflectionRegistry;
   readonly documents: DocumentStore;
   readonly modelSlots: ModelSlots;
   readonly admissionConfig: ReturnType<typeof admissionConfigSchema.parse>;
@@ -136,6 +138,11 @@ export class WorkService {
       );
       this.skills = new SkillRegistry(this.store, this.workspaces);
       this.learning = new LearningRegistry(this.store, this.workspaces);
+      this.reflection = new ReflectionRegistry(
+        this.store,
+        this.learning,
+        this.skills,
+      );
       this.documents = new DocumentStore(this.store, this.artifacts);
       this.memories = new MemoryRegistry(
         this.store,
@@ -679,6 +686,8 @@ export class WorkService {
         call: async (name, args, callId) => {
           abort.signal.throwIfAborted();
           const current = this.store.get(work.id);
+          if (current.runMode === "reflection")
+            return this.reflection.dispatch(work, name, args, callId);
           this.skills.assertToolsAllowed(work);
           if (name === "rocky_skill_check") return "ok";
           if (name === "rocky_skill_backend") {
@@ -1064,6 +1073,16 @@ export class WorkService {
           work.id,
           entry,
           async (_owned, payload, requestSignal) => {
+            if (
+              work.runMode === "reflection" &&
+              payload.kind !== "tool_request" &&
+              payload.kind !== "model_request"
+            )
+              throw new RockyError(
+                "reflection_rpc",
+                "Reflection cannot access conversation or steering RPC",
+                403,
+              );
             if (payload.kind === "context_read")
               return new ContextLedger(this.store).read(
                 _owned,
@@ -1102,6 +1121,15 @@ export class WorkService {
               this.admissionClass(work),
               signal,
               async () => {
+                if (work.runMode === "reflection") {
+                  this.reflection.checkWork(_owned);
+                  if (payload.child || payload.purpose === "summary")
+                    throw new RockyError(
+                      "reflection_model",
+                      "Reflection cannot dispatch child or summary models",
+                      403,
+                    );
+                }
                 const messages = fromModelWire(payload.messages);
                 const reply = configuredModels
                   ? await (
@@ -1127,10 +1155,15 @@ export class WorkService {
             ).sourceGraphThreadId,
             contextBatchId: contextBatch?.id,
             maxInputTokens: configuredModels?.root.profile.maxInputTokens,
-            imageInputs: configuredModels?.root.profile.imageInputs,
-            steering: true,
+            imageInputs:
+              work.runMode === "reflection"
+                ? false
+                : configuredModels?.root.profile.imageInputs,
+            steering: work.runMode !== "reflection",
+            reflection: work.reflection,
             mode: work.mode,
-            testFixtureTools: this.testFixtureTools,
+            testFixtureTools:
+              work.runMode === "reflection" ? false : this.testFixtureTools,
             event: (_owned, name, data) => hooks.event(name, data),
           },
         );

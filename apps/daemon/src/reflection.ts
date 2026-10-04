@@ -4,7 +4,10 @@ import {
   reflectionBindingSchema,
   reflectionToolSchemas,
 } from "../../../packages/contracts/src/reflection.js";
-import { RockyError } from "../../../packages/contracts/src/index.js";
+import {
+  RockyError,
+  type Work,
+} from "../../../packages/contracts/src/index.js";
 import type { Store } from "./store.js";
 import type { LearningRegistry } from "./learning.js";
 import type { SkillRegistry } from "./skills.js";
@@ -31,6 +34,55 @@ export class ReflectionRegistry {
       );
     return { binding, episode };
   }
+  checkWork(owner: Work) {
+    const current = this.store.get(owner.id);
+    if (
+      current.runMode !== "reflection" ||
+      current.mode !== "configured" ||
+      current.status !== "running" ||
+      current.runId !== owner.runId ||
+      current.executionSessionId !== owner.executionSessionId ||
+      !current.reflection
+    )
+      throw new RockyError(
+        "reflection_owner",
+        "Reflection requires a running owned execution",
+        403,
+      );
+    return this.check(current.reflection);
+  }
+  dispatch(
+    owner: Work,
+    name: string,
+    args: Record<string, unknown>,
+    callId?: string,
+  ) {
+    // Synchronous validation and call share one event-loop turn; call owns the transaction.
+    const { binding } = this.checkWork(owner);
+    if (
+      intentHash(binding) !==
+      intentHash(reflectionBindingSchema.parse(args.binding))
+    )
+      throw new RockyError(
+        "reflection_owner",
+        "Reflection request changed the stored episode binding",
+        403,
+      );
+    if (name === "rocky_reflection_check") return "ok";
+    if (name !== "rocky_reflection_tool" || !callId)
+      throw new RockyError(
+        "reflection_tool",
+        "Reflection RPC is not allowed",
+        403,
+      );
+    return JSON.stringify(
+      this.call(binding, callId, z.string().parse(args.name), args.args, {
+        workId: owner.id,
+        runId: owner.runId,
+        executionSessionId: owner.executionSessionId,
+      }),
+    );
+  }
   private allowed(workId: string) {
     return (this.skills.catalog(workId)?.items ?? []).filter(
       (item) =>
@@ -39,7 +91,13 @@ export class ReflectionRegistry {
           .get(item.id, item.contentHash),
     );
   }
-  call(input: unknown, callId: string, name: string, args: unknown) {
+  call(
+    input: unknown,
+    callId: string,
+    name: string,
+    args: unknown,
+    execution?: { workId: string; runId: string; executionSessionId: string },
+  ) {
     z.string().min(1).max(300).parse(callId);
     if (!Object.hasOwn(reflectionToolSchemas, name))
       throw new RockyError(
@@ -129,7 +187,11 @@ export class ReflectionRegistry {
           "Reflection output contains protected content",
           403,
         );
-      const key = intentHash({ binding, callId }),
+      const key = intentHash({
+          binding,
+          callId,
+          ...(execution ? { execution } : {}),
+        }),
         hash = intentHash({ binding, name, args: parsed });
       const prior = this.store.db
         .prepare(
@@ -149,6 +211,7 @@ export class ReflectionRegistry {
         id: randomUUID(),
         episodeId: binding.episodeId,
         sourceWorkId: episode.workId,
+        ...(execution ? { execution } : {}),
         binding,
         kind: name,
         status: name === "mark_no_learning" ? "no_learning" : "proposed",
