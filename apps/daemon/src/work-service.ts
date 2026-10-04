@@ -2027,6 +2027,14 @@ export class WorkService {
         work.error =
           this.workspaceWriteErrors.get(id) ??
           (error instanceof Error ? error.message : "Run failed");
+        if (work.reflection) {
+          try {
+            this.reflection.check(work.reflection);
+          } catch {
+            work.error =
+              "Reflection source authorization is no longer valid; review consent and the current episode.";
+          }
+        }
         if (
           work.approval &&
           ["workspace_write", "workspace_worktree"].includes(
