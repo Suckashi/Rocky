@@ -1150,7 +1150,18 @@ input[type="checkbox"] {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.inline-tool > details {
+.inline-tool > summary {
+  color: inherit;
+  list-style: none;
+  padding: 0;
+}
+.inline-tool > summary::-webkit-details-marker {
+  display: none;
+}
+.inline-tool[open] .tool-chevron {
+  transform: rotate(90deg);
+}
+.inline-tool-evidence {
   padding: 0 14px 12px;
 }
 .inline-tool p {

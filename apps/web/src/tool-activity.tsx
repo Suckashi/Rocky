@@ -1,4 +1,4 @@
-import { FileText, GitBranch, Wrench } from "lucide-react";
+import { ChevronRight, FileText, GitBranch, Wrench } from "lucide-react";
 import type {
   PublicEvent,
   Work,
@@ -106,25 +106,33 @@ export function ToolActivity({
             } as Record<string, string>
           )[call.name] ?? call.name;
         return (
-          <section className="inline-tool" key={key} aria-label={label}>
-            <header>
-              <Icon size={16} aria-hidden="true" />
-              <strong>{label}</strong>
-              <span
-                className={
-                  call.state === "failed" ? "tool-state failed" : "tool-state"
-                }
-              >
-                {state}
-              </span>
-            </header>
-            {call.target && (
-              <div className="inline-tool-detail" title={call.target}>
-                {call.target}
-              </div>
-            )}
-            <details>
-              <summary>{zh ? "工具證據" : "Tool evidence"}</summary>
+          <details className="inline-tool" key={key} aria-label={label}>
+            <summary
+              aria-label={`${label}: ${state}; ${zh ? "展開工具證據" : "Expand tool evidence"}`}
+            >
+              <header>
+                <Icon size={16} aria-hidden="true" />
+                <strong>{label}</strong>
+                <span
+                  className={
+                    call.state === "failed" ? "tool-state failed" : "tool-state"
+                  }
+                >
+                  {state}
+                </span>
+                <ChevronRight
+                  className="tool-chevron"
+                  size={16}
+                  aria-hidden="true"
+                />
+              </header>
+              {call.target && (
+                <div className="inline-tool-detail" title={call.target}>
+                  {call.target}
+                </div>
+              )}
+            </summary>
+            <div className="inline-tool-evidence">
               <p>
                 {zh
                   ? "工具返回不代表外部操作已成功；副作用以工作收據為準。"
@@ -139,8 +147,8 @@ export function ToolActivity({
                 </summary>
                 <pre>{JSON.stringify(call.events, null, 2)}</pre>
               </details>
-            </details>
-          </section>
+            </div>
+          </details>
         );
       })}
     </>

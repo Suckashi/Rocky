@@ -1,3 +1,4 @@
+import { mkdirSync, writeFileSync } from "node:fs";
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("explicit activity fixture matches compact inline tool layout", async ({
@@ -99,6 +100,18 @@ test("explicit activity fixture matches compact inline tool layout", async ({
   await expect(page.locator("article.work")).toHaveCount(1);
   if (process.env.ROCKY_CAPTURE_PHASE !== "before") {
     await expect(page.locator(".inline-tool")).toHaveCount(3);
+    const firstCard = page.locator(".inline-tool").first();
+    await expect(firstCard).toHaveCSS("height", "70px");
+    await firstCard.locator(":scope > summary").focus();
+    await page.keyboard.press("Enter");
+    await expect(firstCard).toHaveAttribute("open", "");
+    await expect(
+      firstCard.getByText(
+        "工具返回不代表外部操作已成功；副作用以工作收據為準。",
+      ),
+    ).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(firstCard).not.toHaveAttribute("open");
     await expect(page.locator(".inline-tool header").first()).toHaveCSS(
       "padding",
       "12px 14px",
@@ -136,5 +149,41 @@ test("explicit activity fixture matches compact inline tool layout", async ({
     await page.screenshot({
       path: `.rocky-reports/tool-alignment/${process.env.ROCKY_CAPTURE_PHASE ?? "after"}-${width}.png`,
     });
+  }
+  if (process.env.ROCKY_CAPTURE_PHASE !== "before") {
+    await page.getByRole("button", { name: "English", exact: true }).click();
+    const metrics = [];
+    mkdirSync(".rocky-reports/tool-component", { recursive: true });
+    for (const [width, height] of [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844],
+    ]) {
+      await page.setViewportSize({ width: width!, height: height! });
+      const card = page.locator(".inline-tool").first();
+      await expect(card).toContainText("Reading file");
+      metrics.push({
+        width,
+        height,
+        ...(await card.evaluate((el) => ({
+          cardWidth: el.getBoundingClientRect().width,
+          cardHeight: el.getBoundingClientRect().height,
+          radius: getComputedStyle(el).borderRadius,
+          headerHeight: el.querySelector("header")!.getBoundingClientRect()
+            .height,
+          padding: getComputedStyle(el.querySelector("header")!).padding,
+          font: getComputedStyle(el.querySelector("header")!).fontSize,
+          weight: getComputedStyle(el.querySelector("strong")!).fontWeight,
+        }))),
+      });
+      await page.screenshot({
+        path: ".rocky-reports/tool-component/rocky-" + width + ".png",
+      });
+    }
+    writeFileSync(
+      ".rocky-reports/tool-component/rocky-metrics.json",
+      JSON.stringify(metrics, null, 2),
+    );
   }
 });
