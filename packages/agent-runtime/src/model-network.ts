@@ -64,6 +64,8 @@ export function createConnectionDispatcher(
   return proxy
     ? new ProxyAgent({
         uri: proxy,
+        // Undici 8 forwards plain-HTTP targets without CONNECT unless asked.
+        proxyTunnel: true,
         requestTls: tls,
         proxyTls: {
           ...tls,

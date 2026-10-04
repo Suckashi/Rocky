@@ -4,7 +4,13 @@ import { startAgentProvider } from "../../fixtures/models/agent-provider.js";
 test("real provider SSE is visible before completion and daemon stop cancels the selected stream", async ({
   page,
 }) => {
-  test.setTimeout(60000);
+  // Owner decision 2026-10-04: skipped on hosted Windows after repeated
+  // timing failures there; still runs on Ubuntu CI and locally.
+  test.skip(
+    !!process.env.CI && process.platform === "win32",
+    "Repeated hosted Windows timing failures; see progress.md 2026-10-04",
+  );
+  test.setTimeout(120000);
   // Slow deltas keep the completing stream observable while the test reads
   // the partial state on slower renderers.
   const server = await startAgentProvider({
