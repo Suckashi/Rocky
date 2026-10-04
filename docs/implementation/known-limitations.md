@@ -180,3 +180,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 - Reflection results now have an authorized paginated HTTP read endpoint. Result UI and browser evidence remain pending; returned proposals are unevaluated drafts and do not authorize publication. See evidence/2026-10-04/reflection-results.json.
 
 - Learning manual reflection UI is connected and no_learning browser flow verified. Candidate structured presentation, repeat reflection/history selection, stop/reopen browser matrix and matched reference comparison remain pending. See evidence/2026-10-04/reflection-ui.json.
+
+- Candidate create/patch presentation now has readable fields and collapsed source/raw data, verified with explicit UI fixtures. This is not materialized/evaluated/published skill proof or completed OpenDots comparison. See evidence/2026-10-04/learning-draft-ui.json.
