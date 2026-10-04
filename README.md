@@ -66,7 +66,8 @@ For checks, debugging prerequisites, and test modes, use the [development guide]
 | [`scripts/`](scripts/)                               | Development, verification, setup, and packaging commands       |
 | [`docs/`](docs/README.md)                            | User guides, architecture, decisions, and verification records |
 | [`specs/rocky/`](specs/rocky/README.md)              | Product contracts and the task/acceptance ledger               |
-| [`assets/rocky/`](assets/rocky/README.md)            | Editable artwork and provenance                                |
+| [`assets/rocky/`](assets/rocky/README.md)            | Product marks, favicon, and provenance                         |
+| [`assets/roko/`](assets/roko/README.md)              | Roko mascot atlas, animation manifest, and separate rights     |
 
 See [architecture and file placement](docs/architecture.md) before adding a module. Runtime data, browser profiles, build output, and private diagnostics are excluded from Git.
 
@@ -79,3 +80,5 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) for the branch → pull request → CI w
 ## License and provenance
 
 Original Rocky source is licensed under [Apache-2.0](LICENSE). Adapted OpenDots presentation code retains its MIT attribution in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [NOTICE](NOTICE). Rocky is an independent project with its own data and runtime, without affiliation implied by those references. Artwork provenance and pending name/character/trademark review are recorded in the [asset manifest](assets/rocky/asset-manifest.json).
+
+The Roko mascot has [separate provenance and rights](assets/roko/README.md). The repository's code license does not grant rights to that artwork; public distribution clearance is still pending.

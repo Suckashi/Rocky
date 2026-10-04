@@ -8,8 +8,10 @@ This is a maintainer checklist, not evidence that any remote action happened. Th
 - [ ] Run relevant development checks and record exact results in `docs/implementation/`.
 - [ ] Build, then run `npm run check:package` to inspect current files, historical blobs, and the npm dry-run inventory. Pattern scanning is not a complete secrets review; inspect live diagnostics and public screenshots separately.
 - [ ] Confirm LICENSE, NOTICE, THIRD_PARTY_NOTICES, lockfile, source attribution, and asset provenance are included.
+- [ ] Resolve the Roko atlas distribution-rights record before publishing a snapshot containing it; the code license does not license this artwork.
 - [ ] Confirm README languages, CHANGELOG, security limitations, and task evidence agree. Do not convert failed or unrun gates into passed statuses.
 - [ ] Review the staged snapshot and create a local commit. Do not rewrite history or delete local data to hide findings.
+- [ ] Choose the exact bootstrap revision. Local `main` was created at `e42a0a8`; later development commits require an explicitly approved integration before they become the published default branch.
 
 ## Create the repository after owner authorization
 

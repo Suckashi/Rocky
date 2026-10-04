@@ -1,0 +1,133 @@
+{
+  "total": 19,
+  "passed": 19,
+  "failed": 0,
+  "skipped": 0,
+  "files": [
+    {
+      "file": "configured-work.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-007 shutdown cancels configured model I/O and retains unknown usage without replay",
+          "status": "passed",
+          "durationMs": 1199.1464
+        },
+        {
+          "name": "T-007 configured Work openai-compatible preserves daemon approval, native child, usage and persisted model selection",
+          "status": "passed",
+          "durationMs": 1272.2347000000004
+        },
+        {
+          "name": "T-007 configured Work anthropic preserves daemon approval, native child, usage and persisted model selection",
+          "status": "passed",
+          "durationMs": 1239.8591999999999
+        },
+        {
+          "name": "T-007 submission rejects implicit model selection and stale configured approvals cannot dispatch effects",
+          "status": "passed",
+          "durationMs": 1230.1686
+        }
+      ]
+    },
+    {
+      "file": "identity.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "T-037 assets retain provenance, hashes and a bounded first-party vector source",
+          "status": "passed",
+          "durationMs": 2.141900000000021
+        },
+        {
+          "name": "T-037 assistant identity persists and its public schema cannot carry policy or remote artwork",
+          "status": "passed",
+          "durationMs": 51.101099999999974
+        },
+        {
+          "name": "T-037 semantic text tokens meet 4.5:1 on both themes",
+          "status": "passed",
+          "durationMs": 0.6496999999999957
+        }
+      ]
+    },
+    {
+      "file": "presence.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "model waiting survives snapshot without retained wait events and never animates",
+          "status": "passed",
+          "durationMs": 2.085000000000008
+        },
+        {
+          "name": "presence uses run progress, not heartbeat or connection, with deterministic sixty-second staleness",
+          "status": "passed",
+          "durationMs": 0.39400000000000546
+        },
+        {
+          "name": "foreground outcomes stay distinct from independent background counts and evaluation work",
+          "status": "passed",
+          "durationMs": 0.35140000000001237
+        },
+        {
+          "name": "completion feedback excludes history, replay, late catch-up, background and unsuccessful states",
+          "status": "passed",
+          "durationMs": 2.432600000000008
+        },
+        {
+          "name": "presence matches execution session and only advertises active model/tool evidence",
+          "status": "passed",
+          "durationMs": 0.19840000000002078
+        }
+      ]
+    },
+    {
+      "file": "projection.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "snapshot pages preserve the event boundary and include older active Works on the first page",
+          "status": "passed",
+          "durationMs": 234.97830000000005
+        },
+        {
+          "name": "T-005 strict DTO and official AG-UI contracts reject invalid identities, private fields and cursors",
+          "status": "passed",
+          "durationMs": 2.176300000000083
+        },
+        {
+          "name": "snapshot high water and replay preserve newer revisions and deduplicate evidence beyond safe-number precision",
+          "status": "passed",
+          "durationMs": 47.25459999999998
+        },
+        {
+          "name": "Rocky P0 event upgrade is transactional and retained across reopen",
+          "status": "passed",
+          "durationMs": 98.39960000000008
+        },
+        {
+          "name": "unsupported store version releases lock and preserves stored bytes",
+          "status": "passed",
+          "durationMs": 44.31529999999998
+        }
+      ]
+    },
+    {
+      "file": "roko.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Roko original hash, dimensions and all manifest frames have visible pixels and remain inside the atlas",
+          "status": "passed",
+          "durationMs": 9016.413999999999
+        },
+        {
+          "name": "Roko activity stays a projection; terminal and uncertain states never run or celebrate",
+          "status": "passed",
+          "durationMs": 0.3544000000001688
+        }
+      ]
+    }
+  ]
+}

@@ -919,6 +919,14 @@ export class WorkService {
                       inputTokenBound,
                       outputTokenBound,
                     });
+                    this.emit(this.store.get(work.id), "rocky.model.started", {
+                      requestId,
+                      purpose: summary
+                        ? "summary"
+                        : child
+                          ? "subagent"
+                          : "target",
+                    });
                   },
                   settle: (requestId, usage) => {
                     this.modelBudgets.settle(work.runId, requestId, usage);
@@ -978,10 +986,15 @@ export class WorkService {
                 inputTokenBound: null,
                 outputTokenBound: null,
               });
+              this.emit(this.store.get(work.id), "rocky.model.started", {
+                requestId,
+                purpose: child ? "subagent" : "target",
+              });
               const result = await fixtureModel.request(messages, child);
               // The deterministic fixture does not report model token usage. Never invent zero usage.
               this.modelBudgets.settle(work.runId, requestId, null);
               this.emit(this.store.get(work.id), "rocky.model.completed", {
+                requestId,
                 destination: fixtureModel.endpoint,
                 purpose: "target",
                 child,

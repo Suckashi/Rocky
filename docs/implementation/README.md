@@ -9,6 +9,8 @@ These files preserve engineering decisions and test evidence. They are not all c
 3. [Acceptance table](acceptance-report.md): generated view of the ledger; refresh with `npm run docs:status`.
 4. [Pre-publication verification](pre-publication.md): fresh complete Windows test invocations, dependency remediation and local snapshot review.
 5. [V1 concentrated report](evidence/2026-10-04/v1-concentrated/verification.json): earlier Windows results and focused reruns, with original failures retained.
+6. [Roko integration and V1 continuation](roko.md): current mascot, focused Windows verification, and Ubuntu WSL 2 Node-only/MCP evidence.
+7. [Local publication candidate](publication-candidate.md): Roko review, fresh regression results, source hashes, and the main/development branch handoff.
 
 The dated [earlier October 4 snapshot](status-2026-10-04.md), [P0 architecture notes](architecture.md), and feature notes describe their stated revision. Do not add up every historical limitation as a current gap, or apply a later success to an untested platform.
 

@@ -60,6 +60,7 @@
     "docs:status": "node scripts/sync-acceptance.mjs --write",
     "test": "vitest run",
     "test:contract": "vitest run tests/contracts.test.ts tests/projection.test.ts tests/http.test.ts",
+    "test:recovery": "vitest run tests/persistence.test.ts tests/storage-faults.test.ts tests/worker-channel.test.ts tests/inbox.test.ts tests/operation-ledger.test.ts tests/backup.test.ts",
     "test:network": "vitest run tests/network.test.ts && node --import ./scripts/network-audit.mjs --import tsx scripts/evaluate.ts",
     "test:learning": "node --import tsx scripts/evaluate.ts",
     "test:e2e": "playwright test",

@@ -3,7 +3,7 @@ export const ROCKY_IDENTITY = {
   productId: "rocky",
   displayName: "Rocky",
   personaVersion: "1.0.0",
-  avatarAssetId: "rocky-avatar-v1",
+  avatarAssetId: "roko",
 } as const;
 export const assistantSchema = z
   .object({
@@ -11,6 +11,6 @@ export const assistantSchema = z
     productId: z.literal("rocky"),
     displayName: z.string().min(1).max(64),
     personaVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
-    avatarAssetId: z.literal("rocky-avatar-v1"),
+    avatarAssetId: z.literal("roko"),
   })
   .strict();

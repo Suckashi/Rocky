@@ -174,14 +174,26 @@ export function useRockyProjection(request: RockyRequest) {
         stream = new EventSource(
           API_PREFIX + "/events?after=" + snapshot.cursor,
         );
+        let lostConnection = false;
         stream.onopen = () => {
+          if (lostConnection && !disposed) {
+            // A reconnect is catch-up, never a new completion celebration.
+            // Refresh the authoritative watermark before consuming live events.
+            stream?.close();
+            setAttempt((old) => old + 1);
+            return;
+          }
           if (!disposed) setConnected(navigator.onLine);
         };
         stream.onerror = () => {
-          if (!disposed) setConnected(false);
+          lostConnection = true;
+          if (!disposed) {
+            setConnected(false);
+            setCompletion(undefined);
+          }
         };
         stream.addEventListener("daemon_degraded", () => {
-          if (disposed) return;
+          if (disposed || lostConnection) return;
           setConnected(false);
           setConnectionError(
             "執行儲存或清理失敗；狀態可能尚未同步。請修復儲存問題並重啟 daemon，再確認操作結果。 / Execution storage or cleanup failed. Restart the daemon after repair, then reconcile operation outcomes.",
@@ -189,7 +201,7 @@ export function useRockyProjection(request: RockyRequest) {
           stream?.close();
         });
         stream.onmessage = (message) => {
-          if (disposed) return;
+          if (disposed || lostConnection) return;
           try {
             const event = publicEventSchema.parse(JSON.parse(message.data));
             const feedback = projectCompletion(

@@ -140,7 +140,7 @@ writeFileSync(
       steps,
       forbiddenToolAttempts: attempts,
       limitations: [
-        "Constrained-PATH clean-copy install on this host; not an Ubuntu or pristine-machine result.",
+        `Constrained-PATH clean-copy install on ${process.platform}/${process.arch}; not a pristine-machine result. Linux under WSL does not establish native Ubuntu hardware or desktop behavior.`,
         "Temporary evidence retained for inspection.",
       ],
     },

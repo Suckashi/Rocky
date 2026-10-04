@@ -1,7 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { RokoSprite } from "./roko-sprite.js";
+import { completionDuration, rokoPlayback } from "./roko-animation.js";
 import type { CompletionFeedback } from "./presence-feedback.js";
 import type { PresenceInput } from "./presence.js";
 import { deriveRockyPresence } from "./presence.js";
+// Transport already deduplicates stable event/run IDs and suppresses snapshots.
+// This additionally survives presentation remounts, without retaining old records.
+const consumedCompletions = new WeakSet<CompletionFeedback>();
 const labels: Record<string, [string, string]> = {
   setup_required: ["先設定模型連線", "Set up a model connection"],
   idle: ["你想先處理哪件事？", "What would you like to work on?"],
@@ -9,6 +14,11 @@ const labels: Record<string, [string, string]> = {
   waiting_resource: ["等待工作區可用", "Waiting for workspace availability"],
   waiting_model: ["等待模型資源可用", "Waiting for model capacity"],
   running: ["正在處理工作", "Working"],
+  model: ["等待模型回應", "Waiting for model response"],
+  tool: ["正在執行工具", "Running a tool"],
+  read: ["正在讀取檔案", "Reading files"],
+  review: ["正在檢查變更", "Reviewing changes"],
+  subagent: ["子工作正在執行", "Subtask running"],
   stale: ["尚未收到新的進度", "No recent progress received"],
   awaiting_approval: [
     "這個操作需要你的核准",
@@ -87,24 +97,32 @@ export function RockyPresence({
     now,
   );
   const [celebrating, setCelebrating] = useState(false);
-  const consumed = useRef<string | undefined>(undefined);
   useEffect(() => {
     setCelebrating(false);
-    if (!completion || consumed.current === completion.id) return;
-    consumed.current = completion.id;
-    if (
-      !connected ||
-      !enabled ||
-      reduced ||
-      hidden ||
-      model.state !== "completed" ||
-      model.foregroundId !== completion.workId ||
-      Date.now() - completion.receivedAt > 1000
-    )
-      return;
-    setCelebrating(true);
-    const timer = setTimeout(() => setCelebrating(false), 600);
-    return () => clearTimeout(timer);
+    if (!completion || consumedCompletions.has(completion)) return;
+    let disposed = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // Defer claiming until after StrictMode's setup/cleanup probe.
+    queueMicrotask(() => {
+      if (disposed || consumedCompletions.has(completion)) return;
+      consumedCompletions.add(completion);
+      if (
+        !connected ||
+        !enabled ||
+        reduced ||
+        hidden ||
+        model.state !== "completed" ||
+        model.foregroundId !== completion.workId ||
+        Date.now() - completion.receivedAt > 1000
+      )
+        return;
+      setCelebrating(true);
+      timer = setTimeout(() => setCelebrating(false), completionDuration);
+    });
+    return () => {
+      disposed = true;
+      clearTimeout(timer);
+    };
   }, [
     completion,
     connected,
@@ -115,22 +133,13 @@ export function RockyPresence({
     model.foregroundId,
   ]);
   const count = model.counts;
+  const playback = rokoPlayback(model, celebrating);
   return (
     <div className="rocky-presence" data-presence={model.state}>
-      <img
-        key={celebrating ? completion?.id : "static"}
-        className={
-          "rocky-avatar" +
-          (model.moving
-            ? " presence-moving"
-            : celebrating
-              ? " presence-completed"
-              : "")
-        }
-        src="/rocky/avatar.svg"
-        width="50"
-        height="50"
-        alt="Rocky"
+      <RokoSprite
+        {...playback}
+        className="rocky-avatar"
+        playbackId={celebrating ? completion?.id : undefined}
       />
       <h1>Rocky</h1>
       <p role="status">
@@ -139,7 +148,13 @@ export function RockyPresence({
             ? "連線中斷；下方為最後確認狀態 · "
             : "Disconnected; last confirmed state · "
           : ""}
-        {(labels[model.state] ?? labels.idle)![zh ? 0 : 1]}
+        {
+          (labels[
+            model.state === "running" && model.activity
+              ? model.activity
+              : model.state
+          ] ?? labels.idle)![zh ? 0 : 1]
+        }
       </p>
       {!connected && lastConfirmedAt && (
         <p>

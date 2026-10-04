@@ -1,4 +1,7 @@
 Rocky
+Roko artwork (assets/roko; packaged as dist/web/roko) is user-supplied and
+excluded from the Apache-2.0 code license. See its accompanying README and
+manifest for provenance and rights status; no distribution license is asserted.
 
 Original Rocky source is distributed under the Apache License, Version 2.0.
 See LICENSE for the license text.

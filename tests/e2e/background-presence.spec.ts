@@ -197,8 +197,9 @@ test("workspace wait is persisted, visible and cleared on exact cancel", async (
     await expect(page.locator("#work-" + waiter.id + " .status")).toHaveText(
       "等待工作區可用",
     );
-    await expect(page.locator(".rocky-presence .rocky-avatar")).not.toHaveClass(
-      /presence-moving/,
+    await expect(page.locator(".rocky-presence .rocky-avatar")).toHaveAttribute(
+      "data-playing",
+      "false",
     );
     for (const [width, height] of [
       [1440, 900],

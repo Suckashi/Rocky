@@ -1,0 +1,111 @@
+{
+  "stats": {
+    "startTime": "2026-10-04T12:37:56.100Z",
+    "duration": 32954.397,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "background-presence.spec.ts",
+      "name": "background attention navigates to authoritative terminal Work without changing foreground",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4741
+        }
+      ]
+    },
+    {
+      "file": "background-presence.spec.ts",
+      "name": "workspace wait is persisted, visible and cleared on exact cancel",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1945
+        }
+      ]
+    },
+    {
+      "file": "html-preview.spec.ts",
+      "name": "restricted HTML artifact renders without script, storage, API or network authority",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7520
+        }
+      ]
+    },
+    {
+      "file": "identity.spec.ts",
+      "name": "T-037 Roko avatar in app and both themes render from the shared local atlas",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2583
+        }
+      ]
+    },
+    {
+      "file": "reconnect.spec.ts",
+      "name": "volatile daemon degradation preserves prior Work state and disables the connected claim",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1360
+        }
+      ]
+    },
+    {
+      "file": "reconnect.spec.ts",
+      "name": "initial snapshot failure reconnects to authoritative snapshot without inventing Work",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2091
+        }
+      ]
+    },
+    {
+      "file": "roko.spec.ts",
+      "name": "Roko follows production Presence with deterministic transport fixtures and pauses decoration",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3862
+        }
+      ]
+    },
+    {
+      "file": "roko.spec.ts",
+      "name": "Roko image failure leaves readable fallback and usable conversation",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1919
+        }
+      ]
+    },
+    {
+      "file": "roko.spec.ts",
+      "name": "Roko completion is consumed across component remounts",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2665
+        }
+      ]
+    }
+  ]
+}

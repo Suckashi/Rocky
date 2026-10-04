@@ -55,18 +55,19 @@ npm run dev
 <details>
 <summary>原始碼目錄與職責</summary>
 
-| 目錄                                                 | 用途                               |
-| ---------------------------------------------------- | ---------------------------------- |
-| [`apps/web/`](apps/web/)                             | React/Vite 對話介面與設定          |
-| [`apps/daemon/`](apps/daemon/)                       | 本機 API、持久化、核准與操作權限   |
-| [`apps/agent-worker/`](apps/agent-worker/)           | Agent 子程序與 daemon IPC          |
-| [`packages/agent-runtime/`](packages/agent-runtime/) | Deep Agents 組裝、模型與工具介接   |
-| [`packages/contracts/`](packages/contracts/)         | 共用 DTO、事件和 IPC 驗證契約      |
-| [`tests/`](tests/)、[`fixtures/`](fixtures/)         | 單元、整合、瀏覽器與確定性服務測試 |
-| [`scripts/`](scripts/)                               | 開發、驗證、設定與打包命令         |
-| [`docs/`](docs/README.md)                            | 操作指南、架構、決策與驗證紀錄     |
-| [`specs/rocky/`](specs/rocky/README.md)              | 產品契約與任務／驗收計畫           |
-| [`assets/rocky/`](assets/rocky/README.md)            | 可編輯素材與來源紀錄               |
+| 目錄                                                 | 用途                                  |
+| ---------------------------------------------------- | ------------------------------------- |
+| [`apps/web/`](apps/web/)                             | React/Vite 對話介面與設定             |
+| [`apps/daemon/`](apps/daemon/)                       | 本機 API、持久化、核准與操作權限      |
+| [`apps/agent-worker/`](apps/agent-worker/)           | Agent 子程序與 daemon IPC             |
+| [`packages/agent-runtime/`](packages/agent-runtime/) | Deep Agents 組裝、模型與工具介接      |
+| [`packages/contracts/`](packages/contracts/)         | 共用 DTO、事件和 IPC 驗證契約         |
+| [`tests/`](tests/)、[`fixtures/`](fixtures/)         | 單元、整合、瀏覽器與確定性服務測試    |
+| [`scripts/`](scripts/)                               | 開發、驗證、設定與打包命令            |
+| [`docs/`](docs/README.md)                            | 操作指南、架構、決策與驗證紀錄        |
+| [`specs/rocky/`](specs/rocky/README.md)              | 產品契約與任務／驗收計畫              |
+| [`assets/rocky/`](assets/rocky/README.md)            | 產品標誌、favicon 與來源紀錄          |
+| [`assets/roko/`](assets/roko/README.md)              | Roko 角色圖集、動畫清單與獨立權利紀錄 |
 
 新增模組前請閱讀[架構與檔案放置原則](docs/architecture.md)。執行資料、瀏覽器 profile、建置產物與私人診斷不進 Git。
 
@@ -79,3 +80,5 @@ npm run dev
 ## 授權與來源
 
 Rocky 原創程式採 [Apache-2.0](LICENSE)。OpenDots 展示程式的改寫保留 MIT 聲明，見 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 與 [NOTICE](NOTICE)。Rocky 是具有獨立資料與 runtime 的專案，引用不表示官方關聯。素材來源及尚待完成的名稱／角色／商標審查列於[素材清單](assets/rocky/asset-manifest.json)。
+
+Roko 角色素材的[來源與權利另行記錄](assets/roko/README.md)。本專案的程式碼授權不授予該素材的使用權；公開散布權利尚待確認。

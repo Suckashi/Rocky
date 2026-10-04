@@ -10,6 +10,7 @@ import {
   Monitor,
 } from "lucide-react";
 import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import { RokoSprite } from "./roko-sprite.js";
 
 export function Chrome({
   locale,
@@ -221,7 +222,7 @@ export function Chrome({
         <div className="wordmark">Rocky</div>
         <div className="nav-label">{zh ? "助手" : "ASSISTANT"}</div>
         <button className="nav-item selected" onClick={() => open(0)}>
-          <img src="/rocky/mark.svg" width="20" height="20" alt="" />
+          <RokoSprite width={20} />
           <span>Rocky</span>
         </button>
         <div className="nav-label">{zh ? "工作空間" : "WORKSPACE"}</div>

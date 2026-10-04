@@ -54,9 +54,19 @@ test("restricted HTML artifact renders without script, storage, API or network a
     await page.addInitScript(() => {
       const state = window as typeof window & { completionAnimations: number };
       state.completionAnimations = 0;
-      document.addEventListener("animationstart", (event) => {
-        if ((event as AnimationEvent).animationName === "rocky-completed")
-          state.completionAnimations++;
+      new MutationObserver((mutations) => {
+        for (const change of mutations) {
+          const target = change.target as HTMLElement;
+          if (
+            change.attributeName === "data-clip" &&
+            target.dataset.clip === "jumping"
+          )
+            state.completionAnimations++;
+        }
+      }).observe(document, {
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["data-clip"],
       });
     });
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -127,8 +137,9 @@ test("restricted HTML artifact renders without script, storage, API or network a
     const enabledMotion = page.getByRole("button", { name: /角色動畫/ });
     if ((await enabledMotion.getAttribute("aria-pressed")) === "false")
       await enabledMotion.click();
-    await expect(page.locator(".rocky-presence .rocky-avatar")).not.toHaveClass(
-      /presence-moving/,
+    await expect(page.locator(".rocky-presence .rocky-avatar")).toHaveAttribute(
+      "data-playing",
+      "false",
     );
     await page
       .locator("article.work")
@@ -205,9 +216,9 @@ test("restricted HTML artifact renders without script, storage, API or network a
     await page.reload();
     await expect(motion).toHaveAttribute("aria-pressed", "false");
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await expect(page.locator(".rocky-presence .rocky-avatar")).toHaveCSS(
-      "animation-name",
-      "none",
+    await expect(page.locator(".rocky-presence .rocky-avatar")).toHaveAttribute(
+      "data-playing",
+      "false",
     );
     await openResult.click();
     const iframe = page.locator("iframe.html-artifact-preview");

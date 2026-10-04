@@ -1,5 +1,11 @@
 # Rocky — Bot 角色、視覺與互動規格
 
+> 2026-10-04 使用者提供的 Roko 原始 atlas 已取代本文舊 SVG avatar 的外觀基線。
+> 產品仍名 Rocky，角色名 Roko；原圖、manifest 與來源在 `assets/roko/`。
+> 原圖 3,057,640 bytes 是本次明確核准的 100 KiB 素材預算例外，並非其他資產的通用豁免。
+> 以原 atlas 的固定幀格、8 FPS 動作取代舊 CSS 動作；真實狀態、權限、reduced motion 與完成去重契約不變。
+> 角色素材不因匯入而取得 Apache-2.0 授權；發布權利審核仍待辦。詳見 `docs/implementation/roko.md`。
+
 > **規格版本：2.0.0｜日期：2026-10-02｜產品：Rocky**  
 > 這是可實作的設計基線，不是已產出的最終插畫、使用者已核准的美術或已通過測試的元件。
 
@@ -59,15 +65,18 @@ Rocky產品中的avatar為新繪製的抽象化視覺，不直接取電影劇照
 
 ```text
 assets/rocky/
-  avatar.svg              # 可編輯原始向量，完整輪廓
   mark.svg                # 小尺寸抽象標誌
   mark-monochrome.svg     # 單色
   favicon.svg
   asset-manifest.json     # provenance / rights / hash
   README.md               # source、輸出規則與尺寸使用方式
+assets/roko/
+  roko-spritesheet.png     # 使用者提供的原始角色圖集
+  roko-manifest.json       # 固定幀格、有效欄位、來源、hash 與獨立權利紀錄
+  README.md               # 素材來源與授權範圍
 ```
 
-PNG預覽可由上述資產本地輸出；不要將NodeModules、設計軟體工程cache、巨型影片或3D模型放入Git。主avatar優先透過少量SVG groups/CSS variables表達深淺主題及動作，不需要每個狀態一张大PNG。
+2026-10-04 的 Roko 圖集取代原 `avatar.svg`。主角色由單一共用圖集與 Canvas 播放器呈現，按 manifest 的有效幀格以 8 FPS 播放；產品 mark/favicon 保留 SVG。原始圖集的大小例外見本文開頭，不能套用到其他素材。不要將 node_modules、設計軟體 cache、巨型影片或 3D 模型放入 Git。
 
 P0互動spike可暫用中性圖示，T-037完成時必須有真正的新視覺source和render證據。placeholder不能成為正式交付。
 

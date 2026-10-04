@@ -198,6 +198,12 @@ button:hover:not(:disabled) {
   height: 68px;
   margin: 0 auto 4px;
 }
+.roko-sprite {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+  object-fit: contain;
+}
 h1 {
   font-size: 17px;
   margin: 6px 0;
@@ -1055,42 +1061,6 @@ input[type="checkbox"] {
   color: var(--muted);
   background: transparent;
 }
-.presence-moving {
-  animation: rocky-working 3s ease-in-out infinite;
-}
-@keyframes rocky-working {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-1px);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .presence-moving {
-    animation: none;
-  }
-}
-
-.presence-completed {
-  animation: rocky-completed 0.6s ease-out 1;
-}
-@keyframes rocky-completed {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .presence-completed {
-    animation: none;
-  }
-}
-
 .presence-background {
   flex-basis: 100%;
   min-width: 0;

@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "assetId": "roko",
+  "displayName": "Roko",
+  "provenance": {
+    "recordedSourceName": "Rocky Bot",
+    "sourceKind": "existing-generated-pet-asset",
+    "originalFileName": "spritesheet-extended.png",
+    "originalSha256": "0d47eb7f7495849818b8285fee2df7722ba76a8e8f22145cb147817516cf0ef3",
+    "historicalVerificationDate": "2026-10-03",
+    "integrationVerified": false,
+    "note": "原始來源名為 Rocky Bot；Roko 是本次使用者指定名稱。未查詢 ChatGPT 即時啟用狀態；不包含帳號、內部 pet_id 或憑證；此紀錄不是授權證明。"
+  },
+  "image": {
+    "file": "roko-spritesheet.png",
+    "width": 1536,
+    "height": 2288,
+    "format": "PNG",
+    "colorMode": "RGBA",
+    "sizeBytes": 3057640,
+    "sha256": "0d47eb7f7495849818b8285fee2df7722ba76a8e8f22145cb147817516cf0ef3"
+  },
+  "grid": {
+    "columns": 8,
+    "rows": 11,
+    "cellWidth": 192,
+    "cellHeight": 208,
+    "indices": "zero-based",
+    "origin": "top-left",
+    "padding": 0,
+    "spacing": 0
+  },
+  "animations": {
+    "idle": {
+      "row": 0,
+      "columns": [0, 1, 2, 3, 4, 5]
+    },
+    "running-right": {
+      "row": 1,
+      "columns": [0, 1, 2, 3, 4, 5, 6, 7]
+    },
+    "running-left": {
+      "row": 2,
+      "columns": [0, 1, 2, 3, 4, 5, 6, 7]
+    },
+    "waving": {
+      "row": 3,
+      "columns": [0, 1, 2, 3]
+    },
+    "jumping": {
+      "row": 4,
+      "columns": [0, 1, 2, 3, 4]
+    },
+    "failed": {
+      "row": 5,
+      "columns": [0, 1, 2, 3, 4, 5, 6, 7]
+    },
+    "waiting": {
+      "row": 6,
+      "columns": [0, 1, 2, 3, 4, 5]
+    },
+    "running": {
+      "row": 7,
+      "columns": [0, 1, 2, 3, 4, 5]
+    },
+    "review": {
+      "row": 8,
+      "columns": [0, 1, 2, 3, 4, 5]
+    }
+  },
+  "lookDirections": {
+    "count": 16,
+    "zeroDegrees": "up",
+    "positiveDirection": "clockwise",
+    "stepDegrees": 22.5,
+    "frames": [
+      {
+        "angleDegrees": 0.0,
+        "row": 9,
+        "column": 0
+      },
+      {
+        "angleDegrees": 22.5,
+        "row": 9,
+        "column": 1
+      },
+      {
+        "angleDegrees": 45.0,
+        "row": 9,
+        "column": 2
+      },
+      {
+        "angleDegrees": 67.5,
+        "row": 9,
+        "column": 3
+      },
+      {
+        "angleDegrees": 90.0,
+        "row": 9,
+        "column": 4
+      },
+      {
+        "angleDegrees": 112.5,
+        "row": 9,
+        "column": 5
+      },
+      {
+        "angleDegrees": 135.0,
+        "row": 9,
+        "column": 6
+      },
+      {
+        "angleDegrees": 157.5,
+        "row": 9,
+        "column": 7
+      },
+      {
+        "angleDegrees": 180.0,
+        "row": 10,
+        "column": 0
+      },
+      {
+        "angleDegrees": 202.5,
+        "row": 10,
+        "column": 1
+      },
+      {
+        "angleDegrees": 225.0,
+        "row": 10,
+        "column": 2
+      },
+      {
+        "angleDegrees": 247.5,
+        "row": 10,
+        "column": 3
+      },
+      {
+        "angleDegrees": 270.0,
+        "row": 10,
+        "column": 4
+      },
+      {
+        "angleDegrees": 292.5,
+        "row": 10,
+        "column": 5
+      },
+      {
+        "angleDegrees": 315.0,
+        "row": 10,
+        "column": 6
+      },
+      {
+        "angleDegrees": 337.5,
+        "row": 10,
+        "column": 7
+      }
+    ]
+  },
+  "playback": {
+    "sourceTimingAvailable": false,
+    "suggestedStartingFps": 8,
+    "timingOrigin": "integration recommendation, not exported ChatGPT timing",
+    "note": "產品自行决定 looping/once/static；勿在動畫中播放未使用的空白 cells。視線幀是離散角度，不是循環動作。"
+  },
+  "rights": {
+    "status": "not-a-license-grant",
+    "note": "角色素材與程式碼授權分開處理；保留來源，不自動標 MIT/Apache 或自稱官方角色。"
+  }
+}

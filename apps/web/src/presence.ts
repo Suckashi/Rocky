@@ -41,6 +41,7 @@ export function deriveRockyPresence(input: PresenceInput, now: number) {
         (e) =>
           e.workId === foreground.id &&
           e.runId === foreground.runId &&
+          e.executionSessionId === foreground.executionSessionId &&
           e.payload.kind === "domain" &&
           progressNames.has(e.payload.name),
       )
@@ -49,6 +50,45 @@ export function deriveRockyPresence(input: PresenceInput, now: number) {
     (last, e) => Math.max(last ?? 0, Date.parse(e.timestamp)),
     null,
   );
+  const active = new Map<
+    string,
+    "model" | "tool" | "read" | "review" | "subagent"
+  >();
+  for (const event of evidence) {
+    if (event.payload.kind !== "domain") continue;
+    const { name, data } = event.payload;
+    const category = name.split(".")[1];
+    const key = JSON.stringify([
+      event.subagentId,
+      category,
+      data.callId ?? data.requestId,
+    ]);
+    if (
+      name.endsWith(".completed") ||
+      name.endsWith(".failed") ||
+      (name === "rocky.model.stream" && data.phase === "end")
+    )
+      active.delete(key);
+    else if (name.endsWith(".started") || name === "rocky.model.stream") {
+      // Only explicit executed tool identities can advertise review/read activity.
+      const tool = typeof data.name === "string" ? data.name : "";
+      active.set(
+        key,
+        category === "model"
+          ? "model"
+          : category === "subagent"
+            ? "subagent"
+            : ["read_file", "workspace_read"].includes(tool)
+              ? "read"
+              : ["workspace_diff"].includes(tool)
+                ? "review"
+                : "tool",
+      );
+    }
+  }
+  const activity =
+    [...active.values()].find((value) => value !== "model") ??
+    active.values().next().value;
   let state: string =
     foreground?.status ?? (input.configured ? "idle" : "setup_required");
   if (
@@ -83,8 +123,10 @@ export function deriveRockyPresence(input: PresenceInput, now: number) {
     foregroundId: foreground?.id,
     counts,
     lastProgressAt,
+    activity,
     moving:
       state === "running" &&
+      active.size > 0 &&
       input.connected &&
       input.animationsEnabled &&
       !input.reducedMotion &&

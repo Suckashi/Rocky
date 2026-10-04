@@ -41,6 +41,17 @@ test("T-007 shutdown cancels configured model I/O and retains unknown usage with
     await expect
       .poll(() => fixture.requests.length, { timeout: 10000 })
       .toBe(1);
+    expect(
+      service.store
+        .snapshot()
+        .events.some(
+          (event) =>
+            event.workId === work.id &&
+            event.executionSessionId === work.executionSessionId &&
+            event.payload.kind === "domain" &&
+            event.payload.name === "rocky.model.started",
+        ),
+    ).toBe(true);
     await service.close();
     closed = true;
     const reopened = new Store(root);

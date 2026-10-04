@@ -10,7 +10,7 @@ Windows fixtures and browser runs cover these paths with scoped limitations. The
 
 ## Before a verified release
 
-- Complete Ubuntu Node-only installation and MCP process-lifecycle evidence.
+- Extend the [Ubuntu WSL 2 Node-only and MCP evidence](implementation/roko.md) to native desktop/browser and remaining command coverage.
 - Pass strict browser egress in a clean environment using the pinned browser.
 - Resolve remaining dependency advisories; see [Security](../SECURITY.md).
 - Verify a real container engine's enforcement, including network behavior.

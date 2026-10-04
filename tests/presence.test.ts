@@ -32,6 +32,7 @@ function event(w: Work, name: string, time = now): PublicEvent {
     timestamp: new Date(time).toISOString(),
     workId: w.id,
     runId: w.runId,
+    executionSessionId: w.executionSessionId,
     payload: { kind: "domain", name, data: {} },
   };
 }
@@ -179,4 +180,30 @@ test("completion feedback excludes history, replay, late catch-up, background an
   expect(
     projectCompletion({ ...e, runId: randomUUID() }, "11", now).completion,
   ).toBeUndefined();
+});
+
+test("presence matches execution session and only advertises active model/tool evidence", () => {
+  const w = work("running");
+  const start = event(w, "rocky.tool.started");
+  if (start.payload.kind !== "domain") throw Error("fixture");
+  start.payload.data = { name: "workspace_read", callId: "read" };
+  expect(deriveRockyPresence(input([w], [start]), now)).toMatchObject({
+    moving: true,
+    activity: "read",
+  });
+  const done = {
+    ...start,
+    sequence: "2",
+    payload: { ...start.payload, name: "rocky.tool.completed" },
+  };
+  expect(deriveRockyPresence(input([w], [start, done]), now)).toMatchObject({
+    moving: false,
+    activity: undefined,
+  });
+  expect(
+    deriveRockyPresence(
+      input([w], [{ ...start, executionSessionId: randomUUID() }]),
+      now,
+    ).state,
+  ).toBe("stale");
 });

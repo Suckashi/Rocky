@@ -1,0 +1,152 @@
+{
+  "total": 24,
+  "passed": 24,
+  "failed": 0,
+  "skipped": 0,
+  "files": [
+    {
+      "file": "mcp-manager.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Stop during native startup/discovery cancels only the owned process and old request does not restart it",
+          "status": "passed",
+          "durationMs": 575.33246
+        },
+        {
+          "name": "configured HTTP redirect cannot forward credentials or initialize an unconfigured endpoint",
+          "status": "passed",
+          "durationMs": 300.2736869999999
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: pages",
+          "status": "passed",
+          "durationMs": 524.2646020000002
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: repeat",
+          "status": "passed",
+          "durationMs": 512.9416459999998
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: diagnostics",
+          "status": "passed",
+          "durationMs": 512.079362
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: overflow",
+          "status": "passed",
+          "durationMs": 469.2123489999999
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: unsafe-input",
+          "status": "passed",
+          "durationMs": 475.95567800000026
+        },
+        {
+          "name": "bounded actual stdio discovery/diagnostics: unsafe-output",
+          "status": "passed",
+          "durationMs": 484.386845
+        },
+        {
+          "name": "configured official MCP lifecycle lists actual tools and stops without replay: stdio",
+          "status": "passed",
+          "durationMs": 811.0222760000006
+        },
+        {
+          "name": "configured official MCP lifecycle lists actual tools and stops without replay: http",
+          "status": "passed",
+          "durationMs": 419.58265200000005
+        },
+        {
+          "name": "failed configured stdio startup is bounded, reported and not retried by old receipt",
+          "status": "passed",
+          "durationMs": 299.43338699999913
+        }
+      ]
+    },
+    {
+      "file": "mcp-registry.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Rocky MCP schema rejects foreign/mixed config and plaintext credentials; defaults disabled",
+          "status": "passed",
+          "durationMs": 6.170211999999992
+        },
+        {
+          "name": "MCP settings use atomic CAS and persistent receipts, isolated launch env/path and retired-secret redaction",
+          "status": "passed",
+          "durationMs": 272.408673
+        },
+        {
+          "name": "MCP API requires owner session; config references remain references and failed input preserves stored settings",
+          "status": "passed",
+          "durationMs": 269.87016100000005
+        }
+      ]
+    },
+    {
+      "file": "mcp-work.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: approve",
+          "status": "passed",
+          "durationMs": 1935.9764389999998
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: reject",
+          "status": "passed",
+          "durationMs": 1547.6367019999998
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: revoke",
+          "status": "passed",
+          "durationMs": 1563.4526850000002
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: invalid",
+          "status": "passed",
+          "durationMs": 1357.935837
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: uncertain",
+          "status": "passed",
+          "durationMs": 1505.6032589999995
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: synthetic",
+          "status": "passed",
+          "durationMs": 1174.1180650000006
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: background",
+          "status": "passed",
+          "durationMs": 1494.9484450000018
+        },
+        {
+          "name": "configured native worker uses discovered MCP schema and exact approval: schedule",
+          "status": "passed",
+          "durationMs": 1456.7150789999996
+        }
+      ]
+    },
+    {
+      "file": "mcp.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "SDK discovery and full fixture schema rejects invalid args: stdio",
+          "status": "passed",
+          "durationMs": 216.604047
+        },
+        {
+          "name": "SDK discovery and full fixture schema rejects invalid args: http",
+          "status": "passed",
+          "durationMs": 45.21364199999999
+        }
+      ]
+    }
+  ]
+}

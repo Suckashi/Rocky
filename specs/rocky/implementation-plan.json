@@ -462,6 +462,28 @@
           "mode": "fixture",
           "command": "npm test -- --reporter=default --reporter=json --outputFile=.rocky-reports/bootstrap-unit-final.json",
           "exitCode": 0
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "static",
+          "command": "npm run check:docs",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/publication-candidate/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Fresh Windows whole-unit run and nine focused browser cases; the full browser suite and strict-egress gate were not rerun.",
+            "Browser uses installed Chromium 1223 compatibility override; pinned-browser acceptance remains open.",
+            "The full unit invocation skips the native-browser case when the pinned executable is missing; its separate compatibility-browser rerun is recorded without combining invocation totals.",
+            "Existing Ubuntu WSL 2 reports were inspected and all eight recorded runtime/lockfile hashes match; Ubuntu was not rerun in this pass.",
+            "Dependency lockfile unchanged; retained audit reports seven high, zero moderate and zero critical entries. No fresh audit or waiver in this pass.",
+            "Artwork distribution rights remain pending owner clarification; Apache-2.0 covers source, not the Roko atlas.",
+            "No real-container, external live-endpoint, relative-performance or hosted CI acceptance established.",
+            "Source/history/package pattern checks and three Roko screenshots reviewed; not an exhaustive security, PII or historical image audit.",
+            "Local commits only. Main remains at e42a0a8; no merge, remote creation, visibility change, push, tag or deployment."
+          ]
         }
       ],
       "blockedReason": null,
@@ -493,7 +515,7 @@
         "R-050",
         "R-055"
       ],
-      "status": "blocked",
+      "status": "done",
       "evidence": [
         {
           "commit": "322186bdee19dc15d1c01c242e54ca7cfccde52b",
@@ -534,9 +556,28 @@
             "Real container engine/enforcement not verified; no host fallback.",
             "No commit, remote, paid endpoint, security software or global system setting change."
           ]
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Ubuntu 24.04.5 x64 / WSL 2",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npm run test:no-python",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/roko/verification.json",
+          "testFiles": [
+            "scripts/no-python.mjs"
+          ],
+          "limitations": [
+            "Focused Windows fixtures and Ubuntu WSL 2 evidence, not whole-repository or bare-metal/Ubuntu-browser acceptance.",
+            "Pinned browser and clean strict browser egress remain open; installed Chromium 1223 is compatibility evidence.",
+            "Dependency audit remains failed: 7 high, 0 moderate, 0 critical. No downgrade or waiver.",
+            "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
+            "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
+          ]
         }
       ],
-      "blockedReason": "Ubuntu x64 no-Python install/build/fixture evidence unavailable. Windows constrained-PATH clean copy passes.",
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
         "已鎖定可重現 dependency set 與 license inventory。",
@@ -2996,7 +3037,7 @@
         "R-021",
         "R-023"
       ],
-      "status": "in_progress",
+      "status": "done",
       "evidence": [
         {
           "commit": "5488911",
@@ -3091,9 +3132,32 @@
             "Real container engine/enforcement not verified; no host fallback.",
             "No commit, remote, paid endpoint, security software or global system setting change."
           ]
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Ubuntu 24.04.5 x64 / WSL 2",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npm test -- tests/mcp-manager.test.ts tests/mcp-registry.test.ts tests/mcp.test.ts tests/mcp-work.test.ts --reporter=json --outputFile=.rocky-reports/ubuntu-mcp.json; npm test -- tests/terminate-process-tree.test.ts --reporter=json --outputFile=.rocky-reports/ubuntu-process.json",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/roko/verification.json",
+          "testFiles": [
+            "tests/mcp-manager.test.ts",
+            "tests/mcp-registry.test.ts",
+            "tests/mcp.test.ts",
+            "tests/mcp-work.test.ts",
+            "tests/terminate-process-tree.test.ts"
+          ],
+          "limitations": [
+            "Focused Windows fixtures and Ubuntu WSL 2 evidence, not whole-repository or bare-metal/Ubuntu-browser acceptance.",
+            "Pinned browser and clean strict browser egress remain open; installed Chromium 1223 is compatibility evidence.",
+            "Dependency audit remains failed: 7 high, 0 moderate, 0 critical. No downgrade or waiver.",
+            "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
+            "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
+          ]
         }
       ],
-      "blockedReason": "Implementation connected; Windows SDK transport/lifecycle passes. Required Ubuntu lifecycle remains not_run.",
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
         "兩平台真 SDK+Node stdio fixture 與 HTTP fixture 往返成功。",
@@ -4138,6 +4202,30 @@
             "Chromium 1223 compatibility override; pinned Chromium 1243 and strict egress not accepted.",
             "Real container engine/enforcement not verified; no host fallback.",
             "No commit, remote, paid endpoint, security software or global system setting change."
+          ]
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npx playwright test tests/e2e/roko.spec.ts tests/e2e/identity.spec.ts tests/e2e/html-preview.spec.ts tests/e2e/background-presence.spec.ts tests/e2e/reconnect.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/roko/verification.json",
+          "testFiles": [
+            "tests/roko.test.ts",
+            "tests/presence.test.ts",
+            "tests/e2e/roko.spec.ts",
+            "tests/e2e/identity.spec.ts",
+            "tests/e2e/html-preview.spec.ts"
+          ],
+          "limitations": [
+            "Focused Windows fixtures and Ubuntu WSL 2 evidence, not whole-repository or bare-metal/Ubuntu-browser acceptance.",
+            "Pinned browser and clean strict browser egress remain open; installed Chromium 1223 is compatibility evidence.",
+            "Dependency audit remains failed: 7 high, 0 moderate, 0 critical. No downgrade or waiver.",
+            "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
+            "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
           ]
         }
       ],
@@ -6575,9 +6663,55 @@
           "mode": "static",
           "command": "npm run build",
           "exitCode": 0
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npx playwright test tests/e2e/roko.spec.ts tests/e2e/identity.spec.ts tests/e2e/html-preview.spec.ts tests/e2e/background-presence.spec.ts tests/e2e/reconnect.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/roko/verification.json",
+          "testFiles": [
+            "tests/roko.test.ts",
+            "tests/presence.test.ts",
+            "tests/e2e/roko.spec.ts",
+            "tests/e2e/identity.spec.ts",
+            "tests/e2e/html-preview.spec.ts"
+          ],
+          "limitations": [
+            "Focused Windows fixtures and Ubuntu WSL 2 evidence, not whole-repository or bare-metal/Ubuntu-browser acceptance.",
+            "Pinned browser and clean strict browser egress remain open; installed Chromium 1223 is compatibility evidence.",
+            "Dependency audit remains failed: 7 high, 0 moderate, 0 critical. No downgrade or waiver.",
+            "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
+            "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
+          ]
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npm test -- --reporter=default --reporter=json --outputFile=.rocky-reports/oss-final-unit.json",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/publication-candidate/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Fresh Windows whole-unit run and nine focused browser cases; the full browser suite and strict-egress gate were not rerun.",
+            "Browser uses installed Chromium 1223 compatibility override; pinned-browser acceptance remains open.",
+            "The full unit invocation skips the native-browser case when the pinned executable is missing; its separate compatibility-browser rerun is recorded without combining invocation totals.",
+            "Existing Ubuntu WSL 2 reports were inspected and all eight recorded runtime/lockfile hashes match; Ubuntu was not rerun in this pass.",
+            "Dependency lockfile unchanged; retained audit reports seven high, zero moderate and zero critical entries. No fresh audit or waiver in this pass.",
+            "Artwork distribution rights remain pending owner clarification; Apache-2.0 covers source, not the Roko atlas.",
+            "No real-container, external live-endpoint, relative-performance or hosted CI acceptance established.",
+            "Source/history/package pattern checks and three Roko screenshots reviewed; not an exhaustive security, PII or historical image audit.",
+            "Local commits only. Main remains at e42a0a8; no merge, remote creation, visibility change, push, tag or deployment."
+          ]
         }
       ],
-      "blockedReason": "Implementation connected; Windows clean install/build/core/Learning and package guards pass. Ubuntu command matrix remains unavailable; dependency audit is failed.",
+      "blockedReason": "Windows package/recovery checks and Ubuntu WSL Node-only install/build/core/Learning now pass. Dependency audit, full platform command coverage and optional environment setup remain open.",
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
         "所有承諾 command 在兩平台存在且可運行，doctor 不更改全域環境。",
@@ -6726,9 +6860,33 @@
           "mode": "fixture",
           "command": "npm test -- --reporter=default --reporter=json --outputFile=.rocky-reports/bootstrap-unit-final.json",
           "exitCode": 0
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npx playwright test tests/e2e/roko.spec.ts tests/e2e/identity.spec.ts tests/e2e/html-preview.spec.ts tests/e2e/background-presence.spec.ts tests/e2e/reconnect.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/roko/verification.json",
+          "testFiles": [
+            "tests/roko.test.ts",
+            "tests/presence.test.ts",
+            "tests/e2e/roko.spec.ts",
+            "tests/e2e/identity.spec.ts",
+            "tests/e2e/html-preview.spec.ts"
+          ],
+          "limitations": [
+            "Focused Windows fixtures and Ubuntu WSL 2 evidence, not whole-repository or bare-metal/Ubuntu-browser acceptance.",
+            "Pinned browser and clean strict browser egress remain open; installed Chromium 1223 is compatibility evidence.",
+            "Dependency audit remains failed: 7 high, 0 moderate, 0 critical. No downgrade or waiver.",
+            "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
+            "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
+          ]
         }
       ],
-      "blockedReason": "Concentrated Windows validation and all 70 AT records updated. AT-01/04/30/53 not_run; AT-03/51 failed. See scoped evidence, not full acceptance.",
+      "blockedReason": "AT-01 and AT-04 now have scoped Ubuntu WSL 2 evidence; AT-30/53 not_run and AT-03/51 failed. Remaining browser/container/live/performance gates retained.",
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
         "全域 AT matrix 已逐項實際處理，fixture/live/not_run 狀態不混用。",
@@ -7009,12 +7167,58 @@
             "Real container engine/enforcement not verified; no host fallback.",
             "No commit, remote, paid endpoint, security software or global system setting change."
           ]
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npx playwright test tests/e2e/roko.spec.ts tests/e2e/identity.spec.ts tests/e2e/html-preview.spec.ts tests/e2e/background-presence.spec.ts tests/e2e/reconnect.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/roko/verification.json",
+          "testFiles": [
+            "tests/roko.test.ts",
+            "tests/presence.test.ts",
+            "tests/e2e/roko.spec.ts",
+            "tests/e2e/identity.spec.ts",
+            "tests/e2e/html-preview.spec.ts"
+          ],
+          "limitations": [
+            "Focused Windows fixtures and Ubuntu WSL 2 evidence, not whole-repository or bare-metal/Ubuntu-browser acceptance.",
+            "Pinned browser and clean strict browser egress remain open; installed Chromium 1223 is compatibility evidence.",
+            "Dependency audit remains failed: 7 high, 0 moderate, 0 critical. No downgrade or waiver.",
+            "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
+            "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
+          ]
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npm test -- --reporter=default --reporter=json --outputFile=.rocky-reports/oss-final-unit.json",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/publication-candidate/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Fresh Windows whole-unit run and nine focused browser cases; the full browser suite and strict-egress gate were not rerun.",
+            "Browser uses installed Chromium 1223 compatibility override; pinned-browser acceptance remains open.",
+            "The full unit invocation skips the native-browser case when the pinned executable is missing; its separate compatibility-browser rerun is recorded without combining invocation totals.",
+            "Existing Ubuntu WSL 2 reports were inspected and all eight recorded runtime/lockfile hashes match; Ubuntu was not rerun in this pass.",
+            "Dependency lockfile unchanged; retained audit reports seven high, zero moderate and zero critical entries. No fresh audit or waiver in this pass.",
+            "Artwork distribution rights remain pending owner clarification; Apache-2.0 covers source, not the Roko atlas.",
+            "No real-container, external live-endpoint, relative-performance or hosted CI acceptance established.",
+            "Source/history/package pattern checks and three Roko screenshots reviewed; not an exhaustive security, PII or historical image audit.",
+            "Local commits only. Main remains at e42a0a8; no merge, remote creation, visibility change, push, tag or deployment."
+          ]
         }
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
-        "原創角色/mark/tokens在24/32/48/96px及light/dark實際render；無上游頭像改色、電影圖或未授權擷取素材。",
+        "使用者提供的 Roko 原始 atlas 取代舊 SVG avatar；正式聊天與靜態側欄使用同一原圖，桌面/手機、light/dark 實際 render；產品 mark/favicon 保留。素材大小例外與來源/權利獨立記錄。",
         "persona/name是表達設定、不改權限與Agent runtime；中文/英文範例與初始樣式可檢視；視覺基線不冒稱使用者已核准最終美術。",
         "asset-manifest已記provenance/rights-status；已執行的視覺fixture/size檢查留證，未完成的發布權利審核不偽標passed。"
       ]
@@ -7190,6 +7394,52 @@
             "Real container engine/enforcement not verified; no host fallback.",
             "No commit, remote, paid endpoint, security software or global system setting change."
           ]
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npx playwright test tests/e2e/roko.spec.ts tests/e2e/identity.spec.ts tests/e2e/html-preview.spec.ts tests/e2e/background-presence.spec.ts tests/e2e/reconnect.spec.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/roko/verification.json",
+          "testFiles": [
+            "tests/roko.test.ts",
+            "tests/presence.test.ts",
+            "tests/e2e/roko.spec.ts",
+            "tests/e2e/identity.spec.ts",
+            "tests/e2e/html-preview.spec.ts"
+          ],
+          "limitations": [
+            "Focused Windows fixtures and Ubuntu WSL 2 evidence, not whole-repository or bare-metal/Ubuntu-browser acceptance.",
+            "Pinned browser and clean strict browser egress remain open; installed Chromium 1223 is compatibility evidence.",
+            "Dependency audit remains failed: 7 high, 0 moderate, 0 critical. No downgrade or waiver.",
+            "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
+            "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
+          ]
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npm test -- --reporter=default --reporter=json --outputFile=.rocky-reports/oss-final-unit.json",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/publication-candidate/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Fresh Windows whole-unit run and nine focused browser cases; the full browser suite and strict-egress gate were not rerun.",
+            "Browser uses installed Chromium 1223 compatibility override; pinned-browser acceptance remains open.",
+            "The full unit invocation skips the native-browser case when the pinned executable is missing; its separate compatibility-browser rerun is recorded without combining invocation totals.",
+            "Existing Ubuntu WSL 2 reports were inspected and all eight recorded runtime/lockfile hashes match; Ubuntu was not rerun in this pass.",
+            "Dependency lockfile unchanged; retained audit reports seven high, zero moderate and zero critical entries. No fresh audit or waiver in this pass.",
+            "Artwork distribution rights remain pending owner clarification; Apache-2.0 covers source, not the Roko atlas.",
+            "No real-container, external live-endpoint, relative-performance or hosted CI acceptance established.",
+            "Source/history/package pattern checks and three Roko screenshots reviewed; not an exhaustive security, PII or historical image audit.",
+            "Local commits only. Main remains at e42a0a8; no merge, remote creation, visibility change, push, tag or deployment."
+          ]
         }
       ],
       "blockedReason": null,
@@ -7211,7 +7461,7 @@
         "R-047"
       ],
       "passCondition": "Windows x64／Ubuntu x64 在 Python 不可用的驗證環境 npm ci、build、core tests、Learning fixture eval 成功；追蹤到 Python/uv/pip/node-gyp source fallback 即失敗。",
-      "status": "not_run",
+      "status": "passed",
       "testFiles": [
         "tests/backup.test.ts",
         "tests/contracts.test.ts",
@@ -7260,6 +7510,29 @@
           "mode": "fixture",
           "command": "npm run test:no-python",
           "exitCode": 0
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64 (prior same-lock evidence) + Ubuntu 24.04.5 x64 / WSL 2 (new)",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npm run test:no-python",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/roko/verification.json",
+          "testFiles": [
+            "tests/backup.test.ts",
+            "tests/contracts.test.ts",
+            "tests/learning-candidates.test.ts"
+          ],
+          "limitations": [
+            "Ubuntu clean-copy install/check/build/42 core tests/Learning all exit 0, zero forbidden-tool attempts. Existing Windows same-lock constrained-PATH evidence retained.",
+            "Focused Windows fixtures and Ubuntu WSL 2 evidence, not whole-repository or bare-metal/Ubuntu-browser acceptance.",
+            "Pinned browser and clean strict browser egress remain open; installed Chromium 1223 is compatibility evidence.",
+            "Dependency audit remains failed: 7 high, 0 moderate, 0 critical. No downgrade or waiver.",
+            "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
+            "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
+          ]
         }
       ]
     },
@@ -7433,7 +7706,7 @@
         "R-020"
       ],
       "passCondition": "Node fixture server 在兩平台可 start/list/call/cancel/stop；重啟診斷可恢復；無殘留程序。",
-      "status": "not_run",
+      "status": "passed",
       "testFiles": [
         "tests/mcp.test.ts",
         "tests/mcp-manager.test.ts",
@@ -7461,6 +7734,29 @@
             "Chromium 1223 compatibility override; pinned Chromium 1243 and strict egress not accepted.",
             "Real container engine/enforcement not verified; no host fallback.",
             "No commit, remote, paid endpoint, security software or global system setting change."
+          ]
+        },
+        {
+          "commit": "e42a0a8974a2a7d8472e158d96ce45e89bb6bc93+working-tree",
+          "platform": "Windows x64 (prior same-lock evidence) + Ubuntu 24.04.5 x64 / WSL 2 (new)",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npm test -- tests/mcp-manager.test.ts tests/mcp-registry.test.ts tests/mcp.test.ts tests/mcp-work.test.ts --reporter=json --outputFile=.rocky-reports/ubuntu-mcp.json; npm test -- tests/terminate-process-tree.test.ts --reporter=json --outputFile=.rocky-reports/ubuntu-process.json",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/roko/verification.json",
+          "testFiles": [
+            "tests/mcp.test.ts",
+            "tests/mcp-manager.test.ts",
+            "tests/terminate-process-tree.test.ts"
+          ],
+          "limitations": [
+            "25 Ubuntu MCP/owned-process tests pass, complementing existing Windows lifecycle evidence.",
+            "Focused Windows fixtures and Ubuntu WSL 2 evidence, not whole-repository or bare-metal/Ubuntu-browser acceptance.",
+            "Pinned browser and clean strict browser egress remain open; installed Chromium 1223 is compatibility evidence.",
+            "Dependency audit remains failed: 7 high, 0 moderate, 0 critical. No downgrade or waiver.",
+            "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
+            "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
           ]
         }
       ]
@@ -10638,6 +10934,33 @@
       ],
       "reference": "docs/implementation/uiux-opendots-alignment.md",
       "deferRule": "At most two grounded investigations / approximately 15 minutes per environment blocker; preserve acceptance status and proceed with independent features; no remote actions"
+    },
+    {
+      "date": "2026-10-04",
+      "decision": "Integrate owner-provided Roko into existing Rocky UI, then continue V1 mandatory work",
+      "authorization": "User supplied local Roko import request and CODEX_PROMPT.md",
+      "scope": [
+        "T-037",
+        "T-038",
+        "T-019",
+        "T-002",
+        "T-015",
+        "T-034",
+        "T-035"
+      ],
+      "reference": "docs/implementation/roko.md",
+      "openGates": [
+        "Strict browser egress/pinned browser",
+        "Dependency audit",
+        "Container enforcement",
+        "Authorized live endpoints",
+        "Remaining performance and command coverage"
+      ],
+      "assetException": {
+        "bytes": 3057640,
+        "sha256": "0d47eb7f7495849818b8285fee2df7722ba76a8e8f22145cb147817516cf0ef3",
+        "rights": "User supplied; not granted Apache-2.0 by import"
+      }
     }
   ]
 }

@@ -1,16 +1,17 @@
 import { test, expect } from "./fixture.js";
 
-test("T-037 original avatar in app and all sizes/themes render without remote assets", async ({
+test("T-037 Roko avatar in app and both themes render from the shared local atlas", async ({
   page,
 }, testInfo) => {
   await page.goto("/");
-  const avatar = page.locator("img.rocky-avatar");
+  await expect(page.getByText("本機已連線", { exact: true })).toBeVisible();
+  const avatar = page.locator("canvas.rocky-avatar");
   await expect(avatar).toBeVisible();
-  await expect(avatar).toHaveAttribute("src", "/rocky/avatar.svg");
+  await expect(avatar).toHaveAttribute("aria-label", "Roko");
   await expect
     .poll(() =>
       avatar.evaluate(
-        (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+        (canvas: HTMLCanvasElement) => canvas.dataset.loaded === "true",
       ),
     )
     .toBe(true);
@@ -21,7 +22,7 @@ test("T-037 original avatar in app and all sizes/themes render without remote as
     page.evaluate(() =>
       performance
         .getEntriesByType("resource")
-        .filter((e) => new URL(e.name).pathname.startsWith("/rocky/"))
+        .filter((e) => new URL(e.name).pathname.startsWith("/roko/"))
         .map((e) => {
           const r = e as PerformanceResourceTiming;
           return {
@@ -34,11 +35,12 @@ test("T-037 original avatar in app and all sizes/themes render without remote as
     );
   const cold = await timing();
   await page.reload();
+  await expect(page.getByText("本機已連線", { exact: true })).toBeVisible();
   await expect(avatar).toBeVisible();
   await expect
     .poll(() =>
       avatar.evaluate(
-        (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+        (canvas: HTMLCanvasElement) => canvas.dataset.loaded === "true",
       ),
     )
     .toBe(true);
@@ -81,20 +83,6 @@ test("T-037 original avatar in app and all sizes/themes render without remote as
   ).toBe(true);
   await page.screenshot({
     path: "test-results/identity-zoom.png",
-    fullPage: true,
-  });
-
-  await page.setViewportSize({ width: 1000, height: 700 });
-  await page.setContent(
-    `<html lang="en"><head><style>body{margin:0;font:16px/1.6 system-ui;background:#15181c;color:#f4f1e9}section{padding:24px}section.light{background:#f6f4ef;color:#1c232a}.row{display:flex;gap:36px;align-items:end;margin:16px 0}figure{margin:0;width:128px;text-align:center}figcaption{font-size:13px}img{display:block;margin:auto;image-rendering:auto}h1{font-size:20px;margin:0}</style></head><body>${["dark", "light"].map((theme) => `<section class="${theme}"><h1>Rocky · ${theme} · original vector baseline</h1><div class="row">${[24, 32, 48, 96].map((size) => `<figure><img src="/rocky/avatar.svg" alt="Rocky ${size}" width="${size}" height="${size}"><figcaption>Avatar ${size}px</figcaption></figure>`).join("")}<figure><img src="/rocky/mark.svg" width="24" height="24" alt="Rocky mark"><figcaption>Mark 24px</figcaption></figure><figure><img src="/rocky/mark-monochrome.svg" width="24" height="24" alt="Rocky monochrome"><figcaption>Mono 24px</figcaption></figure></div></section>`).join("")}</body></html>`,
-  );
-  await page
-    .locator("img")
-    .evaluateAll((images) =>
-      Promise.all(images.map((img) => (img as HTMLImageElement).decode())),
-    );
-  await page.screenshot({
-    path: "test-results/rocky-identity-matrix.png",
     fullPage: true,
   });
 });
