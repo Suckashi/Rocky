@@ -1,0 +1,46 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "cardWidth": 780,
+    "cardHeight": 112,
+    "radius": "14px",
+    "headerHeight": 40,
+    "padding": "12px 14px",
+    "font": "12px",
+    "weight": "550"
+  },
+  {
+    "width": 1280,
+    "height": 800,
+    "cardWidth": 780,
+    "cardHeight": 112,
+    "radius": "14px",
+    "headerHeight": 40,
+    "padding": "12px 14px",
+    "font": "12px",
+    "weight": "550"
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "cardWidth": 358,
+    "cardHeight": 112,
+    "radius": "14px",
+    "headerHeight": 40,
+    "padding": "12px 14px",
+    "font": "12px",
+    "weight": "550"
+  },
+  {
+    "width": 320,
+    "height": 844,
+    "cardWidth": 288,
+    "cardHeight": 112,
+    "radius": "14px",
+    "headerHeight": 40,
+    "padding": "12px 14px",
+    "font": "12px",
+    "weight": "550"
+  }
+]

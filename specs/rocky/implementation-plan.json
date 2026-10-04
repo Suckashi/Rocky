@@ -3364,7 +3364,8 @@
             "PNG/JPEG artifacts, document tools/context references, remaining V1 modules and all70 global AT remain incomplete/not_run"
           ]
         },
-        "docs/implementation/evidence/2026-10-04/tool-alignment/verification.json"
+        "docs/implementation/evidence/2026-10-04/tool-alignment/verification.json",
+        "docs/implementation/evidence/2026-10-04/tool-component/verification.json"
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
