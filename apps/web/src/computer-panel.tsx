@@ -126,7 +126,18 @@ export function ComputerPanel({
                 : "Confirmed tool activity from shared events; not a current screen or proof of external success."}
             </p>
             {work ? (
-              <ToolActivity work={work} events={events} locale={locale} />
+              <ToolActivity
+                work={work}
+                events={events}
+                locale={locale}
+                empty={
+                  <p>
+                    {zh
+                      ? "此工作尚無可顯示的工具活動。"
+                      : "No tool activity to display for this Work."}
+                  </p>
+                }
+              />
             ) : (
               <p>{zh ? "尚無可顯示的活動。" : "No activity to display."}</p>
             )}

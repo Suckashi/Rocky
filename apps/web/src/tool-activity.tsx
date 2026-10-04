@@ -7,10 +7,12 @@ export function ToolActivity({
   work,
   events,
   locale,
+  empty = null,
 }: {
   work: Work;
   events: PublicEvent[];
   locale: "zh" | "en";
+  empty?: import("react").ReactNode;
 }) {
   const zh = locale === "zh";
   const calls = new Map<
@@ -70,6 +72,7 @@ export function ToolActivity({
       events: [...(old?.events ?? []), event],
     });
   }
+  if (!calls.size) return empty;
   return (
     <>
       {[...calls].map(([key, call]) => {

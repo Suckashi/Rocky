@@ -126,7 +126,7 @@ export function Chrome({
     return () => document.removeEventListener("keydown", key);
   }, [drawer]);
   useEffect(() => {
-    if (panel !== "2") return;
+    if (!isSidePanel) return;
     function key(event: KeyboardEvent) {
       if (event.defaultPrevented) return;
       if (event.key === "Escape") {
@@ -148,7 +148,7 @@ export function Chrome({
     }
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
-  }, [panel, compact]);
+  }, [isSidePanel, compact]);
   function open(index: number) {
     setDrawer(false);
     if (index === 0) {
@@ -182,7 +182,7 @@ export function Chrome({
         <button aria-label={names[0]} onClick={() => open(0)}>
           <MessageCircle size={18} />
         </button>
-        <button aria-label={names[Number(panel)]} onClick={() => open(2)}>
+        <button aria-label={names[2]} onClick={() => open(2)}>
           <FileText size={18} />
         </button>
         <button
@@ -289,7 +289,7 @@ export function Chrome({
             className="result-pane"
             role={compact ? "dialog" : "region"}
             aria-modal={compact || undefined}
-            aria-label={names[2]}
+            aria-label={names[Number(panel)]}
             onKeyDown={(event) => {
               if (event.key === "Escape") {
                 event.preventDefault();
@@ -304,7 +304,7 @@ export function Chrome({
                   resultPane.current?.querySelectorAll<HTMLElement>(
                     'button:not(:disabled):not([tabindex="-1"]), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], summary, [tabindex="0"]',
                   ) ?? [],
-                ).filter((el) => el.getClientRects().length);
+                ).filter((el) => el.checkVisibility());
                 const first = elements[0],
                   last = elements.at(-1);
                 if (event.shiftKey && document.activeElement === first) {
