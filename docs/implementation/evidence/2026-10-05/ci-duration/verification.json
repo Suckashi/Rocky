@@ -1,0 +1,200 @@
+{
+  "date": "2026-10-05",
+  "commands": [
+    {
+      "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+      "platform": "Windows x64",
+      "nodeVersion": "v24.12.0",
+      "npmVersion": "11.6.4",
+      "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+      "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+      "testFiles": [],
+      "limitations": [
+        "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+        "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+        "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+        "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+      ],
+      "mode": "static",
+      "command": "npm ci",
+      "exitCode": 0
+    },
+    {
+      "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+      "platform": "Windows x64",
+      "nodeVersion": "v24.12.0",
+      "npmVersion": "11.6.4",
+      "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+      "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+      "testFiles": [],
+      "limitations": [
+        "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+        "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+        "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+        "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+      ],
+      "mode": "static",
+      "command": "npm run check",
+      "exitCode": 0
+    },
+    {
+      "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+      "platform": "Windows x64",
+      "nodeVersion": "v24.12.0",
+      "npmVersion": "11.6.4",
+      "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+      "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+      "testFiles": [],
+      "limitations": [
+        "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+        "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+        "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+        "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+      ],
+      "mode": "static",
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+      "platform": "Windows x64",
+      "nodeVersion": "v24.12.0",
+      "npmVersion": "11.6.4",
+      "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+      "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+      "testFiles": [],
+      "limitations": [
+        "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+        "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+        "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+        "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+      ],
+      "mode": "static",
+      "command": "npm run format:check",
+      "exitCode": 0
+    },
+    {
+      "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+      "platform": "Windows x64",
+      "nodeVersion": "v24.12.0",
+      "npmVersion": "11.6.4",
+      "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+      "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+      "testFiles": [],
+      "limitations": [
+        "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+        "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+        "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+        "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+      ],
+      "mode": "static",
+      "command": "npm run check:docs",
+      "exitCode": 0
+    },
+    {
+      "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+      "platform": "Windows x64",
+      "nodeVersion": "v24.12.0",
+      "npmVersion": "11.6.4",
+      "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+      "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+      "testFiles": [],
+      "limitations": [
+        "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+        "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+        "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+        "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+      ],
+      "mode": "fixture",
+      "command": "npm run test:no-python -- --install-only",
+      "exitCode": 0,
+      "installOnly": true,
+      "steps": [
+        {
+          "command": "npm ci",
+          "exitCode": 0
+        },
+        {
+          "command": "npm run check",
+          "exitCode": 0
+        },
+        {
+          "command": "npm run build",
+          "exitCode": 0
+        }
+      ],
+      "forbiddenToolAttempts": []
+    },
+    {
+      "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+      "platform": "Windows x64",
+      "nodeVersion": "v24.12.0",
+      "npmVersion": "11.6.4",
+      "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+      "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+      "testFiles": [],
+      "limitations": [
+        "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+        "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+        "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+        "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+      ],
+      "mode": "fixture",
+      "command": "npm run test:no-python",
+      "exitCode": 0,
+      "installOnly": false,
+      "steps": [
+        {
+          "command": "npm ci",
+          "exitCode": 0
+        },
+        {
+          "command": "npm run check",
+          "exitCode": 0
+        },
+        {
+          "command": "npm run build",
+          "exitCode": 0
+        },
+        {
+          "command": "npm test -- tests/contracts.test.ts tests/runtime.test.ts tests/worker-channel.test.ts tests/http.test.ts tests/attachments.test.ts tests/documents-new.test.ts tests/model-budget.test.ts tests/learning-candidates.test.ts tests/backup.test.ts",
+          "exitCode": 0
+        },
+        {
+          "command": "npm run test:learning",
+          "exitCode": 0
+        }
+      ],
+      "forbiddenToolAttempts": []
+    },
+    {
+      "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+      "platform": "Windows x64",
+      "nodeVersion": "v24.12.0",
+      "npmVersion": "11.6.4",
+      "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+      "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+      "testFiles": [],
+      "limitations": [
+        "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+        "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+        "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+        "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge.",
+        "actionlint not run; YAML parser, structure assertions and manual review used."
+      ],
+      "mode": "static",
+      "command": "YAML.parse verify.yml plus Node assert checks; manual GitHub Actions workflow/expression review",
+      "exitCode": 0,
+      "review": [
+        "PR matrix selects Ubuntu only; other supported events select Ubuntu and Windows.",
+        "main-only push trigger, cron 17 3 * * *, existing dispatch and PR triggers preserved.",
+        "No changes to permissions, pinned actions, job names, audit, unit tests or e2e.",
+        "CI install-only follows npm test and test:learning."
+      ]
+    }
+  ],
+  "hostedCI": {
+    "status": "pending",
+    "limitations": "Will verify actual PR job list and conclusions after publication."
+  }
+}
