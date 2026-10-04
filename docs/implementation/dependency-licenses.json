@@ -26,246 +26,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@adaline/anthropic",
-      "version": "1.10.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/anthropic/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/azure",
-      "version": "1.8.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/azure/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/gateway",
-      "version": "1.11.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/gateway/node_modules/@smithy/is-array-buffer",
-      "version": "3.0.0",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/gateway/node_modules/@smithy/signature-v4",
-      "version": "4.2.4",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/gateway/node_modules/@smithy/types",
-      "version": "3.7.2",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/gateway/node_modules/@smithy/util-buffer-from",
-      "version": "3.0.0",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/gateway/node_modules/@smithy/util-utf8",
-      "version": "3.0.0",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/gateway/node_modules/dotenv",
-      "version": "16.6.1",
-      "license": "BSD-2-Clause",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/gateway/node_modules/uuid",
-      "version": "10.0.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/gateway/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/google",
-      "version": "1.12.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/google/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/groq",
-      "version": "1.10.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/groq/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/open-router",
-      "version": "1.7.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/open-router/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/openai",
-      "version": "1.12.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/openai/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/provider",
-      "version": "1.7.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/provider/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/together-ai",
-      "version": "1.7.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/together-ai/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/types",
-      "version": "1.10.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/types/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/vertex",
-      "version": "1.10.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/vertex/node_modules/jose",
-      "version": "5.10.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@adaline/vertex/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@ag-ui/a2ui-middleware",
       "version": "0.0.10",
       "license": "MIT",
@@ -330,8 +90,56 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@ai-zen/node-fetch-event-source",
-      "version": "2.1.4",
+      "path": "node_modules/@ai-sdk/gateway",
+      "version": "3.0.209",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@ai-sdk/provider",
+      "version": "3.0.18",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@ai-sdk/provider-utils",
+      "version": "4.0.57",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@ai-sdk/provider-utils/node_modules/undici",
+      "version": "6.29.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@alcalzone/ansi-tokenize",
+      "version": "0.3.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@alcalzone/ansi-tokenize/node_modules/ansi-styles",
+      "version": "6.2.3",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@alcalzone/ansi-tokenize/node_modules/is-fullwidth-code-point",
+      "version": "5.1.0",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -347,15 +155,79 @@
     },
     {
       "path": "node_modules/@anthropic-ai/claude-agent-sdk",
-      "version": "0.1.77",
+      "version": "0.3.263",
       "license": "SEE LICENSE IN README.md",
       "optional": true,
       "installed": false,
       "permitted": false
     },
     {
+      "path": "node_modules/@anthropic-ai/claude-agent-sdk-darwin-arm64",
+      "version": "0.3.263",
+      "license": "SEE LICENSE IN LICENSE.md",
+      "optional": true,
+      "installed": false,
+      "permitted": false
+    },
+    {
+      "path": "node_modules/@anthropic-ai/claude-agent-sdk-darwin-x64",
+      "version": "0.3.263",
+      "license": "SEE LICENSE IN LICENSE.md",
+      "optional": true,
+      "installed": false,
+      "permitted": false
+    },
+    {
+      "path": "node_modules/@anthropic-ai/claude-agent-sdk-linux-arm64",
+      "version": "0.3.263",
+      "license": "SEE LICENSE IN LICENSE.md",
+      "optional": true,
+      "installed": false,
+      "permitted": false
+    },
+    {
+      "path": "node_modules/@anthropic-ai/claude-agent-sdk-linux-arm64-musl",
+      "version": "0.3.263",
+      "license": "SEE LICENSE IN LICENSE.md",
+      "optional": true,
+      "installed": false,
+      "permitted": false
+    },
+    {
+      "path": "node_modules/@anthropic-ai/claude-agent-sdk-linux-x64",
+      "version": "0.3.263",
+      "license": "SEE LICENSE IN LICENSE.md",
+      "optional": true,
+      "installed": false,
+      "permitted": false
+    },
+    {
+      "path": "node_modules/@anthropic-ai/claude-agent-sdk-linux-x64-musl",
+      "version": "0.3.263",
+      "license": "SEE LICENSE IN LICENSE.md",
+      "optional": true,
+      "installed": false,
+      "permitted": false
+    },
+    {
+      "path": "node_modules/@anthropic-ai/claude-agent-sdk-win32-arm64",
+      "version": "0.3.263",
+      "license": "SEE LICENSE IN LICENSE.md",
+      "optional": true,
+      "installed": false,
+      "permitted": false
+    },
+    {
+      "path": "node_modules/@anthropic-ai/claude-agent-sdk-win32-x64",
+      "version": "0.3.263",
+      "license": "SEE LICENSE IN LICENSE.md",
+      "optional": true,
+      "installed": false,
+      "permitted": false
+    },
+    {
       "path": "node_modules/@anthropic-ai/sdk",
-      "version": "0.71.2",
+      "version": "0.124.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -363,7 +235,7 @@
     },
     {
       "path": "node_modules/@apidevtools/json-schema-ref-parser",
-      "version": "15.5.2",
+      "version": "16.0.3",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -378,40 +250,8 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@apidevtools/json-schema-ref-parser/node_modules/undici",
-      "version": "6.29.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@asamuzakjp/css-color",
-      "version": "3.2.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@asamuzakjp/css-color/node_modules/lru-cache",
-      "version": "10.4.3",
-      "license": "ISC",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@aws-crypto/sha256-js",
-      "version": "5.2.0",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@aws-crypto/util",
-      "version": "5.2.0",
+      "path": "node_modules/@aws-sdk/checksums",
+      "version": "3.1001.1",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -434,6 +274,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/@aws-sdk/client-s3",
+      "version": "3.1146.0",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/@aws-sdk/client-sagemaker-runtime",
       "version": "3.1146.0",
       "license": "Apache-2.0",
@@ -444,6 +292,14 @@
     {
       "path": "node_modules/@aws-sdk/core",
       "version": "3.978.1",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@aws-sdk/credential-provider-cognito-identity",
+      "version": "3.972.71",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -522,6 +378,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/@aws-sdk/credential-providers",
+      "version": "3.1146.0",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/@aws-sdk/eventstream-handler-node",
       "version": "3.972.35",
       "license": "Apache-2.0",
@@ -532,6 +396,14 @@
     {
       "path": "node_modules/@aws-sdk/middleware-eventstream",
       "version": "3.972.30",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@aws-sdk/middleware-sdk-s3",
+      "version": "3.972.77",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -578,8 +450,24 @@
       "permitted": true
     },
     {
+      "path": "node_modules/@aws-sdk/util-format-url",
+      "version": "3.972.48",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/@aws-sdk/xml-builder",
       "version": "3.972.41",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@aws/bedrock-token-generator",
+      "version": "1.1.0",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -610,16 +498,8 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@azure/ai-agents",
-      "version": "1.1.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@azure/ai-projects",
-      "version": "1.0.1",
+      "version": "2.7.1",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -730,22 +610,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@azure/identity/node_modules/@azure/msal-common",
-      "version": "16.14.1",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@azure/identity/node_modules/@azure/msal-node",
-      "version": "6.0.1",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@azure/logger",
       "version": "1.4.0",
       "license": "MIT",
@@ -771,7 +635,7 @@
     },
     {
       "path": "node_modules/@azure/msal-node",
-      "version": "3.8.10",
+      "version": "6.0.1",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -779,15 +643,7 @@
     },
     {
       "path": "node_modules/@azure/msal-node/node_modules/@azure/msal-common",
-      "version": "15.17.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@azure/msal-node/node_modules/uuid",
-      "version": "8.3.2",
+      "version": "16.14.1",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -1018,46 +874,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@biomejs/cli-darwin-arm64",
-      "version": "2.3.8",
-      "license": "MIT OR Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/@biomejs/cli-darwin-x64",
-      "version": "2.3.8",
-      "license": "MIT OR Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/@biomejs/cli-linux-x64",
-      "version": "2.3.8",
-      "license": "MIT OR Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/@biomejs/cli-linux-x64-musl",
-      "version": "2.3.8",
-      "license": "MIT OR Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/@biomejs/cli-win32-x64",
-      "version": "2.3.8",
-      "license": "MIT OR Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
       "path": "node_modules/@borewit/text-codec",
       "version": "0.2.2",
       "license": "MIT",
@@ -1077,6 +893,14 @@
       "path": "node_modules/@bufbuild/protobuf",
       "version": "2.16.0",
       "license": "(Apache-2.0 AND BSD-3-Clause)",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@cacheable/memory",
+      "version": "2.2.0",
+      "license": "MIT",
       "optional": false,
       "installed": true,
       "permitted": true
@@ -1522,46 +1346,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@csstools/color-helpers",
-      "version": "5.1.0",
-      "license": "MIT-0",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@csstools/css-calc",
-      "version": "2.1.4",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@csstools/css-color-parser",
-      "version": "3.1.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@csstools/css-parser-algorithms",
-      "version": "3.0.5",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@csstools/css-tokenizer",
-      "version": "3.0.4",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@dabh/diagnostics",
       "version": "2.0.9",
       "license": "MIT",
@@ -1811,39 +1595,15 @@
     },
     {
       "path": "node_modules/@eslint/config-array",
-      "version": "0.21.2",
+      "version": "0.23.5",
       "license": "Apache-2.0",
       "optional": false,
       "installed": true,
       "permitted": true
     },
     {
-      "path": "node_modules/@eslint/config-array/node_modules/balanced-match",
-      "version": "1.0.2",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@eslint/config-array/node_modules/brace-expansion",
-      "version": "1.1.21",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@eslint/config-array/node_modules/minimatch",
-      "version": "3.1.5",
-      "license": "ISC",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@eslint/config-helpers",
-      "version": "0.4.2",
+      "version": "0.7.0",
       "license": "Apache-2.0",
       "optional": false,
       "installed": true,
@@ -1851,79 +1611,15 @@
     },
     {
       "path": "node_modules/@eslint/core",
-      "version": "0.17.0",
+      "version": "1.2.1",
       "license": "Apache-2.0",
       "optional": false,
       "installed": true,
       "permitted": true
     },
     {
-      "path": "node_modules/@eslint/eslintrc",
-      "version": "3.3.7",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@eslint/eslintrc/node_modules/ajv",
-      "version": "6.15.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@eslint/eslintrc/node_modules/balanced-match",
-      "version": "1.0.2",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@eslint/eslintrc/node_modules/brace-expansion",
-      "version": "1.1.21",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@eslint/eslintrc/node_modules/json-schema-traverse",
-      "version": "0.4.1",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@eslint/eslintrc/node_modules/minimatch",
-      "version": "3.1.5",
-      "license": "ISC",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@eslint/eslintrc/node_modules/strip-json-comments",
-      "version": "3.1.1",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@eslint/js",
-      "version": "9.39.4",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@eslint/object-schema",
-      "version": "2.1.7",
+      "version": "3.0.5",
       "license": "Apache-2.0",
       "optional": false,
       "installed": true,
@@ -1931,7 +1627,7 @@
     },
     {
       "path": "node_modules/@eslint/plugin-kit",
-      "version": "0.4.1",
+      "version": "0.7.3",
       "license": "Apache-2.0",
       "optional": false,
       "installed": true,
@@ -1987,10 +1683,18 @@
     },
     {
       "path": "node_modules/@googleapis/sheets",
-      "version": "12.0.0",
+      "version": "14.0.0",
       "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@graphql-typed-document-node/core",
+      "version": "3.2.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -1999,6 +1703,30 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@huggingface/jinja",
+      "version": "0.5.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@huggingface/tokenizers",
+      "version": "0.2.0",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@huggingface/transformers",
+      "version": "4.3.0",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -2050,14 +1778,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@ibm-generative-ai/node-sdk",
-      "version": "3.2.4",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@iconify/types",
       "version": "2.0.0",
       "license": "MIT",
@@ -2083,7 +1803,7 @@
     },
     {
       "path": "node_modules/@img/sharp-darwin-arm64",
-      "version": "0.33.5",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -2091,7 +1811,15 @@
     },
     {
       "path": "node_modules/@img/sharp-darwin-x64",
-      "version": "0.33.5",
+      "version": "0.35.5",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@img/sharp-freebsd-wasm32",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -2099,7 +1827,7 @@
     },
     {
       "path": "node_modules/@img/sharp-libvips-darwin-arm64",
-      "version": "1.0.4",
+      "version": "1.3.4",
       "license": "LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2107,7 +1835,7 @@
     },
     {
       "path": "node_modules/@img/sharp-libvips-darwin-x64",
-      "version": "1.0.4",
+      "version": "1.3.4",
       "license": "LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2115,7 +1843,7 @@
     },
     {
       "path": "node_modules/@img/sharp-libvips-linux-arm",
-      "version": "1.0.5",
+      "version": "1.3.4",
       "license": "LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2123,7 +1851,7 @@
     },
     {
       "path": "node_modules/@img/sharp-libvips-linux-arm64",
-      "version": "1.0.4",
+      "version": "1.3.4",
       "license": "LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2131,7 +1859,7 @@
     },
     {
       "path": "node_modules/@img/sharp-libvips-linux-ppc64",
-      "version": "1.2.4",
+      "version": "1.3.4",
       "license": "LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2139,7 +1867,7 @@
     },
     {
       "path": "node_modules/@img/sharp-libvips-linux-riscv64",
-      "version": "1.2.4",
+      "version": "1.3.4",
       "license": "LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2147,7 +1875,7 @@
     },
     {
       "path": "node_modules/@img/sharp-libvips-linux-s390x",
-      "version": "1.2.4",
+      "version": "1.3.4",
       "license": "LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2155,7 +1883,7 @@
     },
     {
       "path": "node_modules/@img/sharp-libvips-linux-x64",
-      "version": "1.0.4",
+      "version": "1.3.4",
       "license": "LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2163,7 +1891,7 @@
     },
     {
       "path": "node_modules/@img/sharp-libvips-linuxmusl-arm64",
-      "version": "1.0.4",
+      "version": "1.3.4",
       "license": "LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2171,7 +1899,7 @@
     },
     {
       "path": "node_modules/@img/sharp-libvips-linuxmusl-x64",
-      "version": "1.0.4",
+      "version": "1.3.4",
       "license": "LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2179,7 +1907,7 @@
     },
     {
       "path": "node_modules/@img/sharp-linux-arm",
-      "version": "0.33.5",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -2187,7 +1915,7 @@
     },
     {
       "path": "node_modules/@img/sharp-linux-arm64",
-      "version": "0.33.5",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -2195,7 +1923,7 @@
     },
     {
       "path": "node_modules/@img/sharp-linux-ppc64",
-      "version": "0.34.5",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -2203,7 +1931,7 @@
     },
     {
       "path": "node_modules/@img/sharp-linux-riscv64",
-      "version": "0.34.5",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -2211,7 +1939,7 @@
     },
     {
       "path": "node_modules/@img/sharp-linux-s390x",
-      "version": "0.34.5",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -2219,7 +1947,7 @@
     },
     {
       "path": "node_modules/@img/sharp-linux-x64",
-      "version": "0.33.5",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -2227,7 +1955,7 @@
     },
     {
       "path": "node_modules/@img/sharp-linuxmusl-arm64",
-      "version": "0.33.5",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -2235,7 +1963,7 @@
     },
     {
       "path": "node_modules/@img/sharp-linuxmusl-x64",
-      "version": "0.33.5",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -2243,15 +1971,23 @@
     },
     {
       "path": "node_modules/@img/sharp-wasm32",
-      "version": "0.34.5",
+      "version": "0.35.5",
       "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
       "optional": true,
       "installed": false,
       "permitted": false
     },
     {
+      "path": "node_modules/@img/sharp-webcontainers-wasm32",
+      "version": "0.35.5",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/@img/sharp-win32-arm64",
-      "version": "0.34.5",
+      "version": "0.35.5",
       "license": "Apache-2.0 AND LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2259,7 +1995,7 @@
     },
     {
       "path": "node_modules/@img/sharp-win32-ia32",
-      "version": "0.34.5",
+      "version": "0.35.5",
       "license": "Apache-2.0 AND LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2267,7 +2003,7 @@
     },
     {
       "path": "node_modules/@img/sharp-win32-x64",
-      "version": "0.33.5",
+      "version": "0.35.5",
       "license": "Apache-2.0 AND LGPL-3.0-or-later",
       "optional": true,
       "installed": false,
@@ -2290,14 +2026,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@inquirer/checkbox/node_modules/@inquirer/core",
-      "version": "12.0.3",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@inquirer/confirm",
       "version": "6.3.2",
       "license": "MIT",
@@ -2306,16 +2034,8 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@inquirer/confirm/node_modules/@inquirer/core",
-      "version": "12.0.3",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@inquirer/core",
-      "version": "11.2.1",
+      "version": "12.0.3",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -2330,11 +2050,11 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@inquirer/editor/node_modules/@inquirer/core",
-      "version": "12.0.3",
+      "path": "node_modules/@inquirer/expand",
+      "version": "5.1.5",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -2362,8 +2082,40 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@inquirer/input/node_modules/@inquirer/core",
-      "version": "12.0.3",
+      "path": "node_modules/@inquirer/number",
+      "version": "4.2.3",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@inquirer/password",
+      "version": "5.2.2",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@inquirer/prompts",
+      "version": "8.7.2",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@inquirer/rawlist",
+      "version": "5.3.5",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@inquirer/search",
+      "version": "4.3.3",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -2372,14 +2124,6 @@
     {
       "path": "node_modules/@inquirer/select",
       "version": "5.2.5",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@inquirer/select/node_modules/@inquirer/core",
-      "version": "12.0.3",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -2397,40 +2141,56 @@
       "path": "node_modules/@isaacs/cliui",
       "version": "8.0.2",
       "license": "ISC",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@isaacs/cliui/node_modules/ansi-regex",
       "version": "6.4.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@isaacs/cliui/node_modules/ansi-styles",
+      "version": "6.2.3",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@isaacs/cliui/node_modules/emoji-regex",
       "version": "9.2.2",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@isaacs/cliui/node_modules/string-width",
       "version": "5.1.2",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@isaacs/cliui/node_modules/strip-ansi",
       "version": "7.2.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@isaacs/cliui/node_modules/wrap-ansi",
+      "version": "8.1.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -2482,6 +2242,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/@keyv/bigmap",
+      "version": "1.3.1",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
       "path": "node_modules/@keyv/serialize",
       "version": "1.1.1",
       "license": "MIT",
@@ -2507,7 +2275,7 @@
     },
     {
       "path": "node_modules/@langchain/core",
-      "version": "1.2.9",
+      "version": "1.2.14",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -2618,6 +2386,142 @@
       "permitted": true
     },
     {
+      "path": "node_modules/@langfuse/client",
+      "version": "5.11.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@langfuse/core",
+      "version": "5.11.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@langfuse/tracing",
+      "version": "5.11.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/client",
+      "version": "0.18.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/core",
+      "version": "0.18.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/darwin-arm64",
+      "version": "0.5.29",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/darwin-x64",
+      "version": "0.5.29",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/hrana-client",
+      "version": "0.10.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/isomorphic-ws",
+      "version": "0.1.5",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/linux-arm-gnueabihf",
+      "version": "0.5.29",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/linux-arm-musleabihf",
+      "version": "0.5.29",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/linux-arm64-gnu",
+      "version": "0.5.29",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/linux-arm64-musl",
+      "version": "0.5.29",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/linux-x64-gnu",
+      "version": "0.5.29",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/linux-x64-musl",
+      "version": "0.5.29",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@libsql/win32-x64-msvc",
+      "version": "0.5.29",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@linear/sdk",
+      "version": "95.0.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/@lit-labs/ssr-dom-shim",
       "version": "1.6.0",
       "license": "BSD-3-Clause",
@@ -2671,6 +2575,14 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/server",
+      "version": "2.0.0-alpha.4",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -2770,6 +2682,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/@napi-rs/canvas-win32-arm64-msvc",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/@napi-rs/canvas-win32-x64-msvc",
       "version": "0.1.80",
       "license": "MIT",
@@ -2783,6 +2703,14 @@
       "license": "MIT",
       "optional": true,
       "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@neon-rs/load",
+      "version": "0.0.4",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
       "permitted": true
     },
     {
@@ -2818,65 +2746,281 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@openai/agents",
-      "version": "0.3.9",
+      "path": "node_modules/@octokit/auth-token",
+      "version": "6.0.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@octokit/core",
+      "version": "7.0.8",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@octokit/endpoint",
+      "version": "11.0.5",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@octokit/graphql",
+      "version": "9.0.5",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@octokit/openapi-types",
+      "version": "29.0.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@octokit/request",
+      "version": "10.0.16",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@octokit/request-error",
+      "version": "7.1.2",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@octokit/request/node_modules/content-type",
+      "version": "3.1.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@octokit/types",
+      "version": "18.0.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/agents",
+      "version": "0.11.8",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@openai/agents-core",
-      "version": "0.3.9",
+      "version": "0.11.8",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@openai/agents-core/node_modules/openai",
       "version": "6.49.0",
       "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@openai/agents-openai",
-      "version": "0.3.9",
+      "version": "0.11.8",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@openai/agents-openai/node_modules/openai",
       "version": "6.49.0",
       "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@openai/agents-realtime",
-      "version": "0.3.9",
+      "version": "0.11.8",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@openai/agents/node_modules/openai",
       "version": "6.49.0",
       "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex",
+      "version": "0.153.4",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-darwin-arm64",
+      "version": "0.153.4-darwin-arm64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-darwin-x64",
+      "version": "0.153.4-darwin-x64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-linux-arm64",
+      "version": "0.153.4-linux-arm64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-linux-x64",
+      "version": "0.153.4-linux-x64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/@openai/codex-sdk",
-      "version": "0.64.0",
+      "version": "0.153.4",
       "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-security",
+      "version": "0.1.31",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-security/node_modules/@openai/codex",
+      "version": "0.156.1",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-security/node_modules/@openai/codex-darwin-arm64",
+      "version": "0.156.1-darwin-arm64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-security/node_modules/@openai/codex-darwin-x64",
+      "version": "0.156.1-darwin-x64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-security/node_modules/@openai/codex-linux-arm64",
+      "version": "0.156.1-linux-arm64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-security/node_modules/@openai/codex-linux-x64",
+      "version": "0.156.1-linux-x64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-security/node_modules/@openai/codex-sdk",
+      "version": "0.156.1",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-security/node_modules/@openai/codex-win32-arm64",
+      "version": "0.156.1-win32-arm64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-security/node_modules/@openai/codex-win32-x64",
+      "version": "0.156.1-win32-x64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-security/node_modules/zod",
+      "version": "4.6.5",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-win32-arm64",
+      "version": "0.153.4-win32-arm64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@openai/codex-win32-x64",
+      "version": "0.153.4-win32-x64",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opencode-ai/sdk",
+      "version": "1.18.34",
+      "license": "MIT",
       "optional": true,
       "installed": false,
       "permitted": true
@@ -2885,16 +3029,112 @@
       "path": "node_modules/@opentelemetry/api",
       "version": "1.9.1",
       "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/api-logs",
+      "version": "0.222.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/context-async-hooks",
+      "version": "2.11.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/core",
+      "version": "2.11.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/exporter-trace-otlp-http",
+      "version": "0.222.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/otlp-exporter-base",
+      "version": "0.222.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/otlp-transformer",
+      "version": "0.222.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/resources",
+      "version": "2.11.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/sdk-logs",
+      "version": "0.222.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/sdk-metrics",
+      "version": "2.11.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/sdk-trace",
+      "version": "2.11.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/sdk-trace-base",
+      "version": "2.11.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@opentelemetry/sdk-trace-node",
+      "version": "2.11.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
       "permitted": true
     },
     {
       "path": "node_modules/@opentelemetry/semantic-conventions",
       "version": "1.43.0",
       "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
+      "optional": false,
+      "installed": true,
       "permitted": true
     },
     {
@@ -2943,6 +3183,78 @@
       "license": "Apache-2.0",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@protobufjs/aspromise",
+      "version": "1.1.2",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@protobufjs/base64",
+      "version": "1.1.2",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@protobufjs/codegen",
+      "version": "2.0.5",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@protobufjs/eventemitter",
+      "version": "1.1.1",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@protobufjs/fetch",
+      "version": "1.1.1",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@protobufjs/float",
+      "version": "1.0.2",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@protobufjs/path",
+      "version": "1.1.2",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@protobufjs/pool",
+      "version": "1.1.0",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@protobufjs/utf8",
+      "version": "1.1.2",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -3226,6 +3538,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/@scalar/openapi-types",
+      "version": "0.8.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/@scarf/scarf",
       "version": "1.4.0",
       "license": "Apache-2.0",
@@ -3355,7 +3675,7 @@
     },
     {
       "path": "node_modules/@slack/logger",
-      "version": "4.0.1",
+      "version": "5.0.0",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -3363,7 +3683,7 @@
     },
     {
       "path": "node_modules/@slack/types",
-      "version": "2.22.0",
+      "version": "3.2.0",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -3371,7 +3691,7 @@
     },
     {
       "path": "node_modules/@slack/web-api",
-      "version": "7.19.0",
+      "version": "8.2.0",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -3389,6 +3709,22 @@
       "path": "node_modules/@slack/web-api/node_modules/p-retry",
       "version": "4.6.2",
       "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@slack/web-api/node_modules/p-retry/node_modules/@types/retry",
+      "version": "0.12.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@smithy/config-resolver",
+      "version": "4.7.2",
+      "license": "Apache-2.0",
       "optional": true,
       "installed": false,
       "permitted": true
@@ -3418,8 +3754,24 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@smithy/is-array-buffer",
-      "version": "2.2.0",
+      "path": "node_modules/@smithy/hash-node",
+      "version": "4.5.2",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@smithy/invalid-dependency",
+      "version": "4.5.2",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@smithy/node-config-provider",
+      "version": "4.6.2",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -3435,15 +3787,7 @@
     },
     {
       "path": "node_modules/@smithy/protocol-http",
-      "version": "4.1.8",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@smithy/protocol-http/node_modules/@smithy/types",
-      "version": "3.7.2",
+      "version": "5.6.2",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
@@ -3466,54 +3810,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@smithy/util-buffer-from",
-      "version": "2.2.0",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@smithy/util-hex-encoding",
-      "version": "3.0.0",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@smithy/util-middleware",
-      "version": "3.0.11",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@smithy/util-middleware/node_modules/@smithy/types",
-      "version": "3.7.2",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@smithy/util-uri-escape",
-      "version": "3.0.0",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/@smithy/util-utf8",
-      "version": "2.3.0",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@so-ric/colorspace",
       "version": "1.1.6",
       "license": "MIT",
@@ -3524,6 +3820,14 @@
     {
       "path": "node_modules/@socket.io/component-emitter",
       "version": "3.1.2",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@stablelib/base64",
+      "version": "1.0.1",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -3730,11 +4034,11 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@tootallnate/quickjs-emscripten",
-      "version": "0.23.0",
+      "path": "node_modules/@toon-format/toon",
+      "version": "2.3.1",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -4058,6 +4362,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/@types/esrecurse",
+      "version": "4.3.1",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
       "path": "node_modules/@types/estree",
       "version": "1.0.9",
       "license": "MIT",
@@ -4171,7 +4483,7 @@
     },
     {
       "path": "node_modules/@types/retry",
-      "version": "0.12.0",
+      "version": "0.12.5",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -4322,14 +4634,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@typescript-eslint/visitor-keys/node_modules/eslint-visitor-keys",
-      "version": "5.0.1",
-      "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/@typespec/ts-http-runtime",
       "version": "0.3.9",
       "license": "MIT",
@@ -4357,6 +4661,14 @@
       "path": "node_modules/@urql/core",
       "version": "5.2.0",
       "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/@vercel/oidc",
+      "version": "3.2.0",
+      "license": "Apache-2.0",
       "optional": false,
       "installed": true,
       "permitted": true
@@ -4426,14 +4738,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/@xmldom/xmldom",
-      "version": "0.8.15",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/a-sync-waterfall",
       "version": "1.0.1",
       "license": "MIT",
@@ -4466,6 +4770,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/adm-zip",
+      "version": "0.6.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/afinn-165",
       "version": "2.0.2",
       "license": "MIT",
@@ -4490,6 +4802,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/ai",
+      "version": "6.0.300",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
       "path": "node_modules/ajv",
       "version": "8.20.0",
       "license": "MIT",
@@ -4503,6 +4823,14 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/ansi-escapes",
+      "version": "7.3.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -4605,8 +4933,8 @@
       "path": "node_modules/asn1",
       "version": "0.2.6",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -4636,6 +4964,14 @@
     {
       "path": "node_modules/asynckit",
       "version": "0.4.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/auto-bind",
+      "version": "5.0.1",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -4706,6 +5042,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/before-after-hook",
+      "version": "4.0.0",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/better-sqlite3",
       "version": "12.11.1",
       "license": "MIT",
@@ -4767,14 +5111,6 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/bluebird",
-      "version": "3.7.2",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
       "permitted": true
     },
     {
@@ -4845,8 +5181,8 @@
       "path": "node_modules/buffer-equal-constant-time",
       "version": "1.0.1",
       "license": "BSD-3-Clause",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -4874,6 +5210,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/cacheable",
+      "version": "2.5.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
       "path": "node_modules/call-bind-apply-helpers",
       "version": "1.0.2",
       "license": "MIT",
@@ -4884,14 +5228,6 @@
     {
       "path": "node_modules/call-bound",
       "version": "1.0.4",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/callsites",
-      "version": "3.1.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -5006,8 +5342,8 @@
       "path": "node_modules/charenc",
       "version": "0.0.2",
       "license": "BSD-3-Clause",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -5035,6 +5371,22 @@
       "permitted": true
     },
     {
+      "path": "node_modules/cli-boxes",
+      "version": "4.0.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/cli-cursor",
+      "version": "4.0.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/cli-progress",
       "version": "3.12.0",
       "license": "MIT",
@@ -5056,6 +5408,38 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/cli-truncate",
+      "version": "6.1.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/cli-truncate/node_modules/ansi-regex",
+      "version": "6.4.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/cli-truncate/node_modules/string-width",
+      "version": "8.3.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/cli-truncate/node_modules/strip-ansi",
+      "version": "7.2.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -5086,6 +5470,14 @@
       "path": "node_modules/cluster-key-slot",
       "version": "1.1.2",
       "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/code-excerpt",
+      "version": "4.0.0",
+      "license": "MIT",
       "optional": true,
       "installed": false,
       "permitted": true
@@ -5206,8 +5598,8 @@
       "path": "node_modules/concat-map",
       "version": "0.0.1",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -5235,6 +5627,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/convert-to-spaces",
+      "version": "2.0.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/cookie",
       "version": "0.7.2",
       "license": "MIT",
@@ -5248,14 +5648,6 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/core-util-is",
-      "version": "1.0.3",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
       "permitted": true
     },
     {
@@ -5283,14 +5675,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/cross-fetch",
-      "version": "4.1.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/cross-spawn",
       "version": "7.0.6",
       "license": "MIT",
@@ -5302,24 +5686,8 @@
       "path": "node_modules/crypt",
       "version": "0.0.2",
       "license": "BSD-3-Clause",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/crypto-js",
-      "version": "4.2.0",
-      "license": "MIT",
       "optional": true,
       "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/cssstyle",
-      "version": "4.6.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
       "permitted": true
     },
     {
@@ -5700,39 +6068,7 @@
     },
     {
       "path": "node_modules/data-uri-to-buffer",
-      "version": "6.0.2",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/data-urls",
-      "version": "5.0.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/data-urls/node_modules/tr46",
-      "version": "5.1.1",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/data-urls/node_modules/webidl-conversions",
-      "version": "7.0.0",
-      "license": "BSD-2-Clause",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/data-urls/node_modules/whatwg-url",
-      "version": "14.2.0",
+      "version": "8.0.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -5851,6 +6187,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/define-data-property",
+      "version": "1.1.4",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/define-lazy-prop",
       "version": "3.0.0",
       "license": "MIT",
@@ -5859,8 +6203,16 @@
       "permitted": true
     },
     {
+      "path": "node_modules/define-properties",
+      "version": "1.2.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/degenerator",
-      "version": "5.0.1",
+      "version": "7.0.1",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -5987,51 +6339,19 @@
       "permitted": true
     },
     {
-      "path": "node_modules/duplexer2",
-      "version": "0.1.4",
-      "license": "BSD-3-Clause",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/duplexer2/node_modules/readable-stream",
-      "version": "2.3.8",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/duplexer2/node_modules/safe-buffer",
-      "version": "5.1.2",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/duplexer2/node_modules/string_decoder",
-      "version": "1.1.1",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/eastasianwidth",
       "version": "0.2.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/ecdsa-sig-formatter",
       "version": "1.0.11",
       "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -6164,15 +6484,15 @@
     },
     {
       "path": "node_modules/entities",
-      "version": "6.0.1",
+      "version": "8.1.0",
       "license": "BSD-2-Clause",
       "optional": false,
       "installed": true,
       "permitted": true
     },
     {
-      "path": "node_modules/env-paths",
-      "version": "3.0.0",
+      "path": "node_modules/environment",
+      "version": "1.1.0",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -6230,8 +6550,8 @@
       "path": "node_modules/es6-promisify",
       "version": "7.0.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -6284,7 +6604,7 @@
     },
     {
       "path": "node_modules/eslint",
-      "version": "9.39.4",
+      "version": "10.11.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -6292,7 +6612,7 @@
     },
     {
       "path": "node_modules/eslint-scope",
-      "version": "8.4.0",
+      "version": "9.1.2",
       "license": "BSD-2-Clause",
       "optional": false,
       "installed": true,
@@ -6300,7 +6620,7 @@
     },
     {
       "path": "node_modules/eslint-visitor-keys",
-      "version": "4.2.1",
+      "version": "5.0.1",
       "license": "Apache-2.0",
       "optional": false,
       "installed": true,
@@ -6309,22 +6629,6 @@
     {
       "path": "node_modules/eslint/node_modules/ajv",
       "version": "6.15.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/eslint/node_modules/balanced-match",
-      "version": "1.0.2",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/eslint/node_modules/brace-expansion",
-      "version": "1.1.21",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -6347,16 +6651,8 @@
       "permitted": true
     },
     {
-      "path": "node_modules/eslint/node_modules/minimatch",
-      "version": "3.1.5",
-      "license": "ISC",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/espree",
-      "version": "10.4.0",
+      "version": "11.2.0",
       "license": "BSD-2-Clause",
       "optional": false,
       "installed": true,
@@ -6460,7 +6756,7 @@
     },
     {
       "path": "node_modules/execa",
-      "version": "9.6.1",
+      "version": "10.0.1",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -6501,6 +6797,14 @@
     {
       "path": "node_modules/express-rate-limit",
       "version": "8.7.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/exsolve",
+      "version": "1.1.3",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -6558,6 +6862,14 @@
       "path": "node_modules/fast-safe-stringify",
       "version": "2.1.1",
       "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/fast-sha256",
+      "version": "1.3.0",
+      "license": "Unlicense",
       "optional": false,
       "installed": true,
       "permitted": true
@@ -6659,14 +6971,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/fetch-retry",
-      "version": "5.0.6",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/fflate",
       "version": "0.8.3",
       "license": "MIT",
@@ -6684,7 +6988,7 @@
     },
     {
       "path": "node_modules/file-entry-cache",
-      "version": "8.0.0",
+      "version": "11.1.5",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -6732,15 +7036,7 @@
     },
     {
       "path": "node_modules/flat-cache",
-      "version": "4.0.1",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/flat-cache/node_modules/keyv",
-      "version": "4.5.4",
+      "version": "6.1.23",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -6760,30 +7056,6 @@
       "license": "ISC",
       "optional": false,
       "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/fluent-ffmpeg",
-      "version": "2.1.3",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/fluent-ffmpeg/node_modules/async",
-      "version": "0.2.10",
-      "license": "UNKNOWN",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/fluent-ffmpeg/node_modules/which",
-      "version": "1.3.1",
-      "license": "ISC",
-      "optional": true,
-      "installed": false,
       "permitted": true
     },
     {
@@ -6822,8 +7094,8 @@
       "path": "node_modules/foreground-child",
       "version": "3.3.1",
       "license": "ISC",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -6924,24 +7196,8 @@
     },
     {
       "path": "node_modules/gaxios",
-      "version": "7.1.3",
+      "version": "7.3.1",
       "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/gaxios/node_modules/balanced-match",
-      "version": "1.0.2",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/gaxios/node_modules/brace-expansion",
-      "version": "2.1.7",
-      "license": "MIT",
       "optional": false,
       "installed": true,
       "permitted": true
@@ -6955,30 +7211,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/gaxios/node_modules/glob",
-      "version": "10.5.0",
-      "license": "ISC",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/gaxios/node_modules/lru-cache",
-      "version": "10.4.3",
-      "license": "ISC",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/gaxios/node_modules/minimatch",
-      "version": "9.0.9",
-      "license": "ISC",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/gaxios/node_modules/node-fetch",
       "version": "3.3.2",
       "license": "MIT",
@@ -6987,24 +7219,8 @@
       "permitted": true
     },
     {
-      "path": "node_modules/gaxios/node_modules/path-scurry",
-      "version": "1.11.1",
-      "license": "BlueOak-1.0.0",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/gaxios/node_modules/rimraf",
-      "version": "5.0.10",
-      "license": "ISC",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/gcp-metadata",
-      "version": "8.1.4",
+      "version": "9.0.4",
       "license": "Apache-2.0",
       "optional": false,
       "installed": true,
@@ -7068,7 +7284,7 @@
     },
     {
       "path": "node_modules/get-uri",
-      "version": "6.0.5",
+      "version": "8.0.1",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -7099,56 +7315,32 @@
       "permitted": true
     },
     {
-      "path": "node_modules/globals",
-      "version": "14.0.0",
+      "path": "node_modules/global-agent",
+      "version": "4.1.3",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/globalthis",
+      "version": "1.0.4",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/google-auth-library",
-      "version": "10.9.1",
+      "version": "11.1.0",
       "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/google-auth-library/node_modules/data-uri-to-buffer",
-      "version": "4.0.1",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/google-auth-library/node_modules/gaxios",
-      "version": "7.3.1",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/google-auth-library/node_modules/gcp-metadata",
-      "version": "8.1.2",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/google-auth-library/node_modules/node-fetch",
-      "version": "3.3.2",
-      "license": "MIT",
       "optional": true,
       "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/google-logging-utils",
-      "version": "1.1.3",
+      "version": "2.0.1",
       "license": "Apache-2.0",
       "optional": false,
       "installed": true,
@@ -7158,16 +7350,112 @@
       "path": "node_modules/googleapis-common",
       "version": "8.0.3",
       "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/balanced-match",
+      "version": "1.0.2",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/brace-expansion",
+      "version": "2.1.7",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/data-uri-to-buffer",
+      "version": "4.0.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/gaxios",
+      "version": "7.1.3",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/gcp-metadata",
+      "version": "8.1.4",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/glob",
+      "version": "10.5.0",
+      "license": "ISC",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/googleapis-common/node_modules/google-auth-library",
       "version": "10.5.0",
       "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/google-logging-utils",
+      "version": "1.1.3",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/lru-cache",
+      "version": "10.4.3",
+      "license": "ISC",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/minimatch",
+      "version": "9.0.9",
+      "license": "ISC",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/node-fetch",
+      "version": "3.3.2",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/path-scurry",
+      "version": "1.11.1",
+      "license": "BlueOak-1.0.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/googleapis-common/node_modules/rimraf",
+      "version": "5.0.10",
+      "license": "ISC",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -7198,8 +7486,16 @@
       "path": "node_modules/gtoken",
       "version": "8.0.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/guid-typescript",
+      "version": "1.0.9",
+      "license": "ISC",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -7216,6 +7512,14 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/has-property-descriptors",
+      "version": "1.0.2",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -7283,6 +7587,22 @@
       "permitted": true
     },
     {
+      "path": "node_modules/hast-util-from-html/node_modules/entities",
+      "version": "6.0.1",
+      "license": "BSD-2-Clause",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/hast-util-from-html/node_modules/parse5",
+      "version": "7.3.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
       "path": "node_modules/hast-util-from-parse5",
       "version": "8.0.3",
       "license": "MIT",
@@ -7333,6 +7653,22 @@
     {
       "path": "node_modules/hast-util-raw/node_modules/@types/unist",
       "version": "3.0.3",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/hast-util-raw/node_modules/entities",
+      "version": "6.0.1",
+      "license": "BSD-2-Clause",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/hast-util-raw/node_modules/parse5",
+      "version": "7.3.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -7483,14 +7819,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/html-encoding-sniffer",
-      "version": "4.0.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/html-url-attributes",
       "version": "3.0.1",
       "license": "MIT",
@@ -7517,14 +7845,6 @@
     {
       "path": "node_modules/http-proxy-agent",
       "version": "7.0.2",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/http-status-codes",
-      "version": "2.3.0",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -7627,14 +7947,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/import-fresh",
-      "version": "3.3.1",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/import-meta-resolve",
       "version": "4.2.0",
       "license": "MIT",
@@ -7648,6 +7960,22 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/incur",
+      "version": "0.5.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/indent-string",
+      "version": "5.0.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -7672,6 +8000,70 @@
       "license": "ISC",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/ink",
+      "version": "7.1.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/ink/node_modules/ansi-regex",
+      "version": "6.4.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/ink/node_modules/ansi-styles",
+      "version": "6.2.3",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/ink/node_modules/chalk",
+      "version": "5.6.2",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/ink/node_modules/scheduler",
+      "version": "0.27.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/ink/node_modules/signal-exit",
+      "version": "3.0.7",
+      "license": "ISC",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/ink/node_modules/string-width",
+      "version": "8.3.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/ink/node_modules/strip-ansi",
+      "version": "7.2.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -7726,8 +8118,8 @@
       "path": "node_modules/is-buffer",
       "version": "1.1.6",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -7741,14 +8133,6 @@
     {
       "path": "node_modules/is-docker",
       "version": "3.0.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/is-electron",
-      "version": "2.2.2",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -7792,6 +8176,14 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/is-in-ci",
+      "version": "2.0.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -7843,14 +8235,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/is-potential-custom-element-name",
-      "version": "1.0.1",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/is-promise",
       "version": "4.0.0",
       "license": "MIT",
@@ -7885,14 +8269,6 @@
     {
       "path": "node_modules/is-wsl",
       "version": "3.1.1",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/isarray",
-      "version": "1.0.0",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -7934,8 +8310,8 @@
       "path": "node_modules/jackspeak",
       "version": "3.4.3",
       "license": "BlueOak-1.0.0",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -7950,8 +8326,8 @@
       "path": "node_modules/jks-js",
       "version": "1.1.7",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -7965,6 +8341,14 @@
     {
       "path": "node_modules/jpeg-js",
       "version": "0.4.4",
+      "license": "BSD-3-Clause",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/js-base64",
+      "version": "3.9.4",
       "license": "BSD-3-Clause",
       "optional": false,
       "installed": true,
@@ -7995,70 +8379,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/js-yaml",
-      "version": "4.3.2",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/jsdom",
-      "version": "26.1.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/jsdom/node_modules/tldts",
-      "version": "6.1.86",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/jsdom/node_modules/tldts-core",
-      "version": "6.1.86",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/jsdom/node_modules/tough-cookie",
-      "version": "5.1.2",
-      "license": "BSD-3-Clause",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/jsdom/node_modules/tr46",
-      "version": "5.1.1",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/jsdom/node_modules/webidl-conversions",
-      "version": "7.0.0",
-      "license": "BSD-2-Clause",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/jsdom/node_modules/whatwg-url",
-      "version": "14.2.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/jsesc",
       "version": "3.1.0",
       "license": "MIT",
@@ -8075,19 +8395,11 @@
       "permitted": true
     },
     {
-      "path": "node_modules/json-buffer",
-      "version": "3.0.1",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/json-schema",
       "version": "0.4.0",
       "license": "(AFL-2.1 OR BSD-3-Clause)",
-      "optional": true,
-      "installed": false,
+      "optional": false,
+      "installed": true,
       "permitted": true
     },
     {
@@ -8147,14 +8459,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/jsonschema",
-      "version": "1.5.0",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/jsonwebtoken",
       "version": "9.0.3",
       "license": "MIT",
@@ -8166,16 +8470,16 @@
       "path": "node_modules/jwa",
       "version": "2.0.1",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/jws",
       "version": "4.0.1",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -8260,22 +8564,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/langfuse",
-      "version": "3.39.2",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/langfuse-core",
-      "version": "3.39.2",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/langsmith",
       "version": "0.9.0",
       "license": "MIT",
@@ -8303,6 +8591,22 @@
       "path": "node_modules/levn",
       "version": "0.4.1",
       "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/libsql",
+      "version": "0.5.29",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/libsql/node_modules/detect-libc",
+      "version": "2.0.2",
+      "license": "Apache-2.0",
       "optional": false,
       "installed": true,
       "permitted": true
@@ -8345,14 +8649,6 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/lodash",
-      "version": "4.18.1",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
       "permitted": true
     },
     {
@@ -8412,14 +8708,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/lodash.merge",
-      "version": "4.6.2",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/lodash.once",
       "version": "4.1.1",
       "license": "MIT",
@@ -8447,6 +8735,14 @@
       "path": "node_modules/logform/node_modules/@colors/colors",
       "version": "1.6.0",
       "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/long",
+      "version": "5.3.2",
+      "license": "Apache-2.0",
       "optional": false,
       "installed": true,
       "permitted": true
@@ -8524,6 +8820,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/matcher",
+      "version": "4.0.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/math-intrinsics",
       "version": "1.1.0",
       "license": "MIT",
@@ -8543,8 +8847,8 @@
       "path": "node_modules/md5",
       "version": "2.3.0",
       "license": "BSD-3-Clause",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -9092,6 +9396,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/mimic-fn",
+      "version": "2.1.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/mimic-function",
       "version": "5.0.1",
       "license": "MIT",
@@ -9351,8 +9663,8 @@
       "path": "node_modules/node-int64",
       "version": "0.4.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -9367,8 +9679,8 @@
       "path": "node_modules/node-rsa",
       "version": "1.1.1",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -9412,14 +9724,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/nwsapi",
-      "version": "2.2.28",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/object-assign",
       "version": "4.1.1",
       "license": "MIT",
@@ -9433,6 +9737,14 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/object-keys",
+      "version": "1.1.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -9476,6 +9788,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/onetime",
+      "version": "5.1.2",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/oniguruma-parser",
       "version": "0.12.2",
       "license": "MIT",
@@ -9492,6 +9812,46 @@
       "permitted": true
     },
     {
+      "path": "node_modules/onnxruntime-common",
+      "version": "1.30.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/onnxruntime-node",
+      "version": "1.30.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/onnxruntime-web",
+      "version": "1.31.0-dev.20260914-8d85527a0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/onnxruntime-web/node_modules/onnxruntime-common",
+      "version": "1.31.0-dev.20260911-2a43ec07e",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/onnxruntime-web/node_modules/protobufjs",
+      "version": "7.6.6",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/open",
       "version": "10.2.0",
       "license": "MIT",
@@ -9500,19 +9860,11 @@
       "permitted": true
     },
     {
-      "path": "node_modules/openapi-fetch",
-      "version": "0.8.2",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/openapi-typescript-helpers",
-      "version": "0.0.5",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
+      "path": "node_modules/openai",
+      "version": "7.27.0",
+      "license": "Apache-2.0",
+      "optional": false,
+      "installed": true,
       "permitted": true
     },
     {
@@ -9599,8 +9951,8 @@
       "path": "node_modules/os-tmpdir",
       "version": "1.0.2",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -9636,22 +9988,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/p-queue-compat",
-      "version": "1.0.225",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/p-queue-compat/node_modules/eventemitter3",
-      "version": "5.0.4",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
       "path": "node_modules/p-retry",
       "version": "7.1.1",
       "license": "MIT",
@@ -9668,16 +10004,32 @@
       "permitted": true
     },
     {
-      "path": "node_modules/p-timeout-compat",
-      "version": "1.0.8",
+      "path": "node_modules/pac-proxy-agent",
+      "version": "9.1.0",
       "license": "MIT",
-      "optional": true,
-      "installed": false,
+      "optional": false,
+      "installed": true,
       "permitted": true
     },
     {
-      "path": "node_modules/pac-proxy-agent",
-      "version": "7.2.0",
+      "path": "node_modules/pac-proxy-agent/node_modules/agent-base",
+      "version": "9.0.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pac-proxy-agent/node_modules/http-proxy-agent",
+      "version": "9.1.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pac-proxy-agent/node_modules/https-proxy-agent",
+      "version": "9.1.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -9685,7 +10037,7 @@
     },
     {
       "path": "node_modules/pac-resolver",
-      "version": "7.0.1",
+      "version": "9.0.1",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -9695,8 +10047,8 @@
       "path": "node_modules/package-json-from-dist",
       "version": "1.0.1",
       "license": "BlueOak-1.0.0",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -9708,11 +10060,11 @@
       "permitted": true
     },
     {
-      "path": "node_modules/parent-module",
-      "version": "1.0.1",
+      "path": "node_modules/papaparse",
+      "version": "5.7.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -9733,7 +10085,7 @@
     },
     {
       "path": "node_modules/parse5",
-      "version": "7.3.0",
+      "version": "8.0.1",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -9753,6 +10105,14 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/patch-console",
+      "version": "2.0.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -9836,11 +10196,115 @@
       "permitted": true
     },
     {
-      "path": "node_modules/pem",
-      "version": "1.15.1",
+      "path": "node_modules/pdfjs-dist",
+      "version": "6.3.289",
+      "license": "Apache-2.0",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas",
+      "version": "1.0.10",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas-android-arm64",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas-darwin-arm64",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas-darwin-x64",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas-linux-arm-gnueabihf",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas-linux-arm64-gnu",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas-linux-arm64-musl",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas-linux-riscv64-gnu",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas-linux-x64-gnu",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas-linux-x64-musl",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pdfjs-dist/node_modules/@napi-rs/canvas-win32-x64-msvc",
+      "version": "1.0.10",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pem",
+      "version": "1.14.8",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/pend",
+      "version": "1.2.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -9937,6 +10401,14 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/platform",
+      "version": "1.3.6",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -10076,16 +10548,24 @@
       "permitted": true
     },
     {
-      "path": "node_modules/process-nextick-args",
-      "version": "2.0.1",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
+      "path": "node_modules/promise-limit",
+      "version": "2.7.0",
+      "license": "ISC",
+      "optional": false,
+      "installed": true,
       "permitted": true
     },
     {
       "path": "node_modules/promptfoo",
-      "version": "0.120.0",
+      "version": "0.123.1",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/promptfoo/node_modules/@hono/node-server",
+      "version": "2.1.1",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -10093,7 +10573,7 @@
     },
     {
       "path": "node_modules/promptfoo/node_modules/chalk",
-      "version": "5.6.2",
+      "version": "6.0.1",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -10109,23 +10589,15 @@
     },
     {
       "path": "node_modules/promptfoo/node_modules/commander",
-      "version": "14.0.3",
+      "version": "15.0.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
       "permitted": true
     },
     {
-      "path": "node_modules/promptfoo/node_modules/openai",
-      "version": "6.49.0",
-      "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/promptfoo/node_modules/proxy-from-env",
-      "version": "1.1.0",
+      "path": "node_modules/promptfoo/node_modules/js-yaml",
+      "version": "5.4.1",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -10148,24 +10620,8 @@
       "permitted": true
     },
     {
-      "path": "node_modules/promptfoo/node_modules/uuid",
-      "version": "13.0.2",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/promptfoo/node_modules/zod",
-      "version": "3.25.76",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/promptfoo/node_modules/zod-validation-error",
-      "version": "3.5.4",
+      "path": "node_modules/promptfoo/node_modules/undici",
+      "version": "7.30.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -10196,6 +10652,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/protobufjs",
+      "version": "8.8.0",
+      "license": "BSD-3-Clause",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
       "path": "node_modules/proxy-addr",
       "version": "2.0.8",
       "license": "MIT",
@@ -10205,7 +10669,39 @@
     },
     {
       "path": "node_modules/proxy-agent",
-      "version": "6.5.0",
+      "version": "8.0.2",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/proxy-agent-negotiate",
+      "version": "1.1.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/proxy-agent/node_modules/agent-base",
+      "version": "9.0.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/proxy-agent/node_modules/http-proxy-agent",
+      "version": "9.1.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/proxy-agent/node_modules/https-proxy-agent",
+      "version": "9.1.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -10220,19 +10716,11 @@
       "permitted": true
     },
     {
-      "path": "node_modules/proxy-agent/node_modules/proxy-from-env",
-      "version": "1.1.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/proxy-from-env",
       "version": "2.1.0",
       "license": "MIT",
-      "optional": true,
-      "installed": false,
+      "optional": false,
+      "installed": true,
       "permitted": true
     },
     {
@@ -10292,6 +10780,22 @@
       "permitted": true
     },
     {
+      "path": "node_modules/qified",
+      "version": "0.10.1",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/qified/node_modules/hookified",
+      "version": "2.2.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
       "path": "node_modules/qs",
       "version": "6.16.0",
       "license": "BSD-3-Clause",
@@ -10302,6 +10806,14 @@
     {
       "path": "node_modules/queue-microtask",
       "version": "1.2.3",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/quickjs-wasi",
+      "version": "2.2.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -10364,6 +10876,22 @@
       "permitted": true
     },
     {
+      "path": "node_modules/react-reconciler",
+      "version": "0.33.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/react-reconciler/node_modules/scheduler",
+      "version": "0.27.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/react-refresh",
       "version": "0.18.0",
       "license": "MIT",
@@ -10397,7 +10925,7 @@
     },
     {
       "path": "node_modules/read-excel-file",
-      "version": "6.0.3",
+      "version": "9.3.10",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -10532,11 +11060,19 @@
       "permitted": true
     },
     {
-      "path": "node_modules/resolve-from",
+      "path": "node_modules/restore-cursor",
       "version": "4.0.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/restore-cursor/node_modules/signal-exit",
+      "version": "3.0.7",
+      "license": "ISC",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -10652,14 +11188,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/rrweb-cssom",
-      "version": "0.8.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/run-applescript",
       "version": "7.1.0",
       "license": "MIT",
@@ -10724,6 +11252,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/saxen",
+      "version": "11.2.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/saxes",
       "version": "6.0.0",
       "license": "ISC",
@@ -10761,6 +11297,22 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/serialize-error",
+      "version": "8.1.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/serialize-error/node_modules/type-fest",
+      "version": "0.20.2",
+      "license": "(MIT OR CC0-1.0)",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -10805,131 +11357,11 @@
     },
     {
       "path": "node_modules/sharp",
-      "version": "0.34.5",
+      "version": "0.35.5",
       "license": "Apache-2.0",
       "optional": true,
       "installed": false,
       "permitted": true
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-darwin-arm64",
-      "version": "0.34.5",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-darwin-x64",
-      "version": "0.34.5",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-libvips-darwin-arm64",
-      "version": "1.2.4",
-      "license": "LGPL-3.0-or-later",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-libvips-darwin-x64",
-      "version": "1.2.4",
-      "license": "LGPL-3.0-or-later",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-libvips-linux-arm",
-      "version": "1.2.4",
-      "license": "LGPL-3.0-or-later",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-libvips-linux-arm64",
-      "version": "1.2.4",
-      "license": "LGPL-3.0-or-later",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-libvips-linux-x64",
-      "version": "1.2.4",
-      "license": "LGPL-3.0-or-later",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-libvips-linuxmusl-arm64",
-      "version": "1.2.4",
-      "license": "LGPL-3.0-or-later",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-libvips-linuxmusl-x64",
-      "version": "1.2.4",
-      "license": "LGPL-3.0-or-later",
-      "optional": true,
-      "installed": false,
-      "permitted": false
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-linux-arm",
-      "version": "0.34.5",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-linux-arm64",
-      "version": "0.34.5",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-linux-x64",
-      "version": "0.34.5",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-linuxmusl-arm64",
-      "version": "0.34.5",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-linuxmusl-x64",
-      "version": "0.34.5",
-      "license": "Apache-2.0",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/sharp/node_modules/@img/sharp-win32-x64",
-      "version": "0.34.5",
-      "license": "Apache-2.0 AND LGPL-3.0-or-later",
-      "optional": true,
-      "installed": false,
-      "permitted": false
     },
     {
       "path": "node_modules/shebang-command",
@@ -11036,11 +11468,43 @@
       "permitted": true
     },
     {
+      "path": "node_modules/slice-ansi",
+      "version": "9.0.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/slice-ansi/node_modules/ansi-styles",
+      "version": "6.2.3",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/slice-ansi/node_modules/is-fullwidth-code-point",
+      "version": "5.1.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/smart-buffer",
       "version": "4.2.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/smol-toml",
+      "version": "1.8.0",
+      "license": "BSD-3-Clause",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -11125,7 +11589,15 @@
     },
     {
       "path": "node_modules/socks-proxy-agent",
-      "version": "8.0.5",
+      "version": "10.1.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/socks-proxy-agent/node_modules/agent-base",
+      "version": "9.0.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -11180,8 +11652,32 @@
       "permitted": true
     },
     {
+      "path": "node_modules/stack-utils",
+      "version": "2.0.6",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/stack-utils/node_modules/escape-string-regexp",
+      "version": "2.0.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/stackback",
       "version": "0.0.2",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/standardwebhooks",
+      "version": "1.1.1",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -11303,8 +11799,8 @@
       "path": "node_modules/string-width-cjs",
       "version": "4.2.3",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -11327,8 +11823,8 @@
       "path": "node_modules/strip-ansi-cjs",
       "version": "6.0.1",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -11420,11 +11916,11 @@
       "permitted": false
     },
     {
-      "path": "node_modules/symbol-tree",
-      "version": "3.2.4",
+      "path": "node_modules/tagged-tag",
+      "version": "1.0.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -11449,6 +11945,14 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/terminal-size",
+      "version": "4.0.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -11550,6 +12054,14 @@
     {
       "path": "node_modules/token-types",
       "version": "6.1.2",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/tokenx",
+      "version": "1.6.0",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -11660,6 +12172,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/type-fest",
+      "version": "5.10.0",
+      "license": "(MIT OR CC0-1.0)",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/type-is",
       "version": "2.1.0",
       "license": "MIT",
@@ -11717,7 +12237,7 @@
     },
     {
       "path": "node_modules/undici",
-      "version": "7.30.0",
+      "version": "8.11.2",
       "license": "MIT",
       "optional": false,
       "installed": true,
@@ -11876,6 +12396,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/universal-user-agent",
+      "version": "7.0.3",
+      "license": "ISC",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/universalify",
       "version": "2.0.1",
       "license": "MIT",
@@ -11900,16 +12428,8 @@
       "permitted": true
     },
     {
-      "path": "node_modules/unzipper",
-      "version": "0.12.5",
-      "license": "MIT",
-      "optional": true,
-      "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/unzipper/node_modules/fs-extra",
-      "version": "11.3.1",
+      "path": "node_modules/unzipper-esm",
+      "version": "0.13.3",
       "license": "MIT",
       "optional": true,
       "installed": false,
@@ -11935,8 +12455,8 @@
       "path": "node_modules/url-template",
       "version": "2.0.8",
       "license": "BSD",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true,
       "reviewedLicense": "BSD-3-Clause"
     },
@@ -12077,14 +12597,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/w3c-xmlserializer",
-      "version": "5.0.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/web-namespaces",
       "version": "2.0.1",
       "license": "MIT",
@@ -12109,30 +12621,6 @@
       "permitted": true
     },
     {
-      "path": "node_modules/whatwg-encoding",
-      "version": "3.1.1",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/whatwg-encoding/node_modules/iconv-lite",
-      "version": "0.6.3",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/whatwg-mimetype",
-      "version": "4.0.0",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
       "path": "node_modules/whatwg-url",
       "version": "5.0.0",
       "license": "MIT",
@@ -12149,11 +12637,51 @@
       "permitted": true
     },
     {
+      "path": "node_modules/which-command",
+      "version": "0.1.0",
+      "license": "MIT",
+      "optional": false,
+      "installed": true,
+      "permitted": true
+    },
+    {
       "path": "node_modules/why-is-node-running",
       "version": "2.3.0",
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/widest-line",
+      "version": "6.0.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/widest-line/node_modules/ansi-regex",
+      "version": "6.4.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/widest-line/node_modules/string-width",
+      "version": "8.3.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/widest-line/node_modules/strip-ansi",
+      "version": "7.2.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -12205,83 +12733,83 @@
       "permitted": true
     },
     {
-      "path": "node_modules/wrap-ansi",
-      "version": "8.1.0",
+      "path": "node_modules/worker-f",
+      "version": "0.1.20",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/wrap-ansi",
+      "version": "10.0.2",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/wrap-ansi-cjs",
       "version": "7.0.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/wrap-ansi-cjs/node_modules/ansi-styles",
       "version": "4.3.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/wrap-ansi-cjs/node_modules/color-convert",
       "version": "2.0.1",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/wrap-ansi-cjs/node_modules/color-name",
       "version": "1.1.4",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/wrap-ansi/node_modules/ansi-regex",
       "version": "6.4.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/wrap-ansi/node_modules/ansi-styles",
       "version": "6.2.3",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/wrap-ansi/node_modules/emoji-regex",
-      "version": "9.2.2",
-      "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/wrap-ansi/node_modules/string-width",
-      "version": "5.1.2",
+      "version": "8.3.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
       "path": "node_modules/wrap-ansi/node_modules/strip-ansi",
       "version": "7.2.0",
       "license": "MIT",
-      "optional": false,
-      "installed": true,
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
@@ -12306,14 +12834,6 @@
       "license": "MIT",
       "optional": true,
       "installed": false,
-      "permitted": true
-    },
-    {
-      "path": "node_modules/xml-name-validator",
-      "version": "5.0.0",
-      "license": "Apache-2.0",
-      "optional": false,
-      "installed": true,
       "permitted": true
     },
     {
@@ -12366,6 +12886,14 @@
       "permitted": true
     },
     {
+      "path": "node_modules/yauzl",
+      "version": "3.4.0",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
+      "permitted": true
+    },
+    {
       "path": "node_modules/yocto-queue",
       "version": "0.1.0",
       "license": "MIT",
@@ -12379,6 +12907,14 @@
       "license": "MIT",
       "optional": false,
       "installed": true,
+      "permitted": true
+    },
+    {
+      "path": "node_modules/yoga-layout",
+      "version": "3.2.1",
+      "license": "MIT",
+      "optional": true,
+      "installed": false,
       "permitted": true
     },
     {
