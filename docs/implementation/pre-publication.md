@@ -4,6 +4,8 @@ Rocky is prepared as development-preview source. This record covers the existing
 
 ## Exact snapshot and evidence
 
+Implementation commit: `d28aac0906f609ae388173a8e648cdd654ed30e0`. The following documentation-only commit records this identity; the tested source hashes are unchanged.
+
 - [Verification record](evidence/2026-10-04/pre-publication/verification.json): actual commands, exits, platform, lockfile and limitations.
 - [Source manifest](evidence/2026-10-04/pre-publication/source-manifest.json): hashes of implementation, tests, fixtures, configuration and CI files.
 - [Publication review](evidence/2026-10-04/pre-publication/publication-review.json): source-review scope, image inventory, history checks and dependency assessment.

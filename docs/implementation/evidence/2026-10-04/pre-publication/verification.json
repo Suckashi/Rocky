@@ -1,7 +1,7 @@
 {
   "recordedAt": "2026-10-04T10:39:29.370Z",
   "baseCommit": "dbf5c475ce9c66c995c25aca81a0b7185923ded4",
-  "revision": "baseCommit plus reviewed working tree; source-manifest.json identifies exact tested implementation bytes",
+  "revision": "Implementation snapshot at implementationCommit; a documentation-only follow-up records its identity. Source-manifest hashes rechecked after commit.",
   "platform": "Windows x64",
   "nodeVersion": "v24.12.0",
   "npm": "11.6.4",
@@ -236,6 +236,21 @@
     {
       "command": "git diff --check",
       "exitCode": 0
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 0,
+      "phase": "Before implementation commit"
+    },
+    {
+      "command": "git status --short",
+      "exitCode": 0,
+      "result": "Clean after implementation commit"
+    },
+    {
+      "command": "git remote -v",
+      "exitCode": 0,
+      "result": "No remote configured"
     }
   ],
   "repairs": [
@@ -260,5 +275,6 @@
   "sourceVerification": {
     "finalUnitAndBrowser": "Both complete invocations use the source-manifest implementation/test bytes; hashes rechecked after the final unit run.",
     "supportingChecks": "Supporting check/build/Learning/network and the clean-copy setup began before the final artifact fault-injection fixture edit. Runtime, dependencies and all files executed by those checks were unchanged. The artifact test is outside the no-python subset."
-  }
+  },
+  "implementationCommit": "d28aac0906f609ae388173a8e648cdd654ed30e0"
 }
