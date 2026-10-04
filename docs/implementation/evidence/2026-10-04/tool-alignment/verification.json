@@ -1,0 +1,27 @@
+{
+  "commit": "f30809784a84f19504e2a6b7abac538caa0b154f",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "referenceCommit": "c2569bb6a13a22e565cf3eb791c62267d06babb1",
+  "command": "ROCKY_CAPTURE_PHASE=before npx playwright test tests/e2e/tool-alignment.spec.ts; npx playwright test tests/e2e/tool-alignment.spec.ts; npm run check; scoped eslint tool-activity/main/test; git diff --check; Node Playwright reference CSS fixture and side-by-side capture",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/tool-alignment/verification.json",
+  "testFiles": ["tests/e2e/tool-alignment.spec.ts"],
+  "browserTests": 1,
+  "browserSeconds": 4.9,
+  "assertions": [
+    "Three inline cards from shared persisted tool/subagent events, keyed by call and child identity within exact Work/run/session",
+    "Returned/failed/unconfirmed states distinct; no success inferred from stream or Work completion",
+    "14px radius,12px header type,12px14px padding and9px gap match fixed upstream CSS metrics",
+    "Four viewport widths no full-page overflow; desktop before and desktop/mobile after visually inspected"
+  ],
+  "limitations": [
+    "Synthetic routed event/history fixture, not real tool execution proof",
+    "Reference is reconstructed tool-region markup using full upstream style.css/editor.css; not original component mount or upstream service",
+    "Reference icon is a neutral square; only card typography/geometry comparable, not whole-page pixel diff",
+    "Before/after full viewport scroll differs with added content; comparisons are labeled and cannot prove global app fidelity",
+    "Colors use existing contrast-safe semantic tokens; evidence row is a Rocky adaptation",
+    "Complete Computer, tool result summaries, all live/error/dark/keyboard states and populated full-app OpenDots comparison still pending"
+  ]
+}

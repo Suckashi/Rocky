@@ -182,3 +182,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 - Learning manual reflection UI is connected and no_learning browser flow verified. Candidate structured presentation, repeat reflection/history selection, stop/reopen browser matrix and matched reference comparison remain pending. See evidence/2026-10-04/reflection-ui.json.
 
 - Candidate create/patch presentation now has readable fields and collapsed source/raw data, verified with explicit UI fixtures. This is not materialized/evaluated/published skill proof or completed OpenDots comparison. See evidence/2026-10-04/learning-draft-ui.json.
+
+- Inline tool cards now match measured OpenDots card geometry and show truthful returned/failed/unconfirmed states. This closes hidden-only summary presentation, not full Computer/tool results or global UI fidelity. Reference comparisons are explicitly local card-region CSS reconstruction. See evidence/2026-10-04/tool-alignment/verification.json.
