@@ -54,3 +54,5 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 
 ComputerToolCard inline-computer presentation from the same fixed OpenDots commit is adapted in apps/web/src/tool-activity.tsx and style.css: 14px radius, 12px/14px header padding, 9px gap and 12px type. Rocky uses shared daemon events, semantic theme colors, separate returned/failed/unconfirmed states and collapsed evidence; no upstream screenshot polling or API is copied.
+
+ComputerPanel.tsx/style.css at the same OpenDots commit inform computer-panel.tsx and style.css: four compact tabs, 12px tab gap, 8px/2px underline tabs, status spacing and setup sections. Rocky reuses its owned workspace browser and shared event projection; Browser/Terminal adapters remain unavailable. Keyboard tab navigation and responsive focus containment are Rocky accessibility adaptations. No upstream service/polling is imported.

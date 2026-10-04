@@ -1,3 +1,4 @@
+import { ComputerPanel } from "./computer-panel.js";
 import { ToolActivity } from "./tool-activity.js";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createRoot } from "react-dom/client";
@@ -248,6 +249,14 @@ function App() {
   }
   return (
     <Chrome
+      computer={
+        <ComputerPanel
+          locale={locale}
+          works={presenceWorks}
+          events={events}
+          request={request}
+        />
+      }
       learning={<LearningSettings locale={locale} request={request} />}
       skills={<SkillSettings locale={locale} request={request} />}
       locale={locale}

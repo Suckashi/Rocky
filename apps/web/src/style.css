@@ -1167,3 +1167,51 @@ input[type="checkbox"] {
 .inline-tool p {
   font-size: 12px;
 }
+/* ComputerPanel presentation adapted from OpenDots c2569bb6, MIT. */
+.computer-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.computer-status span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.computer-tool-tabs {
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.computer-tool-tabs button {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 8px 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.computer-tool-tabs button[aria-selected="true"] {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+.computer-section {
+  border-top: 1px solid var(--border);
+  margin-top: 18px;
+  padding-top: 14px;
+}
+.computer-setup {
+  background: var(--surface);
+  padding: 14px;
+  border-radius: 8px;
+}
+.computer-panel p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.computer-panel select {
+  width: 100%;
+  min-width: 0;
+}

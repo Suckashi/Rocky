@@ -125,8 +125,8 @@ export function Workspaces({
       <h2>{zh ? "本機工作區" : "Local workspaces"}</h2>
       <p>
         {zh
-          ? "註冊後可自行瀏覽。選擇工作區，並在送出前明確啟用唯讀權限，才能讓該工作與臨時子任務讀取。Native 使用你的 OS 權限，並非 OS sandbox。寫入、shell 與 worktree 尚未接通。"
-          : "Browse registered folders yourself. Select a workspace and explicitly enable read scope before sending to allow that Work and its ephemeral children to read. Native uses your OS permissions, not an OS sandbox. Writes, shell and worktrees are not connected yet."}
+          ? "註冊後可自行瀏覽。選擇工作區，並在送出前明確啟用唯讀權限，才能讓該工作與臨時子任務讀取。Native 使用你的 OS 權限，並非 OS sandbox。寫入與建立 worktree 需精確核准；shell 尚未提供。"
+          : "Browse registered folders yourself. Select a workspace and explicitly enable read scope before sending to allow that Work and its ephemeral children to read. Native uses your OS permissions, not an OS sandbox. Writes and worktree creation require exact approval; shell execution is not available."}
       </p>
       <form onSubmit={(event) => void save(event)}>
         <fieldset disabled={busy}>

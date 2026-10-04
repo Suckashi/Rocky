@@ -22,6 +22,7 @@ export function Chrome({
   learning,
   workspaces,
   artifacts,
+  computer,
   resultRequest,
 }: {
   resultRequest?: object;
@@ -35,11 +36,13 @@ export function Chrome({
   learning?: ReactNode;
   workspaces?: ReactNode;
   artifacts?: ReactNode;
+  computer?: ReactNode;
 }) {
   const zh = locale === "zh";
   const [collapsed, setCollapsed] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const [panel, setPanel] = useState<string | null>(null);
+  const isSidePanel = panel === "2" || panel === "6";
   const [compact, setCompact] = useState(() => window.innerWidth <= 1100);
   const resultPane = useRef<HTMLElement>(null);
   const panelOpener = useRef<HTMLElement | null>(null);
@@ -80,12 +83,12 @@ export function Chrome({
         "Settings",
       ];
   useEffect(() => {
-    if (!panel || panel === "2") return;
+    if (!panel || isSidePanel) return;
     dialog.current?.showModal();
     return () => dialog.current?.close();
-  }, [panel]);
+  }, [panel, isSidePanel]);
   useEffect(() => {
-    if (panel === "2")
+    if (isSidePanel)
       resultPane.current?.querySelector<HTMLButtonElement>("button")?.focus();
     else if (resultWasOpen.current)
       (window.innerWidth <= 700 &&
@@ -93,8 +96,8 @@ export function Chrome({
         ? opener.current
         : panelOpener.current
       )?.focus();
-    resultWasOpen.current = panel === "2";
-  }, [panel]);
+    resultWasOpen.current = isSidePanel;
+  }, [panel, isSidePanel]);
   useEffect(() => {
     if (!drawer) return;
     const nav = document.querySelector<HTMLElement>(".sidebar");
@@ -161,11 +164,11 @@ export function Chrome({
   }
   return (
     <div
-      className={`template-app app ${collapsed ? "nav-collapsed" : ""} ${drawer ? "nav-open" : ""} ${panel === "2" ? "result-open" : ""}`}
+      className={`template-app app ${collapsed ? "nav-collapsed" : ""} ${drawer ? "nav-open" : ""} ${isSidePanel ? "result-open" : ""}`}
     >
       <div
         className="icon-rail"
-        inert={panel === "2" && compact ? true : undefined}
+        inert={isSidePanel && compact ? true : undefined}
         aria-label={zh ? "應用程式導覽" : "Application navigation"}
       >
         <img src="/rocky/mark.svg" width="28" height="28" alt="" />
@@ -179,7 +182,7 @@ export function Chrome({
         <button aria-label={names[0]} onClick={() => open(0)}>
           <MessageCircle size={18} />
         </button>
-        <button aria-label={names[2]} onClick={() => open(2)}>
+        <button aria-label={names[Number(panel)]} onClick={() => open(2)}>
           <FileText size={18} />
         </button>
         <button
@@ -193,7 +196,7 @@ export function Chrome({
       <button
         ref={opener}
         className="mobile-menu"
-        inert={panel === "2" && compact ? true : undefined}
+        inert={isSidePanel && compact ? true : undefined}
         aria-label={zh ? "開啟導覽" : "Open navigation"}
         aria-expanded={drawer}
         onClick={() => setDrawer(!drawer)}
@@ -212,7 +215,7 @@ export function Chrome({
       )}
       <aside
         className="sidebar"
-        inert={panel === "2" && compact ? true : undefined}
+        inert={isSidePanel && compact ? true : undefined}
         aria-label={zh ? "主要導覽" : "Main navigation"}
       >
         <div className="wordmark">Rocky</div>
@@ -254,7 +257,7 @@ export function Chrome({
         id="chat"
         className="workspace"
         tabIndex={-1}
-        inert={panel === "2" && compact ? true : undefined}
+        inert={isSidePanel && compact ? true : undefined}
       >
         <header
           className="topbar"
@@ -278,7 +281,7 @@ export function Chrome({
         </header>
         {children}
       </main>
-      {panel === "2" && (
+      {isSidePanel && (
         <>
           {compact && <div className="result-scrim" aria-hidden="true" />}
           <aside
@@ -299,7 +302,7 @@ export function Chrome({
               if (compact && event.key === "Tab") {
                 const elements = Array.from(
                   resultPane.current?.querySelectorAll<HTMLElement>(
-                    'button:not(:disabled), a[href], summary, [tabindex="0"]',
+                    'button:not(:disabled):not([tabindex="-1"]), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], summary, [tabindex="0"]',
                   ) ?? [],
                 ).filter((el) => el.getClientRects().length);
                 const first = elements[0],
@@ -315,9 +318,17 @@ export function Chrome({
             }}
           >
             <div className="pane-header">
-              <strong>{names[2]}</strong>
+              <strong>{names[Number(panel)]}</strong>
               <button
-                aria-label={zh ? "關閉成果面板" : "Close result panel"}
+                aria-label={
+                  panel === "6"
+                    ? zh
+                      ? "關閉 Computer 面板"
+                      : "Close Computer panel"
+                    : zh
+                      ? "關閉成果面板"
+                      : "Close result panel"
+                }
                 onClick={() => {
                   setPanel(null);
                   (window.innerWidth <= 700
@@ -329,7 +340,9 @@ export function Chrome({
                 ×
               </button>
             </div>
-            <div className="pane-body">{artifacts}</div>
+            <div className="pane-body">
+              {panel === "6" ? computer : artifacts}
+            </div>
           </aside>
         </>
       )}
