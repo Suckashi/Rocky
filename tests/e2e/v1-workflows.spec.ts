@@ -86,7 +86,7 @@ test("PNG upload is sanitized, bound to the submitted Work and delivered to the 
         id: connectionId,
         expectedRevision: 0,
         config: {
-          name: "Attachment browser fixture",
+          name: `Attachment browser fixture ${connectionId}`,
           provider: "openai-compatible",
           baseUrl: provider.baseUrl,
           modelId: "fixture",
@@ -104,7 +104,7 @@ test("PNG upload is sanitized, bound to the submitted Work and delivered to the 
     await page.getByText("模型連線設定", { exact: true }).click();
     await page
       .locator(".model-card")
-      .filter({ hasText: "Attachment browser fixture" })
+      .filter({ hasText: `Attachment browser fixture ${connectionId}` })
       .getByRole("button", { name: "使用此模型", exact: true })
       .click();
     await page.keyboard.press("Escape");
@@ -130,7 +130,10 @@ test("PNG upload is sanitized, bound to the submitted Work and delivered to the 
     await page.locator("#compose textarea").fill(prompt);
     await page.getByRole("button", { name: "送出", exact: true }).click();
     const work = page.locator("article.work").filter({ hasText: prompt });
-    await expect(work.getByText("已完成", { exact: true })).toBeVisible();
+    // Vision Work completes in seconds locally but slower on hosted Windows.
+    await expect(work.getByText("已完成", { exact: true })).toBeVisible({
+      timeout: 30000,
+    });
     const works = (await (await page.request.get("/api/v1/works")).json())
       .works;
     const item = works.find((w: { text: string }) => w.text === prompt);
