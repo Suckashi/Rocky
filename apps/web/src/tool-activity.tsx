@@ -43,7 +43,10 @@ export function ToolActivity({
     )
       continue;
     const key = JSON.stringify([
-      event.subagentId ?? null,
+      event.subagentId ??
+        (typeof data.parentCallId === "string" ? data.parentCallId : null),
+      match[1],
+      data.name,
       data.child === true,
       data.callId,
     ]);

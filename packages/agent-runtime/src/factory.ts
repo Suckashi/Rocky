@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import "./environment.js";
 import {
   memoryReadToolSchema,
@@ -96,6 +97,7 @@ export function createRockyAgent(
     return JSON.parse(result);
   };
   const syntheticTools = !models || testFixtureTools;
+  const nativeTaskScope = new AsyncLocalStorage<string>();
   function guard(child: boolean) {
     return createMiddleware({
       name: child ? "RockyChildPolicy" : "RockyRootPolicy",
@@ -138,6 +140,8 @@ export function createRockyAgent(
         if (!allowed.includes(name))
           throw Error("Rocky policy denied tool: " + name);
         const callId = id ?? "";
+        const parentCallId = child ? nativeTaskScope.getStore() : undefined;
+        const ancestry = parentCallId ? { parentCallId } : {};
         if (!callId) throw Error("Tool call identity required");
         if (models) await hooks.call("rocky_skill_check", {}, callId);
         const skillRead =
@@ -152,15 +156,18 @@ export function createRockyAgent(
             : args;
         hooks.event(
           name === "task" ? "rocky.subagent.started" : "rocky.tool.started",
-          { name, callId, args: publicArgs, child },
+          { name, callId, args: publicArgs, child, ...ancestry },
         );
         let result;
         try {
-          result = await handler(request);
+          result =
+            name === "task"
+              ? await nativeTaskScope.run(callId, () => handler(request))
+              : await handler(request);
         } catch (error) {
           hooks.event(
             name === "task" ? "rocky.subagent.failed" : "rocky.tool.failed",
-            { name, callId, child },
+            { name, callId, child, ...ancestry },
           );
           throw error;
         }
@@ -171,7 +178,7 @@ export function createRockyAgent(
             : failed
               ? "rocky.tool.failed"
               : "rocky.tool.completed",
-          { name, callId, child },
+          { name, callId, child, ...ancestry },
         );
         return result;
       },

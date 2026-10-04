@@ -45,8 +45,37 @@ test("explicit activity fixture matches compact inline tool layout", async ({
       },
     },
   }));
+  for (const [parentCallId, terminal] of [
+    ["parent-a", "completed"],
+    ["parent-b", "failed"],
+  ]) {
+    for (const state of ["started", terminal])
+      events.push({
+        ...events[0]!,
+        id: randomUUID(),
+        sequence: String(events.length + 1),
+        payload: {
+          kind: "domain",
+          name: "rocky.tool." + state,
+          data: {
+            name: "read_file",
+            callId: "shared-child-call",
+            args: { file_path: "project/notes.md" },
+            child: true,
+            parentCallId,
+          } as (typeof events)[number]["payload"]["data"],
+        },
+      });
+  }
   await page.route("**/api/v1/snapshot", (r) =>
-    r.fulfill({ json: { works: [w], events, cursor: "5", schemaVersion: 1 } }),
+    r.fulfill({
+      json: {
+        works: [w],
+        events,
+        cursor: String(events.length),
+        schemaVersion: 1,
+      },
+    }),
   );
   await page.route("**/api/v1/events?**", (r) =>
     r.fulfill({
@@ -99,7 +128,9 @@ test("explicit activity fixture matches compact inline tool layout", async ({
   await page.goto("/");
   await expect(page.locator("article.work")).toHaveCount(1);
   if (process.env.ROCKY_CAPTURE_PHASE !== "before") {
-    await expect(page.locator(".inline-tool")).toHaveCount(3);
+    await expect(page.locator(".inline-tool")).toHaveCount(5);
+    await expect(page.locator(".inline-tool").nth(3)).toContainText("已返回");
+    await expect(page.locator(".inline-tool").nth(4)).toContainText("失敗");
     const firstCard = page.locator(".inline-tool").first();
     await expect(firstCard).toHaveCSS("height", "70px");
     await firstCard.locator(":scope > summary").focus();
