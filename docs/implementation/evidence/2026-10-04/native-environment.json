@@ -1,0 +1,37 @@
+{
+  "commit": "8cf0bcc3d7f5bc135ba472e52d8d30f4089c7a05",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/native-environment.test.ts tests/git-worktree.test.ts; npm run check; npx eslint apps/daemon/src/native-environment.ts tests/native-environment.test.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/native-environment.json",
+  "testFiles": [
+    "tests/native-environment.test.ts",
+    "tests/git-worktree.test.ts"
+  ],
+  "tests": 12,
+  "seconds": 4.95,
+  "assertions": [
+    "Actual Node executable argv preserves shell metacharacters literally; writes only the explicit test file in selected temporary cwd",
+    "Nonzero exit7 and stderr retained without claiming operation success",
+    "Ambient synthetic credential not inherited",
+    "Cancellation, timeout, aggregate output cap terminate actual processes",
+    "Owned descendant PID no longer exists after cancellation",
+    "Pre-abort and relative executable validation do not launch; spawn failure has no process exit code",
+    "Existing actual Git worktree tests remain passing"
+  ],
+  "attempts": [
+    "Initial five tests: four passed; Windows failed spawn exposed internal negative code instead of null; normalized unlaunched result",
+    "Final six adapter and six Git tests pass"
+  ],
+  "limitations": [
+    "Internal adapter only: no Work tool, API, exact approval/ledger binding or Terminal UI enabled",
+    "Native runs under owner OS privileges, no filesystem or network sandbox; explicit OS env allowlist cannot block host credential/file access",
+    "Root-exits-before-descendants, detached descendants, daemon crash/restart and termination-failure acceptance remain unverified; process tree helper is not OS job containment",
+    "Executable/cwd resolve does not pin executable bytes or workspace revision; future authorized dispatcher must bind/revalidate command intent and operation context",
+    "Isolated adapter/engine/browser profiles and takeover unimplemented; no live external or Ubuntu evidence",
+    "Output is internal raw process output; future persistence/UI integration must apply existing public redaction boundary",
+    "No global AT marked passed"
+  ]
+}

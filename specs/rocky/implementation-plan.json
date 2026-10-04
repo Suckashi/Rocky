@@ -3659,9 +3659,10 @@
         "R-025",
         "R-047"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "evidence": [
-        "docs/implementation/evidence/2026-10-04/computer-activity/verification.json"
+        "docs/implementation/evidence/2026-10-04/computer-activity/verification.json",
+        "docs/implementation/evidence/2026-10-04/native-environment.json"
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",

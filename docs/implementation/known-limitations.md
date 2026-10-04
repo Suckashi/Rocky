@@ -190,3 +190,7 @@ Current status (370e855): safe native main context now survives cancellation/mod
 - New native child evidence includes parent task call identity and prevents repeated child call IDs merging in inline cards. Existing events lacking ancestry cannot reconstruct it; daemon restart/resume propagation still needs coverage. See evidence/2026-10-04/native-task-identity.json.
 
 - Computer pane now exposes real registered local file reads and shared activity; Browser/Terminal and isolated environments/profile takeover remain unavailable. T-022/023 are not completed by this UI slice. See evidence/2026-10-04/computer-panel/verification.json.
+
+### Native environment adapter (2026-10-04)
+
+Internal bounded Node child-process adapter exists and local Windows process-tree cancellation is tested. It is deliberately not exposed as a Work tool or Terminal action: exact intent approval, ledger/context/revision revalidation, workspace locks, public output redaction and durable reconciliation must be connected first. Native OS authority is not sandboxed; processes may read owner files or access the network. Root-first exit, detached descendant and daemon crash containment are not verified. No isolated engine/browser ownership support is claimed. See [evidence](evidence/2026-10-04/native-environment.json).
