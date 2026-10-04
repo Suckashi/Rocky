@@ -34,6 +34,45 @@ export class ReflectionRegistry {
       );
     return { binding, episode };
   }
+  results(workId: string, before?: string) {
+    const work = this.store.get(workId);
+    if (work.runMode !== "reflection" || !work.reflection)
+      throw new RockyError(
+        "reflection_work",
+        "Results require a reflection Work",
+        422,
+      );
+    this.check(work.reflection);
+    if (
+      before !== undefined &&
+      (!/^[1-9][0-9]{0,18}$/.test(before) ||
+        BigInt(before) > 9223372036854775807n)
+    )
+      throw new RockyError(
+        "reflection_cursor",
+        "Invalid reflection result cursor",
+        422,
+      );
+    const rows = this.store.db
+      .prepare(
+        "SELECT CAST(rowid AS TEXT) AS cursor,data FROM learning_reflection_outputs WHERE json_extract(data,'$.execution.workId')=? AND json_extract(data,'$.execution.runId')=? AND json_extract(data,'$.execution.executionSessionId')=? AND rowid<CAST(? AS INTEGER) ORDER BY rowid DESC LIMIT 21",
+      )
+      .all(
+        work.id,
+        work.runId,
+        work.executionSessionId,
+        before ?? "9223372036854775807",
+      ) as { cursor: string; data: string }[];
+    const page = rows.slice(0, 20);
+    return this.store.publicEvidence({
+      workId: work.id,
+      runId: work.runId,
+      status: work.status,
+      revision: work.revision,
+      outputs: page.map((row) => JSON.parse(row.data)),
+      nextCursor: rows.length > 20 ? page.at(-1)!.cursor : null,
+    });
+  }
   checkWork(owner: Work) {
     const current = this.store.get(owner.id);
     if (

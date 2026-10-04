@@ -294,6 +294,11 @@ export function createApp(service: WorkService) {
       service.learning.reviewEpisode(c.req.param("id"), await readJson(c)),
     ),
   );
+  app.get("/api/v1/learning/reflections/:id/results", (c) =>
+    c.json(
+      service.reflection.results(c.req.param("id"), c.req.query("before")),
+    ),
+  );
   app.post("/api/v1/learning/reflections", async (c) =>
     c.json(service.reflect(await readJson(c))),
   );

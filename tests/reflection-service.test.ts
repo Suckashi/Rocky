@@ -202,6 +202,63 @@ test.each([
       expect(output).not.toHaveProperty("payload");
     }
     if (mode.startsWith("withdraw")) expect(final.error).toContain("consent");
+    const resultsResponse = await app.request(
+      "/api/v1/learning/reflections/" + work.id + "/results",
+      { headers },
+    );
+    expect(resultsResponse.status).toBe(
+      mode.startsWith("withdraw") ? 403 : 200,
+    );
+    if (!mode.startsWith("withdraw")) {
+      const view = (await resultsResponse.json()) as {
+        outputs: unknown[];
+        status: string;
+        nextCursor: string | null;
+      };
+      expect(view.status).toBe(final.status);
+      expect(view.outputs).toHaveLength(mode === "result" ? 1 : 0);
+      expect(view.nextCursor).toBeNull();
+    }
+    expect(
+      (
+        await app.request(
+          "/api/v1/learning/reflections/" + source.id + "/results",
+          { headers },
+        )
+      ).status,
+    ).toBe(422);
+    if (mode === "result") {
+      expect(
+        (
+          await app.request(
+            "/api/v1/learning/reflections/" + work.id + "/results?before=bad",
+            { headers },
+          )
+        ).status,
+      ).toBe(422);
+      const stored = JSON.parse(String(outputs[0]!.data));
+      for (let i = 0; i < 21; i++) {
+        const id = randomUUID();
+        service.store.db
+          .prepare("INSERT INTO learning_reflection_outputs VALUES(?,?,?,?)")
+          .run(id, id, "fixture", JSON.stringify({ ...stored, id }));
+      }
+      const first = service.reflection.results(work.id) as {
+        outputs: { id: string }[];
+        nextCursor: string;
+      };
+      const second = service.reflection.results(work.id, first.nextCursor) as {
+        outputs: { id: string }[];
+        nextCursor: null;
+      };
+      expect(first.outputs).toHaveLength(20);
+      expect(second.outputs).toHaveLength(2);
+      expect(second.nextCursor).toBeNull();
+      expect(
+        new Set([...first.outputs, ...second.outputs].map((item) => item.id))
+          .size,
+      ).toBe(22);
+    }
     if (mode === "stop") expect(provider.requests).toHaveLength(1);
     expect(service.reflect(command).id).toBe(work.id);
     expect(service.modelBudgets.snapshot(work.runId).calls).toBeLessThanOrEqual(
