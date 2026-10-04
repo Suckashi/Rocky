@@ -176,3 +176,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 - Manual reflection WorkService admission now runs end-to-end with deterministic local provider, using existing evaluation-class low-priority slots and wall budget. Dedicated Learning budget UI, mixed-queue fairness, HTTP/browser launch and stop/restart/withdrawal matrix remain unverified; automatic triggering and candidate pipeline are unfinished. See evidence/2026-10-04/reflection-admission.json.
 
 - Reflection HTTP owner admission, active stop and source withdrawal before/after output now have local integration coverage. Restart/crash, queued withdrawal, UI lifecycle, mixed-priority fairness and checkpoint cleanup remain open. See evidence/2026-10-04/reflection-lifecycle.json.
+
+- Reflection results now have an authorized paginated HTTP read endpoint. Result UI and browser evidence remain pending; returned proposals are unevaluated drafts and do not authorize publication. See evidence/2026-10-04/reflection-results.json.

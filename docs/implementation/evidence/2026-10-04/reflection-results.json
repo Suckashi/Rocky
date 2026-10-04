@@ -1,0 +1,26 @@
+{
+  "commit": "27b807ee9b0b4f49f8ae485d6a89209429700c84",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/reflection-service.test.ts; npm run check; npx eslint apps/daemon/src/reflection.ts apps/daemon/src/http.ts tests/reflection-service.test.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/reflection-results.json",
+  "testFiles": ["tests/reflection-service.test.ts"],
+  "tests": 6,
+  "seconds": 7.02,
+  "assertions": [
+    "HTTP results endpoint scopes rows to exact Work/run/session and returns daemon status/revision",
+    "Current reviewed source authorization is checked before read; withdrawn source returns403",
+    "Non-reflection Work and invalid cursor return422",
+    "Descending20-record pagination covers22 synthetic output rows exactly once",
+    "Public evidence redaction reapplied to result projection"
+  ],
+  "limitations": [
+    "Pagination rows are explicitly duplicated synthetic test outputs, not additional real learning conclusions",
+    "No results UI/browser verification yet",
+    "Results remain unevaluated drafts; no candidate materialization/publication authority",
+    "Restart/crash recovery and checkpoint/private history cleanup remain pending",
+    "No live provider/Ubuntu/global AT completion"
+  ]
+}
