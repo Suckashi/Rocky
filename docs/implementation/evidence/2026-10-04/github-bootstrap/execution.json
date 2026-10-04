@@ -1,0 +1,65 @@
+{
+  "recordedAt": "2026-10-04T13:16:43.008Z",
+  "phase": "published; initial hosted verification in progress",
+  "repository": "https://github.com/Suckashi/Rocky",
+  "visibility": "public",
+  "defaultBranch": "main",
+  "publishedCommit": "1b11a14bf713b8a5659268fa15aa75bf93ab2a0e",
+  "firstPush": {
+    "command": "git push -u origin main",
+    "exitCode": 0,
+    "remoteRefVerified": true
+  },
+  "privateVulnerabilityReporting": true,
+  "protection": {
+    "requiredPullRequest": true,
+    "requiredApprovals": 0,
+    "checks": [
+      "verify (windows-latest)",
+      "verify (ubuntu-latest)",
+      "Dependency audit"
+    ],
+    "strict": true,
+    "appId": 15368,
+    "enforceAdmins": true,
+    "resolveConversations": true,
+    "forcePush": false,
+    "deletion": false
+  },
+  "ci": {
+    "id": 37204351525,
+    "url": "https://github.com/Suckashi/Rocky/actions/runs/37204351525",
+    "status": "in_progress",
+    "ubuntu": {
+      "conclusion": "failure",
+      "unitPassed": 404,
+      "unitFailed": 1,
+      "failedTest": "tests/browser-native.test.ts",
+      "failure": "Owned Chromium could not start; underlying cause not yet established"
+    },
+    "windows": {
+      "conclusion": null
+    },
+    "dependencyAudit": {
+      "conclusion": "failure",
+      "high": 7
+    }
+  },
+  "diagnosticChange": {
+    "scope": "Keep raw launch error in synthetic test and run sandboxed browser preflight before full regression",
+    "platform": "Windows x64",
+    "mode": "fixture",
+    "command": "ROCKY_TEST_BROWSER=installed Chromium 1223; npx vitest run tests/browser-native.test.ts",
+    "exitCode": 0,
+    "passed": 1,
+    "limitations": [
+      "Compatibility browser only; new Ubuntu diagnosis not yet run.",
+      "Product sandbox and public error handling unchanged."
+    ]
+  },
+  "limitations": [
+    "This is a running CI snapshot, not platform acceptance.",
+    "Source preview only; no release/tag/deployment.",
+    "Dependency audit remains required and failing."
+  ]
+}

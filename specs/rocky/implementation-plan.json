@@ -503,6 +503,20 @@
             "Roko is excluded from the code license; no separate artwork reuse license or independent rights clearance is asserted.",
             "No dedicated private conduct contact supplied."
           ]
+        },
+        {
+          "commit": "1b11a14bf713b8a5659268fa15aa75bf93ab2a0e",
+          "platform": "Windows x64 / GitHub API",
+          "mode": "live",
+          "command": "git push -u origin main",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/execution.json",
+          "testFiles": [],
+          "limitations": [
+            "This is a running CI snapshot, not platform acceptance.",
+            "Source preview only; no release/tag/deployment.",
+            "Dependency audit remains required and failing."
+          ]
         }
       ],
       "blockedReason": null,

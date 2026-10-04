@@ -40,6 +40,8 @@ jobs:
       - name: Install Chromium OS dependencies on hosted Linux
         if: runner.os == 'Linux'
         run: npx playwright install-deps chromium
+      - name: Verify sandboxed native browser before full regression
+        run: npx vitest run tests/browser-native.test.ts
       - run: npm test
       - run: npm run build
       - run: npm run check:secrets -- --package
