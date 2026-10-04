@@ -3368,7 +3368,8 @@
         "docs/implementation/evidence/2026-10-04/tool-alignment/verification.json",
         "docs/implementation/evidence/2026-10-04/tool-component/verification.json",
         "docs/implementation/evidence/2026-10-04/native-task-identity.json",
-        "docs/implementation/evidence/2026-10-04/computer-panel/verification.json"
+        "docs/implementation/evidence/2026-10-04/computer-panel/verification.json",
+        "docs/implementation/evidence/2026-10-04/computer-activity/verification.json"
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
@@ -3659,7 +3660,9 @@
         "R-047"
       ],
       "status": "pending",
-      "evidence": [],
+      "evidence": [
+        "docs/implementation/evidence/2026-10-04/computer-activity/verification.json"
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [
@@ -3688,7 +3691,9 @@
         "R-026"
       ],
       "status": "pending",
-      "evidence": [],
+      "evidence": [
+        "docs/implementation/evidence/2026-10-04/computer-activity/verification.json"
+      ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
       "doneWhen": [

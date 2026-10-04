@@ -1,0 +1,31 @@
+{
+  "commit": "af3df386c909dc958e0788425c3ebecd80eb5540",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "referenceCommit": "c2569bb6a13a22e565cf3eb791c62267d06babb1",
+  "command": "npm run check; scoped eslint chrome/computer-panel/tool-activity/computer-panel.spec; ROCKY_E2E_DATA_DIR=.rocky-reports/computer-activity-data ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts computer-panel.spec.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/computer-activity/verification.json",
+  "testFiles": ["tests/e2e/computer-panel.spec.ts"],
+  "browserTests": 2,
+  "seconds": 5.6,
+  "assertions": [
+    "Real workspace register/read regression at1440/1280/390/320",
+    "Explicit activity fixture excludes mismatched Work/run/session; empty Work shows truthful empty state",
+    "Computer accessible name and stable results shortcut; End tab navigation",
+    "320px modal focus wraps for closed and expanded evidence; Escape returns navigation trigger",
+    "320px Traditional Chinese light and English dark screenshots inspected; reduced-motion enabled; no page overflow"
+  ],
+  "attempts": [
+    "First new fixture failed required answer schema; corrected test data",
+    "Second attempt exposed hidden details descendants in focus loop; replaced getClientRects with checkVisibility",
+    "Final two browser tests pass5.6s"
+  ],
+  "limitations": [
+    "Activity uses explicit routed test data, not live external execution",
+    "After-only screenshots; no new matched full Computer reference comparison",
+    "Browser/Terminal adapters, isolated environments and profile/takeover remain unimplemented",
+    "Full locale/theme/keyboard matrix and platform acceptance remain incomplete; no global AT promoted"
+  ]
+}
