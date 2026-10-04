@@ -1,0 +1,32 @@
+{
+  "commit": "4675c4794b137df81a12d47855e5a4e14c9133bd",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "referenceCommit": "c2569bb6a13a22e565cf3eb791c62267d06babb1",
+  "command": "npm run check; scoped eslint Computer/chrome/main/workspaces/e2e/config; ROCKY_E2E_DATA_DIR=.rocky-reports/computer-panel-evidence-data ROCKY_TEST_BROWSER=chromium-1223/chrome-win64/chrome.exe npx playwright test --config playwright.production.config.ts computer-panel.spec.ts; npx playwright test tests/e2e/alignment.spec.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/computer-panel/verification.json",
+  "testFiles": [
+    "tests/e2e/computer-panel.spec.ts",
+    "tests/e2e/alignment.spec.ts"
+  ],
+  "browserTests": 2,
+  "computerSeconds": 4.6,
+  "alignmentSeconds": 4.6,
+  "assertions": [
+    "Computer opens the shared responsive right pane instead of generic placeholder dialog",
+    "Actual temp workspace registration, daemon directory listing and UTF8 file read through Files tab",
+    "Browser/Terminal explicitly unavailable, no fake screen or host fallback",
+    "Arrow keys switch tabs; desktop widths576/512 and mobile390/320 confirmed; no page/pane overflow; Escape restores mobile opener",
+    "Existing shell geometry/nav/theme/focus regression passes"
+  ],
+  "limitations": [
+    "T-022 adapters and T-023 profile/takeover are still unimplemented; UI does not claim environment readiness",
+    "Activity reuses shared events; nonempty activity-specific browser test pending",
+    "First shared production data root refused writer lock; preserved root/lock and used explicit isolated root",
+    "Regression runner removed prior test-results captures; final Computer test rerun to save evidence immediately",
+    "After-only screenshots; no new matched upstream Computer full-page comparison",
+    "Computer dark/English/full focus matrix and Files presentation parity remain incomplete"
+  ]
+}

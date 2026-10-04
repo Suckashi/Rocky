@@ -188,3 +188,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 - Tool-card reference now mounts actual unmodified OpenDots ComputerToolCard in isolated fixture; collapsed density corrected70px. Full shell comparison remains incomplete, and fixture uses local Rocky dependency versions. See evidence/2026-10-04/tool-component/verification.json.
 
 - New native child evidence includes parent task call identity and prevents repeated child call IDs merging in inline cards. Existing events lacking ancestry cannot reconstruct it; daemon restart/resume propagation still needs coverage. See evidence/2026-10-04/native-task-identity.json.
+
+- Computer pane now exposes real registered local file reads and shared activity; Browser/Terminal and isolated environments/profile takeover remain unavailable. T-022/023 are not completed by this UI slice. See evidence/2026-10-04/computer-panel/verification.json.
