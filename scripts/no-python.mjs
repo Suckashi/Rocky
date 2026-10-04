@@ -110,7 +110,8 @@ for (const args of [
       env,
       encoding: "utf8",
       maxBuffer: 20 * 1024 * 1024,
-      timeout: 240000,
+      // Cold clean-copy installs on hosted Windows exceed four minutes.
+      timeout: 600000,
     },
   );
   steps.push({
