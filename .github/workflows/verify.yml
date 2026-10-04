@@ -41,6 +41,24 @@ jobs:
       - name: Install Chromium OS dependencies on hosted Linux
         if: runner.os == 'Linux'
         run: npx playwright install-deps chromium
+      - name: Allow the pinned Chromium sandbox on the ephemeral Ubuntu runner
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { realpathSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          import { chromium } from 'playwright-core';
+          const browser = realpathSync(chromium.executablePath());
+          if (!/^\/home\/runner\/\.cache\/ms-playwright\/chromium-\d+\/chrome-linux64\/chrome$/.test(browser)) {
+            throw new Error('Unexpected pinned browser path; refusing to install a broad AppArmor rule');
+          }
+          // Exact downloaded binary only. Keep global userns restrictions and Chromium sandboxing.
+          // https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md
+          const profile = `abi <abi/4.0>,\ninclude <tunables/global>\nprofile rocky-ci-chromium "${browser}" flags=(unconfined) {\n  userns,\n}\n`;
+          execFileSync('sudo', ['tee', '/etc/apparmor.d/rocky-ci-chromium'], { input: profile, stdio: ['pipe', 'inherit', 'inherit'] });
+          execFileSync('sudo', ['apparmor_parser', '-r', '/etc/apparmor.d/rocky-ci-chromium'], { stdio: 'inherit' });
+          NODE
       - name: Verify sandboxed native browser before full regression
         run: npx vitest run tests/browser-native.test.ts
       - run: npm test

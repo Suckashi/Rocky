@@ -61,5 +61,17 @@
     "This is a running CI snapshot, not platform acceptance.",
     "Source preview only; no release/tag/deployment.",
     "Dependency audit remains required and failing."
-  ]
+  ],
+  "sandboxDiagnosis": {
+    "runId": 37205168831,
+    "jobId": 111444784803,
+    "platform": "GitHub-hosted Ubuntu",
+    "mode": "fixture",
+    "conclusion": "failed",
+    "error": "Chromium sandboxing failed; No usable sandbox",
+    "source": "https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md",
+    "repair": "Exact-path AppArmor userns allowlist for pinned Chromium on ephemeral runner; global restrictions and chromiumSandbox remain enabled",
+    "repairVerification": "pending hosted run"
+  },
+  "workflowChange": "push only main; PR and manual verification retained. Eight redundant non-main push runs with corresponding same-revision PR runs received cancellation requests."
 }
