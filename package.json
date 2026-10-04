@@ -76,7 +76,7 @@
     "setup": "node scripts/setup.mjs",
     "test:no-python": "node scripts/no-python.mjs",
     "check:licenses": "node scripts/licenses.mjs",
-    "check:dependencies": "npm audit --audit-level=moderate --registry=https://registry.npmjs.org",
+    "check:dependencies": "node scripts/check-dependencies.mjs",
     "lint": "eslint apps packages fixtures tests scripts *.ts",
     "format:check": "prettier --check apps packages fixtures tests scripts *.ts *.mjs *.json *.md docs .github",
     "doctor": "node scripts/doctor.mjs",

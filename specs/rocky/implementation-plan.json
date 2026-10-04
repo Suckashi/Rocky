@@ -6995,6 +6995,25 @@
             "Owner-authorized artwork inclusion does not assign an artwork reuse license.",
             "Original workspace has concurrent unrelated edits; this repair uses an isolated managed worktree."
           ]
+        },
+        {
+          "commit": "8822108f18550cbd91a8c424c219bb0987b3bc9c+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npm run check:dependencies",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/dependency-audit/verification.json",
+          "testFiles": [
+            "scripts/check-dependencies.mjs"
+          ],
+          "limitations": [
+            "Exceptions are a CI gate policy, not remediation: both advisories remain present in the installed tree.",
+            "braces is runtime-reachable through Deep Agents glob filtering; a hostile nested pattern can still exhaust the stack. No pattern-depth guard was added.",
+            "Security acceptance requiring a clean dependency audit is not promoted.",
+            "Exceptions expire on 2026-11-04 and must be re-reviewed."
+          ]
         }
       ],
       "blockedReason": "AT-01 and AT-04 now have scoped Ubuntu WSL 2 evidence; AT-30/53 not_run and AT-03/51 failed. Remaining browser/container/live/performance gates retained.",
