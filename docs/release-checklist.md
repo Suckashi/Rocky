@@ -1,6 +1,6 @@
 # GitHub bootstrap and release checklist
 
-This is a maintainer checklist, not evidence that any remote action happened. The project currently has no configured Git remote. Keep preview-source publication separate from a verified product release.
+This is a maintainer checklist, not execution evidence. The public repository is [Suckashi/Rocky](https://github.com/Suckashi/Rocky); dated bootstrap outcomes are recorded in [GitHub bootstrap](implementation/github-bootstrap.md). Keep preview-source publication separate from a verified product release.
 
 ## Prepare the source snapshot
 
@@ -8,10 +8,10 @@ This is a maintainer checklist, not evidence that any remote action happened. Th
 - [ ] Run relevant development checks and record exact results in `docs/implementation/`.
 - [ ] Build, then run `npm run check:package` to inspect current files, historical blobs, and the npm dry-run inventory. Pattern scanning is not a complete secrets review; inspect live diagnostics and public screenshots separately.
 - [ ] Confirm LICENSE, NOTICE, THIRD_PARTY_NOTICES, lockfile, source attribution, and asset provenance are included.
-- [ ] Resolve the Roko atlas distribution-rights record before publishing a snapshot containing it; the code license does not license this artwork.
+- [ ] Retain the Roko atlas source and rights record: the owner identified GPT generation and authorized public-repository inclusion on 2026-10-04. No separate reuse license or third-party rights clearance is asserted.
 - [ ] Confirm README languages, CHANGELOG, security limitations, and task evidence agree. Do not convert failed or unrun gates into passed statuses.
 - [ ] Review the staged snapshot and create a local commit. Do not rewrite history or delete local data to hide findings.
-- [ ] Choose the exact bootstrap revision. Local `main` was created at `e42a0a8`; later development commits require an explicitly approved integration before they become the published default branch.
+- [ ] Record the exact bootstrap revision. The owner authorized integration into `main`, public repository creation and first push on 2026-10-04; later delivery uses branch → PR → CI.
 
 ## Create the repository after owner authorization
 

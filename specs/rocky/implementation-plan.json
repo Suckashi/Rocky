@@ -484,6 +484,25 @@
             "Source/history/package pattern checks and three Roko screenshots reviewed; not an exhaustive security, PII or historical image audit.",
             "Local commits only. Main remains at e42a0a8; no merge, remote creation, visibility change, push, tag or deployment."
           ]
+        },
+        {
+          "commit": "ae719b79c079ed48632642d36d0b7ace1fec5c5a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "static",
+          "command": "npm run check:docs",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Before-push snapshot: hosted CI and branch protection are not yet established.",
+            "Source publication only; no stable release, tag, deployment or npm publication.",
+            "Prior fixture results remain scoped; no fresh full suite for documentation/package metadata/provenance changes.",
+            "Unchanged lockfile; existing dependency and product acceptance gaps remain open.",
+            "Roko is excluded from the code license; no separate artwork reuse license or independent rights clearance is asserted.",
+            "No dedicated private conduct contact supplied."
+          ]
         }
       ],
       "blockedReason": null,
@@ -7057,6 +7076,25 @@
           "mode": "fixture",
           "command": "npm run test:e2e",
           "exitCode": 1
+        },
+        {
+          "commit": "ae719b79c079ed48632642d36d0b7ace1fec5c5a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "static",
+          "command": "npm run check:docs",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Before-push snapshot: hosted CI and branch protection are not yet established.",
+            "Source publication only; no stable release, tag, deployment or npm publication.",
+            "Prior fixture results remain scoped; no fresh full suite for documentation/package metadata/provenance changes.",
+            "Unchanged lockfile; existing dependency and product acceptance gaps remain open.",
+            "Roko is excluded from the code license; no separate artwork reuse license or independent rights clearance is asserted.",
+            "No dedicated private conduct contact supplied."
+          ]
         }
       ],
       "blockedReason": "Bilingual delivery guides complete. Live external model/MCP endpoints and remote delivery lack explicit authorization; no live or release acceptance claimed.",

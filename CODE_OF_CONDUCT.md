@@ -13,6 +13,6 @@ Harassment, discriminatory remarks, threats, sexualized attention, doxxing, impe
 
 ## Reporting and enforcement
 
-Contact the repository owner privately through an available profile contact to report a conduct concern. This pre-publication repository has no dedicated conduct mailbox yet; the owner must establish a private route during GitHub setup. Do not post sensitive reports publicly. If the owner is involved, contact another maintainer if available or use the hosting platform's abuse-reporting process.
+The repository owner is [Suckashi](https://github.com/Suckashi). A dedicated private conduct contact has not yet been published. Until one is available, use GitHub's **Report abuse** action on the relevant content or profile for platform-policy violations; do not post sensitive reports in public issues. A private maintainer contact remains a community-setup follow-up. If the owner is involved, contact another maintainer if available or use the hosting platform's abuse-reporting process.
 
 Maintainers may remove harmful content, request a correction, temporarily restrict participation, or ban participants based on severity and repeated behavior. They should explain decisions privately where possible, protect reporter privacy, and avoid reviewing complaints in which they have a conflict. A person affected by a decision may request reconsideration with additional context.

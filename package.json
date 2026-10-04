@@ -11,6 +11,14 @@
   ],
   "version": "0.1.0-dev.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Suckashi/Rocky.git"
+  },
+  "homepage": "https://github.com/Suckashi/Rocky#readme",
+  "bugs": {
+    "url": "https://github.com/Suckashi/Rocky/issues"
+  },
   "type": "module",
   "license": "Apache-2.0",
   "files": [

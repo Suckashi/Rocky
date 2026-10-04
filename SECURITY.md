@@ -2,13 +2,13 @@
 
 ## Reporting a vulnerability
 
-Do not open a public issue containing an exploit, credential, or private diagnostic. Once GitHub private vulnerability reporting is enabled, use the repository's **Security → Report a vulnerability** action. If that action is unavailable, contact the repository owner privately through a published profile contact before sending sensitive details. No dedicated mailbox or hosted reporting route is established in this pre-publication checkout.
+Do not open a public issue containing an exploit, credential, or private diagnostic. Use [GitHub private vulnerability reporting](https://github.com/Suckashi/Rocky/security/advisories/new) (**Security → Report a vulnerability**), enabled for this repository. If GitHub makes that action unavailable, do not send sensitive details through public issues. No dedicated security mailbox is currently published.
 
 Include the affected revision, minimal synthetic reproduction, impact, and proposed mitigation if known. Remove user data and credentials. Maintainers should acknowledge privately, agree on a disclosure plan, and publish a fix or limitation notice; there is currently no guaranteed response time.
 
 ## Supported versions
 
-Only the current development branch is maintained. There are no stable releases or supported older release lines yet. A development preview is not a production security assurance. The [release checklist](docs/release-checklist.md) requires establishing private reporting before public bootstrap.
+Only the current `main` development line is maintained. There are no stable releases or supported older release lines yet. A development preview is not a production security assurance. See the [release checklist](docs/release-checklist.md) for remaining release gates.
 
 ## Runtime boundaries
 

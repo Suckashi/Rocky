@@ -11,8 +11,14 @@ used columns; only its runtime image filename changes.
 - Timing and state mapping are Rocky integration decisions, not exported platform timing.
 - The original 100 KiB vector budget has an owner-approved exception for this atlas.
 
-The user supplied this artwork for integration. **It is not licensed under the
-repository's Apache-2.0 code license by this import.** No additional artwork
-license, distribution-rights review or trademark clearance is asserted. The
-manifest's historical verification flag describes the import pack, not current
-Rocky test results. See `docs/implementation/roko.md` for integration evidence.
+On 2026-10-04 the repository owner identified the artwork as **GPT-generated**,
+with inspiration from _Project Hail Mary_ (《極限返航》), and authorized its inclusion
+in the public `Suckashi/Rocky` repository. This is an owner-provided source statement,
+not a claim of official affiliation or third-party rights clearance.
+
+**The artwork is excluded from the repository's Apache-2.0 code license.** No
+separate artwork reuse license has been specified. Ask the owner before reusing
+or redistributing the artwork; do not infer an MIT/Apache grant from the code license.
+No trademark or character-rights clearance is asserted. The manifest's historical
+verification flag describes the import pack, not current Rocky test results.
+See `docs/implementation/roko.md` for integration evidence.

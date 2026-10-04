@@ -81,4 +81,4 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) for the branch → pull request → CI w
 
 Original Rocky source is licensed under [Apache-2.0](LICENSE). Adapted OpenDots presentation code retains its MIT attribution in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [NOTICE](NOTICE). Rocky is an independent project with its own data and runtime, without affiliation implied by those references. Artwork provenance and pending name/character/trademark review are recorded in the [asset manifest](assets/rocky/asset-manifest.json).
 
-The Roko mascot has [separate provenance and rights](assets/roko/README.md). The repository's code license does not grant rights to that artwork; public distribution clearance is still pending.
+The Roko mascot has [separate provenance and rights](assets/roko/README.md). The owner identifies it as GPT-generated artwork inspired by _Project Hail Mary_ and has authorized its inclusion in this public repository. The code license does not license the artwork, and no separate reuse license or official affiliation is asserted.

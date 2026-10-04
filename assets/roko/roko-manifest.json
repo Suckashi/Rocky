@@ -9,7 +9,13 @@
     "originalSha256": "0d47eb7f7495849818b8285fee2df7722ba76a8e8f22145cb147817516cf0ef3",
     "historicalVerificationDate": "2026-10-03",
     "integrationVerified": false,
-    "note": "原始來源名為 Rocky Bot；Roko 是本次使用者指定名稱。未查詢 ChatGPT 即時啟用狀態；不包含帳號、內部 pet_id 或憑證；此紀錄不是授權證明。"
+    "note": "原始來源名為 Rocky Bot；Roko 是本次使用者指定名稱。未查詢 ChatGPT 即時啟用狀態；不包含帳號、內部 pet_id 或憑證；此紀錄不是授權證明。",
+    "ownerStatement": {
+      "date": "2026-10-04",
+      "creationMethod": "GPT-generated",
+      "inspiration": "Project Hail Mary (極限返航)",
+      "verification": "Owner statement; no independent third-party rights or trademark clearance asserted"
+    }
   },
   "image": {
     "file": "roko-spritesheet.png",
@@ -75,7 +81,7 @@
     "stepDegrees": 22.5,
     "frames": [
       {
-        "angleDegrees": 0.0,
+        "angleDegrees": 0,
         "row": 9,
         "column": 0
       },
@@ -85,7 +91,7 @@
         "column": 1
       },
       {
-        "angleDegrees": 45.0,
+        "angleDegrees": 45,
         "row": 9,
         "column": 2
       },
@@ -95,7 +101,7 @@
         "column": 3
       },
       {
-        "angleDegrees": 90.0,
+        "angleDegrees": 90,
         "row": 9,
         "column": 4
       },
@@ -105,7 +111,7 @@
         "column": 5
       },
       {
-        "angleDegrees": 135.0,
+        "angleDegrees": 135,
         "row": 9,
         "column": 6
       },
@@ -115,7 +121,7 @@
         "column": 7
       },
       {
-        "angleDegrees": 180.0,
+        "angleDegrees": 180,
         "row": 10,
         "column": 0
       },
@@ -125,7 +131,7 @@
         "column": 1
       },
       {
-        "angleDegrees": 225.0,
+        "angleDegrees": 225,
         "row": 10,
         "column": 2
       },
@@ -135,7 +141,7 @@
         "column": 3
       },
       {
-        "angleDegrees": 270.0,
+        "angleDegrees": 270,
         "row": 10,
         "column": 4
       },
@@ -145,7 +151,7 @@
         "column": 5
       },
       {
-        "angleDegrees": 315.0,
+        "angleDegrees": 315,
         "row": 10,
         "column": 6
       },
@@ -163,7 +169,10 @@
     "note": "產品自行决定 looping/once/static；勿在動畫中播放未使用的空白 cells。視線幀是離散角度，不是循環動作。"
   },
   "rights": {
-    "status": "not-a-license-grant",
-    "note": "角色素材與程式碼授權分開處理；保留來源，不自動標 MIT/Apache 或自稱官方角色。"
+    "status": "owner-authorized-public-repository-inclusion",
+    "authorizedRepository": "https://github.com/Suckashi/Rocky",
+    "authorizationDate": "2026-10-04",
+    "reuseLicense": "unspecified; excluded from Apache-2.0 code license",
+    "note": "Owner authorized publication in this repository. No separate reuse license, official affiliation, character or trademark clearance is asserted."
   }
 }

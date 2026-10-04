@@ -4,7 +4,7 @@
 > 產品仍名 Rocky，角色名 Roko；原圖、manifest 與來源在 `assets/roko/`。
 > 原圖 3,057,640 bytes 是本次明確核准的 100 KiB 素材預算例外，並非其他資產的通用豁免。
 > 以原 atlas 的固定幀格、8 FPS 動作取代舊 CSS 動作；真實狀態、權限、reduced motion 與完成去重契約不變。
-> 角色素材不因匯入而取得 Apache-2.0 授權；發布權利審核仍待辦。詳見 `docs/implementation/roko.md`。
+> 2026-10-04 擁有者確認 Roko 圖檔由 GPT 生成，靈感為《極限返航》（Project Hail Mary），並授權納入公開 Repo。素材不套用 Apache-2.0，未另授重用授權或宣稱第三方角色／商標權利審查完成；見 `assets/roko/README.md`。
 
 > **規格版本：2.0.0｜日期：2026-10-02｜產品：Rocky**  
 > 這是可實作的設計基線，不是已產出的最終插畫、使用者已核准的美術或已通過測試的元件。

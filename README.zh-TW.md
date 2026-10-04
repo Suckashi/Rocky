@@ -81,4 +81,4 @@ npm run dev
 
 Rocky 原創程式採 [Apache-2.0](LICENSE)。OpenDots 展示程式的改寫保留 MIT 聲明，見 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 與 [NOTICE](NOTICE)。Rocky 是具有獨立資料與 runtime 的專案，引用不表示官方關聯。素材來源及尚待完成的名稱／角色／商標審查列於[素材清單](assets/rocky/asset-manifest.json)。
 
-Roko 角色素材的[來源與權利另行記錄](assets/roko/README.md)。本專案的程式碼授權不授予該素材的使用權；公開散布權利尚待確認。
+Roko 角色素材的[來源與權利另行記錄](assets/roko/README.md)。專案擁有者確認素材由 GPT 生成，靈感來自《極限返航》（_Project Hail Mary_），並授權納入此公開 Repo。程式碼授權不包含角色素材；未另行授予素材重用授權，也不宣稱官方關聯。
