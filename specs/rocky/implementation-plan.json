@@ -5093,7 +5093,8 @@
           ]
         },
         "docs/implementation/evidence/2026-10-04/reflection-worker.json",
-        "docs/implementation/evidence/2026-10-04/reflection-work-identity.json"
+        "docs/implementation/evidence/2026-10-04/reflection-work-identity.json",
+        "docs/implementation/evidence/2026-10-04/reflection-dispatch.json"
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",

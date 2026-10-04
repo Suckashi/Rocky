@@ -1,0 +1,28 @@
+{
+  "commit": "df5c0779a635807e4020eedb98383924836cee7f",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/reflection-authority.test.ts tests/reflection-worker.test.ts tests/reflection-profile.test.ts; npm run check; scoped eslint reflection/work-service/authority-test; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/reflection-dispatch.json",
+  "testFiles": [
+    "tests/reflection-authority.test.ts",
+    "tests/reflection-worker.test.ts",
+    "tests/reflection-profile.test.ts"
+  ],
+  "tests": 9,
+  "seconds": 2.94,
+  "assertions": [
+    "Owned dispatch checks current running reflection Work, run/session identity, exact binding and fresh source consent",
+    "Rejects normal Work, replaced run, cancelled Work, mismatched episode and non-reflection RPC",
+    "Persisted output includes originating Work/run/session; idempotency key is scoped to execution",
+    "WorkService routes reflection tools to restricted registry and rechecks source before model dispatch; conversation/steering RPC denied"
+  ],
+  "limitations": [
+    "WorkService branch is wired but no production reflection admission endpoint yet; integrated service flow test pending",
+    "Initial test exposed nested transaction; fixed by synchronous dispatch validation with call-owned transaction",
+    "No UI or browser changes; no live provider, Ubuntu or global AT completion claim",
+    "Priority/admission budgets, cancellation lifecycle coverage and candidate evaluation remain unfinished"
+  ]
+}

@@ -170,3 +170,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 - Reflection worker IPC is verified with a deterministic daemon-port fixture. Production WorkService does not yet admit or dispatch reflection Work; no live reflection, budget or queue completion claim. See evidence/2026-10-04/reflection-worker.json.
 
 - Reflection Work identity now persists and is immutable through Work CAS. This supersedes the earlier fixture normal-runMode limitation, but production admission and authority routing are still unconnected; see evidence/2026-10-04/reflection-work-identity.json.
+
+- Reflection authority routing is now wired in WorkService and registry identity checks are fixture-tested. No production admission command sets that path yet; integrated lifecycle verification remains pending. See evidence/2026-10-04/reflection-dispatch.json.
