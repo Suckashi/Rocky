@@ -1,0 +1,32 @@
+{
+  "commit": "e9b4cb192aeb4ddd350148af0cbcea43ee3ae592",
+  "platform": "Windows x64",
+  "nodeVersion": "v24.12.0",
+  "mode": "fixture",
+  "command": "npx vitest run tests/workspace-commands.test.ts tests/native-environment.test.ts; npm run check; npx eslint apps/daemon/src/native-environment.ts apps/daemon/src/workspace-commands.ts tests/workspace-commands.test.ts; git diff --check",
+  "exitCode": 0,
+  "reportPath": "docs/implementation/evidence/2026-10-04/workspace-command-proposal.json",
+  "testFiles": [
+    "tests/workspace-commands.test.ts",
+    "tests/native-environment.test.ts"
+  ],
+  "tests": 7,
+  "seconds": 2.43,
+  "assertions": [
+    "Real registered workspace and file bytes are hashed without executing the proposal",
+    "Fingerprint covers owner Work/run/session, command args/limits, executable canonical path/content/stat, workspace registration/root identity, model selection and allowed OS environment hash",
+    "Changed argv/limits produce different fingerprints; changed owner/environment/executable rejects revalidation",
+    "Workspace revision or replaced root rejects proposal; reflection/fixture mode, arbitrary cwd and pre-abort denied",
+    "Six real native adapter process tests remain passing"
+  ],
+  "attempts": [
+    "Initial proposal fixture lacked configured modelSelection; corrected fixture to satisfy existing Work contract",
+    "Final7 tests pass2.43s"
+  ],
+  "limitations": [
+    "Preparation/revalidation only; operation ledger, exact approval resume, Work model tool and Terminal UI not connected yet",
+    "Executable content hash does not pin shared libraries, interpreter input scripts, transitive dependencies or mutable workspace files",
+    "Revalidation does not provide OS-level atomic exec-by-handle or containment; native owner privileges remain explicit",
+    "No isolated engine/live service/Ubuntu claim; no global AT promotion"
+  ]
+}

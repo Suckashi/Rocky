@@ -2884,7 +2884,8 @@
             "Worktree-specific dark/English matrix and fresh matching upstream comparison not_run; existing OpenDots-derived approval structure reused",
             "New workspace source linkage is in the immutable operation receipt; richer managed workspace metadata/library display remains pending"
           ]
-        }
+        },
+        "docs/implementation/evidence/2026-10-04/workspace-command-proposal.json"
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
@@ -3662,7 +3663,8 @@
       "status": "in_progress",
       "evidence": [
         "docs/implementation/evidence/2026-10-04/computer-activity/verification.json",
-        "docs/implementation/evidence/2026-10-04/native-environment.json"
+        "docs/implementation/evidence/2026-10-04/native-environment.json",
+        "docs/implementation/evidence/2026-10-04/workspace-command-proposal.json"
       ],
       "blockedReason": null,
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
