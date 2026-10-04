@@ -1,3 +1,4 @@
+import { LearningReflection } from "./learning-reflection.js";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 const schema = z.object({
@@ -125,8 +126,8 @@ export function LearningEpisodes({
                 : "Content changed; review required again"
               : item.status === "approved"
                 ? zh
-                  ? "已核准摘要，尚未反思"
-                  : "Summary approved, reflection not started"
+                  ? "已核准摘要"
+                  : "Summary approved"
                 : item.status === "rejected"
                   ? zh
                     ? "已拒絕"
@@ -221,6 +222,13 @@ export function LearningEpisodes({
               </>
             )}
           </details>
+          {item.status === "approved" && (
+            <LearningReflection
+              locale={locale}
+              episode={item}
+              request={request}
+            />
+          )}
         </article>
       ))}
       {value?.nextCursor && (

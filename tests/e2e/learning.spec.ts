@@ -96,28 +96,44 @@ test("work Learning consent defaults excluded, saves review consent and withdraw
   const { startAgentProvider } =
     await import("../../fixtures/models/agent-provider.js");
   const callId = randomUUID();
+  let reflecting = false;
   const provider = await startAgentProvider({
     reply: async (messages) =>
-      messages.some(
-        (message) =>
-          message instanceof ToolMessage && message.tool_call_id === callId,
-      )
-        ? new AIMessage("Finished local consent fixture")
-        : new AIMessage({
-            content: "",
-            tool_calls: [
-              {
-                id: callId,
-                name: "write_todos",
-                args: {
-                  todos: [
-                    { content: "Record observed plan", status: "completed" },
-                  ],
+      reflecting
+        ? messages.some((m) => m instanceof ToolMessage)
+          ? new AIMessage("Reflection complete")
+          : new AIMessage({
+              content: "",
+              tool_calls: [
+                {
+                  id: randomUUID(),
+                  name: "mark_no_learning",
+                  args: { reason: "Fixture lacks independent evidence" },
+                  type: "tool_call",
                 },
-                type: "tool_call",
-              },
-            ],
-          }),
+              ],
+            })
+        : messages.some(
+              (message) =>
+                message instanceof ToolMessage &&
+                message.tool_call_id === callId,
+            )
+          ? new AIMessage("Finished local consent fixture")
+          : new AIMessage({
+              content: "",
+              tool_calls: [
+                {
+                  id: callId,
+                  name: "write_todos",
+                  args: {
+                    todos: [
+                      { content: "Record observed plan", status: "completed" },
+                    ],
+                  },
+                  type: "tool_call",
+                },
+              ],
+            }),
   });
   try {
     await page.goto("/");
@@ -210,7 +226,45 @@ test("work Learning consent defaults excluded, saves review consent and withdraw
     ).toBeDisabled();
     await episodeCard.getByLabel("我已審查這份摘要及來源").check();
     await episodeCard.getByRole("button", { name: "核准這份摘要" }).click();
-    await expect(episodeCard).toContainText("已核准摘要，尚未反思");
+    await expect(episodeCard).toContainText("已核准摘要");
+    reflecting = true;
+    const reflection = episodeCard.locator(".learning-reflection");
+    await reflection.locator(":scope > summary").click();
+    await reflection
+      .getByRole("button", { name: "載入模型與最近反思" })
+      .click();
+    await reflection.getByLabel("反思模型").selectOption(connectionId);
+    await reflection.getByRole("button", { name: "啟動受限反思" }).click();
+    await expect(reflection.getByRole("status")).toBeVisible();
+    await expect
+      .poll(async () => {
+        await reflection
+          .getByRole("button", { name: "重新整理反思結果" })
+          .click();
+        return await reflection.getByRole("status").textContent();
+      })
+      .toContain("已完成");
+    await expect(reflection).toContainText("沒有可重用的結論");
+    await expect(reflection).toContainText(
+      "Fixture lacks independent evidence",
+    );
+    for (const [width, height] of [
+      [1440, 900],
+      [1280, 800],
+      [390, 844],
+      [320, 844],
+    ]) {
+      await page.setViewportSize({ width: width!, height: height! });
+      await reflection.scrollIntoViewIfNeeded();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: "test-results/reflection-" + width + ".png",
+      });
+    }
 
     await page.setViewportSize({ width: 320, height: 844 });
     await episodeCard.scrollIntoViewIfNeeded();
