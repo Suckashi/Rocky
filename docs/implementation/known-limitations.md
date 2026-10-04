@@ -172,3 +172,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 - Reflection Work identity now persists and is immutable through Work CAS. This supersedes the earlier fixture normal-runMode limitation, but production admission and authority routing are still unconnected; see evidence/2026-10-04/reflection-work-identity.json.
 
 - Reflection authority routing is now wired in WorkService and registry identity checks are fixture-tested. No production admission command sets that path yet; integrated lifecycle verification remains pending. See evidence/2026-10-04/reflection-dispatch.json.
+
+- Manual reflection WorkService admission now runs end-to-end with deterministic local provider, using existing evaluation-class low-priority slots and wall budget. Dedicated Learning budget UI, mixed-queue fairness, HTTP/browser launch and stop/restart/withdrawal matrix remain unverified; automatic triggering and candidate pipeline are unfinished. See evidence/2026-10-04/reflection-admission.json.
