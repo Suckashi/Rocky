@@ -3652,6 +3652,35 @@
             "Real container engine/enforcement not verified; no host fallback.",
             "No commit, remote, paid endpoint, security software or global system setting change."
           ]
+        },
+        {
+          "commit": "a150f57ea3d9d8f02db26a53a356ff16771bb583+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npx vitest run tests/backup.test.ts tests/git-worktree.test.ts tests/workspace-worktrees.test.ts tests/isolated-environment.test.ts tests/skill-sources.test.ts tests/workspaces.test.ts tests/continuous-conversation.test.ts tests/persistence.test.ts tests/writer-lock.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/execution.json",
+          "testFiles": [
+            "tests/backup.test.ts",
+            "tests/git-worktree.test.ts",
+            "tests/workspace-worktrees.test.ts",
+            "tests/isolated-environment.test.ts",
+            "tests/skill-sources.test.ts",
+            "tests/workspaces.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/persistence.test.ts"
+          ],
+          "limitations": [
+            "Initial main CI failed on both platforms; subsequent repair evidence is scoped to its exact revision and completed steps.",
+            "Source preview only; no release, tag, deployment or stable acceptance.",
+            "Dependency audit remains required and failing with seven high affected-package entries. No waiver or runtime downgrade.",
+            "Fresh hosted verification of the Windows and Store fixes is pending.",
+            "Authorized live providers/MCP, actual container enforcement, strict browser egress and relative-performance acceptance remain scoped by their own reports.",
+            "Owner-authorized artwork inclusion does not assign an artwork reuse license.",
+            "Original workspace has concurrent unrelated edits; this repair uses an isolated managed worktree."
+          ]
         }
       ],
       "blockedReason": null,
@@ -6917,6 +6946,55 @@
             "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
             "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
           ]
+        },
+        {
+          "commit": "1b11a14bf713b8a5659268fa15aa75bf93ab2a0e",
+          "platform": "GitHub-hosted windows-latest and ubuntu-latest",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "gh run watch 37204351525 --repo Suckashi/Rocky --interval 30 --exit-status",
+          "exitCode": 1,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/execution.json",
+          "testFiles": [],
+          "limitations": [
+            "Initial main CI failed on both platforms; subsequent repair evidence is scoped to its exact revision and completed steps.",
+            "Source preview only; no release, tag, deployment or stable acceptance.",
+            "Dependency audit remains required and failing with seven high affected-package entries. No waiver or runtime downgrade.",
+            "Fresh hosted verification of the Windows and Store fixes is pending.",
+            "Authorized live providers/MCP, actual container enforcement, strict browser egress and relative-performance acceptance remain scoped by their own reports.",
+            "Owner-authorized artwork inclusion does not assign an artwork reuse license.",
+            "Original workspace has concurrent unrelated edits; this repair uses an isolated managed worktree."
+          ]
+        },
+        {
+          "commit": "a150f57ea3d9d8f02db26a53a356ff16771bb583+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npx vitest run tests/backup.test.ts tests/git-worktree.test.ts tests/workspace-worktrees.test.ts tests/isolated-environment.test.ts tests/skill-sources.test.ts tests/workspaces.test.ts tests/continuous-conversation.test.ts tests/persistence.test.ts tests/writer-lock.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/execution.json",
+          "testFiles": [
+            "tests/backup.test.ts",
+            "tests/git-worktree.test.ts",
+            "tests/workspace-worktrees.test.ts",
+            "tests/isolated-environment.test.ts",
+            "tests/skill-sources.test.ts",
+            "tests/workspaces.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/persistence.test.ts"
+          ],
+          "limitations": [
+            "Initial main CI failed on both platforms; subsequent repair evidence is scoped to its exact revision and completed steps.",
+            "Source preview only; no release, tag, deployment or stable acceptance.",
+            "Dependency audit remains required and failing with seven high affected-package entries. No waiver or runtime downgrade.",
+            "Fresh hosted verification of the Windows and Store fixes is pending.",
+            "Authorized live providers/MCP, actual container enforcement, strict browser egress and relative-performance acceptance remain scoped by their own reports.",
+            "Owner-authorized artwork inclusion does not assign an artwork reuse license.",
+            "Original workspace has concurrent unrelated edits; this repair uses an isolated managed worktree."
+          ]
         }
       ],
       "blockedReason": "AT-01 and AT-04 now have scoped Ubuntu WSL 2 evidence; AT-30/53 not_run and AT-03/51 failed. Remaining browser/container/live/performance gates retained.",
@@ -7108,6 +7186,26 @@
             "Unchanged lockfile; existing dependency and product acceptance gaps remain open.",
             "Roko is excluded from the code license; no separate artwork reuse license or independent rights clearance is asserted.",
             "No dedicated private conduct contact supplied."
+          ]
+        },
+        {
+          "commit": "1b11a14bf713b8a5659268fa15aa75bf93ab2a0e",
+          "platform": "GitHub-hosted windows-latest and ubuntu-latest",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "gh run watch 37204351525 --repo Suckashi/Rocky --interval 30 --exit-status",
+          "exitCode": 1,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/execution.json",
+          "testFiles": [],
+          "limitations": [
+            "Initial main CI failed on both platforms; subsequent repair evidence is scoped to its exact revision and completed steps.",
+            "Source preview only; no release, tag, deployment or stable acceptance.",
+            "Dependency audit remains required and failing with seven high affected-package entries. No waiver or runtime downgrade.",
+            "Fresh hosted verification of the Windows and Store fixes is pending.",
+            "Authorized live providers/MCP, actual container enforcement, strict browser egress and relative-performance acceptance remain scoped by their own reports.",
+            "Owner-authorized artwork inclusion does not assign an artwork reuse license.",
+            "Original workspace has concurrent unrelated edits; this repair uses an isolated managed worktree."
           ]
         }
       ],

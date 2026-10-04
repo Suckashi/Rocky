@@ -29,6 +29,15 @@ jobs:
         with:
           node-version: "24.12.0"
           cache: npm
+      - name: Use a canonical temporary directory on hosted Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $canonicalTemp = (& node -e 'console.log(require("node:fs").realpathSync.native(require("node:os").tmpdir()))').Trim()
+          if ($LASTEXITCODE -ne 0) { throw 'Could not canonicalize the runner temporary directory' }
+          # Fixtures compare approved canonical paths; RUNNER~1 is an alias of runneradmin.
+          "TEMP=$canonicalTemp" >> $env:GITHUB_ENV
+          "TMP=$canonicalTemp" >> $env:GITHUB_ENV
       - run: npm install --global npm@11.6.4
       - run: npm ci
       - run: npm run check
