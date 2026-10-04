@@ -168,3 +168,5 @@ Current status (370e855): safe native main context now survives cancellation/mod
 2026-10-04 stale-hash episode renewal gap is resolved: current approved view projects needs_review and requires explicit fresh decision. This supersedes the older no-renewal limitation. Backend tests cover actual redaction change/reapproval; browser renewed-review state is an explicit response fixture. Cross-client immediate invalidation and full UI matrix remain pending. [Evidence](evidence/2026-10-04/learning-rereview.json).
 
 - Reflection worker IPC is verified with a deterministic daemon-port fixture. Production WorkService does not yet admit or dispatch reflection Work; no live reflection, budget or queue completion claim. See evidence/2026-10-04/reflection-worker.json.
+
+- Reflection Work identity now persists and is immutable through Work CAS. This supersedes the earlier fixture normal-runMode limitation, but production admission and authority routing are still unconnected; see evidence/2026-10-04/reflection-work-identity.json.
