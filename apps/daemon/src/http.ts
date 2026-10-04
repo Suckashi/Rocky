@@ -157,6 +157,12 @@ export function createApp(service: WorkService) {
   app.post("/api/v1/model-connections", async (c) =>
     c.json(service.models.save(await readJson(c))),
   );
+  app.get("/api/v1/local-secrets", (c) =>
+    c.json(service.localSecrets.status()),
+  );
+  app.post("/api/v1/local-secrets", async (c) =>
+    c.json(service.localSecrets.save(await readJson(c))),
+  );
   app.post("/api/v1/model-connections/:id/probe", async (c) =>
     c.json(await service.models.probe(c.req.param("id"), await readJson(c))),
   );

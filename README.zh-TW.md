@@ -29,7 +29,7 @@ npm run doctor
 npm start
 ```
 
-開啟 **http://127.0.0.1:3211**。先在 Settings 設定模型連線，再選擇第一個 Work 使用的工作區與權限。憑證透過環境變數名稱引用，請勿寫入版本控制中的檔案。模型設定、資料位置與核准流程見[操作指南](docs/user-guide.zh-TW.md)。
+開啟 **http://127.0.0.1:3211**。首次開啟會出現「先連接一個模型」：選供應商（Anthropic／OpenAI／Ollama／OpenAI 相容）、填模型 ID 與 API 金鑰即可開始；也可以先用合成測試試用流程。金鑰存在 daemon 資料目錄的 `secrets.env`（未加密、權限 0600），或改用環境變數（開發時 `npm run dev` 會讀取專案根目錄的 `.env`，範本見 [`.env.example`](.env.example)）。請勿把金鑰寫入版本控制中的檔案。模型設定、資料位置與核准流程見[操作指南](docs/user-guide.zh-TW.md)。
 
 核心安裝與標準 Learning fixture 僅需 Node/npm。需要瀏覽器功能時，另外執行下載：
 

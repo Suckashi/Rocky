@@ -23,6 +23,7 @@ import { ConversationStore } from "./conversation-store.js";
 import { ContextLedger } from "./context-ledger.js";
 import { SteeringStore } from "./steering.js";
 import { ModelRegistry } from "./model-registry.js";
+import { LocalSecrets } from "./local-secrets.js";
 import { McpRegistry } from "./mcp-registry.js";
 import { McpManager } from "./mcp-manager.js";
 import {
@@ -98,6 +99,7 @@ type Active = {
 export class WorkService {
   readonly store: Store;
   readonly models: ModelRegistry;
+  readonly localSecrets: LocalSecrets;
   readonly mcp: McpRegistry;
   readonly mcpManager: McpManager;
   readonly modelBudgets: ModelBudgetLedger;
@@ -164,6 +166,7 @@ export class WorkService {
     this.modelSlots = new ModelSlots(this.admissionConfig.modelSlots);
     this.store = new Store(root);
     try {
+      this.localSecrets = new LocalSecrets(root);
       this.models = new ModelRegistry(this.store);
       this.mcp = new McpRegistry(this.store);
       this.mcpManager = new McpManager(this.store, this.mcp);

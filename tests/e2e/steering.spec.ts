@@ -53,9 +53,7 @@ test("owner steering shows accepted then checkpoint-applied and survives reload 
       .click();
     await page.keyboard.press("Escape");
     await page.locator("#compose textarea").fill(prompt);
-    await page
-      .getByRole("button", { name: "傳送至模型", exact: false })
-      .click();
+    await page.getByRole("button", { name: "送出", exact: true }).click();
     await expect.poll(() => entered).toBe(true);
     const work = page.locator("article.work").filter({ hasText: prompt });
     await work.locator("summary").filter({ hasText: "工作詳情" }).click();

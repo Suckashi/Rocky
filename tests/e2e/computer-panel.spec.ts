@@ -149,7 +149,7 @@ test("explicit Computer activity fixture isolates Work identity and traps compac
   await expect(pane).toBeVisible();
   await expect(
     page
-      .locator(".icon-rail")
+      .locator(".sidebar")
       .getByRole("button", { name: "文件與成果", exact: true }),
   ).toHaveCount(1);
   await pane.getByRole("tab", { name: "Browser", exact: true }).focus();

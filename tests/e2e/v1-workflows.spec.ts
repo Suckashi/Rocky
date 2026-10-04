@@ -128,9 +128,7 @@ test("PNG upload is sanitized, bound to the submitted Work and delivered to the 
     ).toBeVisible();
     const prompt = "Inspect uploaded PNG " + randomUUID();
     await page.locator("#compose textarea").fill(prompt);
-    await page
-      .getByRole("button", { name: "傳送至模型", exact: false })
-      .click();
+    await page.getByRole("button", { name: "送出", exact: true }).click();
     const work = page.locator("article.work").filter({ hasText: prompt });
     // Vision Work completes in seconds locally but slower on hosted Windows.
     await expect(work.getByText("已完成", { exact: true })).toBeVisible({

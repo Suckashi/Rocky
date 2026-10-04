@@ -4,9 +4,17 @@ import { startAgentProvider } from "../../fixtures/models/agent-provider.js";
 test("real provider SSE is visible before completion and daemon stop cancels the selected stream", async ({
   page,
 }) => {
-  test.setTimeout(60000);
+  // Owner decision 2026-10-04: skipped on hosted Windows after repeated
+  // timing failures there; still runs on Ubuntu CI and locally.
+  test.skip(
+    !!process.env.CI && process.platform === "win32",
+    "Repeated hosted Windows timing failures; see progress.md 2026-10-04",
+  );
+  test.setTimeout(120000);
+  // Slow deltas keep the completing stream observable while the test reads
+  // the partial state on slower renderers.
   const server = await startAgentProvider({
-    streamDelayMs: 300,
+    streamDelayMs: 1000,
     stallTextWhen: (prompt) => prompt.startsWith("Stream stop "),
   });
   const name = `Streaming UI ${Date.now()}`;
@@ -34,7 +42,7 @@ test("real provider SSE is visible before completion and daemon stop cancels the
         `Stream ${cancel ? "stop" : "complete"} ${Date.now()}` +
         (cancel ? "" : " 閱讀歷史驗證。".repeat(120));
       await page.locator("#compose textarea").fill(prompt);
-      await page.getByRole("button", { name: "傳送至模型" }).click();
+      await page.getByRole("button", { name: "送出", exact: true }).click();
       const work = page.locator("article.work").filter({ hasText: prompt });
       await work.getByRole("button", { name: "核准這次寫入" }).click();
       await expect(work.locator(".stream-label")).toBeVisible();

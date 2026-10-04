@@ -12,7 +12,7 @@ A prebuilt local package containing `dist` can install runtime dependencies with
 
 ## Models, Works and approvals
 
-Select a provider, exact endpoint, model ID, trusted context limit and output limit in Settings. Credentials are environment-variable references, never inline secrets. Proxy and CA policies belong to each connection; Rocky does not change system DNS, proxy or TLS settings. Probes and configured work make real requests and may incur charges. Cost remains unknown without trusted prices; call/token/cost budgets are separate.
+Select a provider, exact endpoint, model ID, trusted context limit and output limit in Settings. Credentials are environment-variable references, never inline secrets. The first-run setup can store a key in the optional local `secrets.env` in the data directory (unencrypted, mode 0600); explicit process environment variables always take precedence, and the API only ever returns key names. Proxy and CA policies belong to each connection; Rocky does not change system DNS, proxy or TLS settings. Probes and configured work make real requests and may incur charges. Cost remains unknown without trusted prices; call/token/cost budgets are separate.
 
 Before submitting, choose workspace/read scope and optional isolated environment or browser origins/shared profile. Native children share root budgets and permission boundaries. Approvals bind exact arguments and targets. Rejection cannot be bypassed with another tool. Stop does not undo effects already dispatched; unknown outcomes need receipt reconciliation and remain unknown when no trustworthy observer exists.
 
