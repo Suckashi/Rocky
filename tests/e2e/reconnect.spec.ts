@@ -59,9 +59,16 @@ test("initial snapshot failure reconnects to authoritative snapshot without inve
     page.getByText("Snapshot fixture unavailable", { exact: false }),
   ).toBeVisible();
   // Without a snapshot there are no Works, so first run shows only setup.
-  await page
-    .getByRole("button", { name: "先用合成測試試試看", exact: true })
-    .click();
+  // Earlier specs may leave model connections, which hide the fixture path
+  // behind "add a model".
+  const fixture = page.getByRole("button", {
+    name: "先用合成測試試試看",
+    exact: true,
+  });
+  const add = page.getByRole("button", { name: "+ 新增模型", exact: true });
+  await expect(fixture.or(add)).toBeVisible();
+  if (await add.isVisible()) await add.click();
+  await fixture.click();
   await expect(
     page.getByRole("button", { name: "送出", exact: true }),
   ).toBeDisabled();

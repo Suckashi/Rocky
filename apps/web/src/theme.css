@@ -196,6 +196,9 @@ summary:hover {
   background: var(--canvas);
 }
 .breadcrumbs {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 14px;
   font-weight: 550;
   color: var(--text);
@@ -205,6 +208,7 @@ summary:hover {
   font-weight: 400;
 }
 .top-actions {
+  flex-shrink: 0;
   gap: 6px;
 }
 .top-actions button {

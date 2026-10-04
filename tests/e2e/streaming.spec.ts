@@ -5,8 +5,10 @@ test("real provider SSE is visible before completion and daemon stop cancels the
   page,
 }) => {
   test.setTimeout(60000);
+  // Slow deltas keep the completing stream observable while the test reads
+  // the partial state on slower renderers.
   const server = await startAgentProvider({
-    streamDelayMs: 300,
+    streamDelayMs: 1000,
     stallTextWhen: (prompt) => prompt.startsWith("Stream stop "),
   });
   const name = `Streaming UI ${Date.now()}`;
