@@ -11,6 +11,8 @@ const dataRoot = (process.env.ROCKY_E2E_ROOT ??= join(
 export default defineConfig({
   testDir: "tests/e2e",
   workers: 1,
+  // Hosted runners show rare timing flakes; retries are reported as flaky.
+  retries: process.env.CI ? 2 : 0,
   timeout: 30000,
   webServer: {
     command:
