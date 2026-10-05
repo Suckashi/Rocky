@@ -1,6 +1,23 @@
 // Rocky's base system prompt. Deep Agents gives non-Codex models no prompt of its own
 // (ADR 0001, finding 2). Changes here must run the eval suite once it exists (M2).
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { Locale } from '../store/settings.ts';
+
+const INSTRUCTIONS_LIMIT = 20_000;
+
+/** The project's own AGENTS.md, read at the start of every turn (capped). */
+export function projectInstructions(
+  project: string | undefined,
+): string | undefined {
+  if (!project) return undefined;
+  const file = join(project, 'AGENTS.md');
+  if (!existsSync(file)) return undefined;
+  let text = readFileSync(file, 'utf8');
+  if (text.length > INSTRUCTIONS_LIMIT)
+    text = `${text.slice(0, INSTRUCTIONS_LIMIT)}\n[AGENTS.md truncated]`;
+  return `The project's AGENTS.md (the user's instructions for working in this project; follow them):\n<agents_md>\n${text}\n</agents_md>`;
+}
 
 export function rockyPrompt(locale: Locale, project?: string): string {
   const language =

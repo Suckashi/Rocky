@@ -3,7 +3,18 @@ import { useEffect, useState } from 'react';
 import manifest from '../../../assets/roko/roko-manifest.json' with { type: 'json' };
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 
-export type RokoState = 'idle' | 'waving' | 'running' | 'failed' | 'waiting';
+export type RokoState =
+  'idle' | 'waving' | 'running' | 'failed' | 'waiting' | 'done';
+
+/** Sprite rows per state; a finished turn plays the jump. */
+const ROW: Record<RokoState, keyof typeof manifest.animations> = {
+  idle: 'idle',
+  waving: 'waving',
+  running: 'running',
+  failed: 'failed',
+  waiting: 'waiting',
+  done: 'jumping',
+};
 
 const { cellWidth, cellHeight, columns, rows } = manifest.grid;
 const FPS = manifest.playback.suggestedStartingFps;
@@ -22,7 +33,7 @@ export function Roko({
   size?: number;
 }) {
   const { t } = useI18n();
-  const animation = manifest.animations[state];
+  const animation = manifest.animations[ROW[state]];
   const [frame, setFrame] = useState(0);
   useEffect(() => {
     setFrame(0);

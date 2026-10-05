@@ -4,8 +4,8 @@ A single-user AI engineering partner that runs only on your own computer (Window
 Rocky chats, works in your project folders, handles documents, and delegates heavy coding
 to external coding agents over ACP. Roko, our mascot, keeps you company.
 
-**Status: rebuild in progress (M1).** You can chat with Roko through a model you choose.
-Working in project folders, approvals and delegation come in later milestones.
+**Status: V1 rebuild (M0–M5) on the `claude/rocky-rebuild` branch.** Verified on Linux and in
+CI on Windows; the owner's own Windows run is still to be confirmed (see `docs/rebuild/plan.md`).
 The previous Rocky lives on `main`.
 
 ## Start
@@ -22,13 +22,38 @@ The first run installs dependencies with `npm ci` (no compiler needed). Rocky th
 your browser with a one-time login link. Run the launcher again to reopen Rocky while it is
 running. On other systems use `npm ci` and `npm start`.
 
-Data lives in `%LOCALAPPDATA%\Rocky` (Windows) or `~/.local/share/rocky`.
+Data lives in `%LOCALAPPDATA%\Rocky` (Windows) or `~/.local/share/rocky`: conversations,
+receipts and snapshots (`rocky.sqlite`, `snapshots/`), memory (`memory/`), skills
+(`skills/`), job worktrees (`worktrees/`), and `secrets.json` (model key, MCP settings).
+
+## Use
+
+1. **Choose a model**: any OpenAI-compatible endpoint (for example Command Code), OpenAI,
+   or Ollama. **Choose a project folder**: Rocky only reads, edits and runs commands there.
+2. **Chat** in Traditional Chinese or English. Rocky searches, reads, edits files, runs
+   commands (argv only, no shell) and runs your tests after changing code. It reads the
+   project's `AGENTS.md` at the start of each turn.
+3. **Approvals** replace the input box when Rocky needs you (keys `1`–`4`, `Enter`, `Esc`).
+   Three modes: always ask, ask when needed (default), hands off. Dangerous commands and
+   outside actions always ask. Every action has a receipt; every file change has a
+   snapshot and a "restore all" per turn. Details: [docs/rebuild/approvals.md](docs/rebuild/approvals.md).
+4. **Documents**: pdf, docx, xlsx, pptx, md and html are read as Markdown, created from
+   Markdown, and (Office files) edited in place keeping their formatting.
+5. **Delegate** coding to [OpenCode](https://opencode.ai) (`npm i -g opencode-ai`): ask Rocky
+   to hand a task to OpenCode. It works in a git worktree; you approve its actions in Rocky;
+   Rocky checks the diff and runs the tests; you apply or discard it on the Jobs page.
+6. **Memory** (ask Rocky to remember something), **skills** (folders with a `SKILL.md` in the
+   skills folder) and **MCP servers** (Settings) extend Rocky. MCP calls always go through
+   approval unless you mark a tool read-only.
 
 ## Develop
 
 `npm run check` runs type checks, lint, formatting, the i18n checks and the tests.
-`npm run test:e2e` drives the UI in a real browser against a scripted model
-(the system Edge, or `ROCKY_E2E_BROWSER`).
+`npm run test:e2e` (and `test:e2e:jobs`, which needs OpenCode) drive the UI in a real browser
+against a scripted model (the system Edge, or `ROCKY_E2E_BROWSER`).
+`npm run eval` runs about 30 real tasks against a live model and compares with
+`evals/baseline.json` (see `evals/run.ts`). Changes to prompts, tools or the agent loop
+must not lower the score.
 
 - Product: [docs/rebuild/product.md](docs/rebuild/product.md)
 - Architecture: [docs/rebuild/architecture.md](docs/rebuild/architecture.md)

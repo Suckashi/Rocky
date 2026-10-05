@@ -26,6 +26,8 @@ type Event = { type: string; [k: string]: unknown };
 let fake: FakeOpenAI;
 /** The tool calls the model makes on its first turn; afterwards it echoes the tool results. */
 let plan: ScriptedToolCall[] = [];
+/** What the research subagent's model does on its first turn (when Rocky calls "task"). */
+let subPlan: ScriptedToolCall[] = [];
 
 function toolResults(messages: ChatRequestMessage[]): string[] {
   return messages
@@ -38,6 +40,13 @@ function toolResults(messages: ChatRequestMessage[]): string[] {
 beforeAll(async () => {
   fake = await startFakeOpenAI((messages) => {
     const results = toolResults(messages);
+    const rocky = JSON.stringify(messages[0]?.content).includes(
+      'You are Rocky',
+    );
+    if (!rocky)
+      return results.length
+        ? { text: `SUB:${results.join('|')}` }
+        : { toolCalls: subPlan };
     if (results.length === 0) return { toolCalls: plan };
     return { text: `RESULTS:\n${results.join('\n---\n')}` };
   });
@@ -546,6 +555,39 @@ describe('MCP tools', () => {
     await rocky.mcp.close();
     delete process.env['ROCKY_API_TOKEN'];
   }, 60_000);
+});
+
+describe('project instructions and the subagent', () => {
+  it("reads the project's AGENTS.md into the system prompt", async () => {
+    const { call, project } = await setup('ask-when-needed');
+    writeFileSync(
+      join(project, 'AGENTS.md'),
+      '# 規則\n\n測試一律用 node --test。\n',
+    );
+    plan = [];
+    await run(call, 'a1');
+    const system = JSON.stringify(fake.requests.at(-1)?.messages[0]?.content);
+    expect(system).toContain('測試一律用 node --test。');
+  });
+
+  it('lets the research subagent read but not change anything', async () => {
+    const { call, project } = await setup('hands-off');
+    plan = [
+      {
+        name: 'task',
+        args: { description: 'look around', subagent_type: 'general-purpose' },
+      },
+    ];
+    subPlan = [
+      { name: 'read_file', args: { file_path: '/app.js' } },
+      { name: 'write_file', args: { file_path: '/sub.txt', content: 'x' } },
+    ];
+    const text = reply(await run(call, 's1'));
+    expect(text).toContain('const answer = 41;');
+    expect(text).toContain('read-only');
+    expect(() => readFileSync(join(project, 'sub.txt'))).toThrow();
+    subPlan = [];
+  });
 });
 
 describe('without a project folder', () => {

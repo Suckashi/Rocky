@@ -70,6 +70,11 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
               );
       if ('none' in mapped) return handler(request);
       if ('error' in mapped) return error(mapped.error);
+      // The subagent is read-only: anything with an effect is refused before the gate.
+      if (actor === 'subagent' && mapped.effect.kind !== 'read')
+        return error(
+          'The research subagent is read-only. Report what you found; Rocky makes the changes.',
+        );
       const result = await run.gate.request(
         mapped.effect,
         { threadId: run.threadId, runId: run.runId, toolCallId: id, actor },

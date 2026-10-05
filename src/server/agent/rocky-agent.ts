@@ -38,7 +38,7 @@ import { createSkillTool, skillsPrompt } from './skills.ts';
 import { createMcpTools } from './mcp.ts';
 import type { McpManager } from '../mcp/manager.ts';
 import { createRunCommandTool } from './run-command.ts';
-import { rockyPrompt } from './prompt.ts';
+import { projectInstructions, rockyPrompt } from './prompt.ts';
 import { AguiMapper } from './to-agui.ts';
 
 // Deep Agents' shell tool takes a shell string with no approval point; Rocky has run_command.
@@ -215,9 +215,14 @@ export class RockyAgent extends AbstractAgent {
             apiKey: settings.apiKey() ?? 'not-needed',
             configuration: { baseURL: model.baseURL },
             streaming: true,
+            // Model calls change nothing outside, so retrying a 429 or network error is safe.
+            maxRetries: 3,
           }),
           systemPrompt: [
             rockyPrompt(settings.locale(), projectRoot),
+            ...(projectInstructions(projectRoot)
+              ? [projectInstructions(projectRoot)!]
+              : []),
             ...(memory ? [memoryPrompt(memory)] : []),
             ...(skills && skillsPrompt(skills) ? [skillsPrompt(skills)!] : []),
           ].join('\n\n'),
@@ -255,6 +260,9 @@ export class RockyAgent extends AbstractAgent {
           subagents: [
             {
               ...GENERAL_PURPOSE_SUBAGENT,
+              // Read-only: it researches and reports; Rocky makes the changes (enforced by the gate middleware).
+              description:
+                'A read-only helper for research in the project: it searches and reads files (and documents) and reports what it found. It cannot change files, run commands or delegate.',
               middleware: [createGateMiddleware(run, 'subagent')],
             },
           ],

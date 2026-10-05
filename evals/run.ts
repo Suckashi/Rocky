@@ -68,8 +68,19 @@ async function runCase(c: Case): Promise<Result> {
       ['commit', '-q', '-m', 'init'],
     ])
       execFileSync('git', ['-C', dir, ...a]);
+    if (c.remote) {
+      const remote = join(root, 'remote.git');
+      execFileSync('git', ['init', '-q', '--bare', remote]);
+      execFileSync('git', ['-C', dir, 'remote', 'add', 'origin', remote]);
+      execFileSync('git', ['-C', dir, 'push', '-q', 'origin', 'HEAD:main']);
+    }
   }
-  mkdirSync(join(root, 'data'));
+  mkdirSync(join(root, 'data', 'memory'), { recursive: true });
+  for (const [title, content] of Object.entries(c.memories ?? {}))
+    writeFileSync(
+      join(root, 'data', 'memory', `${title}.md`),
+      `# ${title}\n\n${content}\n`,
+    );
   const rocky = composeRocky({
     dataDir: join(root, 'data'),
     token,

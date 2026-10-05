@@ -146,11 +146,13 @@ function Shell({
             {t(
               roko === 'waiting'
                 ? 'panel.waiting'
-                : roko === 'running'
-                  ? 'panel.running'
-                  : roko === 'failed'
-                    ? 'panel.failed'
-                    : 'panel.idle',
+                : roko === 'done'
+                  ? 'panel.done'
+                  : roko === 'running'
+                    ? 'panel.running'
+                    : roko === 'failed'
+                      ? 'panel.failed'
+                      : 'panel.idle',
             )}
           </strong>
         </div>

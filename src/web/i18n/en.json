@@ -264,5 +264,7 @@
   "mcp.env": "Environment (one KEY=value per line, kept on this computer)",
   "mcp.headers": "HTTP headers (one Name=value per line, kept on this computer)",
   "mcp.save": "Save",
-  "mcp.error": "Not saved: {error}"
+  "mcp.error": "Not saved: {error}",
+  "roko.alt.done": "Roko jumps for joy",
+  "panel.done": "Done with this turn"
 }

@@ -159,6 +159,14 @@ export function Chat({
     };
   }, [agent, copilotkit, isReady, t]);
 
+  // A turn that just finished well shows Roko's jump for a moment.
+  const [justDone, setJustDone] = useState(false);
+  useEffect(() => {
+    if (!justDone) return;
+    const timer = setTimeout(() => setJustDone(false), 3000);
+    return () => clearTimeout(timer);
+  }, [justDone]);
+
   useEffect(() => {
     onState(
       pending.length > 0
@@ -167,9 +175,11 @@ export function Chat({
           ? 'failed'
           : running
             ? 'running'
-            : 'idle',
+            : justDone
+              ? 'done'
+              : 'idle',
     );
-  }, [error, running, pending.length, onState]);
+  }, [error, running, pending.length, justDone, onState]);
 
   // Tell the user when Rocky starts waiting while the window is in the background.
   const waitingCount = useRef(0);
@@ -202,6 +212,7 @@ export function Chat({
     agent.addMessage({ id: crypto.randomUUID(), role: 'user', content: text });
     try {
       await copilotkit.runAgent({ agent });
+      setJustDone(true);
     } catch (e) {
       setError(t('chat.error', { error: e instanceof Error ? e.message : '' }));
     } finally {

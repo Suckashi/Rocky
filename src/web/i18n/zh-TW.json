@@ -264,5 +264,7 @@
   "mcp.env": "環境變數（一行一個 KEY=value，只存在你的電腦）",
   "mcp.headers": "HTTP 標頭（一行一個 Name=value，只存在你的電腦）",
   "mcp.save": "儲存",
-  "mcp.error": "沒有儲存：{error}"
+  "mcp.error": "沒有儲存：{error}",
+  "roko.alt.done": "Roko 開心地跳起來",
+  "panel.done": "這輪完成了"
 }
