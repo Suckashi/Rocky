@@ -32,7 +32,9 @@ handles documents, and delegates heavy coding to external coding agents over ACP
 - Redaction applies to logs and display only. It never alters content sent to a
   model or written back to files.
 - Credentials, local databases, browser profiles and private evidence stay out of Git.
-- Roko, the mascot, must appear in the UI. The UI is Traditional Chinese first.
+- Roko, the mascot, must appear in the UI.
+- The UI is switchable between Traditional Chinese (default) and English. Every
+  user-facing string goes through the i18n catalog; no hardcoded UI text.
 
 ## How we work
 
@@ -49,8 +51,8 @@ handles documents, and delegates heavy coding to external coding agents over ACP
 - When reporting, state the real platform, command, exit code and limitations.
   Never mark a failing or unrun test as passed. Never fabricate Windows or
   live-model results.
-- Code, comments and commit messages are in English. User-facing text is in
-  Traditional Chinese.
+- Code, comments and commit messages are in English. User-facing text lives in
+  the i18n catalogs (`zh-TW` complete first, `en` alongside).
 - Prefer deleting code to adding abstractions. No requirement ledgers or plan JSON.
 
 ## Git

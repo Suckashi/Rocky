@@ -5,7 +5,7 @@
 ## 形狀
 
 ```
-瀏覽器 (React + Vite, 繁中, Roko)
+瀏覽器 (React + Vite, zh-TW / en, Roko)
    │  HTTP + SSE，只連 127.0.0.1，每個請求都要 token
    ▼
 Rocky 程序 (Node 24, 單一程序)
@@ -38,6 +38,7 @@ Rocky 程序 (Node 24, 單一程序)
 | 資料位置 | `%LOCALAPPDATA%\Rocky`（Windows） | 不進 Git、不送遙測 |
 | UI 框架 | React 19 + Vite（與 OpenDots 相同），用自己的 design tokens | 不 import OpenDots 的 CSS |
 | UI 與後端的協定 | 事件格式採 **AG-UI** 標準事件（`TEXT_MESSAGE_*`、`TOOL_CALL_*`、`STATE_*`），核准與收據用少量自訂事件；**V1 不用 CopilotKit runtime 和 react-core** | 時間軸、核准、收據都由 Rocky 存在本機並可重播；CopilotKit 的對話紀錄預設放在雲端 Intelligence 服務，而且 `useHumanInTheLoop` 讓核准在瀏覽器端完成，兩者都和「Rocky 是唯一權威」衝突。舊 Rocky 用了 CopilotKit，結果只用到 `CUSTOM` 事件，UI 只能靠名稱比對 |
+| 多語系 | 所有介面文字放在語系檔（`zh-TW`、`en`），設定頁切換並記住；日期、數字用 `Intl` 格式化；CI 檢查兩邊的 key 一致、元件裡沒有寫死的字串 | 舊 Rocky 的 i18n 只做一半，畫面中英混雜 |
 | HTTP 伺服器 | Hono + `@hono/node-server`（與 OpenDots 相同） | 小、型別好；照 OpenDots 的 composition root、依功能分的 route 模組、單一安全 guard、有期限的優雅關機 |
 | 文件編輯器 | Tiptap（與 OpenDots 相同）編輯 Markdown 文件，附原始碼模式 | 借用 OpenDots 的自動儲存、修訂版本檢查（防止舊內容覆蓋新內容） |
 
