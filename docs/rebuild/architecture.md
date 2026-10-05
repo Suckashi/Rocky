@@ -13,7 +13,7 @@ Rocky 程序 (Node 24, 單一程序)
  ├─ 動作關卡：政策 → 核准 → 執行 → 操作紀錄（見 approvals.md）
  ├─ 快照庫：T1 寫入前的內容定址備份，用來還原
  ├─ Agent：Deep Agents JS（同一程序內執行，鎖定版本）
- ├─ 模型層：OpenAI 相容 / OpenAI / Anthropic / Ollama（官方 SDK，有快取與重試）
+ ├─ 模型層：OpenAI 相容 / OpenAI / Ollama（官方 SDK，有快取與重試）
  ├─ ACP client：啟動 OpenCode（之後是 Codex、Claude Code、Kimi）
  ├─ MCP client：使用者設定的 server
  ├─ 文件工具：純 Node 函式庫，加上用系統 Edge 轉 PDF

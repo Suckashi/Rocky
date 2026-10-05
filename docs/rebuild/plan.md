@@ -13,7 +13,7 @@
 | UI 協定    | AG-UI 標準事件                                                                                                     | 核准、操作紀錄用少量自訂事件                  |
 | 對話保存   | 自己寫 `RockyAgentRunner`（繼承 CopilotKit 的 `AgentRunner`）                                                      | 存在本機，不用 Intelligence                   |
 | Agent      | Deep Agents JS + LangGraph JS，在同一個程序裡執行                                                                  | 包成 AG-UI `AbstractAgent`（`RockyAgent`）    |
-| 模型       | `@langchain/openai`（也用來接 OpenAI 相容端點）、`@langchain/anthropic`、`@langchain/ollama`                       | 有 prompt caching，429 會重試                 |
+| 模型       | `@langchain/openai`（也用來接 OpenAI 相容端點）、`@langchain/ollama`                                               | 有 prompt caching，429 會重試                 |
 | 外部 agent | `@agentclientprotocol/sdk` 1.x → `opencode acp`                                                                    | 只回 `allow_once` 或 `reject_once`            |
 | MCP        | `@modelcontextprotocol/sdk`（v1 或 v2 在 spike 時決定）                                                            |                                               |
 | 儲存       | `node:sqlite`（Node 內建，不需要編譯）＋檔案                                                                       | 中文搜尋：FTS5 trigram，兩個字以下補用 LIKE   |
@@ -94,3 +94,4 @@ S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一
 
 - 2026-10-05：骨架與 Windows／Ubuntu CI 完成。S2（agent 執行路徑）以假模型驗證完成，見 `docs/adr/0001-agent-runtime-spike.md`；真實模型待擁有者在 Windows 上跑 `spikes/s2-agent/live.ts`。
 - 2026-10-05：S2 真實模型驗證（雲端 Linux，Command Code，`deepseek/deepseek-v4-flash`，OpenAI 格式）：工具呼叫、寫檔前暫停、拒絕後換做法、中文、用量與快取 token 都通過；Anthropic 格式因方案不含 Claude 模型未驗證。見 ADR 0001。
+- 2026-10-05：擁有者決定只用 OpenAI 相容的第三方端點，Anthropic 格式先不採用，移除 `@langchain/anthropic`。見 ADR 0002。

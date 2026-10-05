@@ -1,8 +1,6 @@
 // S2 live check against a real model.
 // Usage: node spikes/s2-agent/live.ts [task]
-//   ROCKY_S2_PROVIDER      openai (default, any OpenAI-compatible endpoint) or anthropic
-//   ROCKY_S2_BASE_URL      openai: default http://127.0.0.1:11434/v1 (Ollama);
-//                          anthropic: API root without /v1, for example https://api.commandcode.ai/provider
+//   ROCKY_S2_BASE_URL      OpenAI-compatible URL ending in /v1; default http://127.0.0.1:11434/v1 (Ollama)
 //   ROCKY_S2_MODEL         model name, for example deepseek/deepseek-v4-flash
 //   ROCKY_S2_API_KEY       only for endpoints that need one
 //   ROCKY_S2_AUTO_APPROVE  unset: ask in the terminal; 1: allow every request;
@@ -12,7 +10,6 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { Command, MemorySaver } from '@langchain/langgraph';
-import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatOpenAI } from '@langchain/openai';
 import {
   createDeepAgent,
@@ -29,7 +26,6 @@ import {
 import { AguiMapper } from './to-agui.ts';
 import { ROCKY_BASE_PROMPT } from './scenario.ts';
 
-const provider = process.env['ROCKY_S2_PROVIDER'] ?? 'openai';
 const baseURL = process.env['ROCKY_S2_BASE_URL'] ?? 'http://127.0.0.1:11434/v1';
 const apiKey = process.env['ROCKY_S2_API_KEY'] ?? 'not-needed';
 const model = process.env['ROCKY_S2_MODEL'];
@@ -38,10 +34,6 @@ if (!model) {
   console.error(
     'Set ROCKY_S2_MODEL, for example: $env:ROCKY_S2_MODEL="qwen3-coder:30b"',
   );
-  process.exit(2);
-}
-if (provider !== 'openai' && provider !== 'anthropic') {
-  console.error('ROCKY_S2_PROVIDER must be openai or anthropic');
   process.exit(2);
 }
 if (autoApprove && autoApprove !== '1' && autoApprove !== 'reject-first') {
@@ -59,22 +51,13 @@ globalThis.fetch = (input, init) => {
 const root = mkdtempSync(join(tmpdir(), 'rocky-s2-live-'));
 const gateLog: GateLogEntry[] = [];
 const gate = createGateMiddleware(gateLog);
-const chatModel =
-  provider === 'anthropic'
-    ? new ChatAnthropic({
-        model,
-        apiKey,
-        anthropicApiUrl: baseURL,
-        streaming: true,
-      })
-    : new ChatOpenAI({
-        model,
-        apiKey,
-        configuration: { baseURL },
-        streaming: true,
-      });
 const agent = createDeepAgent({
-  model: chatModel,
+  model: new ChatOpenAI({
+    model,
+    apiKey,
+    configuration: { baseURL },
+    streaming: true,
+  }),
   systemPrompt: ROCKY_BASE_PROMPT,
   backend: new FilesystemBackend({ rootDir: root, virtualMode: true }),
   middleware: [todoListMiddleware() as unknown as AgentMiddleware, gate],
@@ -179,7 +162,7 @@ terminal?.close();
 
 console.log('\n--- S2 live report ---');
 console.log(
-  `node ${process.version} on ${process.platform}; ${provider} model ${model} at ${baseURL}`,
+  `node ${process.version} on ${process.platform}; model ${model} at ${baseURL}`,
 );
 console.log(
   `approvals: ${autoApprove ? `automatic (ROCKY_S2_AUTO_APPROVE=${autoApprove})` : 'asked in the terminal'}`,

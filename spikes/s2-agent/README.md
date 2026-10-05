@@ -22,15 +22,10 @@ tool calls, token usage with cache read/write, hosts contacted, files written).
 
 | Variable                | Meaning                                                                          |
 | ----------------------- | -------------------------------------------------------------------------------- |
-| `ROCKY_S2_PROVIDER`     | `openai` (default) or `anthropic`                                                |
-| `ROCKY_S2_BASE_URL`     | `openai`: URL ending in `/v1`; `anthropic`: API root without `/v1`               |
+| `ROCKY_S2_BASE_URL`     | OpenAI-compatible URL ending in `/v1` (default: Ollama on 127.0.0.1)             |
 | `ROCKY_S2_MODEL`        | Model id, for example `deepseek/deepseek-v4-flash`                               |
 | `ROCKY_S2_API_KEY`      | Only for endpoints that need one                                                 |
 | `ROCKY_S2_AUTO_APPROVE` | Unset: ask. `1`: allow everything. `reject-first`: reject the first request only |
-
-Anthropic format on Command Code (Claude models only, needs a plan that includes them):
-`ROCKY_S2_PROVIDER=anthropic`, `ROCKY_S2_BASE_URL=https://api.commandcode.ai/provider`,
-`ROCKY_S2_MODEL=claude-haiku-4-5-20251001`.
 
 Behind an HTTPS proxy (for example a cloud container), also set `NODE_USE_ENV_PROXY=1`:
 Node's built-in fetch ignores `HTTPS_PROXY` otherwise.

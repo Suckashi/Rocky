@@ -1,7 +1,7 @@
 # ADR 0001：Agent 執行路徑（S2 spike 結果）
 
 - 日期：2026-10-05
-- 狀態：已採用（真實模型已在雲端 Linux 用 Command Code 驗證；Windows 與 Anthropic 格式待確認）
+- 狀態：已採用（真實模型已在雲端 Linux 用 Command Code 驗證；Windows 待確認；Anthropic 格式不採用，見 ADR 0002）
 - 程式：`spikes/s2-agent/`；測試：`tests/spikes/s2-agent.test.ts`
 
 ## 決定
@@ -46,23 +46,24 @@ Deep Agents 1.14.1（在 Rocky 程序內）→ `@langchain/openai` 的 `ChatOpen
 任務是預設任務：在 /notes.md 寫三行繁體中文待辦事項，讀回確認。核准一律由 `ROCKY_S2_AUTO_APPROVE` **自動回答**，不是人按的。
 依擁有者要求只用便宜的模型。
 
-| 項目                                     | 結果                                                                                           |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `GET /models`                            | ✅ HTTP 200，列出 Claude、GPT、DeepSeek、Qwen 等模型                                           |
-| 工具呼叫（`deepseek/deepseek-v4-flash`） | ✅ `ls` → `write_file` → `read_file`，參數格式正確，一次就成功，不需要換模型                   |
-| 寫檔前暫停                               | ✅ 關卡在 `write_file` 前 interrupt，當時 `/notes.md on disk before approval: no`              |
-| 中文內容                                 | ✅ 硬碟上的檔案是三行正確的繁體中文，讀回後模型回報一致                                        |
-| 用量回報                                 | ✅ 每次模型呼叫都有 `usage_metadata`（串流也有）                                               |
-| 快取 token                               | ✅ OpenAI 格式回報 `cache_read`（自動快取，不需要 `cache_control`）；不回報 cache write        |
-| 拒絕（`reject-first`）                   | ✅ 模型收到原因後改成直接在回覆列出內容，沒有重試寫檔，硬碟上沒有檔案                          |
-| 聯絡過的主機                             | ✅ 只有 `api.commandcode.ai`                                                                   |
-| Anthropic 格式（`ChatAnthropic`）        | ❌ 沒跑成：路徑 `https://api.commandcode.ai/provider` 正確，但方案不含 Claude 模型（見發現 9） |
+| 項目                                     | 結果                                                                                    |
+| ---------------------------------------- | --------------------------------------------------------------------------------------- |
+| `GET /models`                            | ✅ HTTP 200，列出 Claude、GPT、DeepSeek、Qwen 等模型                                    |
+| 工具呼叫（`deepseek/deepseek-v4-flash`） | ✅ `ls` → `write_file` → `read_file`，參數格式正確，一次就成功，不需要換模型            |
+| 寫檔前暫停                               | ✅ 關卡在 `write_file` 前 interrupt，當時 `/notes.md on disk before approval: no`       |
+| 中文內容                                 | ✅ 硬碟上的檔案是三行正確的繁體中文，讀回後模型回報一致                                 |
+| 用量回報                                 | ✅ 每次模型呼叫都有 `usage_metadata`（串流也有）                                        |
+| 快取 token                               | ✅ OpenAI 格式回報 `cache_read`（自動快取，不需要 `cache_control`）；不回報 cache write |
+| 拒絕（`reject-first`）                   | ✅ 模型收到原因後改成直接在回覆列出內容，沒有重試寫檔，硬碟上沒有檔案                   |
+| 聯絡過的主機                             | ✅ 只有 `api.commandcode.ai`                                                            |
+| Anthropic 格式（`ChatAnthropic`）        | ❌ 沒跑成：方案不含 Claude 模型（見發現 9）；之後不採用，程式已移除（ADR 0002）         |
 
 8. **雲端環境的 Node 要設 `NODE_USE_ENV_PROXY=1`。** Node 內建的 fetch 不讀 `HTTPS_PROXY`，直接連線會被環境的出口白名單擋（403）。
    這只和雲端容器有關；擁有者的 Windows 直接連線不需要。
 9. **Command Code 的 `/provider/v1/messages` 只接受 Claude 模型**，其他模型回 400 並指向 `/chat/completions`。
    目前方案用 Claude Haiku 4.5 回 `403 MODEL_NOT_IN_PLAN`（需要 Pro 以上或按量計費），所以 prompt caching 的 cache read/write 還沒在 Anthropic 格式上驗證。
-   Deep Agents 偵測到 `ChatAnthropic` 時會自動加上 `anthropicPromptCachingMiddleware` 與系統提示詞的 cache breakpoint，Rocky 不用自己加。
+   Deep Agents 偵測到 `ChatAnthropic` 時會自動加上 `anthropicPromptCachingMiddleware` 與系統提示詞的 cache breakpoint。
+   擁有者不使用含 Claude 的方案，因此 Anthropic 格式不採用，`@langchain/anthropic` 與 `live.ts` 的 anthropic 分支已移除（ADR 0002）。
 10. 拒絕原因會原封不動傳給模型，模型依原因換做法；工具結果的 `status: 'error'` 加上中文原因就足夠，不需要另外的訊息格式。
 
 ## 執行紀錄
@@ -80,7 +81,7 @@ Deep Agents 1.14.1（在 Rocky 程序內）→ `@langchain/openai` 的 `ChatOpen
 ## 還沒驗證的（限制）
 
 - **真實模型只在雲端 Linux 跑過一個模型（DeepSeek V4 Flash）**，核准是自動回答。還沒在擁有者的 Windows 上跑，也還沒試過其他模型。
-- **Anthropic 格式與 prompt caching 的 cache read/write 沒驗證到**：方案不含 Claude 模型。升級方案或開啟按量計費後，用 `ROCKY_S2_PROVIDER=anthropic` 再跑一次。
+- Anthropic 格式不採用（ADR 0002），因此不再列為待驗證。
 - 只跑了預設任務；子代理、平行寫檔、恢復時不重做指令，這些仍只有假模型的證據。
 - Checkpointer 用的是記憶體版 `MemorySaver`；`node:sqlite` 版本另外做。
 - 第二道防線（通行證）、`run_command` 與 Windows 的子行程管理都還沒做，屬於 M2。
