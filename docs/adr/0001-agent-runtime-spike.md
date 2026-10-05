@@ -80,6 +80,8 @@ Deep Agents 1.14.1（在 Rocky 程序內）→ `@langchain/openai` 的 `ChatOpen
 
 ## 還沒驗證的（限制）
 
+- **Windows 上的真實模型驗證先跳過**（擁有者決定，2026-10-05），之後補跑 `spikes/s2-agent/live.ts`。
+
 - **真實模型只在雲端 Linux 跑過一個模型（DeepSeek V4 Flash）**，核准是自動回答。還沒在擁有者的 Windows 上跑，也還沒試過其他模型。
 - Anthropic 格式不採用（ADR 0002），因此不再列為待驗證。
 - 只跑了預設任務；子代理、平行寫檔、恢復時不重做指令，這些仍只有假模型的證據。

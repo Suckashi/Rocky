@@ -69,6 +69,8 @@ Rocky 用 `@agentclientprotocol/sdk` 1.7.0 的 `ClientSideConnection` 直接啟�
 
 ## 還沒驗證的（限制）
 
+- **Windows 上的真實模型驗證先跳過**（擁有者決定，2026-10-05），之後補跑 `spikes/s1-acp/live.ts`。
+
 - **CI 不再跑 S1**（擁有者決定：太重）。上面 Windows 欄的結果來自 2026-10-05 的 CI 執行（run 37312826744）；之後要重驗，在裝了 OpenCode 的機器上設 `ROCKY_REQUIRE_OPENCODE=1` 跑 `npm test`。
 
 - **擁有者的 Windows 上還沒跑過真實模型**：CI 的 Windows 只用假模型。請照 `spikes/s1-acp/README.md` 在你的電腦上跑一次 `live.ts`（手動核准）。

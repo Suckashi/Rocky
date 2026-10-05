@@ -98,3 +98,4 @@ S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一
 - 2026-10-05：S1（OpenCode ACP）：原生 Windows 可行，不需要 WSL 備案。核准、拒絕、取消、續接、worktree 對帳都在 Windows 與 Ubuntu CI 上以假模型通過；真實模型在雲端 Linux 修 bug 加跑測試成功。見 ADR 0003。
 - 2026-10-05：S3（安裝不需要編譯）：計畫中的完整依賴在 Linux 上 `npm ci` 不需要編譯、只連 npm；CopilotKit 帶有安裝遙測（Scarf），已在 `package.json` 關閉。Windows 11 上擁有者執行兩個腳本都是 exit 0（擁有者回報）。見 ADR 0004。
 - 2026-10-05：S4（中文文件）：六種格式的中文往返測試都通過，已放進 `npm test`。發現 unpdf 讀不到靠 CMap 的中文 PDF、`.ttc` 不能直接嵌入、pptx-automizer 會留下舊投影片，都已有對策。見 ADR 0005。
+- 2026-10-05：M0 收尾。S1、S2 的 Windows 真實模型驗證（`live.ts`）由擁有者決定先跳過，待補；開始 M1。
