@@ -61,7 +61,7 @@ Rocky 程序 (Node 24, 單一程序)
 
 ## Deep Agents 能力對照（deepagents 1.14.1）
 
-原則：**Deep Agents 負責「想」和「派工」，凡是會改變外部世界的動作，都要經過 Rocky 的動作關卡。**
+原則：**能用 Deep Agents 原本的就用；只在「會改變外部世界」的那一刻接上 Rocky 的動作關卡。**
 
 | Deep Agents 能力 | Rocky 怎麼用 | 說明 |
 |---|---|---|
@@ -69,15 +69,15 @@ Rocky 程序 (Node 24, 單一程序)
 | 子代理（`task`，隔離上下文） | ✅ 照用 | 內建通用子代理，另外定義「探索者」（唯讀搜尋）和「審查者」（驗證成果）；讀取可以平行跑，同一時間只有一個寫手 |
 | 分叉子代理（`ForkedSubAgent`） | ✅ 選用 | 繼承主對話的上下文；適合「接著做」的小任務 |
 | 非同步子代理（`AsyncSubAgent`） | ❌ 不用 | 需要遠端的 Agent Protocol 伺服器；背景工作改由 Rocky 的 Work 服務負責 |
-| 檔案工具（`ls`、`read_file`、`write_file`、`edit_file`、`glob`、`grep`） | ✅ 照用工具介面，換掉後端 | 自己實作 `RockyBackend`：讀取直接執行；寫入先經過動作關卡、存快照、寫操作紀錄。不用內建的 `FilesystemBackend`，因為它會直接寫檔 |
-| Shell 執行（`LocalShellBackend` 的 `execute`） | 🔁 換成自己的 | 改用 Rocky 的 `run_command`：用參數陣列啟動、不經過 shell 字串、用 Job Object 管住整棵行程樹、經過動作關卡 |
-| 檔案權限（`permissions`，只有 allow/deny） | 🔁 換成動作關卡 | 太粗，判斷一律交給 `approvals.md` 的判斷順序 |
+| 檔案工具（`ls`、`read_file`、`write_file`、`edit_file`、`glob`、`grep`） | ✅ 照用，只攔寫入 | 繼承 `FilesystemBackend`（`virtualMode: true`），讀取、搜尋、路徑與 symlink 檢查都沿用；只覆寫 `write`／`edit`：先過動作關卡 → 存快照 → 呼叫原本的寫入 → 寫操作紀錄 |
+| Shell 執行（`LocalShellBackend` 的 `execute`） | 🔁 換成自己的（很薄） | 原本收一整串 shell 字串、沒有核准點、不處理 Windows 的 `.cmd`、PowerShell 與子行程樹，套件文件自己標了安全警告。改用 `run_command`：拆成參數陣列 → 過動作關卡 → 用 Job Object 執行 → 寫操作紀錄 |
+| 檔案權限（`permissions`，只有 allow/deny） | ✅ 保留當硬擋 | 用來硬擋機密檔（`.env*`、SSH 金鑰、憑證）；是否要問、留操作紀錄，仍由動作關卡決定 |
 | 人工介入（`interruptOn`） | ✅ 當作「暫停機制」 | 動作關卡決定要問你時，用 interrupt 讓 agent 停下來等；要不要問，由動作關卡決定，不是 Deep Agents |
 | 上下文壓縮（summarization，約 85% 時觸發） | ✅ 照用 | 修掉舊 Rocky 的兩個問題：token 數用模型實際回報的值，不用估算；上下文超過上限的錯誤要原樣往上傳，壓縮才觸發得了 |
 | 大結果卸載（超過 2 萬 token 存成檔案） | ✅ 照用 | 存在本機的工作資料夾 |
 | 技能（`SKILL.md`） | ✅ 照用 | 平常只載入名稱和說明，需要時才載入全文；技能不帶任何權限 |
 | 專案說明（memory middleware 讀 `AGENTS.md`） | ✅ 照用 | 開工時讀專案的 `AGENTS.md` |
-| 長期記憶（agent memory、`StoreBackend`） | 🔁 換成自己的 | 記憶要能用中文搜尋、要有操作紀錄、要能撤銷，所以用 Rocky 自己的記憶工具 |
+| 長期記憶（`createMemoryMiddleware`、記憶檔） | ✅ 照用 | 記憶是 Markdown 檔，`grep` 搜尋中文沒問題；寫入走上面改造過的檔案工具，自動有快照、操作紀錄、可撤銷。記憶多到載不完時，再補一個搜尋工具 |
 | Harness profile（每種模型的基礎提示詞） | ✅ 一定要設定 | 1.14.1 起，不認得的模型拿到的是空 profile，等於沒有任何寫程式指引；要註冊 Rocky 自己的 profile |
 | 修補懸空工具呼叫（patch tool calls） | ✅ 照用 | 預設就有 |
 | 結構化回覆（`responseFormat`） | ✅ 選用 | 讓子代理回傳固定格式的結果 |
