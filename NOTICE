@@ -1,5 +1,5 @@
 Rocky
-Roko artwork (assets/roko; packaged as dist/web/roko) is user-supplied and
+Roko artwork (assets/roko) is user-supplied and
 excluded from the Apache-2.0 code license. See its accompanying README and
 manifest for provenance and rights status. The owner identifies it as GPT-generated
 and authorizes inclusion in this public repository; no separate reuse license is asserted.
@@ -7,7 +7,7 @@ and authorizes inclusion in this public repository; no separate reuse license is
 Original Rocky source is distributed under the Apache License, Version 2.0.
 See LICENSE for the license text.
 
-This product includes presentation code adapted from OpenDots:
+This product follows layout and server patterns from OpenDots:
 Copyright (c) Atai Barkai
 Licensed under the MIT License.
 
