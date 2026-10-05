@@ -9,7 +9,7 @@ function hasOpenCode(): boolean {
     resolveOpenCode();
     return true;
   } catch (error) {
-    // CI installs OpenCode and sets this, so a missing binary fails there instead of skipping.
+    // Set to make a missing OpenCode fail instead of skip.
     if (process.env['ROCKY_REQUIRE_OPENCODE'] === '1') throw error;
     return false;
   }

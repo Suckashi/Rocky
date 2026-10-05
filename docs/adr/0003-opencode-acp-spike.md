@@ -1,7 +1,7 @@
 # ADR 0003：外部 agent 執行路徑（S1 spike 結果）
 
 - 日期：2026-10-05
-- 狀態：已採用（原生 Windows 在 CI 上以假模型驗證；擁有者電腦上的真實使用待確認）
+- 狀態：已採用（原生 Windows 曾在 CI 上以假模型驗證，之後 CI 不再跑 S1；擁有者電腦上的真實使用待確認）
 - 程式：`spikes/s1-acp/`；測試：`tests/spikes/s1-acp.test.ts`
 
 ## 決定
@@ -68,6 +68,8 @@ Rocky 用 `@agentclientprotocol/sdk` 1.7.0 的 `ClientSideConnection` 直接啟�
 | 雲端 Linux，Node 24.21.0      | `node spikes/s1-acp/live.ts`（Command Code，自動核准）  | 第一次 exit 124：關閉時卡住（發現 4）；修正後 exit 0，結果如上                                      |
 
 ## 還沒驗證的（限制）
+
+- **CI 不再跑 S1**（擁有者決定：太重）。上面 Windows 欄的結果來自 2026-10-05 的 CI 執行（run 37312826744）；之後要重驗，在裝了 OpenCode 的機器上設 `ROCKY_REQUIRE_OPENCODE=1` 跑 `npm test`。
 
 - **擁有者的 Windows 上還沒跑過真實模型**：CI 的 Windows 只用假模型。請照 `spikes/s1-acp/README.md` 在你的電腦上跑一次 `live.ts`（手動核准）。
 - 沒測 OpenCode 的登入（`opencode auth login`）：Rocky 直接用自己的模型設定，不需要它。
