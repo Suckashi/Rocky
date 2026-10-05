@@ -1,6 +1,7 @@
 import type { Settings } from '../api.ts';
 import { LanguageSwitch } from '../components/LanguageSwitch.tsx';
 import { ModelForm } from '../components/ModelForm.tsx';
+import { ProjectForm } from '../components/ProjectForm.tsx';
 import { Roko } from '../components/Roko.tsx';
 import { useI18n } from '../i18n/index.tsx';
 
@@ -44,6 +45,11 @@ export function Onboarding({
             {t('onboarding.step1')}
           </h2>
           <ModelForm current={settings.model} onSaved={onChange} />
+          <h2>
+            <span className="step">2</span>
+            {t('onboarding.step2')}
+          </h2>
+          <ProjectForm current={settings.project} onSaved={onChange} />
           <div className="row end">
             <button type="button" className="secondary" onClick={onDone}>
               {t('onboarding.later')}

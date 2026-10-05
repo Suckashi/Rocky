@@ -1,6 +1,7 @@
 // What an action is, who asked for it, and how Rocky decided.
 
-export type Actor = 'rocky' | 'subagent' | 'opencode';
+/** 'user': actions the user started from the interface, such as restoring files. */
+export type Actor = 'rocky' | 'subagent' | 'opencode' | 'user';
 export type Mode = 'ask-always' | 'ask-when-needed' | 'hands-off';
 
 export type Effect =

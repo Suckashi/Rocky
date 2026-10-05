@@ -554,3 +554,310 @@ button.secondary {
     padding: var(--space-5) var(--space-4);
   }
 }
+
+/* M2: composer bar, approval panel, tool cards, diffs, change cards. */
+.spacer {
+  flex: 1;
+}
+.warn {
+  color: var(--warn);
+  margin: 0;
+}
+.badge {
+  display: inline-block;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--link);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.badge.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.code {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  color: var(--code-text);
+  font: 12px/1.5 var(--font-mono);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow: auto;
+}
+.project-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.composer-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.composer-box textarea {
+  border: 0;
+  resize: none;
+  padding: var(--space-3) var(--space-4) 0;
+  background: transparent;
+  min-height: 52px;
+  max-height: 240px;
+}
+.composer-box textarea:focus {
+  outline: none;
+}
+.composer-box:focus-within {
+  outline: 2px solid var(--primary);
+}
+.composer-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+}
+.mode-select {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  padding: 4px var(--space-2);
+  font-size: 13px;
+}
+.turn-part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.tool-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-left: 44px;
+}
+.tool-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 13px;
+}
+.tool-card summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px var(--space-3);
+  cursor: pointer;
+  list-style: none;
+}
+.tool-card summary::-webkit-details-marker {
+  display: none;
+}
+.tool-icon {
+  display: inline-flex;
+  color: var(--ok);
+}
+.tool-card.running .tool-icon {
+  color: var(--link);
+}
+.tool-card.interrupted .tool-icon {
+  color: var(--warn);
+}
+.tool-name {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tool-target {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+.tool-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 var(--space-3) var(--space-3);
+}
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
+.diff {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+  font: 12px/1.5 var(--font-mono);
+  max-height: 360px;
+  overflow: auto;
+  padding: var(--space-1) 0;
+}
+.diff > div {
+  padding: 0 var(--space-3);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.diff-add {
+  background: var(--diff-add-bg);
+  color: var(--diff-add-text);
+}
+.diff-del {
+  background: var(--diff-del-bg);
+  color: var(--diff-del-text);
+}
+.diff-gap {
+  color: var(--text-subtle);
+  font-style: italic;
+}
+.diff-sign {
+  display: inline-block;
+  width: 1.5em;
+  user-select: none;
+}
+.turn-changes,
+.unknown-outcome {
+  margin-left: 44px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: var(--space-3) var(--space-4);
+}
+.unknown-outcome {
+  background: var(--warn-soft);
+  border-color: var(--warn);
+}
+.unknown-outcome p {
+  margin: 0;
+}
+.change-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.change {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.approval {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: var(--space-3) var(--space-4);
+  max-height: 60vh;
+  overflow: auto;
+}
+.approval:focus {
+  outline: none;
+}
+.approval.fullscreen {
+  position: fixed;
+  inset: var(--space-5);
+  max-height: none;
+  z-index: 10;
+  box-shadow: var(--shadow-overlay);
+}
+.approval.fullscreen .diff {
+  max-height: none;
+}
+.approval-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.approval-head strong {
+  flex: 1;
+}
+.approval p {
+  margin: 0;
+}
+.approval-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.argv {
+  margin: 0;
+  padding: var(--space-2) var(--space-2) var(--space-2) 2.5em;
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  color: var(--code-text);
+  font-size: 12px;
+}
+.approval-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.approval-options li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.approval-options button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.approval-options button.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.approval-options kbd {
+  font: 12px var(--font-mono);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 0 5px;
+  background: var(--surface-muted);
+}
+.approval-options input {
+  margin-left: 36px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 7px var(--space-3);
+}
+.approval-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.approval-foot .muted {
+  flex: 1;
+}
+.presence.waiting {
+  background: var(--primary-soft);
+}

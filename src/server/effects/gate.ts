@@ -232,6 +232,49 @@ export class Gate {
     };
   }
 
+  /**
+   * An action the user started from the interface after seeing a preview (restore). The
+   * click is the approval, bound to the content hash of the preview; deny decisions still win.
+   */
+  userAction(
+    effect: Effect,
+    origin: Origin & { threadId: string },
+    seenHash: string,
+  ): GateResult {
+    const verdict = decide(effect, this.context(origin.threadId));
+    if (verdict.decision === 'deny') {
+      const receipt = this.deps.receipts.intent(
+        origin,
+        effect,
+        verdict,
+        'denied',
+        verdict.detail,
+      );
+      return { allowed: false, receipt, message: verdict.reason };
+    }
+    if (seenHash !== verdict.contentHash) {
+      const receipt = this.deps.receipts.intent(
+        origin,
+        effect,
+        verdict,
+        'rejected',
+        'content-changed',
+      );
+      return { allowed: false, receipt, message: 'content-changed' };
+    }
+    const receipt = this.deps.receipts.intent(
+      origin,
+      effect,
+      verdict,
+      'approved',
+    );
+    return {
+      allowed: true,
+      receipt,
+      pass: this.passes.issue(verdict.contentHash, receipt.id),
+    };
+  }
+
   /** The user's answer to a pending approval. False when it is no longer pending. */
   answer(approvalId: string, decision: UserDecision): boolean {
     const waiting = this.waiting.get(approvalId);

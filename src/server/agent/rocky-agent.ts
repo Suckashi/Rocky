@@ -53,9 +53,15 @@ function textOf(content: unknown): string {
   return '';
 }
 
+export const INTERRUPTED_TOOL_RESULT =
+  'This tool call was interrupted before it returned; its outcome is unknown. Check before repeating it.';
+
 /** AG-UI messages from the browser to LangChain messages for the model. */
 export function toLangChain(messages: Message[]): BaseMessage[] {
   const out: BaseMessage[] = [];
+  const answered = new Set(
+    messages.flatMap((m) => (m.role === 'tool' ? [m.toolCallId] : [])),
+  );
   for (const message of messages) {
     switch (message.role) {
       case 'user':
@@ -82,6 +88,17 @@ export function toLangChain(messages: Message[]): BaseMessage[] {
             })),
           }),
         );
+        // A turn stopped mid-tool leaves calls without results; models reject that history.
+        for (const call of message.toolCalls ?? []) {
+          if (!answered.has(call.id))
+            out.push(
+              new ToolMessage({
+                tool_call_id: call.id,
+                status: 'error',
+                content: INTERRUPTED_TOOL_RESULT,
+              }),
+            );
+        }
         break;
       case 'tool':
         out.push(

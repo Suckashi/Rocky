@@ -19,6 +19,11 @@
   --warn-soft: #fff7ec;
   --code-bg: #23252e;
   --code-text: #e9eaf0;
+  --diff-add-bg: #e7f5ec;
+  --diff-add-text: #1f5a37;
+  --diff-del-bg: #fbeceb;
+  --diff-del-text: #8a2a24;
+  --shadow-overlay: 0 8px 40px rgb(0 0 0 / 20%);
 
   --font-sans:
     'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', system-ui,

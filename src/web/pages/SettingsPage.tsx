@@ -1,6 +1,8 @@
-import type { Settings } from '../api.ts';
+import { api, type Settings } from '../api.ts';
 import { LanguageSwitch } from '../components/LanguageSwitch.tsx';
+import { ModeSelect } from '../components/ModeSelect.tsx';
 import { ModelForm } from '../components/ModelForm.tsx';
+import { ProjectForm } from '../components/ProjectForm.tsx';
 import { useI18n } from '../i18n/index.tsx';
 
 export function SettingsPage({
@@ -27,6 +29,24 @@ export function SettingsPage({
           <div className="row">
             <span>{t('settings.language')}</span>
             <LanguageSwitch settings={settings} onChange={onChange} />
+          </div>
+        </section>
+        <section className="card">
+          <h2>{t('settings.project')}</h2>
+          <ProjectForm current={settings.project} onSaved={onChange} />
+        </section>
+        <section className="card">
+          <h2>{t('settings.mode')}</h2>
+          <div className="row">
+            <span className="small muted">{t('settings.mode.hint')}</span>
+            <ModeSelect
+              value={settings.mode}
+              onChange={(mode) =>
+                void api<Settings>('/settings/mode', 'PUT', { mode }).then(
+                  onChange,
+                )
+              }
+            />
           </div>
         </section>
         <section className="card">

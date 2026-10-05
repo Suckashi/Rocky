@@ -1,10 +1,23 @@
-// One conversation: history from the local runner, streaming reply, stop, errors.
+// One conversation: history from the local runner, streaming reply, tool cards, approvals
+// (in place of the input box), per-turn file changes, and actions with an unknown outcome.
 import { useAgent, useCopilotKit } from '@copilotkit/react-core/v2';
 import { ArrowUp, Square } from 'lucide-react';
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import ReactMarkdown from 'react-markdown';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react';
+import ReactMarkdown, { type Components } from 'react-markdown';
+import { api, type Mode, type PendingApproval, type Receipt } from '../api.ts';
 import { useI18n } from '../i18n/index.tsx';
+import { ApprovalPanel, type Answer } from './ApprovalPanel.tsx';
+import { ModeSelect } from './ModeSelect.tsx';
 import { Roko, type RokoState } from './Roko.tsx';
+import { ToolCard, type ToolState } from './ToolCard.tsx';
+import { TurnChanges } from './TurnChanges.tsx';
+import { UnknownOutcome } from './UnknownOutcome.tsx';
 
 const AGENT_ID = 'rocky';
 
@@ -20,12 +33,55 @@ function textOf(content: unknown): string {
   return '';
 }
 
+interface ToolCall {
+  id: string;
+  function: { name: string; arguments: string };
+}
+
+interface Snapshot {
+  receiptId: string;
+  path: string;
+}
+
+/** Files each run changed (by Rocky, not by the user's restores), and its last tool call. */
+function runsWithChanges(receipts: Receipt[], snapshots: Snapshot[]) {
+  const paths = new Map<string, string[]>();
+  for (const s of snapshots) {
+    paths.set(s.receiptId, [...(paths.get(s.receiptId) ?? []), s.path]);
+  }
+  const runs = new Map<string, { files: Set<string>; lastToolCall: string }>();
+  for (const r of receipts) {
+    if (r.actor === 'user' || r.outcome !== 'succeeded' || !r.runId) continue;
+    const files = paths.get(r.id);
+    if (!files || !r.toolCallId) continue;
+    const run = runs.get(r.runId) ?? {
+      files: new Set<string>(),
+      lastToolCall: r.toolCallId,
+    };
+    files.forEach((f) => run.files.add(f));
+    run.lastToolCall = r.toolCallId;
+    runs.set(r.runId, run);
+  }
+  return runs;
+}
+
+const markdownComponents: Components = {
+  img: ({ alt }) => <span>{alt}</span>,
+  a: ({ href, children }) => (
+    <a href={href} target="_blank" rel="noreferrer">
+      {children}
+    </a>
+  ),
+};
+
 export function Chat({
   threadId,
+  project,
   onActivity,
   onState,
 }: {
   threadId: string;
+  project: string | null;
   onActivity: () => void;
   onState: (state: RokoState) => void;
 }) {
@@ -40,7 +96,32 @@ export function Chat({
   const [running, setRunning] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
+  const [pending, setPending] = useState<PendingApproval[]>([]);
+  const [mode, setMode] = useState<Mode | null>(null);
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
+  const runningRef = useRef(false);
   const bottom = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
+
+  const refresh = useCallback(async () => {
+    const [approvals, log] = await Promise.all([
+      api<{ mode: Mode; pending: PendingApproval[] }>(
+        `/threads/${threadId}/approvals`,
+      ),
+      api<{ receipts: Receipt[]; snapshots: Snapshot[] }>(
+        `/threads/${threadId}/receipts`,
+      ),
+    ]);
+    setPending(approvals.pending);
+    setMode(approvals.mode);
+    setReceipts(log.receipts);
+    setSnapshots(log.snapshots);
+  }, [threadId]);
+
+  useEffect(() => {
+    void refresh().catch(() => undefined);
+  }, [refresh]);
 
   useEffect(() => {
     const events = agent.subscribe({
@@ -50,6 +131,16 @@ export function Chat({
             ? t('chat.error.model-not-configured')
             : t('chat.error', { error: event.message }),
         );
+      },
+      // Replayed history carries old snapshots; only a live run speaks for the present.
+      onStateSnapshotEvent: ({ event }) => {
+        if (!runningRef.current) return;
+        const state = event.snapshot as {
+          mode?: Mode;
+          pendingApprovals?: PendingApproval[];
+        };
+        if (state.pendingApprovals) setPending(state.pendingApprovals);
+        if (state.mode) setMode(state.mode);
       },
     });
     return () => events.unsubscribe();
@@ -69,18 +160,44 @@ export function Chat({
   }, [agent, copilotkit, isReady, t]);
 
   useEffect(() => {
-    onState(error ? 'failed' : running ? 'running' : 'idle');
-  }, [error, running, onState]);
+    onState(
+      pending.length > 0
+        ? 'waiting'
+        : error
+          ? 'failed'
+          : running
+            ? 'running'
+            : 'idle',
+    );
+  }, [error, running, pending.length, onState]);
+
+  // Tell the user when Rocky starts waiting while the window is in the background.
+  const waitingCount = useRef(0);
+  useEffect(() => {
+    if (
+      pending.length > waitingCount.current &&
+      document.hidden &&
+      'Notification' in window &&
+      Notification.permission === 'granted'
+    ) {
+      new Notification(t('approval.notify'));
+    }
+    waitingCount.current = pending.length;
+  }, [pending.length, t]);
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'end' });
-  }, [agent.messages.length, running]);
+  }, [agent.messages.length, running, pending.length]);
 
   const send = async () => {
     const text = draft.trim();
     if (!text || running || !loaded) return;
+    if ('Notification' in window && Notification.permission === 'default') {
+      void Notification.requestPermission().catch(() => undefined);
+    }
     setError('');
     setRunning(true);
+    runningRef.current = true;
     setDraft('');
     agent.addMessage({ id: crypto.randomUUID(), role: 'user', content: text });
     try {
@@ -88,9 +205,26 @@ export function Chat({
     } catch (e) {
       setError(t('chat.error', { error: e instanceof Error ? e.message : '' }));
     } finally {
+      runningRef.current = false;
       setRunning(false);
       onActivity();
+      void refresh().catch(() => undefined);
     }
+  };
+
+  const answer = async (approval: PendingApproval, choice: Answer) => {
+    await api(`/approvals/${approval.id}`, 'POST', {
+      ...choice,
+      contentHash: approval.contentHash,
+    });
+    setPending((list) => list.filter((a) => a.id !== approval.id));
+  };
+
+  const changeMode = (next: Mode) => {
+    setMode(next);
+    void api(`/threads/${threadId}/mode`, 'PUT', { mode: next }).catch(() =>
+      refresh(),
+    );
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -105,50 +239,128 @@ export function Chat({
     }
   };
 
-  const messages = agent.messages.filter(
+  const messages = agent.messages;
+  const results = new Map<string, string>();
+  for (const m of messages) {
+    if (m.role === 'tool') results.set(m.toolCallId, textOf(m.content));
+  }
+  const lastUser = messages.findLastIndex((m) => m.role === 'user');
+  const toolCallsOf = (m: (typeof messages)[number]): ToolCall[] =>
+    m.role === 'assistant' ? ((m.toolCalls ?? []) as ToolCall[]) : [];
+
+  // Each run's change card goes at the end of the turn that holds its last tool call.
+  const cardsAt = new Map<number, { runId: string; count: number }[]>();
+  for (const [runId, run] of runsWithChanges(receipts, snapshots)) {
+    const anchor = messages.findIndex((m) =>
+      toolCallsOf(m).some((c) => c.id === run.lastToolCall),
+    );
+    if (anchor < 0) continue;
+    const nextUser = messages.findIndex(
+      (m, i) => i > anchor && m.role === 'user',
+    );
+    const at = (nextUser < 0 ? messages.length : nextUser) - 1;
+    cardsAt.set(at, [
+      ...(cardsAt.get(at) ?? []),
+      { runId, count: run.files.size },
+    ]);
+  }
+  const unknown = receipts.filter((r) => r.outcome === 'unknown');
+  const visible = messages.some(
     (m) =>
-      (m.role === 'user' || m.role === 'assistant') && textOf(m.content).trim(),
+      m.role === 'user' ||
+      (m.role === 'assistant' &&
+        (textOf(m.content).trim() || toolCallsOf(m).length > 0)),
   );
 
   return (
     <section className="chat">
       <div className="transcript" aria-live="polite">
-        {loaded && messages.length === 0 && (
+        {loaded && !visible && (
           <div className="empty">
             <Roko state="waving" size={120} />
             <p>{t('chat.empty')}</p>
           </div>
         )}
-        {messages.map((message) =>
-          message.role === 'user' ? (
-            <div
-              key={message.id}
-              className="bubble user"
-              aria-label={t('chat.you')}
-            >
-              {textOf(message.content)}
-            </div>
-          ) : (
-            <div key={message.id} className="reply">
-              <Roko state="idle" size={32} />
-              <div className="markdown">
-                <ReactMarkdown
-                  components={{
-                    img: ({ alt }) => <span>{alt}</span>,
-                    a: ({ href, children }) => (
-                      <a href={href} target="_blank" rel="noreferrer">
-                        {children}
-                      </a>
-                    ),
-                  }}
-                >
+        {messages.map((message, index) => {
+          const cards = (cardsAt.get(index) ?? []).map((card) => (
+            <TurnChanges
+              key={card.runId}
+              threadId={threadId}
+              runId={card.runId}
+              count={card.count}
+              project={project}
+              onRestored={() => void refresh().catch(() => undefined)}
+            />
+          ));
+          if (message.role === 'user') {
+            return (
+              <div key={message.id} className="turn-part">
+                <div className="bubble user" aria-label={t('chat.you')}>
                   {textOf(message.content)}
-                </ReactMarkdown>
+                </div>
+                {cards}
               </div>
+            );
+          }
+          if (message.role !== 'assistant') {
+            return cards.length ? <div key={message.id}>{cards}</div> : null;
+          }
+          const text = textOf(message.content).trim();
+          const calls = toolCallsOf(message);
+          if (!text && calls.length === 0 && cards.length === 0) return null;
+          return (
+            <div key={message.id} className="turn-part">
+              {text && (
+                <div className="reply">
+                  <Roko state="idle" size={32} />
+                  <div className="markdown">
+                    <ReactMarkdown components={markdownComponents}>
+                      {textOf(message.content)}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              )}
+              {calls.length > 0 && (
+                <div className="tool-cards">
+                  {calls.map((call) => {
+                    const result = results.get(call.id);
+                    const state: ToolState =
+                      result !== undefined
+                        ? 'done'
+                        : running && index > lastUser
+                          ? 'running'
+                          : 'interrupted';
+                    return (
+                      <ToolCard
+                        key={call.id}
+                        name={call.function.name}
+                        args={call.function.arguments}
+                        result={result}
+                        state={state}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+              {cards}
             </div>
-          ),
+          );
+        })}
+        {unknown.map((receipt) => (
+          <UnknownOutcome
+            key={receipt.id}
+            receipt={receipt}
+            project={project}
+            onConfirmed={() => void refresh().catch(() => undefined)}
+            onRetry={(prompt) => {
+              setDraft(prompt);
+              input.current?.focus();
+            }}
+          />
+        ))}
+        {running && pending.length === 0 && (
+          <p className="thinking">{t('chat.thinking')}</p>
         )}
-        {running && <p className="thinking">{t('chat.thinking')}</p>}
         {error && (
           <p className="error" role="alert">
             {error}
@@ -156,41 +368,59 @@ export function Chat({
         )}
         <div ref={bottom} />
       </div>
-      <form
-        className="composer"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void send();
-        }}
-      >
-        <textarea
-          value={draft}
-          rows={2}
-          placeholder={t('chat.placeholder')}
-          aria-label={t('chat.placeholder')}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={onKeyDown}
-        />
-        {running ? (
-          <button
-            type="button"
-            className="icon-button"
-            aria-label={t('chat.stop')}
-            onClick={() => copilotkit.stopAgent({ agent })}
-          >
-            <Square size={16} />
-          </button>
-        ) : (
-          <button
-            type="submit"
-            className="icon-button primary"
-            aria-label={t('chat.send')}
-            disabled={!draft.trim() || !loaded}
-          >
-            <ArrowUp size={16} />
-          </button>
-        )}
-      </form>
+      {pending.length > 0 ? (
+        <div className="composer">
+          <ApprovalPanel
+            approvals={pending}
+            project={project}
+            onAnswer={answer}
+            onStop={() => copilotkit.stopAgent({ agent })}
+          />
+        </div>
+      ) : (
+        <form
+          className="composer"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void send();
+          }}
+        >
+          <div className="composer-box">
+            <textarea
+              ref={input}
+              value={draft}
+              rows={2}
+              placeholder={t('chat.placeholder')}
+              aria-label={t('chat.placeholder')}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={onKeyDown}
+            />
+            <div className="composer-bar">
+              {mode && <ModeSelect value={mode} onChange={changeMode} />}
+              <span className="spacer" />
+              {running ? (
+                <button
+                  type="button"
+                  className="icon-button"
+                  aria-label={t('chat.stop')}
+                  onClick={() => copilotkit.stopAgent({ agent })}
+                >
+                  <Square size={16} />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="icon-button primary"
+                  aria-label={t('chat.send')}
+                  disabled={!draft.trim() || !loaded}
+                >
+                  <ArrowUp size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+        </form>
+      )}
     </section>
   );
 }

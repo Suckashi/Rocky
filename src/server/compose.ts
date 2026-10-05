@@ -74,7 +74,7 @@ export function composeRocky(options: ComposeOptions) {
     api: [
       settingsRoutes(settings, egress, options.listModels),
       threadRoutes(threads, runner),
-      approvalRoutes(gate, receipts, snapshots),
+      approvalRoutes(gate, receipts, snapshots, executor),
     ],
     mounted: [copilotRoutes(agent, runner)],
     ...(options.webRoot ? { webRoot: options.webRoot } : {}),

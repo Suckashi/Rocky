@@ -265,6 +265,78 @@ describe('agent tools through the action gate', () => {
   });
 });
 
+describe('restoring a turn', () => {
+  it('shows the changes and puts every file back through the gate', async () => {
+    const { call, project } = await setup('hands-off');
+    plan = [
+      {
+        name: 'edit_file',
+        args: {
+          file_path: '/app.js',
+          old_string: 'answer = 41',
+          new_string: 'answer = 42',
+        },
+      },
+      { name: 'write_file', args: { file_path: '/new.txt', content: 'hi\n' } },
+    ];
+    await run(call, 'r1');
+    expect(readFileSync(join(project, 'new.txt'), 'utf8')).toBe('hi\n');
+
+    type Change = {
+      path: string;
+      created: boolean;
+      before: string | null;
+      after: string | null;
+      contentHash: string;
+      modifiedSince: boolean;
+    };
+    const { changes } = (await (
+      await call('/api/threads/r1/runs/r1-r/changes')
+    ).json()) as { changes: Change[] };
+    expect(changes).toHaveLength(2);
+    const edit = changes.find((c) => c.path.endsWith('app.js'))!;
+    expect(edit).toMatchObject({
+      before: 'const answer = 41;\n',
+      after: 'const answer = 42;\n',
+      modifiedSince: false,
+    });
+    expect(changes.find((c) => c.path.endsWith('new.txt'))?.created).toBe(true);
+
+    const items = changes.map((c) => ({
+      path: c.path,
+      contentHash: c.contentHash,
+    }));
+    // A plan that no longer matches what is on disk is refused.
+    const stale = await call('/api/threads/r1/runs/r1-r/restore', {
+      method: 'POST',
+      body: {
+        items: items.map((i) => ({ ...i, contentHash: '0'.repeat(64) })),
+      },
+    });
+    expect(stale.status).toBe(409);
+    expect(readFileSync(join(project, 'app.js'), 'utf8')).toContain('42');
+
+    const restored = await call('/api/threads/r1/runs/r1-r/restore', {
+      method: 'POST',
+      body: { items },
+    });
+    expect(restored.status).toBe(200);
+    expect(readFileSync(join(project, 'app.js'), 'utf8')).toBe(
+      'const answer = 41;\n',
+    );
+    expect(() => readFileSync(join(project, 'new.txt'))).toThrow();
+    const { receipts: list } = await receipts(call, 'r1');
+    expect(
+      list.filter((r) => r.actor === 'user').map((r) => r.outcome),
+    ).toEqual(['not-run', 'succeeded', 'succeeded']);
+    // The run's own change list is unchanged by the restore.
+    const after = (await (
+      await call('/api/threads/r1/runs/r1-r/changes')
+    ).json()) as { changes: Change[] };
+    expect(after.changes).toHaveLength(2);
+  });
+});
+
 describe('without a project folder', () => {
   it('tells the model that files and commands are unavailable', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'rocky-tools-'));

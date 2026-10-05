@@ -85,6 +85,7 @@ function Shell({
       <Chat
         key={threadId}
         threadId={threadId}
+        project={settings.project}
         onActivity={onActivity}
         onState={setRoko}
       />
@@ -93,13 +94,29 @@ function Shell({
           <Roko state={roko} size={128} />
           <strong>
             {t(
-              roko === 'running'
-                ? 'panel.running'
-                : roko === 'failed'
-                  ? 'panel.failed'
-                  : 'panel.idle',
+              roko === 'waiting'
+                ? 'panel.waiting'
+                : roko === 'running'
+                  ? 'panel.running'
+                  : roko === 'failed'
+                    ? 'panel.failed'
+                    : 'panel.idle',
             )}
           </strong>
+        </div>
+        <div className="panel-section">
+          <span className="label">{t('panel.project')}</span>
+          {settings.project ? (
+            <span className="mono small">{settings.project}</span>
+          ) : (
+            <button
+              type="button"
+              className="link"
+              onClick={() => setView('settings')}
+            >
+              {t('project.none')}
+            </button>
+          )}
         </div>
         <div className="panel-section">
           <span className="label">{t('panel.model')}</span>

@@ -2,7 +2,7 @@
 // Not part of CI (too heavy for every push). Run: npm run test:e2e
 //   ROCKY_E2E_BROWSER  path to a Chromium-based browser; default: the system Edge (msedge)
 import { spawn } from 'node:child_process';
-import { mkdtempSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { chromium, type Page } from 'playwright-core';
@@ -17,7 +17,32 @@ function check(condition: unknown, message: string): asserts condition {
   console.log(`ok - ${message}`);
 }
 
-const fake = await startFakeOpenAI(() => ({ text: REPLY }));
+// Asked to change something, the model edits /app.js; once a tool answered, it reports back.
+const fake = await startFakeOpenAI((messages) => {
+  const lastUser = messages.findLastIndex((m) => m.role === 'user');
+  const results = messages.slice(lastUser + 1).filter((m) => m.role === 'tool');
+  if (results.length > 0)
+    return { text: `已處理。工具回覆：${String(results.at(-1)!.content)}` };
+  if (JSON.stringify(messages[lastUser]?.content ?? '').includes('改'))
+    return {
+      toolCalls: [
+        {
+          name: 'edit_file',
+          args: {
+            file_path: '/app.js',
+            old_string: 'answer = 41',
+            new_string: 'answer = 42',
+          },
+        },
+      ],
+    };
+  return { text: REPLY };
+});
+const project = join(mkdtempSync(join(tmpdir(), 'rocky-e2e-project-')), 'app');
+mkdirSync(project);
+const appFile = join(project, 'app.js');
+writeFileSync(appFile, 'const answer = 41;\n');
+const shots = process.env['ROCKY_E2E_SCREENSHOTS'];
 const server = spawn(
   process.execPath,
   [join(root, 'src', 'server', 'start.ts')],
@@ -76,6 +101,62 @@ try {
   await page.reload();
   await page.getByText('測試回覆').waitFor();
   check(true, 'history survives a reload (stored locally)');
+
+  // M2: project folder, approval mode, approval panel, change card and restore.
+  await page.getByRole('button', { name: '設定' }).click();
+  await page.getByLabel('專案資料夾').fill(project);
+  await page.getByRole('button', { name: '使用這個資料夾' }).click();
+  await page.getByText('已設定').waitFor();
+  await page.getByLabel('核准模式').selectOption('ask-always');
+  await page.getByRole('button', { name: '回到對話' }).click();
+  await page.getByRole('button', { name: '新對話' }).click();
+  check(
+    (await page.getByLabel('核准模式').inputValue()) === 'ask-always',
+    'a new conversation starts in the default approval mode',
+  );
+  await page.getByRole('textbox').fill('請把 41 改成 42');
+  await page.keyboard.press('Enter');
+  const panel = page.getByRole('region', { name: '等你核准' });
+  await panel.waitFor({ timeout: 20_000 });
+  await panel.getByText('Rocky 想修改 app.js').waitFor();
+  await panel.locator('.diff-add', { hasText: 'const answer = 42;' }).waitFor();
+  check(
+    readFileSync(appFile, 'utf8').includes('41'),
+    'the approval panel replaces the input box and shows the diff before anything is written',
+  );
+  if (shots) await page.screenshot({ path: join(shots, 'm2-approval.png') });
+  await page.keyboard.press('1');
+  await page.getByText('這輪改了 1 個檔案').waitFor({ timeout: 20_000 });
+  check(
+    readFileSync(appFile, 'utf8') === 'const answer = 42;\n',
+    'key 1 approves once and the file is written',
+  );
+  await page.locator('.tool-card', { hasText: '修改檔案' }).first().waitFor();
+  check(true, 'the edit shows as a tool card with a change card for the turn');
+  await page.getByRole('button', { name: '看看' }).click();
+  await page.locator('.turn-changes .diff-del', { hasText: '41' }).waitFor();
+  if (shots) await page.screenshot({ path: join(shots, 'm2-changes.png') });
+  await page.getByRole('button', { name: '全部還原' }).click();
+  await page.getByRole('button', { name: '確定還原' }).click();
+  await page.getByText('已還原 1 個檔案。').waitFor();
+  check(
+    readFileSync(appFile, 'utf8') === 'const answer = 41;\n',
+    'restore all puts the file back',
+  );
+
+  await page.getByRole('textbox').fill('再改一次');
+  await page.keyboard.press('Enter');
+  await panel.waitFor({ timeout: 20_000 });
+  await page.keyboard.press('4');
+  await page.getByPlaceholder('告訴 Rocky 為什麼').fill('先不要改，請先跑測試');
+  await page.keyboard.press('Enter');
+  await page
+    .locator('.reply', { hasText: '先不要改，請先跑測試' })
+    .waitFor({ timeout: 20_000 });
+  check(
+    readFileSync(appFile, 'utf8').includes('41'),
+    'key 4 rejects with a reason, the file is untouched and the reason reaches the model',
+  );
 
   await page.getByRole('button', { name: '設定' }).click();
   await page.getByRole('radio', { name: 'English' }).click();
