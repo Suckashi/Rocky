@@ -58,6 +58,16 @@ const server = serve({ fetch: app.fetch, hostname: HOST, port }, (info) => {
   if (process.env['ROCKY_OPEN_BROWSER'] !== '0') openBrowser(url);
 });
 
+server.on('error', (error: NodeJS.ErrnoException) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(
+      `Port ${port} is in use. If Rocky is already running, run the launcher again to open it; otherwise set ROCKY_PORT.`,
+    );
+    process.exit(1);
+  }
+  throw error;
+});
+
 const shutdown = createShutdown({
   steps: [
     {

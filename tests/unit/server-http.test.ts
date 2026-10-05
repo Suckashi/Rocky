@@ -134,6 +134,27 @@ describe('local API security', () => {
     expect(again.headers.get('set-cookie')).toBeNull();
   });
 
+  it('gives an authenticated caller a fresh login URL', async () => {
+    const { call, codes } = setup();
+    const denied = await call('/api/login-code', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    });
+    expect(denied.status).toBe(401);
+    const res = await call('/api/login-code', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token}`,
+        'content-type': 'application/json',
+      },
+      body: '{}',
+    });
+    const { url } = (await res.json()) as { url: string };
+    expect(url).toMatch(/^http:\/\/127\.0\.0\.1:4317\/\?code=/);
+    expect(codes.redeem(new URL(url).searchParams.get('code')!)).toBe(true);
+  });
+
   it('expires login codes', () => {
     let now = 0;
     const codes = new LoginCodes(1000, () => now);

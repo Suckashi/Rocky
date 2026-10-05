@@ -54,6 +54,12 @@ export function createApp(options: AppOptions): Hono {
   );
   app.use('/api/*', authGuard(options));
   app.get('/api/health', (c) => c.json({ ok: true }));
+  // The launcher (which can read the token file) asks a running Rocky for a fresh login URL.
+  app.post('/api/login-code', (c) =>
+    c.json({
+      url: `http://127.0.0.1:${options.port}/?code=${options.codes.issue()}`,
+    }),
+  );
   for (const routes of options.api ?? []) app.route('/api', routes);
   for (const routes of options.mounted ?? []) app.route('/', routes);
   app.all('/api/*', (c) => c.json({ error: 'not-found' }, 404));
