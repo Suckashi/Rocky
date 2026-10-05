@@ -6,6 +6,7 @@
 > - 路徑一律使用 repo 相對路徑；OpenDots 路徑加上 `opendots/` 前綴。審查期間的截圖寫成「審查截圖〈畫面〉」，探針腳本只寫用途（例如「claim 洩漏探針」）；它們都是審查期間的暫存檔，未提交進 Git，repo 中找不到。
 > - 不收錄個人資料：證據檔中出現的本機路徑一律寫成「本機絕對路徑（含使用者名稱）」。
 > - 本版已套用一輪逐句事實查核的更正，並與計畫的說法對齊；查核範圍、更正數量與計畫原 §1.9 的更正表都在第 6 節。審查期間 GitHub 上開著 11 個 PR，其狀態與處置見 0.4。
+> - 對標研究：另一個工作階段的「Rocky 對標研究」提出的 Rocky 問題，已回到程式碼重新確認並新增為 D23–D27（第 2 節）；整合方式與兩邊看法不同之處見第 7 節。
 > - 所有執行都在 Linux 雲端 sandbox；沒有在擁有者的 Windows 主機上執行任何東西，也沒有呼叫任何真實模型（live provider）。Linux 上的結果不能當成 Windows 結果。
 
 **狀態標記**
@@ -365,6 +366,45 @@ Daemon 依功能分群（opendots-server 稽核估算，行數）：核心 Work 
 - 證據：`apps/web/src/main.tsx:236-286` `agent.runAgent` 一旦 reject（HTTP 錯誤，例如 413，或 SSE 串流中斷），composer 就顯示錯誤，但 daemon 擁有的 Work 可能仍在執行。（daemon 只在 Work 已 `failed` 時送出 `RUN_ERROR`，`apps/daemon/src/http.ts:875-880`；`@ag-ui/client` 1.0.1 收到 `RUN_ERROR` 只通知 subscriber，`runAgent` 不會因此 reject。）catch 只呼叫 `setError`（`main.tsx:281-286`），在全域 banner 顯示錯誤（`:949-951`）；Work 本身的狀態與錯誤仍來自 daemon projection（`:819`）。
 - 定性（本版更正）：初版把這項寫成違反 `AGENTS.md:7`「Never infer success from stream termination」的精神。實際上 UI 沒有據此改變 Work 狀態，daemon 仍是權威；問題是誤導性的 UX：Work 可能仍在執行或已成功，畫面卻同時顯示一則錯誤。
 - 建議：composer 只回報「送出是否被 daemon 接受」；Work 狀態一律來自 daemon projection。
+
+### D23【已重現（防護繞過）；完整自我核准未執行】本機 token 外洩：任何本機行程都能取得 mutation token（高）
+
+- 來源：對標研究（另一個工作階段）提出，本輪回到程式碼重新確認。
+- 證據：`apps/daemon/src/http.ts:152` 的 `GET /api/v1/session` 不需任何驗證就回傳 token；`:66-76` 的 Origin 檢查只在請求帶 `Origin` header 時才生效；`:77-81` 的 mutation 檢查只比對 `x-rocky-session`。
+- 重現（Linux、Node 24.12.0，以暫存 `ROCKY_DATA_DIR` 從原始碼啟動 daemon）：`curl http://127.0.0.1:3211/api/v1/session`（不帶 Origin）取得 64 字元的 token；不帶 token 的 `POST /api/v1/approvals/x/decision` 得到 403；帶 token、不帶 Origin 的同一請求通過 guard，到達 handler 並回 404「Approval not found」。沒有建立真的待核准來執行完整的自我核准流程。
+- 影響：Rocky 核准執行的 Native 指令或 stdio MCP server 都是本機行程；若受 prompt injection 操控，可以取得 token 並替自己的下一步送出核准決定。同一使用者的行程能偽造任何 header，所以修法（`POST` 取得 token、檢查 Origin 與 `Sec-Fetch-Site`、所有 GET 都要 token）只是提高門檻；真正的邊界是 OS 沙箱。
+- 計畫：P0.13、I1、§5.8 第 3 與第 7 條。
+
+### D24【已重現（遮蔽函式）；寫回檔案的流程未執行】遮蔽器改寫給模型看的程式碼（高）
+
+- 來源：對標研究，本輪重新確認。
+- 證據：`apps/daemon/src/work-service.ts:2480-2483` 把 `workspace_read` 等讀取結果送進 `this.models.redact`（`apps/daemon/src/model-registry.ts:34-36`）→ `redactEvidence`；`apps/daemon/src/redaction.ts:39-44` 的 regex 會把 `password`、`api_key`、`access_token` 等字樣後面的值換成 `[REDACTED]`。
+- 重現：直接呼叫 `redactEvidence({content: "const schema = z.object({ password: z.string() });"})`，結果為 `const schema = z.object({ password: [REDACTED] });`。
+- 影響：模型看到的是被改過的程式碼；Rocky 目前只能整檔覆寫（D27），模型可能把 `[REDACTED]` 寫回使用者的檔案，默默損壞資料。
+- 計畫：P0.14、I26、§5.13。
+
+### D25【已重現】記憶搜尋找不到中文詞，排序不看相關度（中）
+
+- 證據：`apps/daemon/src/store.ts:295` 以預設 tokenizer（unicode61）建立 `memory_fts`；`apps/daemon/src/memory.ts:428` 以 `instr()` 子字串或整句 `MATCH` 查詢，`:428,438` 都以 `ORDER BY rowid DESC` 排序。
+- 重現（node:sqlite、Node 24.12.0）：把「記憶體搜尋改成支援繁體中文與 English」寫進 FTS5 後，`MATCH '繁體中文'` 與 `MATCH '搜尋'` 都回傳 0 筆，只有整串連續漢字或 `English` 才找得到。目前中文查詢能找到東西，完全靠 `instr()` 子字串備援。
+- 對標研究的實驗（Node v22.22.0、SQLite 3.50.4，未在 Node 24 上重跑）另指出：trigram tokenizer 對少於 3 字的查詢靜默回傳 0 筆；`Intl.Segmenter('zh-Hant')` 先斷詞再進 unicode61 可以正確找到中文詞。
+- 計畫：P2.14、I27、§5.11。
+
+### D26【程式碼確認；設計如此】拒絕一次，整個 run 的後續副作用都被拒；同一回合只能有一個核准（中）
+
+- 證據：`apps/daemon/src/operation-ledger.ts:30-44` 只要這個 run 有一筆 `owner_rejected` 的 `rocky.operation.not_executed` 事件，之後所有有副作用的工具都丟 `owner_rejected`（訊息寫明這是為了防止繞過）；`apps/daemon/src/work-service.ts:2621-2625` 在一次 interrupt 有超過一個 action 時丟出「Only one exact tool approval at a time is supported」。
+- 影響：拒絕「這個指令」等於取消整個 Work；模型無法一次提出多個需要核准的修改。對標研究指出這是核准疲勞與自主性不足的主因之一。
+- 計畫：P2.6（一次 N 個核准）、C3（Decline／Cancel，O3e）。
+
+### D27【程式碼確認】agent 能力缺口（中）
+
+- 證據：
+  - 工作區沒有 grep／glob；`apps/daemon/src/workspaces.ts:306` 的列表一次最多 200 筆（掃描上限 2,000）。要搜尋只能透過 `workspace_command` 提出 `git grep` 並等核准。
+  - 寫檔只能整檔覆寫，`packages/contracts/src/workspaces.ts:25-32` 的 `content` 上限 65,536 字元。
+  - repo 中沒有任何讀取 `AGENTS.md` 或 `CLAUDE.md` 的程式（在 `apps` 與 `packages` 內 grep 為 0 筆）；系統提示只有 persona 與政策段落（`packages/agent-runtime/src/factory.ts:473-484`）。
+  - `configured-model.ts` 與 `model-network.ts` 沒有任何重試邏輯（唯一的 429 是 `context_exceeded` 錯誤的 HTTP 狀態，`configured-model.ts:368-372`）。
+  - 預算預設 48 次模型呼叫（`packages/contracts/src/model-budget.ts:6`）、主 Work 20 分鐘（`apps/daemon/src/admission-config.ts:9`）。
+- 計畫：C1、C2、C4、C6、P2.11（計畫 §5.16）。
 
 ### 未確認項目（不可當成既定事實）
 
@@ -902,6 +942,22 @@ Daemon 依功能分群（opendots-server 稽核估算，行數）：核心 Work 
 
 ---
 
+## 7. 對標研究的整合
+
+- **來源**：另一個工作階段（2026-10-04）完成的研究報告「Rocky 對標研究：頂尖 AI Agent 的架構、RAG 取捨與改進路線圖」。它比較 30 多個 agent 產品與框架，並以 Rocky `1812992` 的原始碼盤點提出 P0／P1／P2 路線圖。報告本身是你帳號裡的私人頁面，沒有提交進 repo。
+- **怎麼併入**：只採用它對 Rocky 的結論；它引用的其他產品數字多為廠商自報，本計畫不當成事實引用。它提出的 Rocky 問題都回到程式碼重新確認，結果記為 D23–D27（上方 §2）。
+- **它對本計畫的修正**：
+  - **重試**：本計畫原本寫「`maxRetries: 0`、不重試」；改為對 429／529／5xx、且還沒收到任何位元組時，對同一連線有界重試（計畫 §5.9、P2.11）。
+  - **中文搜尋**：本計畫原本沿用 FTS5 預設斷詞；改為 `Intl.Segmenter` 斷詞加 `bm25()`（計畫 §5.11、P2.14）。
+  - **預算**：本計畫原本沿用 48 次呼叫；coding Work 改為約 200 次、60 分鐘，以成本上限為主，用完可「延長並繼續」（計畫 §5.5、C6）。
+  - **威脅模型**：本計畫原本說 session token「不是用來防同一台機器上的其他行程」；改為明確區分瀏覽器與同使用者行程兩種威脅，並修掉 token 外洩（計畫 §5.8、P0.13）。
+- **新增的內容**：C 線「agent 能力」（計畫 §5.16、§8.4.1）、rocky-bench（P1.11）、不變式 I26–I28、風險 R24–R26、決策 O3e 與 O20。
+- **兩邊看法不同的地方**（都寫進計畫 §11，由你決定）：
+  - **Learning（O1）**：研究認為 Learning 的治理結構是 Rocky 的旗艦差異化，主張保留並改成用真實任務評測；本計畫仍推薦先刪除現有管線，等 rocky-bench 累積真實任務後再重做。兩邊都同意順序是「先讓 agent 做得出事、先量得到，再談 Learning」。
+  - **AG-UI（O4）**：研究建議改用 AG-UI 標準事件以符合現行 spec §9.3；本計畫推薦移除 CopilotKit／AG-UI，並把「保留 AG-UI、改用標準事件」列為選項 D。
+  - **agent 執行位置（O2）**：研究把「worker 沒有網路、拿不到憑證」列為優點；本計畫推薦 in-process，O2 已寫明這個取捨。
+- **研究的限制**（照它自己的說明）：研究環境擋掉 openai.com、cursor.com、cognition.ai、manus.im、arxiv.org 等網站，這些來源只透過官方 GitHub、轉載或搜尋摘錄讀取；它沒有修改 Rocky，也沒有執行 Rocky 的測試，Rocky 現況來自讀碼。
+
 ## 附錄 A：各稽核提出、需要擁有者決定的問題（彙整）
 
 1. Rocky 是純個人本機工具，還是也要作為公開開源專案讓他人安裝？（決定授權／SBOM 關卡、多 OS 支援、打包、發布清單與社群檔案是否保留；GitHub 遠端 repo 目前是公開的。）
@@ -924,4 +980,6 @@ Daemon 依功能分群（opendots-server 稽核估算，行數）：核心 Work 
 18. Node 版本是否必須精確為 24.12.0 / npm 11.6.4，還是任何 Node 24 LTS patch 都可以？
 19. （審查後新增，計畫 O19）PR #10 把 UI 改成 Rocky 自有的配色與 260 px sidebar，並改寫 OpenDots 幾何的守門測試（見 0.4）。要維持 `specs/rocky/DECISIONS.md` 2026-10-03 的 OpenDots 基準、整理後再合併 #10，還是正式改變視覺方向（需要先修改 DECISIONS.md），或關閉 #10？
 
-計畫 §11 把上述問題整理成 O1–O19，並為每一題給出推薦預設與不做決定時的做法。
+20. （對標研究整合後新增，計畫 O3e、O20）拒絕一個動作時，是否改成 agent 帶著理由繼續（Decline），要整個停下才用 Cancel？是否開放「Work 範圍的驗證設定檔」，讓 `npm test`、`tsc` 這類驗證指令在窄範本下只核准一次？
+
+計畫 §11 把上述問題整理成 O1–O20，並為每一題給出推薦預設與不做決定時的做法。
