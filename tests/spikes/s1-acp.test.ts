@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { delimiter, join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { NOTES, runS1, type S1Report } from '../../spikes/s1-acp/scenario.ts';
 import { resolveOpenCode } from '../../spikes/s1-acp/opencode.ts';
@@ -11,6 +13,13 @@ function hasOpenCode(): boolean {
     if (process.env['ROCKY_REQUIRE_OPENCODE'] === '1') throw error;
     return false;
   }
+}
+
+function hasRipgrep(): boolean {
+  const name = process.platform === 'win32' ? 'rg.exe' : 'rg';
+  return (process.env['PATH'] ?? '')
+    .split(delimiter)
+    .some((dir) => dir && existsSync(join(dir, name)));
 }
 
 describe.runIf(hasOpenCode())('S1: opencode acp behind Rocky approvals', () => {
@@ -79,7 +88,16 @@ describe.runIf(hasOpenCode())('S1: opencode acp behind Rocky approvals', () => {
     expect(report.usage).toMatchObject({ cachedReadTokens: 1024 });
   });
 
-  it('reaches no host except the npm registry (OpenCode plugin check)', () => {
-    expect(report.hosts.filter((h) => h !== 'registry.npmjs.org')).toEqual([]);
+  it('reaches only the known hosts: npm registry, and GitHub for ripgrep when rg is missing', () => {
+    // OpenCode checks @opencode-ai/plugin on npm at startup, and downloads ripgrep 15.1.0
+    // from GitHub releases when no rg is on PATH (Windows runners have none).
+    const known = hasRipgrep()
+      ? ['registry.npmjs.org']
+      : [
+          'registry.npmjs.org',
+          'github.com',
+          'release-assets.githubusercontent.com',
+        ];
+    expect(report.hosts.filter((host) => !known.includes(host))).toEqual([]);
   });
 });
