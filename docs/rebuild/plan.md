@@ -89,3 +89,7 @@ S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一
 - 不用 Dependabot 自動開 PR；漏洞通知靠 GitHub repo 設定裡的 Dependabot alerts。
 - 每個里程碑結束時手動升級一次。Deep Agents、LangChain、LangGraph 一起升，升完跑測試與評測再合併。
 - TypeScript 暫時停在 6.0.x：typescript-eslint 8.71 只支援到 TypeScript 6.0。
+
+## 7. 進度
+
+- 2026-10-05：骨架與 Windows／Ubuntu CI 完成。S2（agent 執行路徑）以假模型驗證完成，見 `docs/adr/0001-agent-runtime-spike.md`；真實模型待擁有者在 Windows 上跑 `spikes/s2-agent/live.ts`。
