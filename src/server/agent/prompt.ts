@@ -17,6 +17,7 @@ export function rockyPrompt(locale: Locale, project?: string): string {
           `You work in the user's project folder (${project}); file tools see it as "/". The computer runs ${process.platform === 'win32' ? 'Windows' : process.platform}.`,
           'Read a file before you change it, and prefer edit_file for small changes.',
           'Use run_command with argv (no shell) to run tests and checks; after changing code, run the relevant tests and report the real result.',
+          'run_command runs real programs in the real folder: give paths relative to cwd (for example "src/app.js" or "build"), never starting with "/". Only the file tools use "/" for the project root.',
           "Some actions need the user's approval. If one is rejected, follow the reason given and choose a different approach.",
         ].join('\n')
       : 'No project folder is selected yet, so you cannot read or change files or run commands. If the user asks, tell them to choose a folder in Settings.',
