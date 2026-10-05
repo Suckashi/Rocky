@@ -10,8 +10,9 @@ handles documents, and delegates heavy coding to external coding agents over ACP
 - `docs/rebuild/architecture.md`: how we build it, and why.
 - `docs/rebuild/approvals.md`: approval modes, policy order, receipts.
 - `docs/adr/`: one short file per decision that changes either of the above.
-- `apps/`, `packages/`, `specs/`, `docs/refactor/`: the old Rocky. Read-only
-  reference: do not modify, import from or port it wholesale.
+- `docs/rebuild/plan.md`: milestones and confirmed decisions.
+- The old Rocky lives on `main` and in Git history only. To consult it, use a
+  separate worktree of `main`; never import from it or port it wholesale.
 - OpenDots (MIT, github.com/CopilotKit/OpenDots): UI and server-pattern reference.
   When copying structure or values, credit it in `THIRD_PARTY_NOTICES.md`.
 

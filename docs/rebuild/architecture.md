@@ -20,6 +20,32 @@ Rocky 程序 (Node 24, 單一程序)
  └─ 儲存：node:sqlite（內建，不需編譯）＋ 檔案（記憶、技能、快照）
 ```
 
+## 技術層次（Deep Agents 與 LangChain 的關係）
+
+```
+Deep Agents   待辦清單、子代理、檔案工具、上下文壓縮（每個都是一個 middleware）
+   │ 蓋在
+LangChain v1  agent 迴圈、工具、middleware 掛勾點、模型介面（@langchain/openai 等）
+   │ 蓋在
+LangGraph     逐步執行、暫停、中斷後接著跑（checkpointer）
+```
+
+只有一個 agent 執行環境，就是 Deep Agents。LangChain、LangGraph 是它底下的層，不是另一套框架；
+三者一起鎖版本、一起升級，升級後一起跑評測。
+
+## 動作關卡：一個獨立模組，兩道防線
+
+業界做法（Claude Code、Codex、Kimi Code）都是把權限判斷做成獨立模組，在「工具執行前」這一個統一入口攔截；
+最好的再加 OS 沙箱當最後保險。Rocky 在 Windows 原生、不需要管理員權限的前提下，這樣做：
+
+1. **動作關卡是獨立模組**（`src/server/effects/`），不 import Deep Agents。
+   - 介面只有一件事：「誰想做什麼」→ 依 `approvals.md` 的判斷順序決定 → 需要時問你 → 發一張綁定內容雜湊的**通行證** → 寫操作紀錄。
+   - Rocky 的 agent、OpenCode（ACP）、MCP、介面上的「還原」按鈕，都呼叫同一個關卡。
+2. **第一道防線：工具入口**。用 LangChain v1 的 `wrapToolCall` middleware，在每一個工具執行前呼叫關卡；子代理掛同一個 middleware。新增的工具自動受管。
+3. **第二道防線：真正動手的函式要看通行證**。寫檔、執行指令、呼叫 MCP 的底層函式只接受關卡發的通行證，並比對雜湊；任何繞過第一道防線的路徑都會在這裡失敗。這是 Windows 上沒有 OS 沙箱時的替代保險。
+4. **和 Deep Agents 的接點只有兩個薄轉接層**：關卡 middleware；檔案後端用「組合」包住 `FilesystemBackend`（讀取交給它，寫入改呼叫 Rocky 的寫檔函式），不用繼承。
+5. **之後**：OS 沙箱（例如參考 Codex 的 Windows 沙箱）可以當第三層加上去，關卡的介面不變。
+
 ## 關鍵決策
 
 | 決策 | 選擇 | 理由／舊 Rocky 的教訓 |
@@ -69,7 +95,7 @@ Rocky 程序 (Node 24, 單一程序)
 | 子代理（`task`，隔離上下文） | ✅ 照用 | 內建通用子代理，另外定義「探索者」（唯讀搜尋）和「審查者」（驗證成果）；讀取可以平行跑，同一時間只有一個寫手 |
 | 分叉子代理（`ForkedSubAgent`） | ✅ 選用 | 繼承主對話的上下文；適合「接著做」的小任務 |
 | 非同步子代理（`AsyncSubAgent`） | ❌ 不用 | 需要遠端的 Agent Protocol 伺服器；背景工作改由 Rocky 的 Work 服務負責 |
-| 檔案工具（`ls`、`read_file`、`write_file`、`edit_file`、`glob`、`grep`） | ✅ 照用，只攔寫入 | 繼承 `FilesystemBackend`（`virtualMode: true`），讀取、搜尋、路徑與 symlink 檢查都沿用；只覆寫 `write`／`edit`：先過動作關卡 → 存快照 → 呼叫原本的寫入 → 寫操作紀錄 |
+| 檔案工具（`ls`、`read_file`、`write_file`、`edit_file`、`glob`、`grep`） | ✅ 照用，只換寫入 | 用「組合」包住 `FilesystemBackend`（`virtualMode: true`）：讀取、搜尋、路徑與 symlink 檢查交給它；寫入改呼叫 Rocky 的寫檔函式（要有關卡發的通行證、會存快照、寫操作紀錄）。權限判斷在關卡 middleware，不在後端 |
 | Shell 執行（`LocalShellBackend` 的 `execute`） | 🔁 換成自己的（很薄） | 原本收一整串 shell 字串、沒有核准點、不處理 Windows 的 `.cmd`、PowerShell 與子行程樹，套件文件自己標了安全警告。改用 `run_command`：拆成參數陣列 → 過動作關卡 → 用 Job Object 執行 → 寫操作紀錄 |
 | 檔案權限（`permissions`，只有 allow/deny） | ✅ 保留當硬擋 | 用來硬擋機密檔（`.env*`、SSH 金鑰、憑證）；是否要問、留操作紀錄，仍由動作關卡決定 |
 | 人工介入（`interruptOn`） | ✅ 當作「暫停機制」 | 動作關卡決定要問你時，用 interrupt 讓 agent 停下來等；要不要問，由動作關卡決定，不是 Deep Agents |

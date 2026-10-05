@@ -1,6 +1,6 @@
-# Rocky 開工計畫（草稿，待擁有者確認）
+# Rocky 開工計畫
 
-> 2026-10-05。分支：`claude/rocky-rebuild`。產品見 `product.md`，架構見 `architecture.md`，
+> 2026-10-05 擁有者確認。分支：`claude/rocky-rebuild`。產品見 `product.md`，架構見 `architecture.md`，
 > 核准見 `approvals.md`。
 
 ## 1. 技術棧
@@ -76,3 +76,10 @@
 5. **骨架**：package.json、tsconfig、ESLint、Prettier、Vitest、CI。
 
 S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一輪；OpenCode 的登入和真實使用，還是要在你的電腦上確認。
+
+## 5. 已確認的決定（2026-10-05）
+
+- 技術棧：照第 1 節。
+- 舊程式碼：從這個分支刪除，新程式碼放在根目錄；舊 Rocky 保留在 `main` 與 git 歷史，需要參考時開一個 `main` 的 worktree。
+- V1 安裝：`git clone` 加 PowerShell 啟動腳本（第一次執行自動 `npm ci`）；正式安裝檔或發佈到 npm 留到 M5，且要另外授權。
+- CI：GitHub Actions，在 `windows-latest` 與 `ubuntu-latest` 上跑。
