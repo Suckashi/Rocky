@@ -62,13 +62,6 @@ for (const file of [
 ])
   if (!existsSync(file) || !pkg.files.includes(file))
     throw Error(`Required public/package file missing: ${file}`);
-const workflow = parse(readFileSync(".github/workflows/verify.yml", "utf8"));
-for (const job of Object.values(workflow.jobs)) {
-  for (const step of job.steps ?? []) {
-    if (step.uses && !/@[a-f\d]{40}$/.test(step.uses))
-      throw Error(`Action must be commit-pinned: ${step.uses}`);
-  }
-}
 for (const file of ["bug_report.yml", "feature_request.yml", "question.yml"]) {
   const form = parse(readFileSync(".github/ISSUE_TEMPLATE/" + file, "utf8"));
   if (!form.name || !form.description || !Array.isArray(form.body))

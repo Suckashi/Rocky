@@ -11013,6 +11013,19 @@
         "sha256": "0d47eb7f7495849818b8285fee2df7722ba76a8e8f22145cb147817516cf0ef3",
         "rights": "User supplied; not granted Apache-2.0 by import"
       }
+    },
+    {
+      "date": "2026-10-05",
+      "decision": "Owner requested removal of automated CI and required CI checks; relevant local verification replaces waiting for hosted CI.",
+      "scope": [
+        "T-001",
+        "R-043"
+      ],
+      "reference": "docs/implementation/ci-removal.md",
+      "platform": "Windows x64",
+      "mode": "live",
+      "verification": "gh workflow disable and DELETE required_status_checks exited 0; independent GET confirmed disabled_manually and no required_status_checks. No active Verify runs returned.",
+      "limitations": "No application tests or Ubuntu runs; acceptance statuses unchanged. Hosted configuration took effect before the separately authorized source push."
     }
   ]
 }
