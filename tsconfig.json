@@ -19,5 +19,6 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["src", "scripts", "spikes", "tests", "*.ts"]
+  "include": ["src", "scripts", "spikes", "tests", "*.ts"],
+  "exclude": ["node_modules", "spikes/s3-install"]
 }
