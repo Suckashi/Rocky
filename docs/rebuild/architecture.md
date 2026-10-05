@@ -36,7 +36,20 @@ Rocky 程序 (Node 24, 單一程序)
 | 中文搜尋 | SQLite FTS5 trigram 索引，兩個字以下的查詢補用 LIKE；附中文召回測試 | 舊版 FTS5 查不到中文 |
 | 文件 | md：markdown-it；docx：docx + mammoth + OOXML 直接編輯；xlsx：exceljs（開檔時重算）；pptx：pptxgenjs + pptx-automizer；pdf：unpdf（附 CJK cmaps）+ pdf-lib + fontkit；HTML 轉 PDF：Playwright 呼叫系統 Edge | 沒有 Office；LibreOffice 是選配 |
 | 資料位置 | `%LOCALAPPDATA%\Rocky`（Windows） | 不進 Git、不送遙測 |
-| UI | React + Vite，參考 OpenDots 的版面，用自己的 design tokens | 不直接搬 OpenDots 的程式碼 |
+| UI 框架 | React 19 + Vite（與 OpenDots 相同），用自己的 design tokens | 不 import OpenDots 的 CSS |
+| UI 與後端的協定 | 事件格式採 **AG-UI** 標準事件（`TEXT_MESSAGE_*`、`TOOL_CALL_*`、`STATE_*`），核准與收據用少量自訂事件；**V1 不用 CopilotKit runtime 和 react-core** | 時間軸、核准、收據都由 Rocky 存在本機並可重播；CopilotKit 的對話紀錄預設放在雲端 Intelligence 服務，而且 `useHumanInTheLoop` 讓核准在瀏覽器端完成，兩者都和「Rocky 是唯一權威」衝突。舊 Rocky 用了 CopilotKit，結果只用到 `CUSTOM` 事件，UI 只能靠名稱比對 |
+| HTTP 伺服器 | Hono + `@hono/node-server`（與 OpenDots 相同） | 小、型別好；照 OpenDots 的 composition root、依功能分的 route 模組、單一安全 guard、有期限的優雅關機 |
+| 文件編輯器 | Tiptap（與 OpenDots 相同）編輯 Markdown 文件，附原始碼模式 | 借用 OpenDots 的自動儲存、修訂版本檢查（防止舊內容覆蓋新內容） |
+
+### 從 OpenDots 借什麼（MIT，出處記在 `THIRD_PARTY_NOTICES.md`）
+
+| 借 | 不借 |
+|---|---|
+| 版面：左側 rail、側欄、對話欄、右側面板，以及斷點 | CopilotKit Intelligence 雲端對話、Slack、語音 |
+| 工具卡：用人話的動詞標籤；沒完成就顯示「已中斷」，絕不顯示成功 | Docker 電腦服務、遠端 owner token、多使用者欄位 |
+| 審查卡：決定後保留成收據、「核准前不會有任何變更」 | 由瀏覽器執行副作用 |
+| `Mascot` 元件模式（依狀態切換）→ 換成 Roko 的 spritesheet 動畫 | 輪詢迴圈、`window.prompt`、單檔巨型 `App.tsx` |
+| Spaces／文件庫的格狀與清單頁、首次使用卡加範例提示 | TanStack AI（模型層改用 LangChain provider） |
 
 ## 先驗證再定案（第一週的 spike）
 
