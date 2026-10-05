@@ -42,7 +42,13 @@
 
 ## 驗證
 
-（見下方。）
+| 平台                                            | 指令                                                                     | 結果                                                                                                                                                       |
+| ----------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 雲端 Linux，Node 24.21.0，OpenCode 1.18.34      | `ROCKY_REQUIRE_OPENCODE=1 npm run check`                                 | exit 0；143 個測試通過。六種格式的中文往返（docx 只改 `word/document.xml`、pptx 只改被改的投影片、xlsx 公式開檔重算、md 保留 BOM＋CRLF、Big5 被拒絕）      |
+| 同上                                            | 整合測試（假模型）                                                       | 建立 docx 要核准實際位元組、編輯前後的 Markdown diff、二進位還原；記憶新增、中文搜尋、刪除要問、可還原；MCP 預設要問、唯讀不問、關閉直接拒絕、token 不外洩 |
+| 同上，Command Code `deepseek/deepseek-v4-flash` | `npm run eval -- --repeat 3 --save-baseline`（13 題，含文件與記憶 4 題） | exit 0；39/39，共 771 秒，存為新基線。文件題都用了 `read_document`／`edit_document`／`create_document`；記憶寫入沒有詢問                                   |
+| 同上，Chromium 141                              | `npm run test:e2e`                                                       | exit 0；13 項通過                                                                                                                                          |
+| GitHub Actions windows-latest／ubuntu-latest    | `npm run check`                                                          | 推送後由 CI 執行                                                                                                                                           |
 
 ## 還沒驗證的（限制）
 
