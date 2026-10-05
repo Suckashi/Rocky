@@ -15,6 +15,11 @@ Adapted files:
 - `src/server/http/security.ts`: the API guard (Host, Origin, `sec-fetch-site`, constant-time token
   check, JSON-only writes) from `src/server/app.ts`; Rocky always requires the token.
 - `src/server/shutdown.ts`: the deadline-bound shutdown from `src/server/shutdown.ts`.
+- `src/web/components/Chat.tsx`: the conversation flow (`useAgent` with a per-thread agent,
+  `connectAgent` for history, `addMessage` + `runAgent`, run-error subscription) from `src/client/Chat.tsx`.
+- `src/web/components/ThreadList.tsx`: the `useThreads` conversation list from `src/client/ThreadList.tsx`.
+- Layout (rail, conversation list, chat, right panel) follows `src/client/App.tsx` and `style.css`;
+  colors and spacing come from the owner's Rocky design, not from OpenDots' CSS.
 
 ## CopilotKit
 
