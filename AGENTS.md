@@ -8,6 +8,7 @@ handles documents, and delegates heavy coding to external coding agents over ACP
 
 - `docs/rebuild/product.md`: what we build (goals, non-goals, V1 scope, success criteria).
 - `docs/rebuild/architecture.md`: how we build it, and why.
+- `docs/rebuild/approvals.md`: approval modes, policy order, receipts.
 - `docs/adr/`: one short file per decision that changes either of the above.
 - `apps/`, `packages/`, `specs/`, `docs/refactor/`: the old Rocky. Read-only
   reference: do not modify, import from or port it wholesale.

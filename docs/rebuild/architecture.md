@@ -10,7 +10,7 @@
    ▼
 Rocky 程序 (Node 24, 單一程序)
  ├─ Work 服務：對話、背景工作、狀態機（Rocky 是唯一權威）
- ├─ 效果管線：政策 → 核准 → 執行 → 收據（T0–T3）
+ ├─ 效果管線：政策 → 核准 → 執行 → 收據（見 approvals.md）
  ├─ 快照庫：T1 寫入前的內容定址備份，用來還原
  ├─ Agent：Deep Agents JS（同一程序內執行，鎖定版本）
  ├─ 模型層：OpenAI 相容 / OpenAI / Anthropic / Ollama（官方 SDK，有快取與重試）
