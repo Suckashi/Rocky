@@ -99,7 +99,7 @@ test("explicit workspace selection and read scope reaches real native Work throu
       .getByRole("button", { name: "選擇給下一個工作" })
       .click();
     await page.keyboard.press("Escape");
-    await page.getByText("模型與工具", { exact: true }).click();
+    await page.getByText("進階選項", { exact: true }).click();
     const scope = page.getByRole("checkbox", {
       name: "允許此工作讀取工作區（含臨時子任務）",
       exact: true,
@@ -121,7 +121,7 @@ test("explicit workspace selection and read scope reaches real native Work throu
     await scope.check();
     const prompt = "Workspace browser read " + Date.now();
     await page.locator("#compose textarea").fill(prompt);
-    await page.getByRole("button", { name: "傳送至模型" }).click();
+    await page.getByRole("button", { name: "送出", exact: true }).click();
     const work = page.locator("article.work").filter({ hasText: prompt });
     await expect(work).toContainText("BROWSER_ACTUAL_OWNER_FILE");
     const list = await (await page.request.get("/api/v1/works")).json(),
@@ -143,7 +143,7 @@ test("explicit workspace selection and read scope reaches real native Work throu
     await expect(
       work.getByText("讀取綁定的工作區", { exact: true }),
     ).toBeVisible();
-    await page.getByText("模型與工具", { exact: true }).click();
+    await page.getByText("進階選項", { exact: true }).click();
     await expect(scope).not.toBeChecked();
     for (const [width, height] of [
       [1440, 900],

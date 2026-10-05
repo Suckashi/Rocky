@@ -43,9 +43,7 @@ test("retry UI reviews receipts and creates a distinct Work; mobile controls rem
       .click();
     await page.keyboard.press("Escape");
     await page.locator("#compose textarea").fill(name);
-    await page
-      .getByRole("button", { name: "傳送至模型", exact: false })
-      .click();
+    await page.getByRole("button", { name: "送出", exact: true }).click();
     const original = page
       .locator("article.work")
       .filter({ hasText: name })

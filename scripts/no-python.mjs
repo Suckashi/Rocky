@@ -72,6 +72,7 @@ const env = {
   PROMPTFOO_DISABLE_TELEMETRY: "1",
   PROMPTFOO_DISABLE_UPDATE: "1",
 };
+const installOnly = process.argv.includes("--install-only");
 const steps = [];
 const npmVersion = spawnSync(
   process.execPath,
@@ -80,7 +81,7 @@ const npmVersion = spawnSync(
 );
 if (npmVersion.status !== 0)
   throw Error("Could not verify the npm executable used by this check");
-for (const args of [
+const fullPlan = [
   ["ci"],
   ["run", "check"],
   ["run", "build"],
@@ -101,7 +102,9 @@ for (const args of [
     "tests/backup.test.ts",
   ],
   ["run", "test:learning"],
-]) {
+];
+const plannedSteps = installOnly ? fullPlan.slice(0, 3) : fullPlan;
+for (const args of plannedSteps) {
   const result = spawnSync(
     process.execPath,
     [process.env.npm_execpath, ...args],
@@ -110,7 +113,8 @@ for (const args of [
       env,
       encoding: "utf8",
       maxBuffer: 20 * 1024 * 1024,
-      timeout: 240000,
+      // Cold clean-copy installs on hosted Windows take four to ten minutes.
+      timeout: 900000,
     },
   );
   steps.push({
@@ -137,6 +141,7 @@ writeFileSync(
       inheritedUserAgent: process.env.npm_config_user_agent,
       scratch,
       mode: "fixture",
+      installOnly,
       steps,
       forbiddenToolAttempts: attempts,
       limitations: [
@@ -149,7 +154,7 @@ writeFileSync(
   ),
 );
 if (
-  steps.length !== 5 ||
+  steps.length !== plannedSteps.length ||
   steps.some((s) => s.exitCode !== 0) ||
   attempts.length
 )

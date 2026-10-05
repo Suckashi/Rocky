@@ -517,6 +517,121 @@
             "Source preview only; no release/tag/deployment.",
             "Dependency audit remains required and failing."
           ]
+        },
+        {
+          "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+          "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+            "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+            "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+            "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+          ],
+          "mode": "static",
+          "command": "npm ci",
+          "exitCode": 0
+        },
+        {
+          "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+          "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+            "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+            "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+            "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+          ],
+          "mode": "static",
+          "command": "npm run check",
+          "exitCode": 0
+        },
+        {
+          "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+          "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+            "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+            "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+            "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+          ],
+          "mode": "static",
+          "command": "npm run lint",
+          "exitCode": 0
+        },
+        {
+          "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+          "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+            "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+            "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+            "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+          ],
+          "mode": "static",
+          "command": "npm run format:check",
+          "exitCode": 0
+        },
+        {
+          "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+          "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+            "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+            "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+            "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+          ],
+          "mode": "static",
+          "command": "npm run check:docs",
+          "exitCode": 0
+        },
+        {
+          "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+          "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+            "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+            "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+            "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge.",
+            "actionlint not run; YAML parser, structure assertions and manual review used."
+          ],
+          "mode": "static",
+          "command": "YAML.parse verify.yml plus Node assert checks; manual GitHub Actions workflow/expression review",
+          "exitCode": 0,
+          "review": [
+            "PR matrix selects Ubuntu only; other supported events select Ubuntu and Windows.",
+            "main-only push trigger, cron 17 3 * * *, existing dispatch and PR triggers preserved.",
+            "No changes to permissions, pinned actions, job names, audit, unit tests or e2e.",
+            "CI install-only follows npm test and test:learning."
+          ]
         }
       ],
       "blockedReason": null,
@@ -609,6 +724,82 @@
             "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
             "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
           ]
+        },
+        {
+          "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+          "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+            "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+            "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+            "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+          ],
+          "mode": "fixture",
+          "command": "npm run test:no-python -- --install-only",
+          "exitCode": 0,
+          "installOnly": true,
+          "steps": [
+            {
+              "command": "npm ci",
+              "exitCode": 0
+            },
+            {
+              "command": "npm run check",
+              "exitCode": 0
+            },
+            {
+              "command": "npm run build",
+              "exitCode": 0
+            }
+          ],
+          "forbiddenToolAttempts": []
+        },
+        {
+          "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+          "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+            "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+            "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+            "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+          ],
+          "mode": "fixture",
+          "command": "npm run test:no-python",
+          "exitCode": 0,
+          "installOnly": false,
+          "steps": [
+            {
+              "command": "npm ci",
+              "exitCode": 0
+            },
+            {
+              "command": "npm run check",
+              "exitCode": 0
+            },
+            {
+              "command": "npm run build",
+              "exitCode": 0
+            },
+            {
+              "command": "npm test -- tests/contracts.test.ts tests/runtime.test.ts tests/worker-channel.test.ts tests/http.test.ts tests/attachments.test.ts tests/documents-new.test.ts tests/model-budget.test.ts tests/learning-candidates.test.ts tests/backup.test.ts",
+              "exitCode": 0
+            },
+            {
+              "command": "npm run test:learning",
+              "exitCode": 0
+            }
+          ],
+          "forbiddenToolAttempts": []
         }
       ],
       "acceptanceScope": "contributes_to_final_acceptance; do not mark global acceptance passed from a partial phase",
@@ -3651,6 +3842,35 @@
             "Chromium 1223 compatibility override; pinned Chromium 1243 and strict egress not accepted.",
             "Real container engine/enforcement not verified; no host fallback.",
             "No commit, remote, paid endpoint, security software or global system setting change."
+          ]
+        },
+        {
+          "commit": "a150f57ea3d9d8f02db26a53a356ff16771bb583+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npx vitest run tests/backup.test.ts tests/git-worktree.test.ts tests/workspace-worktrees.test.ts tests/isolated-environment.test.ts tests/skill-sources.test.ts tests/workspaces.test.ts tests/continuous-conversation.test.ts tests/persistence.test.ts tests/writer-lock.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/execution.json",
+          "testFiles": [
+            "tests/backup.test.ts",
+            "tests/git-worktree.test.ts",
+            "tests/workspace-worktrees.test.ts",
+            "tests/isolated-environment.test.ts",
+            "tests/skill-sources.test.ts",
+            "tests/workspaces.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/persistence.test.ts"
+          ],
+          "limitations": [
+            "Initial main CI failed on both platforms; subsequent repair evidence is scoped to its exact revision and completed steps.",
+            "Source preview only; no release, tag, deployment or stable acceptance.",
+            "Dependency audit remains required and failing with seven high affected-package entries. No waiver or runtime downgrade.",
+            "Fresh hosted verification of the Windows and Store fixes is pending.",
+            "Authorized live providers/MCP, actual container enforcement, strict browser egress and relative-performance acceptance remain scoped by their own reports.",
+            "Owner-authorized artwork inclusion does not assign an artwork reuse license.",
+            "Original workspace has concurrent unrelated edits; this repair uses an isolated managed worktree."
           ]
         }
       ],
@@ -6742,6 +6962,82 @@
             "Source/history/package pattern checks and three Roko screenshots reviewed; not an exhaustive security, PII or historical image audit.",
             "Local commits only. Main remains at e42a0a8; no merge, remote creation, visibility change, push, tag or deployment."
           ]
+        },
+        {
+          "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+          "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+            "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+            "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+            "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+          ],
+          "mode": "fixture",
+          "command": "npm run test:no-python -- --install-only",
+          "exitCode": 0,
+          "installOnly": true,
+          "steps": [
+            {
+              "command": "npm ci",
+              "exitCode": 0
+            },
+            {
+              "command": "npm run check",
+              "exitCode": 0
+            },
+            {
+              "command": "npm run build",
+              "exitCode": 0
+            }
+          ],
+          "forbiddenToolAttempts": []
+        },
+        {
+          "commit": "04f4ea6700db12970ef24d672bb6f3ecd4efe68a+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "npmVersion": "11.6.4",
+          "lockfileHash": "66b1eb6e8ad14412a4502f4c432458e7161e96bb23e8118c0dd3cd2c9b9a3638",
+          "reportPath": "docs/implementation/evidence/2026-10-05/ci-duration/verification.json",
+          "testFiles": [],
+          "limitations": [
+            "Windows x64 constrained-PATH clean-copy fixture, not a pristine-machine installation.",
+            "Install-only covers npm ci, check and build; only the default five-step invocation includes core tests and Learning for AT-01.",
+            "Ubuntu and whole-suite/e2e verification await hosted PR CI; no live-provider or complete global acceptance claim.",
+            "PR verification omits Windows; main pushes, daily 03:17 UTC schedule and workflow_dispatch retain both platforms. No branch protection change or merge."
+          ],
+          "mode": "fixture",
+          "command": "npm run test:no-python",
+          "exitCode": 0,
+          "installOnly": false,
+          "steps": [
+            {
+              "command": "npm ci",
+              "exitCode": 0
+            },
+            {
+              "command": "npm run check",
+              "exitCode": 0
+            },
+            {
+              "command": "npm run build",
+              "exitCode": 0
+            },
+            {
+              "command": "npm test -- tests/contracts.test.ts tests/runtime.test.ts tests/worker-channel.test.ts tests/http.test.ts tests/attachments.test.ts tests/documents-new.test.ts tests/model-budget.test.ts tests/learning-candidates.test.ts tests/backup.test.ts",
+              "exitCode": 0
+            },
+            {
+              "command": "npm run test:learning",
+              "exitCode": 0
+            }
+          ],
+          "forbiddenToolAttempts": []
         }
       ],
       "blockedReason": "Windows package/recovery checks and Ubuntu WSL Node-only install/build/core/Learning now pass. Dependency audit, full platform command coverage and optional environment setup remain open.",
@@ -6916,6 +7212,74 @@
             "Dependency audit remains failed: 7 high, 0 moderate, 0 critical. No downgrade or waiver.",
             "No real container engine, authorized external endpoints, relative-performance or artwork distribution-rights acceptance.",
             "Optional gaze deferred. No remote, commit, push, merge, tag, deployment or global system configuration change."
+          ]
+        },
+        {
+          "commit": "1b11a14bf713b8a5659268fa15aa75bf93ab2a0e",
+          "platform": "GitHub-hosted windows-latest and ubuntu-latest",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "gh run watch 37204351525 --repo Suckashi/Rocky --interval 30 --exit-status",
+          "exitCode": 1,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/execution.json",
+          "testFiles": [],
+          "limitations": [
+            "Initial main CI failed on both platforms; subsequent repair evidence is scoped to its exact revision and completed steps.",
+            "Source preview only; no release, tag, deployment or stable acceptance.",
+            "Dependency audit remains required and failing with seven high affected-package entries. No waiver or runtime downgrade.",
+            "Fresh hosted verification of the Windows and Store fixes is pending.",
+            "Authorized live providers/MCP, actual container enforcement, strict browser egress and relative-performance acceptance remain scoped by their own reports.",
+            "Owner-authorized artwork inclusion does not assign an artwork reuse license.",
+            "Original workspace has concurrent unrelated edits; this repair uses an isolated managed worktree."
+          ]
+        },
+        {
+          "commit": "a150f57ea3d9d8f02db26a53a356ff16771bb583+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npx vitest run tests/backup.test.ts tests/git-worktree.test.ts tests/workspace-worktrees.test.ts tests/isolated-environment.test.ts tests/skill-sources.test.ts tests/workspaces.test.ts tests/continuous-conversation.test.ts tests/persistence.test.ts tests/writer-lock.test.ts",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/execution.json",
+          "testFiles": [
+            "tests/backup.test.ts",
+            "tests/git-worktree.test.ts",
+            "tests/workspace-worktrees.test.ts",
+            "tests/isolated-environment.test.ts",
+            "tests/skill-sources.test.ts",
+            "tests/workspaces.test.ts",
+            "tests/continuous-conversation.test.ts",
+            "tests/persistence.test.ts"
+          ],
+          "limitations": [
+            "Initial main CI failed on both platforms; subsequent repair evidence is scoped to its exact revision and completed steps.",
+            "Source preview only; no release, tag, deployment or stable acceptance.",
+            "Dependency audit remains required and failing with seven high affected-package entries. No waiver or runtime downgrade.",
+            "Fresh hosted verification of the Windows and Store fixes is pending.",
+            "Authorized live providers/MCP, actual container enforcement, strict browser egress and relative-performance acceptance remain scoped by their own reports.",
+            "Owner-authorized artwork inclusion does not assign an artwork reuse license.",
+            "Original workspace has concurrent unrelated edits; this repair uses an isolated managed worktree."
+          ]
+        },
+        {
+          "commit": "8822108f18550cbd91a8c424c219bb0987b3bc9c+working-tree",
+          "platform": "Windows x64",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "npm run check:dependencies",
+          "exitCode": 0,
+          "reportPath": "docs/implementation/evidence/2026-10-04/dependency-audit/verification.json",
+          "testFiles": [
+            "scripts/check-dependencies.mjs"
+          ],
+          "limitations": [
+            "Exceptions are a CI gate policy, not remediation: both advisories remain present in the installed tree.",
+            "braces is runtime-reachable through Deep Agents glob filtering; a hostile nested pattern can still exhaust the stack. No pattern-depth guard was added.",
+            "Security acceptance requiring a clean dependency audit is not promoted.",
+            "Exceptions expire on 2026-11-04 and must be re-reviewed."
           ]
         }
       ],
@@ -7108,6 +7472,26 @@
             "Unchanged lockfile; existing dependency and product acceptance gaps remain open.",
             "Roko is excluded from the code license; no separate artwork reuse license or independent rights clearance is asserted.",
             "No dedicated private conduct contact supplied."
+          ]
+        },
+        {
+          "commit": "1b11a14bf713b8a5659268fa15aa75bf93ab2a0e",
+          "platform": "GitHub-hosted windows-latest and ubuntu-latest",
+          "nodeVersion": "v24.12.0",
+          "lockfileHash": "dcc3933c7bc77f6cb0d8009b6a881c636c17fffcf51e3360a930292a41192b45",
+          "mode": "fixture",
+          "command": "gh run watch 37204351525 --repo Suckashi/Rocky --interval 30 --exit-status",
+          "exitCode": 1,
+          "reportPath": "docs/implementation/evidence/2026-10-04/github-bootstrap/execution.json",
+          "testFiles": [],
+          "limitations": [
+            "Initial main CI failed on both platforms; subsequent repair evidence is scoped to its exact revision and completed steps.",
+            "Source preview only; no release, tag, deployment or stable acceptance.",
+            "Dependency audit remains required and failing with seven high affected-package entries. No waiver or runtime downgrade.",
+            "Fresh hosted verification of the Windows and Store fixes is pending.",
+            "Authorized live providers/MCP, actual container enforcement, strict browser egress and relative-performance acceptance remain scoped by their own reports.",
+            "Owner-authorized artwork inclusion does not assign an artwork reuse license.",
+            "Original workspace has concurrent unrelated edits; this repair uses an isolated managed worktree."
           ]
         }
       ],

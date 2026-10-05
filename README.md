@@ -29,7 +29,7 @@ npm run doctor
 npm start
 ```
 
-Open **http://127.0.0.1:3211**. Configure a model connection in Settings, then choose the workspace and permissions for your first Work. Credentials are referenced from environment variables; do not paste secrets into repository files. See the [user guide](docs/user-guide.en.md) for model setup, storage locations, and approvals.
+Open **http://127.0.0.1:3211**. On first launch, "Connect a model first" asks for a provider (Anthropic / OpenAI / Ollama / OpenAI-compatible), a model ID and an API key; the synthetic fixture is available to try the workflow first. Keys are stored in the daemon data directory as `secrets.env` (unencrypted, mode 0600) or come from environment variables (`npm run dev` reads a root `.env`; see [`.env.example`](.env.example)). Do not paste secrets into repository files. See the [user guide](docs/user-guide.en.md) for model setup, storage locations, and approvals.
 
 Core installation and standard Learning fixtures use Node/npm only. An optional browser download is explicit:
 

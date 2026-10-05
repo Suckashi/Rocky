@@ -160,7 +160,7 @@ for (const dataMode of [false, true]) {
         await page.keyboard.press("Escape");
         const prompt = "MCP exact browser approval " + Date.now();
         await page.locator("#compose textarea").fill(prompt);
-        await page.getByRole("button", { name: "傳送至模型" }).click();
+        await page.getByRole("button", { name: "送出", exact: true }).click();
         const work = page.locator("article.work").filter({ hasText: prompt });
         await expect(work.locator(".approval")).toBeVisible();
         await expect(

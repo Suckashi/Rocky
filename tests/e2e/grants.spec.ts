@@ -4,11 +4,11 @@ test("T-008 Work permission revocation persists through UI reload", async ({
 }) => {
   const prompt = `Grant UI ${Date.now()}`;
   await page.goto("/");
-  await page.getByText("模型與工具", { exact: true }).click();
+  await page.getByText("進階選項", { exact: true }).click();
   await page.getByLabel("啟用合成測試").check();
-  await page.getByText("模型與工具", { exact: true }).click();
+  await page.getByText("進階選項", { exact: true }).click();
   await page.locator("#compose textarea").fill(prompt);
-  await page.getByRole("button", { name: /開始驗證/ }).click();
+  await page.getByRole("button", { name: "送出", exact: true }).click();
   const work = page.locator("article.work").filter({ hasText: prompt });
   await expect(
     work.getByRole("button", { name: "核准這次寫入", exact: true }),

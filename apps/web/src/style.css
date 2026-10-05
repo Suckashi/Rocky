@@ -1220,3 +1220,170 @@ input[type="checkbox"] {
   width: 100%;
   min-width: 0;
 }
+/* Composer: icon buttons and visible model chip. */
+#compose button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#compose button::after,
+#compose .composer-stop::after {
+  content: none;
+}
+.model-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workspace-chip {
+  font-size: 11px;
+  color: var(--muted);
+}
+.composer-tools > .connection-options {
+  margin-left: auto;
+}
+.composer-tools .connection-options[open] .setup {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.composer-status {
+  color: var(--muted);
+}
+button.link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--user);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+}
+/* First-run model onboarding. */
+.onboarding {
+  align-self: center;
+  width: min(520px, 100%);
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--canvas);
+  padding: 22px 24px;
+  font-size: 13px;
+}
+.onboarding h2 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+.onboarding h3 {
+  margin: 16px 0 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.onboarding > p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.onboarding fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.onboarding label {
+  display: grid;
+  gap: 4px;
+}
+.onboarding label small {
+  color: var(--muted);
+  line-height: 1.5;
+}
+.onboarding input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+.onboarding details {
+  display: grid;
+  gap: 10px;
+}
+.onboarding details[open] > summary {
+  margin-bottom: 10px;
+}
+.onboarding details summary {
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.onboarding details label + label {
+  margin-top: 10px;
+}
+.provider-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.provider-choices button {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+}
+.provider-choices button[aria-checked="true"] {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+.onboarding-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+.onboarding-actions .primary {
+  padding: 9px 16px;
+  border-radius: 9px;
+}
+.onboarding-models ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.onboarding-models li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.onboarding-models li span {
+  display: grid;
+  min-width: 0;
+}
+.onboarding-models li small {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.onboarding [role="alert"] {
+  color: var(--error);
+  margin: 12px 0 0;
+}

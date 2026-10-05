@@ -9,7 +9,7 @@ test("empty owned installation offers setup without accounts, imported history o
   );
   await page.goto("/");
   await expect(
-    page.getByText("尚無工作。你的第一項驗證會出現在這裡。", { exact: true }),
+    page.getByRole("heading", { name: "先連接一個模型", exact: true }),
   ).toBeVisible();
   expect(
     (await (await page.request.get("/api/v1/works")).json()).works,
@@ -18,7 +18,10 @@ test("empty owned installation offers setup without accounts, imported history o
     (await (await page.request.get("/api/v1/model-connections")).json())
       .connections,
   ).toEqual([]);
-  await expect(page.getByRole("button", { name: "開始驗證" })).toBeDisabled();
+  // First launch shows only model setup; nothing can be sent yet.
+  await expect(
+    page.getByRole("button", { name: "送出", exact: true }),
+  ).toHaveCount(0);
   await page.getByRole("button", { name: "設定", exact: true }).last().click();
   await expect(page.getByText("模型連線設定", { exact: true })).toBeVisible();
   await expect(

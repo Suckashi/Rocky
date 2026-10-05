@@ -1,36 +1,71 @@
-/* OpenDots c2569bb6, MIT Copyright (c) Atai Barkai.
- * Effective compact chrome adapted to Rocky semantic tokens; see THIRD_PARTY_NOTICES.md. */
+/* Rocky semantic tokens. Layout geometry was originally adapted from OpenDots c2569bb6,
+ * MIT Copyright (c) Atai Barkai; see THIRD_PARTY_NOTICES.md. Palette is Rocky's own. */
 :root {
   --canvas: #ffffff;
-  --surface: #fafafa;
-  --chrome: #f9f9f9;
-  --rail: #f5f5f5;
-  --raised: #ededed;
-  --text: #242424;
-  --muted: #686868;
-  --border: #e7e7e7;
-  --accent: #282828;
+  --surface: #faf9f7;
+  --chrome: #f6f5f2;
+  --rail: #f1efeb;
+  --raised: #eeece7;
+  --text: #1d2125;
+  --muted: #565b62;
+  --subtle: #63686f;
+  --border: #e7e4de;
+  --border-strong: #d6d2ca;
+  --accent: #2c6e65;
+  --accent-hover: #245b54;
+  --accent-soft: #e8f2f0;
   --accent-text: #ffffff;
-  --user: #3d7e75;
-  --success: #496d61;
-  --error: #a63131;
-  --focus: #3d7e75;
+  --user: #2c6e65;
+  --user-bubble: #eaf2f0;
+  --user-bubble-text: #16332f;
+  --success: #276a4e;
+  --success-soft: #e7f3ec;
+  --warning: #9a5b00;
+  --warning-soft: #fdf3e2;
+  --error: #b42318;
+  --error-soft: #fdecea;
+  --focus: #2c6e65;
+  --shadow-sm: 0 1px 2px #1d212508;
+  --shadow-md: 0 4px 16px #1d21250d, 0 1px 3px #1d212508;
+  --shadow-lg: 0 12px 40px #1d212518, 0 2px 6px #1d21250a;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --font-sans:
+    "Inter", system-ui, -apple-system, "Segoe UI", "PingFang TC",
+    "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas,
+    monospace;
   color-scheme: light;
 }
 :root[data-theme="dark"] {
-  --canvas: #202020;
-  --surface: #252525;
-  --chrome: #262626;
-  --rail: #292929;
-  --raised: #363636;
-  --text: #ededed;
-  --muted: #b5b5b5;
-  --border: #424242;
-  --accent: #e5e5e5;
-  --accent-text: #202020;
-  --user: #3d7e75;
-  --success: #98c3af;
+  --canvas: #18191b;
+  --surface: #1e1f22;
+  --chrome: #1b1c1e;
+  --rail: #161719;
+  --raised: #2a2c30;
+  --text: #ececec;
+  --muted: #a3a7ad;
+  --subtle: #9a9fa6;
+  --border: #2e3135;
+  --border-strong: #3b3f44;
+  --accent: #5fb3a6;
+  --accent-hover: #74c2b6;
+  --accent-soft: #1f3330;
+  --accent-text: #0e1513;
+  --user: #5fb3a6;
+  --user-bubble: #223532;
+  --user-bubble-text: #e2f1ee;
+  --success: #7cc4a0;
+  --success-soft: #1d2f26;
+  --warning: #e7b464;
+  --warning-soft: #33291a;
   --error: #f0a4a4;
-  --focus: #98c3af;
+  --error-soft: #3a2222;
+  --focus: #74c2b6;
+  --shadow-sm: 0 1px 2px #00000040;
+  --shadow-md: 0 4px 16px #00000050;
+  --shadow-lg: 0 12px 40px #00000070;
   color-scheme: dark;
 }

@@ -17,6 +17,49 @@ import { WorkspaceRegistry } from "../apps/daemon/src/workspaces.js";
 import { WorkService } from "../apps/daemon/src/work-service.js";
 import { createApp } from "../apps/daemon/src/http.js";
 import { workSchema } from "../packages/contracts/src/index.js";
+test("private data stays outside workspace access when Store starts through a directory alias", async () => {
+  const base = await mkdtemp(join(tmpdir(), "rocky-private-alias-"));
+  const project = join(base, "project");
+  const alias = join(base, "alias");
+  await mkdir(project);
+  await symlink(
+    project,
+    alias,
+    process.platform === "win32" ? "junction" : "dir",
+  );
+  const store = new Store(join(alias, "private-data"));
+  const registry = new WorkspaceRegistry(store);
+  try {
+    const workspace = await registry.save({
+      requestId: randomUUID(),
+      id: randomUUID(),
+      expectedRevision: 0,
+      name: "Canonical workspace",
+      root: project,
+    });
+    expect(
+      (await registry.files(workspace.id, 1)).entries.map(
+        (entry) => entry.name,
+      ),
+    ).not.toContain("private-data");
+    await expect(
+      registry.read(workspace.id, 1, "private-data/manifest.json"),
+    ).rejects.toThrow();
+    await expect(
+      registry.save({
+        requestId: randomUUID(),
+        id: randomUUID(),
+        expectedRevision: 0,
+        name: "Private data",
+        root: join(project, "private-data"),
+      }),
+    ).rejects.toThrow();
+  } finally {
+    store.close();
+    await rm(base, { recursive: true, force: true });
+  }
+});
+
 test("directory limits are truthful and unfinished workspace reservations prevent rebinding", async () => {
   const base = await mkdtemp(join(tmpdir(), "rocky-workspace-reservation-"));
   const project = join(base, "project");

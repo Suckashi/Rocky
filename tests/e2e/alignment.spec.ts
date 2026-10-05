@@ -1,5 +1,5 @@
 import { test, expect } from "./fixture.js";
-test("OpenDots geometry, responsive navigation and keyboard focus", async ({
+test("Rocky shell geometry, responsive navigation and keyboard focus", async ({
   page,
 }) => {
   await page.goto("/");
@@ -16,15 +16,18 @@ test("OpenDots geometry, responsive navigation and keyboard focus", async ({
       rail: document.querySelector(".icon-rail")!.getBoundingClientRect().width,
       sidebar: document.querySelector(".sidebar")!.getBoundingClientRect()
         .width,
-      composer: document
-        .querySelector(".chat-composer")!
-        .getBoundingClientRect().bottom,
+      // First run shows only the setup card; otherwise the composer is last.
+      composer: (
+        document.querySelector(".chat-composer") ??
+        document.querySelector(".transcript-frame")!
+      ).getBoundingClientRect().bottom,
     }));
     expect(boxes.overflow).toBe(false);
     expect(boxes.composer).toBeLessThanOrEqual(height);
     if (width > 700) {
-      expect(boxes.rail).toBe(48);
-      expect(boxes.sidebar).toBe(220);
+      // The icon rail only appears while the sidebar is collapsed.
+      expect(boxes.rail).toBe(0);
+      expect(boxes.sidebar).toBe(260);
     } else {
       expect(boxes.sidebar).toBe(252);
       await page.getByRole("button", { name: "開啟導覽" }).click();
@@ -37,9 +40,9 @@ test("OpenDots geometry, responsive navigation and keyboard focus", async ({
   }
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole("button", { name: "收合導覽" }).click();
-  await expect(page.locator(".workspace")).toHaveCSS("margin-left", "48px");
-  await page.getByRole("button", { name: "收合導覽" }).click();
-  await expect(page.locator(".workspace")).toHaveCSS("margin-left", "268px");
+  await expect(page.locator(".workspace")).toHaveCSS("margin-left", "56px");
+  await page.getByRole("button", { name: "展開導覽" }).click();
+  await expect(page.locator(".workspace")).toHaveCSS("margin-left", "260px");
   await page.getByRole("button", { name: "設定", exact: true }).last().click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");

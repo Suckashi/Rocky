@@ -1,0 +1,27 @@
+{
+  "policy": "Each exception names one advisory on one exact locked package version with no patched release. Any other moderate+ advisory, a changed version, an expired review date or a stale entry fails npm run check:dependencies.",
+  "exceptions": [
+    {
+      "advisory": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "version": "3.0.3",
+      "severity": "high",
+      "path": "deepagents@1.14.1 > micromatch@4.0.8 (and fast-glob@3.3.3) > braces@3.0.3",
+      "reachability": "Runtime. Deep Agents glob/grep filtering passes patterns to micromatch; a deeply nested pattern can exhaust the stack of the process evaluating it.",
+      "reason": "Every published braces version is affected and npm's only remediation downgrades deepagents to 0.0.2, which removes the runtime.",
+      "approved": "2026-10-04",
+      "reviewBy": "2026-11-04"
+    },
+    {
+      "advisory": "GHSA-86w9-cpqp-85rv",
+      "package": "node-forge",
+      "version": "1.4.0",
+      "severity": "high",
+      "path": "devDependency node-forge@1.4.0; promptfoo@0.120.0 > jks-js@1.1.7 > node-forge@1.4.0",
+      "reachability": "Test fixtures generate ephemeral TLS certificates; promptfoo uses it only for Java keystore loading. Rocky never verifies RSA PKCS#1 v1.5 signatures with node-forge.",
+      "reason": "Every published node-forge version is affected and npm's only remediation downgrades promptfoo to 0.116.7.",
+      "approved": "2026-10-04",
+      "reviewBy": "2026-11-04"
+    }
+  ]
+}

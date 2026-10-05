@@ -58,6 +58,14 @@ test("Computer opens a reference-sized pane with actual registered files and hon
       });
     }
     await pane.getByRole("tab", { name: "Terminal", exact: true }).click();
+    // The pane defaults to the newest Work, which earlier specs may give
+    // command receipts; select a seeded Work that never runs commands.
+    const picker = pane.getByLabel("檢視工作");
+    const seeded = await picker
+      .locator("option", { hasText: "Reconciliation UI" })
+      .first()
+      .getAttribute("value");
+    await picker.selectOption(seeded!);
     await expect(pane).toContainText("此工作尚無命令收據");
     await page.screenshot({
       path: "test-results/computer-unavailable-320.png",
@@ -141,7 +149,7 @@ test("explicit Computer activity fixture isolates Work identity and traps compac
   await expect(pane).toBeVisible();
   await expect(
     page
-      .locator(".icon-rail")
+      .locator(".sidebar")
       .getByRole("button", { name: "文件與成果", exact: true }),
   ).toHaveCount(1);
   await pane.getByRole("tab", { name: "Browser", exact: true }).focus();
