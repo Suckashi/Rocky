@@ -1,7 +1,7 @@
 // S3: install the planned dependency tree with `npm ci` and prove nothing was compiled.
 // Fails on: an install script outside the allowlist, any binding.gyp, any addon built into
 // build/Release, node-gyp / prebuild / cmake output, or an outbound host other than npm.
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import {
   mkdtempSync,
   readdirSync,
@@ -79,14 +79,27 @@ env['NO_PROXY'] = '127.0.0.1,localhost';
 if (process.env['ROCKY_S3_FRESH_CACHE'] === '1') {
   env['npm_config_cache'] = mkdtempSync(join(tmpdir(), 'rocky-s3-npm-cache-'));
 }
-const install = spawnSync(
-  process.execPath,
-  [npmCli(), 'ci', '--foreground-scripts', '--no-audit', '--no-fund'],
-  { cwd: here, env, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+// Async on purpose: spawnSync would block the event loop that serves the logging proxy.
+const install = await new Promise<{ status: number | null; output: string }>(
+  (resolve) => {
+    const child = spawn(
+      process.execPath,
+      [npmCli(), 'ci', '--foreground-scripts', '--no-audit', '--no-fund'],
+      { cwd: here, env },
+    );
+    let output = '';
+    child.stdout
+      .setEncoding('utf8')
+      .on('data', (text: string) => (output += text));
+    child.stderr
+      .setEncoding('utf8')
+      .on('data', (text: string) => (output += text));
+    child.on('close', (status) => resolve({ status, output }));
+  },
 );
 const seconds = (Date.now() - started) / 1000;
 await hostLog.close();
-const output = `${install.stdout}\n${install.stderr}`;
+const { output } = install;
 if (install.status !== 0) failures.push(`npm ci exited ${install.status}`);
 for (const pattern of [
   /node-gyp/i,

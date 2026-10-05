@@ -52,7 +52,7 @@ export async function startHostLog(upstream?: string): Promise<HostLog> {
     // Plain-HTTP proxying is not needed: the child reaches 127.0.0.1 directly (NO_PROXY).
     res.writeHead(405).end();
   });
-  server.on('connect', (req, client: Socket) => {
+  server.on('connect', (req, client: Socket, head: Buffer) => {
     const target = req.url ?? '';
     hosts.add(target.replace(/:443$/, ''));
     sockets.add(client);
@@ -65,6 +65,8 @@ export async function startHostLog(upstream?: string): Promise<HostLog> {
         sockets.add(remote);
         remote.on('close', () => sockets.delete(remote));
         client.write('HTTP/1.1 200 Connection Established\r\n\r\n');
+        // Bytes the client sent right after CONNECT (e.g. a TLS hello) belong to the tunnel.
+        if (head.length) remote.write(head);
         remote.pipe(client).on('error', () => client.destroy());
         client.pipe(remote).on('error', () => remote.destroy());
         remote.on('error', () => client.destroy());
