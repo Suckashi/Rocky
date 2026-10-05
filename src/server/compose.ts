@@ -15,8 +15,14 @@ import { copilotRoutes } from './http/copilot.ts';
 import { LoginCodes } from './http/login-codes.ts';
 import { approvalRoutes } from './http/routes/approvals.ts';
 import { jobRoutes } from './http/routes/jobs.ts';
+import { memoryRoutes } from './http/routes/memory.ts';
+import { skillRoutes } from './http/routes/skills.ts';
+import { mcpRoutes } from './http/routes/mcp.ts';
 import { JobRunner } from './jobs/runner.ts';
 import { JobStore } from './jobs/store.ts';
+import { MemoryStore } from './memory/store.ts';
+import { SkillStore } from './skills/store.ts';
+import { McpManager } from './mcp/manager.ts';
 import { settingsRoutes, type ListModels } from './http/routes/settings.ts';
 import { threadRoutes } from './http/routes/threads.ts';
 import { EgressGuard } from './platform/egress.ts';
@@ -66,6 +72,9 @@ export function composeRocky(options: ComposeOptions) {
         .some((s) => s.path === path && s.beforeSha === null),
   });
   const executor = new Executor({ passes: gate.passes, receipts, snapshots });
+  const memory = new MemoryStore(options.dataDir);
+  const skills = new SkillStore(options.dataDir);
+  const mcp = new McpManager();
   const jobs = new JobStore(db);
   const interruptedJobs = jobs.markInterrupted();
   const jobRunner = new JobRunner({
@@ -78,10 +87,21 @@ export function composeRocky(options: ComposeOptions) {
     ...(options.findAgent ? { findAgent: options.findAgent } : {}),
   });
   const runner = new RockyAgentRunner(threads);
-  const agent = new RockyAgent({ settings, gate, executor, jobs: jobRunner });
+  const agent = new RockyAgent({
+    settings,
+    gate,
+    executor,
+    receipts,
+    memory,
+    skills,
+    mcp,
+    jobs: jobRunner,
+  });
   const egress = options.egress ?? new EgressGuard();
   const savedModel = settings.model();
   if (savedModel) egress.allow(savedModel.baseURL);
+  for (const server of settings.mcpServers())
+    if (server.transport === 'http') egress.allow(server.url);
   const codes = new LoginCodes();
   const app = createApp({
     token: options.token,
@@ -99,6 +119,9 @@ export function composeRocky(options: ComposeOptions) {
         receipts,
         settings,
       }),
+      memoryRoutes({ memory, gate, executor }),
+      skillRoutes(skills),
+      mcpRoutes({ settings, manager: mcp, egress }),
     ],
     mounted: [copilotRoutes(agent, runner)],
     ...(options.webRoot ? { webRoot: options.webRoot } : {}),
@@ -114,6 +137,9 @@ export function composeRocky(options: ComposeOptions) {
     rules,
     jobs,
     jobRunner,
+    memory,
+    skills,
+    mcp,
     interruptedJobs,
     gate,
     executor,

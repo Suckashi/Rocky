@@ -1,6 +1,9 @@
 import { api, type Settings } from '../api.ts';
 import { LanguageSwitch } from '../components/LanguageSwitch.tsx';
+import { McpSettings } from '../components/McpSettings.tsx';
+import { MemoryList } from '../components/MemoryList.tsx';
 import { ModeSelect } from '../components/ModeSelect.tsx';
+import { SkillList } from '../components/SkillList.tsx';
 import { ModelForm } from '../components/ModelForm.tsx';
 import { ProjectForm } from '../components/ProjectForm.tsx';
 import { useI18n } from '../i18n/index.tsx';
@@ -48,6 +51,18 @@ export function SettingsPage({
               }
             />
           </div>
+        </section>
+        <section className="card">
+          <h2>{t('settings.memory')}</h2>
+          <MemoryList />
+        </section>
+        <section className="card">
+          <h2>{t('settings.skills')}</h2>
+          <SkillList />
+        </section>
+        <section className="card">
+          <h2>{t('settings.mcp')}</h2>
+          <McpSettings />
         </section>
         <section className="card">
           <h2>{t('settings.model')}</h2>

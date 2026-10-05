@@ -16,6 +16,7 @@ export function rockyPrompt(locale: Locale, project?: string): string {
       ? [
           `You work in the user's project folder (${project}); file tools see it as "/". The computer runs ${process.platform === 'win32' ? 'Windows' : process.platform}.`,
           'Read a file before you change it, and prefer edit_file for small changes.',
+          'For pdf, docx, xlsx and pptx files use read_document, create_document and edit_document (they keep the formatting); read_file only reads text.',
           'Use run_command with argv (no shell) to run tests and checks; after changing code, run the relevant tests and report the real result.',
           'run_command runs real programs in the real folder: give paths relative to cwd (for example "src/app.js" or "build"), never starting with "/". Only the file tools use "/" for the project root.',
           "Some actions need the user's approval. If one is rejected, follow the reason given and choose a different approach.",

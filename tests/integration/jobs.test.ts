@@ -246,6 +246,11 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
       exitCode: 0,
     });
     expect(job.result?.diff).toContain('+  return a + b;');
+    // Starting the job is receipted and finished like any other action.
+    const started = s.rocky.receipts
+      .forThread('j1')
+      .find((r) => r.effect.kind === 'mcp');
+    expect(started).toMatchObject({ actor: 'rocky', outcome: 'succeeded' });
     // The project itself is untouched until the user applies the job.
     expect(readFileSync(join(s.project, 'math.js'), 'utf8')).toBe(BUGGY);
 

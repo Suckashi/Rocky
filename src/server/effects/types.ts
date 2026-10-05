@@ -11,6 +11,10 @@ export type Effect =
       path: string;
       operation: 'create' | 'edit' | 'delete';
       content?: string;
+      /** base64: content is binary (documents); default utf8 text. */
+      encoding?: 'base64';
+      /** Readable form of the new content (Markdown of a document), for the approval diff. */
+      preview?: string;
     }
   | { kind: 'command'; argv: string[]; cwd: string }
   | {

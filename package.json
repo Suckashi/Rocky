@@ -51,6 +51,7 @@
     "@langchain/langgraph-checkpoint": "1.1.5",
     "@langchain/langgraph-sdk": "1.12.1",
     "@langchain/openai": "1.6.2",
+    "@modelcontextprotocol/sdk": "1.32.1",
     "@pdf-lib/fontkit": "1.1.1",
     "@xmldom/xmldom": "0.9.12",
     "cross-spawn": "7.0.6",

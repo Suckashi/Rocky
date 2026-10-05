@@ -42,7 +42,13 @@ export function applyEdit(
   };
 }
 
-export const READ_TOOLS = new Set(['ls', 'read_file', 'glob', 'grep']);
+export const READ_TOOLS = new Set([
+  'ls',
+  'read_file',
+  'glob',
+  'grep',
+  'read_document',
+]);
 /** Tools with no effect outside the agent's own state. */
 export const NO_EFFECT_TOOLS = new Set(['write_todos', 'task']);
 

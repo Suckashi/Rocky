@@ -14,12 +14,26 @@ const KNOWN = new Set([
   'write_todos',
   'task',
   'delegate_to_opencode',
+  'read_document',
+  'create_document',
+  'edit_document',
+  'remember',
+  'forget',
+  'search_memory',
+  'load_skill',
 ]);
 const RESULT_LIMIT = 4000;
 
 function target(args: Record<string, unknown>): string {
   if (Array.isArray(args['argv'])) return commandLine(args['argv'].map(String));
-  for (const key of ['file_path', 'path', 'pattern', 'description']) {
+  for (const key of [
+    'file_path',
+    'path',
+    'pattern',
+    'description',
+    'title',
+    'query',
+  ]) {
     if (typeof args[key] === 'string') return args[key];
   }
   return '';

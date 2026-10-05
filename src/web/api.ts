@@ -55,6 +55,8 @@ export type Effect =
       path: string;
       operation: 'create' | 'edit' | 'delete';
       content?: string;
+      encoding?: 'base64';
+      preview?: string;
     }
   | { kind: 'command'; argv: string[]; cwd: string }
   | { kind: 'mcp'; server: string; tool: string; args: unknown }

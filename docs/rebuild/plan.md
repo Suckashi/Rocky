@@ -101,3 +101,5 @@ S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一
 - 2026-10-05：M0 收尾。S1、S2 的 Windows 真實模型驗證（`live.ts`）由擁有者決定先跳過，待補；開始 M1。
 - 2026-10-05：M1（能對話）：本機伺服器與安全檢查、對話存在 `node:sqlite`、CopilotKit runtime 接 Deep Agents、繁中／英文介面與 Roko、首次設定與設定頁、`Start-Rocky.ps1`。Linux 上用假模型的瀏覽器端對端測試與真實模型都通過；Windows 上的實際啟動待擁有者確認。見 ADR 0006。
 - 2026-10-05：M2（能做事）：動作關卡、通行證、操作紀錄、快照與還原、Rocky 的讀檔／搜尋／編輯／指令工具、核准面板與三種模式、評測第一版。真實模型（`deepseek/deepseek-v4-flash`）修好 3 個真實小 bug，評測基線 24/24。Windows 上的執行待擁有者確認。見 ADR 0007。
+- 2026-10-05：M3（能派工）：ACP 接 OpenCode、每個工作一個 git worktree、權限請求走 Rocky 的關卡、Rocky 自己對帳 diff 並跑測試、工作頁（時間軸、diff、套用、捨棄、還原）。真實模型派工修 bug 通過；評測 9 題基線 26/27。Windows 上待擁有者確認。見 ADR 0008。
+- 2026-10-05：M4（能處理文件）：六種格式的讀取、建立與保留格式的編輯（核准綁定實際位元組）、Markdown 記憶（中文搜尋、可撤銷）、`SKILL.md` 技能、MCP（stdio／HTTP，每個工具可設定核准）。評測加到 13 題。Windows 上待擁有者確認。見 ADR 0009。

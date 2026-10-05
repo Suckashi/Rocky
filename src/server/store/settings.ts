@@ -3,6 +3,13 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import type { DatabaseSync } from 'node:sqlite';
 import { join } from 'node:path';
+import type { McpServerConfig, ToolPolicy } from '../mcp/manager.ts';
+
+interface Secrets {
+  modelApiKey?: string;
+  /** MCP server settings can carry tokens (env, headers), so they live with the secrets. */
+  mcpServers?: McpServerConfig[];
+}
 
 export type Provider = 'openai-compatible' | 'openai' | 'ollama';
 export type Locale = 'zh-TW' | 'en';
@@ -90,6 +97,26 @@ export class SettingsStore {
     return this.readSecrets().modelApiKey || undefined;
   }
 
+  mcpServers(): McpServerConfig[] {
+    return this.readSecrets().mcpServers ?? [];
+  }
+
+  setMcpServers(servers: McpServerConfig[]): void {
+    this.writeSecrets({ ...this.readSecrets(), mcpServers: servers });
+  }
+
+  /** Per-tool approval for MCP tools, keyed "server/tool"; unset means "ask". */
+  toolPolicies(): Record<string, ToolPolicy> {
+    return this.get<Record<string, ToolPolicy>>('mcpToolPolicies') ?? {};
+  }
+
+  setToolPolicy(server: string, tool: string, policy: ToolPolicy): void {
+    const all = this.toolPolicies();
+    if (policy === 'ask') delete all[`${server}/${tool}`];
+    else all[`${server}/${tool}`] = policy;
+    this.set('mcpToolPolicies', all);
+  }
+
   public(): PublicSettings {
     const model = this.model();
     return {
@@ -102,14 +129,12 @@ export class SettingsStore {
     };
   }
 
-  private readSecrets(): { modelApiKey?: string } {
+  private readSecrets(): Secrets {
     if (!existsSync(this.secretsFile)) return {};
-    return JSON.parse(readFileSync(this.secretsFile, 'utf8')) as {
-      modelApiKey?: string;
-    };
+    return JSON.parse(readFileSync(this.secretsFile, 'utf8')) as Secrets;
   }
 
-  private writeSecrets(secrets: { modelApiKey?: string }): void {
+  private writeSecrets(secrets: Secrets): void {
     writeFileSync(this.secretsFile, JSON.stringify(secrets), { mode: 0o600 });
   }
 }

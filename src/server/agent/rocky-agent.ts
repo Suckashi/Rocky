@@ -23,12 +23,20 @@ import {
 import { todoListMiddleware, type AgentMiddleware } from 'langchain';
 import { Observable } from 'rxjs';
 import type { Executor } from '../effects/execute.ts';
+import type { ReceiptStore } from '../effects/receipts.ts';
 import type { JobRunner } from '../jobs/runner.ts';
 import type { Gate } from '../effects/gate.ts';
 import type { SettingsStore } from '../store/settings.ts';
 import { createRockyBackend } from './backend.ts';
 import { createGateMiddleware, type GateRun } from './gate-middleware.ts';
 import { createDelegateTool } from './delegate.ts';
+import { createDocumentTools } from './documents.ts';
+import { createMemoryTools, memoryPrompt } from './memory.ts';
+import type { MemoryStore } from '../memory/store.ts';
+import type { SkillStore } from '../skills/store.ts';
+import { createSkillTool, skillsPrompt } from './skills.ts';
+import { createMcpTools } from './mcp.ts';
+import type { McpManager } from '../mcp/manager.ts';
 import { createRunCommandTool } from './run-command.ts';
 import { rockyPrompt } from './prompt.ts';
 import { AguiMapper } from './to-agui.ts';
@@ -131,6 +139,10 @@ export interface RockyAgentDeps {
   settings: SettingsStore;
   gate: Gate;
   executor: Executor;
+  receipts: ReceiptStore;
+  memory?: MemoryStore;
+  skills?: SkillStore;
+  mcp?: McpManager;
   jobs?: JobRunner;
 }
 
@@ -159,7 +171,8 @@ export class RockyAgent extends AbstractAgent {
     return new Observable<BaseEvent>((subscriber) => {
       const controller = new AbortController();
       this.controller = controller;
-      const { settings, gate, executor, jobs } = this.deps;
+      const { settings, gate, executor, receipts, memory, skills, mcp, jobs } =
+        this.deps;
       // The mapper emits RUN_STARTED first, so even a configuration error is a well-formed run.
       const mapper = new AguiMapper(input.threadId, input.runId, (event) =>
         subscriber.next(event),
@@ -178,9 +191,20 @@ export class RockyAgent extends AbstractAgent {
         const model = settings.model();
         if (!model) throw new ModelNotConfiguredError();
         const projectRoot = settings.project();
+        // MCP servers connect once and stay connected; a server that fails is skipped.
+        const servers = settings.mcpServers();
+        const mcpTools =
+          mcp && servers.length
+            ? createMcpTools(mcp, await mcp.refresh(servers), controller.signal)
+            : undefined;
         const run: GateRun = {
           gate,
+          receipts,
           projectRoot,
+          ...(memory ? { memory } : {}),
+          ...(mcpTools
+            ? { mcp: { map: mcpTools.map, policies: settings.toolPolicies() } }
+            : {}),
           threadId: input.threadId,
           runId: input.runId,
           signal: controller.signal,
@@ -192,12 +216,24 @@ export class RockyAgent extends AbstractAgent {
             configuration: { baseURL: model.baseURL },
             streaming: true,
           }),
-          systemPrompt: rockyPrompt(settings.locale(), projectRoot),
+          systemPrompt: [
+            rockyPrompt(settings.locale(), projectRoot),
+            ...(memory ? [memoryPrompt(memory)] : []),
+            ...(skills && skillsPrompt(skills) ? [skillsPrompt(skills)!] : []),
+          ].join('\n\n'),
           ...(projectRoot
-            ? {
-                backend: createRockyBackend(projectRoot, executor),
-                tools: [
+            ? { backend: createRockyBackend(projectRoot, executor) }
+            : {}),
+          tools: [
+            ...(memory ? createMemoryTools(memory, executor) : []),
+            ...(mcpTools?.tools ?? []),
+            ...(skills && skills.list().length
+              ? [createSkillTool(skills)]
+              : []),
+            ...(projectRoot
+              ? [
                   createRunCommandTool(projectRoot, executor),
+                  ...createDocumentTools(projectRoot, executor),
                   ...(jobs
                     ? [
                         createDelegateTool(jobs, {
@@ -207,9 +243,9 @@ export class RockyAgent extends AbstractAgent {
                         }),
                       ]
                     : []),
-                ],
-              }
-            : {}),
+                ]
+              : []),
+          ],
           // Cast: langchain's todo middleware types fail under exactOptionalPropertyTypes (ADR 0001).
           middleware: [
             todoListMiddleware() as unknown as AgentMiddleware,

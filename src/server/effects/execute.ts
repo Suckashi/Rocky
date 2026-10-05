@@ -100,7 +100,10 @@ export class Executor {
         });
       } else {
         mkdirSync(dirname(path), { recursive: true });
-        const content = Buffer.from(effect.content ?? '', 'utf8');
+        const content = Buffer.from(
+          effect.content ?? '',
+          effect.encoding ?? 'utf8',
+        );
         writeFileSync(path, content);
         const after = this.snapshots.put(content);
         this.snapshots.record({

@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import type { Executor } from '../effects/execute.ts';
 import type { Gate } from '../effects/gate.ts';
 import { contentHash } from '../effects/hash.ts';
+import { asContent } from '../effects/snapshots.ts';
 import type { Effect } from '../effects/types.ts';
 import { changedFiles, git, removeWorktree } from '../external/worktree.ts';
 import type { Job, JobStore } from './store.ts';
@@ -47,7 +48,8 @@ export async function applyPlan(
   for (const path of await changedFiles(job.worktree)) {
     const source = join(job.worktree, path);
     const target = join(project, ...path.split('/'));
-    const after = existsSync(source) ? readFileSync(source, 'utf8') : null;
+    const afterBlob = existsSync(source) ? readFileSync(source) : null;
+    const after = afterBlob ? asContent(afterBlob) : null;
     const current = existsSync(target) ? readFileSync(target, 'utf8') : null;
     const effect: WriteEffect =
       after === null
@@ -56,7 +58,7 @@ export async function applyPlan(
             kind: 'write',
             path: target,
             operation: current === null ? 'create' : 'edit',
-            content: after,
+            ...after,
           };
     items.push({
       path,
@@ -65,7 +67,7 @@ export async function applyPlan(
       modifiedSince:
         current !== (await baseContent(project, job.baseCommit, path)),
       before: current,
-      after,
+      after: after && !after.encoding ? after.content : null,
     });
   }
   return items;

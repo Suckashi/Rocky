@@ -6,10 +6,13 @@ import { existsSync } from 'node:fs';
 import { FilesystemBackend, type BackendProtocolV2 } from 'deepagents';
 import type { Executor } from '../effects/execute.ts';
 import type { Pass } from '../effects/passes.ts';
+import type { Effect } from '../effects/types.ts';
 import { applyEdit, resolveVirtual } from './workspace.ts';
 
 /** The pass for the tool call currently running, set by the gate middleware. */
 export const currentPass = new AsyncLocalStorage<Pass>();
+/** The exact effect that pass was issued for (document tools write these bytes). */
+export const currentEffect = new AsyncLocalStorage<Effect>();
 
 function requirePass(): Pass {
   const pass = currentPass.getStore();

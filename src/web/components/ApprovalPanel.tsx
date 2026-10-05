@@ -113,7 +113,14 @@ function Preview({
       <div className="approval-preview">
         <Diff
           before={approval.before}
-          after={effect.operation === 'delete' ? null : (effect.content ?? '')}
+          after={
+            effect.operation === 'delete'
+              ? null
+              : // Documents are bytes: the diff compares their Markdown.
+                effect.encoding === 'base64'
+                ? (effect.preview ?? '')
+                : (effect.content ?? '')
+          }
         />
       </div>
     );

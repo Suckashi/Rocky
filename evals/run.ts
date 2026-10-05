@@ -8,7 +8,9 @@
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { composeRocky } from '../src/server/compose.ts';
+import { findOpenCode } from '../src/server/external/opencode.ts';
 import { EgressGuard } from '../src/server/platform/egress.ts';
 import { CASES, type Case, type CaseContext } from './cases.ts';
 
@@ -54,6 +56,19 @@ async function runCase(c: Case): Promise<Result> {
     mkdirSync(dirname(join(dir, path)), { recursive: true });
     writeFileSync(join(dir, path), content);
   }
+  for (const [path, make] of Object.entries(c.documents ?? {})) {
+    writeFileSync(join(dir, path), await make());
+  }
+  if (c.git) {
+    for (const a of [
+      ['init', '-q'],
+      ['config', 'user.email', 'eval@example.com'],
+      ['config', 'user.name', 'eval'],
+      ['add', '-A'],
+      ['commit', '-q', '-m', 'init'],
+    ])
+      execFileSync('git', ['-C', dir, ...a]);
+  }
   mkdirSync(join(root, 'data'));
   const rocky = composeRocky({
     dataDir: join(root, 'data'),
@@ -73,11 +88,16 @@ async function runCase(c: Case): Promise<Result> {
   rocky.gate.subscribe(threadId, () => {
     for (const approval of rocky.gate.pending(threadId)) {
       asked.push({ summary: JSON.stringify(approval.effect).slice(0, 200) });
-      rocky.gate.answer(approval.id, {
-        decision: 'reject',
-        contentHash: approval.contentHash,
-        reason: c.rejectReason ?? 'Not approved in this evaluation.',
-      });
+      rocky.gate.answer(
+        approval.id,
+        c.approve?.(approval.effect)
+          ? { decision: 'allow-once', contentHash: approval.contentHash }
+          : {
+              decision: 'reject',
+              contentHash: approval.contentHash,
+              reason: c.rejectReason ?? 'Not approved in this evaluation.',
+            },
+      );
     }
   });
 
@@ -131,7 +151,15 @@ async function runCase(c: Case): Promise<Result> {
   const receipts = rocky.receipts.forThread(threadId);
   const problems = error
     ? [`run failed: ${error}`]
-    : c.check({ dir, reply, tools, receipts, asked });
+    : await c.check({
+        dir,
+        reply,
+        tools,
+        receipts,
+        asked,
+        jobs: rocky.jobs.list(),
+        memories: rocky.memory.list(),
+      });
   rocky.db.close();
   return {
     id: c.id,
@@ -148,7 +176,13 @@ async function runCase(c: Case): Promise<Result> {
   };
 }
 
-const cases = CASES.filter((c) => !only || c.id === only);
+const hasOpenCode = findOpenCode() !== undefined;
+const skipped = CASES.filter((c) => c.needs === 'opencode' && !hasOpenCode);
+for (const c of skipped)
+  console.log(`${c.id} … SKIPPED (OpenCode not installed)`);
+const cases = CASES.filter(
+  (c) => (!only || c.id === only) && !skipped.includes(c),
+);
 const results: Result[] = [];
 for (let round = 1; round <= repeat; round++) {
   for (const c of cases) {
@@ -175,6 +209,7 @@ const summary = {
   passed,
   total: results.length,
   repeat,
+  skipped: skipped.map((c) => c.id),
   results,
 };
 console.log(`\nscore ${passed}/${results.length} = ${score} (${model})`);

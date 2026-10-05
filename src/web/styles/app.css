@@ -945,3 +945,64 @@ button.secondary {
 .check summary {
   cursor: pointer;
 }
+
+/* M4: memory list. */
+.memory-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.memory-list p {
+  margin: 0;
+}
+.memory summary {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  cursor: pointer;
+  padding: var(--space-2) 0;
+}
+.skill-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.skill-list li {
+  display: flex;
+  flex-direction: column;
+}
+.mcp-settings,
+.mcp-server {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.mcp-settings p {
+  margin: 0;
+}
+.mcp-server {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+}
+.mcp-tool .mcp-desc {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mcp-add summary {
+  cursor: pointer;
+  color: var(--link);
+  padding: var(--space-2) 0;
+}
+.fields textarea,
+.fields select {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 9px var(--space-3);
+  background: var(--surface);
+  color: var(--text);
+}

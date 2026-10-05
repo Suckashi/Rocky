@@ -71,3 +71,20 @@ export class SnapshotStore {
     }));
   }
 }
+
+/** A blob as write-effect content: UTF-8 text when it decodes cleanly, base64 otherwise. */
+export function asContent(blob: Buffer): {
+  content: string;
+  encoding?: 'base64';
+} {
+  try {
+    return {
+      content: new TextDecoder('utf-8', {
+        fatal: true,
+        ignoreBOM: true,
+      }).decode(blob),
+    };
+  } catch {
+    return { content: blob.toString('base64'), encoding: 'base64' };
+  }
+}

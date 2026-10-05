@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { composeRocky } from '../../src/server/compose.ts';
+import { toMarkdown } from '../../src/server/documents/read.ts';
 import type { PendingApproval } from '../../src/server/effects/gate.ts';
 import type { Receipt } from '../../src/server/effects/receipts.ts';
 import type { Snapshot } from '../../src/server/effects/snapshots.ts';
@@ -265,6 +266,84 @@ describe('agent tools through the action gate', () => {
   });
 });
 
+describe('document tools', () => {
+  it('creates a docx only after approval of its exact bytes, and edits it in place', async () => {
+    const { call, project } = await setup('ask-always');
+    plan = [
+      {
+        name: 'create_document',
+        args: {
+          file_path: '/報告.docx',
+          markdown: '# 季度報告\n\n營收成長**百分之十二**。',
+        },
+      },
+    ];
+    const events = run(call, 'd1');
+    const approval = await nextApproval(call, 'd1');
+    expect(approval.effect).toMatchObject({
+      kind: 'write',
+      operation: 'create',
+      encoding: 'base64',
+    });
+    expect((approval.effect as { preview?: string }).preview).toContain(
+      '# 季度報告',
+    );
+    await call(`/api/approvals/${approval.id}`, {
+      method: 'POST',
+      body: { decision: 'allow-once', contentHash: approval.contentHash },
+    });
+    expect(reply(await events)).toContain('Created');
+    const bytes = readFileSync(join(project, '報告.docx'));
+    expect(bytes.subarray(0, 2).toString()).toBe('PK');
+
+    plan = [
+      {
+        name: 'edit_document',
+        args: {
+          file_path: '/報告.docx',
+          replacements: [{ find: '百分之十二', replace: '百分之十五' }],
+        },
+      },
+      { name: 'read_document', args: { file_path: '/報告.docx' } },
+    ];
+    const second = run(call, 'd2');
+    const edit = await nextApproval(call, 'd2');
+    expect(edit.before).toContain('**百分之十二**');
+    expect((edit.effect as { preview?: string }).preview).toContain(
+      '**百分之十五**',
+    );
+    await call(`/api/approvals/${edit.id}`, {
+      method: 'POST',
+      body: { decision: 'allow-once', contentHash: edit.contentHash },
+    });
+    const text = reply(await second);
+    expect(text).toContain('Edited');
+    // read_document ran in parallel with the (approval-pending) edit: it saw the old text.
+    expect(text).toContain('營收成長**百分之十二**');
+    expect(
+      await toMarkdown(
+        new Uint8Array(readFileSync(join(project, '報告.docx'))),
+        'docx',
+      ),
+    ).toContain('營收成長**百分之十五**');
+
+    // The change card restores binary documents too.
+    const { changes } = (await (
+      await call('/api/threads/d2/runs/d2-r/changes')
+    ).json()) as { changes: { path: string; contentHash: string }[] };
+    const restored = await call('/api/threads/d2/runs/d2-r/restore', {
+      method: 'POST',
+      body: {
+        items: changes.map(({ path, contentHash }) => ({ path, contentHash })),
+      },
+    });
+    expect(restored.status).toBe(200);
+    expect(
+      Buffer.compare(readFileSync(join(project, '報告.docx')), bytes),
+    ).toBe(0);
+  });
+});
+
 describe('restoring a turn', () => {
   it('shows the changes and puts every file back through the gate', async () => {
     const { call, project } = await setup('hands-off');
@@ -335,6 +414,138 @@ describe('restoring a turn', () => {
     ).json()) as { changes: Change[] };
     expect(after.changes).toHaveLength(2);
   });
+});
+
+describe('memory', () => {
+  it('remembers, finds in Chinese, forgets, and can be undone', async () => {
+    const { call, rocky } = await setup('ask-when-needed');
+    plan = [
+      {
+        name: 'remember',
+        args: {
+          title: '回覆偏好',
+          content: '使用者希望用繁體中文、簡短地回覆。',
+        },
+      },
+    ];
+    expect(reply(await run(call, 'm1'))).toContain('Saved');
+    expect(rocky.memory.list().map((m) => m.title)).toEqual(['回覆偏好']);
+
+    // The next conversation sees the title in its system prompt and can search.
+    plan = [{ name: 'search_memory', args: { query: '中文回覆' } }];
+    expect(reply(await run(call, 'm2'))).toContain('簡短地回覆');
+    const system = JSON.stringify(fake.requests.at(-1)?.messages[0]?.content);
+    expect(system).toContain('回覆偏好');
+
+    // Deleting a memory that existed before is an outside action: it always asks.
+    plan = [{ name: 'forget', args: { title: '回覆偏好' } }];
+    const forgetting = run(call, 'm3');
+    const ask = await nextApproval(call, 'm3');
+    expect(ask.reason).toBe('external');
+    await call(`/api/approvals/${ask.id}`, {
+      method: 'POST',
+      body: { decision: 'allow-once', contentHash: ask.contentHash },
+    });
+    expect(reply(await forgetting)).toContain('Forgotten');
+    expect(rocky.memory.list()).toEqual([]);
+
+    // Forgetting was a receipted write: the turn's change card brings it back.
+    const { changes } = (await (
+      await call('/api/threads/m3/runs/m3-r/changes')
+    ).json()) as { changes: { path: string; contentHash: string }[] };
+    await call('/api/threads/m3/runs/m3-r/restore', {
+      method: 'POST',
+      body: {
+        items: changes.map(({ path, contentHash }) => ({ path, contentHash })),
+      },
+    });
+    expect(rocky.memory.list().map((m) => m.title)).toEqual(['回覆偏好']);
+
+    // The settings page deletes through the gate too.
+    const list = (await (await call('/api/memory')).json()) as {
+      memories: { file: string; deleteHash: string }[];
+    };
+    const deleted = await call('/api/memory/delete', {
+      method: 'POST',
+      body: {
+        file: list.memories[0]!.file,
+        contentHash: list.memories[0]!.deleteHash,
+      },
+    });
+    expect(deleted.status).toBe(200);
+    expect(rocky.memory.list()).toEqual([]);
+  }, 30_000);
+});
+
+describe('MCP tools', () => {
+  it('asks for every call unless the user marks the tool read-only, and can turn one off', async () => {
+    process.env['ROCKY_API_TOKEN'] = 'must-not-leak';
+    const { call, rocky } = await setup('ask-when-needed');
+    const saved = await call('/api/mcp/servers', {
+      method: 'PUT',
+      body: {
+        servers: [
+          {
+            name: 'notes',
+            transport: 'stdio',
+            command: process.execPath,
+            args: [join(import.meta.dirname, '../fixtures/mcp-server.ts')],
+            env: { NOTE_TOKEN: 'n-1' },
+          },
+        ],
+      },
+    });
+    expect(saved.status).toBe(200);
+    const info = (await (await call('/api/mcp')).json()) as {
+      servers: { env: Record<string, string> }[];
+      status: { connected: boolean; tools: { name: string }[] }[];
+    };
+    // Saved values never go back to the browser.
+    expect(info.servers[0]?.env['NOTE_TOKEN']).not.toBe('n-1');
+    expect(info.status[0]).toMatchObject({ connected: true });
+    expect(info.status[0]?.tools.map((t) => t.name).sort()).toEqual([
+      'echo',
+      'env',
+    ]);
+
+    // Default: an outside action, so it asks.
+    plan = [{ name: 'mcp__notes__echo', args: { text: '你好' } }];
+    const first = run(call, 'p1');
+    const ask = await nextApproval(call, 'p1');
+    expect(ask.effect).toMatchObject({
+      kind: 'mcp',
+      server: 'notes',
+      tool: 'echo',
+    });
+    await call(`/api/approvals/${ask.id}`, {
+      method: 'POST',
+      body: { decision: 'allow-once', contentHash: ask.contentHash },
+    });
+    expect(reply(await first)).toContain('echo: 你好');
+    expect(rocky.receipts.forThread('p1')[0]).toMatchObject({
+      outcome: 'succeeded',
+    });
+
+    // Marked read-only: runs without asking; the server never sees Rocky's variables.
+    await call('/api/mcp/tools', {
+      method: 'PUT',
+      body: { server: 'notes', tool: 'env', policy: 'read-only' },
+    });
+    plan = [{ name: 'mcp__notes__env', args: {} }];
+    const env = reply(await run(call, 'p2'));
+    expect(env).toContain('"rockyKeys":[]');
+    expect(env).toContain('"note":"n-1"');
+
+    // Turned off: refused without asking.
+    await call('/api/mcp/tools', {
+      method: 'PUT',
+      body: { server: 'notes', tool: 'echo', policy: 'deny' },
+    });
+    plan = [{ name: 'mcp__notes__echo', args: { text: 'x' } }];
+    expect(reply(await run(call, 'p3'))).toContain('turned off');
+    await rocky.mcp.close();
+    delete process.env['ROCKY_API_TOKEN'];
+  }, 60_000);
 });
 
 describe('without a project folder', () => {

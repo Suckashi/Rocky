@@ -6,7 +6,7 @@ import type { Executor } from './execute.ts';
 import type { Gate } from './gate.ts';
 import { contentHash } from './hash.ts';
 import type { ReceiptStore } from './receipts.ts';
-import type { SnapshotStore } from './snapshots.ts';
+import { asContent, type SnapshotStore } from './snapshots.ts';
 import type { Effect } from './types.ts';
 
 type WriteEffect = Extract<Effect, { kind: 'write' }>;
@@ -70,7 +70,7 @@ export function planRestore(
             kind: 'write',
             path: change.path,
             operation: existsSync(change.path) ? 'edit' : 'create',
-            content: snapshots.read(change.beforeSha).toString('utf8'),
+            ...asContent(snapshots.read(change.beforeSha)),
           };
     return {
       path: change.path,

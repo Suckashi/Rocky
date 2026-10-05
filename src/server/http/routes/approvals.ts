@@ -6,7 +6,7 @@ import type { Executor } from '../../effects/execute.ts';
 import type { Gate } from '../../effects/gate.ts';
 import { planRestore, restoreRun, runChanges } from '../../effects/restore.ts';
 import type { ReceiptStore } from '../../effects/receipts.ts';
-import type { SnapshotStore } from '../../effects/snapshots.ts';
+import { asContent, type SnapshotStore } from '../../effects/snapshots.ts';
 
 const answer = z.discriminatedUnion('decision', [
   z
@@ -78,7 +78,10 @@ export function approvalRoutes(
     const text = (sha: string | null): string | null => {
       if (sha === null) return null;
       const blob = snapshots.read(sha);
-      if (blob.length <= PREVIEW_LIMIT) return blob.toString('utf8');
+      const content = asContent(blob);
+      if (blob.length <= PREVIEW_LIMIT && !content.encoding)
+        return content.content;
+      // Too large, or binary (a document): listed without a text preview.
       tooLarge = true;
       return null;
     };
