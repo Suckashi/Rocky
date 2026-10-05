@@ -16,6 +16,11 @@ Adapted files:
   check, JSON-only writes) from `src/server/app.ts`; Rocky always requires the token.
 - `src/server/shutdown.ts`: the deadline-bound shutdown from `src/server/shutdown.ts`.
 
+## CopilotKit
+
+`src/server/agent/runner.ts` follows the run lifecycle of `InMemoryAgentRunner` in
+`@copilotkit/runtime` 1.77.0 (MIT, Copyright (c) CopilotKit), storing history in SQLite instead of memory.
+
 Copyright (c) Atai Barkai
 
 The conversation delivery card in work-artifacts.tsx/style.css additionally adapts PageReviewCard presentation at this commit:16px radius,14px/18px header/footer padding,18px/22px body padding,20px title and9px action radius. Rocky replaces review decisions with confirmed immutable-result open/download actions and uses its semantic theme tokens. No upstream persistence or API is imported.
