@@ -1,7 +1,7 @@
 # ADR 0005：中文文件（S4 spike 結果）
 
 - 日期：2026-10-05
-- 狀態：已採用（Linux 已驗證；Windows 由 CI 執行，結果見執行紀錄）
+- 狀態：已採用（Linux 與 Windows CI 都通過）
 - 程式：`spikes/s4-documents/`；測試：`tests/spikes/s4-documents.test.ts`（在 `npm test` 裡，CI 會跑）
 
 ## 決定
@@ -32,7 +32,7 @@
 ## 重要發現
 
 1. **unpdf 預設的 CMap 路徑在 Node 上無效。** 它把 `file://...` 網址字串交給 pdf.js，而 pdf.js 的 Node 讀取器直接 `fs.readFile` 那個字串，所以讀不到；
-   而且 unpdf 只在有安裝 `pdfjs-dist` 時才會設定 cmaps。結果是：**舊系統產生、字型沒有嵌入的中文 PDF 會被讀成空字串，只印一行警告**。
+   而且 unpdf 只在有安裝 `pdfjs-dist` 時才會設定 cmaps。Windows CI 的日誌也看得到它的預設值讀 `file:///D:/.../UniCNS-UCS2-H.bcmap` 失敗。結果是：**舊系統產生、字型沒有嵌入的中文 PDF 會被讀成空字串，只印一行警告**。
    Rocky 傳一般的檔案路徑就沒問題，但 pdf.js 要求路徑以 `/` 結尾：Windows 上要把 `\` 換成 `/`（CI 第一次在 Windows 就是因此失敗）。讀出空字串時，介面要提示「可能是掃描檔或缺字型」，不能當成成功。
 2. **pdf-lib + fontkit 不能嵌入 `.ttc`**（會丟出 `createSubset is not a function`）。Windows 的正黑體、細明體都是 `.ttc`。
    抽出單一字型約 60 行程式；一個 11 MB 的 TTC 抽出、嵌入、存檔約 170 ms。也可以選擇隨 Rocky 附一份 Noto Sans TC（OFL）。
@@ -52,10 +52,11 @@ markdown-it、docx、mammoth、exceljs、pptxgenjs、pptx-automizer、unpdf、pd
 
 ## 執行紀錄
 
-| 平台                                         | 指令            | 結果                                              |
-| -------------------------------------------- | --------------- | ------------------------------------------------- |
-| 雲端 Linux，Node 24.21.0                     | `npm run check` | exit 0；S4 13 個測試通過（系統 TTC 用文泉驛正黑） |
-| GitHub Actions windows-latest／ubuntu-latest | `npm run check` | 推送後由 CI 執行                                  |
+| 平台                          | 指令            | 結果                                                                                                               |
+| ----------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 雲端 Linux，Node 24.21.0      | `npm run check` | exit 0；S4 13 個測試通過（系統 TTC 用文泉驛正黑）                                                                  |
+| GitHub Actions windows-latest | `npm run check` | 第一次失敗：CMap 路徑以 `\` 結尾（發現 1）；修正後通過（run 37319818674），S4 13 個全過，含系統 TTC 測試（818 ms） |
+| GitHub Actions ubuntu-latest  | `npm run check` | 通過（run 37319818674）                                                                                            |
 
 ## 還沒驗證的（限制）
 
