@@ -19,6 +19,7 @@
     "build": "vite build",
     "start": "vite build && node src/server/start.ts",
     "test:e2e": "vite build && node scripts/e2e.ts",
+    "test:e2e:jobs": "vite build && node scripts/e2e-jobs.ts",
     "eval": "node evals/run.ts"
   },
   "devDependencies": {

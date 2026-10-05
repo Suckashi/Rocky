@@ -861,3 +861,87 @@ button.secondary {
 .presence.waiting {
   background: var(--primary-soft);
 }
+
+/* M3: jobs. */
+.jobs-main {
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+.job-detail {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.job-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.job-head h2 {
+  margin: 0;
+}
+.job-detail h3 {
+  margin: 0;
+  font-size: 14px;
+}
+.job-detail .card p {
+  margin: 0;
+}
+.pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.job-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+}
+.badge.status-verified,
+.badge.status-applied {
+  background: var(--diff-add-bg);
+  color: var(--ok);
+}
+.badge.status-problems,
+.badge.status-interrupted,
+.badge.status-stopped {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.badge.status-failed {
+  background: var(--diff-del-bg);
+  color: var(--bad);
+}
+.badge.status-discarded {
+  background: var(--surface-muted);
+  color: var(--text-subtle);
+}
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.timeline .event {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 0 var(--space-3);
+}
+.event-body {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.timeline .event.permission strong {
+  color: var(--link);
+}
+.check summary {
+  cursor: pointer;
+}

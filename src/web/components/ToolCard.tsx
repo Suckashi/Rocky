@@ -13,6 +13,7 @@ const KNOWN = new Set([
   'run_command',
   'write_todos',
   'task',
+  'delegate_to_opencode',
 ]);
 const RESULT_LIMIT = 4000;
 
@@ -44,6 +45,10 @@ export function ToolCard({
   } catch {
     parsed = {};
   }
+  const jobId =
+    name === 'delegate_to_opencode' && result
+      ? /Job ([\w-]{36})/.exec(result)?.[1]
+      : undefined;
   const label = KNOWN.has(name)
     ? t(`tool.${name}` as MessageKey)
     : t('tool.other', { name });
@@ -65,6 +70,15 @@ export function ToolCard({
         <span className="tool-target mono">{target(parsed)}</span>
         {state === 'interrupted' && (
           <span className="badge warn">{t('tool.interrupted')}</span>
+        )}
+        {jobId && (
+          <a
+            className="link small"
+            href={`#/jobs/${jobId}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {t('jobs.view')}
+          </a>
         )}
       </summary>
       {result !== undefined && (

@@ -1,19 +1,25 @@
 // The shell: rail, conversation list, chat and Roko's panel, or onboarding/settings/locked.
 import { CopilotKitProvider } from '@copilotkit/react-core/v2';
-import { MessageSquare, Settings as SettingsIcon } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import {
+  Briefcase,
+  MessageSquare,
+  Settings as SettingsIcon,
+} from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError, type Settings } from './api.ts';
 import { Chat } from './components/Chat.tsx';
 import { Roko, type RokoState } from './components/Roko.tsx';
 import { ThreadList } from './components/ThreadList.tsx';
 import { I18nProvider, useI18n } from './i18n/index.tsx';
 import { Locked } from './pages/Locked.tsx';
+import { JobsPage } from './pages/JobsPage.tsx';
 import { Onboarding } from './pages/Onboarding.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
 
-type View = 'chat' | 'settings' | 'onboarding';
+type View = 'chat' | 'jobs' | 'settings' | 'onboarding';
 
 const threadFromHash = () => /^#\/t\/([\w-]+)$/.exec(window.location.hash)?.[1];
+const jobFromHash = () => /^#\/jobs(?:\/([\w-]+))?$/.exec(window.location.hash);
 
 function Shell({
   settings,
@@ -24,17 +30,40 @@ function Shell({
 }) {
   const { t } = useI18n();
   const [view, setView] = useState<View>(
-    settings.model ? 'chat' : 'onboarding',
+    !settings.model ? 'onboarding' : jobFromHash() ? 'jobs' : 'chat',
   );
+  const [jobId, setJobId] = useState(() => jobFromHash()?.[1]);
   const [threadId, setThreadId] = useState(
     () => threadFromHash() ?? crypto.randomUUID(),
   );
   const [refreshKey, setRefreshKey] = useState(0);
   const [roko, setRoko] = useState<RokoState>('idle');
 
+  // The hash Rocky itself wrote; only other changes (links, back/forward) navigate.
+  const written = useRef('');
   useEffect(() => {
-    window.location.hash = `/t/${threadId}`;
-  }, [threadId]);
+    if (view !== 'chat' && view !== 'jobs') return;
+    written.current = `#${view === 'jobs' ? (jobId ? `/jobs/${jobId}` : '/jobs') : `/t/${threadId}`}`;
+    window.location.hash = written.current;
+  }, [threadId, view, jobId]);
+
+  // Links inside the page (a job from a tool card, a conversation from a job) use the hash.
+  useEffect(() => {
+    const onHash = () => {
+      if (window.location.hash === written.current) return;
+      const job = jobFromHash();
+      const thread = threadFromHash();
+      if (job) {
+        setJobId(job[1]);
+        setView('jobs');
+      } else if (thread) {
+        setThreadId(thread);
+        setView('chat');
+      }
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
 
   const onActivity = useCallback(() => setRefreshKey((k) => k + 1), []);
 
@@ -57,15 +86,26 @@ function Shell({
     );
   }
   return (
-    <div className="shell">
+    <div className={`shell${view === 'jobs' ? ' jobs-view' : ''}`}>
       <nav className="rail" aria-label={t('app.name')}>
         <img src="/rocky/mark.svg" alt={t('app.name')} width={28} height={28} />
         <button
           type="button"
-          className="icon-button active"
+          className={`icon-button${view === 'chat' ? ' active' : ''}`}
           aria-label={t('nav.chat')}
+          aria-current={view === 'chat' ? 'page' : undefined}
+          onClick={() => setView('chat')}
         >
           <MessageSquare size={18} />
+        </button>
+        <button
+          type="button"
+          className={`icon-button${view === 'jobs' ? ' active' : ''}`}
+          aria-label={t('nav.jobs')}
+          aria-current={view === 'jobs' ? 'page' : undefined}
+          onClick={() => setView('jobs')}
+        >
+          <Briefcase size={18} />
         </button>
         <button
           type="button"
@@ -76,19 +116,29 @@ function Shell({
           <SettingsIcon size={18} />
         </button>
       </nav>
-      <ThreadList
-        selected={threadId}
-        onSelect={setThreadId}
-        onNew={() => setThreadId(crypto.randomUUID())}
-        refreshKey={refreshKey}
-      />
-      <Chat
-        key={threadId}
-        threadId={threadId}
-        project={settings.project}
-        onActivity={onActivity}
-        onState={setRoko}
-      />
+      {view === 'jobs' ? (
+        <JobsPage
+          selected={jobId}
+          project={settings.project}
+          onSelect={setJobId}
+        />
+      ) : (
+        <>
+          <ThreadList
+            selected={threadId}
+            onSelect={setThreadId}
+            onNew={() => setThreadId(crypto.randomUUID())}
+            refreshKey={refreshKey}
+          />
+          <Chat
+            key={threadId}
+            threadId={threadId}
+            project={settings.project}
+            onActivity={onActivity}
+            onState={setRoko}
+          />
+        </>
+      )}
       <aside className="panel">
         <div className={`presence ${roko}`}>
           <Roko state={roko} size={128} />

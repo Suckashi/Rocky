@@ -70,6 +70,7 @@ export interface PendingApproval {
   reason: string;
   detail: string | null;
   before: string | null;
+  root: string | null;
   createdAt: number;
 }
 
@@ -112,4 +113,61 @@ export function displayPath(path: string, project: string | null): string {
     full.toLowerCase().startsWith(`${root.toLowerCase()}/`) ||
     full.toLowerCase() === root.toLowerCase();
   return inside ? full.slice(root.length + 1) || '.' : full;
+}
+
+export type JobStatus =
+  | 'running'
+  | 'verified'
+  | 'problems'
+  | 'failed'
+  | 'stopped'
+  | 'interrupted'
+  | 'applied'
+  | 'discarded';
+
+export interface JobResult {
+  stopReason: string | null;
+  summary: string;
+  changed: string[];
+  unapproved: string[];
+  mismatched: string[];
+  diff: string;
+  checks: { argv: string[]; exitCode: number | null; output: string }[];
+  warnings: string[];
+  error?: string;
+}
+
+export interface Job {
+  id: string;
+  threadId: string;
+  agent: string;
+  title: string;
+  task: string;
+  status: JobStatus;
+  worktree: string | null;
+  branch: string | null;
+  result: JobResult | null;
+  createdAt: number;
+  finishedAt: number | null;
+}
+
+export type JobEvent = { at: number } & (
+  | { type: 'message' | 'thought' | 'prompt' | 'status'; text: string }
+  | { type: 'tool'; id: string; title: string; kind: string; status: string }
+  | {
+      type: 'permission';
+      id: string;
+      title: string;
+      decision: 'allow' | 'reject';
+      receiptId: string | null;
+    }
+);
+
+export interface ApplyItem {
+  path: string;
+  operation: 'create' | 'edit' | 'delete';
+  contentHash: string;
+  modifiedSince: boolean;
+  before: string | null;
+  after: string | null;
 }

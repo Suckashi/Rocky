@@ -5,6 +5,21 @@ import { displayPath, type PendingApproval } from '../api.ts';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { Diff } from './Diff.tsx';
 
+/** Rocky's own request to start an external agent job. */
+function delegation(
+  approval: PendingApproval,
+): { title: string; task: string } | undefined {
+  const e = approval.effect;
+  if (
+    e.kind !== 'mcp' ||
+    e.server !== 'rocky' ||
+    e.tool !== 'delegate_to_opencode'
+  )
+    return undefined;
+  const args = (e.args ?? {}) as { title?: unknown; task?: unknown };
+  return { title: String(args.title ?? ''), task: String(args.task ?? '') };
+}
+
 export type Answer =
   | { decision: 'allow-once' | 'allow-session' }
   | { decision: 'reject'; reason?: string };
@@ -26,6 +41,8 @@ function Title({
   const { t } = useI18n();
   const actor = t(`approval.actor.${approval.actor}`);
   const effect = approval.effect;
+  // An external agent's request is about its worktree, not the project.
+  project = approval.root ?? project;
   switch (effect.kind) {
     case 'read':
       return (
@@ -47,7 +64,10 @@ function Title({
       );
     case 'command':
       return <>{t('approval.title.command', { actor })}</>;
-    case 'mcp':
+    case 'mcp': {
+      const job = delegation(approval);
+      if (job)
+        return <>{t('approval.title.delegate', { actor, title: job.title })}</>;
       return (
         <>
           {t('approval.title.mcp', {
@@ -57,6 +77,7 @@ function Title({
           })}
         </>
       );
+    }
     case 'network':
       return <>{t('approval.title.network', { actor, url: effect.url })}</>;
   }
@@ -71,6 +92,7 @@ function Preview({
 }) {
   const { t } = useI18n();
   const effect = approval.effect;
+  project = approval.root ?? project;
   if (effect.kind === 'command') {
     return (
       <div className="approval-preview">
@@ -93,6 +115,15 @@ function Preview({
           before={approval.before}
           after={effect.operation === 'delete' ? null : (effect.content ?? '')}
         />
+      </div>
+    );
+  }
+  const job = delegation(approval);
+  if (job) {
+    return (
+      <div className="approval-preview">
+        <p className="pre">{job.task}</p>
+        <span className="small muted">{t('approval.delegateNote')}</span>
       </div>
     );
   }
