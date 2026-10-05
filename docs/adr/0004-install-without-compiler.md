@@ -1,7 +1,7 @@
 # ADR 0004：安裝不需要編譯（S3 spike 結果）
 
 - 日期：2026-10-05
-- 狀態：Linux 已驗證；**Windows 待擁有者執行**（CI 不跑這個重的檢查）
+- 狀態：已採用。Linux 已驗證；Windows 11 由擁有者執行通過（擁有者回報的摘要，見執行紀錄）
 - 程式：`spikes/s3-install/`
 
 ## 決定
@@ -40,16 +40,19 @@ Rocky 的 `package.json` 一律設定 `"scarfSettings": { "enabled": false }`。
 
 ## 執行紀錄
 
-| 平台                     | 指令                                                   | 結果                              |
-| ------------------------ | ------------------------------------------------------ | --------------------------------- |
-| 雲端 Linux，Node 24.21.0 | `ROCKY_S3_FRESH_CACHE=1 node install-check.ts`         | exit 0；只連 `registry.npmjs.org` |
-| 雲端 Linux，Node 24.21.0 | 拿掉 `scarfSettings` 後 `node install-check.ts`        | exit 1（預期）；抓到 `scarf.sh`   |
-| 雲端 Linux，Node 24.21.0 | `ROCKY_S3_BROWSER=<Playwright Chromium> node smoke.ts` | exit 0；10 項全部通過             |
-| 雲端 Linux，Node 24.21.0 | `node smoke.ts`（沒有 Edge）                           | Edge 一項標為 skipped，其餘通過   |
+| 平台                                                                      | 指令                                                   | 結果                                                                                  |
+| ------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| 雲端 Linux，Node 24.21.0                                                  | `ROCKY_S3_FRESH_CACHE=1 node install-check.ts`         | exit 0；只連 `registry.npmjs.org`                                                     |
+| 雲端 Linux，Node 24.21.0                                                  | 拿掉 `scarfSettings` 後 `node install-check.ts`        | exit 1（預期）；抓到 `scarf.sh`                                                       |
+| 雲端 Linux，Node 24.21.0                                                  | `ROCKY_S3_BROWSER=<Playwright Chromium> node smoke.ts` | exit 0；10 項全部通過                                                                 |
+| 雲端 Linux，Node 24.21.0                                                  | `node smoke.ts`（沒有 Edge）                           | Edge 一項標為 skipped，其餘通過                                                       |
+| Windows 11（擁有者的電腦，`D:\Code\Rocky\spikes\s3-install`，PowerShell） | `$env:ROCKY_S3_FRESH_CACHE="1"; node install-check.ts` | exit 0；PASS：空快取 `npm ci` 成功、沒有編譯、只連 `registry.npmjs.org`（擁有者回報） |
+| Windows 11（同上）                                                        | `node smoke.ts`                                        | exit 0；10 項全部 ok，Edge 一項用系統 Edge 154（擁有者回報）                          |
 
 ## 還沒驗證的（限制）
 
-- **還沒在 Windows 上跑。** 這正是 S3 的重點：請照 `spikes/s3-install/README.md` 在你的電腦上跑兩個腳本並貼回報告。
-  Windows 上會改用 `@rolldown/binding-win32-x64-msvc` 與 `lightningcss-win32-x64-msvc`，Edge 一項沒有 Edge 時會直接失敗，不會跳過。
+- Windows 的結果是**擁有者回報的摘要**（2026-10-05），原始輸出沒有附在這裡：不知道 Windows 上的 `npm ci` 秒數、`node_modules` 大小、
+  Node 版本與原生模組的確切檔名（預期是 `@rolldown/binding-win32-x64-msvc`、`lightningcss-win32-x64-msvc`），以及 Edge 的完整版本號。
+  擁有者補貼原始輸出後再更新這一節。
 - 沒測 `pptx-automizer` 的實際編輯（需要範本檔，屬於 S4）。
 - 中文 PDF 的字型嵌入（pdf-lib + fontkit + CJK 字型）屬於 S4。
