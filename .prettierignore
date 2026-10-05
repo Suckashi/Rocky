@@ -1,9 +1,0 @@
-node_modules
-dist
-.rocky*
-test-results
-playwright-report
-specs
-package-lock.json
-docs/implementation/dependency-licenses.json
-

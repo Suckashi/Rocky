@@ -1,5 +1,0 @@
-
-> rocky@0.1.0-dev.0 check:package
-> node scripts/repo-guards.mjs --history --package
-
-{"files":851,"failures":[],"warnings":[],"historyObjects":4443,"packageFiles":700,"scope":"Source worktree; optional --history checks local Git objects and --package checks the actual npm dry-run inventory. Pattern scan is not a universal secret detector."}

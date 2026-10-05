@@ -1,7 +1,0 @@
-{
-  "total": 1,
-  "passed": 1,
-  "failed": 0,
-  "skipped": 0,
-  "scope": "Separate rerun with installed Chromium 1223; does not change the skipped case in the full invocation."
-}
