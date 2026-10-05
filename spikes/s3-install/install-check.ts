@@ -76,6 +76,9 @@ env['HTTP_PROXY'] = hostLog.url;
 env['NODE_USE_ENV_PROXY'] = '1';
 // Without this, npm's own CONNECT to the local proxy would be sent through the proxy again.
 env['NO_PROXY'] = '127.0.0.1,localhost';
+// A fresh temp dir resets Scarf's rate-limit history, so telemetry is always attempted and seen.
+const temp = mkdtempSync(join(tmpdir(), 'rocky-s3-tmp-'));
+for (const key of ['TMPDIR', 'TMP', 'TEMP']) env[key] = temp;
 if (process.env['ROCKY_S3_FRESH_CACHE'] === '1') {
   env['npm_config_cache'] = mkdtempSync(join(tmpdir(), 'rocky-s3-npm-cache-'));
 }

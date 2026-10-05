@@ -51,9 +51,14 @@ await check('import every planned package', async () => {
   const pkg = JSON.parse(readFileSync(join(here, 'package.json'), 'utf8')) as {
     dependencies: Record<string, string>;
   };
-  const skip = new Set(['@ag-ui/core', 'zod', 'langsmith', '@tiptap/pm']); // no root export / covered elsewhere
-  const names = Object.keys(pkg.dependencies).filter((name) => !skip.has(name));
-  for (const name of names) await import(name);
+  // Packages without a root export are loaded through the entry Rocky will use.
+  const entry: Record<string, string> = {
+    '@modelcontextprotocol/sdk': '@modelcontextprotocol/sdk/client/index.js',
+    '@tiptap/pm': '@tiptap/pm/state',
+    '@ag-ui/core': '@ag-ui/core',
+  };
+  const names = Object.keys(pkg.dependencies);
+  for (const name of names) await import(entry[name] ?? name);
   return `${names.length} packages`;
 });
 
@@ -139,9 +144,10 @@ await check('pdf-lib + fontkit → unpdf', async () => {
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   pdf.addPage().drawText('Rocky S3', { x: 50, y: 700, font, size: 24 });
   const bytes = await pdf.save();
+  const size = bytes.length; // unpdf transfers the buffer away
   const { text } = await extractText(bytes, { mergePages: true });
   expect(String(text).includes('Rocky S3'), String(text));
-  return `${bytes.length} bytes`;
+  return `${size} bytes`;
 });
 
 await check('playwright-core → system Edge → PDF (Chinese)', async () => {

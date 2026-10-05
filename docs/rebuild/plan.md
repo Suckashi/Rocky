@@ -96,3 +96,4 @@ S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一
 - 2026-10-05：S2 真實模型驗證（雲端 Linux，Command Code，`deepseek/deepseek-v4-flash`，OpenAI 格式）：工具呼叫、寫檔前暫停、拒絕後換做法、中文、用量與快取 token 都通過；Anthropic 格式因方案不含 Claude 模型未驗證。見 ADR 0001。
 - 2026-10-05：擁有者決定只用 OpenAI 相容的第三方端點，Anthropic 格式先不採用，移除 `@langchain/anthropic`。見 ADR 0002。
 - 2026-10-05：S1（OpenCode ACP）：原生 Windows 可行，不需要 WSL 備案。核准、拒絕、取消、續接、worktree 對帳都在 Windows 與 Ubuntu CI 上以假模型通過；真實模型在雲端 Linux 修 bug 加跑測試成功。見 ADR 0003。
+- 2026-10-05：S3（安裝不需要編譯）：計畫中的完整依賴在 Linux 上 `npm ci` 不需要編譯、只連 npm；CopilotKit 帶有安裝遙測（Scarf），已在 `package.json` 關閉。Windows 待擁有者執行。見 ADR 0004。
