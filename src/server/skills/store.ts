@@ -70,10 +70,10 @@ export class SkillStore {
     if (!existsSync(path) || !statSync(path).isFile())
       throw new Error(`no file ${file} in skill ${name}`);
     const text = readFileSync(path, 'utf8');
-    const files = readdirSync(root, {
-      recursive: true,
-      encoding: 'utf8',
-    }).filter((f) => f !== 'SKILL.md' && statSync(join(root, f)).isFile());
+    // Forward slashes on every platform: the model passes these paths back.
+    const files = readdirSync(root, { recursive: true, encoding: 'utf8' })
+      .filter((f) => f !== 'SKILL.md' && statSync(join(root, f)).isFile())
+      .map((f) => f.split(sep).join('/'));
     const body =
       text.length > FILE_LIMIT
         ? `${text.slice(0, FILE_LIMIT)}\n[truncated]`
