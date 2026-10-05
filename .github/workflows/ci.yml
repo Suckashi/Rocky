@@ -21,4 +21,8 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
+      # S1 drives the real OpenCode binary; it is not a project dependency.
+      - run: npm install -g opencode-ai@1.18.34
       - run: npm run check
+        env:
+          ROCKY_REQUIRE_OPENCODE: '1'
