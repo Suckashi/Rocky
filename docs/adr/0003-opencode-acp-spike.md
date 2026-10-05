@@ -60,12 +60,12 @@ Rocky 用 `@agentclientprotocol/sdk` 1.7.0 的 `ClientSideConnection` 直接啟�
 
 ## 執行紀錄
 
-| 平台                          | 指令                                                    | 結果                                                                                    |
-| ----------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| 雲端 Linux，Node 24.21.0      | `ROCKY_REQUIRE_OPENCODE=1 npm run check`                | exit 0；22 個測試通過（S1 9 個）                                                        |
-| GitHub Actions windows-latest | `npm install -g opencode-ai@1.18.34` 後 `npm run check` | 第一次：S1 功能測試 8 個通過，主機檢查失敗（ripgrep 下載，見發現 5）；修正後見下一次 CI |
-| GitHub Actions ubuntu-latest  | 同上                                                    | 通過                                                                                    |
-| 雲端 Linux，Node 24.21.0      | `node spikes/s1-acp/live.ts`（Command Code，自動核准）  | 第一次 exit 124：關閉時卡住（發現 4）；修正後 exit 0，結果如上                          |
+| 平台                          | 指令                                                    | 結果                                                                                                |
+| ----------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 雲端 Linux，Node 24.21.0      | `ROCKY_REQUIRE_OPENCODE=1 npm run check`                | exit 0；22 個測試通過（S1 9 個）                                                                    |
+| GitHub Actions windows-latest | `npm install -g opencode-ai@1.18.34` 後 `npm run check` | 第一次：S1 功能測試 8 個通過，主機檢查失敗（ripgrep 下載，見發現 5）；修正後通過（run 37312826744） |
+| GitHub Actions ubuntu-latest  | 同上                                                    | 通過                                                                                                |
+| 雲端 Linux，Node 24.21.0      | `node spikes/s1-acp/live.ts`（Command Code，自動核准）  | 第一次 exit 124：關閉時卡住（發現 4）；修正後 exit 0，結果如上                                      |
 
 ## 還沒驗證的（限制）
 
