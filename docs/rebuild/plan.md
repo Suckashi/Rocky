@@ -93,3 +93,4 @@ S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一
 ## 7. 進度
 
 - 2026-10-05：骨架與 Windows／Ubuntu CI 完成。S2（agent 執行路徑）以假模型驗證完成，見 `docs/adr/0001-agent-runtime-spike.md`；真實模型待擁有者在 Windows 上跑 `spikes/s2-agent/live.ts`。
+- 2026-10-05：S2 真實模型驗證（雲端 Linux，Command Code，`deepseek/deepseek-v4-flash`，OpenAI 格式）：工具呼叫、寫檔前暫停、拒絕後換做法、中文、用量與快取 token 都通過；Anthropic 格式因方案不含 Claude 模型未驗證。見 ADR 0001。

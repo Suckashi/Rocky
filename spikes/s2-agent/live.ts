@@ -1,13 +1,18 @@
-// S2 live check against a real OpenAI-compatible endpoint (Ollama by default).
-// Usage: node spikes/s2-agent/live.ts
-//   ROCKY_S2_BASE_URL  default http://127.0.0.1:11434/v1 (Ollama)
-//   ROCKY_S2_MODEL     model name, for example qwen3-coder:30b
-//   ROCKY_S2_API_KEY   only for endpoints that need one
-import { mkdtempSync, readdirSync, readFileSync } from 'node:fs';
+// S2 live check against a real model.
+// Usage: node spikes/s2-agent/live.ts [task]
+//   ROCKY_S2_PROVIDER      openai (default, any OpenAI-compatible endpoint) or anthropic
+//   ROCKY_S2_BASE_URL      openai: default http://127.0.0.1:11434/v1 (Ollama);
+//                          anthropic: API root without /v1, for example https://api.commandcode.ai/provider
+//   ROCKY_S2_MODEL         model name, for example deepseek/deepseek-v4-flash
+//   ROCKY_S2_API_KEY       only for endpoints that need one
+//   ROCKY_S2_AUTO_APPROVE  unset: ask in the terminal; 1: allow every request;
+//                          reject-first: reject the first request, allow the rest
+import { existsSync, mkdtempSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { Command, MemorySaver } from '@langchain/langgraph';
+import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatOpenAI } from '@langchain/openai';
 import {
   createDeepAgent,
@@ -24,12 +29,23 @@ import {
 import { AguiMapper } from './to-agui.ts';
 import { ROCKY_BASE_PROMPT } from './scenario.ts';
 
+const provider = process.env['ROCKY_S2_PROVIDER'] ?? 'openai';
 const baseURL = process.env['ROCKY_S2_BASE_URL'] ?? 'http://127.0.0.1:11434/v1';
+const apiKey = process.env['ROCKY_S2_API_KEY'] ?? 'not-needed';
 const model = process.env['ROCKY_S2_MODEL'];
+const autoApprove = process.env['ROCKY_S2_AUTO_APPROVE'];
 if (!model) {
   console.error(
     'Set ROCKY_S2_MODEL, for example: $env:ROCKY_S2_MODEL="qwen3-coder:30b"',
   );
+  process.exit(2);
+}
+if (provider !== 'openai' && provider !== 'anthropic') {
+  console.error('ROCKY_S2_PROVIDER must be openai or anthropic');
+  process.exit(2);
+}
+if (autoApprove && autoApprove !== '1' && autoApprove !== 'reject-first') {
+  console.error('ROCKY_S2_AUTO_APPROVE must be 1 or reject-first');
   process.exit(2);
 }
 
@@ -43,13 +59,22 @@ globalThis.fetch = (input, init) => {
 const root = mkdtempSync(join(tmpdir(), 'rocky-s2-live-'));
 const gateLog: GateLogEntry[] = [];
 const gate = createGateMiddleware(gateLog);
+const chatModel =
+  provider === 'anthropic'
+    ? new ChatAnthropic({
+        model,
+        apiKey,
+        anthropicApiUrl: baseURL,
+        streaming: true,
+      })
+    : new ChatOpenAI({
+        model,
+        apiKey,
+        configuration: { baseURL },
+        streaming: true,
+      });
 const agent = createDeepAgent({
-  model: new ChatOpenAI({
-    model,
-    apiKey: process.env['ROCKY_S2_API_KEY'] ?? 'not-needed',
-    configuration: { baseURL },
-    streaming: true,
-  }),
+  model: chatModel,
   systemPrompt: ROCKY_BASE_PROMPT,
   backend: new FilesystemBackend({ rootDir: root, virtualMode: true }),
   middleware: [todoListMiddleware() as unknown as AgentMiddleware, gate],
@@ -60,10 +85,31 @@ const agent = createDeepAgent({
 const task =
   process.argv[2] ??
   '在 /notes.md 寫入三行繁體中文的待辦事項，然後讀回這個檔案，確認內容正確後告訴我結果。';
-const terminal = createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+const terminal = autoApprove
+  ? undefined
+  : createInterface({ input: process.stdin, output: process.stdout });
+let answered = 0;
+async function ask(request: ApprovalRequest): Promise<ApprovalAnswer> {
+  answered++;
+  if (autoApprove === 'reject-first' && answered === 1) {
+    console.log('Auto-rejected (ROCKY_S2_AUTO_APPROVE=reject-first)');
+    return {
+      decision: 'reject',
+      hash: request.hash,
+      reason: '不要建立或修改任何檔案，請直接在回覆中列出內容。',
+    };
+  }
+  if (autoApprove) {
+    console.log(`Auto-approved (ROCKY_S2_AUTO_APPROVE=${autoApprove})`);
+    return { decision: 'allow', hash: request.hash };
+  }
+  const reply = (await terminal!.question('Allow? [y/N] '))
+    .trim()
+    .toLowerCase();
+  return { decision: reply === 'y' ? 'allow' : 'reject', hash: request.hash };
+}
+const usage = { calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
+const toolCalls: string[] = [];
 let input: Parameters<typeof agent.stream>[0] = {
   messages: [{ role: 'user', content: task }],
 };
@@ -79,9 +125,34 @@ for (let step = 1; step <= 10; step++) {
     mapper.push(item as [string[], string, unknown]);
     const [, mode, data] = item as [string[], string, unknown];
     if (mode === 'messages') {
-      const [chunk] = data as [{ content?: unknown; getType?: () => string }];
-      if (chunk.getType?.() === 'ai' && typeof chunk.content === 'string') {
+      const [chunk] = data as [
+        {
+          content?: unknown;
+          getType?: () => string;
+          tool_call_chunks?: { name?: string }[];
+          usage_metadata?: {
+            input_tokens?: number;
+            output_tokens?: number;
+            input_token_details?: {
+              cache_read?: number;
+              cache_creation?: number;
+            };
+          };
+        },
+      ];
+      if (chunk.getType?.() !== 'ai') continue;
+      if (typeof chunk.content === 'string')
         process.stdout.write(chunk.content);
+      for (const part of chunk.tool_call_chunks ?? []) {
+        if (part.name) toolCalls.push(part.name);
+      }
+      const u = chunk.usage_metadata;
+      if (u) {
+        usage.calls++;
+        usage.input += u.input_tokens ?? 0;
+        usage.output += u.output_tokens ?? 0;
+        usage.cacheRead += u.input_token_details?.cache_read ?? 0;
+        usage.cacheWrite += u.input_token_details?.cache_creation ?? 0;
       }
     }
   }
@@ -93,26 +164,34 @@ for (let step = 1; step <= 10; step++) {
     const request = (pending.metadata as { request: ApprovalRequest }).request;
     console.log(`\nRocky wants to run ${request.tool}:`);
     console.log(JSON.stringify(request.args, null, 2));
-    const reply = (await terminal.question('Allow? [y/N] '))
-      .trim()
-      .toLowerCase();
-    resume[pending.id] = {
-      decision: reply === 'y' ? 'allow' : 'reject',
-      hash: request.hash,
-    };
+    const target = (request.args as { file_path?: string }).file_path;
+    if (target) {
+      const onDisk = existsSync(join(root, target));
+      console.log(
+        `${target} on disk before approval: ${onDisk ? 'yes' : 'no'}`,
+      );
+    }
+    resume[pending.id] = await ask(request);
   }
   input = new Command({ resume });
 }
-terminal.close();
+terminal?.close();
 
 console.log('\n--- S2 live report ---');
 console.log(
-  `node ${process.version} on ${process.platform}; model ${model} at ${baseURL}`,
+  `node ${process.version} on ${process.platform}; ${provider} model ${model} at ${baseURL}`,
+);
+console.log(
+  `approvals: ${autoApprove ? `automatic (ROCKY_S2_AUTO_APPROVE=${autoApprove})` : 'asked in the terminal'}`,
 );
 console.log(`elapsed ${((Date.now() - started) / 1000).toFixed(1)} s`);
 console.log(
   'gate decisions:',
   gateLog.map((e) => `${e.tool}:${e.decision}`).join(', '),
+);
+console.log('tool calls:', toolCalls.join(', ') || 'none');
+console.log(
+  `usage: ${usage.calls} usage reports; input ${usage.input}, output ${usage.output}, cache read ${usage.cacheRead}, cache write ${usage.cacheWrite}`,
 );
 console.log('hosts contacted:', [...hosts].join(', ') || 'none');
 console.log(`files in ${root}:`);
