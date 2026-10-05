@@ -17,6 +17,8 @@ export interface PendingApproval {
   contentHash: string;
   reason: Reason;
   detail: string | null;
+  /** For writes: the current file content, so the UI can show a diff. */
+  before: string | null;
   createdAt: number;
 }
 
@@ -38,8 +40,6 @@ export interface GateDeps {
   safeList: (projectRoot: string) => string[][];
   /** Paths Rocky itself created in a thread (they may be deleted without asking). */
   createdByRocky: (threadId: string, absolutePath: string) => boolean;
-  /** Called whenever a thread's pending approvals change. */
-  onPendingChange?: (threadId: string) => void;
 }
 
 interface Waiting {
@@ -56,9 +56,22 @@ export class Gate {
   private readonly waiting = new Map<string, Waiting>();
   private readonly sessionApprovals = new Map<string, Set<string>>();
   private readonly modes = new Map<string, Mode>();
+  private readonly listeners = new Map<string, Set<() => void>>();
 
   constructor(deps: GateDeps) {
     this.deps = deps;
+  }
+
+  /** Called whenever the thread's pending approvals change; returns an unsubscribe function. */
+  subscribe(threadId: string, listener: () => void): () => void {
+    const set = this.listeners.get(threadId) ?? new Set();
+    set.add(listener);
+    this.listeners.set(threadId, set);
+    return () => set.delete(listener);
+  }
+
+  private changed(threadId: string): void {
+    for (const listener of this.listeners.get(threadId) ?? []) listener();
   }
 
   mode(threadId: string): Mode {
@@ -95,6 +108,7 @@ export class Gate {
     effect: Effect,
     origin: Origin & { threadId: string },
     signal?: AbortSignal,
+    preview: { before?: string } = {},
   ): Promise<GateResult> {
     const verdict = decide(effect, this.context(origin.threadId));
     const tool = effect.kind === 'command' ? 'run_command' : effect.kind;
@@ -142,18 +156,19 @@ export class Gate {
       contentHash: verdict.contentHash,
       reason: verdict.reason,
       detail: verdict.detail ?? null,
+      before: preview.before ?? null,
       createdAt: Date.now(),
     };
     const answer = await new Promise<UserDecision | 'stopped'>((resolve) => {
       this.waiting.set(approval.id, { approval, resolve });
-      this.deps.onPendingChange?.(origin.threadId);
+      this.changed(origin.threadId);
       if (signal?.aborted) resolve('stopped');
       signal?.addEventListener('abort', () => resolve('stopped'), {
         once: true,
       });
     });
     this.waiting.delete(approval.id);
-    this.deps.onPendingChange?.(origin.threadId);
+    this.changed(origin.threadId);
 
     if (answer === 'stopped') {
       const receipt = this.deps.receipts.intent(

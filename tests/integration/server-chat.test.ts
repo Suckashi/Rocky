@@ -3,17 +3,8 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { RockyAgent } from '../../src/server/agent/rocky-agent.ts';
-import { RockyAgentRunner } from '../../src/server/agent/runner.ts';
-import { createApp } from '../../src/server/http/app.ts';
-import { copilotRoutes } from '../../src/server/http/copilot.ts';
-import { LoginCodes } from '../../src/server/http/login-codes.ts';
-import { settingsRoutes } from '../../src/server/http/routes/settings.ts';
-import { threadRoutes } from '../../src/server/http/routes/threads.ts';
+import { composeRocky } from '../../src/server/compose.ts';
 import { EgressGuard } from '../../src/server/platform/egress.ts';
-import { openDatabase } from '../../src/server/store/db.ts';
-import { SettingsStore } from '../../src/server/store/settings.ts';
-import { ThreadStore } from '../../src/server/store/threads.ts';
 import {
   startFakeOpenAI,
   type FakeOpenAI,
@@ -25,21 +16,14 @@ const token = 't'.repeat(43);
 const REPLY = '你好，我是 Rocky，有什麼可以幫你？';
 
 function server(dir: string) {
-  const db = openDatabase(join(dir, 'rocky.sqlite'));
-  const threads = new ThreadStore(db);
-  const settings = new SettingsStore(db, dir);
-  const runner = new RockyAgentRunner(threads);
-  const egress = new EgressGuard(() => {});
-  const app = createApp({
+  const rocky = composeRocky({
+    dataDir: dir,
     token,
-    codes: new LoginCodes(),
     port: PORT,
-    api: [
-      settingsRoutes(settings, egress, async () => ['m1', 'm2']),
-      threadRoutes(threads, runner),
-    ],
-    mounted: [copilotRoutes(new RockyAgent({ settings }), runner)],
+    egress: new EgressGuard(() => {}),
+    listModels: async () => ['m1', 'm2'],
   });
+  const { app, settings, threads } = rocky;
   const call = (path: string, init: { method?: string; body?: unknown } = {}) =>
     app.request(`http://${HOST}${path}`, {
       method: init.method ?? 'GET',
@@ -52,7 +36,7 @@ function server(dir: string) {
       },
       ...(init.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
     });
-  return { call, settings, threads };
+  return { call, settings, threads, rocky };
 }
 
 async function sseEvents(

@@ -15,27 +15,25 @@ import {
   type BaseMessage,
 } from '@langchain/core/messages';
 import { ChatOpenAI } from '@langchain/openai';
-import { createDeepAgent, registerHarnessProfile } from 'deepagents';
+import {
+  createDeepAgent,
+  GENERAL_PURPOSE_SUBAGENT,
+  registerHarnessProfile,
+} from 'deepagents';
 import { todoListMiddleware, type AgentMiddleware } from 'langchain';
 import { Observable } from 'rxjs';
+import type { Executor } from '../effects/execute.ts';
+import type { Gate } from '../effects/gate.ts';
 import type { SettingsStore } from '../store/settings.ts';
+import { createRockyBackend } from './backend.ts';
+import { createGateMiddleware, type GateRun } from './gate-middleware.ts';
+import { createRunCommandTool } from './run-command.ts';
 import { rockyPrompt } from './prompt.ts';
 import { AguiMapper } from './to-agui.ts';
 
-// Hide the virtual filesystem and subagent tools until M2 wires them through the gate.
-// Exclusions shape what the model sees; they are not a security boundary.
-registerHarnessProfile('openai', {
-  excludedTools: [
-    'ls',
-    'read_file',
-    'write_file',
-    'edit_file',
-    'glob',
-    'grep',
-    'execute',
-    'task',
-  ],
-});
+// Deep Agents' shell tool takes a shell string with no approval point; Rocky has run_command.
+// Exclusions shape what the model sees; the gate middleware is the actual boundary.
+registerHarnessProfile('openai', { excludedTools: ['execute', 'delete'] });
 
 export class ModelNotConfiguredError extends Error {
   constructor() {
@@ -112,6 +110,8 @@ export function toLangChain(messages: Message[]): BaseMessage[] {
 
 export interface RockyAgentDeps {
   settings: SettingsStore;
+  gate: Gate;
+  executor: Executor;
 }
 
 export class RockyAgent extends AbstractAgent {
@@ -139,14 +139,32 @@ export class RockyAgent extends AbstractAgent {
     return new Observable<BaseEvent>((subscriber) => {
       const controller = new AbortController();
       this.controller = controller;
+      const { settings, gate, executor } = this.deps;
       // The mapper emits RUN_STARTED first, so even a configuration error is a well-formed run.
       const mapper = new AguiMapper(input.threadId, input.runId, (event) =>
         subscriber.next(event),
       );
+      // Pending approvals reach the UI as standard state snapshots (no custom events).
+      const publishState = () =>
+        subscriber.next({
+          type: EventType.STATE_SNAPSHOT,
+          snapshot: {
+            mode: gate.mode(input.threadId),
+            pendingApprovals: gate.pending(input.threadId),
+          },
+        } as BaseEvent);
+      const unsubscribe = gate.subscribe(input.threadId, publishState);
       void (async () => {
-        const settings = this.deps.settings;
         const model = settings.model();
         if (!model) throw new ModelNotConfiguredError();
+        const projectRoot = settings.project();
+        const run: GateRun = {
+          gate,
+          projectRoot,
+          threadId: input.threadId,
+          runId: input.runId,
+          signal: controller.signal,
+        };
         const agent = createDeepAgent({
           model: new ChatOpenAI({
             model: model.model,
@@ -154,24 +172,44 @@ export class RockyAgent extends AbstractAgent {
             configuration: { baseURL: model.baseURL },
             streaming: true,
           }),
-          systemPrompt: rockyPrompt(settings.locale()),
+          systemPrompt: rockyPrompt(settings.locale(), projectRoot),
+          ...(projectRoot
+            ? {
+                backend: createRockyBackend(projectRoot, executor),
+                tools: [createRunCommandTool(projectRoot, executor)],
+              }
+            : {}),
           // Cast: langchain's todo middleware types fail under exactOptionalPropertyTypes (ADR 0001).
-          middleware: [todoListMiddleware() as unknown as AgentMiddleware],
+          middleware: [
+            todoListMiddleware() as unknown as AgentMiddleware,
+            createGateMiddleware(run, 'rocky'),
+          ],
+          // The built-in subagent does not inherit middleware (ADR 0001, finding 1): gate it explicitly.
+          subagents: [
+            {
+              ...GENERAL_PURPOSE_SUBAGENT,
+              middleware: [createGateMiddleware(run, 'subagent')],
+            },
+          ],
         });
+        publishState();
         const stream = await agent.stream(
           { messages: toLangChain(input.messages) },
           {
             streamMode: ['messages', 'updates'],
             subgraphs: true,
             signal: controller.signal,
+            recursionLimit: 100,
           },
         );
         for await (const item of stream) {
           mapper.push(item as [string[], string, unknown]);
         }
         mapper.finish();
+        unsubscribe();
         subscriber.complete();
       })().catch((error: unknown) => {
+        unsubscribe();
         if (controller.signal.aborted) {
           subscriber.error(new Error('stopped'));
           return;

@@ -23,9 +23,10 @@ function setup(mode: Mode = 'ask-always') {
     rules: () => [],
     safeList: () => builtInSafeList(),
     createdByRocky: () => false,
-    onPendingChange: (t) => changes.push(t),
   };
-  return { gate: new Gate(deps), receipts, project, db, dir, changes };
+  const gate = new Gate(deps);
+  gate.subscribe('t1', () => changes.push('t1'));
+  return { gate, receipts, project, db, dir, changes };
 }
 
 const origin = { threadId: 't1', actor: 'rocky' as const, toolCallId: 'c1' };

@@ -13,9 +13,13 @@ export interface ModelSettings {
   model: string;
 }
 
+export type ApprovalMode = 'ask-always' | 'ask-when-needed' | 'hands-off';
+
 export interface PublicSettings {
   locale: Locale;
   model: (ModelSettings & { hasApiKey: boolean }) | null;
+  project: string | null;
+  mode: ApprovalMode;
 }
 
 export const DEFAULT_BASE_URL: Record<Provider, string> = {
@@ -56,6 +60,22 @@ export class SettingsStore {
     this.set('locale', locale);
   }
 
+  project(): string | undefined {
+    return this.get<string>('project');
+  }
+
+  setProject(path: string): void {
+    this.set('project', path);
+  }
+
+  mode(): ApprovalMode {
+    return this.get<ApprovalMode>('mode') ?? 'ask-when-needed';
+  }
+
+  setMode(mode: ApprovalMode): void {
+    this.set('mode', mode);
+  }
+
   model(): ModelSettings | undefined {
     return this.get<ModelSettings>('model');
   }
@@ -77,6 +97,8 @@ export class SettingsStore {
       model: model
         ? { ...model, hasApiKey: this.apiKey() !== undefined }
         : null,
+      project: this.project() ?? null,
+      mode: this.mode(),
     };
   }
 

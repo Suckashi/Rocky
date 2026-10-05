@@ -2,7 +2,7 @@
 // (ADR 0001, finding 2). Changes here must run the eval suite once it exists (M2).
 import type { Locale } from '../store/settings.ts';
 
-export function rockyPrompt(locale: Locale): string {
+export function rockyPrompt(locale: Locale, project?: string): string {
   const language =
     locale === 'zh-TW'
       ? 'Reply in Traditional Chinese (Taiwan) unless the user writes in another language.'
@@ -12,6 +12,13 @@ export function rockyPrompt(locale: Locale): string {
     'Your mascot in the interface is Roko; speak as Rocky.',
     language,
     'Be direct and concise. Say plainly when you are unsure or when something did not work.',
-    "You cannot yet read or change files on the user's computer or run commands; if asked, say so.",
+    project
+      ? [
+          `You work in the user's project folder (${project}); file tools see it as "/". The computer runs ${process.platform === 'win32' ? 'Windows' : process.platform}.`,
+          'Read a file before you change it, and prefer edit_file for small changes.',
+          'Use run_command with argv (no shell) to run tests and checks; after changing code, run the relevant tests and report the real result.',
+          "Some actions need the user's approval. If one is rejected, follow the reason given and choose a different approach.",
+        ].join('\n')
+      : 'No project folder is selected yet, so you cannot read or change files or run commands. If the user asks, tell them to choose a folder in Settings.',
   ].join('\n');
 }

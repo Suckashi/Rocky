@@ -1,4 +1,6 @@
 // Settings API: language and model. The API key is write-only from the browser's side.
+import { statSync } from 'node:fs';
+import { isAbsolute } from 'node:path';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import type { EgressGuard } from '../../platform/egress.ts';
@@ -57,6 +59,34 @@ export function settingsRoutes(
       .safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: 'invalid-locale' }, 400);
     settings.setLocale(parsed.data.locale);
+    return c.json(settings.public());
+  });
+
+  app.put('/settings/project', async (c) => {
+    const parsed = z
+      .object({ path: z.string().trim().min(1).max(1000) })
+      .strict()
+      .safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success || !isAbsolute(parsed.data.path))
+      return c.json({ error: 'invalid-project' }, 400);
+    let isDir: boolean;
+    try {
+      isDir = statSync(parsed.data.path).isDirectory();
+    } catch {
+      isDir = false;
+    }
+    if (!isDir) return c.json({ error: 'project-not-found' }, 400);
+    settings.setProject(parsed.data.path);
+    return c.json(settings.public());
+  });
+
+  app.put('/settings/mode', async (c) => {
+    const parsed = z
+      .object({ mode: z.enum(['ask-always', 'ask-when-needed', 'hands-off']) })
+      .strict()
+      .safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid-mode' }, 400);
+    settings.setMode(parsed.data.mode);
     return c.json(settings.public());
   });
 

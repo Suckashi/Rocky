@@ -122,6 +122,15 @@ export class ReceiptStore {
     if (changed === 0) throw new Error(`receipt ${id} is not pending`);
   }
 
+  /** Nothing was done after all (for example the pass did not match the content). */
+  cancel(id: string, detail: string): void {
+    this.db
+      .prepare(
+        "update receipts set outcome = 'not-run', detail = ?, finished_at = ? where id = ? and outcome = 'pending'",
+      )
+      .run(detail, this.now(), id);
+  }
+
   /** The user looked and confirms an unknown outcome succeeded. Never re-runs anything. */
   confirm(id: string): boolean {
     return (
