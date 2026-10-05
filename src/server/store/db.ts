@@ -24,6 +24,36 @@ const MIGRATIONS: string[] = [
    );
    create index runs_by_thread on runs(thread_id, created_at);
    create table settings (key text primary key, value text not null);`,
+  `create table receipts (
+     id text primary key,
+     thread_id text,
+     run_id text,
+     tool_call_id text,
+     actor text not null,
+     kind text not null,
+     effect text not null,
+     content_hash text not null,
+     decision text not null check (decision in ('allowed', 'approved', 'rejected', 'denied')),
+     reason text not null,
+     outcome text not null check (outcome in ('pending', 'succeeded', 'failed', 'unknown', 'not-run')),
+     detail text,
+     created_at integer not null,
+     finished_at integer
+   );
+   create index receipts_by_thread on receipts(thread_id, created_at);
+   create table snapshots (
+     receipt_id text not null references receipts(id) on delete cascade,
+     path text not null,
+     before_sha text,
+     after_sha text,
+     primary key (receipt_id, path)
+   );
+   create table rules (
+     id text primary key,
+     decision text not null check (decision in ('allow', 'deny')),
+     prefix text not null,
+     created_at integer not null
+   );`,
 ];
 
 export function openDatabase(path: string): DatabaseSync {
