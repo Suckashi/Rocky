@@ -75,7 +75,7 @@ npm run dev
 
 ## 貢獻與支援
 
-開發流程採分支 → PR → CI，詳見[貢獻指南](CONTRIBUTING.md)。問題回報見[支援說明](SUPPORT.md)，漏洞回報與安全限制見[安全政策](SECURITY.md)，社群互動遵循[行為準則](CODE_OF_CONDUCT.md)。歡迎使用繁體中文或英文回報。
+開發流程採分支 → 本地驗證 → PR，詳見[貢獻指南](CONTRIBUTING.md)。問題回報見[支援說明](SUPPORT.md)，漏洞回報與安全限制見[安全政策](SECURITY.md)，社群互動遵循[行為準則](CODE_OF_CONDUCT.md)。歡迎使用繁體中文或英文回報。
 
 ## 授權與來源
 

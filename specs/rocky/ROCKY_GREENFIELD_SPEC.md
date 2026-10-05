@@ -1,5 +1,7 @@
 # Rocky — 全新專案開發規格（Greenfield）
 
+> 2026-10-05 owner decision: remove automated Verify CI and required CI status checks; use relevant local verification. This supersedes earlier mandatory CI / no-disable-CI instructions for Rocky. PR and other branch protections remain; acceptance results are unchanged. See docs/implementation/ci-removal.md.
+
 > **文件版本：2.0.0｜規劃日期：2026-10-02（Asia/Taipei）**  
 > **產品方向：Local + Explicit Network｜Node / TypeScript-only｜MCP｜Permissive OSS**  
 > **狀態：可交付 coding agent 的開發規格；不是已實作／已通過驗證的產品聲明。**

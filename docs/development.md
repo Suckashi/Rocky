@@ -41,16 +41,14 @@ Focused tests use `npx vitest run tests/<name>.test.ts` or `npx playwright test 
 
 Fixtures run the real local services with scripted providers and synthetic inputs. They do not prove live provider compatibility. A browser executable override is diagnostic evidence and does not satisfy the pinned-browser gate. Tests must not use production profiles or credentials.
 
-Install the optional pinned browser with `npm run setup:browser` before running the native browser integration test. `npm test` skips that single case if no browser executable is available; CI installs Chromium first so the case runs there. A local `ROCKY_TEST_BROWSER` override must be recorded as compatibility evidence.
+Install the optional pinned browser with `npm run setup:browser` before running the native browser integration test. `npm test` skips that single case if no browser executable is available. Install Chromium locally to run that case. A local `ROCKY_TEST_BROWSER` override must be recorded as compatibility evidence.
 
-The normal browser suite starts with reconciliation fixtures and intentionally skips the empty-installation case. Run `npm run test:e2e -- tests/e2e/empty-install.spec.ts` separately with `ROCKY_E2E_EMPTY=1` in that process's environment. Restore the variable afterwards before a normal suite run. CI runs both modes. Do not run unit/integration workloads at the same time as the browser performance measurement.
+The normal browser suite starts with reconciliation fixtures and intentionally skips the empty-installation case. Run `npm run test:e2e -- tests/e2e/empty-install.spec.ts` separately with `ROCKY_E2E_EMPTY=1` in that process's environment. Restore the variable afterwards before a normal suite run. Run both modes when verifying browser changes. Do not run unit/integration workloads at the same time as the browser performance measurement.
 
 Record commands, exit codes, Node version, operating system, relevant revision, lockfile hash, and scope limits. Keep initial failure records when documenting a repaired run. An aggregate of focused reruns must be labeled as such; it is not a fresh full-suite result.
 
 The [implementation ledger](../specs/rocky/implementation-plan.json) holds acceptance statuses. See [evidence conventions](implementation/README.md). The current open gates are listed in the [roadmap](ROADMAP.md).
 
-## CI
+## Local verification
 
-[Verify](../.github/workflows/verify.yml) runs Ubuntu verification and a separate dependency-audit job for pull requests. Pushes to main, the daily 03:17 UTC schedule, and manual dispatch run both Ubuntu and Windows verification. CI uses the install-only no-Python check because unit tests and Learning fixtures already run in the same job; the default five-step command remains the AT-01 acceptance check. Actions are pinned to commit SHAs, permissions are read-only, and no deployment credentials are needed. Failed dependency checks remain failures even if functional tests pass.
-
-Workflow files are source configuration. GitHub execution and branch protection are established only after repository creation and successful hosted runs. No current local result stands in for that evidence.
+Automated Verify CI and main's required CI status checks were removed at the owner's request on 2026-10-05. Run the relevant commands above locally and record actual results. PR review and conversation resolution remain required. Existing dependency findings and unrun acceptance tests retain their recorded status.

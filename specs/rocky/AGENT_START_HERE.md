@@ -1,5 +1,7 @@
 # 交給 Coding Agent：從新的 Rocky Repo 開始
 
+> 2026-10-05 owner decision: remove automated Verify CI and required CI status checks; use relevant local verification. This supersedes earlier mandatory CI / no-disable-CI instructions for Rocky. PR and other branch protections remain; acceptance results are unchanged. See docs/implementation/ci-removal.md.
+
 > 規格版本2.0.0；取代舊的Apsis重構指令。這不是要求你在Apsis開分支或只做rename。
 
 ## 1. 先讀這四份文件

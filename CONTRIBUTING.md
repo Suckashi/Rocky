@@ -55,6 +55,6 @@ Link the issue or agreed proposal so the reviewer can see the intended scope. Ex
 
 AI-assisted contributions are welcome. The contributor remains responsible for reviewing every changed file, understanding the result, checking attribution, and running the reported checks. State any uncertainty explicitly. Do not submit raw agent transcripts, invented test results, or summaries you have not verified.
 
-Use branch → PR → CI → maintainer merge. Remote setup, branch protection, releases, tags, and deployment are maintainer actions. The repository's CI definitions do not prove those settings are enabled or that a run passed. Required checks must finish successfully at the revision being merged; reviewers should resolve discussion threads before merge.
+Use branch → local verification → PR → maintainer merge. Automated CI and required CI status checks were removed at the owner's request on 2026-10-05. Run relevant checks locally and record actual results. Remote setup, branch protection, releases, tags, and deployment are maintainer actions; reviewers should resolve discussion threads before merge.
 
 Contributions are submitted under the project's existing [Apache-2.0 license](LICENSE). Retain any third-party notices applicable to contributed code. This project currently has no separate CLA process.

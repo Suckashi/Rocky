@@ -1,5 +1,7 @@
 # Rocky Greenfield 決策紀錄
 
+> 2026-10-05 owner decision: remove automated Verify CI and required CI status checks; use relevant local verification. This supersedes earlier mandatory CI / no-disable-CI instructions for Rocky. PR and other branch protections remain; acceptance results are unchanged. See docs/implementation/ci-removal.md.
+
 **版本2.0.0｜2026-10-02。**本紀錄與主Spec完整取代先前Apsis重構Spec；不是貼在舊需求後的可選附錄。
 
 > 2026-10-03 最新 UI 決策：OpenDots 是 Rocky 的主要 UI／UX 對照基準；Rocky 的原創設計集中在角色、名稱與必要的功能適配。 舊版與其衝突的全站配色、sidebar、閱讀區、卡片及間距值由本決策取代；產品與技術契約不變。

@@ -75,7 +75,7 @@ See [architecture and file placement](docs/architecture.md) before adding a modu
 
 ## Contributing and support
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) for the branch → pull request → CI workflow, [SUPPORT.md](SUPPORT.md) for bug reports, and [SECURITY.md](SECURITY.md) for private vulnerability reporting and known security limitations. Community participation follows the [Code of Conduct](CODE_OF_CONDUCT.md).
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the branch → pull request workflow with local verification, [SUPPORT.md](SUPPORT.md) for bug reports, and [SECURITY.md](SECURITY.md) for private vulnerability reporting and known security limitations. Community participation follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License and provenance
 
