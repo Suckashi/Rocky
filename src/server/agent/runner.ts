@@ -123,7 +123,12 @@ export class RockyAgentRunner extends AgentRunner {
         events.push(event);
         subject.next(event);
       }
-      const failure = live.stopRequested ? 'stopped' : error;
+      // An agent can report failure as a RUN_ERROR event instead of throwing.
+      const reported = events.find((e) => e.type === EventType.RUN_ERROR) as
+        { message?: string } | undefined;
+      const failure = live.stopRequested
+        ? 'stopped'
+        : (error ?? reported?.message);
       this.store.finishRun(input.runId, {
         events: compactEvents(events),
         outcome: failure === undefined ? 'succeeded' : 'failed',

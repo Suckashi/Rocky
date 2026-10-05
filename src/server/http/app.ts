@@ -15,7 +15,10 @@ export interface AppOptions extends GuardOptions {
   codes: LoginCodes;
   /** Directory of the built web UI; omitted in API-only tests. */
   webRoot?: string;
-  api?: Hono;
+  /** Route groups mounted under /api. */
+  api?: Hono[];
+  /** Apps that bring their own /api/... base path (the CopilotKit runtime). */
+  mounted?: Hono[];
 }
 
 export function createApp(options: AppOptions): Hono {
@@ -51,7 +54,8 @@ export function createApp(options: AppOptions): Hono {
   );
   app.use('/api/*', authGuard(options));
   app.get('/api/health', (c) => c.json({ ok: true }));
-  if (options.api) app.route('/api', options.api);
+  for (const routes of options.api ?? []) app.route('/api', routes);
+  for (const routes of options.mounted ?? []) app.route('/', routes);
   app.all('/api/*', (c) => c.json({ error: 'not-found' }, 404));
 
   if (options.webRoot) {
