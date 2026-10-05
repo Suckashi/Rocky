@@ -1,6 +1,6 @@
 # Rocky 架構（重做版 V1）
 
-> 狀態：草稿，2026-10-05。選定方案：A，全 TypeScript、單一程序。
+> 狀態：草稿，2026-10-05。選定方案：A，全 TypeScript、單一程序。原則：**能跟 OpenDots 一樣的就一樣，只在關鍵處做 Rocky 的轉換**（本機儲存、核准權威、Deep Agents、ACP、文件）。
 
 ## 形狀
 
@@ -37,7 +37,7 @@ Rocky 程序 (Node 24, 單一程序)
 | 文件 | md：markdown-it；docx：docx + mammoth + OOXML 直接編輯；xlsx：exceljs（開檔時重算）；pptx：pptxgenjs + pptx-automizer；pdf：unpdf（附 CJK cmaps）+ pdf-lib + fontkit；HTML 轉 PDF：Playwright 呼叫系統 Edge | 沒有 Office；LibreOffice 是選配 |
 | 資料位置 | `%LOCALAPPDATA%\Rocky`（Windows） | 不進 Git、不送遙測 |
 | UI 框架 | React 19 + Vite（與 OpenDots 相同），用自己的 design tokens | 不 import OpenDots 的 CSS |
-| UI 與後端的協定 | 事件格式採 **AG-UI** 標準事件（`TEXT_MESSAGE_*`、`TOOL_CALL_*`、`STATE_*`），核准與收據用少量自訂事件；**V1 不用 CopilotKit runtime 和 react-core** | 時間軸、核准、收據都由 Rocky 存在本機並可重播；CopilotKit 的對話紀錄預設放在雲端 Intelligence 服務，而且 `useHumanInTheLoop` 讓核准在瀏覽器端完成，兩者都和「Rocky 是唯一權威」衝突。舊 Rocky 用了 CopilotKit，結果只用到 `CUSTOM` 事件，UI 只能靠名稱比對 |
+| UI 與後端的協定 | **照 OpenDots：CopilotKit（`@copilotkit/react-core` v2 + `@copilotkit/runtime`）+ AG-UI**。關鍵轉換：不用 Intelligence 雲端，自己實作 `RockyAgentRunner`（CopilotKit 的 `AgentRunner` 抽象類別只有 `run`、`connect`、`isRunning`、`stop`），對話與事件存在 Rocky 的 `node:sqlite`；工具與狀態一律送 AG-UI 標準事件（`TOOL_CALL_*`、`STATE_*`），不用 `CUSTOM` 事件比對名稱；核准卡由 CopilotKit 渲染，但決定送到 Rocky 的核准 API，由 Rocky 綁雜湊、寫收據、執行 | 跟 OpenDots 一致，就能直接沿用它的對話與工具卡元件。官方的 `@copilotkit/sqlite-runner` 依賴 `better-sqlite3`，在 Windows 上有原生編譯風險，所以不用它。舊 Rocky 也用 CopilotKit，但只用到 `CUSTOM` 事件，這次修正 |
 | 多語系 | 所有介面文字放在語系檔（`zh-TW`、`en`），設定頁切換並記住；日期、數字用 `Intl` 格式化；CI 檢查兩邊的 key 一致、元件裡沒有寫死的字串 | 舊 Rocky 的 i18n 只做一半，畫面中英混雜 |
 | HTTP 伺服器 | Hono + `@hono/node-server`（與 OpenDots 相同） | 小、型別好；照 OpenDots 的 composition root、依功能分的 route 模組、單一安全 guard、有期限的優雅關機 |
 | 文件編輯器 | Tiptap（與 OpenDots 相同）編輯 Markdown 文件，附原始碼模式 | 借用 OpenDots 的自動儲存、修訂版本檢查（防止舊內容覆蓋新內容） |
@@ -50,7 +50,7 @@ Rocky 程序 (Node 24, 單一程序)
 | 工具卡：用人話的動詞標籤；沒完成就顯示「已中斷」，絕不顯示成功 | Docker 電腦服務、遠端 owner token、多使用者欄位 |
 | 審查卡：決定後保留成收據、「核准前不會有任何變更」 | 由瀏覽器執行副作用 |
 | `Mascot` 元件模式（依狀態切換）→ 換成 Roko 的 spritesheet 動畫 | 輪詢迴圈、`window.prompt`、單檔巨型 `App.tsx` |
-| Spaces／文件庫的格狀與清單頁、首次使用卡加範例提示 | TanStack AI（模型層改用 LangChain provider） |
+| Spaces／文件庫的格狀與清單頁、首次使用卡加範例提示 | TanStack AI（模型層改用 LangChain provider，透過 CopilotKit 的 LangGraph 整合接 Deep Agents） |
 
 ## 先驗證再定案（第一週的 spike）
 
