@@ -54,6 +54,31 @@ const MIGRATIONS: string[] = [
      prefix text not null,
      created_at integer not null
    );`,
+  `create table jobs (
+     id text primary key,
+     thread_id text not null,
+     run_id text,
+     tool_call_id text,
+     agent text not null,
+     title text not null,
+     task text not null,
+     status text not null check (status in ('running', 'verified', 'problems', 'failed', 'stopped', 'interrupted', 'applied', 'discarded')),
+     worktree text,
+     branch text,
+     base_commit text,
+     session_id text,
+     result text,
+     created_at integer not null,
+     finished_at integer
+   );
+   create index jobs_by_thread on jobs(thread_id, created_at);
+   create table job_events (
+     job_id text not null references jobs(id) on delete cascade,
+     seq integer not null,
+     at integer not null,
+     event text not null,
+     primary key (job_id, seq)
+   );`,
 ];
 
 export function openDatabase(path: string): DatabaseSync {

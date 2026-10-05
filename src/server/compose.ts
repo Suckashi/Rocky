@@ -14,6 +14,9 @@ import { createApp } from './http/app.ts';
 import { copilotRoutes } from './http/copilot.ts';
 import { LoginCodes } from './http/login-codes.ts';
 import { approvalRoutes } from './http/routes/approvals.ts';
+import { jobRoutes } from './http/routes/jobs.ts';
+import { JobRunner } from './jobs/runner.ts';
+import { JobStore } from './jobs/store.ts';
 import { settingsRoutes, type ListModels } from './http/routes/settings.ts';
 import { threadRoutes } from './http/routes/threads.ts';
 import { EgressGuard } from './platform/egress.ts';
@@ -28,6 +31,8 @@ export interface ComposeOptions {
   webRoot?: string;
   egress?: EgressGuard;
   listModels?: ListModels;
+  /** Where to find OpenCode (tests); default: ROCKY_OPENCODE_BIN or PATH. */
+  findAgent?: () => string | undefined;
 }
 
 function packageScripts(projectRoot: string): Record<string, string> {
@@ -61,8 +66,19 @@ export function composeRocky(options: ComposeOptions) {
         .some((s) => s.path === path && s.beforeSha === null),
   });
   const executor = new Executor({ passes: gate.passes, receipts, snapshots });
+  const jobs = new JobStore(db);
+  const interruptedJobs = jobs.markInterrupted();
+  const jobRunner = new JobRunner({
+    jobs,
+    gate,
+    receipts,
+    executor,
+    settings,
+    dataDir: options.dataDir,
+    ...(options.findAgent ? { findAgent: options.findAgent } : {}),
+  });
   const runner = new RockyAgentRunner(threads);
-  const agent = new RockyAgent({ settings, gate, executor });
+  const agent = new RockyAgent({ settings, gate, executor, jobs: jobRunner });
   const egress = options.egress ?? new EgressGuard();
   const savedModel = settings.model();
   if (savedModel) egress.allow(savedModel.baseURL);
@@ -75,6 +91,14 @@ export function composeRocky(options: ComposeOptions) {
       settingsRoutes(settings, egress, options.listModels),
       threadRoutes(threads, runner),
       approvalRoutes(gate, receipts, snapshots, executor),
+      jobRoutes({
+        jobs,
+        runner: jobRunner,
+        gate,
+        executor,
+        receipts,
+        settings,
+      }),
     ],
     mounted: [copilotRoutes(agent, runner)],
     ...(options.webRoot ? { webRoot: options.webRoot } : {}),
@@ -88,6 +112,9 @@ export function composeRocky(options: ComposeOptions) {
     receipts,
     snapshots,
     rules,
+    jobs,
+    jobRunner,
+    interruptedJobs,
     gate,
     executor,
     runner,

@@ -24,9 +24,13 @@ const rocky = composeRocky({
 const { app, codes, db, threads, runner } = rocky;
 rocky.egress.install();
 const interrupted = threads.interruptedRuns();
-if (interrupted.length > 0 || rocky.interruptedActions > 0) {
+if (
+  interrupted.length > 0 ||
+  rocky.interruptedActions > 0 ||
+  rocky.interruptedJobs > 0
+) {
   console.log(
-    `Interrupted last time: ${interrupted.length} run(s), ${rocky.interruptedActions} action(s); they stay marked unknown.`,
+    `Interrupted last time: ${interrupted.length} run(s), ${rocky.interruptedActions} action(s), ${rocky.interruptedJobs} job(s); they stay marked unknown and are not restarted.`,
   );
 }
 

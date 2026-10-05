@@ -19,6 +19,8 @@ export interface PendingApproval {
   detail: string | null;
   /** For writes: the current file content, so the UI can show a diff. */
   before: string | null;
+  /** The folder paths are relative to, when it is not the project (an external agent's worktree). */
+  root: string | null;
   createdAt: number;
 }
 
@@ -89,8 +91,9 @@ export class Gate {
       .sort((a, b) => a.createdAt - b.createdAt);
   }
 
-  context(threadId: string): PolicyContext {
-    const projectRoot = this.deps.projectRoot();
+  /** root: judge paths against this folder instead of the project (an external agent's worktree). */
+  context(threadId: string, root?: string): PolicyContext {
+    const projectRoot = root ?? this.deps.projectRoot();
     if (!projectRoot) throw new Error('no-project');
     return {
       projectRoot,
@@ -108,9 +111,9 @@ export class Gate {
     effect: Effect,
     origin: Origin & { threadId: string },
     signal?: AbortSignal,
-    preview: { before?: string } = {},
+    preview: { before?: string; root?: string } = {},
   ): Promise<GateResult> {
-    const verdict = decide(effect, this.context(origin.threadId));
+    const verdict = decide(effect, this.context(origin.threadId, preview.root));
     const tool = effect.kind === 'command' ? 'run_command' : effect.kind;
     if (verdict.decision === 'deny') {
       const receipt = this.deps.receipts.intent(
@@ -157,6 +160,7 @@ export class Gate {
       reason: verdict.reason,
       detail: verdict.detail ?? null,
       before: preview.before ?? null,
+      root: preview.root ?? null,
       createdAt: Date.now(),
     };
     const answer = await new Promise<UserDecision | 'stopped'>((resolve) => {
@@ -240,8 +244,9 @@ export class Gate {
     effect: Effect,
     origin: Origin & { threadId: string },
     seenHash: string,
+    root?: string,
   ): GateResult {
-    const verdict = decide(effect, this.context(origin.threadId));
+    const verdict = decide(effect, this.context(origin.threadId, root));
     if (verdict.decision === 'deny') {
       const receipt = this.deps.receipts.intent(
         origin,

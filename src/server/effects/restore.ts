@@ -34,11 +34,8 @@ export function runChanges(
 ): FileChange[] {
   const list = receipts
     .forThread(threadId)
-    // Restores are the user's own writes in the same run; they are not part of the run's changes.
-    .filter(
-      (r) =>
-        r.runId === runId && r.outcome === 'succeeded' && r.actor !== 'user',
-    )
+    // Restores are recorded under "restore:<run>", so they never count as the run's changes.
+    .filter((r) => r.runId === runId && r.outcome === 'succeeded')
     .sort((a, b) => a.createdAt - b.createdAt);
   const order = new Map(list.map((r, i) => [r.id, i]));
   const snaps = snapshots
@@ -109,7 +106,7 @@ export function restoreRun(
   for (const [i, item] of plan.entries()) {
     const result = deps.gate.userAction(
       item.effect,
-      { threadId, runId, actor: 'user' },
+      { threadId, runId: `restore:${runId}`, actor: 'user' },
       seen[i]!.contentHash,
     );
     if (!result.allowed) {

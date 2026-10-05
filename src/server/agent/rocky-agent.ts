@@ -23,10 +23,12 @@ import {
 import { todoListMiddleware, type AgentMiddleware } from 'langchain';
 import { Observable } from 'rxjs';
 import type { Executor } from '../effects/execute.ts';
+import type { JobRunner } from '../jobs/runner.ts';
 import type { Gate } from '../effects/gate.ts';
 import type { SettingsStore } from '../store/settings.ts';
 import { createRockyBackend } from './backend.ts';
 import { createGateMiddleware, type GateRun } from './gate-middleware.ts';
+import { createDelegateTool } from './delegate.ts';
 import { createRunCommandTool } from './run-command.ts';
 import { rockyPrompt } from './prompt.ts';
 import { AguiMapper } from './to-agui.ts';
@@ -129,6 +131,7 @@ export interface RockyAgentDeps {
   settings: SettingsStore;
   gate: Gate;
   executor: Executor;
+  jobs?: JobRunner;
 }
 
 export class RockyAgent extends AbstractAgent {
@@ -156,7 +159,7 @@ export class RockyAgent extends AbstractAgent {
     return new Observable<BaseEvent>((subscriber) => {
       const controller = new AbortController();
       this.controller = controller;
-      const { settings, gate, executor } = this.deps;
+      const { settings, gate, executor, jobs } = this.deps;
       // The mapper emits RUN_STARTED first, so even a configuration error is a well-formed run.
       const mapper = new AguiMapper(input.threadId, input.runId, (event) =>
         subscriber.next(event),
@@ -193,7 +196,18 @@ export class RockyAgent extends AbstractAgent {
           ...(projectRoot
             ? {
                 backend: createRockyBackend(projectRoot, executor),
-                tools: [createRunCommandTool(projectRoot, executor)],
+                tools: [
+                  createRunCommandTool(projectRoot, executor),
+                  ...(jobs
+                    ? [
+                        createDelegateTool(jobs, {
+                          threadId: input.threadId,
+                          runId: input.runId,
+                          signal: controller.signal,
+                        }),
+                      ]
+                    : []),
+                ],
               }
             : {}),
           // Cast: langchain's todo middleware types fail under exactOptionalPropertyTypes (ADR 0001).
