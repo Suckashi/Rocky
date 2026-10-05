@@ -10,7 +10,7 @@
 | 執行環境 | Node 24 LTS、TypeScript、npm | 單一 package，不做 monorepo |
 | 後端 | Hono + `@hono/node-server` | 照 OpenDots |
 | 前端 | React 19 + Vite + `@copilotkit/react-core` v2 | 照 OpenDots；不用 `react-ui` 現成元件 |
-| UI 協定 | AG-UI 標準事件 | 核准、收據用少量自訂事件 |
+| UI 協定 | AG-UI 標準事件 | 核准、操作紀錄用少量自訂事件 |
 | 對話保存 | 自己寫 `RockyAgentRunner`（繼承 CopilotKit 的 `AgentRunner`） | 存在本機，不用 Intelligence |
 | Agent | Deep Agents JS + LangGraph JS，在同一個程序裡執行 | 包成 AG-UI `AbstractAgent`（`RockyAgent`） |
 | 模型 | `@langchain/openai`（也用來接 OpenAI 相容端點）、`@langchain/anthropic`、`@langchain/ollama` | 有 prompt caching，429 會重試 |
@@ -33,7 +33,7 @@
 │  │  ├─ main.ts              組裝所有元件、啟動、有時間上限的關機
 │  │  ├─ http/                Hono app、安全檢查（token / Host / Origin）、routes/
 │  │  ├─ work/                Work 服務與狀態機（Rocky 是唯一權威）
-│  │  ├─ effects/             判斷順序、核准、收據、快照、危險指令偵測
+│  │  ├─ effects/             判斷順序、核准、操作紀錄、快照、危險指令偵測
 │  │  ├─ agent/               Deep Agents 設定、tools/、提示詞、RockyAgent、RockyAgentRunner
 │  │  ├─ models/              各家模型的設定
 │  │  ├─ acp/                 ACP client、OpenCode、worktree
@@ -62,7 +62,7 @@
 |---|---|---|
 | **M0 驗證**（第 1 週） | 四個 spike；專案骨架；Windows 與 Ubuntu 的 CI | spike 結果寫進 ADR；CI 綠燈 |
 | **M1 能對話** | 伺服器與安全檢查、介面外殼、Roko、i18n、跟模型串流對話、對話存在本機 | 在 Windows 上 `npm start`，打開瀏覽器就能和 Roko 聊天 |
-| **M2 能做事** | Rocky 的工具（搜尋、讀檔、局部編輯、跑指令）、核准管線、收據、快照、評測第一版 | 能修一個真實的 bug；評測訂出基線 |
+| **M2 能做事** | Rocky 的工具（搜尋、讀檔、局部編輯、跑指令）、核准管線、操作紀錄、快照、評測第一版 | 能修一個真實的 bug；評測訂出基線 |
 | **M3 能派工** | ACP 接 OpenCode、worktree、Rocky 自己驗證、工作詳情頁 | 在 Windows 上派 OpenCode 修 bug，核准全部在 Rocky 處理 |
 | **M4 能處理文件** | 六種文件格式、記憶、技能、MCP | 六種格式的中文往返測試都通過 |
 | **M5 收尾** | 安裝流程、首次啟動、英文語系補齊、細修介面 | 符合 `product.md` 的成功標準 |
