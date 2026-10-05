@@ -10,7 +10,11 @@ Rocky's UI layout and server patterns follow OpenDots at
 https://github.com/CopilotKit/OpenDots/tree/c2569bb6a13a22e565cf3eb791c62267d06babb1 (MIT).
 When code, structure or values are adapted, the adapted files are listed here.
 
-Adapted files: none yet.
+Adapted files:
+
+- `src/server/http/security.ts`: the API guard (Host, Origin, `sec-fetch-site`, constant-time token
+  check, JSON-only writes) from `src/server/app.ts`; Rocky always requires the token.
+- `src/server/shutdown.ts`: the deadline-bound shutdown from `src/server/shutdown.ts`.
 
 Copyright (c) Atai Barkai
 
