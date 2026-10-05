@@ -5,22 +5,22 @@
 
 ## 1. 技術棧
 
-| 層 | 選擇 | 備註 |
-|---|---|---|
-| 執行環境 | Node 24 LTS、TypeScript、npm | 單一 package，不做 monorepo |
-| 後端 | Hono + `@hono/node-server` | 照 OpenDots |
-| 前端 | React 19 + Vite + `@copilotkit/react-core` v2 | 照 OpenDots；不用 `react-ui` 現成元件 |
-| UI 協定 | AG-UI 標準事件 | 核准、操作紀錄用少量自訂事件 |
-| 對話保存 | 自己寫 `RockyAgentRunner`（繼承 CopilotKit 的 `AgentRunner`） | 存在本機，不用 Intelligence |
-| Agent | Deep Agents JS + LangGraph JS，在同一個程序裡執行 | 包成 AG-UI `AbstractAgent`（`RockyAgent`） |
-| 模型 | `@langchain/openai`（也用來接 OpenAI 相容端點）、`@langchain/anthropic`、`@langchain/ollama` | 有 prompt caching，429 會重試 |
-| 外部 agent | `@agentclientprotocol/sdk` 1.x → `opencode acp` | 只回 `allow_once` 或 `reject_once` |
-| MCP | `@modelcontextprotocol/sdk`（v1 或 v2 在 spike 時決定） | |
-| 儲存 | `node:sqlite`（Node 內建，不需要編譯）＋檔案 | 中文搜尋：FTS5 trigram，兩個字以下補用 LIKE |
-| 文件 | markdown-it、docx、mammoth、exceljs、pptxgenjs、pptx-automizer、unpdf、pdf-lib + fontkit、Playwright 呼叫系統 Edge | LibreOffice 為選配 |
-| 編輯器 | Tiptap | 照 OpenDots |
-| 測試 | Vitest（單元、整合）、Playwright（端對端）、評測任務集 | |
-| CI | GitHub Actions：`windows-latest` 和 `ubuntu-latest` | 讓 Windows 上的結果是真的跑出來的，不是推測的 |
+| 層         | 選擇                                                                                                               | 備註                                          |
+| ---------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| 執行環境   | Node 24 LTS、TypeScript、npm                                                                                       | 單一 package，不做 monorepo                   |
+| 後端       | Hono + `@hono/node-server`                                                                                         | 照 OpenDots                                   |
+| 前端       | React 19 + Vite + `@copilotkit/react-core` v2                                                                      | 照 OpenDots；不用 `react-ui` 現成元件         |
+| UI 協定    | AG-UI 標準事件                                                                                                     | 核准、操作紀錄用少量自訂事件                  |
+| 對話保存   | 自己寫 `RockyAgentRunner`（繼承 CopilotKit 的 `AgentRunner`）                                                      | 存在本機，不用 Intelligence                   |
+| Agent      | Deep Agents JS + LangGraph JS，在同一個程序裡執行                                                                  | 包成 AG-UI `AbstractAgent`（`RockyAgent`）    |
+| 模型       | `@langchain/openai`（也用來接 OpenAI 相容端點）、`@langchain/anthropic`、`@langchain/ollama`                       | 有 prompt caching，429 會重試                 |
+| 外部 agent | `@agentclientprotocol/sdk` 1.x → `opencode acp`                                                                    | 只回 `allow_once` 或 `reject_once`            |
+| MCP        | `@modelcontextprotocol/sdk`（v1 或 v2 在 spike 時決定）                                                            |                                               |
+| 儲存       | `node:sqlite`（Node 內建，不需要編譯）＋檔案                                                                       | 中文搜尋：FTS5 trigram，兩個字以下補用 LIKE   |
+| 文件       | markdown-it、docx、mammoth、exceljs、pptxgenjs、pptx-automizer、unpdf、pdf-lib + fontkit、Playwright 呼叫系統 Edge | LibreOffice 為選配                            |
+| 編輯器     | Tiptap                                                                                                             | 照 OpenDots                                   |
+| 測試       | Vitest（單元、整合）、Playwright（端對端）、評測任務集                                                             |                                               |
+| CI         | GitHub Actions：`windows-latest` 和 `ubuntu-latest`                                                                | 讓 Windows 上的結果是真的跑出來的，不是推測的 |
 
 ## 2. 專案結構
 
@@ -58,14 +58,14 @@
 
 ## 3. 里程碑
 
-| 里程碑 | 內容 | 完成的樣子 |
-|---|---|---|
-| **M0 驗證**（第 1 週） | 四個 spike；專案骨架；Windows 與 Ubuntu 的 CI | spike 結果寫進 ADR；CI 綠燈 |
-| **M1 能對話** | 伺服器與安全檢查、介面外殼、Roko、i18n、跟模型串流對話、對話存在本機 | 在 Windows 上 `npm start`，打開瀏覽器就能和 Roko 聊天 |
-| **M2 能做事** | Rocky 的工具（搜尋、讀檔、局部編輯、跑指令）、核准管線、操作紀錄、快照、評測第一版 | 能修一個真實的 bug；評測訂出基線 |
-| **M3 能派工** | ACP 接 OpenCode、worktree、Rocky 自己驗證、工作詳情頁 | 在 Windows 上派 OpenCode 修 bug，核准全部在 Rocky 處理 |
-| **M4 能處理文件** | 六種文件格式、記憶、技能、MCP | 六種格式的中文往返測試都通過 |
-| **M5 收尾** | 安裝流程、首次啟動、英文語系補齊、細修介面 | 符合 `product.md` 的成功標準 |
+| 里程碑                 | 內容                                                                               | 完成的樣子                                             |
+| ---------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| **M0 驗證**（第 1 週） | 四個 spike；專案骨架；Windows 與 Ubuntu 的 CI                                      | spike 結果寫進 ADR；CI 綠燈                            |
+| **M1 能對話**          | 伺服器與安全檢查、介面外殼、Roko、i18n、跟模型串流對話、對話存在本機               | 在 Windows 上 `npm start`，打開瀏覽器就能和 Roko 聊天  |
+| **M2 能做事**          | Rocky 的工具（搜尋、讀檔、局部編輯、跑指令）、核准管線、操作紀錄、快照、評測第一版 | 能修一個真實的 bug；評測訂出基線                       |
+| **M3 能派工**          | ACP 接 OpenCode、worktree、Rocky 自己驗證、工作詳情頁                              | 在 Windows 上派 OpenCode 修 bug，核准全部在 Rocky 處理 |
+| **M4 能處理文件**      | 六種文件格式、記憶、技能、MCP                                                      | 六種格式的中文往返測試都通過                           |
+| **M5 收尾**            | 安裝流程、首次啟動、英文語系補齊、細修介面                                         | 符合 `product.md` 的成功標準                           |
 
 ## 4. 第一批工作（M0）
 
@@ -83,3 +83,9 @@ S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一
 - 舊程式碼：從這個分支刪除，新程式碼放在根目錄；舊 Rocky 保留在 `main` 與 git 歷史，需要參考時開一個 `main` 的 worktree。
 - V1 安裝：`git clone` 加 PowerShell 啟動腳本（第一次執行自動 `npm ci`）；正式安裝檔或發佈到 npm 留到 M5，且要另外授權。
 - CI：GitHub Actions，在 `windows-latest` 與 `ubuntu-latest` 上跑。
+
+## 6. 依賴升級
+
+- 不用 Dependabot 自動開 PR；漏洞通知靠 GitHub repo 設定裡的 Dependabot alerts。
+- 每個里程碑結束時手動升級一次。Deep Agents、LangChain、LangGraph 一起升，升完跑測試與評測再合併。
+- TypeScript 暫時停在 6.0.x：typescript-eslint 8.71 只支援到 TypeScript 6.0。

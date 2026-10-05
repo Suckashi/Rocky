@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src", "scripts", "tests", "*.ts"]
+}
