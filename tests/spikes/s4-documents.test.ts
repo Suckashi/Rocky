@@ -80,6 +80,9 @@ describe('S4: Chinese documents', () => {
         const pdf = await createPdf(lines, extractFace(ttc, 0));
         expect(await readPdfText(pdf)).toBe(lines.join('\n'));
       },
+      // Parsing and subsetting a ~20 MB system font took 0.8 s once and over 5 s once on
+      // the Windows runner; the default 5 s limit is too tight for this work.
+      30_000,
     );
   });
 

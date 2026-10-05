@@ -41,8 +41,10 @@
    `cleanup: true` 會清掉。讀取時也必須照 `presentation.xml` 的順序，否則會讀到這些殘留的投影片。
 5. **pptxgenjs 把東亞字型的 charset 寫成 `-122`（GB2312，簡體）**，不是繁體的 Big5（136）。PowerPoint 通常仍會用指定的字型，但 M4 要確認，必要時修正 XML。
 6. exceljs 改檔會重寫它認得的 part；它不支援的內容（圖表、樞紐分析表）**很可能會遺失**。這次只測了 exceljs 自己產生的檔案，真實的 Excel 檔要在 M4 用擁有者的檔案測試，不支援的就改成直接改 XML。
-7. pdf.js 會轉移傳給它的 `Uint8Array`（呼叫之後長度變成 0），所以要先複製一份再交給它。
-8. 型別定義和執行時不一致：pptxgenjs 在 NodeNext 下的 default 匯出、mammoth 的 `convertToMarkdown`、exceljs 的 `conditionalFormattings`，都要做型別轉換。
+7. **嵌入大型系統字型很慢，而且時間不穩。** 在 Windows runner 上，從 `msjh.ttc` 抽字型、子集化、存檔，一次 0.8 秒、另一次超過 5 秒（CI 因此逾時一次）。
+   M4 建立 PDF 時要在背景做，或快取已抽出的字型，不能卡住對話。
+8. pdf.js 會轉移傳給它的 `Uint8Array`（呼叫之後長度變成 0），所以要先複製一份再交給它。
+9. 型別定義和執行時不一致：pptxgenjs 在 NodeNext 下的 default 匯出、mammoth 的 `convertToMarkdown`、exceljs 的 `conditionalFormattings`，都要做型別轉換。
 
 ## 新增的依賴
 
