@@ -33,7 +33,7 @@
 
 1. **unpdf 預設的 CMap 路徑在 Node 上無效。** 它把 `file://...` 網址字串交給 pdf.js，而 pdf.js 的 Node 讀取器直接 `fs.readFile` 那個字串，所以讀不到；
    而且 unpdf 只在有安裝 `pdfjs-dist` 時才會設定 cmaps。結果是：**舊系統產生、字型沒有嵌入的中文 PDF 會被讀成空字串，只印一行警告**。
-   Rocky 傳一般的檔案路徑就沒問題。讀出空字串時，介面要提示「可能是掃描檔或缺字型」，不能當成成功。
+   Rocky 傳一般的檔案路徑就沒問題，但 pdf.js 要求路徑以 `/` 結尾：Windows 上要把 `\` 換成 `/`（CI 第一次在 Windows 就是因此失敗）。讀出空字串時，介面要提示「可能是掃描檔或缺字型」，不能當成成功。
 2. **pdf-lib + fontkit 不能嵌入 `.ttc`**（會丟出 `createSubset is not a function`）。Windows 的正黑體、細明體都是 `.ttc`。
    抽出單一字型約 60 行程式；一個 11 MB 的 TTC 抽出、嵌入、存檔約 170 ms。也可以選擇隨 Rocky 附一份 Noto Sans TC（OFL）。
 3. **mammoth 轉 Markdown 會丟掉表格結構**（每格變成一段文字），而且 `convertToMarkdown` 已不建議使用。M4 改成先轉 HTML，再由 Rocky 轉成 Markdown 表格。

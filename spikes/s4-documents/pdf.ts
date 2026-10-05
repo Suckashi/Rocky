@@ -8,11 +8,12 @@ import { extractText, getDocumentProxy } from 'unpdf';
 
 /**
  * unpdf points pdf.js at the CMaps with a file:// URL string, which pdf.js's Node reader
- * passes to fs.readFile and fails on. A plain directory path works.
+ * passes to fs.readFile and fails on. A plain directory path works, but pdf.js insists on
+ * a trailing "/", so Windows backslashes become forward slashes (fs accepts both).
  */
 const cMapDir = (() => {
   const pkg = createRequire(import.meta.url).resolve('pdfjs-dist/package.json');
-  return join(dirname(pkg), 'cmaps') + sep;
+  return `${join(dirname(pkg), 'cmaps').split(sep).join('/')}/`;
 })();
 
 export async function readPdfText(
