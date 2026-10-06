@@ -55,6 +55,12 @@ against a scripted model (the system Edge, or `ROCKY_E2E_BROWSER`).
 `evals/baseline.json` (see `evals/run.ts`). Changes to prompts, tools or the agent loop
 must not lower the score.
 
+To check everything on a Windows computer in one go (install, checks, both browser tests,
+the launcher, leftover processes, and optionally the evaluation), run
+`powershell -ExecutionPolicy Bypass -File .\scripts\verify-windows.ps1` (add `-Eval -EvalBaseUrl
+<url> -EvalModel <model>` for the evaluation; the API key is asked for and never shown or saved).
+It writes `verify-results\<time>\summary.md` to paste back.
+
 - Product: [docs/rebuild/product.md](docs/rebuild/product.md)
 - Architecture: [docs/rebuild/architecture.md](docs/rebuild/architecture.md)
 - Approvals: [docs/rebuild/approvals.md](docs/rebuild/approvals.md)

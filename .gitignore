@@ -24,3 +24,4 @@ rocky-backup.json
 .DS_Store
 Thumbs.db
 evals/results/
+verify-results/

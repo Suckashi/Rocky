@@ -35,9 +35,10 @@ if ($version -notmatch '^24\.') {
 }
 
 # First run, or the lockfile changed: install exactly the pinned dependencies (no compiler needed).
+# -Force: PowerShell treats dot files as hidden outside Windows and Get-Item would not find it.
 $installed = Join-Path 'node_modules' '.package-lock.json'
 if (-not (Test-Path -LiteralPath $installed) -or
-    (Get-Item -LiteralPath 'package-lock.json').LastWriteTime -gt (Get-Item -LiteralPath $installed).LastWriteTime) {
+    (Get-Item -LiteralPath 'package-lock.json').LastWriteTime -gt (Get-Item -LiteralPath $installed -Force).LastWriteTime) {
   & npm ci
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
