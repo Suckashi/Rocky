@@ -20,6 +20,7 @@ import { ModeSelect } from './ModeSelect.tsx';
 import { Roko, type RokoState } from './Roko.tsx';
 import { ToolCard, type ToolState } from './ToolCard.tsx';
 import { TurnChanges } from './TurnChanges.tsx';
+import { JobCards } from './JobCards.tsx';
 import { RuleSuggestion, type Suggestion } from './RuleSuggestion.tsx';
 import { UnknownOutcome } from './UnknownOutcome.tsx';
 
@@ -408,6 +409,7 @@ export function Chat({
             }}
           />
         ))}
+        <JobCards threadId={threadId} refreshKey={agent.messages.length} />
         {!running && pending.length === 0 && suggestions[0] && (
           <RuleSuggestion
             key={suggestions[0].prefix.join(' ')}

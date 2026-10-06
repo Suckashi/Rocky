@@ -40,6 +40,15 @@ async function projectFor(
   }
 }
 
+/** A job that stopped running: its result is final. */
+const DONE = new Set<Job['status']>([
+  'verified',
+  'problems',
+  'failed',
+  'stopped',
+  'interrupted',
+]);
+
 export function jobRoutes(deps: {
   jobs: JobStore;
   runner: JobRunner;
@@ -62,11 +71,14 @@ export function jobRoutes(deps: {
     }),
   );
 
-  // For the rail badge and notifications: what is running and what waits for the user.
+  // For the rail badge and notifications: what is running, what waits for the user, and
+  // what finished lately (the page notifies once per job it saw finish).
   app.get('/jobs/summary', (c) => {
-    const active = jobs
-      .list()
-      .filter((j) => j.status === 'queued' || j.status === 'running');
+    const all = jobs.list();
+    const active = all.filter(
+      (j) => j.status === 'queued' || j.status === 'running',
+    );
+    const since = Date.now() - 24 * 60 * 60 * 1000;
     return c.json({
       running: active.filter((j) => j.status === 'running').length,
       queued: active.filter((j) => j.status === 'queued').length,
@@ -74,8 +86,36 @@ export function jobRoutes(deps: {
         (n, j) => n + gate.pending(jobThread(j.id)).length,
         0,
       ),
+      finished: all
+        .filter((j) => DONE.has(j.status) && (j.finishedAt ?? 0) >= since)
+        .map((j) => ({ id: j.id, title: j.title, status: j.status })),
     });
   });
+
+  // The jobs a conversation started, for the cards in that conversation. Applied and
+  // discarded jobs are settled and left out.
+  app.get('/threads/:id/jobs', (c) =>
+    c.json({
+      jobs: jobs
+        .forThread(c.req.param('id'))
+        .filter((j) => j.status !== 'applied' && j.status !== 'discarded')
+        .map((j) => {
+          const checks = j.result?.checks ?? [];
+          return {
+            id: j.id,
+            title: j.title,
+            status: j.status,
+            position: runner.position(j.id) ?? null,
+            waiting: gate.pending(jobThread(j.id)).length,
+            changed: j.result?.changed.length ?? 0,
+            checksPassed: checks.length
+              ? checks.every((ch) => ch.exitCode === 0)
+              : null,
+            finishedAt: j.finishedAt,
+          };
+        }),
+    }),
+  );
 
   app.post('/jobs/:id/cancel', (c) =>
     runner.cancel(c.req.param('id'))

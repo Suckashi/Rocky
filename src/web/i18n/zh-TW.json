@@ -320,5 +320,13 @@
   "preview.close": "關閉預覽",
   "preview.open": "預覽",
   "preview.gone": "這個核准已經結束，請從變更卡再開一次",
-  "preview.unsupported": "這種檔案不能預覽"
+  "preview.unsupported": "這種檔案不能預覽",
+  "jobCard.region": "這個對話派出的背景工作",
+  "jobCard.title": "OpenCode 工作「{title}」",
+  "jobCard.running": "OpenCode 正在做，你可以繼續聊別的。",
+  "jobCard.checksPassed": "Rocky 自己跑的檢查通過",
+  "jobCard.checksFailed": "Rocky 自己跑的檢查沒有通過",
+  "jobCard.noChecks": "沒有檢查可跑",
+  "jobCard.dismiss": "知道了",
+  "jobs.notifyDone": "背景工作「{title}」：{status}"
 }

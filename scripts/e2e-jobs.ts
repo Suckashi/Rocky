@@ -189,20 +189,34 @@ try {
     true,
     'the conversation is free again while the job runs in the background',
   );
-  await page.getByRole('link', { name: '查看工作' }).click();
-  await page
-    .locator('.job-head .badge', { hasText: '已驗證' })
+  // Staying in the conversation: its job card follows the job and reports Rocky's own result.
+  const card = page.locator('.job-card', { hasText: '修正 add' });
+  await card.waitFor({ timeout: 30_000 });
+  await card
+    .locator('.badge', { hasText: '已驗證' })
     .waitFor({ timeout: 120_000 });
+  const cardText = await card.innerText();
+  check(
+    cardText.includes('改了 1 個檔案') &&
+      cardText.includes('Rocky 自己跑的檢查通過'),
+    "the conversation shows the finished job: files changed and Rocky's own checks",
+  );
+  if (shots) await page.screenshot({ path: join(shots, 'm3-job-card.png') });
   check(
     readFileSync(join(project, 'math.js'), 'utf8') === BUGGY,
     'OpenCode worked in a worktree; the project is untouched',
   );
+  // "Apply" on the card opens the job with the plan to confirm.
+  await card.getByRole('link', { name: '套用到專案' }).click();
+  await page.getByText('要把這些改動套用到專案嗎？').waitFor();
   await page.getByText('每個改動都和核准的內容一致。').waitFor();
   await page.getByText('Rocky 執行 npm test：結束代碼 0').waitFor();
-  check(true, "the job page shows Rocky's verification and its own test run");
+  check(
+    true,
+    "Apply on the card opens the job page with the plan, Rocky's verification and its test run",
+  );
   if (shots)
     await page.screenshot({ path: join(shots, 'm3-job.png'), fullPage: true });
-  await page.getByRole('button', { name: '套用到專案' }).click();
   await page.getByRole('button', { name: '確定套用' }).click();
   await page.getByText('已套用 1 個檔案。').waitFor();
   check(
@@ -225,7 +239,10 @@ try {
     .getByRole('button', { name: '工作（1 件等你核准）' })
     .waitFor({ timeout: 60_000 });
   check(true, 'the rail shows that a background job is waiting for approval');
-  await page.getByRole('link', { name: '查看工作' }).last().click();
+  await page
+    .locator('.job-card')
+    .getByRole('link', { name: '查看工作' })
+    .click();
   await panel.getByText('OpenCode 想修改 math.js').waitFor({ timeout: 30_000 });
   if (shots)
     await page.screenshot({ path: join(shots, 'm6-job-approval.png') });

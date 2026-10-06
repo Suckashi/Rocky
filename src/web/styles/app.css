@@ -1229,3 +1229,42 @@ button.secondary {
     grid-template-columns: var(--rail-width) minmax(0, 1fr);
   }
 }
+
+/* Background jobs from this conversation, at the end of the transcript. */
+.job-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.job-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.job-card p {
+  margin: 0;
+}
+.job-card.status-verified {
+  border-color: var(--ok);
+}
+.job-card.status-problems,
+.job-card.status-failed,
+.job-card.status-interrupted {
+  border-color: var(--warn);
+}
+a.button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-3);
+}
+a.button.primary {
+  background: var(--primary);
+  color: var(--primary-text);
+  font-weight: 600;
+}

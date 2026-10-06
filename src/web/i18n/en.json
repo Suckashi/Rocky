@@ -320,5 +320,13 @@
   "preview.close": "Close the preview",
   "preview.open": "Preview",
   "preview.gone": "This approval is over; open the file again from the change card",
-  "preview.unsupported": "This kind of file cannot be previewed"
+  "preview.unsupported": "This kind of file cannot be previewed",
+  "jobCard.region": "Background jobs from this conversation",
+  "jobCard.title": "OpenCode job “{title}”",
+  "jobCard.running": "OpenCode is working on it; you can keep chatting.",
+  "jobCard.checksPassed": "Rocky's own checks passed",
+  "jobCard.checksFailed": "Rocky's own checks failed",
+  "jobCard.noChecks": "No checks to run",
+  "jobCard.dismiss": "Got it",
+  "jobs.notifyDone": "Background job “{title}”: {status}"
 }

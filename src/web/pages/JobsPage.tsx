@@ -1,6 +1,6 @@
 // Jobs handed to an external agent: list, and a detail view with Rocky's verification,
 // the timeline, the diff, and apply / discard / restore.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   api,
   ApiError,
@@ -90,10 +90,13 @@ function Timeline({ events }: { events: JobEvent[] }) {
 function JobDetail({
   id,
   project,
+  autoApply,
   onChanged,
 }: {
   id: string;
   project: string | null;
+  /** Opened from "Apply" on a job card: show the apply plan right away. */
+  autoApply: boolean;
   onChanged: () => void;
 }) {
   const { t } = useI18n();
@@ -139,6 +142,18 @@ function JobDetail({
       ? t(`jobs.error.${code}` as MessageKey, { path: '' })
       : t('jobs.actionError', { error: code });
   };
+
+  // From a job card's "Apply": the plan to confirm, once, as if "Apply" was pressed here.
+  const planShown = useRef(false);
+  const status = detail?.job.status;
+  useEffect(() => {
+    if (!autoApply || planShown.current) return;
+    if (status !== 'verified' && status !== 'problems') return;
+    planShown.current = true;
+    api<{ items: ApplyItem[] }>(`/jobs/${id}/apply`)
+      .then((r) => setPlan(r.items))
+      .catch((e: unknown) => setMessage(errorText(e)));
+  });
 
   const act = async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -424,10 +439,12 @@ function JobDetail({
 export function JobsPage({
   selected,
   project,
+  autoApply = false,
   onSelect,
 }: {
   selected: string | undefined;
   project: string | null;
+  autoApply?: boolean;
   onSelect: (id: string) => void;
 }) {
   const { t } = useI18n();
@@ -489,6 +506,7 @@ export function JobsPage({
             key={selected}
             id={selected}
             project={project}
+            autoApply={autoApply}
             onChanged={load}
           />
         ) : (
