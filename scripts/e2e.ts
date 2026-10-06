@@ -108,7 +108,9 @@ try {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(message.text());
+    // The browser logs every 4xx; a 400 is the expected answer to the invalid input this test sends.
+    if (message.type() === 'error' && !message.text().includes('status of 400'))
+      errors.push(message.text());
   });
 
   await page.goto(url);
@@ -222,6 +224,20 @@ try {
   await page.getByText('正式環境叫「藍鯨」。').waitFor();
   await page.getByText('更新紀錄').waitFor();
   check(true, 'settings list the saved memory and the installed skill');
+  // Permanent rules: add, refuse a too-broad one, remove.
+  await page.getByLabel('指令', { exact: true }).fill('npm test *');
+  await page.getByRole('button', { name: '新增規則' }).click();
+  await page.locator('.rule-list li', { hasText: 'npm test *' }).waitFor();
+  await page.getByLabel('指令', { exact: true }).fill('*');
+  await page.getByRole('button', { name: '新增規則' }).click();
+  await page.getByText('「允許所有指令」範圍太大，不能新增。').waitFor();
+  if (shots) await page.screenshot({ path: join(shots, 'm5-rules.png') });
+  await page
+    .locator('.rule-list li', { hasText: 'npm test *' })
+    .getByRole('button', { name: '移除' })
+    .click();
+  await page.getByText('還沒有規則。').waitFor();
+  check(true, 'permanent rules can be added, are checked, and removed');
   await page.locator('.mcp-add summary').click();
   await page.getByLabel('名稱（英數字、-、_）').fill('notes');
   await page

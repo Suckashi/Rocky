@@ -267,5 +267,21 @@
   "mcp.error": "Not saved: {error}",
   "roko.alt.done": "Roko jumps for joy",
   "panel.done": "Done with this turn",
-  "approval.title.agentOther": "{actor}wants to do something that needs your approval: {title}"
+  "approval.title.agentOther": "{actor}wants to do something that needs your approval: {title}",
+  "settings.rules": "Permanent rules",
+  "rules.hint": "Commands that match a rule are allowed or refused without asking. Rules match the start of the command; a final * means any remaining arguments, for example npm test *. Allow rules never cover dangerous commands or outside actions: those always ask.",
+  "rules.empty": "No rules yet.",
+  "rules.allow": "Allow",
+  "rules.deny": "Deny",
+  "rules.decision": "Rule type",
+  "rules.pattern": "Command",
+  "rules.placeholder": "for example npm test *",
+  "rules.add": "Add rule",
+  "rules.remove": "Remove",
+  "rules.error": "Not added: {error}",
+  "rules.error.empty": "Enter a command.",
+  "rules.error.not-one-command": "One command per rule (no &&, | or ;).",
+  "rules.error.star-not-last": "* can only be last.",
+  "rules.error.too-broad": "“Allow every command” is too broad.",
+  "rules.error.duplicate": "That rule already exists."
 }

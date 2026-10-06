@@ -267,5 +267,21 @@
   "mcp.error": "沒有儲存：{error}",
   "roko.alt.done": "Roko 開心地跳起來",
   "panel.done": "這輪完成了",
-  "approval.title.agentOther": "{actor}想做一件要你確認的事：{title}"
+  "approval.title.agentOther": "{actor}想做一件要你確認的事：{title}",
+  "settings.rules": "永久規則",
+  "rules.hint": "指令符合規則時直接允許或直接拒絕，不再問你。用指令開頭比對，最後的 * 代表後面接什麼參數都可以，例如 npm test *。允許規則不會放行危險指令和對外動作，那些一定會問。",
+  "rules.empty": "還沒有規則。",
+  "rules.allow": "允許",
+  "rules.deny": "禁止",
+  "rules.decision": "規則種類",
+  "rules.pattern": "指令",
+  "rules.placeholder": "例如 npm test *",
+  "rules.add": "新增規則",
+  "rules.remove": "移除",
+  "rules.error": "沒有新增：{error}",
+  "rules.error.empty": "請輸入指令。",
+  "rules.error.not-one-command": "一條規則只能寫一個指令（不能有 &&、| 或 ;）。",
+  "rules.error.star-not-last": "* 只能放在最後。",
+  "rules.error.too-broad": "「允許所有指令」範圍太大，不能新增。",
+  "rules.error.duplicate": "已經有一樣的規則了。"
 }

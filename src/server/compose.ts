@@ -17,6 +17,7 @@ import { approvalRoutes } from './http/routes/approvals.ts';
 import { jobRoutes } from './http/routes/jobs.ts';
 import { memoryRoutes } from './http/routes/memory.ts';
 import { skillRoutes } from './http/routes/skills.ts';
+import { ruleRoutes } from './http/routes/rules.ts';
 import { mcpRoutes } from './http/routes/mcp.ts';
 import { JobRunner } from './jobs/runner.ts';
 import { JobStore } from './jobs/store.ts';
@@ -121,6 +122,7 @@ export function composeRocky(options: ComposeOptions) {
       }),
       memoryRoutes({ memory, gate, executor }),
       skillRoutes(skills),
+      ruleRoutes(rules),
       mcpRoutes({ settings, manager: mcp, egress }),
     ],
     mounted: [copilotRoutes(agent, runner)],

@@ -6,6 +6,7 @@ import { ModeSelect } from '../components/ModeSelect.tsx';
 import { SkillList } from '../components/SkillList.tsx';
 import { ModelForm } from '../components/ModelForm.tsx';
 import { ProjectForm } from '../components/ProjectForm.tsx';
+import { RuleList } from '../components/RuleList.tsx';
 import { useI18n } from '../i18n/index.tsx';
 
 export function SettingsPage({
@@ -51,6 +52,10 @@ export function SettingsPage({
               }
             />
           </div>
+        </section>
+        <section className="card">
+          <h2>{t('settings.rules')}</h2>
+          <RuleList />
         </section>
         <section className="card">
           <h2>{t('settings.memory')}</h2>

@@ -590,6 +590,78 @@ describe('project instructions and the subagent', () => {
   });
 });
 
+describe('permanent rules', () => {
+  it('an allow rule skips the question, a deny rule refuses, and neither touches dangerous commands', async () => {
+    const { call, rocky } = await setup('ask-always');
+    const added = await call('/api/rules', {
+      method: 'POST',
+      body: { decision: 'allow', pattern: `${process.execPath} --version` },
+    });
+    expect(added.status).toBe(200);
+    expect(
+      (
+        await call('/api/rules', {
+          method: 'POST',
+          body: { decision: 'allow', pattern: '*' },
+        })
+      ).status,
+    ).toBe(400);
+    await call('/api/rules', {
+      method: 'POST',
+      body: { decision: 'deny', pattern: 'git push *' },
+    });
+    await call('/api/rules', {
+      method: 'POST',
+      body: { decision: 'allow', pattern: 'rm *' },
+    });
+
+    // Allowed by the rule: no question even in ask-always.
+    plan = [
+      { name: 'run_command', args: { argv: [process.execPath, '--version'] } },
+    ];
+    expect(reply(await run(call, 'u1'))).toContain('exited with code 0');
+    expect(rocky.receipts.forThread('u1')[0]).toMatchObject({
+      reason: 'allow-rule',
+    });
+
+    // Denied by the rule: refused without asking.
+    plan = [
+      {
+        name: 'run_command',
+        args: { argv: ['git', 'push', 'origin', 'main'] },
+      },
+    ];
+    expect(reply(await run(call, 'u2'))).toContain('not allowed');
+
+    // An allow rule never covers a dangerous command: it still asks.
+    plan = [{ name: 'run_command', args: { argv: ['rm', '-rf', 'build'] } }];
+    const dangerous = run(call, 'u3');
+    const ask = await nextApproval(call, 'u3');
+    expect(ask.reason).toBe('dangerous');
+    await call(`/api/approvals/${ask.id}`, {
+      method: 'POST',
+      body: { decision: 'reject', contentHash: ask.contentHash },
+    });
+    await dangerous;
+
+    // Rules are listed and removable.
+    const { rules } = (await (await call('/api/rules')).json()) as {
+      rules: { id: string; decision: string; prefix: string[] }[];
+    };
+    expect(rules.map((r) => [r.decision, r.prefix.join(' ')])).toEqual([
+      ['allow', `${process.execPath} --version`],
+      ['deny', 'git push *'],
+      ['allow', 'rm *'],
+    ]);
+    for (const r of rules)
+      expect(
+        (await call(`/api/rules/${r.id}`, { method: 'DELETE', body: {} }))
+          .status,
+      ).toBe(200);
+    expect(rocky.rules.list()).toEqual([]);
+  }, 30_000);
+});
+
 describe('without a project folder', () => {
   it('tells the model that files and commands are unavailable', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'rocky-tools-'));
