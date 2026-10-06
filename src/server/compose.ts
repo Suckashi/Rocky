@@ -122,7 +122,7 @@ export function composeRocky(options: ComposeOptions) {
       }),
       memoryRoutes({ memory, gate, executor }),
       skillRoutes(skills),
-      ruleRoutes(rules),
+      ruleRoutes(rules, receipts, settings),
       mcpRoutes({ settings, manager: mcp, egress }),
     ],
     mounted: [copilotRoutes(agent, runner)],

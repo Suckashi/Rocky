@@ -117,6 +117,15 @@ export class SettingsStore {
     this.set('mcpToolPolicies', all);
   }
 
+  /** Rule suggestions the user turned down (prefix keys); never offered again. */
+  dismissedSuggestions(): Set<string> {
+    return new Set(this.get<string[]>('dismissedRuleSuggestions') ?? []);
+  }
+
+  dismissSuggestion(key: string): void {
+    this.set('dismissedRuleSuggestions', [...this.dismissedSuggestions(), key]);
+  }
+
   public(): PublicSettings {
     const model = this.model();
     return {

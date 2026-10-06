@@ -662,6 +662,80 @@ describe('permanent rules', () => {
   }, 30_000);
 });
 
+describe("Roko's rule suggestions", () => {
+  it('suggests a rule after two approvals; accepting it stops the questions, dismissing hides it', async () => {
+    const { call, rocky } = await setup('ask-always');
+    const approveNext = async (thread: string) => {
+      const done = run(call, thread);
+      const ask = await nextApproval(call, thread);
+      await call(`/api/approvals/${ask.id}`, {
+        method: 'POST',
+        body: { decision: 'allow-once', contentHash: ask.contentHash },
+      });
+      return reply(await done);
+    };
+    type Suggestion = { prefix: string[]; count: number };
+    const suggestions = async () =>
+      (
+        (await (await call('/api/rules/suggestions')).json()) as {
+          suggestions: Suggestion[];
+        }
+      ).suggestions;
+
+    plan = [{ name: 'run_command', args: { argv: ['git', 'init', '-q'] } }];
+    await approveNext('g1');
+    expect(await suggestions()).toEqual([]);
+    plan = [
+      { name: 'run_command', args: { argv: ['git', 'init', '--quiet'] } },
+    ];
+    await approveNext('g2');
+    expect(await suggestions()).toMatchObject([
+      { prefix: ['git', 'init', '*'], count: 2 },
+    ]);
+
+    // Accepting adds exactly that allow rule; the next one runs without asking.
+    expect(
+      (
+        await call('/api/rules/suggestions/accept', {
+          method: 'POST',
+          body: { prefix: ['git', 'init', '*'] },
+        })
+      ).status,
+    ).toBe(200);
+    expect(rocky.rules.list()).toMatchObject([
+      { decision: 'allow', prefix: ['git', 'init', '*'] },
+    ]);
+    expect(await suggestions()).toEqual([]);
+    plan = [{ name: 'run_command', args: { argv: ['git', 'init', '-q'] } }];
+    expect(reply(await run(call, 'g3'))).toContain('exited with code 0');
+    // Something never suggested cannot be accepted through this door.
+    expect(
+      (
+        await call('/api/rules/suggestions/accept', {
+          method: 'POST',
+          body: { prefix: ['rm', '-rf', '*'] },
+        })
+      ).status,
+    ).toBe(409);
+
+    // A dismissed suggestion does not come back.
+    for (const thread of ['h1', 'h2']) {
+      plan = [
+        { name: 'run_command', args: { argv: ['git', 'tag', '--list'] } },
+      ];
+      await approveNext(thread);
+    }
+    expect(await suggestions()).toMatchObject([
+      { prefix: ['git', 'tag', '*'] },
+    ]);
+    await call('/api/rules/suggestions/dismiss', {
+      method: 'POST',
+      body: { prefix: ['git', 'tag', '*'] },
+    });
+    expect(await suggestions()).toEqual([]);
+  }, 60_000);
+});
+
 describe('without a project folder', () => {
   it('tells the model that files and commands are unavailable', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'rocky-tools-'));

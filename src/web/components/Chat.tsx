@@ -17,6 +17,7 @@ import { ModeSelect } from './ModeSelect.tsx';
 import { Roko, type RokoState } from './Roko.tsx';
 import { ToolCard, type ToolState } from './ToolCard.tsx';
 import { TurnChanges } from './TurnChanges.tsx';
+import { RuleSuggestion, type Suggestion } from './RuleSuggestion.tsx';
 import { UnknownOutcome } from './UnknownOutcome.tsx';
 
 const AGENT_ID = 'rocky';
@@ -100,6 +101,7 @@ export function Chat({
   const [mode, setMode] = useState<Mode | null>(null);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const runningRef = useRef(false);
   const bottom = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -117,6 +119,10 @@ export function Chat({
     setMode(approvals.mode);
     setReceipts(log.receipts);
     setSnapshots(log.snapshots);
+    // Roko's rule suggestions are a nicety: failing to load them changes nothing.
+    void api<{ suggestions: Suggestion[] }>('/rules/suggestions')
+      .then((r) => setSuggestions(r.suggestions))
+      .catch(() => undefined);
   }, [threadId]);
 
   useEffect(() => {
@@ -197,7 +203,7 @@ export function Chat({
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'end' });
-  }, [agent.messages.length, running, pending.length]);
+  }, [agent.messages.length, running, pending.length, suggestions.length]);
 
   const send = async () => {
     const text = draft.trim();
@@ -369,6 +375,13 @@ export function Chat({
             }}
           />
         ))}
+        {!running && pending.length === 0 && suggestions[0] && (
+          <RuleSuggestion
+            key={suggestions[0].prefix.join(' ')}
+            suggestion={suggestions[0]}
+            onDone={() => void refresh().catch(() => undefined)}
+          />
+        )}
         {running && pending.length === 0 && (
           <p className="thinking">{t('chat.thinking')}</p>
         )}

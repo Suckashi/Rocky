@@ -283,5 +283,9 @@
   "rules.error.not-one-command": "一條規則只能寫一個指令（不能有 &&、| 或 ;）。",
   "rules.error.star-not-last": "* 只能放在最後。",
   "rules.error.too-broad": "「允許所有指令」範圍太大，不能新增。",
-  "rules.error.duplicate": "已經有一樣的規則了。"
+  "rules.error.duplicate": "已經有一樣的規則了。",
+  "suggest.text": "你已經核准過 {count} 次類似的指令。要讓這類指令以後直接執行嗎？",
+  "suggest.hint": "會新增一條永久允許規則，隨時可以在設定頁移除；危險指令和對外動作仍然會問。",
+  "suggest.accept": "設為永久規則",
+  "suggest.dismiss": "不用了"
 }

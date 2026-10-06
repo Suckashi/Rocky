@@ -33,6 +33,12 @@ const fake = await startFakeOpenAI((messages) => {
         },
       ],
     };
+  if (said.includes('檢查'))
+    return {
+      toolCalls: [
+        { name: 'run_command', args: { argv: ['npm', 'run', 'lint'] } },
+      ],
+    };
   // A command that outlives its timeout: its outcome is unknown.
   if (said.includes('等很久'))
     return {
@@ -100,11 +106,13 @@ const browser = await chromium.launch(
   executablePath ? { executablePath } : { channel: 'msedge' },
 );
 let failed = false;
+let current: Page | undefined;
 try {
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },
   });
   const page: Page = await context.newPage();
+  current = page;
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
@@ -217,6 +225,31 @@ try {
     'a timed-out command shows as unknown and the user can confirm it',
   );
 
+  // Roko suggests a rule after the same kind of command was approved twice.
+  for (const round of [1, 2]) {
+    const before = await page.locator('.reply').count();
+    await page.getByRole('textbox').fill(`幫我檢查程式碼（第 ${round} 次）`);
+    await page.keyboard.press('Enter');
+    await panel.waitFor({ timeout: 20_000 });
+    await page.keyboard.press('1');
+    await page.locator('.reply').nth(before).waitFor({ timeout: 20_000 });
+    await page.getByRole('button', { name: '送出' }).waitFor();
+  }
+  const suggestion = page.locator('.rule-suggestion');
+  await suggestion.getByText('npm run lint *').waitFor({ timeout: 20_000 });
+  if (shots) await page.screenshot({ path: join(shots, 'm5-suggestion.png') });
+  await suggestion.getByRole('button', { name: '設為永久規則' }).click();
+  await suggestion.waitFor({ state: 'detached' });
+  const replies = await page.locator('.reply').count();
+  await page.getByRole('textbox').fill('幫我檢查程式碼（第 3 次）');
+  await page.keyboard.press('Enter');
+  await page.locator('.reply').nth(replies).waitFor({ timeout: 20_000 });
+  await page.getByRole('button', { name: '送出' }).waitFor();
+  check(
+    (await panel.count()) === 0,
+    "accepting Roko's suggestion adds a rule; the same kind of command no longer asks",
+  );
+
   // Settings: memory, skills and MCP.
   page.on('dialog', (dialog) => void dialog.accept());
   await page.getByRole('button', { name: '設定' }).click();
@@ -234,6 +267,10 @@ try {
   if (shots) await page.screenshot({ path: join(shots, 'm5-rules.png') });
   await page
     .locator('.rule-list li', { hasText: 'npm test *' })
+    .getByRole('button', { name: '移除' })
+    .click();
+  await page
+    .locator('.rule-list li', { hasText: 'npm run lint *' })
     .getByRole('button', { name: '移除' })
     .click();
   await page.getByText('還沒有規則。').waitFor();
@@ -285,6 +322,8 @@ try {
 } catch (error) {
   failed = true;
   console.error(error);
+  if (shots && current)
+    await current.screenshot({ path: join(shots, 'e2e-failure.png') });
 } finally {
   await browser.close();
   server.kill('SIGINT');

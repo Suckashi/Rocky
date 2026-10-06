@@ -283,5 +283,9 @@
   "rules.error.not-one-command": "One command per rule (no &&, | or ;).",
   "rules.error.star-not-last": "* can only be last.",
   "rules.error.too-broad": "“Allow every command” is too broad.",
-  "rules.error.duplicate": "That rule already exists."
+  "rules.error.duplicate": "That rule already exists.",
+  "suggest.text": "You have approved commands like this {count} times. Let them run without asking from now on?",
+  "suggest.hint": "This adds a permanent allow rule you can remove in Settings at any time; dangerous commands and outside actions still ask.",
+  "suggest.accept": "Make it a rule",
+  "suggest.dismiss": "No thanks"
 }
