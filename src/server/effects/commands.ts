@@ -20,8 +20,14 @@ export function programName(token: string): string {
   return base.replace(/\.(exe|cmd|bat|com|ps1)$/i, '').toLowerCase();
 }
 
-/** POSIX-style word splitting with quotes; returns undefined for constructs we do not model. */
-export function splitPosix(text: string): string[][] | undefined {
+/**
+ * POSIX-style word splitting with quotes; returns undefined for constructs we do not model.
+ * literalBackslash: a backslash is an ordinary character (a Windows path separator), not an escape.
+ */
+export function splitPosix(
+  text: string,
+  { literalBackslash = false }: { literalBackslash?: boolean } = {},
+): string[][] | undefined {
   const commands: string[][] = [[]];
   let word = '';
   let inWord = false;
@@ -40,7 +46,12 @@ export function splitPosix(text: string): string[][] | undefined {
         (c === '`' || (c === '$' && text[i + 1] === '('))
       )
         return undefined;
-      else if (quote === '"' && c === '\\' && i + 1 < text.length)
+      else if (
+        quote === '"' &&
+        c === '\\' &&
+        !literalBackslash &&
+        i + 1 < text.length
+      )
         word += text[++i];
       else word += c;
       continue;
@@ -54,7 +65,7 @@ export function splitPosix(text: string): string[][] | undefined {
       (c === '<' && text[i + 1] === '(')
     ) {
       return undefined;
-    } else if (c === '\\' && i + 1 < text.length) {
+    } else if (c === '\\' && !literalBackslash && i + 1 < text.length) {
       word += text[++i];
       inWord = true;
     } else if (/\s/.test(c)) {

@@ -29,7 +29,10 @@ const option = z.object({
 /** Command lines become argv; anything with operators or that cannot be parsed is dropped. */
 function toArgv(c: string[] | string): string[] | undefined {
   if (Array.isArray(c)) return c;
-  const parsed = splitPosix(c.trim());
+  // On Windows a backslash in a command line is a path separator.
+  const parsed = splitPosix(c.trim(), {
+    literalBackslash: process.platform === 'win32',
+  });
   return parsed?.length === 1 && parsed[0]!.length ? parsed[0] : undefined;
 }
 

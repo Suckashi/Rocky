@@ -16,12 +16,15 @@ import type { SettingsStore } from '../../store/settings.ts';
 export type PatternError =
   'empty' | 'not-one-command' | 'star-not-last' | 'too-broad';
 
-/** "npm test *" → ["npm", "test", "*"]; quotes group words, as in a shell. */
+/**
+ * "npm test *" → ["npm", "test", "*"]; quotes group words, as in a shell. A backslash is kept
+ * as typed: on Windows it separates folders (C:\tools\node.exe), it is not an escape.
+ */
 export function parsePattern(
   pattern: string,
   decision: 'allow' | 'deny',
 ): { prefix: string[] } | { error: PatternError } {
-  const commands = splitPosix(pattern.trim());
+  const commands = splitPosix(pattern.trim(), { literalBackslash: true });
   if (!commands || commands.length === 0 || commands[0]!.length === 0)
     return { error: 'empty' };
   if (commands.length !== 1) return { error: 'not-one-command' };
