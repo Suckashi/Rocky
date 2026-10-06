@@ -111,8 +111,28 @@ export function McpSettings() {
   };
 
   const setPolicy = async (server: string, tool: string, policy: Policy) => {
-    await api('/mcp/tools', 'PUT', { server, tool, policy });
-    load();
+    // Show the choice at once; the saved policies come back from the server.
+    setInfo((current) =>
+      current
+        ? {
+            ...current,
+            policies: { ...current.policies, [`${server}/${tool}`]: policy },
+          }
+        : current,
+    );
+    try {
+      const saved = await api<{ policies: Record<string, Policy> }>(
+        '/mcp/tools',
+        'PUT',
+        { server, tool, policy },
+      );
+      setInfo((current) =>
+        current ? { ...current, policies: saved.policies } : current,
+      );
+    } catch (e) {
+      setError(t('mcp.error', { error: e instanceof Error ? e.message : '' }));
+      load();
+    }
   };
 
   return (

@@ -266,5 +266,6 @@
   "mcp.save": "Save",
   "mcp.error": "Not saved: {error}",
   "roko.alt.done": "Roko jumps for joy",
-  "panel.done": "Done with this turn"
+  "panel.done": "Done with this turn",
+  "approval.title.agentOther": "{actor}wants to do something that needs your approval: {title}"
 }

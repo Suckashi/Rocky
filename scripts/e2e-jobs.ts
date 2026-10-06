@@ -3,10 +3,17 @@
 // and applies it. Needs OpenCode installed. Not part of CI. Run: npm run test:e2e:jobs
 //   ROCKY_E2E_BROWSER  path to a Chromium-based browser; default: the system Edge (msedge)
 import { execFileSync, spawn } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { chromium } from 'playwright-core';
+import { chromium, type Page } from 'playwright-core';
 import { findOpenCode } from '../src/server/external/opencode.ts';
 import {
   startFakeOpenAI,
@@ -55,13 +62,21 @@ for (const args of [
 const text = (m: ChatRequestMessage | undefined) =>
   JSON.stringify(m?.content ?? '');
 let worktree = '';
+const newestWorktree = () => {
+  const dir = join(base, 'data', 'worktrees');
+  return readdirSync(dir)
+    .map((name) => join(dir, name))
+    .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)[0]!;
+};
 const fake = await startFakeOpenAI((messages) => {
   const system = text(messages[0]);
   if (system.includes('title generator')) return { text: 'Job' };
   const lastUser = [...messages].reverse().find((m) => m.role === 'user');
   if (system.includes('You are Rocky')) {
-    const result = messages.findLast((m) => m.role === 'tool');
-    if (result) return { text: '工作做完了，Rocky 驗證通過，請到工作頁查看。' };
+    // Only this turn's tool results count (earlier turns delegated too).
+    const turn = messages.slice(messages.lastIndexOf(lastUser!) + 1);
+    if (turn.some((m) => m.role === 'tool'))
+      return { text: '工作做完了，Rocky 驗證通過，請到工作頁查看。' };
     return {
       toolCalls: [
         {
@@ -74,12 +89,9 @@ const fake = await startFakeOpenAI((messages) => {
       ],
     };
   }
-  // OpenCode's model: find the worktree from its environment message, edit, test, summarise.
-  if (!worktree)
-    worktree =
-      /(\S*rocky\S*worktrees\S*?)["\s\\<]/.exec(
-        JSON.stringify(messages),
-      )?.[1] ?? '';
+  // OpenCode's model: edit math.js in the job's worktree, run the tests, summarise.
+  // The job running now has the newest worktree.
+  worktree = newestWorktree();
   const step = Math.floor(
     (messages.length - 1 - messages.lastIndexOf(lastUser!)) / 2,
   );
@@ -135,10 +147,12 @@ const browser = await chromium.launch(
   executablePath ? { executablePath } : { channel: 'msedge' },
 );
 let failed = false;
+let current: Page | undefined;
 try {
   const page = await (
     await browser.newContext({ viewport: { width: 1440, height: 900 } })
   ).newPage();
+  current = page;
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (m) => {
@@ -148,10 +162,7 @@ try {
   await page
     .getByText('選好模型就能開始')
     .waitFor({ timeout: 15_000 })
-    .catch(async () => {
-      await page.screenshot({
-        path: '/tmp/claude-0/-home-user-Rocky/70f7a0f6-c2a1-50ae-a854-b677ad805b7f/scratchpad/shots/debug.png',
-      });
+    .catch(() => {
       throw new Error(`onboarding did not render: ${errors.join(' | ')}`);
     });
   await page.getByLabel('網址').fill(fake.baseURL);
@@ -190,9 +201,34 @@ try {
     readFileSync(join(project, 'math.js'), 'utf8').includes('a + b'),
     'applying copies the verified change into the project',
   );
+  // A second job, discarded: its worktree goes away and the project stays as it is.
+  page.on('dialog', (dialog) => void dialog.accept());
+  await page.getByRole('button', { name: '對話' }).click();
+  await page.getByRole('textbox').fill('請再交給 OpenCode 修一次');
+  await page.keyboard.press('Enter');
+  await panel.waitFor({ timeout: 30_000 });
+  await page.keyboard.press('1');
+  await page
+    .locator('.reply', { hasText: '工作做完了' })
+    .nth(1)
+    .waitFor({ timeout: 120_000 });
+  await page.getByRole('link', { name: '查看工作' }).last().click();
+  await page.locator('.job-head .badge', { hasText: '已驗證' }).waitFor();
+  const before = readFileSync(join(project, 'math.js'), 'utf8');
+  await page.getByRole('button', { name: '捨棄' }).click();
+  await page.locator('.job-head .badge', { hasText: '已捨棄' }).waitFor();
+  check(
+    readFileSync(join(project, 'math.js'), 'utf8') === before,
+    'discarding a job leaves the project untouched',
+  );
   check(errors.length === 0, `no page errors (${errors.join(' | ')})`);
 } catch (error) {
   failed = true;
+  if (shots && current)
+    await current.screenshot({
+      path: join(shots, 'm3-failure.png'),
+      fullPage: true,
+    });
   console.error(error);
 } finally {
   await browser.close();

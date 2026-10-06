@@ -68,6 +68,18 @@ function Title({
       const job = delegation(approval);
       if (job)
         return <>{t('approval.title.delegate', { actor, title: job.title })}</>;
+      // An external agent's request that is not an edit or a command: name what it asked for.
+      if (effect.server === 'opencode') {
+        const what = (effect.args as { title?: unknown } | undefined)?.title;
+        return (
+          <>
+            {t('approval.title.agentOther', {
+              actor,
+              title: typeof what === 'string' && what ? what : effect.tool,
+            })}
+          </>
+        );
+      }
       return (
         <>
           {t('approval.title.mcp', {

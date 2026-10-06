@@ -266,5 +266,6 @@
   "mcp.save": "儲存",
   "mcp.error": "沒有儲存：{error}",
   "roko.alt.done": "Roko 開心地跳起來",
-  "panel.done": "這輪完成了"
+  "panel.done": "這輪完成了",
+  "approval.title.agentOther": "{actor}想做一件要你確認的事：{title}"
 }

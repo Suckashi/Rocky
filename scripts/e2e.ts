@@ -23,7 +23,30 @@ const fake = await startFakeOpenAI((messages) => {
   const results = messages.slice(lastUser + 1).filter((m) => m.role === 'tool');
   if (results.length > 0)
     return { text: `已處理。工具回覆：${String(results.at(-1)!.content)}` };
-  if (JSON.stringify(messages[lastUser]?.content ?? '').includes('改'))
+  const said = JSON.stringify(messages[lastUser]?.content ?? '');
+  if (said.includes('記住'))
+    return {
+      toolCalls: [
+        {
+          name: 'remember',
+          args: { title: '部署環境', content: '正式環境叫「藍鯨」。' },
+        },
+      ],
+    };
+  // A command that outlives its timeout: its outcome is unknown.
+  if (said.includes('等很久'))
+    return {
+      toolCalls: [
+        {
+          name: 'run_command',
+          args: {
+            argv: [process.execPath, '-e', 'setTimeout(() => {}, 20000)'],
+            timeout_seconds: 1,
+          },
+        },
+      ],
+    };
+  if (said.includes('改'))
     return {
       toolCalls: [
         {
@@ -43,13 +66,20 @@ mkdirSync(project);
 const appFile = join(project, 'app.js');
 writeFileSync(appFile, 'const answer = 41;\n');
 const shots = process.env['ROCKY_E2E_SCREENSHOTS'];
+// A skill installed by hand, as a user would.
+const dataDir = mkdtempSync(join(tmpdir(), 'rocky-e2e-'));
+mkdirSync(join(dataDir, 'skills', 'changelog'), { recursive: true });
+writeFileSync(
+  join(dataDir, 'skills', 'changelog', 'SKILL.md'),
+  '---\nname: 更新紀錄\ndescription: 用繁體中文寫 CHANGELOG\n---\n\n內容\n',
+);
 const server = spawn(
   process.execPath,
   [join(root, 'src', 'server', 'start.ts')],
   {
     env: {
       ...process.env,
-      ROCKY_DATA_DIR: mkdtempSync(join(tmpdir(), 'rocky-e2e-')),
+      ROCKY_DATA_DIR: dataDir,
       ROCKY_PORT: String(port),
       ROCKY_OPEN_BROWSER: '0',
     },
@@ -95,6 +125,8 @@ try {
   await page.keyboard.press('Enter');
   await page.getByText('測試回覆').waitFor({ timeout: 20_000 });
   check(true, 'a Chinese message gets a streamed reply rendered as Markdown');
+  await page.getByText('這輪完成了').waitFor();
+  check(true, 'Roko shows the done state after a turn finishes');
   await page.locator('.threads li', { hasText: '你好，請自我介紹' }).waitFor();
   check(true, 'the conversation is named after its first message');
 
@@ -157,6 +189,70 @@ try {
     readFileSync(appFile, 'utf8').includes('41'),
     'key 4 rejects with a reason, the file is untouched and the reason reaches the model',
   );
+
+  // Memory: remembered in chat (ask-always mode asks first).
+  await page.getByRole('textbox').fill('請記住部署環境');
+  await page.keyboard.press('Enter');
+  await panel.waitFor({ timeout: 20_000 });
+  await page.keyboard.press('1');
+  await page
+    .locator('.reply', { hasText: 'Saved' })
+    .waitFor({ timeout: 20_000 });
+  check(true, 'remembering asks in ask-always mode and saves');
+
+  // An action whose outcome is unknown offers the two buttons; Rocky never redoes it.
+  await page.getByRole('textbox').fill('跑一個會等很久的指令');
+  await page.keyboard.press('Enter');
+  await panel.waitFor({ timeout: 20_000 });
+  await page.keyboard.press('1');
+  const unknown = page.locator('.unknown-outcome');
+  await unknown.waitFor({ timeout: 30_000 });
+  await unknown.getByRole('button', { name: '沒成功，再做一次' }).waitFor();
+  await unknown.getByRole('button', { name: '我看過了，成功了' }).click();
+  await unknown.waitFor({ state: 'detached' });
+  check(
+    true,
+    'a timed-out command shows as unknown and the user can confirm it',
+  );
+
+  // Settings: memory, skills and MCP.
+  page.on('dialog', (dialog) => void dialog.accept());
+  await page.getByRole('button', { name: '設定' }).click();
+  await page.locator('.memory summary', { hasText: '部署環境' }).click();
+  await page.getByText('正式環境叫「藍鯨」。').waitFor();
+  await page.getByText('更新紀錄').waitFor();
+  check(true, 'settings list the saved memory and the installed skill');
+  await page.locator('.mcp-add summary').click();
+  await page.getByLabel('名稱（英數字、-、_）').fill('notes');
+  await page
+    .getByRole('textbox', { name: '程式', exact: true })
+    .fill(process.execPath);
+  await page
+    .getByLabel('參數（一行一個）')
+    .fill(join(root, 'tests', 'fixtures', 'mcp-server.ts'));
+  await page.locator('.mcp-add').getByRole('button', { name: '儲存' }).click();
+  await page
+    .locator('.mcp-server .badge', { hasText: '已連線' })
+    .waitFor({ timeout: 30_000 });
+  await page.getByLabel('echo 的核准方式').selectOption('read-only');
+  check(
+    (await page.getByLabel('echo 的核准方式').inputValue()) === 'read-only',
+    'an MCP server connects, lists its tools, and a tool can be marked read-only',
+  );
+  if (shots)
+    await page.screenshot({
+      path: join(shots, 'm5-settings.png'),
+      fullPage: true,
+    });
+  await page
+    .locator('.mcp-server')
+    .getByRole('button', { name: '移除' })
+    .click();
+  await page.getByText('還沒有設定 MCP 伺服器。').waitFor();
+  await page.locator('.memory').getByRole('button', { name: '刪除' }).click();
+  await page.getByText('還沒有記憶。').waitFor();
+  check(true, 'removing the MCP server and deleting the memory work');
+  await page.getByRole('button', { name: '回到對話' }).click();
 
   await page.getByRole('button', { name: '設定' }).click();
   await page.getByRole('radio', { name: 'English' }).click();
