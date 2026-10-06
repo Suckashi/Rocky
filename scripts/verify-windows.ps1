@@ -240,7 +240,7 @@ if ($Eval) {
     [void]$lines.Add('## Evaluation')
     [void]$lines.Add('')
     [void]$lines.Add('```')
-    Get-Content -LiteralPath $evalLog | Where-Object { $_ -match 'FAIL|score|baseline|SKIPPED' } |
+    Get-Content -LiteralPath $evalLog | Where-Object { $_ -cmatch 'FAIL|score|baseline|SKIPPED' }  # case-sensitive: not "failed" |
       ForEach-Object { [void]$lines.Add(($_ -replace "\x1b\[[0-9;]*m", '')) }
     [void]$lines.Add('```')
   }
