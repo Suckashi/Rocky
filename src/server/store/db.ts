@@ -79,6 +79,28 @@ const MIGRATIONS: string[] = [
      event text not null,
      primary key (job_id, seq)
    );`,
+  // Jobs can wait in a queue: rebuild the table with the "queued" status (SQLite cannot alter a check).
+  `create table jobs_new (
+     id text primary key,
+     thread_id text not null,
+     run_id text,
+     tool_call_id text,
+     agent text not null,
+     title text not null,
+     task text not null,
+     status text not null check (status in ('queued', 'running', 'verified', 'problems', 'failed', 'stopped', 'interrupted', 'applied', 'discarded')),
+     worktree text,
+     branch text,
+     base_commit text,
+     session_id text,
+     result text,
+     created_at integer not null,
+     finished_at integer
+   );
+   insert into jobs_new select * from jobs;
+   drop table jobs;
+   alter table jobs_new rename to jobs;
+   create index jobs_by_thread on jobs(thread_id, created_at);`,
 ];
 
 export function openDatabase(path: string): DatabaseSync {
@@ -89,6 +111,9 @@ export function openDatabase(path: string): DatabaseSync {
   const { user_version: version } = db.prepare('pragma user_version').get() as {
     user_version: number;
   };
+  // Table rebuilds need foreign keys off (it cannot change inside a transaction); they are
+  // checked again before being turned back on.
+  if (version < MIGRATIONS.length) db.exec('pragma foreign_keys = off');
   for (let i = version; i < MIGRATIONS.length; i++) {
     db.exec('begin');
     try {
@@ -99,6 +124,12 @@ export function openDatabase(path: string): DatabaseSync {
       db.exec('rollback');
       throw error;
     }
+  }
+  if (version < MIGRATIONS.length) {
+    const broken = db.prepare('pragma foreign_key_check').all();
+    if (broken.length > 0)
+      throw new Error(`database migration broke ${broken.length} references`);
+    db.exec('pragma foreign_keys = on');
   }
   return db;
 }

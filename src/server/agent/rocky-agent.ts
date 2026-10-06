@@ -29,7 +29,8 @@ import type { Gate } from '../effects/gate.ts';
 import type { SettingsStore } from '../store/settings.ts';
 import { createRockyBackend } from './backend.ts';
 import { createGateMiddleware, type GateRun } from './gate-middleware.ts';
-import { createDelegateTool } from './delegate.ts';
+import { createCheckJobsTool, createDelegateTool } from './delegate.ts';
+import type { JobStore } from '../jobs/store.ts';
 import { createDocumentTools } from './documents.ts';
 import { createPlanTool } from './plan.ts';
 import { createMemoryTools, memoryPrompt } from './memory.ts';
@@ -145,6 +146,7 @@ export interface RockyAgentDeps {
   skills?: SkillStore;
   mcp?: McpManager;
   jobs?: JobRunner;
+  jobStore?: JobStore;
 }
 
 export class RockyAgent extends AbstractAgent {
@@ -172,8 +174,17 @@ export class RockyAgent extends AbstractAgent {
     return new Observable<BaseEvent>((subscriber) => {
       const controller = new AbortController();
       this.controller = controller;
-      const { settings, gate, executor, receipts, memory, skills, mcp, jobs } =
-        this.deps;
+      const {
+        settings,
+        gate,
+        executor,
+        receipts,
+        memory,
+        skills,
+        mcp,
+        jobs,
+        jobStore,
+      } = this.deps;
       // The mapper emits RUN_STARTED first, so even a configuration error is a well-formed run.
       const mapper = new AguiMapper(input.threadId, input.runId, (event) =>
         subscriber.next(event),
@@ -241,13 +252,13 @@ export class RockyAgent extends AbstractAgent {
                   createPlanTool(),
                   createRunCommandTool(projectRoot, executor),
                   ...createDocumentTools(projectRoot, executor),
-                  ...(jobs
+                  ...(jobs && jobStore
                     ? [
                         createDelegateTool(jobs, {
                           threadId: input.threadId,
                           runId: input.runId,
-                          signal: controller.signal,
                         }),
+                        createCheckJobsTool(jobStore, jobs, input.threadId),
                       ]
                     : []),
                 ]

@@ -4,6 +4,8 @@ import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
 
 export type JobStatus =
+  /** Waiting for its turn: one external agent job runs at a time. */
+  | 'queued'
   | 'running'
   /** Rocky checked the worktree against its approvals and the checks passed. */
   | 'verified'
@@ -123,7 +125,7 @@ export class JobStore {
     this.db
       .prepare(
         `insert into jobs (id, thread_id, run_id, tool_call_id, agent, title, task, status, created_at)
-         values (?, ?, ?, ?, ?, ?, ?, 'running', ?)`,
+         values (?, ?, ?, ?, ?, ?, ?, 'queued', ?)`,
       )
       .run(
         id,
@@ -210,12 +212,12 @@ export class JobStore {
     ).map((r) => ({ ...(JSON.parse(r.event) as JobEvent), at: r.at }));
   }
 
-  /** At startup: jobs that were running when Rocky stopped. Never restarted automatically. */
+  /** At startup: jobs that were queued or running when Rocky stopped. Never started again automatically. */
   markInterrupted(): number {
     return Number(
       this.db
         .prepare(
-          "update jobs set status = 'interrupted', finished_at = ? where status = 'running'",
+          "update jobs set status = 'interrupted', finished_at = ? where status in ('queued', 'running')",
         )
         .run(this.now()).changes,
     );

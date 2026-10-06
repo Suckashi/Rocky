@@ -98,8 +98,10 @@ async function runCase(c: Case): Promise<Result> {
 
   const threadId = `eval-${c.id}`;
   const asked: CaseContext['asked'] = [];
-  rocky.gate.subscribe(threadId, () => {
-    for (const approval of rocky.gate.pending(threadId)) {
+  // The conversation asks in its thread; background jobs in their own ("job:<id>").
+  rocky.gate.subscribeAll((thread) => {
+    if (thread !== threadId && !thread.startsWith('job:')) return;
+    for (const approval of rocky.gate.pending(thread)) {
       asked.push({ summary: JSON.stringify(approval.effect).slice(0, 200) });
       if (approval.effect.kind === 'plan') {
         rocky.gate.answer(
@@ -166,6 +168,10 @@ async function runCase(c: Case): Promise<Result> {
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
   }
+  // Delegated jobs run in the background: the case is judged after they finish.
+  await Promise.all(
+    rocky.jobs.list().map((job) => rocky.jobRunner.wait(job.id)),
+  );
   const seconds = Math.round((Date.now() - started) / 100) / 10;
 
   // The reply is the text after the last tool call: what Rocky finally told the user.

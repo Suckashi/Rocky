@@ -64,9 +64,23 @@ function hasTestScript(dir: string): boolean {
   }
 }
 
+/** Approvals and receipts of a job's own actions live in this thread, not the conversation's. */
+export const jobThread = (jobId: string) => `job:${jobId}`;
+
+interface Prepared {
+  project: string;
+  bin: string;
+  model: { baseURL: string; model: string; apiKey?: string | undefined };
+}
+
 export class JobRunner {
   private readonly deps: JobRunnerDeps;
   private readonly listeners = new Set<(jobId: string) => void>();
+  private readonly queue: { job: Job; prepared: Prepared }[] = [];
+  private readonly controllers = new Map<string, AbortController>();
+  private readonly finished = new Map<string, Promise<Job>>();
+  private readonly resolvers = new Map<string, (job: Job) => void>();
+  private active: string | undefined;
 
   constructor(deps: JobRunnerDeps) {
     this.deps = deps;
@@ -87,11 +101,7 @@ export class JobRunner {
   }
 
   /** Checks that fail before any job exists, with a code the model and the UI can explain. */
-  private async preflight(): Promise<{
-    project: string;
-    bin: string;
-    model: { baseURL: string; model: string; apiKey?: string | undefined };
-  }> {
+  private async preflight(): Promise<Prepared> {
     const { settings } = this.deps;
     const project = settings.project();
     if (!project) throw new JobError('no-project');
@@ -107,10 +117,95 @@ export class JobRunner {
     };
   }
 
-  async run(input: JobInput, signal: AbortSignal): Promise<Job> {
+  /** Puts a job in the queue and returns at once; it runs in the background, one at a time. */
+  async enqueue(input: JobInput): Promise<Job> {
+    const prepared = await this.preflight();
+    const job = this.deps.jobs.create({ ...input, agent: 'opencode' });
+    // The job asks in its own thread, with the conversation's approval mode.
+    this.deps.gate.setMode(
+      jobThread(job.id),
+      this.deps.gate.mode(input.threadId),
+    );
+    this.finished.set(
+      job.id,
+      new Promise<Job>((resolve) => this.resolvers.set(job.id, resolve)),
+    );
+    this.queue.push({ job, prepared });
+    this.changed(job.id);
+    void this.next();
+    return this.deps.jobs.get(job.id)!;
+  }
+
+  /** Resolves when the job has finished (or at once if it already has). */
+  wait(jobId: string): Promise<Job> {
+    return (
+      this.finished.get(jobId) ?? Promise.resolve(this.deps.jobs.get(jobId)!)
+    );
+  }
+
+  /** Position in the queue (1 = next), 0 when running, undefined when not waiting. */
+  position(jobId: string): number | undefined {
+    if (this.active === jobId) return 0;
+    const index = this.queue.findIndex((q) => q.job.id === jobId);
+    return index < 0 ? undefined : index + 1;
+  }
+
+  /** Stops a running job, or takes a queued one out of the queue. False if it is neither. */
+  cancel(jobId: string): boolean {
+    const index = this.queue.findIndex((q) => q.job.id === jobId);
+    if (index >= 0) {
+      this.queue.splice(index, 1);
+      this.deps.jobs.finish(jobId, 'stopped', null);
+      this.deps.jobs.addEvent(jobId, { type: 'status', text: 'stopped' });
+      this.settle(jobId);
+      return true;
+    }
+    const controller = this.controllers.get(jobId);
+    if (!controller) return false;
+    controller.abort();
+    return true;
+  }
+
+  /** At shutdown: stop the running job and drop the queue (they become interrupted next start). */
+  close(): void {
+    this.queue.length = 0;
+    for (const controller of this.controllers.values()) controller.abort();
+  }
+
+  private settle(jobId: string): void {
+    this.resolvers.get(jobId)?.(this.deps.jobs.get(jobId)!);
+    this.resolvers.delete(jobId);
+    this.finished.delete(jobId);
+    this.changed(jobId);
+  }
+
+  private async next(): Promise<void> {
+    if (this.active) return;
+    const item = this.queue.shift();
+    if (!item) return;
+    const { job, prepared } = item;
+    this.active = job.id;
+    const controller = new AbortController();
+    this.controllers.set(job.id, controller);
+    this.deps.jobs.setStatus(job.id, 'running');
+    this.changed(job.id);
+    try {
+      await this.execute(job, prepared, controller.signal);
+    } finally {
+      this.controllers.delete(job.id);
+      this.active = undefined;
+      this.settle(job.id);
+      void this.next();
+    }
+  }
+
+  private async execute(
+    job: Job,
+    { project, bin, model }: Prepared,
+    signal: AbortSignal,
+  ): Promise<void> {
     const { jobs, gate, receipts, dataDir } = this.deps;
-    const { project, bin, model } = await this.preflight();
-    const job = jobs.create({ ...input, agent: 'opencode' });
+    const thread = jobThread(job.id);
     const event = (e: Parameters<JobStore['addEvent']>[1]) => {
       jobs.addEvent(job.id, e);
       this.changed(job.id);
@@ -167,8 +262,8 @@ export class JobRunner {
         text = '';
       };
       const origin = (toolCallId: string) => ({
-        threadId: input.threadId,
-        ...(input.runId ? { runId: input.runId } : {}),
+        threadId: thread,
+        runId: thread,
         toolCallId,
         actor: 'opencode' as const,
       });
@@ -264,9 +359,9 @@ export class JobRunner {
       jobs.setSession(job.id, sessionId);
       if (signal.aborted) onAbort();
 
-      let prompt = `${GUIDANCE}\n\nTask:\n${input.task}`;
+      let prompt = `${GUIDANCE}\n\nTask:\n${job.task}`;
       for (let round = 0; ; round++) {
-        event({ type: 'prompt', text: round === 0 ? input.task : prompt });
+        event({ type: 'prompt', text: round === 0 ? job.task : prompt });
         rejection = undefined;
         const response = await agent.prompt(sessionId, prompt);
         flush();
@@ -295,7 +390,7 @@ export class JobRunner {
         hasTestScript(worktree)
       ) {
         result.checks.push(
-          await this.check(input, worktree, ['npm', 'test'], signal),
+          await this.check(thread, worktree, ['npm', 'test'], signal),
         );
       }
 
@@ -316,11 +411,10 @@ export class JobRunner {
       jobs.finish(job.id, status, result);
       event({ type: 'status', text: status });
     }
-    return jobs.get(job.id)!;
   }
 
   private async check(
-    input: JobInput,
+    thread: string,
     worktree: string,
     argv: string[],
     signal: AbortSignal,
@@ -328,11 +422,7 @@ export class JobRunner {
     const effect = { kind: 'command' as const, argv, cwd: worktree };
     const decision = await this.deps.gate.request(
       effect,
-      {
-        threadId: input.threadId,
-        ...(input.runId ? { runId: input.runId } : {}),
-        actor: 'rocky',
-      },
+      { threadId: thread, runId: thread, actor: 'rocky' },
       signal,
       { root: worktree },
     );

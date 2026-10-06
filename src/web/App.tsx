@@ -21,6 +21,41 @@ type View = 'chat' | 'jobs' | 'settings' | 'onboarding';
 const threadFromHash = () => /^#\/t\/([\w-]+)$/.exec(window.location.hash)?.[1];
 const jobFromHash = () => /^#\/jobs(?:\/([\w-]+))?$/.exec(window.location.hash);
 
+/**
+ * Approvals background jobs are waiting for. Polled (jobs run outside any chat stream); a
+ * browser notification goes out when the count rises while the window is in the background.
+ */
+function useJobsWaiting(): number {
+  const { t } = useI18n();
+  const [waiting, setWaiting] = useState(0);
+  const last = useRef(0);
+  useEffect(() => {
+    let active = true;
+    const poll = () =>
+      void api<{ waiting: number }>('/jobs/summary')
+        .then((s) => {
+          if (!active) return;
+          if (
+            s.waiting > last.current &&
+            document.hidden &&
+            'Notification' in window &&
+            Notification.permission === 'granted'
+          )
+            new Notification(t('jobs.notify'));
+          last.current = s.waiting;
+          setWaiting(s.waiting);
+        })
+        .catch(() => undefined);
+    poll();
+    const timer = setInterval(poll, 3000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [t]);
+  return waiting;
+}
+
 function Shell({
   settings,
   setSettings,
@@ -38,6 +73,7 @@ function Shell({
   );
   const [refreshKey, setRefreshKey] = useState(0);
   const [roko, setRoko] = useState<RokoState>('idle');
+  const jobsWaiting = useJobsWaiting();
 
   // The hash Rocky itself wrote; only other changes (links, back/forward) navigate.
   const written = useRef('');
@@ -101,11 +137,20 @@ function Shell({
         <button
           type="button"
           className={`icon-button${view === 'jobs' ? ' active' : ''}`}
-          aria-label={t('nav.jobs')}
+          aria-label={
+            jobsWaiting
+              ? t('nav.jobsWaiting', { count: jobsWaiting })
+              : t('nav.jobs')
+          }
           aria-current={view === 'jobs' ? 'page' : undefined}
           onClick={() => setView('jobs')}
         >
           <Briefcase size={18} />
+          {jobsWaiting > 0 && (
+            <span className="rail-badge" aria-hidden="true">
+              {jobsWaiting}
+            </span>
+          )}
         </button>
         <button
           type="button"

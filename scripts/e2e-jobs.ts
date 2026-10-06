@@ -76,7 +76,7 @@ const fake = await startFakeOpenAI((messages) => {
     // Only this turn's tool results count (earlier turns delegated too).
     const turn = messages.slice(messages.lastIndexOf(lastUser!) + 1);
     if (turn.some((m) => m.role === 'tool'))
-      return { text: '工作做完了，Rocky 驗證通過，請到工作頁查看。' };
+      return { text: '已排入背景，可以繼續聊天；結果請到工作頁查看。' };
     return {
       toolCalls: [
         {
@@ -182,13 +182,21 @@ try {
   check(true, 'starting a job asks first, in plain language');
   if (shots) await page.screenshot({ path: join(shots, 'm3-delegate.png') });
   await page.keyboard.press('1');
-  await page.getByText('工作做完了').waitFor({ timeout: 120_000 });
+  // The turn ends at once; the job runs in the background.
+  await page.getByText('已排入背景').waitFor({ timeout: 30_000 });
+  await page.getByRole('button', { name: '送出' }).waitFor();
+  check(
+    true,
+    'the conversation is free again while the job runs in the background',
+  );
+  await page.getByRole('link', { name: '查看工作' }).click();
+  await page
+    .locator('.job-head .badge', { hasText: '已驗證' })
+    .waitFor({ timeout: 120_000 });
   check(
     readFileSync(join(project, 'math.js'), 'utf8') === BUGGY,
     'OpenCode worked in a worktree; the project is untouched',
   );
-  await page.getByRole('link', { name: '查看工作' }).click();
-  await page.locator('.job-head .badge', { hasText: '已驗證' }).waitFor();
   await page.getByText('每個改動都和核准的內容一致。').waitFor();
   await page.getByText('Rocky 執行 npm test：結束代碼 0').waitFor();
   check(true, "the job page shows Rocky's verification and its own test run");
@@ -201,19 +209,47 @@ try {
     readFileSync(join(project, 'math.js'), 'utf8').includes('a + b'),
     'applying copies the verified change into the project',
   );
-  // A second job, discarded: its worktree goes away and the project stays as it is.
+  // A second job in ask-always mode: its edit asks on the job page, with a badge on the rail.
   page.on('dialog', (dialog) => void dialog.accept());
   await page.getByRole('button', { name: '對話' }).click();
+  await page.getByLabel('核准模式').selectOption('ask-always');
   await page.getByRole('textbox').fill('請再交給 OpenCode 修一次');
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 30_000 });
   await page.keyboard.press('1');
   await page
-    .locator('.reply', { hasText: '工作做完了' })
+    .locator('.reply', { hasText: '已排入背景' })
     .nth(1)
-    .waitFor({ timeout: 120_000 });
+    .waitFor({ timeout: 30_000 });
+  await page
+    .getByRole('button', { name: '工作（1 件等你核准）' })
+    .waitFor({ timeout: 60_000 });
+  check(true, 'the rail shows that a background job is waiting for approval');
   await page.getByRole('link', { name: '查看工作' }).last().click();
-  await page.locator('.job-head .badge', { hasText: '已驗證' }).waitFor();
+  await panel.getByText('OpenCode 想修改 math.js').waitFor({ timeout: 30_000 });
+  if (shots)
+    await page.screenshot({ path: join(shots, 'm6-job-approval.png') });
+  // In ask-always every action asks (the edit, then OpenCode running the tests): approve each.
+  const finished = page.locator('.job-head .badge', {
+    hasText: /已驗證|有問題/,
+  });
+  for (let i = 0; i < 5 && !(await finished.isVisible()); i++) {
+    const option = panel.getByRole('option').first();
+    await Promise.race([
+      option.waitFor({ timeout: 60_000 }),
+      finished.waitFor({ timeout: 60_000 }),
+    ]);
+    if (await option.isVisible()) {
+      const title = await panel.locator('strong').first().textContent();
+      await page.keyboard.press('1');
+      await panel
+        .locator('strong', { hasText: title ?? '' })
+        .waitFor({ state: 'detached', timeout: 30_000 })
+        .catch(() => undefined);
+    }
+  }
+  await finished.waitFor({ timeout: 120_000 });
+  check(true, "the background job's approval is answered on the job page");
   const before = readFileSync(join(project, 'math.js'), 'utf8');
   await page.getByRole('button', { name: '捨棄' }).click();
   await page.locator('.job-head .badge', { hasText: '已捨棄' }).waitFor();

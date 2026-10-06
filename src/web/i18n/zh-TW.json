@@ -297,5 +297,11 @@
   "plan.keys": "按數字選方案，{revise} 要求修改，Esc 拒絕",
   "approval.reason.plan": "這是一份方案，要由你選擇",
   "effect.plan": "方案：{title}",
-  "tool.propose_plan": "提出方案"
+  "tool.propose_plan": "提出方案",
+  "jobs.status.queued": "排隊中",
+  "jobs.queuedAt": "排隊中（第 {position} 個）",
+  "jobs.stop": "停止",
+  "jobs.waiting": "等你核准 {count} 件",
+  "nav.jobsWaiting": "工作（{count} 件等你核准）",
+  "jobs.notify": "背景工作在等你核准"
 }

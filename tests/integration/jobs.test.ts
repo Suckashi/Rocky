@@ -11,6 +11,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { createCheckJobsTool } from '../../src/server/agent/delegate.ts';
 import { composeRocky } from '../../src/server/compose.ts';
 import { findOpenCode } from '../../src/server/external/opencode.ts';
 import { JobStore } from '../../src/server/jobs/store.ts';
@@ -109,7 +110,9 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
         };
       }
       // OpenCode's model: edit, run the tests, summarise.
-      const worktree = current.rocky.jobs.list()[0]!.worktree!;
+      const worktree = current.rocky.jobs
+        .list()
+        .find((j) => j.status === 'running')!.worktree!;
       if (text(lastUser).includes('because the user rejected it')) {
         seen.followUp = text(lastUser);
         return { text: '了解，不改檔。' };
@@ -174,8 +177,9 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
     });
     rocky.settings.setProject(project);
     rocky.settings.setMode(mode);
-    rocky.gate.subscribe('j1', () => {
-      for (const a of rocky.gate.pending('j1')) {
+    // The conversation asks in "j1"; the background job in its own "job:<id>" thread.
+    rocky.gate.subscribeAll((thread) => {
+      for (const a of rocky.gate.pending(thread)) {
         const choice = answer(a.effect as { kind: string; tool?: string });
         rocky.gate.answer(a.id, { ...choice, contentHash: a.contentHash });
       }
@@ -199,14 +203,18 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
     return current;
   }
 
-  async function chat(s: Setup): Promise<string> {
+  async function chat(s: Setup, turn = ''): Promise<string> {
     const res = await s.call('/api/copilotkit/agent/rocky/run', {
       method: 'POST',
       body: {
         threadId: 'j1',
-        runId: 'j1-r',
+        runId: `j1-r${turn}`,
         messages: [
-          { id: 'j1-u', role: 'user', content: '請交給 OpenCode 修 add' },
+          {
+            id: `j1-u${turn}`,
+            role: 'user',
+            content: '請交給 OpenCode 修 add',
+          },
         ],
         tools: [],
         context: [],
@@ -233,10 +241,21 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
       return { decision: 'allow-once' };
     });
     const reply = await chat(s);
+    // The turn ends at once: the job runs in the background.
+    expect(reply).toContain('runs in the background');
+    const queued = s.rocky.jobs.list()[0]!;
+    const job = await s.rocky.jobRunner.wait(queued.id);
     // Starting a job is an outside action; edits and tests inside the worktree are not.
     expect(asked).toEqual(['delegate_to_opencode']);
-    expect(reply).toContain('status \\"verified\\"');
-    const job = s.rocky.jobs.list()[0]!;
+    // Asked later, Rocky can look the job up.
+    const status = String(
+      await createCheckJobsTool(s.rocky.jobs, s.rocky.jobRunner, 'j1').invoke(
+        {},
+      ),
+    );
+    expect(status).toContain(`Job ${job.id} (修 add): verified`);
+    expect(status).toContain('changed: math.js');
+    expect(status).toContain('Rocky ran npm test: exit 0');
     expect(job.status).toBe('verified');
     expect(job.result?.changed).toEqual(['math.js']);
     expect(job.result?.unapproved).toEqual([]);
@@ -305,7 +324,7 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
         : { decision: 'allow-once' },
     );
     await chat(s);
-    const job = s.rocky.jobs.list()[0]!;
+    const job = await s.rocky.jobRunner.wait(s.rocky.jobs.list()[0]!.id);
     expect(job.result?.changed).toEqual([]);
     expect(readFileSync(join(job.worktree!, 'math.js'), 'utf8')).toBe(BUGGY);
     expect(seen.followUp).toContain('先不要改 math.js');
@@ -315,5 +334,31 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
     });
     expect(discarded.status).toBe(200);
     expect(existsSync(job.worktree!)).toBe(false);
+  }, 120_000);
+
+  it('queues jobs one at a time; a queued job can be stopped before it starts', async () => {
+    const s = await setup('ask-when-needed', () => ({
+      decision: 'allow-once',
+    }));
+    await chat(s, '1');
+    await chat(s, '2');
+    const [second, first] = s.rocky.jobs.list();
+    expect(first!.status).toBe('running');
+    expect(second!.status).toBe('queued');
+    expect(s.rocky.jobRunner.position(second!.id)).toBe(1);
+    const summary = (await (await s.call('/api/jobs/summary')).json()) as {
+      running: number;
+      queued: number;
+    };
+    expect(summary).toMatchObject({ running: 1, queued: 1 });
+
+    const stopped = await s.call(`/api/jobs/${second!.id}/cancel`, {
+      method: 'POST',
+      body: {},
+    });
+    expect(stopped.status).toBe(200);
+    expect(s.rocky.jobs.get(second!.id)?.status).toBe('stopped');
+    expect(s.rocky.jobs.get(second!.id)?.worktree).toBeNull();
+    expect((await s.rocky.jobRunner.wait(first!.id)).status).toBe('verified');
   }, 120_000);
 });

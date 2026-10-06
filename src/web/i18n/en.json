@@ -297,5 +297,11 @@
   "plan.keys": "Number keys choose an option, {revise} asks for changes, Esc rejects",
   "approval.reason.plan": "this is a plan for you to choose",
   "effect.plan": "plan: {title}",
-  "tool.propose_plan": "Propose a plan"
+  "tool.propose_plan": "Propose a plan",
+  "jobs.status.queued": "Queued",
+  "jobs.queuedAt": "Queued (#{position})",
+  "jobs.stop": "Stop",
+  "jobs.waiting": "{count} waiting for you",
+  "nav.jobsWaiting": "Jobs ({count} waiting for approval)",
+  "jobs.notify": "A background job is waiting for your approval"
 }

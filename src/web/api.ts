@@ -126,6 +126,7 @@ export function displayPath(path: string, project: string | null): string {
 }
 
 export type JobStatus =
+  | 'queued'
   | 'running'
   | 'verified'
   | 'problems'
@@ -159,6 +160,9 @@ export interface Job {
   result: JobResult | null;
   createdAt: number;
   finishedAt: number | null;
+  /** In the list: place in the queue (0 = running), and approvals waiting for the user. */
+  position?: number | null;
+  waiting?: number;
 }
 
 export type JobEvent = { at: number } & (

@@ -4,7 +4,7 @@
 import { tool } from 'langchain';
 import { z } from 'zod';
 import { JobError, type JobRunner } from '../jobs/runner.ts';
-import type { Job } from '../jobs/store.ts';
+import type { JobStore } from '../jobs/store.ts';
 
 const ERRORS: Record<string, string> = {
   'no-project': 'No project folder is selected.',
@@ -15,60 +15,29 @@ const ERRORS: Record<string, string> = {
   'model-not-configured': 'No model is configured.',
 };
 
-export function jobReport(job: Job): string {
-  const r = job.result;
-  const lines = [
-    `Job ${job.id} (${job.title}) finished with status "${job.status}".`,
-  ];
-  if (!r) return lines.join('\n');
-  if (r.error) lines.push(`Error: ${r.error}`);
-  if (r.summary) lines.push(`OpenCode's summary: ${r.summary}`);
-  lines.push(
-    r.changed.length
-      ? `Changed files (in the job's worktree): ${r.changed.join(', ')}`
-      : 'No files were changed.',
-  );
-  if (r.unapproved.length)
-    lines.push(`Changed WITHOUT approval: ${r.unapproved.join(', ')}`);
-  if (r.mismatched.length)
-    lines.push(
-      `Content differs from what was approved: ${r.mismatched.join(', ')}`,
-    );
-  for (const check of r.checks) {
-    lines.push(
-      `Rocky ran ${check.argv.join(' ')}: exit ${check.exitCode ?? 'none'}\n${check.output.slice(-1500)}`,
-    );
-  }
-  if (r.warnings.includes('uncommitted-changes'))
-    lines.push(
-      'Note: the project had uncommitted changes; the worktree started from the last commit and does not include them.',
-    );
-  lines.push(
-    'Nothing has been applied to the project yet. The user reviews the diff on the job page and applies or discards it. Report the result honestly, including any problems.',
-  );
-  return lines.join('\n');
-}
-
 export function createDelegateTool(
   runner: JobRunner,
-  context: { threadId: string; runId: string; signal: AbortSignal },
+  context: { threadId: string; runId: string },
 ) {
   return tool(
     async (input, config) => {
       const toolCallId = (config as { toolCall?: { id?: string } } | undefined)
         ?.toolCall?.id;
       try {
-        const job = await runner.run(
-          {
-            threadId: context.threadId,
-            runId: context.runId,
-            ...(toolCallId ? { toolCallId } : {}),
-            title: input.title,
-            task: input.task,
-          },
-          context.signal,
-        );
-        return jobReport(job);
+        const job = await runner.enqueue({
+          threadId: context.threadId,
+          runId: context.runId,
+          ...(toolCallId ? { toolCallId } : {}),
+          title: input.title,
+          task: input.task,
+        });
+        const position = runner.position(job.id) ?? 0;
+        return [
+          `Job ${job.id} (${job.title}) ${position > 0 ? `is queued (position ${position})` : 'has started'} and runs in the background.`,
+          'The user approves its actions and reviews the result on the Jobs page; you will not see the result in this turn.',
+          'Tell the user it is running in the background and that they can keep chatting. Do not wait for it, claim a result, or promise to report back on your own:',
+          'the result appears on the Jobs page, and you can look it up with check_jobs when the user asks.',
+        ].join('\n');
       } catch (error) {
         if (error instanceof JobError)
           return `Error: ${ERRORS[error.message] ?? error.message}`;
@@ -79,8 +48,8 @@ export function createDelegateTool(
       name: 'delegate_to_opencode',
       description:
         'Hand a coding task to OpenCode, an external coding agent, ONLY when the user explicitly asks for OpenCode (or to delegate). ' +
-        'It works in a separate git worktree; the user approves its actions; Rocky then checks the diff and runs the tests. ' +
-        'The result is not applied to the project until the user applies it on the job page.',
+        'The job runs in the background in a separate git worktree (one job at a time; others wait in a queue). The user approves its actions on the Jobs page; ' +
+        'Rocky then checks the diff and runs the tests. Nothing is applied to the project until the user applies it on the Jobs page.',
       schema: z.object({
         title: z.string().min(1).max(120).describe('Short name for the job'),
         task: z
@@ -91,6 +60,58 @@ export function createDelegateTool(
             'Complete instructions for OpenCode, with the files and the expected result',
           ),
       }),
+    },
+  );
+}
+
+/** check_jobs: the jobs started from this conversation, as Rocky sees them (read-only). */
+export function createCheckJobsTool(
+  jobs: JobStore,
+  runner: JobRunner,
+  threadId: string,
+) {
+  return tool(
+    async () => {
+      const mine = jobs
+        .list()
+        .filter((j) => j.threadId === threadId)
+        .slice(0, 10);
+      if (mine.length === 0)
+        return 'No jobs were started from this conversation.';
+      return mine
+        .map((job) => {
+          const r = job.result;
+          const lines = [`Job ${job.id} (${job.title}): ${job.status}`];
+          const position = runner.position(job.id);
+          if (job.status === 'queued' && position)
+            lines.push(`  queue position ${position}`);
+          if (r) {
+            lines.push(
+              `  changed: ${r.changed.join(', ') || 'nothing'}`,
+              ...(r.unapproved.length
+                ? [`  changed WITHOUT approval: ${r.unapproved.join(', ')}`]
+                : []),
+              ...(r.mismatched.length
+                ? [
+                    `  differs from what was approved: ${r.mismatched.join(', ')}`,
+                  ]
+                : []),
+              ...r.checks.map(
+                (c) =>
+                  `  Rocky ran ${c.argv.join(' ')}: exit ${c.exitCode ?? 'none'}`,
+              ),
+              ...(r.error ? [`  error: ${r.error.slice(0, 300)}`] : []),
+            );
+          }
+          return lines.join('\n');
+        })
+        .join('\n');
+    },
+    {
+      name: 'check_jobs',
+      description:
+        "Look up the OpenCode jobs started from this conversation: status (queued, running, verified, problems, ...), changed files and Rocky's test results. Read-only.",
+      schema: z.object({}),
     },
   );
 }

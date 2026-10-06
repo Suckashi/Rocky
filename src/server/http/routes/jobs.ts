@@ -7,7 +7,7 @@ import type { Gate } from '../../effects/gate.ts';
 import type { ReceiptStore } from '../../effects/receipts.ts';
 import { git } from '../../external/worktree.ts';
 import { applyJob, applyPlan, discardWorkspace } from '../../jobs/apply.ts';
-import type { JobRunner } from '../../jobs/runner.ts';
+import { jobThread, type JobRunner } from '../../jobs/runner.ts';
 import type { Job, JobStore } from '../../jobs/store.ts';
 import type { SettingsStore } from '../../store/settings.ts';
 
@@ -52,7 +52,35 @@ export function jobRoutes(deps: {
   const app = new Hono();
 
   app.get('/jobs', (c) =>
-    c.json({ available: runner.available(), jobs: jobs.list() }),
+    c.json({
+      available: runner.available(),
+      jobs: jobs.list().map((job) => ({
+        ...job,
+        position: runner.position(job.id) ?? null,
+        waiting: gate.pending(jobThread(job.id)).length,
+      })),
+    }),
+  );
+
+  // For the rail badge and notifications: what is running and what waits for the user.
+  app.get('/jobs/summary', (c) => {
+    const active = jobs
+      .list()
+      .filter((j) => j.status === 'queued' || j.status === 'running');
+    return c.json({
+      running: active.filter((j) => j.status === 'running').length,
+      queued: active.filter((j) => j.status === 'queued').length,
+      waiting: active.reduce(
+        (n, j) => n + gate.pending(jobThread(j.id)).length,
+        0,
+      ),
+    });
+  });
+
+  app.post('/jobs/:id/cancel', (c) =>
+    runner.cancel(c.req.param('id'))
+      ? c.json({ ok: true })
+      : c.json({ error: 'not-running' }, 409),
   );
 
   app.get('/jobs/:id', (c) => {
@@ -64,10 +92,13 @@ export function jobRoutes(deps: {
         e.type === 'permission' && e.receiptId ? [e.receiptId] : [],
       ),
     );
+    const thread = jobThread(job.id);
     return c.json({
       job,
       events,
-      receipts: receipts.forThread(job.threadId).filter((r) => ids.has(r.id)),
+      position: runner.position(job.id) ?? null,
+      pending: gate.pending(thread),
+      receipts: receipts.forThread(thread).filter((r) => ids.has(r.id)),
     });
   });
 
@@ -120,7 +151,11 @@ export function jobRoutes(deps: {
   app.post('/jobs/:id/discard', async (c) => {
     const job = jobs.get(c.req.param('id'));
     if (!job) return c.json({ error: 'not-found' }, 404);
-    if (job.status === 'running' || job.status === 'applied')
+    if (
+      job.status === 'queued' ||
+      job.status === 'running' ||
+      job.status === 'applied'
+    )
       return c.json({ error: 'not-discardable' }, 409);
     const project = await projectFor(job, settings);
     if (project) await discardWorkspace(job, project);

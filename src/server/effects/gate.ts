@@ -70,6 +70,7 @@ export class Gate {
   private readonly sessionApprovals = new Map<string, Set<string>>();
   private readonly modes = new Map<string, Mode>();
   private readonly listeners = new Map<string, Set<() => void>>();
+  private readonly anyListeners = new Set<(threadId: string) => void>();
 
   constructor(deps: GateDeps) {
     this.deps = deps;
@@ -83,8 +84,15 @@ export class Gate {
     return () => set.delete(listener);
   }
 
+  /** Called whenever any thread's pending approvals change (background jobs ask in their own). */
+  subscribeAll(listener: (threadId: string) => void): () => void {
+    this.anyListeners.add(listener);
+    return () => this.anyListeners.delete(listener);
+  }
+
   private changed(threadId: string): void {
     for (const listener of this.listeners.get(threadId) ?? []) listener();
+    for (const listener of this.anyListeners) listener(threadId);
   }
 
   mode(threadId: string): Mode {

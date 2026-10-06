@@ -60,6 +60,7 @@ const shutdown = createShutdown({
           await runner.stop({ threadId: thread.id });
       },
     },
+    { name: 'jobs', run: () => rocky.jobRunner.close() },
     { name: 'mcp', run: () => rocky.mcp.close() },
     {
       name: 'http',

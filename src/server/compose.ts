@@ -97,6 +97,7 @@ export function composeRocky(options: ComposeOptions) {
     skills,
     mcp,
     jobs: jobRunner,
+    jobStore: jobs,
   });
   const egress = options.egress ?? new EgressGuard();
   const savedModel = settings.model();

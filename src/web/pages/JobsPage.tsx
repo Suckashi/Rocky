@@ -7,8 +7,10 @@ import {
   type ApplyItem,
   type Job,
   type JobEvent,
+  type PendingApproval,
   type Receipt,
 } from '../api.ts';
+import { ApprovalPanel, type Answer } from '../components/ApprovalPanel.tsx';
 import { Diff } from '../components/Diff.tsx';
 import { Roko } from '../components/Roko.tsx';
 import { TurnChanges } from '../components/TurnChanges.tsx';
@@ -99,6 +101,8 @@ function JobDetail({
     job: Job;
     events: JobEvent[];
     receipts: Receipt[];
+    pending: PendingApproval[];
+    position: number | null;
   } | null>(null);
   const [plan, setPlan] = useState<ApplyItem[] | null>(null);
   const [message, setMessage] = useState('');
@@ -115,7 +119,8 @@ function JobDetail({
   }, [load]);
 
   // A running job updates its timeline as it goes.
-  const running = detail?.job.status === 'running';
+  const running =
+    detail?.job.status === 'running' || detail?.job.status === 'queued';
   useEffect(() => {
     if (!running) return;
     const timer = setInterval(() => void load().catch(() => undefined), 1500);
@@ -153,7 +158,17 @@ function JobDetail({
   const { job, events } = detail;
   const r = job.result;
   const canApply = job.status === 'verified' || job.status === 'problems';
-  const canDiscard = !['running', 'applied', 'discarded'].includes(job.status);
+  const canDiscard = !['queued', 'running', 'applied', 'discarded'].includes(
+    job.status,
+  );
+  const active = job.status === 'queued' || job.status === 'running';
+  const answer = async (approval: PendingApproval, choice: Answer) => {
+    await api(`/approvals/${approval.id}`, 'POST', {
+      ...choice,
+      contentHash: approval.contentHash,
+    });
+    await load();
+  };
 
   return (
     <article className="job-detail">
@@ -165,10 +180,41 @@ function JobDetail({
             {new Date(job.createdAt).toLocaleString()}
           </span>
         </div>
-        <span className={`badge status-${job.status}`}>
-          {t(`jobs.status.${job.status}`)}
-        </span>
+        <div className="row">
+          <span className={`badge status-${job.status}`}>
+            {job.status === 'queued' && detail.position
+              ? t('jobs.queuedAt', { position: detail.position })
+              : t(`jobs.status.${job.status}`)}
+          </span>
+          {active && (
+            <button
+              type="button"
+              className="secondary"
+              disabled={busy}
+              onClick={() =>
+                void act(async () => {
+                  await api(`/jobs/${id}/cancel`, 'POST', {});
+                })
+              }
+            >
+              {t('jobs.stop')}
+            </button>
+          )}
+        </div>
       </header>
+
+      {detail.pending.length > 0 && (
+        <ApprovalPanel
+          approvals={detail.pending}
+          project={project}
+          onAnswer={answer}
+          onStop={() =>
+            void act(async () => {
+              await api(`/jobs/${id}/cancel`, 'POST', {});
+            })
+          }
+        />
+      )}
 
       <section className="card">
         <h3>{t('jobs.task')}</h3>
@@ -394,7 +440,9 @@ export function JobsPage({
       .catch(() => undefined);
   }, []);
   useEffect(load, [load]);
-  const anyRunning = list?.jobs.some((j) => j.status === 'running');
+  const anyRunning = list?.jobs.some(
+    (j) => j.status === 'running' || j.status === 'queued',
+  );
   useEffect(() => {
     if (!anyRunning) return;
     const timer = setInterval(load, 2000);
@@ -420,9 +468,15 @@ export function JobsPage({
                 onClick={() => onSelect(job.id)}
               >
                 <span>{job.title}</span>
-                <span className={`badge status-${job.status}`}>
-                  {t(`jobs.status.${job.status}`)}
-                </span>
+                {job.waiting ? (
+                  <span className="badge warn">
+                    {t('jobs.waiting', { count: job.waiting })}
+                  </span>
+                ) : (
+                  <span className={`badge status-${job.status}`}>
+                    {t(`jobs.status.${job.status}`)}
+                  </span>
+                )}
               </button>
             </li>
           ))}

@@ -4,7 +4,8 @@ import { tool } from 'langchain';
 import { z } from 'zod';
 import type { SkillStore } from '../skills/store.ts';
 
-export const SKILL_TOOLS = new Set(['load_skill']);
+/** Tools that only read Rocky's own data (skills, jobs): they change nothing and skip the gate. */
+export const SKILL_TOOLS = new Set(['load_skill', 'check_jobs']);
 
 export function skillsPrompt(skills: SkillStore): string | undefined {
   const list = skills.list();

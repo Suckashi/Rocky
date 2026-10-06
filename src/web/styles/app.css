@@ -1101,3 +1101,20 @@ button.secondary {
   padding: var(--space-2) var(--space-3);
   resize: vertical;
 }
+.rail .icon-button {
+  position: relative;
+}
+.rail-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--warn);
+  color: var(--primary-text);
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+}
