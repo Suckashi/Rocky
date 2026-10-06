@@ -1,12 +1,16 @@
 // Approvals, modes and receipts. The decision is Rocky's: it is checked against the content
 // hash the user saw, recorded in a receipt, and only then is a pass issued.
-import { Hono } from 'hono';
+import { existsSync, readFileSync } from 'node:fs';
+import { Hono, type Context } from 'hono';
 import { z } from 'zod';
 import type { Executor } from '../../effects/execute.ts';
 import type { Gate, UserDecision } from '../../effects/gate.ts';
 import { planRestore, restoreRun, runChanges } from '../../effects/restore.ts';
 import type { ReceiptStore } from '../../effects/receipts.ts';
 import { asContent, type SnapshotStore } from '../../effects/snapshots.ts';
+import { formatOf, isBinary } from '../../documents/formats.ts';
+import { previewDocument } from '../../documents/preview.ts';
+import { toMarkdown } from '../../documents/read.ts';
 
 const answer = z.discriminatedUnion('decision', [
   z
@@ -40,6 +44,30 @@ const answer = z.discriminatedUnion('decision', [
 
 /** Larger files are listed without content; the UI says they are too large to preview. */
 const PREVIEW_LIMIT = 256 * 1024;
+/** Documents up to this size get a Markdown diff and a layout preview. */
+const DOCUMENT_LIMIT = 30 * 1024 * 1024;
+
+const side = (c: Context) =>
+  c.req.query('side') === 'before' ? 'before' : 'after';
+
+/** One version of a document as a self-contained HTML page; null when that version does not exist. */
+async function preview(c: Context, path: string, bytes: Uint8Array | null) {
+  const format = formatOf(path);
+  if (!format) return c.json({ error: 'not-a-document' }, 415);
+  if (bytes === null) return c.json({ html: null, truncated: false });
+  if (bytes.length > DOCUMENT_LIMIT) return c.json({ error: 'too-large' }, 413);
+  try {
+    return c.json(await previewDocument(bytes, format));
+  } catch (error) {
+    return c.json(
+      {
+        error: 'preview-failed',
+        message: error instanceof Error ? error.message : String(error),
+      },
+      422,
+    );
+  }
+}
 
 export function approvalRoutes(
   gate: Gate,
@@ -51,6 +79,26 @@ export function approvalRoutes(
   app.get('/threads/:id/approvals', (c) => {
     const id = c.req.param('id');
     return c.json({ mode: gate.mode(id), pending: gate.pending(id) });
+  });
+  // What a pending write would leave behind, or what the file looks like now.
+  app.get('/approvals/:id/preview', (c) => {
+    const approval = gate.find(c.req.param('id'));
+    const effect = approval?.effect;
+    if (!effect || effect.kind !== 'write')
+      return c.json({ error: 'not-pending' }, 404);
+    if (side(c) === 'before')
+      return preview(
+        c,
+        effect.path,
+        existsSync(effect.path) ? readFileSync(effect.path) : null,
+      );
+    return preview(
+      c,
+      effect.path,
+      effect.operation === 'delete'
+        ? null
+        : Buffer.from(effect.content ?? '', effect.encoding ?? 'utf8'),
+    );
   });
   app.post('/approvals/:id', async (c) => {
     const parsed = answer.safeParse(await c.req.json().catch(() => null));
@@ -83,41 +131,63 @@ export function approvalRoutes(
     return c.json({ receipts: list, snapshots: snaps });
   });
   // One turn's file changes with before/after text, and the restore plan the user approves.
-  app.get('/threads/:id/runs/:runId/changes', (c) => {
+  app.get('/threads/:id/runs/:runId/changes', async (c) => {
     const [threadId, runId] = [c.req.param('id'), c.req.param('runId')];
     const plan = new Map(
       planRestore(receipts, snapshots, threadId, runId).map((i) => [i.path, i]),
     );
-    let tooLarge = false;
-    const text = (sha: string | null): string | null => {
+    /** The text to diff; undefined when there is none to show (too large or unreadable). */
+    const text = async (
+      sha: string | null,
+      path: string,
+    ): Promise<string | null | undefined> => {
       if (sha === null) return null;
       const blob = snapshots.read(sha);
       const content = asContent(blob);
       if (blob.length <= PREVIEW_LIMIT && !content.encoding)
         return content.content;
-      // Too large, or binary (a document): listed without a text preview.
-      tooLarge = true;
-      return null;
+      // A document (bytes) is compared as Markdown, like in the approval panel.
+      const format = formatOf(path);
+      if (format && isBinary(format) && blob.length <= DOCUMENT_LIMIT) {
+        try {
+          return await toMarkdown(blob, format);
+        } catch {
+          // Unreadable: listed without a text diff (the layout preview may still work).
+        }
+      }
+      return undefined;
     };
-    const changes = runChanges(receipts, snapshots, threadId, runId).map(
-      (change) => {
-        tooLarge = false;
-        const item = plan.get(change.path)!;
-        const before = text(change.beforeSha);
-        const after = text(change.afterSha);
-        return {
-          path: change.path,
-          created: change.beforeSha === null,
-          deleted: change.afterSha === null,
-          before,
-          after,
-          tooLarge,
-          modifiedSince: item.modifiedSince,
-          contentHash: item.contentHash,
-        };
-      },
-    );
+    const changes = [];
+    for (const change of runChanges(receipts, snapshots, threadId, runId)) {
+      const item = plan.get(change.path)!;
+      const before = await text(change.beforeSha, change.path);
+      const after = await text(change.afterSha, change.path);
+      changes.push({
+        path: change.path,
+        created: change.beforeSha === null,
+        deleted: change.afterSha === null,
+        before: before ?? null,
+        after: after ?? null,
+        tooLarge: before === undefined || after === undefined,
+        document: formatOf(change.path) !== undefined,
+        modifiedSince: item.modifiedSince,
+        contentHash: item.contentHash,
+      });
+    }
     return c.json({ changes });
+  });
+  // One version of a document this turn changed, from the snapshots.
+  app.get('/threads/:id/runs/:runId/preview', (c) => {
+    const path = c.req.query('path') ?? '';
+    const change = runChanges(
+      receipts,
+      snapshots,
+      c.req.param('id'),
+      c.req.param('runId'),
+    ).find((ch) => ch.path === path);
+    if (!change) return c.json({ error: 'not-found' }, 404);
+    const sha = side(c) === 'before' ? change.beforeSha : change.afterSha;
+    return preview(c, path, sha === null ? null : snapshots.read(sha));
   });
   app.post('/threads/:id/runs/:runId/restore', async (c) => {
     const parsed = z

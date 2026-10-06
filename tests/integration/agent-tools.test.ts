@@ -322,6 +322,16 @@ describe('document tools', () => {
     expect((edit.effect as { preview?: string }).preview).toContain(
       '**百分之十五**',
     );
+    // The layout preview shows the file as it is and as the approval would leave it.
+    type Layout = { html: string | null; truncated: boolean };
+    const layout = async (url: string) =>
+      (await (await call(url)).json()) as Layout;
+    const now = await layout(`/api/approvals/${edit.id}/preview?side=before`);
+    const next = await layout(`/api/approvals/${edit.id}/preview?side=after`);
+    expect(now.html).toContain('<strong>百分之十二</strong>');
+    expect(next.html).toContain('<strong>百分之十五</strong>');
+    expect(next.html).toContain("default-src 'none'");
+    expect((await call('/api/approvals/nope/preview')).status).toBe(404);
     await call(`/api/approvals/${edit.id}`, {
       method: 'POST',
       body: { decision: 'allow-once', contentHash: edit.contentHash },
@@ -337,10 +347,37 @@ describe('document tools', () => {
       ),
     ).toContain('營收成長**百分之十五**');
 
-    // The change card restores binary documents too.
+    // The change card compares documents as Markdown, previews them, and restores them too.
     const { changes } = (await (
       await call('/api/threads/d2/runs/d2-r/changes')
-    ).json()) as { changes: { path: string; contentHash: string }[] };
+    ).json()) as {
+      changes: {
+        path: string;
+        contentHash: string;
+        before: string | null;
+        after: string | null;
+        tooLarge: boolean;
+        document: boolean;
+      }[];
+    };
+    expect(changes).toMatchObject([{ document: true, tooLarge: false }]);
+    expect(changes[0]!.before).toContain('**百分之十二**');
+    expect(changes[0]!.after).toContain('**百分之十五**');
+    const path = encodeURIComponent(changes[0]!.path);
+    expect(
+      (
+        await layout(
+          `/api/threads/d2/runs/d2-r/preview?path=${path}&side=before`,
+        )
+      ).html,
+    ).toContain('百分之十二');
+    expect(
+      (await layout(`/api/threads/d2/runs/d2-r/preview?path=${path}`)).html,
+    ).toContain('百分之十五');
+    expect(
+      (await call('/api/threads/d2/runs/d2-r/preview?path=%2Fother.docx'))
+        .status,
+    ).toBe(404);
     const restored = await call('/api/threads/d2/runs/d2-r/restore', {
       method: 'POST',
       body: {

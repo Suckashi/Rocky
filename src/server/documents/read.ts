@@ -13,7 +13,7 @@ import { decodeText } from './text.ts';
  * pdf.js needs the CJK CMaps as a plain directory path ending in "/" (ADR 0005, finding 1);
  * without them, text in non-embedded Chinese fonts reads as an empty string.
  */
-const cMapDir = (() => {
+export const cMapDir = (() => {
   const pkg = createRequire(import.meta.url).resolve('pdfjs-dist/package.json');
   return `${join(dirname(pkg), 'cmaps').split(sep).join('/')}/`;
 })();
@@ -38,7 +38,7 @@ export async function loadWorkbook(
   return book;
 }
 
-function cellText(value: ExcelJS.CellValue): string {
+export function cellText(value: ExcelJS.CellValue): string {
   if (value === null || value === undefined) return '';
   if (value instanceof Date) return value.toISOString().slice(0, 10);
   if (typeof value === 'object' && 'formula' in value) {

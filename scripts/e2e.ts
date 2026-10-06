@@ -2,7 +2,13 @@
 // Not part of CI (too heavy for every push). Run: npm run test:e2e
 //   ROCKY_E2E_BROWSER  path to a Chromium-based browser; default: the system Edge (msedge)
 import { spawn } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { chromium, type Page } from 'playwright-core';
@@ -54,6 +60,19 @@ const fake = await startFakeOpenAI((messages) => {
                 commands: [[process.execPath, '--version']],
               },
             ],
+          },
+        },
+      ],
+    };
+  if (said.includes('簡報'))
+    return {
+      toolCalls: [
+        {
+          name: 'create_document',
+          args: {
+            file_path: '/簡報.pptx',
+            markdown:
+              '# 季度簡報\n\n- 營收成長\n- 成本下降\n\n## 下一步\n\n繼續努力',
           },
         },
       ],
@@ -234,6 +253,37 @@ try {
     .locator('.reply', { hasText: 'Saved' })
     .waitFor({ timeout: 20_000 });
   check(true, 'remembering asks in ask-always mode and saves');
+
+  // Documents: the approval shows how the slides will look, before anything is written.
+  const cards = await page.locator('.turn-changes').count();
+  await page.getByRole('textbox').fill('做一份簡報');
+  await page.keyboard.press('Enter');
+  await panel
+    .getByText('Rocky 想新增檔案 簡報.pptx')
+    .waitFor({ timeout: 20_000 });
+  await panel.getByRole('button', { name: '版面預覽' }).click();
+  const slides = panel.frameLocator('iframe[title="修改後的版面預覽"]');
+  await slides.locator('section.slide', { hasText: '季度簡報' }).waitFor();
+  check(
+    (await slides.locator('section.slide').count()) === 2 &&
+      !existsSync(join(project, '簡報.pptx')),
+    'a new deck shows its slides in a layout preview before it is written',
+  );
+  if (shots) await page.screenshot({ path: join(shots, 'm4-preview.png') });
+  await page.keyboard.press('1');
+  const change = page.locator('.turn-changes').nth(cards);
+  await change.waitFor({ timeout: 20_000 });
+  await change.getByRole('button', { name: '看看' }).click();
+  await change.locator('.diff-add', { hasText: '營收成長' }).waitFor();
+  await change.getByRole('button', { name: '版面預覽' }).click();
+  await change
+    .frameLocator('iframe')
+    .locator('section.slide', { hasText: '下一步' })
+    .waitFor();
+  check(
+    existsSync(join(project, '簡報.pptx')),
+    'the change card compares the deck as text and previews its layout',
+  );
 
   // An action whose outcome is unknown offers the two buttons; Rocky never redoes it.
   await page.getByRole('textbox').fill('跑一個會等很久的指令');

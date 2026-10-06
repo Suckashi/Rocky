@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { api, ApiError, displayPath, type FileChange } from '../api.ts';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { Diff } from './Diff.tsx';
+import { DocumentChange } from './DocumentPreview.tsx';
 
 export function TurnChanges({
   threadId,
@@ -125,7 +126,20 @@ export function TurnChanges({
                 </p>
               )}
               {view === 'diff' &&
-                (c.tooLarge ? (
+                (c.document ? (
+                  <DocumentChange
+                    diff={
+                      c.tooLarge ? (
+                        <p className="small muted">{t('diff.tooLarge')}</p>
+                      ) : (
+                        <Diff before={c.before} after={c.after} />
+                      )
+                    }
+                    url={`${base}/preview?path=${encodeURIComponent(c.path)}`}
+                    hasBefore={!c.created}
+                    hasAfter={!c.deleted}
+                  />
+                ) : c.tooLarge ? (
                   <p className="small muted">{t('diff.tooLarge')}</p>
                 ) : (
                   <Diff before={c.before} after={c.after} />

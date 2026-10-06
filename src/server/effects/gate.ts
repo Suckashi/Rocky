@@ -110,6 +110,11 @@ export class Gate {
       .sort((a, b) => a.createdAt - b.createdAt);
   }
 
+  /** One pending approval by id (for previews of what it would write). */
+  find(approvalId: string): PendingApproval | undefined {
+    return this.waiting.get(approvalId)?.approval;
+  }
+
   /** root: judge paths against this folder instead of the project (an external agent's worktree). */
   context(threadId: string, root?: string): PolicyContext {
     const projectRoot = root ?? this.deps.projectRoot();

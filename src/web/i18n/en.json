@@ -303,5 +303,17 @@
   "jobs.stop": "Stop",
   "jobs.waiting": "{count} waiting for you",
   "nav.jobsWaiting": "Jobs ({count} waiting for approval)",
-  "jobs.notify": "A background job is waiting for your approval"
+  "jobs.notify": "A background job is waiting for your approval",
+  "preview.view": "View",
+  "preview.text": "Text diff",
+  "preview.layout": "Layout preview",
+  "preview.side": "Version",
+  "preview.before": "Before",
+  "preview.after": "After",
+  "preview.frame.before": "Layout preview before the change",
+  "preview.frame.after": "Layout preview after the change",
+  "preview.loading": "Rendering the preview…",
+  "preview.error": "Could not render the preview: {error}",
+  "preview.missing": "This version does not exist (the file is new, or will be deleted).",
+  "preview.truncated": "Only the first 10 pages or slides (and the first 200 rows of a sheet) are shown."
 }

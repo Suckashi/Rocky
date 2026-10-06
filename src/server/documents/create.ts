@@ -139,23 +139,33 @@ async function pptx(blocks: Block[]): Promise<Uint8Array> {
         fontSize: 30,
         bold: true,
       });
+    // Text and tables stack top to bottom in Markdown order, about half an inch per line.
     let y = s.title ? 1.6 : 0.6;
-    const lines: pptxgen.default.TextProps[] = [];
+    let lines: pptxgen.default.TextProps[] = [];
+    const flush = () => {
+      if (!lines.length) return;
+      slide.addText(lines, {
+        x: 0.6,
+        y,
+        w: 12,
+        h: lines.length * 0.5,
+        valign: 'top',
+        fontFace: CJK_FONT,
+        fontSize: 18,
+      });
+      y += lines.length * 0.5;
+      lines = [];
+    };
     for (const b of s.body) {
       if (b.type === 'table') {
+        flush();
         slide.addTable(
           b.rows.map((row, r) =>
             row.map((text) => ({ text, options: { bold: r === 0 } })),
           ),
-          {
-            x: 0.6,
-            y: y + lines.length * 0.5,
-            w: 12,
-            fontFace: CJK_FONT,
-            fontSize: 14,
-          },
+          { x: 0.6, y, w: 12, fontFace: CJK_FONT, fontSize: 14 },
         );
-        y += 0.5 * (b.rows.length + 1);
+        y += 0.45 * b.rows.length + 0.3;
         continue;
       }
       const items =
@@ -176,16 +186,7 @@ async function pptx(blocks: Block[]): Promise<Uint8Array> {
           },
         });
     }
-    if (lines.length)
-      slide.addText(lines, {
-        x: 0.6,
-        y,
-        w: 12,
-        h: 7.5 - y - 0.4,
-        valign: 'top',
-        fontFace: CJK_FONT,
-        fontSize: 18,
-      });
+    flush();
   }
   return new Uint8Array(
     (await pres.write({ outputType: 'nodebuffer' })) as Buffer,
@@ -253,6 +254,8 @@ async function pdf(blocks: Block[]): Promise<Uint8Array> {
   doc.registerFontkit(fontkit);
   const font = await doc.embedFont(pdfFont(), { subset: true });
   const [W, H, M] = [595, 842, 56];
+  // Not every CJK font has "•" (it would draw as an empty box).
+  const bullet = font.getCharacterSet().includes(0x2022) ? '•' : '-';
   let page = doc.addPage([W, H]);
   let y = H - M;
   const draw = (text: string, size: number, indent = 0, gap = 6) => {
@@ -272,7 +275,7 @@ async function pdf(blocks: Block[]): Promise<Uint8Array> {
     else if (b.type === 'paragraph') draw(plain(b.runs), 12);
     else if (b.type === 'list')
       b.items.forEach((item, i) =>
-        draw(`${b.ordered ? `${i + 1}.` : '•'} ${plain(item)}`, 12, 12, 2),
+        draw(`${b.ordered ? `${i + 1}.` : bullet} ${plain(item)}`, 12, 12, 2),
       );
     else if (b.type === 'code') draw(b.text, 10, 12);
     else if (b.type === 'table')

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { displayPath, type PendingApproval } from '../api.ts';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { Diff } from './Diff.tsx';
+import { DocumentChange, isDocument } from './DocumentPreview.tsx';
 
 /** Rocky's own request to start an external agent job. */
 function delegation(
@@ -123,19 +124,32 @@ function Preview({
     );
   }
   if (effect.kind === 'write') {
+    const diff = (
+      <Diff
+        before={approval.before}
+        after={
+          effect.operation === 'delete'
+            ? null
+            : // Documents are bytes: the diff compares their Markdown.
+              effect.encoding === 'base64'
+              ? (effect.preview ?? '')
+              : (effect.content ?? '')
+        }
+      />
+    );
     return (
       <div className="approval-preview">
-        <Diff
-          before={approval.before}
-          after={
-            effect.operation === 'delete'
-              ? null
-              : // Documents are bytes: the diff compares their Markdown.
-                effect.encoding === 'base64'
-                ? (effect.preview ?? '')
-                : (effect.content ?? '')
-          }
-        />
+        {isDocument(effect.path) ? (
+          <DocumentChange
+            key={approval.id}
+            diff={diff}
+            url={`/approvals/${approval.id}/preview`}
+            hasBefore={effect.operation !== 'create'}
+            hasAfter={effect.operation !== 'delete'}
+          />
+        ) : (
+          diff
+        )}
       </div>
     );
   }

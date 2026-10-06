@@ -109,6 +109,8 @@ export interface FileChange {
   before: string | null;
   after: string | null;
   tooLarge: boolean;
+  /** One of the six document formats: a layout preview is available. */
+  document: boolean;
   modifiedSince: boolean;
   contentHash: string;
 }

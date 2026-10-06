@@ -303,5 +303,17 @@
   "jobs.stop": "停止",
   "jobs.waiting": "等你核准 {count} 件",
   "nav.jobsWaiting": "工作（{count} 件等你核准）",
-  "jobs.notify": "背景工作在等你核准"
+  "jobs.notify": "背景工作在等你核准",
+  "preview.view": "顯示方式",
+  "preview.text": "文字差異",
+  "preview.layout": "版面預覽",
+  "preview.side": "版本",
+  "preview.before": "修改前",
+  "preview.after": "修改後",
+  "preview.frame.before": "修改前的版面預覽",
+  "preview.frame.after": "修改後的版面預覽",
+  "preview.loading": "正在產生預覽…",
+  "preview.error": "無法產生預覽：{error}",
+  "preview.missing": "這個版本不存在（檔案是新建立的，或會被刪除）。",
+  "preview.truncated": "只顯示前 10 頁（投影片、工作表前 200 列）。"
 }
