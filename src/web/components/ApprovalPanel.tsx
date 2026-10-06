@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { displayPath, type PendingApproval } from '../api.ts';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { Diff } from './Diff.tsx';
-import { DocumentChange, isDocument } from './DocumentPreview.tsx';
+import { DocumentChange } from './DocumentPreview.tsx';
+import { isPreviewable } from './PreviewPane.tsx';
 
 /** Rocky's own request to start an external agent job. */
 function delegation(
@@ -139,13 +140,15 @@ function Preview({
     );
     return (
       <div className="approval-preview">
-        {isDocument(effect.path) ? (
+        {isPreviewable(effect.path) ? (
           <DocumentChange
-            key={approval.id}
             diff={diff}
-            url={`/approvals/${approval.id}/preview`}
-            hasBefore={effect.operation !== 'create'}
-            hasAfter={effect.operation !== 'delete'}
+            target={{
+              title: displayPath(effect.path, project),
+              url: `/approvals/${approval.id}/preview`,
+              hasBefore: effect.operation !== 'create',
+              hasAfter: effect.operation !== 'delete',
+            }}
           />
         ) : (
           diff

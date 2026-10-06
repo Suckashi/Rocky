@@ -14,6 +14,7 @@ import { createApp } from './http/app.ts';
 import { copilotRoutes } from './http/copilot.ts';
 import { LoginCodes } from './http/login-codes.ts';
 import { approvalRoutes } from './http/routes/approvals.ts';
+import { previewRoutes } from './http/routes/preview.ts';
 import { jobRoutes } from './http/routes/jobs.ts';
 import { memoryRoutes } from './http/routes/memory.ts';
 import { skillRoutes } from './http/routes/skills.ts';
@@ -113,6 +114,7 @@ export function composeRocky(options: ComposeOptions) {
       settingsRoutes(settings, egress, options.listModels),
       threadRoutes(threads, runner),
       approvalRoutes(gate, receipts, snapshots, executor),
+      previewRoutes(settings),
       jobRoutes({
         jobs,
         runner: jobRunner,

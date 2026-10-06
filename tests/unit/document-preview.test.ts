@@ -1,15 +1,15 @@
 // Layout previews: every format becomes one self-contained page that loads nothing and runs
 // nothing. Also covers the layout bugs the previews exposed in documents Rocky creates.
-import fontkit from '@pdf-lib/fontkit';
+import { join } from 'node:path';
 import ExcelJS from 'exceljs';
 import { PDFDocument } from 'pdf-lib';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { fromMarkdown } from '../../src/server/documents/create.ts';
-import { pdfFont } from '../../src/server/documents/fonts.ts';
 import { openPackage, readPart } from '../../src/server/documents/ooxml.ts';
 import {
   PREVIEW_PAGES,
   previewDocument,
+  previewFile,
 } from '../../src/server/documents/preview.ts';
 import { pdfText } from '../../src/server/documents/read.ts';
 
@@ -27,11 +27,25 @@ const REPORT = `# 季度報告
 表格後的說明。
 `;
 
+// PDFs are drawn with the fixture font (CI machines have no CJK font); it only has a few
+// characters, so the PDF text uses those.
+const PDF_REPORT = '# 繁體中文\n\n建立文字\n\n- 中文\n- 引號\n';
+
+beforeAll(() => {
+  process.env['ROCKY_PDF_FONT'] = join(
+    import.meta.dirname,
+    '../fixtures/fonts/noto-tc-subset.ttf',
+  );
+});
+
 const CSP = `content="default-src 'none'; img-src data:; style-src 'unsafe-inline'"`;
 
 describe('document layout previews', () => {
   it('pdf: pages become images, at most ten', async () => {
-    const one = await previewDocument(await fromMarkdown(REPORT, 'pdf'), 'pdf');
+    const one = await previewDocument(
+      await fromMarkdown(PDF_REPORT, 'pdf'),
+      'pdf',
+    );
     expect(one.html).toContain(CSP);
     expect(one.html.match(/<img class="pdf"/g)).toHaveLength(1);
     expect(one.html).toContain('src="data:image/png;base64,');
@@ -138,10 +152,32 @@ describe('documents Rocky creates, as the previews showed them', () => {
     expect(text('表格後的說明').y).toBeGreaterThan(table.y);
   });
 
-  it('pdf: list bullets use a character the font has', async () => {
-    const font = fontkit.create(Buffer.from(pdfFont()));
-    const bullet = font.characterSet.includes(0x2022) ? '•' : '-';
-    const text = await pdfText(await fromMarkdown(REPORT, 'pdf'));
-    expect(text).toContain(`${bullet} 台北門市`);
+  it('pdf: list bullets are drawn dots, not a character the font may lack', async () => {
+    const text = await pdfText(await fromMarkdown(PDF_REPORT, 'pdf'));
+    const lines = text.split('\n').map((l) => l.trim());
+    expect(lines).toContain('中文');
+    expect(lines).toContain('引號');
+    expect(text).not.toMatch(/[•-]/);
+  });
+});
+
+describe('other project files in the preview panel', () => {
+  it('shows pictures and text with line numbers; other bytes are not previewable', async () => {
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+      'base64',
+    );
+    const picture = await previewFile(png, 'logo.PNG');
+    expect(picture?.html).toContain('src="data:image/png;base64,iVBOR');
+    const text = await previewFile(
+      new TextEncoder().encode('a <b>\r\nsecond'),
+      'notes.txt',
+    );
+    expect(text?.html).toContain(
+      '<span>a &#60;b&#62;</span><span>second</span>',
+    );
+    expect(
+      await previewFile(new Uint8Array([0xff, 0xfe, 0x00, 0x81]), 'x.bin'),
+    ).toBeUndefined();
   });
 });

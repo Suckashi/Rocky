@@ -8,6 +8,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError, type Settings } from './api.ts';
 import { Chat } from './components/Chat.tsx';
+import { usePreviewPane } from './components/PreviewPane.tsx';
 import { Roko, type RokoState } from './components/Roko.tsx';
 import { ThreadList } from './components/ThreadList.tsx';
 import { I18nProvider, useI18n } from './i18n/index.tsx';
@@ -74,6 +75,7 @@ function Shell({
   const [refreshKey, setRefreshKey] = useState(0);
   const [roko, setRoko] = useState<RokoState>('idle');
   const jobsWaiting = useJobsWaiting();
+  const preview = usePreviewPane();
 
   // The hash Rocky itself wrote; only other changes (links, back/forward) navigate.
   const written = useRef('');
@@ -121,8 +123,10 @@ function Shell({
       />
     );
   }
-  return (
-    <div className={`shell${view === 'jobs' ? ' jobs-view' : ''}`}>
+  return preview.provider(
+    <div
+      className={`shell${view === 'jobs' ? ' jobs-view' : ''}${preview.open ? ' previewing' : ''}`}
+    >
       <nav className="rail" aria-label={t('app.name')}>
         <img src="/rocky/mark.svg" alt={t('app.name')} width={28} height={28} />
         <button
@@ -184,6 +188,7 @@ function Shell({
           />
         </>
       )}
+      {preview.pane}
       <aside className="panel">
         <div className={`presence ${roko}`}>
           <Roko state={roko} size={128} />
@@ -230,7 +235,7 @@ function Shell({
           )}
         </div>
       </aside>
-    </div>
+    </div>,
   );
 }
 

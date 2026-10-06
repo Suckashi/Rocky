@@ -304,6 +304,20 @@ describe('document tools', () => {
     });
     expect(reply(await events)).toContain('Created');
     const bytes = readFileSync(join(project, '報告.docx'));
+
+    // The side panel opens project files by the path the tools use; never secrets or outside.
+    const file = (path: string) =>
+      call(`/api/files/preview?path=${encodeURIComponent(path)}`);
+    const shown = (await (await file('/報告.docx')).json()) as {
+      html: string;
+    };
+    expect(shown.html).toContain('<h1>季度報告</h1>');
+    const code = (await (await file('app.js')).json()) as { html: string };
+    expect(code.html).toContain('<span>const answer = 41;</span>');
+    expect((await file('/.env')).status).toBe(403);
+    expect((await file('/../outside.txt')).status).toBe(403);
+    expect((await file('/missing.pdf')).status).toBe(404);
+    expect((await file('/')).status).toBe(404);
     expect(bytes.subarray(0, 2).toString()).toBe('PK');
 
     plan = [

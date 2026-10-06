@@ -254,35 +254,79 @@ try {
     .waitFor({ timeout: 20_000 });
   check(true, 'remembering asks in ask-always mode and saves');
 
-  // Documents: the approval shows how the slides will look, before anything is written.
+  // Documents: the side panel shows how the slides will look, before anything is written.
   const cards = await page.locator('.turn-changes').count();
+  const side = page.getByRole('complementary', { name: '預覽' });
   await page.getByRole('textbox').fill('做一份簡報');
   await page.keyboard.press('Enter');
   await panel
     .getByText('Rocky 想新增檔案 簡報.pptx')
     .waitFor({ timeout: 20_000 });
   await panel.getByRole('button', { name: '版面預覽' }).click();
-  const slides = panel.frameLocator('iframe[title="修改後的版面預覽"]');
+  const slides = side.frameLocator('iframe[title="修改後的版面預覽"]');
   await slides.locator('section.slide', { hasText: '季度簡報' }).waitFor();
   check(
     (await slides.locator('section.slide').count()) === 2 &&
-      !existsSync(join(project, '簡報.pptx')),
-    'a new deck shows its slides in a layout preview before it is written',
+      !existsSync(join(project, '簡報.pptx')) &&
+      (await panel.getByRole('option').count()) === 4,
+    'a new deck shows its slides in the side panel before it is written, beside the approval',
   );
   if (shots) await page.screenshot({ path: join(shots, 'm4-preview.png') });
+  const before = await side.boundingBox();
+  const edge = page.getByRole('separator', { name: /調整預覽寬度/ });
+  const grip = (await edge.boundingBox())!;
+  await page.mouse.move(grip.x + 4, grip.y + 200);
+  await page.mouse.down();
+  await page.mouse.move(grip.x - 150, grip.y + 200, { steps: 5 });
+  await page.mouse.up();
+  check(
+    (await side.boundingBox())!.width > before!.width + 100,
+    'dragging the panel edge makes it wider',
+  );
   await page.keyboard.press('1');
   const change = page.locator('.turn-changes').nth(cards);
   await change.waitFor({ timeout: 20_000 });
-  await change.getByRole('button', { name: '看看' }).click();
-  await change.locator('.diff-add', { hasText: '營收成長' }).waitFor();
-  await change.getByRole('button', { name: '版面預覽' }).click();
-  await change
+  await page
+    .locator('.tool-card', { hasText: '簡報.pptx' })
+    .last()
+    .getByRole('button', { name: '預覽' })
+    .click();
+  await side
     .frameLocator('iframe')
     .locator('section.slide', { hasText: '下一步' })
     .waitFor();
+  await change.getByRole('button', { name: '看看' }).click();
+  await change.locator('.diff-add', { hasText: '營收成長' }).waitFor();
   check(
     existsSync(join(project, '簡報.pptx')),
-    'the change card compares the deck as text and previews its layout',
+    'the written deck opens from its tool card; the change card diffs its text',
+  );
+
+  // Replacing it: before and after side by side, then rejected.
+  await page.getByRole('textbox').fill('再做一份簡報');
+  await page.keyboard.press('Enter');
+  await panel.getByText('Rocky 想修改 簡報.pptx').waitFor({ timeout: 20_000 });
+  await panel.getByRole('button', { name: '版面預覽' }).click();
+  await side.getByRole('button', { name: '並排' }).click();
+  await side
+    .frameLocator('iframe[title="修改前的版面預覽"]')
+    .locator('section.slide', { hasText: '季度簡報' })
+    .waitFor();
+  await side
+    .frameLocator('iframe[title="修改後的版面預覽"]')
+    .locator('section.slide', { hasText: '季度簡報' })
+    .waitFor();
+  if (shots)
+    await page.screenshot({ path: join(shots, 'm4-side-by-side.png') });
+  await page.keyboard.press('3');
+  await page
+    .locator('.reply', { hasText: 'rejected' })
+    .last()
+    .waitFor({ timeout: 20_000 });
+  await side.getByRole('button', { name: '關閉預覽' }).click();
+  check(
+    (await side.count()) === 0,
+    'an edit compares before and after side by side; the panel closes',
   );
 
   // An action whose outcome is unknown offers the two buttons; Rocky never redoes it.

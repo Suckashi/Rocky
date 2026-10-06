@@ -13,7 +13,7 @@ import {
   WidthType,
 } from 'docx';
 import ExcelJS from 'exceljs';
-import { PDFDocument, type PDFFont } from 'pdf-lib';
+import { PDFDocument, rgb, type PDFFont } from 'pdf-lib';
 import pptxgen from 'pptxgenjs';
 import { pdfFont } from './fonts.ts';
 import type { Format } from './formats.ts';
@@ -254,18 +254,36 @@ async function pdf(blocks: Block[]): Promise<Uint8Array> {
   doc.registerFontkit(fontkit);
   const font = await doc.embedFont(pdfFont(), { subset: true });
   const [W, H, M] = [595, 842, 56];
-  // Not every CJK font has "•" (it would draw as an empty box).
-  const bullet = font.getCharacterSet().includes(0x2022) ? '•' : '-';
   let page = doc.addPage([W, H]);
   let y = H - M;
-  const draw = (text: string, size: number, indent = 0, gap = 6) => {
-    for (const line of wrap(text, font, size, W - 2 * M - indent)) {
+  /** Draws wrapped text; `bullet` puts a dot before the first line. */
+  const draw = (
+    text: string,
+    size: number,
+    indent = 0,
+    gap = 6,
+    bullet = false,
+  ) => {
+    for (const [i, line] of wrap(
+      text,
+      font,
+      size,
+      W - 2 * M - indent,
+    ).entries()) {
       if (y - size < M) {
         page = doc.addPage([W, H]);
         y = H - M;
       }
       y -= size * 1.4;
       page.drawText(line, { x: M + indent, y, size, font });
+      // A drawn dot, not "•": many CJK fonts have no bullet glyph (it would be an empty box).
+      if (bullet && i === 0)
+        page.drawCircle({
+          x: M + indent - 8,
+          y: y + size * 0.33,
+          size: 1.8,
+          color: rgb(0, 0, 0),
+        });
     }
     y -= gap;
   };
@@ -275,7 +293,9 @@ async function pdf(blocks: Block[]): Promise<Uint8Array> {
     else if (b.type === 'paragraph') draw(plain(b.runs), 12);
     else if (b.type === 'list')
       b.items.forEach((item, i) =>
-        draw(`${b.ordered ? `${i + 1}.` : bullet} ${plain(item)}`, 12, 12, 2),
+        b.ordered
+          ? draw(`${i + 1}. ${plain(item)}`, 12, 12, 2)
+          : draw(plain(item), 12, 24, 2, true),
       );
     else if (b.type === 'code') draw(b.text, 10, 12);
     else if (b.type === 'table')

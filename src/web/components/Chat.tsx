@@ -8,12 +8,14 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import { api, type Mode, type PendingApproval, type Receipt } from '../api.ts';
 import { useI18n } from '../i18n/index.tsx';
 import { ApprovalPanel, type Answer } from './ApprovalPanel.tsx';
 import { PlanPanel } from './PlanPanel.tsx';
+import { filePreview, isPreviewable, useOpenPreview } from './PreviewPane.tsx';
 import { ModeSelect } from './ModeSelect.tsx';
 import { Roko, type RokoState } from './Roko.tsx';
 import { ToolCard, type ToolState } from './ToolCard.tsx';
@@ -67,6 +69,30 @@ function runsWithChanges(receipts: Receipt[], snapshots: Snapshot[]) {
   return runs;
 }
 
+/** Inline code that names a previewable file opens it in the preview panel. */
+function InlineCode({ children }: { children?: ReactNode }) {
+  const { t } = useI18n();
+  const open = useOpenPreview();
+  const text = typeof children === 'string' ? children : '';
+  if (
+    !text ||
+    text.includes('\n') ||
+    !isPreviewable(text) ||
+    /^[a-z]+:/i.test(text)
+  )
+    return <code>{children}</code>;
+  return (
+    <button
+      type="button"
+      className="code-link"
+      title={t('preview.open')}
+      onClick={() => open(filePreview(text))}
+    >
+      <code>{text}</code>
+    </button>
+  );
+}
+
 const markdownComponents: Components = {
   img: ({ alt }) => <span>{alt}</span>,
   a: ({ href, children }) => (
@@ -74,6 +100,12 @@ const markdownComponents: Components = {
       {children}
     </a>
   ),
+  code: ({ className, children }) =>
+    className ? (
+      <code className={className}>{children}</code>
+    ) : (
+      <InlineCode>{children}</InlineCode>
+    ),
 };
 
 export function Chat({

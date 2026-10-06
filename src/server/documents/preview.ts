@@ -6,7 +6,8 @@ import type { Element } from '@xmldom/xmldom';
 import type ExcelJS from 'exceljs';
 import mammoth from 'mammoth';
 import { getDocumentProxy, renderPageAsImage } from 'unpdf';
-import type { Format } from './formats.ts';
+import { extname } from 'node:path';
+import { formatOf, type Format } from './formats.ts';
 import { markdownToHtml } from './markdown.ts';
 import { openPackage, readPart } from './ooxml.ts';
 import { cellText, cMapDir, loadWorkbook, slidePaths } from './read.ts';
@@ -42,6 +43,10 @@ body{margin:0;padding:16px;background:#e9e7e2;font-family:system-ui,"Microsoft J
 .slide .box p{margin:0;line-height:1.2}
 .slide .box.table{overflow:visible}
 .slide .box img{width:100%;height:100%;object-fit:contain}
+.code{margin:0;background:#fff;padding:12px 0;font:13px/1.5 ui-monospace,Consolas,monospace;counter-reset:line;white-space:pre-wrap;word-break:break-all}
+.code span{display:block;padding:0 12px 0 4.5em;text-indent:-3.5em}
+.code span::before{counter-increment:line;content:counter(line);display:inline-block;width:3em;margin-right:.5em;text-align:right;color:#999}
+.picture{display:block;max-width:100%;margin:0 auto;background:#fff}
 .slide .no{position:absolute;right:8px;bottom:4px;font-size:11px;color:#999}
 </style>`;
 
@@ -421,4 +426,46 @@ export async function previewDocument(
     case 'html':
       return { html: ownHtml(decodeText(bytes).text), truncated: false };
   }
+}
+
+const PICTURES: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  svg: 'image/svg+xml',
+};
+const TEXT_LIMIT = 1024 * 1024;
+
+/** Any project file: documents by format, pictures as images, other UTF-8 text with line numbers. */
+export async function previewFile(
+  bytes: Uint8Array,
+  path: string,
+): Promise<Preview | undefined> {
+  const format = formatOf(path);
+  if (format) return previewDocument(bytes, format);
+  const picture = PICTURES[extname(path).slice(1).toLowerCase()];
+  if (picture)
+    return {
+      html: page(
+        `<img class="picture" alt="" src="data:${picture};base64,${Buffer.from(bytes).toString('base64')}">`,
+      ),
+      truncated: false,
+    };
+  let text: string;
+  try {
+    text = new TextDecoder('utf-8', { fatal: true }).decode(
+      bytes.subarray(0, TEXT_LIMIT),
+    );
+  } catch {
+    return undefined;
+  }
+  const lines = text.replace(/\r\n/g, '\n').split('\n');
+  return {
+    html: page(
+      `<pre class="code">${lines.map((l) => `<span>${escape(l)}</span>`).join('')}</pre>`,
+    ),
+    truncated: bytes.length > TEXT_LIMIT,
+  };
 }

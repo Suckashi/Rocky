@@ -135,9 +135,12 @@ export function TurnChanges({
                         <Diff before={c.before} after={c.after} />
                       )
                     }
-                    url={`${base}/preview?path=${encodeURIComponent(c.path)}`}
-                    hasBefore={!c.created}
-                    hasAfter={!c.deleted}
+                    target={{
+                      title: displayPath(c.path, project),
+                      url: `${base}/preview?path=${encodeURIComponent(c.path)}`,
+                      hasBefore: !c.created,
+                      hasAfter: !c.deleted,
+                    }}
                   />
                 ) : c.tooLarge ? (
                   <p className="small muted">{t('diff.tooLarge')}</p>

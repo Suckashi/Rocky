@@ -9,7 +9,7 @@ import { planRestore, restoreRun, runChanges } from '../../effects/restore.ts';
 import type { ReceiptStore } from '../../effects/receipts.ts';
 import { asContent, type SnapshotStore } from '../../effects/snapshots.ts';
 import { formatOf, isBinary } from '../../documents/formats.ts';
-import { previewDocument } from '../../documents/preview.ts';
+import { PREVIEW_MAX_BYTES, previewResponse } from './preview.ts';
 import { toMarkdown } from '../../documents/read.ts';
 
 const answer = z.discriminatedUnion('decision', [
@@ -44,30 +44,11 @@ const answer = z.discriminatedUnion('decision', [
 
 /** Larger files are listed without content; the UI says they are too large to preview. */
 const PREVIEW_LIMIT = 256 * 1024;
-/** Documents up to this size get a Markdown diff and a layout preview. */
-const DOCUMENT_LIMIT = 30 * 1024 * 1024;
+/** Documents up to this size get a Markdown diff (and a layout preview). */
+const DOCUMENT_LIMIT = PREVIEW_MAX_BYTES;
 
 const side = (c: Context) =>
   c.req.query('side') === 'before' ? 'before' : 'after';
-
-/** One version of a document as a self-contained HTML page; null when that version does not exist. */
-async function preview(c: Context, path: string, bytes: Uint8Array | null) {
-  const format = formatOf(path);
-  if (!format) return c.json({ error: 'not-a-document' }, 415);
-  if (bytes === null) return c.json({ html: null, truncated: false });
-  if (bytes.length > DOCUMENT_LIMIT) return c.json({ error: 'too-large' }, 413);
-  try {
-    return c.json(await previewDocument(bytes, format));
-  } catch (error) {
-    return c.json(
-      {
-        error: 'preview-failed',
-        message: error instanceof Error ? error.message : String(error),
-      },
-      422,
-    );
-  }
-}
 
 export function approvalRoutes(
   gate: Gate,
@@ -87,12 +68,12 @@ export function approvalRoutes(
     if (!effect || effect.kind !== 'write')
       return c.json({ error: 'not-pending' }, 404);
     if (side(c) === 'before')
-      return preview(
+      return previewResponse(
         c,
         effect.path,
         existsSync(effect.path) ? readFileSync(effect.path) : null,
       );
-    return preview(
+    return previewResponse(
       c,
       effect.path,
       effect.operation === 'delete'
@@ -187,7 +168,7 @@ export function approvalRoutes(
     ).find((ch) => ch.path === path);
     if (!change) return c.json({ error: 'not-found' }, 404);
     const sha = side(c) === 'before' ? change.beforeSha : change.afterSha;
-    return preview(c, path, sha === null ? null : snapshots.read(sha));
+    return previewResponse(c, path, sha === null ? null : snapshots.read(sha));
   });
   app.post('/threads/:id/runs/:runId/restore', async (c) => {
     const parsed = z

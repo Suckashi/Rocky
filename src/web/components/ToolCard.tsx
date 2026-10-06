@@ -2,6 +2,7 @@
 import { Check, CircleSlash, LoaderCircle } from 'lucide-react';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { commandLine } from '../effects.ts';
+import { filePreview, isPreviewable, useOpenPreview } from './PreviewPane.tsx';
 
 const KNOWN = new Set([
   'ls',
@@ -54,6 +55,7 @@ export function ToolCard({
   state: ToolState;
 }) {
   const { t } = useI18n();
+  const openPreview = useOpenPreview();
   let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(args || '{}') as Record<string, unknown>;
@@ -63,6 +65,16 @@ export function ToolCard({
   const jobId =
     name === 'delegate_to_opencode' && result
       ? /Job ([\w-]{36})/.exec(result)?.[1]
+      : undefined;
+  // A file a tool made, changed or read can be opened in the preview panel once it is done.
+  const file =
+    state === 'done' &&
+    /^(create_document|edit_document|read_document|write_file|edit_file|read_file)$/.test(
+      name,
+    ) &&
+    typeof parsed['file_path'] === 'string' &&
+    isPreviewable(parsed['file_path'])
+      ? parsed['file_path']
       : undefined;
   const label = KNOWN.has(name)
     ? t(`tool.${name}` as MessageKey)
@@ -85,6 +97,18 @@ export function ToolCard({
         <span className="tool-target mono">{target(parsed)}</span>
         {state === 'interrupted' && (
           <span className="badge warn">{t('tool.interrupted')}</span>
+        )}
+        {file && (
+          <button
+            type="button"
+            className="link small"
+            onClick={(e) => {
+              e.preventDefault();
+              openPreview(filePreview(file));
+            }}
+          >
+            {t('preview.open')}
+          </button>
         )}
         {jobId && (
           <a
