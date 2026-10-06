@@ -42,6 +42,8 @@ interface Result {
   seconds: number;
   tools: string[];
   asked: number;
+  /** The end of Rocky's final reply, for reading failures. */
+  reply: string;
   /** What Rocky did, from the receipts: effect, decision, outcome. */
   actions: string[];
   error?: string;
@@ -99,6 +101,23 @@ async function runCase(c: Case): Promise<Result> {
   rocky.gate.subscribe(threadId, () => {
     for (const approval of rocky.gate.pending(threadId)) {
       asked.push({ summary: JSON.stringify(approval.effect).slice(0, 200) });
+      if (approval.effect.kind === 'plan') {
+        rocky.gate.answer(
+          approval.id,
+          c.choosePlan !== undefined
+            ? {
+                decision: 'choose',
+                contentHash: approval.contentHash,
+                option: c.choosePlan,
+              }
+            : {
+                decision: 'reject',
+                contentHash: approval.contentHash,
+                reason: 'Not approved in this evaluation.',
+              },
+        );
+        continue;
+      }
       rocky.gate.answer(
         approval.id,
         c.approve?.(approval.effect)
@@ -179,9 +198,10 @@ async function runCase(c: Case): Promise<Result> {
     seconds,
     tools,
     asked: asked.length,
+    reply: reply.slice(-600),
     actions: receipts.map(
       (r) =>
-        `${r.decision}/${r.outcome} ${r.effect.kind === 'command' ? JSON.stringify(r.effect.argv) : r.effect.kind === 'write' ? `${r.effect.operation} ${r.effect.path}` : r.effect.kind}`,
+        `${r.decision}/${r.outcome} ${r.effect.kind === 'command' ? JSON.stringify(r.effect.argv) : r.effect.kind === 'write' ? `${r.effect.operation} ${r.effect.path}` : r.effect.kind === 'plan' ? `plan: ${r.effect.title}` : r.effect.kind}`,
     ),
     ...(error ? { error } : {}),
   };

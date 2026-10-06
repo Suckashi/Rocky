@@ -55,6 +55,9 @@ export function decide(effect: Effect, ctx: PolicyContext): Verdict {
     ...base,
   });
 
+  // A plan is a question for the user by nature: it always asks, in every mode.
+  if (effect.kind === 'plan') return verdict('ask', 'plan');
+
   // Every program a command really runs, after unwrapping.
   const analysis =
     effect.kind === 'command' ? analyzeCommand(effect.argv) : undefined;

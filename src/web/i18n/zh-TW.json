@@ -287,5 +287,15 @@
   "suggest.text": "你已經核准過 {count} 次類似的指令。要讓這類指令以後直接執行嗎？",
   "suggest.hint": "會新增一條永久允許規則，隨時可以在設定頁移除；危險指令和對外動作仍然會問。",
   "suggest.accept": "設為永久規則",
-  "suggest.dismiss": "不用了"
+  "suggest.dismiss": "不用了",
+  "plan.title": "Rocky 提出 {count} 個方案：{title}",
+  "plan.commands": "選這個方案會預先核准這些指令（只限完全相同）：",
+  "plan.note": "選定後，方案裡列出的指令這個對話不再問；其他動作、危險指令和對外動作仍然會問。",
+  "plan.revise": "要求修改",
+  "plan.reject": "拒絕",
+  "plan.feedback": "想怎麼改？（Enter 送出）",
+  "plan.keys": "按數字選方案，{revise} 要求修改，Esc 拒絕",
+  "approval.reason.plan": "這是一份方案，要由你選擇",
+  "effect.plan": "方案：{title}",
+  "tool.propose_plan": "提出方案"
 }

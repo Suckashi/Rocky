@@ -13,6 +13,7 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import { api, type Mode, type PendingApproval, type Receipt } from '../api.ts';
 import { useI18n } from '../i18n/index.tsx';
 import { ApprovalPanel, type Answer } from './ApprovalPanel.tsx';
+import { PlanPanel } from './PlanPanel.tsx';
 import { ModeSelect } from './ModeSelect.tsx';
 import { Roko, type RokoState } from './Roko.tsx';
 import { ToolCard, type ToolState } from './ToolCard.tsx';
@@ -394,12 +395,21 @@ export function Chat({
       </div>
       {pending.length > 0 ? (
         <div className="composer">
-          <ApprovalPanel
-            approvals={pending}
-            project={project}
-            onAnswer={answer}
-            onStop={() => copilotkit.stopAgent({ agent })}
-          />
+          {pending[0]!.effect.kind === 'plan' ? (
+            <PlanPanel
+              approval={pending[0]!}
+              more={pending.length - 1}
+              onAnswer={answer}
+              onStop={() => copilotkit.stopAgent({ agent })}
+            />
+          ) : (
+            <ApprovalPanel
+              approvals={pending}
+              project={project}
+              onAnswer={answer}
+              onStop={() => copilotkit.stopAgent({ agent })}
+            />
+          )}
         </div>
       ) : (
         <form

@@ -98,13 +98,14 @@ async function run(
   call: Call,
   threadId: string,
   text = 'go',
+  turn = '',
 ): Promise<Event[]> {
   const res = await call('/api/copilotkit/agent/rocky/run', {
     method: 'POST',
     body: {
       threadId,
-      runId: `${threadId}-r`,
-      messages: [{ id: `${threadId}-u`, role: 'user', content: text }],
+      runId: `${threadId}-r${turn}`,
+      messages: [{ id: `${threadId}-u${turn}`, role: 'user', content: text }],
       tools: [],
       context: [],
       state: {},
@@ -734,6 +735,113 @@ describe("Roko's rule suggestions", () => {
     });
     expect(await suggestions()).toEqual([]);
   }, 60_000);
+});
+
+describe('plan review', () => {
+  const options = [
+    {
+      title: '只改 app.js',
+      summary: '最小改動',
+      steps: ['改 app.js'],
+      commands: [],
+    },
+    {
+      title: '改 app.js 並跑檢查',
+      summary: '改完跑版本檢查',
+      steps: ['改 app.js', '跑檢查'],
+      commands: [
+        [process.execPath, '--version'],
+        ['rm', '-rf', 'build'],
+      ],
+    },
+  ];
+  const answer = (call: Call, id: string, body: Record<string, unknown>) =>
+    call(`/api/approvals/${id}`, { method: 'POST', body });
+
+  it('choosing an option approves exactly its commands; others and dangerous ones still ask', async () => {
+    const { call, rocky } = await setup('ask-always');
+    plan = [
+      { name: 'propose_plan', args: { title: '把答案改成 42', options } },
+    ];
+    const proposing = run(call, 'pl1', 'go', '1');
+    const ask = await nextApproval(call, 'pl1');
+    expect(ask.effect).toMatchObject({ kind: 'plan', title: '把答案改成 42' });
+    expect(ask.reason).toBe('plan');
+    await answer(call, ask.id, {
+      decision: 'choose',
+      contentHash: ask.contentHash,
+      option: 1,
+    });
+    const text = reply(await proposing);
+    expect(text).toContain('The user chose option 2: 改 app.js 並跑檢查');
+    expect(rocky.receipts.forThread('pl1')[0]).toMatchObject({
+      decision: 'approved',
+      outcome: 'succeeded',
+      detail: 'option 2: 改 app.js 並跑檢查',
+    });
+
+    // Listed exactly: runs without asking, even in ask-always.
+    plan = [
+      { name: 'run_command', args: { argv: [process.execPath, '--version'] } },
+    ];
+    expect(reply(await run(call, 'pl1', 'go', '2'))).toContain(
+      'exited with code 0',
+    );
+    expect(rocky.receipts.forThread('pl1').at(-1)).toMatchObject({
+      reason: 'session-approved',
+    });
+
+    // Not listed: asks. Listed but dangerous: still asks.
+    for (const [turn, argv] of [
+      ['3', [process.execPath, '--help']],
+      ['4', ['rm', '-rf', 'build']],
+    ] as const) {
+      plan = [{ name: 'run_command', args: { argv: [...argv] } }];
+      const running = run(call, 'pl1', 'go', turn);
+      const again = await nextApproval(call, 'pl1');
+      expect(again.effect).toMatchObject({ kind: 'command', argv });
+      await answer(call, again.id, {
+        decision: 'reject',
+        contentHash: again.contentHash,
+      });
+      await running;
+    }
+  }, 30_000);
+
+  it('asking for changes or rejecting sends the reason back and starts nothing', async () => {
+    const { call } = await setup('hands-off');
+    plan = [{ name: 'propose_plan', args: { title: '計畫', options } }];
+    const first = run(call, 'pl2', 'go', '1');
+    const ask = await nextApproval(call, 'pl2');
+    await answer(call, ask.id, {
+      decision: 'revise',
+      contentHash: ask.contentHash,
+      feedback: '請加上測試',
+    });
+    expect(reply(await first)).toContain(
+      'wants changes to the plan: 請加上測試',
+    );
+
+    const second = run(call, 'pl2', 'go', '2');
+    const ask2 = await nextApproval(call, 'pl2');
+    await answer(call, ask2.id, {
+      decision: 'reject',
+      contentHash: ask2.contentHash,
+      reason: '先不要做',
+    });
+    expect(reply(await second)).toContain(
+      'rejected the plan. Reason: 先不要做',
+    );
+
+    // More than three options is not a plan.
+    plan = [
+      {
+        name: 'propose_plan',
+        args: { title: 'x', options: [...options, ...options] },
+      },
+    ];
+    expect(reply(await run(call, 'pl2', 'go', '3'))).toContain('invalid plan');
+  }, 30_000);
 });
 
 describe('without a project folder', () => {

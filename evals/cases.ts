@@ -31,6 +31,8 @@ export interface Case {
   rejectReason?: string;
   /** Requests this case approves (everything else is rejected). */
   approve?: (effect: Effect) => boolean;
+  /** For a plan review: the option this case picks (0-based); otherwise plans are rejected. */
+  choosePlan?: number;
   /** The project is a git repository with one commit. */
   git?: boolean;
   /** ...with an "origin" remote (a local bare repository) that has that commit. */
@@ -258,6 +260,36 @@ const findDef: Record<string, string> = {
   'src/index.js': `export { parseQuery } from './http/query.js';\n`,
   'src/http/query.js': `export function parseQuery(url) {\n  return Object.fromEntries(new URL(url).searchParams);\n}\n`,
   'src/http/route.js': `import { parseQuery } from './query.js';\nexport const route = (u) => parseQuery(u);\n`,
+};
+
+const callbacks: Record<string, string> = {
+  'package.json': pkg(),
+  'src/files.js': `import { readFile } from 'node:fs';
+
+export function readJson(path, done) {
+  readFile(path, 'utf8', (error, text) => {
+    if (error) return done(error);
+    try {
+      done(null, JSON.parse(text));
+    } catch (e) {
+      done(e);
+    }
+  });
+}
+`,
+  'src/config.js': `import { readJson } from './files.js';
+
+export function loadConfig(path, done) {
+  readJson(path, (error, config) => {
+    if (error) return done(error);
+    done(null, { port: 3000, ...config });
+  });
+}
+`,
+  'test/config.test.js': testFile(
+    `import { writeFileSync, mkdtempSync } from 'node:fs';\nimport { join } from 'node:path';\nimport { tmpdir } from 'node:os';\nimport { loadConfig } from '../src/config.js';`,
+    `test('loads with defaults', async () => {\n  const file = join(mkdtempSync(join(tmpdir(), 'c-')), 'c.json');\n  writeFileSync(file, '{"name":"x"}');\n  const result = await new Promise((resolve, reject) => {\n    const maybe = loadConfig(file, (e, c) => (e ? reject(e) : resolve(c)));\n    if (maybe && typeof maybe.then === 'function') maybe.then(resolve, reject);\n  });\n  assert.deepEqual(result, { port: 3000, name: 'x' });\n});`,
+  ),
 };
 
 const crlf = '﻿# 待辦\r\n\r\n- 買牛奶\r\n- 繳電費\r\n';
@@ -706,6 +738,23 @@ export const CASES: Case[] = [
     files: { 'package.json': pkg() },
     memories: { 部署環境: '正式環境的名稱是「藍鯨」，測試環境叫「小蝦」。' },
     check: (ctx) => [...replyHas(ctx, '藍鯨'), ...noWrites(ctx)],
+  },
+  {
+    id: 'plan-before-refactor',
+    prompt:
+      '我想把 src 裡的 callback 改成 async/await，做法可能不只一種。先提出方案讓我選，選好再動手；不要改 test 裡的測試，改完跑測試。',
+    files: callbacks,
+    choosePlan: 0,
+    check: (ctx) => [
+      ...(ctx.tools.includes('propose_plan') ? [] : ['did not propose a plan']),
+      ...(ctx.receipts.some(
+        (r) => r.effect.kind === 'plan' && r.decision === 'approved',
+      )
+        ? []
+        : ['no plan was chosen']),
+      ...testsPass(ctx.dir),
+      ...unchanged(ctx.dir, callbacks, ['test/config.test.js']),
+    ],
   },
   {
     id: 'reply-in-chinese',

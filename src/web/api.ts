@@ -60,7 +60,15 @@ export type Effect =
     }
   | { kind: 'command'; argv: string[]; cwd: string }
   | { kind: 'mcp'; server: string; tool: string; args: unknown }
-  | { kind: 'network'; method: string; url: string };
+  | { kind: 'network'; method: string; url: string }
+  | { kind: 'plan'; title: string; options: PlanOption[] };
+
+export interface PlanOption {
+  title: string;
+  summary: string;
+  steps: string[];
+  commands: string[][];
+}
 
 export interface PendingApproval {
   id: string;

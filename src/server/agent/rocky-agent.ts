@@ -31,6 +31,7 @@ import { createRockyBackend } from './backend.ts';
 import { createGateMiddleware, type GateRun } from './gate-middleware.ts';
 import { createDelegateTool } from './delegate.ts';
 import { createDocumentTools } from './documents.ts';
+import { createPlanTool } from './plan.ts';
 import { createMemoryTools, memoryPrompt } from './memory.ts';
 import type { MemoryStore } from '../memory/store.ts';
 import type { SkillStore } from '../skills/store.ts';
@@ -237,6 +238,7 @@ export class RockyAgent extends AbstractAgent {
               : []),
             ...(projectRoot
               ? [
+                  createPlanTool(),
                   createRunCommandTool(projectRoot, executor),
                   ...createDocumentTools(projectRoot, executor),
                   ...(jobs

@@ -1051,3 +1051,53 @@ button.secondary {
 .memory-list .rule-suggestion {
   margin-left: 0;
 }
+.plan-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-2);
+}
+.plan-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  text-align: left;
+  padding: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.plan-option:hover,
+.plan-option:focus-visible {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.plan-option-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.plan-option kbd,
+.plan-panel kbd {
+  font: 12px var(--font-mono);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 0 5px;
+  background: var(--surface-muted);
+}
+.plan-steps {
+  margin: 0;
+  padding-left: 1.4em;
+}
+.plan-command {
+  display: block;
+  margin-top: 2px;
+}
+.plan-feedback {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  resize: vertical;
+}

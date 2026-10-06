@@ -22,7 +22,9 @@ function delegation(
 
 export type Answer =
   | { decision: 'allow-once' | 'allow-session' }
-  | { decision: 'reject'; reason?: string };
+  | { decision: 'reject'; reason?: string }
+  | { decision: 'choose'; option: number }
+  | { decision: 'revise'; feedback: string };
 
 const OPTIONS = [
   'approval.allowOnce',

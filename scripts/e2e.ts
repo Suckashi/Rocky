@@ -33,6 +33,31 @@ const fake = await startFakeOpenAI((messages) => {
         },
       ],
     };
+  if (said.includes('規劃'))
+    return {
+      toolCalls: [
+        {
+          name: 'propose_plan',
+          args: {
+            title: '整理專案',
+            options: [
+              {
+                title: '只整理 app.js',
+                summary: '最小改動',
+                steps: ['改 app.js'],
+                commands: [],
+              },
+              {
+                title: '整理並檢查',
+                summary: '改完跑檢查',
+                steps: ['改 app.js', '跑檢查'],
+                commands: [[process.execPath, '--version']],
+              },
+            ],
+          },
+        },
+      ],
+    };
   if (said.includes('檢查'))
     return {
       toolCalls: [
@@ -248,6 +273,39 @@ try {
   check(
     (await panel.count()) === 0,
     "accepting Roko's suggestion adds a rule; the same kind of command no longer asks",
+  );
+
+  // Plan review: ask for changes with key 3, then choose option 2 with key 2.
+  for (const [round, keys] of [
+    [1, ['3']],
+    [2, ['2']],
+  ] as const) {
+    const before = await page.locator('.reply').count();
+    await page.getByRole('textbox').fill(`幫我規劃整理專案（第 ${round} 次）`);
+    await page.keyboard.press('Enter');
+    await page
+      .getByText('Rocky 提出 2 個方案：整理專案')
+      .waitFor({ timeout: 20_000 });
+    if (round === 1) {
+      if (shots) await page.screenshot({ path: join(shots, 'm5-plan.png') });
+      await page.keyboard.press(keys[0]);
+      await page.getByLabel('想怎麼改？（Enter 送出）').fill('請加上測試');
+      await page.keyboard.press('Enter');
+    } else {
+      await page.keyboard.press(keys[0]);
+    }
+    await page.locator('.reply').nth(before).waitFor({ timeout: 20_000 });
+    await page.getByRole('button', { name: '送出' }).waitFor();
+  }
+  await page
+    .locator('.reply', { hasText: 'wants changes to the plan: 請加上測試' })
+    .waitFor();
+  await page
+    .locator('.reply', { hasText: 'The user chose option 2: 整理並檢查' })
+    .waitFor();
+  check(
+    true,
+    'plan review: ask for changes, then choose an option with the number keys',
   );
 
   // Settings: memory, skills and MCP.

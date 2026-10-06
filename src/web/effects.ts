@@ -27,5 +27,7 @@ export function effectSummary(
       return t('effect.mcp', { server: effect.server, tool: effect.tool });
     case 'network':
       return t('effect.network', { method: effect.method, url: effect.url });
+    case 'plan':
+      return t('effect.plan', { title: effect.title });
   }
 }

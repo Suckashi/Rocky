@@ -24,7 +24,17 @@ export type Effect =
       args: unknown;
       readOnly: boolean;
     }
-  | { kind: 'network'; method: string; url: string };
+  | { kind: 'network'; method: string; url: string }
+  /** Plan review (approvals.md): the user picks one option, asks for changes, or rejects. */
+  | { kind: 'plan'; title: string; options: PlanOption[] };
+
+export interface PlanOption {
+  title: string;
+  summary: string;
+  steps: string[];
+  /** Commands this option will run in the project root; choosing it approves exactly these. */
+  commands: string[][];
+}
 
 export type Decision = 'allow' | 'ask' | 'deny';
 
@@ -38,7 +48,8 @@ export type Reason =
   | 'allow-rule'
   | 'safe-list'
   | 'unparseable'
-  | 'mode';
+  | 'mode'
+  | 'plan';
 
 export interface Verdict {
   decision: Decision;

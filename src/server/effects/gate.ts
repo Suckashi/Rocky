@@ -4,6 +4,7 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { PassBook, type Pass } from './passes.ts';
+import { sessionKey } from './hash.ts';
 import { decide, type PolicyContext } from './policy.ts';
 import type { Origin, Receipt, ReceiptStore } from './receipts.ts';
 import type { Effect, Mode, Reason, Rule } from './types.ts';
@@ -27,11 +28,21 @@ export interface PendingApproval {
 export type UserDecision =
   | { decision: 'allow-once'; contentHash: string }
   | { decision: 'allow-session'; contentHash: string }
-  | { decision: 'reject'; contentHash: string; reason?: string };
+  | { decision: 'reject'; contentHash: string; reason?: string }
+  /** Plans only: the option the user picked (0-based). */
+  | { decision: 'choose'; contentHash: string; option: number }
+  /** Plans only: what the user wants changed. */
+  | { decision: 'revise'; contentHash: string; feedback: string };
 
 export type GateResult =
   /** receipt is undefined only for reads that needed no question: they change nothing. */
-  | { allowed: true; pass: Pass; receipt: Receipt | undefined }
+  | {
+      allowed: true;
+      pass: Pass;
+      receipt: Receipt | undefined;
+      /** For a plan: the option the user chose. */
+      choice?: number;
+    }
   | { allowed: false; receipt: Receipt; message: string };
 
 export interface GateDeps {
@@ -114,7 +125,12 @@ export class Gate {
     preview: { before?: string; root?: string } = {},
   ): Promise<GateResult> {
     const verdict = decide(effect, this.context(origin.threadId, preview.root));
-    const tool = effect.kind === 'command' ? 'run_command' : effect.kind;
+    const tool =
+      effect.kind === 'command'
+        ? 'run_command'
+        : effect.kind === 'plan'
+          ? 'propose_plan'
+          : effect.kind;
     if (verdict.decision === 'deny') {
       const receipt = this.deps.receipts.intent(
         origin,
@@ -203,6 +219,24 @@ export class Gate {
         message: `${tool} was not run: the approved content does not match. Ask again.`,
       };
     }
+    if (effect.kind === 'plan') {
+      return this.planAnswer(effect, origin, verdict, answer, preview.root);
+    }
+    // Choosing and revising only make sense for plans; anything else is a rejection.
+    if (answer.decision === 'choose' || answer.decision === 'revise') {
+      const receipt = this.deps.receipts.intent(
+        origin,
+        effect,
+        verdict,
+        'rejected',
+        'invalid-answer',
+      );
+      return {
+        allowed: false,
+        receipt,
+        message: `${tool} was not run: the answer did not fit this request.`,
+      };
+    }
     if (answer.decision === 'reject') {
       const receipt = this.deps.receipts.intent(
         origin,
@@ -277,6 +311,69 @@ export class Gate {
       allowed: true,
       receipt,
       pass: this.passes.issue(verdict.contentHash, receipt.id),
+    };
+  }
+
+  /**
+   * A plan review: the chosen option's commands become approved for this conversation,
+   * exactly as listed (argv and the project folder), so running them does not ask again.
+   * Dangerous commands and outside actions still ask: the policy checks those first.
+   */
+  private planAnswer(
+    effect: Extract<Effect, { kind: 'plan' }>,
+    origin: Origin & { threadId: string },
+    verdict: { contentHash: string; reason: Reason; sessionKey: string },
+    answer: UserDecision,
+    root: string | undefined,
+  ): GateResult {
+    if (answer.decision === 'choose') {
+      const option = effect.options[answer.option];
+      if (option) {
+        const cwd = root ?? this.deps.projectRoot();
+        if (cwd) {
+          const set =
+            this.sessionApprovals.get(origin.threadId) ?? new Set<string>();
+          for (const argv of option.commands)
+            set.add(sessionKey({ kind: 'command', argv, cwd }));
+          this.sessionApprovals.set(origin.threadId, set);
+        }
+        const receipt = this.deps.receipts.intent(
+          origin,
+          effect,
+          verdict,
+          'approved',
+          `option ${answer.option + 1}: ${option.title}`,
+        );
+        // Choosing changes nothing outside; the decision itself is the outcome.
+        this.deps.receipts.finish(receipt.id, 'succeeded');
+        return {
+          allowed: true,
+          receipt,
+          pass: this.passes.issue(verdict.contentHash, receipt.id),
+          choice: answer.option,
+        };
+      }
+    }
+    const feedback =
+      answer.decision === 'revise'
+        ? answer.feedback
+        : answer.decision === 'reject'
+          ? answer.reason
+          : undefined;
+    const receipt = this.deps.receipts.intent(
+      origin,
+      effect,
+      verdict,
+      'rejected',
+      answer.decision === 'revise' ? `revise: ${feedback ?? ''}` : feedback,
+    );
+    return {
+      allowed: false,
+      receipt,
+      message:
+        answer.decision === 'revise'
+          ? `The user wants changes to the plan: ${feedback?.trim() || 'none given'}. Revise it and call propose_plan again; do not start the work yet.`
+          : `The user rejected the plan. Reason: ${feedback?.trim() || 'none given'}. Do not carry it out; ask the user how to proceed.`,
     };
   }
 

@@ -3,7 +3,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import type { Executor } from '../../effects/execute.ts';
-import type { Gate } from '../../effects/gate.ts';
+import type { Gate, UserDecision } from '../../effects/gate.ts';
 import { planRestore, restoreRun, runChanges } from '../../effects/restore.ts';
 import type { ReceiptStore } from '../../effects/receipts.ts';
 import { asContent, type SnapshotStore } from '../../effects/snapshots.ts';
@@ -14,6 +14,20 @@ const answer = z.discriminatedUnion('decision', [
     .strict(),
   z
     .object({ decision: z.literal('allow-session'), contentHash: z.string() })
+    .strict(),
+  z
+    .object({
+      decision: z.literal('choose'),
+      contentHash: z.string(),
+      option: z.number().int().min(0).max(2),
+    })
+    .strict(),
+  z
+    .object({
+      decision: z.literal('revise'),
+      contentHash: z.string(),
+      feedback: z.string().min(1).max(4000),
+    })
     .strict(),
   z
     .object({
@@ -42,14 +56,14 @@ export function approvalRoutes(
     const parsed = answer.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: 'invalid-decision' }, 400);
     const body = parsed.data;
-    const decision =
+    const decision: UserDecision =
       body.decision === 'reject'
         ? {
-            decision: 'reject' as const,
+            decision: 'reject',
             contentHash: body.contentHash,
             ...(body.reason !== undefined ? { reason: body.reason } : {}),
           }
-        : { decision: body.decision, contentHash: body.contentHash };
+        : body;
     return gate.answer(c.req.param('id'), decision)
       ? c.json({ ok: true })
       : c.json({ error: 'not-pending' }, 409);

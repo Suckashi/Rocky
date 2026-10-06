@@ -287,5 +287,15 @@
   "suggest.text": "You have approved commands like this {count} times. Let them run without asking from now on?",
   "suggest.hint": "This adds a permanent allow rule you can remove in Settings at any time; dangerous commands and outside actions still ask.",
   "suggest.accept": "Make it a rule",
-  "suggest.dismiss": "No thanks"
+  "suggest.dismiss": "No thanks",
+  "plan.title": "Rocky offers {count} options: {title}",
+  "plan.commands": "Choosing this pre-approves these commands (exact matches only):",
+  "plan.note": "Once chosen, the listed commands don't ask again in this conversation; other actions, dangerous commands and outside actions still ask.",
+  "plan.revise": "Ask for changes",
+  "plan.reject": "Reject",
+  "plan.feedback": "What should change? (Enter to send)",
+  "plan.keys": "Number keys choose an option, {revise} asks for changes, Esc rejects",
+  "approval.reason.plan": "this is a plan for you to choose",
+  "effect.plan": "plan: {title}",
+  "tool.propose_plan": "Propose a plan"
 }

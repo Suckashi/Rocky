@@ -21,6 +21,7 @@ const KNOWN = new Set([
   'forget',
   'search_memory',
   'load_skill',
+  'propose_plan',
 ]);
 const RESULT_LIMIT = 4000;
 

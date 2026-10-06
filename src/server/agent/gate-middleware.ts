@@ -14,6 +14,7 @@ import {
   memoryEffect,
 } from './memory.ts';
 import { SKILL_TOOLS } from './skills.ts';
+import { chosenPlanMessage, planEffect } from './plan.ts';
 import { mcpEffect, type McpToolMap } from './mcp.ts';
 import type { ToolPolicy } from '../mcp/manager.ts';
 import { toolEffect } from './workspace.ts';
@@ -53,21 +54,28 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
           'No project folder is selected yet, so files and commands are unavailable. Ask the user to choose one in Settings.',
         );
       }
-      const mapped = mcpRef
-        ? mcpEffect(mcpRef, args as Record<string, unknown>, run.mcp!.policies)
-        : memoryWrite
-          ? memoryEffect(name, args as Record<string, unknown>, memoryWrite)
-          : DOCUMENT_WRITE_TOOLS.has(name)
-            ? await documentEffect(
-                name,
+      const mapped =
+        name === 'propose_plan'
+          ? planEffect(args as Record<string, unknown>)
+          : mcpRef
+            ? mcpEffect(
+                mcpRef,
                 args as Record<string, unknown>,
-                run.projectRoot ?? '',
+                run.mcp!.policies,
               )
-            : toolEffect(
-                name,
-                args as Record<string, unknown>,
-                run.projectRoot ?? '',
-              );
+            : memoryWrite
+              ? memoryEffect(name, args as Record<string, unknown>, memoryWrite)
+              : DOCUMENT_WRITE_TOOLS.has(name)
+                ? await documentEffect(
+                    name,
+                    args as Record<string, unknown>,
+                    run.projectRoot ?? '',
+                  )
+                : toolEffect(
+                    name,
+                    args as Record<string, unknown>,
+                    run.projectRoot ?? '',
+                  );
       if ('none' in mapped) return handler(request);
       if ('error' in mapped) return error(mapped.error);
       // The subagent is read-only: anything with an effect is refused before the gate.
@@ -86,6 +94,17 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
       );
       if (!result.allowed) return error(result.message);
       const effect = mapped.effect;
+      // A plan's outcome is the user's choice; nothing else runs.
+      if (effect.kind === 'plan') {
+        run.gate.passes.redeem(result.pass, result.pass.contentHash);
+        const chosen = effect.options[result.choice ?? -1];
+        return new ToolMessage({
+          tool_call_id: id,
+          content: chosen
+            ? chosenPlanMessage(chosen, result.choice!)
+            : 'Error: no option was chosen.',
+        });
+      }
       if (
         effect.kind === 'read' ||
         effect.kind === 'write' ||
