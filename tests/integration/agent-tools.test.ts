@@ -647,7 +647,7 @@ describe('permanent rules', () => {
     const { call, rocky } = await setup('ask-always');
     const added = await call('/api/rules', {
       method: 'POST',
-      body: { decision: 'allow', pattern: `${process.execPath} --version` },
+      body: { decision: 'allow', pattern: `"${process.execPath}" --version` },
     });
     expect(added.status).toBe(200);
     expect(

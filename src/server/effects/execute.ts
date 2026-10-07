@@ -8,7 +8,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  rmSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { dirname } from 'node:path';
@@ -91,7 +91,12 @@ export class Executor {
         ? this.snapshots.put(readFileSync(path))
         : null;
       if (effect.operation === 'delete') {
-        rmSync(path, { force: true });
+        // Not rmSync: on Windows, Node 24.12 aborts the process for non-ASCII names.
+        try {
+          unlinkSync(path);
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+        }
         this.snapshots.record({
           receiptId: pass.receiptId,
           path,

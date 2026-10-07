@@ -137,6 +137,8 @@ export function Chat({
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const runningRef = useRef(false);
+  // Enter pressed before the conversation finished loading: send once it has.
+  const sendWhenLoaded = useRef(false);
   const bottom = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
 
@@ -190,6 +192,7 @@ export function Chat({
     if (!isReady) return;
     let active = true;
     setLoaded(false);
+    sendWhenLoaded.current = false;
     void copilotkit
       .connectAgent({ agent })
       .then(() => active && setLoaded(true))
@@ -241,7 +244,11 @@ export function Chat({
 
   const send = async () => {
     const text = draft.trim();
-    if (!text || running || !loaded) return;
+    if (!text || running) return;
+    if (!loaded) {
+      sendWhenLoaded.current = true;
+      return;
+    }
     if ('Notification' in window && Notification.permission === 'default') {
       void Notification.requestPermission().catch(() => undefined);
     }
@@ -262,6 +269,13 @@ export function Chat({
       void refresh().catch(() => undefined);
     }
   };
+
+  useEffect(() => {
+    if (!loaded || !sendWhenLoaded.current) return;
+    sendWhenLoaded.current = false;
+    void send();
+    // Only the moment loading finishes matters; send reads the current draft.
+  }, [loaded]);
 
   const answer = async (approval: PendingApproval, choice: Answer) => {
     await api(`/approvals/${approval.id}`, 'POST', {
