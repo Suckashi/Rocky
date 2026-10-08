@@ -184,6 +184,17 @@ export class ThreadStore {
     return row ? (JSON.parse(row.messages) as Message[]) : [];
   }
 
+  /** At startup: runs a crash or kill left open stay `unknown` and are closed, never retried. */
+  markInterrupted(): number {
+    return Number(
+      this.db
+        .prepare(
+          "update runs set finished_at = ?, error = 'interrupted' where outcome = 'unknown' and finished_at is null",
+        )
+        .run(this.now()).changes,
+    );
+  }
+
   /** Runs left `unknown` by a crash or kill; shown to the user, never retried. */
   interruptedRuns(): { id: string; threadId: string }[] {
     return (

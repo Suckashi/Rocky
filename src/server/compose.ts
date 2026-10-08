@@ -60,7 +60,6 @@ export function composeRocky(options: ComposeOptions) {
   const receipts = new ReceiptStore(db);
   const snapshots = new SnapshotStore(db, options.dataDir);
   const rules = new RuleStore(db);
-  const interruptedActions = receipts.markInterrupted();
   const gate = new Gate({
     receipts,
     projectRoot: () => settings.project(),
@@ -77,7 +76,6 @@ export function composeRocky(options: ComposeOptions) {
   const skills = new SkillStore(options.dataDir);
   const mcp = new McpManager();
   const jobs = new JobStore(db);
-  const interruptedJobs = jobs.markInterrupted();
   const jobRunner = new JobRunner({
     jobs,
     gate,
@@ -103,6 +101,13 @@ export function composeRocky(options: ComposeOptions) {
   if (savedModel) egress.allow(savedModel.baseURL);
   for (const server of settings.mcpServers())
     if (server.transport === 'http') egress.allow(server.url);
+  /** Marks what a previous run of Rocky left unfinished. Call only once this process owns
+   * the port: a second instance that fails to start must not touch the live one's state. */
+  const recoverInterrupted = () => ({
+    runs: threads.markInterrupted(),
+    actions: receipts.markInterrupted(),
+    jobs: jobs.markInterrupted(),
+  });
   const codes = new LoginCodes();
   const app = createApp({
     token: options.token,
@@ -142,12 +147,11 @@ export function composeRocky(options: ComposeOptions) {
     memory,
     skills,
     mcp,
-    interruptedJobs,
     gate,
     executor,
     runner,
     agent,
     egress,
-    interruptedActions,
+    recoverInterrupted,
   };
 }

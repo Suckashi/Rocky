@@ -23,18 +23,14 @@ const rocky = composeRocky({
 });
 const { app, codes, db, threads, runner } = rocky;
 rocky.egress.install();
-const interrupted = threads.interruptedRuns();
-if (
-  interrupted.length > 0 ||
-  rocky.interruptedActions > 0 ||
-  rocky.interruptedJobs > 0
-) {
-  console.log(
-    `Interrupted last time: ${interrupted.length} run(s), ${rocky.interruptedActions} action(s), ${rocky.interruptedJobs} job(s); they stay marked unknown and are not restarted.`,
-  );
-}
-
 const server = serve({ fetch: app.fetch, hostname: HOST, port }, (info) => {
+  // Only now does this process own the port; before this, another Rocky may be running.
+  const interrupted = rocky.recoverInterrupted();
+  if (interrupted.runs + interrupted.actions + interrupted.jobs > 0) {
+    console.log(
+      `Interrupted last time: ${interrupted.runs} run(s), ${interrupted.actions} action(s), ${interrupted.jobs} job(s); they stay marked unknown and are not restarted.`,
+    );
+  }
   // A one-time code, valid for two minutes; the API token never leaves this process.
   const url = `http://${HOST}:${info.port}/?code=${codes.issue()}`;
   console.log(`Rocky is running. Open: ${url}`);
