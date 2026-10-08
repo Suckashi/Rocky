@@ -70,4 +70,4 @@ markdown-it、docx、mammoth、exceljs、pptxgenjs、pptx-automizer、unpdf、pd
 ## 後續（2026-10-08 檢查）
 
 - spike 程式（`spikes/s4-documents/`）與測試（`tests/spikes/s4-documents.test.ts`）已刪除，最後一版在 commit `6590139`；正式的文件程式在 `src/server/documents/`，由 `tests/unit/documents.test.ts` 與 `tests/unit/document-preview.test.ts` 測試。spike 測過的 CMap 讀取、系統 `.ttc` 抽字型、pptx-automizer `cleanup` 目前沒有對應的單元測試。
-- 發現 5（pptxgenjs 把東亞字型的 charset 寫成 `-122`）仍未處理：`src/server/documents/` 沒有修正它，也沒有在 PowerPoint 裡確認過。
+- 發現 5（pptxgenjs 把東亞字型的 charset 寫成 `-122`）已修正：Rocky 建立 pptx 後，把每張投影片裡 `a:ea` 的 charset 改成 Big5（`-120`），表格儲存格原本的 `0` 也一併改掉（`src/server/documents/create.ts`，測試在 `tests/unit/documents.test.ts`）。還沒有在 PowerPoint 裡實際開檔確認。
