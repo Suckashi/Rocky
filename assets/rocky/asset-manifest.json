@@ -1,30 +1,30 @@
 {
   "schemaVersion": 1,
   "productId": "rocky",
-  "visualVersion": "1.0.0",
+  "visualVersion": "2.0.0",
   "userApprovedFinalArtwork": false,
   "assets": [
     {
       "id": "rocky-mark-v1",
       "path": "assets/rocky/mark.svg",
-      "sha256": "e15140d3f0d01f76ced2f0e583a5e3a3a5106fe5ac2794c0038e75c223013dba",
-      "creator": "Rocky project / Codex-assisted original vector authoring",
+      "sha256": "ec664e58e5aceb5383451edd853dd795a9742f53542949841d0e77246ef529d0",
+      "creator": "Rocky project / Claude-assisted original vector authoring",
       "method": "authored-svg",
       "license": "Apache-2.0",
       "rightsReview": "pending",
-      "reviewEvidence": "Original geometric source; no third-party media copied. Name/character/trademark distribution review has not been performed."
+      "reviewEvidence": "Original geometric source drawn for Rocky after the Roko mascot (faceted rock body, dark visor, glowing eyes, rock feet); no third-party media copied. Name/character/trademark distribution review has not been performed."
     },
     {
       "id": "rocky-favicon-v1",
       "path": "assets/rocky/favicon.svg",
-      "sha256": "e15140d3f0d01f76ced2f0e583a5e3a3a5106fe5ac2794c0038e75c223013dba",
-      "creator": "Rocky project / Codex-assisted original vector authoring",
+      "sha256": "9a5b1632c2690072d139de3f2844873747cf043234c250c100b20f75cbcbaec0",
+      "creator": "Rocky project / Claude-assisted original vector authoring",
       "method": "authored-svg",
       "license": "Apache-2.0",
       "rightsReview": "pending",
-      "reviewEvidence": "Original geometric source; no third-party media copied. Name/character/trademark distribution review has not been performed."
+      "reviewEvidence": "Original geometric source drawn for Rocky after the Roko mascot (faceted rock body, dark visor, glowing eyes, rock feet); no third-party media copied. Name/character/trademark distribution review has not been performed."
     }
   ],
-  "bytes": 686,
+  "bytes": 4134,
   "mascotManifest": "assets/roko/roko-manifest.json"
 }
