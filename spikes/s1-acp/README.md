@@ -12,7 +12,7 @@ permission request itself (only `allow_once` / `reject_once`), and verifies the 
 - `host-log.ts`: a CONNECT proxy on 127.0.0.1 that records the hosts OpenCode reaches.
 - `scenario.ts`: approve, reject, command, cancel and resume against a scripted model.
   Covered by `tests/spikes/s1-acp.test.ts`, which runs only where OpenCode is installed
-  (skipped otherwise, including CI). Set `ROCKY_REQUIRE_OPENCODE=1` to make a missing
+  (skipped otherwise). Set `ROCKY_REQUIRE_OPENCODE=1` to make a missing
   OpenCode fail instead of skip.
 
 ## Run against a real model on Windows

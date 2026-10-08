@@ -6,7 +6,7 @@ toolchain or Python, sends no telemetry, and works on the platform.
 `package.json` here is the current dependencies plus every library planned for M1–M4
 (Hono, React, Vite, CopilotKit, Tiptap, the document libraries, `playwright-core`, the MCP
 SDK, `@langchain/ollama`). It is a separate package so those libraries are not added to
-Rocky before they are used. It is not part of CI (too heavy for every push).
+Rocky before they are used. It is not part of `npm run check` (too heavy).
 
 - `install-check.ts`: deletes `node_modules`, runs `npm ci` through a host-logging proxy
   (S1's `host-log.ts`) and fails on an install script outside the allowlist, any

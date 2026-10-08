@@ -4,7 +4,8 @@ Proves the agent path before M1: Deep Agents (in the Rocky process) → real `Ch
 client → action gate middleware → AG-UI 1.0 events.
 
 - `scenario.ts`: scripted run against a fake OpenAI-compatible server on 127.0.0.1.
-  Covered by `tests/spikes/s2-agent.test.ts`, so CI runs it on Windows and Ubuntu.
+  Covered by `tests/spikes/s2-agent.test.ts`, so `npm test` runs it.
+- `fake-openai.ts`: that fake server. The integration tests and `scripts/e2e*.ts` use it too.
 - `live.ts`: the same wiring against a real model. It needs a key and network, so it is
   never part of `npm test`.
 

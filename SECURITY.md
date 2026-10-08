@@ -6,7 +6,7 @@ Do not open a public issue containing an exploit, credential, or private diagnos
 
 ## Status
 
-This branch is a rebuild in progress with no release. Nothing here is a production security assurance.
+Rocky V1 is on `main` with no tagged release. Nothing here is a production security assurance.
 
 ## Runtime boundaries (design)
 

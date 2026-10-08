@@ -1,6 +1,6 @@
 # Rocky 產品規格（重做版 V1）
 
-> 狀態：草稿，2026-10-05。擁有者已選定：Rocky 當總指揮（A）、全 TypeScript 架構、
+> 2026-10-05 定案，V1 已完成（見 `plan.md` 的進度）。擁有者已選定：Rocky 當總指揮、全 TypeScript 架構、
 > 第一個外部 agent 是 OpenCode、電腦上沒有 Microsoft Office。
 
 ## 一句話
@@ -50,9 +50,9 @@ Rocky 自動決定派給誰、排程例行工作、技能自動學習或演化�
 - 六種格式各自有含中文的往返測試（讀 → 改 → 再讀內容不變）。
 - OpenCode 委派：在 Windows 原生環境完成一個「修 bug＋跑測試」任務，核准從頭到尾都在 Rocky 處理。
 
-## 已知風險
+## 已知限制
 
-- **OpenCode 在原生 Windows**：官方建議在 WSL 上用，原生體驗較差。第一週先做驗證；
-  如果原生版本不穩，就退回「Rocky 透過 WSL 啟動 OpenCode」。
-- **沒有 Office**：xlsx 公式由 Rocky 寫入後，設定成開檔時重算；Rocky 自己的預覽會標示
-  「未重算」。轉 PDF 用系統內建的 Edge。需要高擬真轉檔時，引導你選裝 LibreOffice（選配）。
+- **OpenCode 在原生 Windows**：官方建議在 WSL 上用；S1 驗證原生 Windows 可行，不需要 WSL（ADR 0003）。
+  OpenCode 不是完全離線：每次啟動會連 `registry.npmjs.org`，PATH 上沒有 `rg` 時會下載 ripgrep。
+- **沒有 Office**：xlsx 公式由 Rocky 寫入時不帶計算結果，設定成開檔時重算。版面預覽由 Rocky 自己畫，
+  和 Office 實際開啟的樣子可能不同（ADR 0013）。

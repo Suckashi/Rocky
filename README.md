@@ -4,16 +4,17 @@ A single-user AI engineering partner that runs only on your own computer (Window
 Rocky chats, works in your project folders, handles documents, and delegates heavy coding
 to external coding agents over ACP. Roko, our mascot, keeps you company.
 
-**Status: V1 (M0–M5).** Verified on Linux; on Windows the owner ran
-`scripts/verify-windows.ps1` and fixed what it found (see `docs/rebuild/plan.md`). There is no hosted CI: run the
-checks below locally. The previous Rocky is only in Git history (before commit `87963aa`).
+**Status: V1 (M0–M5), on `main`.** Verified on Linux; on Windows the owner ran
+`scripts/verify-windows.ps1` and fixed what it found (see `docs/rebuild/plan.md`). There is
+no hosted CI: run the checks below locally. The previous Rocky is only in Git history
+(before commit `87963aa`).
 
 ## Start
 
 You need [Node.js 24](https://nodejs.org/) and Git.
 
 ```powershell
-git clone -b claude/rocky-rebuild https://github.com/Suckashi/Rocky.git
+git clone https://github.com/Suckashi/Rocky.git
 cd Rocky
 powershell -ExecutionPolicy Bypass -File .\Start-Rocky.ps1
 ```
