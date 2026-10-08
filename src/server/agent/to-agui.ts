@@ -1,11 +1,6 @@
 // Maps a Deep Agents stream (streamMode messages+updates, subgraphs) to AG-UI events,
 // emitting each event as soon as it is known. Proven in the S2 spike (ADR 0001).
-import {
-  EventType,
-  type BaseEvent,
-  type Interrupt,
-  type TokenUsage,
-} from '@ag-ui/core';
+import { EventType, type BaseEvent, type TokenUsage } from '@ag-ui/core';
 
 interface ChunkLike {
   id?: string;
@@ -38,7 +33,6 @@ export class AguiMapper {
   private seenResults = new Set<string>();
   private subagents = new Map<string, string>();
   private lastTaskCallId: string | undefined;
-  private interrupts: Interrupt[] = [];
 
   private readonly threadId: string;
   private readonly runId: string;
@@ -96,24 +90,6 @@ export class AguiMapper {
     }
     if (mode === 'updates') {
       const update = data as Record<string, unknown>;
-      const pending = update['__interrupt__'] as
-        { id: string; value: unknown }[] | undefined;
-      for (const item of pending ?? []) {
-        const value = item.value as { reason?: string; toolCallId?: string };
-        // A subagent's interrupt is reported by the subgraph and again by the parent.
-        if (
-          value.toolCallId &&
-          this.interrupts.some((i) => i.toolCallId === value.toolCallId)
-        ) {
-          continue;
-        }
-        this.interrupts.push({
-          id: item.id,
-          reason: value.reason ?? 'input',
-          ...(value.toolCallId ? { toolCallId: value.toolCallId } : {}),
-          metadata: { request: item.value },
-        } as Interrupt);
-      }
       const model = update['model_request'] as
         { messages?: ChunkLike[] } | undefined;
       for (const message of model?.messages ?? []) this.finishMessage(message);
@@ -225,21 +201,15 @@ export class AguiMapper {
 
   finish(): BaseEvent[] {
     for (const messageId of [...this.openText]) this.closeText(messageId);
-    const outcome =
-      this.interrupts.length > 0
-        ? { type: 'interrupt', interrupts: this.interrupts }
-        : { type: 'success' };
+    // Approvals wait inside the tool call (gate.ts), so a run never ends on a LangGraph
+    // interrupt; a finished run is a success.
     this.emit({
       type: EventType.RUN_FINISHED,
       threadId: this.threadId,
       runId: this.runId,
-      outcome,
+      outcome: { type: 'success' },
       ...(this.usage.length ? { usage: this.usage } : {}),
     });
     return this.events;
-  }
-
-  get pendingInterrupts(): Interrupt[] {
-    return this.interrupts;
   }
 }

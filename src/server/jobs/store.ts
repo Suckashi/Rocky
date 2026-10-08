@@ -54,7 +54,6 @@ export interface Job {
 
 export type JobEvent =
   | { type: 'message'; text: string }
-  | { type: 'thought'; text: string }
   | { type: 'tool'; id: string; title: string; kind: string; status: string }
   | {
       type: 'permission';
@@ -149,14 +148,6 @@ export class JobStore {
       this.db
         .prepare('select * from jobs order by created_at desc limit 200')
         .all() as unknown as JobRow[]
-    ).map(toJob);
-  }
-
-  forThread(threadId: string): Job[] {
-    return (
-      this.db
-        .prepare('select * from jobs where thread_id = ? order by created_at')
-        .all(threadId) as unknown as JobRow[]
     ).map(toJob);
   }
 

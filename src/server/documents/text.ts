@@ -1,6 +1,5 @@
 // md and html are text: decode, edit, encode back with the same BOM and line endings.
 // Files saved by Windows Notepad often start with a UTF-8 BOM and use CRLF.
-import MarkdownIt from 'markdown-it';
 
 export interface TextFile {
   text: string;
@@ -25,8 +24,4 @@ export function encodeText(file: TextFile): Uint8Array {
   out.set([0xef, 0xbb, 0xbf]);
   out.set(body, 3);
   return out;
-}
-
-export function markdownToHtml(markdown: string): string {
-  return new MarkdownIt().render(markdown);
 }

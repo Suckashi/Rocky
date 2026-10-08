@@ -3,11 +3,6 @@
 // face out of a collection into a standalone font file (ADR 0005, finding 2).
 import { existsSync, readFileSync } from 'node:fs';
 
-export interface FaceInfo {
-  index: number;
-  family: string;
-}
-
 const tag = (view: DataView, at: number) =>
   String.fromCharCode(
     view.getUint8(at),
@@ -21,40 +16,6 @@ function faceOffsets(bytes: Uint8Array): number[] {
   if (tag(view, 0) !== 'ttcf') return [0];
   const count = view.getUint32(8);
   return Array.from({ length: count }, (_, i) => view.getUint32(12 + i * 4));
-}
-
-/** Family names (name ID 1, Windows Unicode) of every face, for picking one. */
-export function listFaces(bytes: Uint8Array): FaceInfo[] {
-  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  return faceOffsets(bytes).map((offset, index) => {
-    const tables = view.getUint16(offset + 4);
-    let family = '';
-    for (let t = 0; t < tables; t++) {
-      const record = offset + 12 + t * 16;
-      if (tag(view, record) !== 'name') continue;
-      const name = view.getUint32(record + 8);
-      const count = view.getUint16(name + 2);
-      const strings = name + view.getUint16(name + 4);
-      for (let n = 0; n < count; n++) {
-        const at = name + 6 + n * 12;
-        const [platform, , language, id, length, start] = [
-          0, 2, 4, 6, 8, 10,
-        ].map((d) => view.getUint16(at + d)) as [
-          number,
-          number,
-          number,
-          number,
-          number,
-          number,
-        ];
-        if (platform !== 3 || id !== 1) continue;
-        const raw = bytes.subarray(strings + start, strings + start + length);
-        const text = new TextDecoder('utf-16be').decode(raw);
-        if (!family || language === 0x0404) family = text; // prefer the zh-TW name
-      }
-    }
-    return { index, family };
-  });
 }
 
 /** Returns face `index` as a standalone .ttf/.otf. A plain font file is returned as is. */

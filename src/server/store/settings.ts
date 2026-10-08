@@ -29,12 +29,6 @@ export interface PublicSettings {
   mode: ApprovalMode;
 }
 
-export const DEFAULT_BASE_URL: Record<Provider, string> = {
-  'openai-compatible': '',
-  openai: 'https://api.openai.com/v1',
-  ollama: 'http://127.0.0.1:11434/v1',
-};
-
 export class SettingsStore {
   private readonly db: DatabaseSync;
   private readonly secretsFile: string;

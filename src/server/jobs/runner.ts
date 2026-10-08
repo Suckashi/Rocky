@@ -72,21 +72,12 @@ export async function baseHasTestScript(
 
 export class JobRunner {
   private readonly deps: JobRunnerDeps;
-  private readonly listeners = new Set<(jobId: string) => void>();
 
   constructor(deps: JobRunnerDeps) {
     this.deps = deps;
   }
 
   /** Called whenever a job's timeline or status changes. */
-  subscribe(listener: (jobId: string) => void): () => void {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-
-  private changed(jobId: string): void {
-    for (const listener of this.listeners) listener(jobId);
-  }
 
   available(): boolean {
     return (this.deps.findAgent ?? findOpenCode)() !== undefined;
@@ -119,7 +110,6 @@ export class JobRunner {
     const job = jobs.create({ ...input, agent: 'opencode' });
     const event = (e: Parameters<JobStore['addEvent']>[1]) => {
       jobs.addEvent(job.id, e);
-      this.changed(job.id);
     };
     const warnings: string[] = [];
     let status: JobStatus = 'failed';

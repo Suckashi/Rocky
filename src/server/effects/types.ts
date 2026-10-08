@@ -24,7 +24,6 @@ export type Effect =
       args: unknown;
       readOnly: boolean;
     }
-  | { kind: 'network'; method: string; url: string }
   /** Plan review (approvals.md): the user picks one option, asks for changes, or rejects. */
   | { kind: 'plan'; title: string; options: PlanOption[] };
 

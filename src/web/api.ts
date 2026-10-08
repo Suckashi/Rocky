@@ -60,7 +60,6 @@ export type Effect =
     }
   | { kind: 'command'; argv: string[]; cwd: string }
   | { kind: 'mcp'; server: string; tool: string; args: unknown }
-  | { kind: 'network'; method: string; url: string }
   | { kind: 'plan'; title: string; options: PlanOption[] };
 
 export interface PlanOption {
@@ -162,7 +161,7 @@ export interface Job {
 }
 
 export type JobEvent = { at: number } & (
-  | { type: 'message' | 'thought' | 'prompt' | 'status'; text: string }
+  | { type: 'message' | 'prompt' | 'status'; text: string }
   | { type: 'tool'; id: string; title: string; kind: string; status: string }
   | {
       type: 'permission';

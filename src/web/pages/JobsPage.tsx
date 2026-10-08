@@ -54,10 +54,6 @@ function Timeline({ events }: { events: JobEvent[] }) {
             label = t('jobs.event.message');
             body = e.text;
             break;
-          case 'thought':
-            label = t('jobs.event.thought');
-            body = e.text;
-            break;
           case 'tool':
             label = t('jobs.event.tool', { title: e.title, status: e.status });
             break;
