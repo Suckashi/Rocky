@@ -1,9 +1,5 @@
 node_modules
 dist
-.rocky*
-test-results
-playwright-report
-specs
+coverage
 package-lock.json
-docs/implementation/dependency-licenses.json
-
+assets

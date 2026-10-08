@@ -1,11 +1,11 @@
-import { defineConfig } from "vitest/config";
+import { defineConfig } from 'vitest/config';
+
 export default defineConfig({
   test: {
-    include: ["tests/**/*.test.ts"],
-    testTimeout: 30000,
-    hookTimeout: 30000,
-    fileParallelism: false,
-    // Hosted runners show rare timing flakes; local runs never retry.
-    retry: process.env.CI ? 2 : 0,
+    include: ['tests/**/*.test.ts'],
+    // Windows CI runners are slow on a cold start (the first PDF render loads a native
+    // canvas, test files run in parallel); 5 s timed out there while locally these take ~1 s.
+    // A test that really hangs still fails.
+    testTimeout: 30_000,
   },
 });

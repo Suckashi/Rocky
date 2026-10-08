@@ -1,11 +1,13 @@
-# Rocky engineering instructions
+# Rocky engineering rules
 
-Rocky is an independent greenfield product. Read `specs/rocky/AGENT_START_HERE.md` and the current task's contracts before changes. Apsis and OpenDots are read-only references, never implementation roots or migration sources.
+Rocky is a single-user AI engineering partner that runs on the owner's own computer
+(Windows first). How it is built is described in `docs/rebuild/` and `docs/adr/`; anything
+not listed below can change. Record a change of architecture or approach in a short ADR.
 
-- Use Node 24 and npm; pin dependencies and commit the lockfile. No Python/compiler fallback in core installation.
-- Keep one Deep Agents runtime. Native tasks are ephemeral children, not a second durable job scheduler.
-- Treat the daemon as the authority for Work, approvals and operation effects. Never infer success from stream termination.
-- Run relevant tests and record real platform, mode, command, exit code and limitations in `docs/implementation/` and the existing plan JSON.
-- Do not mark incomplete acceptance tests passed. Never fabricate live or Ubuntu evidence.
-- No remote creation, visibility changes, first push, merge, tag or deployment without explicit authorization.
-- Keep credentials, local databases, browser profiles and private evidence out of Git.
+- Credentials, local databases, browser profiles and private evidence stay out of Git.
+- Report honestly: state the real platform, command, exit code and limitations. Never mark a
+  failing or unrun check as passed, and never fabricate Windows or live-model results.
+- Roko, the mascot, appears in the UI. Every user-facing string goes through the i18n
+  catalogs (Traditional Chinese by default, English alongside); no hardcoded UI text.
+- No push to main, merge into main, tag, new repository, visibility change or deployment
+  without the owner's explicit approval.

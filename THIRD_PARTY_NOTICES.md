@@ -1,29 +1,30 @@
 # Third-party notices
 
-Original Rocky source is Apache-2.0. No Apsis code or upstream brand assets are copied. OpenDots presentation CSS is adapted under MIT as listed below.
+Rocky source is Apache-2.0 (see `LICENSE`). Roko artwork is excluded; see `NOTICE` and `assets/roko/README.md`.
 
-Dependencies and exact versions/licenses are inventoried in docs/implementation/dependency-licenses.json and package-lock.json. npm-installed packages retain their upstream license and copyright files. Omitted optional packages are not approved for inclusion in a release.
+Dependencies keep their own licenses; exact versions are pinned in `package-lock.json`.
 
-- CopilotKit / AG-UI: MIT. Rocky uses OSS gateway APIs only.
-- Deep Agents / LangChain / LangGraph: MIT.
-- Hono / React / Vite / TypeScript / Rollup WASM: see exact package licenses in the inventory (MIT or Apache-2.0).
-- Promptfoo: MIT; its optional commercial/provider/image integrations are omitted.
-- SQLite: public domain; node:sqlite is built into Node. better-sqlite3 is MIT.
-- khroma 2.1.0: MIT, copyright 2019-present Fabio Spampinato, Andrew Maney.
-- xmlhttprequest-ssl 2.1.2: MIT, copyright 2010 passive.ly LLC.
-- url-template 2.0.8: BSD-3-Clause, copyright 2012-2014 Bram Stein.
-- parse5 7.3.0: MIT, copyright 2013-2019 Ivan Nikulin. Used unmodified as the daemon-side HTML parser for restricted artifact previews; its installed package retains the full MIT license.
-- caniuse-lite 1.0.30001814: browser compatibility data, CC-BY-4.0; upstream https://github.com/browserslist/caniuse-lite, derived from https://caniuse.com. Data is unmodified; its package includes the full attribution license.
+## OpenDots
 
-This source-stage inventory does not replace the P8 complete bundled/distribution notice review. No film imagery, upstream avatars, remote fonts or generated brand assets are included.
+Rocky's UI layout and server patterns follow OpenDots at
+https://github.com/CopilotKit/OpenDots/tree/c2569bb6a13a22e565cf3eb791c62267d06babb1 (MIT).
+When code, structure or values are adapted, the adapted files are listed here.
 
-## OpenDots presentation adaptation
+Adapted files:
 
-js-tiktoken 1.0.21 is a pinned MIT dependency used unmodified with its bundled cl100k_base ranks for daemon-side Memory context budgeting. Source/license: https://github.com/dqbd/tiktoken and https://raw.githubusercontent.com/dqbd/tiktoken/main/LICENSE. Copyright (c) 2022 OpenAI, Shantanu Jain. The MIT permission and warranty text below also applies to this dependency. No CDN loading or Python/WASM fallback is used.
+- `src/server/http/security.ts`: the API guard (Host, Origin, `sec-fetch-site`, constant-time token
+  check, JSON-only writes) from `src/server/app.ts`; Rocky always requires the token.
+- `src/server/shutdown.ts`: the deadline-bound shutdown from `src/server/shutdown.ts`.
+- `src/web/components/Chat.tsx`: the conversation flow (`useAgent` with a per-thread agent,
+  `connectAgent` for history, `addMessage` + `runAgent`, run-error subscription) from `src/client/Chat.tsx`.
+- `src/web/components/ThreadList.tsx`: the `useThreads` conversation list from `src/client/ThreadList.tsx`.
+- Layout (rail, conversation list, chat, right panel) follows `src/client/App.tsx` and `style.css`;
+  colors and spacing come from the owner's Rocky design, not from OpenDots' CSS.
 
-Source: https://github.com/CopilotKit/OpenDots/tree/c2569bb6a13a22e565cf3eb791c62267d06babb1
+## CopilotKit
 
-Upstream src/client/style.css and src/client/editor.css effective compact chrome rules are adapted into apps/web/src/style.css and apps/web/src/tokens.css: selectors reduced to Rocky presentation, semantic theme tokens, mobile/focus changes. apps/web/src/chrome.tsx and main.tsx are Rocky implementations aligned to App/Chat/ChatTranscript/PageReviewCard structure, with no upstream API, persistence or polling. ResultPane presentation from the same source commit also informs chrome.tsx and style.css: 64px top offset, clamp(390px,40vw,660px) desktop width, 1100px overlay and 700px full-width breakpoints; Rocky adds immutable artifact cards, explicit downloads and keyboard/focus handling. PageDocument/editor.css source-mode metrics additionally inform document-editor.tsx/style.css (420px minimum source height,18px padding,13px/1.8 monospace and40px/32px title). Rocky retains explicit revision CAS, source-only editing, semantic theme tokens and visible keyboard focus rather than upstream autosave/rich-editor state. No upstream images, logo or mascot are used.
+`src/server/agent/runner.ts` follows the run lifecycle of `InMemoryAgentRunner` in
+`@copilotkit/runtime` 1.77.0 (MIT, Copyright (c) CopilotKit), storing history in SQLite instead of memory.
 
 Copyright (c) Atai Barkai
 
@@ -35,24 +36,8 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-## YAML parser
+## Noto Sans TC (test fixture)
 
-yaml 2.9.1 is pinned and used unmodified to parse Agent Skills frontmatter as data. Source: https://github.com/eemeli/yaml. License: ISC. The installed package retains this notice:
-
-Copyright Eemeli Aro <eemeli@gmail.com>
-
-Permission to use, copy, modify, and/or distribute this software for any purpose
-with or without fee is hereby granted, provided that the above copyright notice
-and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
-THIS SOFTWARE.
-
-ComputerToolCard inline-computer presentation from the same fixed OpenDots commit is adapted in apps/web/src/tool-activity.tsx and style.css: 14px radius, 12px/14px header padding, 9px gap and 12px type. Rocky uses shared daemon events, semantic theme colors, separate returned/failed/unconfirmed states and collapsed evidence; no upstream screenshot polling or API is copied.
-
-ComputerPanel.tsx/style.css at the same OpenDots commit inform computer-panel.tsx and style.css: four compact tabs, 12px tab gap, 8px/2px underline tabs, status spacing and setup sections. Rocky connects its own workspace, Browser/Terminal adapters, and shared event projection. Keyboard tab navigation and responsive focus containment are Rocky accessibility adaptations. No upstream service/polling is imported.
+`tests/fixtures/fonts/noto-tc-subset.ttf` is a subset of Noto Sans TC Regular (only the glyphs
+the S4 tests draw), built with fontTools from the `@fontsource/noto-sans-tc` 5.3.0 package.
+SIL Open Font License 1.1; the full license text is in `tests/fixtures/fonts/OFL-NotoSansTC.txt`.

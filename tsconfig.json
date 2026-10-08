@@ -1,16 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ES2023",
+    "target": "ES2024",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "strict": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
     "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
-    "types": ["node", "vitest/globals"],
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "noEmit": true
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"]
   },
-  "include": ["apps", "packages", "fixtures", "tests", "scripts", "*.ts"]
+  "include": ["src", "scripts", "spikes", "tests", "evals", "*.ts"],
+  "exclude": ["node_modules", "spikes/s3-install"]
 }
