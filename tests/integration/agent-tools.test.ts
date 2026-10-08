@@ -274,6 +274,27 @@ describe('agent tools through the action gate', () => {
     const text = reply(await run(call, 'e6'));
     expect(text).toContain('const answer = 41;');
   });
+
+  it('gives the model a long document and a long command output, truncated but readable', async () => {
+    const { call, project } = await setup('hands-off');
+    writeFileSync(
+      join(project, 'long.md'),
+      `# 長文件\n\n${'很長的內容。'.repeat(20_000)}`,
+    );
+    writeFileSync(
+      join(project, 'print.js'),
+      "process.stdout.write('x'.repeat(200000));\n",
+    );
+    plan = [
+      { name: 'read_document', args: { file_path: '/long.md' } },
+      { name: 'run_command', args: { argv: ['node', 'print.js'] } },
+    ];
+    const text = reply(await run(call, 'e7'));
+    expect(text).toContain('# 長文件');
+    expect(text).toContain('[truncated:');
+    expect(text).not.toContain('could not be saved');
+    expect(text).not.toContain('missing pass');
+  });
 });
 
 describe('document tools', () => {
