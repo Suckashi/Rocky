@@ -30,18 +30,16 @@
 ├─ package.json  package-lock.json  tsconfig.json  vite.config.ts
 ├─ src/
 │  ├─ server/
-│  │  ├─ main.ts              組裝所有元件、啟動、有時間上限的關機
+│  │  ├─ compose.ts main.ts   組裝所有元件；啟動、有時間上限的關機
 │  │  ├─ http/                Hono app、安全檢查（token / Host / Origin）、routes/
-│  │  ├─ work/                Work 服務與狀態機（Rocky 是唯一權威）
 │  │  ├─ effects/             判斷順序、核准、操作紀錄、快照、危險指令偵測
 │  │  ├─ agent/               Deep Agents 設定、tools/、提示詞、RockyAgent、RockyAgentRunner
-│  │  ├─ models/              各家模型的設定
-│  │  ├─ acp/                 ACP client、OpenCode、worktree
+│  │  ├─ jobs/ external/      派工：ACP client、OpenCode、worktree、套用
 │  │  ├─ mcp/                 MCP client
 │  │  ├─ documents/           md、html、docx、xlsx、pptx、pdf
-│  │  ├─ knowledge/           記憶、技能
+│  │  ├─ memory/ skills/      記憶、技能
 │  │  ├─ store/               node:sqlite、migration
-│  │  └─ platform/            Windows：用 argv 啟動子程序、Job Object、路徑與 junction 處理
+│  │  └─ platform/            資料夾位置、對外白名單、開瀏覽器
 │  ├─ web/
 │  │  ├─ main.tsx  App.tsx
 │  │  ├─ i18n/                zh-TW.json、en.json
@@ -51,7 +49,6 @@
 │  └─ shared/                 前後端共用的 zod schema 與型別
 ├─ evals/                     評測任務與跑分程式
 ├─ tests/                     unit/、integration/、e2e/
-├─ spikes/                    第一週的驗證腳本與結果（之後刪除）
 ├─ assets/roko/
 └─ docs/                      rebuild/、adr/
 ```
