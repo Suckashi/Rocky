@@ -144,7 +144,7 @@ describe('success criterion 2: unknown outcomes are never redone automatically',
     });
     // Composing alone (a second instance that may still lose the port) changes nothing.
     expect(second.receipts.get(pending.id)?.outcome).toBe('pending');
-    expect(second.jobs.get(job.id)?.status).toBe('running');
+    expect(second.jobs.get(job.id)?.status).toBe('queued');
     expect(second.recoverInterrupted()).toEqual({
       runs: 0,
       actions: 1,
