@@ -8,7 +8,8 @@ import {
   readFileSync,
   statSync,
 } from 'node:fs';
-import { join, relative, resolve, sep } from 'node:path';
+import path, { join, sep, type PlatformPath } from 'node:path';
+import { classifyPath } from '../effects/paths.ts';
 
 export interface Skill {
   name: string;
@@ -61,15 +62,10 @@ export class SkillStore {
     const skill = this.list().find((s) => s.name === name || s.folder === name);
     if (!skill) throw new Error(`no skill named "${name}"`);
     const root = join(this.dir, skill.folder);
-    const path = resolve(root, file);
-    if (
-      relative(root, path).startsWith('..') ||
-      relative(root, path).includes(`..${sep}`)
-    )
-      throw new Error('path outside the skill folder');
-    if (!existsSync(path) || !statSync(path).isFile())
+    const target = skillFile(root, file);
+    if (!existsSync(target) || !statSync(target).isFile())
       throw new Error(`no file ${file} in skill ${name}`);
-    const text = readFileSync(path, 'utf8');
+    const text = readFileSync(target, 'utf8');
     // Forward slashes on every platform: the model passes these paths back.
     const files = readdirSync(root, { recursive: true, encoding: 'utf8' })
       .filter((f) => f !== 'SKILL.md' && statSync(join(root, f)).isFile())
@@ -82,4 +78,17 @@ export class SkillStore {
       ? `${body}\n\n(Other files in this skill, readable with load_skill and "file": ${files.join(', ')})`
       : body;
   }
+}
+
+/** A file inside a skill folder, after following links; anything else is refused (other
+ * drives and UNC paths on Windows included). */
+export function skillFile(
+  root: string,
+  file: string,
+  api: PlatformPath = path,
+): string {
+  const facts = classifyPath(file, root, root, api);
+  if (facts.relative === undefined)
+    throw new Error('path outside the skill folder');
+  return facts.absolute;
 }
