@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/rocky/mark.svg" alt="Rocky" width="96" height="96" />
+<img src="assets/rocky/mark.svg" alt="Rocky" width="128" height="128" />
 
 # Rocky
 
