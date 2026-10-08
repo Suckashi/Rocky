@@ -81,7 +81,6 @@ interface Prepared {
 
 export class JobRunner {
   private readonly deps: JobRunnerDeps;
-  private readonly listeners = new Set<(jobId: string) => void>();
   private readonly queue: { job: Job; prepared: Prepared }[] = [];
   private readonly controllers = new Map<string, AbortController>();
   private readonly finished = new Map<string, Promise<Job>>();
@@ -93,14 +92,6 @@ export class JobRunner {
   }
 
   /** Called whenever a job's timeline or status changes. */
-  subscribe(listener: (jobId: string) => void): () => void {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-
-  private changed(jobId: string): void {
-    for (const listener of this.listeners) listener(jobId);
-  }
 
   available(): boolean {
     return (this.deps.findAgent ?? findOpenCode)() !== undefined;
@@ -137,7 +128,6 @@ export class JobRunner {
       new Promise<Job>((resolve) => this.resolvers.set(job.id, resolve)),
     );
     this.queue.push({ job, prepared });
-    this.changed(job.id);
     void this.next();
     return this.deps.jobs.get(job.id)!;
   }
@@ -182,7 +172,6 @@ export class JobRunner {
     this.resolvers.get(jobId)?.(this.deps.jobs.get(jobId)!);
     this.resolvers.delete(jobId);
     this.finished.delete(jobId);
-    this.changed(jobId);
   }
 
   private async next(): Promise<void> {
@@ -194,7 +183,6 @@ export class JobRunner {
     const controller = new AbortController();
     this.controllers.set(job.id, controller);
     this.deps.jobs.setStatus(job.id, 'running');
-    this.changed(job.id);
     try {
       await this.execute(job, prepared, controller.signal);
     } finally {
@@ -214,7 +202,6 @@ export class JobRunner {
     const thread = jobThread(job.id);
     const event = (e: Parameters<JobStore['addEvent']>[1]) => {
       jobs.addEvent(job.id, e);
-      this.changed(job.id);
     };
     const warnings: string[] = [];
     let status: JobStatus = 'failed';

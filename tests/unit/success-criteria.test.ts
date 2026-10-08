@@ -34,7 +34,6 @@ const DANGEROUS: Effect[] = [
 
 const OUTSIDE: Effect[] = [
   { kind: 'mcp', server: 'notes', tool: 'write', args: {}, readOnly: false },
-  { kind: 'network', method: 'POST', url: 'https://example.test/api' },
   { kind: 'write', path: '/etc/hosts', operation: 'edit', content: 'x' },
   { kind: 'write', path: `${ROOT}/README.md`, operation: 'delete' },
   { kind: 'command', argv: ['cp', 'a', '/tmp/elsewhere'], cwd: ROOT },

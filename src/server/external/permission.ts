@@ -72,12 +72,3 @@ export function permissionEffect(
     },
   };
 }
-
-/** The repo-relative path and new content an allowed write will leave behind. */
-export function approvedWrite(
-  effect: Effect,
-): { path: string; content: string } | undefined {
-  return effect.kind === 'write' && effect.operation !== 'delete'
-    ? { path: effect.path, content: effect.content ?? '' }
-    : undefined;
-}

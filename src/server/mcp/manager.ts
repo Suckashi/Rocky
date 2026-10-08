@@ -59,7 +59,6 @@ export function agentToolName(server: string, tool: string): string {
 
 export class McpManager {
   private readonly connections = new Map<string, Connection>();
-  private readonly errors = new Map<string, string>();
   /** Connections being opened, so overlapping refreshes share one server process. */
   private readonly opening = new Map<
     string,
@@ -137,12 +136,10 @@ export class McpManager {
       configs.map(async (config) => {
         try {
           const { tools } = await this.connect(config);
-          this.errors.delete(config.name);
           return { name: config.name, connected: true, error: null, tools };
         } catch (error) {
           const message =
             error instanceof Error ? error.message : String(error);
-          this.errors.set(config.name, message);
           return {
             name: config.name,
             connected: false,
