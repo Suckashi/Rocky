@@ -3,6 +3,7 @@
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { EventSchemas } from '@ag-ui/core/schemas';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { composeRocky } from '../../src/server/compose.ts';
 import { toMarkdown } from '../../src/server/documents/read.ts';
@@ -112,10 +113,19 @@ async function run(
       forwardedProps: {},
     },
   });
-  return (await res.text())
+  const events = (await res.text())
     .split('\n')
     .filter((line) => line.startsWith('data:'))
     .map((line) => JSON.parse(line.slice(5).trim()) as Event);
+  // Every event Rocky streams must pass the AG-UI 1.0 schemas the browser relies on.
+  for (const event of events) {
+    const parsed = EventSchemas.safeParse(event);
+    if (!parsed.success)
+      throw new Error(
+        `${event.type} is not valid AG-UI: ${parsed.error.message}`,
+      );
+  }
+  return events;
 }
 
 async function nextApproval(
