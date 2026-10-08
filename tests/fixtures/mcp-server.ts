@@ -2,7 +2,12 @@
 // reached its environment (it must not).
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { appendFileSync } from 'node:fs';
 import { z } from 'zod';
+
+// Tests count how many server processes Rocky starts.
+if (process.env['MCP_START_LOG'])
+  appendFileSync(process.env['MCP_START_LOG'], 'start\n');
 
 const server = new McpServer({ name: 'notes', version: '1.0.0' });
 server.registerTool(
