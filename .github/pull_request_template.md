@@ -1,23 +1,24 @@
-## 摘要
+## Summary
 
-<!-- 這個 PR 改了什麼、為什麼。 -->
+<!-- What does this change, and why? -->
 
-## 檢查
+## Checks
 
-沒有雲端 CI，請在本機跑，並照實填寫平台、指令與結果（沒跑的就寫沒跑）。
+There is no hosted CI. Run the checks locally and report the real platform, command and
+result. If a check was not run, say so.
 
-| 平台 | 指令 | 結果 |
-| ---- | ---- | ---- |
-|      |      |      |
+| Platform | Command | Result |
+| -------- | ------- | ------ |
+|          |         |        |
 
-- [ ] `npm run check`（型別、lint、格式、i18n、測試）
-- [ ] 改到介面：`npm run test:e2e`；改到派工：`npm run test:e2e:jobs`
-- [ ] 改到提示詞、工具或 agent 迴圈：`npm run eval -- --repeat 3`，沒有低於基線
-- [ ] 改到 Windows 相關的部分：在 Windows 上跑 `scripts/verify-windows.ps1`
+- [ ] `npm run check` (types, lint, formatting, i18n, tests)
+- [ ] UI changes: `npm run test:e2e`; delegation changes: `npm run test:e2e:jobs`
+- [ ] Prompt, tool or agent-loop changes: `npm run eval -- --repeat 3`, no drop below the baseline
+- [ ] Windows-specific changes: `scripts/verify-windows.ps1` on Windows
 
-## 確認
+## Confirm
 
-- [ ] 沒有憑證、本機資料庫、瀏覽器設定檔或私人資料進 Git
-- [ ] 新的介面文字都放在語系檔（`zh-TW`、`en`）
-- [ ] 換了架構或做法時，有寫一份簡短的 ADR（`docs/adr/`）
-- [ ] README 有改時，`README.md` 與 `README.zh-TW.md` 一起更新
+- [ ] No credentials, local databases, browser profiles or private data in Git
+- [ ] New user-facing text is in the i18n catalogs (`zh-TW`, `en`)
+- [ ] A change of architecture or approach has a short ADR in `docs/adr/`
+- [ ] README changes update both `README.md` and `README.zh-TW.md`
