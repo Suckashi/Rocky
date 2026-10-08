@@ -12,7 +12,7 @@ through one approval gate and can be undone.
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 ![Node.js 24](https://img.shields.io/badge/node-24-339933.svg)
-![Platform: Windows first](https://img.shields.io/badge/platform-Windows%20first-0078D4.svg)
+![Platform: Linux | Windows](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey.svg)
 ![Status: V1](https://img.shields.io/badge/status-V1-orange.svg)
 
 [Features](#features) · [Quick start](#quick-start) · [How it works](#how-it-works) ·
@@ -54,18 +54,7 @@ through one approval gate and can be undone.
 
 No C/C++ compiler, Python or Microsoft Office is needed.
 
-### Windows
-
-```powershell
-git clone https://github.com/Suckashi/Rocky.git
-cd Rocky
-powershell -ExecutionPolicy Bypass -File .\Start-Rocky.ps1
-```
-
-The launcher installs the pinned dependencies on first run (`npm ci`), starts Rocky and opens
-your browser with a one-time login link. Run it again at any time to reopen Rocky.
-
-### Linux and other systems
+### Install and start
 
 ```sh
 git clone https://github.com/Suckashi/Rocky.git
@@ -74,8 +63,16 @@ npm ci
 npm start
 ```
 
-Rocky prints a one-time login link and opens it in your browser. Rocky is verified on
-Windows and Linux; other systems are untested.
+Rocky prints a one-time login link and opens it in your browser.
+
+On Windows you can instead run the launcher, which installs the pinned dependencies on first
+run (`npm ci`), starts Rocky, and reopens the browser if Rocky is already running:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Start-Rocky.ps1
+```
+
+Rocky is verified on Linux and Windows; macOS is untested.
 
 ### First run
 
@@ -169,7 +166,7 @@ docs/adr/     architecture decision records
 ## Project status
 
 Rocky V1 is feature-complete. It is verified on Linux, and on Windows with
-`scripts/verify-windows.ps1`. There is no packaged release yet. Known limitations include:
+`scripts/verify-windows.ps1`; macOS is untested. There is no packaged release yet. Known limitations include:
 
 - No operating-system sandbox; commands run with your permissions.
 - Only OpenCode is supported for delegation.
