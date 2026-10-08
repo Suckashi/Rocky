@@ -7,7 +7,7 @@
 
 1. **不跑雲端 CI。** 擁有者先在 `main` 移除了自動 CI，重建分支也一樣刪掉 `.github/workflows/ci.yml`。
    檢查改在本機做：推送前跑 `npm run check`；改到介面時加跑 `npm run test:e2e`（與 `test:e2e:jobs`）；
-   Windows 上用 `scripts/verify-windows.ps1` 一次跑完並產生摘要。改到提示詞、工具或 agent 迴圈時照舊跑評測（AGENTS.md）。
+   Windows 上用 `scripts/verify-windows.ps1` 一次跑完並產生摘要。改到提示詞、工具或 agent 迴圈時跑評測。
 2. **只維護新版。** 重建版透過 PR 合回 `main`，取代舊 Rocky。舊程式碼（含 `main` 上的介面改版 PR #16）不移植，
    只留在 git 歷史（`87963aa` 之前），需要參考時開那個 commit 的 worktree。
 

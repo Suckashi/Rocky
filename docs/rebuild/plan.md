@@ -112,3 +112,4 @@ S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一
 - 2026-10-06：預覽改成對話旁的側欄（可拖拉寬度、修改前／後並排、從工具卡與對話裡的檔名打開）；修好 Windows CI 一直失敗的原因（規則裡的反斜線路徑被吃掉）與 Ubuntu 的測試字型。見 ADR 0013。
 - 2026-10-06：Windows 驗證腳本 `scripts/verify-windows.ps1`（擁有者在自己的電腦上跑，貼回摘要）；對話裡的背景工作卡片（完成結果、套用、瀏覽器通知）。見 ADR 0012 後續。
 - 2026-10-08：依 commit `447421b` 的說明，擁有者在 Windows 上跑了 `verify-windows.ps1` 並修了三個 Windows 問題（中文檔名刪除會讓 Rocky 當掉、載入中按 Enter 訊息被丟掉、規則測試的路徑空格）。移除雲端 CI，開 PR 把重建版合回 `main`，之後只維護新版。見 ADR 0014。
+- 2026-10-08：`AGENTS.md` 只留四條（憑證不進 Git、誠實回報、Roko 與 i18n、main 的 Git 規則）；其餘做法放在 `docs/rebuild/` 與 ADR，換做法時寫 ADR。安全設計仍記在 `architecture.md` 與 `approvals.md`。

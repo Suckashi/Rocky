@@ -52,8 +52,8 @@ receipts and snapshots (`rocky.sqlite`, `snapshots/`), memory (`memory/`), skill
 `npm run test:e2e` (and `test:e2e:jobs`, which needs OpenCode) drive the UI in a real browser
 against a scripted model (the system Edge, or `ROCKY_E2E_BROWSER`).
 `npm run eval` runs about 30 real tasks against a live model and compares with
-`evals/baseline.json` (see `evals/run.ts`). Changes to prompts, tools or the agent loop
-must not lower the score.
+`evals/baseline.json` (see `evals/run.ts`). Run it after changing prompts, tools or the agent
+loop; models vary between runs, so repeat (`--repeat 3`) before reading a drop as real.
 
 To check everything on a Windows computer in one go (install, checks, both browser tests,
 the launcher, leftover processes, and optionally the evaluation), run
