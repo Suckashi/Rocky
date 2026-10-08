@@ -4,7 +4,6 @@ Editable Rocky product marks, authored for this repository:
 
 - `mark.svg`: the mark beside the app name (`src/web/App.tsx`).
 - `favicon.svg`: the browser tab icon (`src/web/index.html`).
-- `mark-monochrome.svg`: a one-color variant, not used by the UI yet.
 
 `vite.config.ts` serves `assets/` as Vite's public directory, so these files are available
 at `/rocky/…` and are copied into the production build. The mascot artwork lives in

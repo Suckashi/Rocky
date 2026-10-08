@@ -50,8 +50,7 @@
 │  └─ shared/                 前後端共用的程式
 ├─ evals/                     評測任務、跑分程式、基線
 ├─ scripts/                   端對端測試、i18n 檢查、Windows 驗證
-├─ tests/                     unit/、integration/、spikes/、fixtures/
-├─ spikes/                    M0 的驗證腳本（s2-agent 的假模型伺服器仍被測試使用）
+├─ tests/                     unit/、integration/、fixtures/（含假模型伺服器 fake-openai.ts）
 ├─ assets/                    rocky/（標誌）、roko/（吉祥物）
 └─ docs/                      rebuild/、adr/
 ```
@@ -103,3 +102,4 @@
 - 2026-10-08：依 commit `447421b` 的說明，擁有者在 Windows 上跑了 `verify-windows.ps1` 並修了三個 Windows 問題（中文檔名刪除會讓 Rocky 當掉、載入中按 Enter 訊息被丟掉、規則測試的路徑空格）。移除雲端 CI，開 PR 把重建版合回 `main`，之後只維護新版。見 ADR 0014。
 - 2026-10-08：`AGENTS.md` 只留四條（憑證不進 Git、誠實回報、Roko 與 i18n、main 的 Git 規則）；其餘做法放在 `docs/rebuild/` 與 ADR，換做法時寫 ADR。安全設計仍記在 `architecture.md` 與 `approvals.md`。
 - 2026-10-08：整理文件：`architecture.md`、`plan.md`、`product.md`、`approvals.md` 依實際程式更新（拿掉沒有實作的 Tiptap、FTS5、Job Object、Edge 轉 PDF、checkpointer、`@langchain/ollama`，專案結構照現況）；README 的 clone 改成 `main`；修正 `THIRD_PARTY_NOTICES.md` 與素材說明裡指向不存在檔案的內容。ADR 是當時的紀錄，不改寫。
+- 2026-10-08：刪除 M0 的 `spikes/` 與 `tests/spikes/`（測的是 spike 自己的程式，不是 `src/`；正式功能由 `tests/unit`、`tests/integration` 涵蓋），假模型伺服器搬到 `tests/fixtures/fake-openai.ts`；刪除沒有用到的 `assets/rocky/mark-monochrome.svg`。ADR 0001–0005 提到的 spike 程式在 commit `6590139`（刪除前的最後一版）。

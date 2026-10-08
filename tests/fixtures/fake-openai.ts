@@ -1,5 +1,5 @@
 // A scripted OpenAI-compatible chat completions server on 127.0.0.1.
-// It lets the spike drive the real ChatOpenAI client without a live model.
+// It lets tests and the browser end-to-end scripts drive the real ChatOpenAI client without a live model.
 import { createServer, type IncomingMessage, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 

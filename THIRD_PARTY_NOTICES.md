@@ -37,5 +37,5 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ## Noto Sans TC (test fixture)
 
 `tests/fixtures/fonts/noto-tc-subset.ttf` is a subset of Noto Sans TC Regular (only the glyphs
-the S4 tests draw), built with fontTools from the `@fontsource/noto-sans-tc` 5.3.0 package.
+the document tests draw), built with fontTools from the `@fontsource/noto-sans-tc` 5.3.0 package.
 SIL Open Font License 1.1; the full license text is in `tests/fixtures/fonts/OFL-NotoSansTC.txt`.
