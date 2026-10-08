@@ -11,8 +11,11 @@ handles documents, and delegates heavy coding to external coding agents over ACP
 - `docs/rebuild/approvals.md`: approval modes, policy order, receipts.
 - `docs/adr/`: one short file per decision that changes either of the above.
 - `docs/rebuild/plan.md`: milestones and confirmed decisions.
-- The old Rocky lives on `main` and in Git history only. To consult it, use a
-  separate worktree of `main`; never import from it or port it wholesale.
+- The old Rocky lives in Git history only (`main` before the rebuild, commit
+  `87963aa`). To consult it, use a separate worktree of that commit; never import
+  from it or port it wholesale.
+- There is no hosted CI. Before pushing, run `npm run check` (and the e2e suites
+  when the UI changes); on Windows, `scripts/verify-windows.ps1` runs everything.
 - OpenDots (MIT, github.com/CopilotKit/OpenDots): UI and server-pattern reference.
   When copying structure or values, credit it in `THIRD_PARTY_NOTICES.md`.
 

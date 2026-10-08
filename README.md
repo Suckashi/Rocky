@@ -4,9 +4,9 @@ A single-user AI engineering partner that runs only on your own computer (Window
 Rocky chats, works in your project folders, handles documents, and delegates heavy coding
 to external coding agents over ACP. Roko, our mascot, keeps you company.
 
-**Status: V1 rebuild (M0–M5) on the `claude/rocky-rebuild` branch.** Verified on Linux and in
-CI on Windows; the owner's own Windows run is still to be confirmed (see `docs/rebuild/plan.md`).
-The previous Rocky lives on `main`.
+**Status: V1 (M0–M5).** Verified on Linux; on Windows the owner ran
+`scripts/verify-windows.ps1` and fixed what it found (see `docs/rebuild/plan.md`). There is no hosted CI: run the
+checks below locally. The previous Rocky is only in Git history (before commit `87963aa`).
 
 ## Start
 

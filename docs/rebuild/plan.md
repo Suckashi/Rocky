@@ -5,22 +5,22 @@
 
 ## 1. 技術棧
 
-| 層         | 選擇                                                                                                               | 備註                                          |
-| ---------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
-| 執行環境   | Node 24 LTS、TypeScript、npm                                                                                       | 單一 package，不做 monorepo                   |
-| 後端       | Hono + `@hono/node-server`                                                                                         | 照 OpenDots                                   |
-| 前端       | React 19 + Vite + `@copilotkit/react-core` v2                                                                      | 照 OpenDots；不用 `react-ui` 現成元件         |
-| UI 協定    | AG-UI 標準事件                                                                                                     | 核准、操作紀錄用少量自訂事件                  |
-| 對話保存   | 自己寫 `RockyAgentRunner`（繼承 CopilotKit 的 `AgentRunner`）                                                      | 存在本機，不用 Intelligence                   |
-| Agent      | Deep Agents JS + LangGraph JS，在同一個程序裡執行                                                                  | 包成 AG-UI `AbstractAgent`（`RockyAgent`）    |
-| 模型       | `@langchain/openai`（也用來接 OpenAI 相容端點）、`@langchain/ollama`                                               | 有 prompt caching，429 會重試                 |
-| 外部 agent | `@agentclientprotocol/sdk` 1.x → `opencode acp`                                                                    | 只回 `allow_once` 或 `reject_once`            |
-| MCP        | `@modelcontextprotocol/sdk`（v1 或 v2 在 spike 時決定）                                                            |                                               |
-| 儲存       | `node:sqlite`（Node 內建，不需要編譯）＋檔案                                                                       | 中文搜尋：FTS5 trigram，兩個字以下補用 LIKE   |
-| 文件       | markdown-it、docx、mammoth、exceljs、pptxgenjs、pptx-automizer、unpdf、pdf-lib + fontkit、Playwright 呼叫系統 Edge | LibreOffice 為選配                            |
-| 編輯器     | Tiptap                                                                                                             | 照 OpenDots                                   |
-| 測試       | Vitest（單元、整合）、Playwright（端對端）、評測任務集                                                             |                                               |
-| CI         | GitHub Actions：`windows-latest` 和 `ubuntu-latest`                                                                | 讓 Windows 上的結果是真的跑出來的，不是推測的 |
+| 層         | 選擇                                                                                                               | 備註                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| 執行環境   | Node 24 LTS、TypeScript、npm                                                                                       | 單一 package，不做 monorepo                 |
+| 後端       | Hono + `@hono/node-server`                                                                                         | 照 OpenDots                                 |
+| 前端       | React 19 + Vite + `@copilotkit/react-core` v2                                                                      | 照 OpenDots；不用 `react-ui` 現成元件       |
+| UI 協定    | AG-UI 標準事件                                                                                                     | 核准、操作紀錄用少量自訂事件                |
+| 對話保存   | 自己寫 `RockyAgentRunner`（繼承 CopilotKit 的 `AgentRunner`）                                                      | 存在本機，不用 Intelligence                 |
+| Agent      | Deep Agents JS + LangGraph JS，在同一個程序裡執行                                                                  | 包成 AG-UI `AbstractAgent`（`RockyAgent`）  |
+| 模型       | `@langchain/openai`（也用來接 OpenAI 相容端點）、`@langchain/ollama`                                               | 有 prompt caching，429 會重試               |
+| 外部 agent | `@agentclientprotocol/sdk` 1.x → `opencode acp`                                                                    | 只回 `allow_once` 或 `reject_once`          |
+| MCP        | `@modelcontextprotocol/sdk`（v1 或 v2 在 spike 時決定）                                                            |                                             |
+| 儲存       | `node:sqlite`（Node 內建，不需要編譯）＋檔案                                                                       | 中文搜尋：FTS5 trigram，兩個字以下補用 LIKE |
+| 文件       | markdown-it、docx、mammoth、exceljs、pptxgenjs、pptx-automizer、unpdf、pdf-lib + fontkit、Playwright 呼叫系統 Edge | LibreOffice 為選配                          |
+| 編輯器     | Tiptap                                                                                                             | 照 OpenDots                                 |
+| 測試       | Vitest（單元、整合）、Playwright（端對端）、評測任務集                                                             |                                             |
+| CI         | （2026-10-08 移除，見 ADR 0014）本機 `npm run check`；Windows 用 `scripts/verify-windows.ps1`                      | 擁有者決定不跑雲端 CI                       |
 
 ## 2. 專案結構
 
@@ -80,9 +80,9 @@ S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一
 ## 5. 已確認的決定（2026-10-05）
 
 - 技術棧：照第 1 節。
-- 舊程式碼：從這個分支刪除，新程式碼放在根目錄；舊 Rocky 保留在 `main` 與 git 歷史，需要參考時開一個 `main` 的 worktree。
+- 舊程式碼：從這個分支刪除，新程式碼放在根目錄；合併回 `main` 後舊 Rocky 只留在 git 歷史（`87963aa` 之前），需要參考時開那個 commit 的 worktree。
 - V1 安裝：`git clone` 加 PowerShell 啟動腳本（第一次執行自動 `npm ci`）；正式安裝檔或發佈到 npm 留到 M5，且要另外授權。
-- CI：GitHub Actions，在 `windows-latest` 與 `ubuntu-latest` 上跑。
+- CI：（2026-10-08 移除，見 ADR 0014。）原本是 GitHub Actions，在 `windows-latest` 與 `ubuntu-latest` 上跑。
 
 ## 6. 依賴升級
 
@@ -111,3 +111,4 @@ S1 和 S3 需要在 Windows 上實際跑。CI 的 Windows runner 可以先跑一
 - 2026-10-06：文件版面預覽：核准面板與變更卡可以切換「文字差異／版面預覽」，看修改前後的樣子（PDF 頁面圖、Word、Excel 表格、PowerPoint 投影片、Markdown、HTML），在不能執行程式也不能連網的框裡顯示；順便修好 pptx 表格重疊與 PDF 項目符號。見 ADR 0013。
 - 2026-10-06：預覽改成對話旁的側欄（可拖拉寬度、修改前／後並排、從工具卡與對話裡的檔名打開）；修好 Windows CI 一直失敗的原因（規則裡的反斜線路徑被吃掉）與 Ubuntu 的測試字型。見 ADR 0013。
 - 2026-10-06：Windows 驗證腳本 `scripts/verify-windows.ps1`（擁有者在自己的電腦上跑，貼回摘要）；對話裡的背景工作卡片（完成結果、套用、瀏覽器通知）。見 ADR 0012 後續。
+- 2026-10-08：依 commit `447421b` 的說明，擁有者在 Windows 上跑了 `verify-windows.ps1` 並修了三個 Windows 問題（中文檔名刪除會讓 Rocky 當掉、載入中按 Enter 訊息被丟掉、規則測試的路徑空格）。移除雲端 CI，開 PR 把重建版合回 `main`，之後只維護新版。見 ADR 0014。
