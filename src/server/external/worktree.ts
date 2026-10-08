@@ -71,20 +71,50 @@ export async function removeWorktree(
   await git(repo, 'branch', '-D', branch).catch(() => '');
 }
 
-/** Paths (forward slashes, relative to the worktree) that differ from the base commit. */
-export async function changedFiles(worktree: string): Promise<string[]> {
+const EXCLUDE_SHARED = `:(exclude)${SHARED_MODULES}`;
+
+/** Makes Git aware of new, non-ignored files without staging their content, so a diff
+ * against the base commit includes them. */
+async function registerNewFiles(worktree: string): Promise<void> {
+  // The pathspec keeps Git from walking into the shared node_modules link (a junction
+  // on Windows may look like a plain directory).
+  const untracked = (
+    await git(
+      worktree,
+      'ls-files',
+      '--others',
+      '--exclude-standard',
+      '-z',
+      '--',
+      '.',
+      EXCLUDE_SHARED,
+    )
+  )
+    .split('\0')
+    .filter((p) => p && p !== SHARED_MODULES);
+  if (untracked.length > 0)
+    await git(worktree, 'add', '--intent-to-add', '--', ...untracked);
+}
+
+/** Paths (forward slashes, relative to the worktree) that differ from the base commit,
+ * including work the agent committed and new files. A move is a delete plus a create. */
+export async function changedFiles(
+  worktree: string,
+  base: string,
+): Promise<string[]> {
+  await registerNewFiles(worktree);
   const out = await git(
     worktree,
-    'status',
-    '--porcelain=v1',
+    'diff',
+    '--name-only',
+    '--no-renames',
     '-z',
-    '--untracked-files=all',
+    base,
+    '--',
+    '.',
+    EXCLUDE_SHARED,
   );
-  return out
-    .split('\0')
-    .filter(Boolean)
-    .map((entry) => entry.slice(3))
-    .filter((p) => p !== SHARED_MODULES && p !== `${SHARED_MODULES}/`);
+  return out.split('\0').filter(Boolean);
 }
 
 /** Uncommitted changes in the project: the worktree starts from HEAD and will not have them. */
@@ -114,9 +144,10 @@ export interface Verification {
 /** approved: repo path → the last full content Rocky approved for it. */
 export async function verifyWorktree(
   worktree: string,
+  base: string,
   approved: Map<string, string>,
 ): Promise<Verification> {
-  const changed = await changedFiles(worktree);
+  const changed = await changedFiles(worktree, base);
   const unapproved = changed.filter((p) => !approved.has(p));
   const mismatched = changed.filter((p) => {
     const expected = approved.get(p);
@@ -127,28 +158,14 @@ export async function verifyWorktree(
       return true;
     }
   });
-  // New files show up in the diff once Git knows about them (without staging content).
-  const status = await git(
-    worktree,
-    'status',
-    '--porcelain=v1',
-    '-z',
-    '--untracked-files=all',
-  );
-  const untracked = status
-    .split('\0')
-    .filter((e) => e.startsWith('?? '))
-    .map((e) => e.slice(3))
-    .filter((p) => p !== SHARED_MODULES && p !== `${SHARED_MODULES}/`);
-  if (untracked.length > 0)
-    await git(worktree, 'add', '--intent-to-add', '--', ...untracked);
   const diff = await git(
     worktree,
     'diff',
-    'HEAD',
+    '--no-renames',
+    base,
     '--',
     '.',
-    `:(exclude)${SHARED_MODULES}`,
+    EXCLUDE_SHARED,
   );
   return { changed, unapproved, mismatched, diff };
 }
