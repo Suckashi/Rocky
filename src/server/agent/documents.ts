@@ -21,7 +21,6 @@ export const DOCUMENT_WRITE_TOOLS = new Set([
   'create_document',
   'edit_document',
 ]);
-const READ_LIMIT = 80_000;
 
 const FORMATS = 'pdf, docx, xlsx, pptx, md or html';
 
@@ -117,9 +116,8 @@ export function createDocumentTools(root: string, executor: Executor) {
         );
         if (format === 'pdf' && !text.replace(/## Page \d+/g, '').trim())
           return 'No text was found in this PDF. It may be a scanned image or use a font Rocky cannot read; say so to the user.';
-        return text.length > READ_LIMIT
-          ? `${text.slice(0, READ_LIMIT)}\n\n[truncated: ${text.length - READ_LIMIT} more characters]`
-          : text;
+        // The gate middleware truncates long results (TOOL_RESULT_LIMIT).
+        return text;
       },
       {
         name: 'read_document',
