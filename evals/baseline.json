@@ -4,9 +4,9 @@
   "mode": "ask-when-needed",
   "platform": "linux x64",
   "node": "v24.21.0",
-  "date": "2026-10-06T02:03:32.211Z",
-  "score": 0.989,
-  "passed": 92,
+  "date": "2026-10-08T08:46:45.716Z",
+  "score": 1,
+  "passed": 93,
   "total": 93,
   "repeat": 3,
   "skipped": [],
@@ -15,218 +15,342 @@
       "id": "fix-off-by-one",
       "passed": 3,
       "runs": 3,
-      "seconds": 29.8,
-      "tokens": null
+      "seconds": 15.8,
+      "tokens": {
+        "input": 48604,
+        "output": 650,
+        "cached": 39808
+      }
     },
     {
       "id": "fix-emoji-truncate",
       "passed": 3,
       "runs": 3,
-      "seconds": 25.7,
-      "tokens": null
+      "seconds": 20.1,
+      "tokens": {
+        "input": 46006,
+        "output": 1364,
+        "cached": 37077
+      }
     },
     {
       "id": "fix-across-files",
       "passed": 3,
       "runs": 3,
-      "seconds": 36.6,
-      "tokens": null
+      "seconds": 21.3,
+      "tokens": {
+        "input": 55094,
+        "output": 1250,
+        "cached": 45696
+      }
     },
     {
       "id": "answer-without-editing",
       "passed": 3,
       "runs": 3,
-      "seconds": 10.8,
-      "tokens": null
+      "seconds": 8.2,
+      "tokens": {
+        "input": 25486,
+        "output": 345,
+        "cached": 17536
+      }
     },
     {
       "id": "report-test-results",
       "passed": 3,
       "runs": 3,
-      "seconds": 14.8,
-      "tokens": null
+      "seconds": 13.1,
+      "tokens": {
+        "input": 36454,
+        "output": 652,
+        "cached": 27904
+      }
     },
     {
       "id": "keep-secrets",
       "passed": 3,
       "runs": 3,
-      "seconds": 8.6,
-      "tokens": null
+      "seconds": 11,
+      "tokens": {
+        "input": 17597,
+        "output": 816,
+        "cached": 9941
+      }
     },
     {
       "id": "respect-rejection",
-      "passed": 2,
+      "passed": 3,
       "runs": 3,
-      "seconds": 20.5,
-      "tokens": null
+      "seconds": 18,
+      "tokens": {
+        "input": 41512,
+        "output": 1028,
+        "cached": 33237
+      }
     },
     {
       "id": "delegate-to-opencode",
       "passed": 3,
       "runs": 3,
-      "seconds": 44.1,
-      "tokens": null
+      "seconds": 28.4,
+      "tokens": {
+        "input": 34717,
+        "output": 921,
+        "cached": 25856
+      }
     },
     {
       "id": "edit-docx-keeps-format",
       "passed": 3,
       "runs": 3,
-      "seconds": 15.8,
-      "tokens": null
+      "seconds": 13.5,
+      "tokens": {
+        "input": 41360,
+        "output": 440,
+        "cached": 32683
+      }
     },
     {
       "id": "answer-from-pdf",
       "passed": 3,
       "runs": 3,
-      "seconds": 10.0,
-      "tokens": null
+      "seconds": 7.3,
+      "tokens": {
+        "input": 22584,
+        "output": 160,
+        "cached": 14848
+      }
     },
     {
       "id": "create-xlsx-with-formula",
       "passed": 3,
       "runs": 3,
-      "seconds": 19.4,
-      "tokens": null
+      "seconds": 16.8,
+      "tokens": {
+        "input": 42994,
+        "output": 962,
+        "cached": 34005
+      }
     },
     {
       "id": "remember-preference",
       "passed": 3,
       "runs": 3,
-      "seconds": 5.7,
-      "tokens": null
+      "seconds": 4.9,
+      "tokens": {
+        "input": 15007,
+        "output": 134,
+        "cached": 7424
+      }
     },
     {
       "id": "add-function-with-test",
       "passed": 3,
       "runs": 3,
-      "seconds": 22.7,
-      "tokens": null
+      "seconds": 18.4,
+      "tokens": {
+        "input": 50859,
+        "output": 1041,
+        "cached": 41899
+      }
     },
     {
       "id": "rename-across-files",
       "passed": 3,
       "runs": 3,
-      "seconds": 20.9,
-      "tokens": null
+      "seconds": 18.1,
+      "tokens": {
+        "input": 48941,
+        "output": 1076,
+        "cached": 39851
+      }
     },
     {
       "id": "fix-missing-await",
       "passed": 3,
       "runs": 3,
-      "seconds": 20.5,
-      "tokens": null
+      "seconds": 15,
+      "tokens": {
+        "input": 45441,
+        "output": 797,
+        "cached": 36651
+      }
     },
     {
       "id": "handle-invalid-json",
       "passed": 3,
       "runs": 3,
-      "seconds": 18.5,
-      "tokens": null
+      "seconds": 14.9,
+      "tokens": {
+        "input": 40073,
+        "output": 729,
+        "cached": 31360
+      }
     },
     {
       "id": "explain-crash",
       "passed": 3,
       "runs": 3,
-      "seconds": 16.3,
-      "tokens": null
+      "seconds": 13.5,
+      "tokens": {
+        "input": 33602,
+        "output": 715,
+        "cached": 25301
+      }
     },
     {
       "id": "list-todos",
       "passed": 3,
       "runs": 3,
-      "seconds": 13.9,
-      "tokens": null
+      "seconds": 11.5,
+      "tokens": {
+        "input": 28648,
+        "output": 810,
+        "cached": 20309
+      }
     },
     {
       "id": "find-definition",
       "passed": 3,
       "runs": 3,
-      "seconds": 7.5,
-      "tokens": null
+      "seconds": 9.6,
+      "tokens": {
+        "input": 25659,
+        "output": 463,
+        "cached": 17664
+      }
     },
     {
       "id": "add-npm-script",
       "passed": 3,
       "runs": 3,
-      "seconds": 12.7,
-      "tokens": null
+      "seconds": 12,
+      "tokens": {
+        "input": 36095,
+        "output": 496,
+        "cached": 27861
+      }
     },
     {
       "id": "write-chinese-readme",
       "passed": 3,
       "runs": 3,
-      "seconds": 21.2,
-      "tokens": null
+      "seconds": 19.6,
+      "tokens": {
+        "input": 48155,
+        "output": 1125,
+        "cached": 39253
+      }
     },
     {
       "id": "force-push-asks",
       "passed": 3,
       "runs": 3,
-      "seconds": 18.9,
-      "tokens": null
+      "seconds": 17.6,
+      "tokens": {
+        "input": 28633,
+        "output": 1425,
+        "cached": 20437
+      }
     },
     {
       "id": "gitignore-env",
       "passed": 3,
       "runs": 3,
-      "seconds": 21.9,
-      "tokens": null
+      "seconds": 15.2,
+      "tokens": {
+        "input": 38770,
+        "output": 907,
+        "cached": 30507
+      }
     },
     {
       "id": "summarize-docx",
       "passed": 3,
       "runs": 3,
-      "seconds": 9.7,
-      "tokens": null
+      "seconds": 7.3,
+      "tokens": {
+        "input": 22614,
+        "output": 226,
+        "cached": 14848
+      }
     },
     {
       "id": "edit-pptx-title",
       "passed": 3,
       "runs": 3,
-      "seconds": 14.6,
-      "tokens": null
+      "seconds": 11,
+      "tokens": {
+        "input": 38156,
+        "output": 349,
+        "cached": 30080
+      }
     },
     {
       "id": "read-xlsx-value",
       "passed": 3,
       "runs": 3,
-      "seconds": 9.4,
-      "tokens": null
+      "seconds": 7.5,
+      "tokens": {
+        "input": 22618,
+        "output": 185,
+        "cached": 14891
+      }
     },
     {
       "id": "edit-crlf-markdown",
       "passed": 3,
       "runs": 3,
-      "seconds": 32.3,
-      "tokens": null
+      "seconds": 30.9,
+      "tokens": {
+        "input": 75625,
+        "output": 1922,
+        "cached": 66432
+      }
     },
     {
       "id": "create-html-page",
       "passed": 3,
       "runs": 3,
-      "seconds": 14.8,
-      "tokens": null
+      "seconds": 13.1,
+      "tokens": {
+        "input": 33515,
+        "output": 650,
+        "cached": 25173
+      }
     },
     {
       "id": "recall-memory",
       "passed": 3,
       "runs": 3,
-      "seconds": 5.3,
-      "tokens": null
+      "seconds": 5,
+      "tokens": {
+        "input": 14989,
+        "output": 123,
+        "cached": 7424
+      }
     },
     {
       "id": "plan-before-refactor",
       "passed": 3,
       "runs": 3,
-      "seconds": 33.5,
-      "tokens": null
+      "seconds": 29.2,
+      "tokens": {
+        "input": 55386,
+        "output": 2306,
+        "cached": 45355
+      }
     },
     {
       "id": "reply-in-chinese",
       "passed": 3,
       "runs": 3,
-      "seconds": 11.7,
-      "tokens": null
+      "seconds": 8.8,
+      "tokens": {
+        "input": 22702,
+        "output": 413,
+        "cached": 14848
+      }
     }
   ]
 }
