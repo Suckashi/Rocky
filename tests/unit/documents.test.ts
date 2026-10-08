@@ -117,6 +117,22 @@ describe('document formats', () => {
     ]);
   });
 
+  it('pptx: the East Asian font is marked Traditional Chinese (Big5), in text and tables', async () => {
+    const bytes = await fromMarkdown(
+      '# 繁體中文\n\n內文\n\n| 城市 | 人口 |\n| --- | --- |\n| 台北 | 250 |\n',
+      'pptx',
+    );
+    const xml = new TextDecoder().decode(
+      (await partBytes(bytes)).get('ppt/slides/slide1.xml'),
+    );
+    const charsets = [...xml.matchAll(/<a:ea [^>]*charset="(-?\d+)"/g)].map(
+      (m) => m[1],
+    );
+    expect(charsets.length).toBeGreaterThan(0);
+    expect(new Set(charsets)).toEqual(new Set(['-120']));
+    expect(await toMarkdown(bytes, 'pptx')).toContain('台北');
+  });
+
   it('pdf: created with an embedded CJK font, read back as text; editing is refused', async () => {
     const bytes = await fromMarkdown(
       '繁體中文：Rocky 建立的 PDF\n\n含標點「引號」與數字 2026。',

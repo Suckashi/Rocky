@@ -24,6 +24,7 @@ import {
   type Block,
   type Run,
 } from './markdown.ts';
+import { openPackage, readPart, savePackage, writePart } from './ooxml.ts';
 import { encodeText } from './text.ts';
 
 const CJK_FONT = 'Microsoft JhengHei';
@@ -188,9 +189,31 @@ async function pptx(blocks: Block[]): Promise<Uint8Array> {
     }
     flush();
   }
-  return new Uint8Array(
-    (await pres.write({ outputType: 'nodebuffer' })) as Buffer,
+  return traditionalChineseCharset(
+    new Uint8Array((await pres.write({ outputType: 'nodebuffer' })) as Buffer),
   );
+}
+
+// pptxgenjs marks the East Asian font as GB2312 (charset -122, Simplified Chinese) in text runs
+// and as ANSI (0) in table cells. Rocky writes Traditional Chinese: Big5 is 136, stored as the
+// signed byte -120, as PowerPoint itself writes it for Microsoft JhengHei.
+async function traditionalChineseCharset(
+  bytes: Uint8Array,
+): Promise<Uint8Array> {
+  const zip = await openPackage(bytes);
+  const slides = Object.keys(zip.files).filter((path) =>
+    /^ppt\/slides\/slide\d+\.xml$/.test(path),
+  );
+  for (const path of slides) {
+    const doc = await readPart(zip, path);
+    const fonts = doc.getElementsByTagName('a:ea');
+    for (let i = 0; i < fonts.length; i++) {
+      const font = fonts.item(i)!;
+      if (font.hasAttribute('charset')) font.setAttribute('charset', '-120');
+    }
+    writePart(zip, path, doc);
+  }
+  return savePackage(zip);
 }
 
 function cellValue(text: string): ExcelJS.CellValue {
