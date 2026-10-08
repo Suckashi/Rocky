@@ -3,8 +3,10 @@
 //   ROCKY_EVAL_BASE_URL  OpenAI-compatible URL ending in /v1
 //   ROCKY_EVAL_MODEL     model name, for example deepseek/deepseek-v4-flash
 //   ROCKY_EVAL_API_KEY   only for endpoints that need one
-//   npm run eval -- [--only <case-id>] [--repeat N] [--save-baseline]
+//   npm run eval -- [--only <case-id>] [--repeat N] [--mode <mode>] [--save-baseline]
 // Approvals are rejected automatically (with the case's reason) and counted.
+// The gate is per case (gate.ts): a case whose pass rate falls by half or more fails the
+// run. A baseline only compares with runs of the same model and approval mode.
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -12,7 +14,14 @@ import { execFileSync } from 'node:child_process';
 import { composeRocky } from '../src/server/compose.ts';
 import { findOpenCode } from '../src/server/external/opencode.ts';
 import { EgressGuard } from '../src/server/platform/egress.ts';
+import type { ApprovalMode } from '../src/server/store/settings.ts';
 import { CASES, type Case, type CaseContext } from './cases.ts';
+import {
+  compareCases,
+  summarize,
+  type CaseSummary,
+  type Tokens,
+} from './gate.ts';
 
 const baseURL = process.env['ROCKY_EVAL_BASE_URL'];
 const model = process.env['ROCKY_EVAL_MODEL'];
@@ -30,6 +39,14 @@ const saveBaseline = args.includes('--save-baseline');
 const repeat = args.includes('--repeat')
   ? Math.max(1, Number(args[args.indexOf('--repeat') + 1]) || 1)
   : 1;
+const MODES: ApprovalMode[] = ['ask-always', 'ask-when-needed', 'hands-off'];
+const mode = (
+  args.includes('--mode') ? args[args.indexOf('--mode') + 1] : 'ask-when-needed'
+) as ApprovalMode;
+if (!MODES.includes(mode)) {
+  console.error(`--mode must be one of ${MODES.join(', ')}`);
+  process.exit(2);
+}
 const CASE_TIMEOUT_MS = 5 * 60_000;
 const PORT = 4399;
 const HOST = `127.0.0.1:${PORT}`;
@@ -46,6 +63,8 @@ interface Result {
   reply: string;
   /** What Rocky did, from the receipts: effect, decision, outcome. */
   actions: string[];
+  /** Model tokens for the whole run, from RUN_FINISHED usage. */
+  tokens: Tokens | null;
   error?: string;
 }
 
@@ -94,7 +113,7 @@ async function runCase(c: Case): Promise<Result> {
     apiKey,
   );
   rocky.settings.setProject(dir);
-  rocky.settings.setMode('ask-when-needed');
+  rocky.settings.setMode(mode);
 
   const threadId = `eval-${c.id}`;
   const asked: CaseContext['asked'] = [];
@@ -185,6 +204,19 @@ async function runCase(c: Case): Promise<Result> {
     .filter((e) => e.type === 'TOOL_CALL_START')
     .map((e) => String(e['toolCallName']));
   const receipts = rocky.receipts.forThread(threadId);
+  const usage = (events.find((e) => e.type === 'RUN_FINISHED')?.['usage'] ??
+    []) as {
+    inputTokens?: number;
+    outputTokens?: number;
+    cachedInputTokens?: number;
+  }[];
+  const tokens = usage.length
+    ? {
+        input: usage.reduce((sum, u) => sum + (u.inputTokens ?? 0), 0),
+        output: usage.reduce((sum, u) => sum + (u.outputTokens ?? 0), 0),
+        cached: usage.reduce((sum, u) => sum + (u.cachedInputTokens ?? 0), 0),
+      }
+    : null;
   const problems = error
     ? [`run failed: ${error}`]
     : await c.check({
@@ -209,6 +241,7 @@ async function runCase(c: Case): Promise<Result> {
       (r) =>
         `${r.decision}/${r.outcome} ${r.effect.kind === 'command' ? JSON.stringify(r.effect.argv) : r.effect.kind === 'write' ? `${r.effect.operation} ${r.effect.path}` : r.effect.kind === 'plan' ? `plan: ${r.effect.title}` : r.effect.kind}`,
     ),
+    tokens,
     ...(error ? { error } : {}),
   };
 }
@@ -239,6 +272,7 @@ const score = Math.round((passed / results.length) * 1000) / 1000;
 const summary = {
   model,
   baseURL,
+  mode,
   platform: `${process.platform} ${process.arch}`,
   node: process.version,
   date: new Date().toISOString(),
@@ -247,35 +281,63 @@ const summary = {
   total: results.length,
   repeat,
   skipped: skipped.map((c) => c.id),
-  results,
+  cases: summarize(results),
 };
-console.log(`\nscore ${passed}/${results.length} = ${score} (${model})`);
+console.log(
+  `\nscore ${passed}/${results.length} = ${score} (${model}, ${mode})`,
+);
 
 const here = import.meta.dirname;
 mkdirSync(join(here, 'results'), { recursive: true });
+// The full transcripts stay local; the baseline keeps only per-case numbers.
 writeFileSync(
   join(here, 'results', 'latest.json'),
-  `${JSON.stringify(summary, null, 2)}\n`,
+  `${JSON.stringify({ ...summary, results }, null, 2)}\n`,
 );
 const baselineFile = join(here, 'baseline.json');
 if (saveBaseline && !only) {
   writeFileSync(baselineFile, `${JSON.stringify(summary, null, 2)}\n`);
   console.log('baseline saved');
 } else if (!only) {
+  let baseline:
+    | {
+        model: string;
+        mode?: ApprovalMode;
+        score: number;
+        cases: CaseSummary[];
+      }
+    | undefined;
   try {
-    const baseline = JSON.parse(readFileSync(baselineFile, 'utf8')) as {
-      score: number;
-      model: string;
-    };
-    if (baseline.model !== model) {
-      console.log(`baseline is for ${baseline.model}; not compared`);
-    } else if (score < baseline.score) {
-      console.error(`score dropped below the baseline (${baseline.score})`);
-      process.exit(1);
-    } else {
-      console.log(`baseline ${baseline.score}: no drop`);
-    }
+    baseline = JSON.parse(
+      readFileSync(baselineFile, 'utf8'),
+    ) as typeof baseline;
   } catch {
     console.log('no baseline yet (run with --save-baseline)');
+  }
+  if (
+    baseline &&
+    (baseline.model !== model || (baseline.mode ?? 'ask-when-needed') !== mode)
+  ) {
+    console.log(
+      `baseline is for ${baseline.model} (${baseline.mode ?? 'ask-when-needed'}); not compared`,
+    );
+  } else if (baseline) {
+    const { blocking, minor, added } = compareCases(
+      baseline.cases,
+      summary.cases,
+    );
+    for (const r of minor)
+      console.log(
+        `note: ${r.id} ${r.baseline} → ${r.now} (within run-to-run variation)`,
+      );
+    if (added.length)
+      console.log(`new cases, not in the baseline: ${added.join(', ')}`);
+    console.log(`baseline score ${baseline.score}, now ${score}`);
+    if (blocking.length) {
+      for (const r of blocking)
+        console.error(`REGRESSION: ${r.id} ${r.baseline} → ${r.now}`);
+      process.exit(1);
+    }
+    console.log('no case regressed');
   }
 }
