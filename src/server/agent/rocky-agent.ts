@@ -67,6 +67,19 @@ function textOf(content: unknown): string {
 export const INTERRUPTED_TOOL_RESULT =
   'This tool call was interrupted before it returned; its outcome is unknown. Check before repeating it.';
 
+/** Tool-call arguments from history. A stream cut off mid-call leaves broken JSON; that call
+ * then gets an "interrupted" result below, so empty arguments are enough to keep it valid. */
+function toolArgs(text: string): Record<string, unknown> {
+  try {
+    const value: unknown = JSON.parse(text || '{}');
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  } catch {
+    return {};
+  }
+}
+
 /** AG-UI messages from the browser to LangChain messages for the model. */
 export function toLangChain(messages: Message[]): BaseMessage[] {
   const out: BaseMessage[] = [];
@@ -91,10 +104,7 @@ export function toLangChain(messages: Message[]): BaseMessage[] {
             tool_calls: (message.toolCalls ?? []).map((call) => ({
               id: call.id,
               name: call.function.name,
-              args: JSON.parse(call.function.arguments || '{}') as Record<
-                string,
-                unknown
-              >,
+              args: toolArgs(call.function.arguments),
               type: 'tool_call' as const,
             })),
           }),
