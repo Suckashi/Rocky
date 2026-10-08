@@ -39,3 +39,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 `tests/fixtures/fonts/noto-tc-subset.ttf` is a subset of Noto Sans TC Regular (only the glyphs
 the document tests draw), built with fontTools from the `@fontsource/noto-sans-tc` 5.3.0 package.
 SIL Open Font License 1.1; the full license text is in `tests/fixtures/fonts/OFL-NotoSansTC.txt`.
+
+## mattpocock/skills
+
+`docs/agents/issue-tracker.md` and `docs/agents/domain.md` are adapted from the templates of the
+`setup-matt-pocock-skills` skill in https://github.com/mattpocock/skills at commit `f3fc563` (MIT,
+Copyright (c) 2026 Matt Pocock).
