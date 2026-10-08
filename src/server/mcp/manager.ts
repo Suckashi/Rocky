@@ -60,11 +60,31 @@ export function agentToolName(server: string, tool: string): string {
 export class McpManager {
   private readonly connections = new Map<string, Connection>();
   private readonly errors = new Map<string, string>();
+  /** Connections being opened, so overlapping refreshes share one server process. */
+  private readonly opening = new Map<
+    string,
+    { key: string; connection: Promise<Connection> }
+  >();
 
-  private async connect(config: McpServerConfig): Promise<Connection> {
+  private connect(config: McpServerConfig): Promise<Connection> {
     const key = keyOf(config);
     const existing = this.connections.get(config.name);
-    if (existing?.key === key) return existing;
+    if (existing?.key === key) return Promise.resolve(existing);
+    const inFlight = this.opening.get(config.name);
+    if (inFlight?.key === key) return inFlight.connection;
+    const connection = this.open(config, key).finally(() => {
+      if (this.opening.get(config.name)?.connection === connection)
+        this.opening.delete(config.name);
+    });
+    this.opening.set(config.name, { key, connection });
+    return connection;
+  }
+
+  private async open(
+    config: McpServerConfig,
+    key: string,
+  ): Promise<Connection> {
+    const existing = this.connections.get(config.name);
     if (existing) await existing.client.close().catch(() => undefined);
     const client = new Client({ name: 'rocky', version: '0.1.0' });
     const transport =
