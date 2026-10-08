@@ -56,3 +56,8 @@ Rocky 的 `package.json` 一律設定 `"scarfSettings": { "enabled": false }`。
   擁有者補貼原始輸出後再更新這一節。
 - 沒測 `pptx-automizer` 的實際編輯（需要範本檔，屬於 S4）。
 - 中文 PDF 的字型嵌入（pdf-lib + fontkit + CJK 字型）屬於 S4。
+
+## 後續（2026-10-08 檢查）
+
+- spike 程式（`spikes/s3-install/`）已刪除，最後一版在 commit `6590139`。
+- 決定裡列為「計畫中」的 Tiptap 3 與 `@langchain/ollama` 最後沒有加入：沒有做文件編輯器，Ollama 走 `@langchain/openai` 的 OpenAI 相容路徑（`/v1`）。

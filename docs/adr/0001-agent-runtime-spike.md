@@ -87,3 +87,9 @@ Deep Agents 1.14.1（在 Rocky 程序內）→ `@langchain/openai` 的 `ChatOpen
 - 只跑了預設任務；子代理、平行寫檔、恢復時不重做指令，這些仍只有假模型的證據。
 - Checkpointer 用的是記憶體版 `MemorySaver`；`node:sqlite` 版本另外做。
 - 第二道防線（通行證）、`run_command` 與 Windows 的子行程管理都還沒做，屬於 M2。
+
+## 後續（2026-10-08 檢查）
+
+- spike 程式（`spikes/s2-agent/`）與測試（`tests/spikes/s2-agent.test.ts`）已刪除，最後一版在 commit `6590139`；假模型伺服器搬到 `tests/fixtures/fake-openai.ts`。限制裡的「之後補跑 `live.ts`」因此不會再做；Windows 上的真實模型使用改由 `scripts/verify-windows.ps1 -Eval` 涵蓋。
+- 限制裡的 checkpointer（`node:sqlite` 版本另外做）沒有做：ADR 0007 改成核准在程序內等待，不用 LangGraph interrupt 與 checkpointer。
+- 執行紀錄裡「推送後由 CI 執行」那一列當時沒有回填結果。

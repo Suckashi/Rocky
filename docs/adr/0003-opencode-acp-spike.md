@@ -78,3 +78,8 @@ Rocky 用 `@agentclientprotocol/sdk` 1.7.0 的 `ClientSideConnection` 直接啟�
 - 沒測 Windows 上 Job Object、`.cmd` 以外的安裝方式（scoop、choco）與 junction 路徑。
 - 取消只測了「權限請求還開著時」；模型串流到一半時取消還沒測。
 - 子代理（OpenCode 的 `task`）、MCP 轉交、`resumeSession`（不重播歷史）還沒測。
+
+## 後續（2026-10-08 檢查）
+
+- spike 程式（`spikes/s1-acp/`）與測試已刪除，最後一版在 commit `6590139`；限制裡「照 `spikes/s1-acp/README.md` 跑 `live.ts`」因此不會再做。正式的 OpenCode 路徑在 `src/server/external/`，由 `tests/integration/jobs.test.ts`（需要 OpenCode）與 `npm run test:e2e:jobs` 測試。
+- 發現 4 提到的 Job Object 沒有做：結束程序樹改用 `taskkill /T /F`（ADR 0007 決定 6），子程序自己脫離時可能留下來。

@@ -66,3 +66,8 @@ markdown-it、docx、mammoth、exceljs、pptxgenjs、pptx-automizer、unpdf、pd
 - 掃描的 PDF（只有圖片）讀不出文字；OCR 不在 V1 範圍。
 - Big5 等舊編碼的文字檔目前直接拒絕；要不要支援，到 M4 再決定。
 - 沒有在 PowerPoint／Word／Excel 裡開檔目測（沒有 Office）。
+
+## 後續（2026-10-08 檢查）
+
+- spike 程式（`spikes/s4-documents/`）與測試（`tests/spikes/s4-documents.test.ts`）已刪除，最後一版在 commit `6590139`；正式的文件程式在 `src/server/documents/`，由 `tests/unit/documents.test.ts` 與 `tests/unit/document-preview.test.ts` 測試。spike 測過的 CMap 讀取、系統 `.ttc` 抽字型、pptx-automizer `cleanup` 目前沒有對應的單元測試。
+- 發現 5（pptxgenjs 把東亞字型的 charset 寫成 `-122`）仍未處理：`src/server/documents/` 沒有修正它，也沒有在 PowerPoint 裡確認過。
