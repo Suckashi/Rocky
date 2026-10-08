@@ -10,7 +10,7 @@ export function contentHash(effect: Effect): string {
   return sha256(effect);
 }
 
-/** "Allow for this session" scope from approvals.md: no free text, no wider than the action. */
+/** "Allow for this session" scope (ADR 0007): no free text, no wider than the action. */
 export function sessionKey(effect: Effect): string {
   switch (effect.kind) {
     case 'write':

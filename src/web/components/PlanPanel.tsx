@@ -1,4 +1,4 @@
-// Plan review (approvals.md): Rocky offers up to three ways to do a larger task. Choosing one
+// Plan review (ADR 0011): Rocky offers up to three ways to do a larger task. Choosing one
 // approves exactly the commands it lists; "ask for changes" sends feedback; Esc rejects.
 import { Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';

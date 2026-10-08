@@ -1,4 +1,4 @@
-// Permanent rules (approvals.md): argv prefixes the user adds in Settings, always visible
+// Permanent rules (ADR 0011): argv prefixes the user adds in Settings, always visible
 // and removable. They only cover commands, and an allow rule never overrides the two
 // bottom lines (dangerous commands, outside actions): the policy checks those first.
 import { Hono } from 'hono';

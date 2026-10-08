@@ -1,7 +1,7 @@
 # Rocky engineering rules
 
 Rocky is a single-user AI engineering partner that runs on the owner's own computer
-(Windows first). How it is built is described in `docs/rebuild/` and `docs/adr/`; anything
+(Windows first). How it is built is recorded in the ADRs in `docs/adr/`; anything
 not listed below can change. Record a change of architecture or approach in a short ADR.
 
 - Credentials, local databases, browser profiles and private evidence stay out of Git.

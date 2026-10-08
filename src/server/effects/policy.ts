@@ -1,4 +1,4 @@
-// The decision order from docs/rebuild/approvals.md. First rule with a verdict wins:
+// The decision order (ADR 0007). First rule with a verdict wins:
 // deny rules, dangerous commands, secrets/protected paths, external actions,
 // session approvals, allow rules, then the mode.
 import path, { type PlatformPath } from 'node:path';

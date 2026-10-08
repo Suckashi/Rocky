@@ -5,7 +5,7 @@ Rocky chats, works in your project folders, handles documents, and delegates hea
 to external coding agents over ACP. Roko, our mascot, keeps you company.
 
 **Status: V1 (M0–M5), on `main`.** Verified on Linux; on Windows the owner ran
-`scripts/verify-windows.ps1` and fixed what it found (see `docs/rebuild/plan.md`). There is
+`scripts/verify-windows.ps1` and fixed what it found (see [ADR 0014](docs/adr/0014-no-hosted-ci-merge-rebuild.md)). There is
 no hosted CI: run the checks below locally. The previous Rocky is only in Git history
 (before commit `87963aa`).
 
@@ -37,7 +37,7 @@ receipts and snapshots (`rocky.sqlite`, `snapshots/`), memory (`memory/`), skill
 3. **Approvals** replace the input box when Rocky needs you (keys `1`–`4`, `Enter`, `Esc`).
    Three modes: always ask, ask when needed (default), hands off. Dangerous commands and
    outside actions always ask. Every action has a receipt; every file change has a
-   snapshot and a "restore all" per turn. Details: [docs/rebuild/approvals.md](docs/rebuild/approvals.md).
+   snapshot and a "restore all" per turn. Details: [ADR 0007](docs/adr/0007-m2-tools-approvals-eval.md).
 4. **Documents**: pdf, docx, xlsx, pptx, md and html are read as Markdown, created from
    Markdown, and (Office files) edited in place keeping their formatting.
 5. **Delegate** coding to [OpenCode](https://opencode.ai) (`npm i -g opencode-ai`): ask Rocky
@@ -62,10 +62,6 @@ the launcher, leftover processes, and optionally the evaluation), run
 <url> -EvalModel <model>` for the evaluation; the API key is asked for and never shown or saved).
 It writes `verify-results\<time>\summary.md` to paste back.
 
-- Product: [docs/rebuild/product.md](docs/rebuild/product.md)
-- Architecture: [docs/rebuild/architecture.md](docs/rebuild/architecture.md)
-- Approvals: [docs/rebuild/approvals.md](docs/rebuild/approvals.md)
-- Plan: [docs/rebuild/plan.md](docs/rebuild/plan.md)
 - Decisions: [docs/adr/](docs/adr/)
 - Engineering rules: [AGENTS.md](AGENTS.md)
 

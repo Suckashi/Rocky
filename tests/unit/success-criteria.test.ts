@@ -1,4 +1,4 @@
-// product.md success criteria, proven by tests:
+// The V1 success criteria (ADR 0010), proven by tests:
 //   1. No outside action and no dangerous command runs without approval, in any mode,
 //      whatever the session approvals or allow rules say.
 //   2. An action whose outcome is unknown is never redone automatically.
