@@ -1,7 +1,7 @@
 # Rocky engineering rules
 
 Rocky is a single-user AI engineering partner that runs on the owner's own computer
-(Windows first). How it is built is described in `docs/rebuild/` and `docs/adr/`; anything
+(Linux and Windows). How it is built is recorded in the ADRs in `docs/adr/`; anything
 not listed below can change. Record a change of architecture or approach in a short ADR.
 
 - Credentials, local databases, browser profiles and private evidence stay out of Git.
@@ -11,3 +11,13 @@ not listed below can change. Record a change of architecture or approach in a sh
   catalogs (Traditional Chinese by default, English alongside); no hardcoded UI text.
 - No push to main, merge into main, tag, new repository, visibility change or deployment
   without the owner's explicit approval.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live in the repo's GitHub Issues (`Suckashi/Rocky`). See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` at the root (created when needed) and `docs/adr/`. See `docs/agents/domain.md`.

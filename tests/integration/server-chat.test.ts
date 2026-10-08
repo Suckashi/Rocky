@@ -5,10 +5,7 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { composeRocky } from '../../src/server/compose.ts';
 import { EgressGuard } from '../../src/server/platform/egress.ts';
-import {
-  startFakeOpenAI,
-  type FakeOpenAI,
-} from '../../spikes/s2-agent/fake-openai.ts';
+import { startFakeOpenAI, type FakeOpenAI } from '../fixtures/fake-openai.ts';
 
 const PORT = 4317;
 const HOST = `127.0.0.1:${PORT}`;

@@ -1,4 +1,4 @@
-// Roko's rule suggestions (approvals.md): when the user keeps approving the same kind of
+// Roko's rule suggestions (ADR 0011): when the user keeps approving the same kind of
 // command, suggest a permanent allow rule for it. Suggestions are only offered; a rule
 // exists only after the user accepts it. Dangerous commands, commands that reach outside
 // the project, and too-broad prefixes are never suggested.

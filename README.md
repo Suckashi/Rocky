@@ -1,71 +1,190 @@
+<div align="center">
+
+<img src="assets/rocky/mark.svg" alt="Rocky" width="96" height="96" />
+
 # Rocky
 
-A single-user AI engineering partner that runs only on your own computer (Windows first).
-Rocky chats, works in your project folders, handles documents, and delegates heavy coding
-to external coding agents over ACP. Roko, our mascot, keeps you company.
+**A local-first AI engineering partner for one person and one computer.**
 
-**Status: V1 (M0–M5).** Verified on Linux; on Windows the owner ran
-`scripts/verify-windows.ps1` and fixed what it found (see `docs/rebuild/plan.md`). There is no hosted CI: run the
-checks below locally. The previous Rocky is only in Git history (before commit `87963aa`).
+Rocky chats with you, works in your project folders, reads and writes Office documents,
+and hands larger coding tasks to an external coding agent. Every change it makes goes
+through one approval gate and can be undone.
 
-## Start
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+![Node.js 24](https://img.shields.io/badge/node-24-339933.svg)
+![Platform: Linux | Windows](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey.svg)
+![Status: V1](https://img.shields.io/badge/status-V1-orange.svg)
 
-You need [Node.js 24](https://nodejs.org/) and Git.
+**English** · [繁體中文](README.zh-TW.md)
+
+[Features](#features) · [Quick start](#quick-start) · [How it works](#how-it-works) ·
+[Security](#security-and-privacy) · [Development](#development) · [Decisions](docs/adr/)
+
+</div>
+
+---
+
+## Features
+
+- **Works in your project.** Search, read, edit files and run commands inside the folder you
+  choose, then run your tests to check the result. Rocky follows the project's `AGENTS.md`.
+- **Approvals that stay out of your way.** Three modes (always ask, ask when needed, hands
+  off). Dangerous commands and actions outside the project always ask, in every mode.
+  Approvals are bound to a hash of the exact content, so a changed command asks again.
+- **Undo for every change.** Files are snapshotted before each write; each turn ends with a
+  card listing what changed and a **Restore all** button. Every action leaves a receipt.
+- **Plan review.** For larger or ambiguous tasks Rocky proposes 1–3 options before it starts.
+- **Documents as first-class files.** PDF, Word, Excel, PowerPoint, Markdown and HTML are read
+  as Markdown and created from Markdown; Word, Excel and PowerPoint are edited in place,
+  keeping their formatting. Chinese text round-trips intact. A side panel previews the layout
+  before and after a change.
+- **Delegation to [OpenCode](https://opencode.ai).** Ask Rocky to hand off a coding task. It runs
+  in the background in its own Git worktree; you approve its actions in Rocky; Rocky checks
+  the diff and reruns the tests before you apply or discard the result.
+- **Extensible.** Long-term memory in Markdown files, skills (`SKILL.md` folders) and MCP
+  servers (stdio or HTTP), each tool with its own approval setting.
+- **Bilingual interface.** Traditional Chinese (default) and English, with Roko the mascot
+  showing what Rocky is doing.
+
+## Quick start
+
+### Requirements
+
+- [Node.js 24](https://nodejs.org/) and [Git](https://git-scm.com/)
+- A model: any OpenAI-compatible endpoint, OpenAI, or a local [Ollama](https://ollama.com/)
+- Optional: OpenCode for delegation (`npm install -g opencode-ai`)
+
+No C/C++ compiler, Python or Microsoft Office is needed.
+
+### Install and start
+
+```sh
+git clone https://github.com/Suckashi/Rocky.git
+cd Rocky
+npm ci
+npm start
+```
+
+Rocky prints a one-time login link and opens it in your browser.
+
+On Windows you can instead run the launcher, which installs the pinned dependencies on first
+run (`npm ci`), starts Rocky, and reopens the browser if Rocky is already running:
 
 ```powershell
-git clone -b claude/rocky-rebuild https://github.com/Suckashi/Rocky.git
-cd Rocky
 powershell -ExecutionPolicy Bypass -File .\Start-Rocky.ps1
 ```
 
-The first run installs dependencies with `npm ci` (no compiler needed). Rocky then opens
-your browser with a one-time login link. Run the launcher again to reopen Rocky while it is
-running. On other systems use `npm ci` and `npm start`.
+Rocky is verified on Linux and Windows; macOS is untested.
 
-Data lives in `%LOCALAPPDATA%\Rocky` (Windows) or `~/.local/share/rocky`: conversations,
-receipts and snapshots (`rocky.sqlite`, `snapshots/`), memory (`memory/`), skills
-(`skills/`), job worktrees (`worktrees/`), and `secrets.json` (model key, MCP settings).
+### First run
 
-## Use
+1. **Choose a model**: base URL, model name and API key. The key is stored only on your computer.
+2. **Choose a project folder**: Rocky reads, edits and runs commands only there.
+3. Start chatting. When Rocky needs you, the approval panel replaces the input box: press
+   `1`–`4` to choose, `Enter` to confirm, `Esc` to reject.
 
-1. **Choose a model**: any OpenAI-compatible endpoint (for example Command Code), OpenAI,
-   or Ollama. **Choose a project folder**: Rocky only reads, edits and runs commands there.
-2. **Chat** in Traditional Chinese or English. Rocky searches, reads, edits files, runs
-   commands (argv only, no shell) and runs your tests after changing code. It reads the
-   project's `AGENTS.md` at the start of each turn.
-3. **Approvals** replace the input box when Rocky needs you (keys `1`–`4`, `Enter`, `Esc`).
-   Three modes: always ask, ask when needed (default), hands off. Dangerous commands and
-   outside actions always ask. Every action has a receipt; every file change has a
-   snapshot and a "restore all" per turn. Details: [docs/rebuild/approvals.md](docs/rebuild/approvals.md).
-4. **Documents**: pdf, docx, xlsx, pptx, md and html are read as Markdown, created from
-   Markdown, and (Office files) edited in place keeping their formatting.
-5. **Delegate** coding to [OpenCode](https://opencode.ai) (`npm i -g opencode-ai`): ask Rocky
-   to hand a task to OpenCode. It works in a git worktree; you approve its actions in Rocky;
-   Rocky checks the diff and runs the tests; you apply or discard it on the Jobs page.
-6. **Memory** (ask Rocky to remember something), **skills** (folders with a `SKILL.md` in the
-   skills folder) and **MCP servers** (Settings) extend Rocky. MCP calls always go through
-   approval unless you mark a tool read-only.
+## Configuration
 
-## Develop
+Settings are made in the app. A few environment variables cover the rest:
 
-`npm run check` runs type checks, lint, formatting, the i18n checks and the tests.
-`npm run test:e2e` (and `test:e2e:jobs`, which needs OpenCode) drive the UI in a real browser
-against a scripted model (the system Edge, or `ROCKY_E2E_BROWSER`).
-`npm run eval` runs about 30 real tasks against a live model and compares with
-`evals/baseline.json` (see `evals/run.ts`). Run it after changing prompts, tools or the agent
-loop; models vary between runs, so repeat (`--repeat 3`) before reading a drop as real.
+| Variable             | Default                                          | Purpose                                       |
+| -------------------- | ------------------------------------------------ | --------------------------------------------- |
+| `ROCKY_PORT`         | `4317`                                           | Local port (always bound to `127.0.0.1`)      |
+| `ROCKY_DATA_DIR`     | `%LOCALAPPDATA%\Rocky` or `~/.local/share/rocky` | Where Rocky keeps its data                    |
+| `ROCKY_OPEN_BROWSER` | on                                               | Set to `0` to only print the login link       |
+| `ROCKY_OPENCODE_BIN` | found on `PATH`                                  | Path to the OpenCode executable               |
+| `ROCKY_PDF_FONT`     | a system CJK font                                | `.ttf` or `.ttc` font used when creating PDFs |
 
-To check everything on a Windows computer in one go (install, checks, both browser tests,
-the launcher, leftover processes, and optionally the evaluation), run
-`powershell -ExecutionPolicy Bypass -File .\scripts\verify-windows.ps1` (add `-Eval -EvalBaseUrl
-<url> -EvalModel <model>` for the evaluation; the API key is asked for and never shown or saved).
-It writes `verify-results\<time>\summary.md` to paste back.
+The data folder holds conversations, receipts and snapshots (`rocky.sqlite`, `snapshots/`),
+memory (`memory/`), skills (`skills/`), job worktrees (`worktrees/`) and `secrets.json`
+(model key and MCP settings). It is never inside a Git checkout.
 
-- Product: [docs/rebuild/product.md](docs/rebuild/product.md)
-- Architecture: [docs/rebuild/architecture.md](docs/rebuild/architecture.md)
-- Approvals: [docs/rebuild/approvals.md](docs/rebuild/approvals.md)
-- Plan: [docs/rebuild/plan.md](docs/rebuild/plan.md)
-- Decisions: [docs/adr/](docs/adr/)
-- Engineering rules: [AGENTS.md](AGENTS.md)
+## How it works
 
-Rocky listens on 127.0.0.1 only, keeps all data on your machine, and sends no telemetry.
+```
+Browser (React, zh-TW / en)
+   │  HTTP + SSE on 127.0.0.1, every request authenticated
+   ▼
+Rocky (one Node.js process)
+ ├─ Agent        Deep Agents + LangChain, OpenAI-compatible models
+ ├─ Action gate  policy → approval → single-use pass → execute → receipt
+ ├─ Snapshots    content-addressed copies of every file before it changes
+ ├─ Jobs         OpenCode over ACP, one Git worktree per job, queued
+ ├─ MCP client   your stdio / HTTP servers
+ ├─ Documents    pure Node libraries for pdf, docx, xlsx, pptx, md, html
+ └─ Storage      node:sqlite + files in the data folder
+```
+
+Every tool call passes the **action gate** before it runs, including calls from OpenCode, MCP
+and the Restore button. The functions that write files or run commands accept only a
+single-use pass issued by the gate for that exact content, so nothing can skip the gate.
+Commands run as argument lists, never through a shell. An action whose outcome is unknown
+is never retried automatically.
+
+The reasoning behind each design choice is recorded in the
+[architecture decision records](docs/adr/).
+
+## Security and privacy
+
+- Rocky listens on `127.0.0.1` only. Do not expose it to a network.
+- No telemetry. Third-party install and runtime telemetry is switched off.
+- Rocky's own outbound requests go only to the model endpoints and MCP servers you configure.
+  OpenCode, when you use it, also contacts the npm registry at startup and may download ripgrep.
+- Rocky's access token never leaves its process: the browser signs in with a one-time code.
+  The model API key is never shown in the interface; OpenCode receives it to call the model.
+- Rocky has **no operating-system sandbox**: approved commands run with your user's
+  permissions. Read what you approve.
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md).
+
+## Development
+
+```sh
+npm ci
+npm run check        # type check, lint, formatting, i18n, unit and integration tests
+npm run test:e2e     # browser end-to-end tests against a scripted model
+npm run test:e2e:jobs  # the same for delegation (needs OpenCode)
+npm run eval         # 31 real tasks against a live model, compared with evals/baseline.json
+```
+
+The end-to-end tests use the system Edge, or the browser set in `ROCKY_E2E_BROWSER`.
+Run `npm run eval` after changing prompts, tools or the agent loop; models vary between runs,
+so use `--repeat 3` before treating a drop as real.
+
+GitHub Actions runs `npm run check` and the build on Windows and Ubuntu for pull requests to
+`main` (a few minutes; it does not block merging). The browser tests, delegation tests and
+the evaluation run locally. On Windows, `scripts/verify-windows.ps1` runs the install, all
+checks, both browser tests and the launcher in one go and writes a summary to `verify-results\`.
+
+Project layout:
+
+```
+src/server/   Node.js server: agent, action gate, jobs, documents, MCP, storage
+src/web/      React interface and i18n catalogs (zh-TW, en)
+tests/        unit and integration tests (Vitest)
+scripts/      browser end-to-end tests, i18n check, Windows verification
+evals/        evaluation tasks and baseline
+docs/adr/     architecture decision records
+```
+
+## Project status
+
+Rocky V1 is feature-complete. It is verified on Linux, and on Windows with
+`scripts/verify-windows.ps1`; macOS is untested. There is no packaged release yet. Known limitations include:
+
+- No operating-system sandbox; commands run with your permissions.
+- Only OpenCode is supported for delegation.
+- Layout previews are drawn by Rocky and can differ from how Office shows the file.
+- Scanned (image-only) PDFs cannot be read.
+
+## Contributing
+
+Rocky is maintained by its owner for personal use. Before changing code, read [AGENTS.md](AGENTS.md): every user-facing string goes through the
+i18n catalogs, checks must be reported honestly, and a change of approach gets a short ADR.
+
+## License
+
+Rocky's source code is licensed under the [Apache License 2.0](LICENSE).
+The Roko mascot artwork in `assets/roko/` is **not** covered by that license; see
+[NOTICE](NOTICE) and [assets/roko/README.md](assets/roko/README.md).
+Third-party attributions are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

@@ -10,18 +10,6 @@
       "sha256": "e15140d3f0d01f76ced2f0e583a5e3a3a5106fe5ac2794c0038e75c223013dba",
       "creator": "Rocky project / Codex-assisted original vector authoring",
       "method": "authored-svg",
-      "sourceRefs": ["specs/rocky/ROCKY_BOT_DESIGN_SPEC.md"],
-      "license": "Apache-2.0",
-      "rightsReview": "pending",
-      "reviewEvidence": "Original geometric source; no third-party media copied. Name/character/trademark distribution review has not been performed."
-    },
-    {
-      "id": "rocky-mark-monochrome-v1",
-      "path": "assets/rocky/mark-monochrome.svg",
-      "sha256": "d7a599670bd21093bcd93f459a6e282fb6dc2c211ef6ad7cfa22cfc0a505b9db",
-      "creator": "Rocky project / Codex-assisted original vector authoring",
-      "method": "authored-svg",
-      "sourceRefs": ["specs/rocky/ROCKY_BOT_DESIGN_SPEC.md"],
       "license": "Apache-2.0",
       "rightsReview": "pending",
       "reviewEvidence": "Original geometric source; no third-party media copied. Name/character/trademark distribution review has not been performed."
@@ -32,12 +20,11 @@
       "sha256": "e15140d3f0d01f76ced2f0e583a5e3a3a5106fe5ac2794c0038e75c223013dba",
       "creator": "Rocky project / Codex-assisted original vector authoring",
       "method": "authored-svg",
-      "sourceRefs": ["specs/rocky/ROCKY_BOT_DESIGN_SPEC.md"],
       "license": "Apache-2.0",
       "rightsReview": "pending",
       "reviewEvidence": "Original geometric source; no third-party media copied. Name/character/trademark distribution review has not been performed."
     }
   ],
-  "bytes": 921,
+  "bytes": 686,
   "mascotManifest": "assets/roko/roko-manifest.json"
 }
