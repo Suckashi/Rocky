@@ -6,7 +6,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { chromium, type Page } from 'playwright-core';
-import { startFakeOpenAI } from '../spikes/s2-agent/fake-openai.ts';
+import { startFakeOpenAI } from '../tests/fixtures/fake-openai.ts';
 
 const REPLY = '你好！我是 Rocky。這是**測試回覆**。';
 const port = 4390 + Math.floor(Math.random() * 9);

@@ -21,7 +21,7 @@ import {
   type ChatRequestMessage,
   type FakeOpenAI,
   type ScriptedReply,
-} from '../../spikes/s2-agent/fake-openai.ts';
+} from '../fixtures/fake-openai.ts';
 
 const PORT = 4319;
 const HOST = `127.0.0.1:${PORT}`;

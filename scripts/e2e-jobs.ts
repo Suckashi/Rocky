@@ -18,7 +18,7 @@ import { findOpenCode } from '../src/server/external/opencode.ts';
 import {
   startFakeOpenAI,
   type ChatRequestMessage,
-} from '../spikes/s2-agent/fake-openai.ts';
+} from '../tests/fixtures/fake-openai.ts';
 
 const port = 4380 + Math.floor(Math.random() * 9);
 const root = join(import.meta.dirname, '..');

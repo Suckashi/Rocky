@@ -1,6 +1,0 @@
-.roko {
-  color: oklch(60% 0.15 250);
-  & + p {
-    margin: 0;
-  }
-}
