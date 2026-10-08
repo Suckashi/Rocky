@@ -149,7 +149,7 @@ export function decide(effect: Effect, ctx: PolicyContext): Verdict {
   }
 
   // 7. The mode. Hands-off and ask-when-needed decide alike here: everything that
-  // still asks in either mode returned above (ADR 0012).
+  // still asks in either mode returned above (ADR 0018).
   if (ctx.mode !== 'ask-always') return verdict('allow', 'mode');
   // ask-always: reads and the safe list run; everything else asks. Fetching pages asks too.
   if (effect.kind === 'read') return verdict('allow', 'mode');
