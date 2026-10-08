@@ -1,7 +1,7 @@
 // Runs one job: a worktree of the project, OpenCode over ACP inside it, every permission
 // request through Rocky's gate, then Rocky's own verification (diff against what it
 // approved, and the project's tests). Nothing reaches the project until the user applies it.
-import { existsSync, mkdirSync, readFileSync, symlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import type { SessionNotification } from '@agentclientprotocol/sdk';
 import { contentHash } from '../effects/hash.ts';
@@ -14,6 +14,7 @@ import { permissionEffect } from '../external/permission.ts';
 import {
   addWorktree,
   hasUncommitted,
+  git,
   isGitRepo,
   toRepoPath,
   verifyWorktree,
@@ -53,11 +54,16 @@ const GUIDANCE = [
   'Finish with a short summary of what you changed and the test result.',
 ].join('\n');
 
-function hasTestScript(dir: string): boolean {
+/** Whether the project had a test script when the job started. Read from the base commit,
+ * so the agent cannot skip Rocky's check by deleting or renaming the script. */
+export async function baseHasTestScript(
+  worktree: string,
+  base: string,
+): Promise<boolean> {
   try {
-    const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as {
-      scripts?: Record<string, string>;
-    };
+    const pkg = JSON.parse(
+      await git(worktree, 'show', `${base}:package.json`),
+    ) as { scripts?: Record<string, string> };
     return typeof pkg.scripts?.['test'] === 'string';
   } catch {
     return false;
@@ -357,10 +363,9 @@ export class JobRunner {
       await agent.initialize();
       sessionId = await agent.newSession(worktree);
       jobs.setSession(job.id, sessionId);
-      if (signal.aborted) onAbort();
-
+      // Stopped while OpenCode was starting: never send it the task.
       let prompt = `${GUIDANCE}\n\nTask:\n${job.task}`;
-      for (let round = 0; ; round++) {
+      for (let round = 0; !signal.aborted; round++) {
         event({ type: 'prompt', text: round === 0 ? job.task : prompt });
         rejection = undefined;
         const response = await agent.prompt(sessionId, prompt);
@@ -387,7 +392,7 @@ export class JobRunner {
       if (
         !signal.aborted &&
         verification.changed.length > 0 &&
-        hasTestScript(worktree)
+        (await baseHasTestScript(worktree, tree.base))
       ) {
         result.checks.push(
           await this.check(thread, worktree, ['npm', 'test'], signal),

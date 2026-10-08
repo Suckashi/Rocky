@@ -19,6 +19,7 @@ import {
   verifyWorktree,
 } from '../../src/server/external/worktree.ts';
 import { applyPlan } from '../../src/server/jobs/apply.ts';
+import { baseHasTestScript } from '../../src/server/jobs/runner.ts';
 import type { Job } from '../../src/server/jobs/store.ts';
 
 function sh(cwd: string, ...args: string[]): string {
@@ -118,5 +119,24 @@ describe('worktree changes', () => {
     expect(readFileSync(join(repo, 'src', 'a.ts'), 'utf8')).toBe(
       'export const a = 1;\n',
     );
+  });
+
+  it("decides on running the project's tests from the base commit, not the agent's edit", async () => {
+    const { repo, worktree, base } = await project();
+    expect(await baseHasTestScript(worktree, base)).toBe(false);
+    writeFileSync(
+      join(repo, 'package.json'),
+      JSON.stringify({ scripts: { test: 'vitest run' } }),
+    );
+    sh(repo, 'add', 'package.json');
+    sh(repo, 'commit', '-q', '-m', 'tests');
+    const second = await addWorktree(
+      repo,
+      join(repo, '..', 'wt2'),
+      'rocky/job-2',
+    );
+    // The agent removes the script; Rocky still runs the check.
+    writeFileSync(join(second.path, 'package.json'), '{}');
+    expect(await baseHasTestScript(second.path, second.base)).toBe(true);
   });
 });
