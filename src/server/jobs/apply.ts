@@ -45,7 +45,7 @@ export async function applyPlan(
 ): Promise<ApplyItem[]> {
   if (!job.worktree || !job.baseCommit) return [];
   const items: ApplyItem[] = [];
-  for (const path of await changedFiles(job.worktree)) {
+  for (const path of await changedFiles(job.worktree, job.baseCommit)) {
     const source = join(job.worktree, path);
     const target = join(project, ...path.split('/'));
     const afterBlob = existsSync(source) ? readFileSync(source) : null;

@@ -280,7 +280,7 @@ export class JobRunner {
       agent = undefined;
 
       // 3. Rocky's own verification: what changed, and does it match what was approved.
-      const verification = await verifyWorktree(worktree, approved);
+      const verification = await verifyWorktree(worktree, tree.base, approved);
       result = { ...result, ...verification };
       // Approved actions OpenCode never reported back: their outcome is not known.
       for (const receiptId of receiptOf.values()) {
