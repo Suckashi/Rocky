@@ -151,8 +151,10 @@ The end-to-end tests use the system Edge, or the browser set in `ROCKY_E2E_BROWS
 Run `npm run eval` after changing prompts, tools or the agent loop; models vary between runs,
 so use `--repeat 3` before treating a drop as real.
 
-There is no hosted CI. On Windows, `scripts/verify-windows.ps1` runs the install, all checks,
-both browser tests and the launcher in one go and writes a summary to `verify-results\`.
+GitHub Actions runs `npm run check` and the build on Windows and Ubuntu for pull requests to
+`main` (a few minutes; it does not block merging). The browser tests, delegation tests and
+the evaluation run locally. On Windows, `scripts/verify-windows.ps1` runs the install, all
+checks, both browser tests and the launcher in one go and writes a summary to `verify-results\`.
 
 Project layout:
 

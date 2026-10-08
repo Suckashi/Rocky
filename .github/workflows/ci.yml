@@ -1,0 +1,51 @@
+# Lightweight CI (ADR 0017): npm run check and the build on Windows and Ubuntu, a few minutes.
+# Browser end-to-end tests, OpenCode jobs and the live-model evaluation stay local.
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**']
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      # Windows PowerShell 5.1 reads scripts without a BOM in the ANSI code page and garbles Chinese.
+      - name: Parse the PowerShell scripts with Windows PowerShell 5.1
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          foreach ($file in @('Start-Rocky.ps1', 'scripts\verify-windows.ps1')) {
+            $path = Join-Path $PWD $file
+            $bytes = [System.IO.File]::ReadAllBytes($path)
+            if ($bytes[0] -ne 0xEF -or $bytes[1] -ne 0xBB -or $bytes[2] -ne 0xBF) { Write-Error "$file must be UTF-8 with BOM"; exit 1 }
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$null, [ref]$errors) | Out-Null
+            if ($errors) { $errors | Format-List; exit 1 }
+            Write-Host "PowerShell $($PSVersionTable.PSVersion): $file parses"
+          }

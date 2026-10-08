@@ -1,7 +1,7 @@
 # ADR 0014：移除雲端 CI，重建版合回 main
 
 - 日期：2026-10-08
-- 狀態：已採用（取代 `docs/rebuild/plan.md` 原本「GitHub Actions 跑 Windows 與 Ubuntu」的決定）
+- 狀態：已採用（決定 1「不跑雲端 CI」已由 ADR 0017 取代；決定 2 仍有效）
 
 ## 決定
 

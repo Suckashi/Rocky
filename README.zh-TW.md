@@ -138,7 +138,8 @@ npm run eval           # 用真實模型跑 31 個任務，和 evals/baseline.js
 端對端測試使用系統的 Edge，或 `ROCKY_E2E_BROWSER` 指定的瀏覽器。
 改了提示詞、工具或 agent 迴圈後要跑 `npm run eval`；模型每次結果會有差異，看到退步時先用 `--repeat 3` 確認。
 
-沒有雲端 CI。在 Windows 上，`scripts/verify-windows.ps1` 會一次跑完安裝、所有檢查、兩組瀏覽器測試與啟動腳本，
+GitHub Actions 會在開 PR 到 `main` 時，於 Windows 與 Ubuntu 上跑 `npm run check` 與打包（幾分鐘，不會擋合併）；
+瀏覽器測試、派工測試與評測在本機跑。在 Windows 上，`scripts/verify-windows.ps1` 會一次跑完安裝、所有檢查、兩組瀏覽器測試與啟動腳本，
 並把摘要寫到 `verify-results\`。
 
 專案結構：

@@ -4,8 +4,8 @@
 
 ## Checks
 
-There is no hosted CI. Run the checks locally and report the real platform, command and
-result. If a check was not run, say so.
+CI runs `npm run check` and the build on Windows and Ubuntu. Run the other checks locally
+and report the real platform, command and result. If a check was not run, say so.
 
 | Platform | Command | Result |
 | -------- | ------- | ------ |
