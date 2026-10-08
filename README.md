@@ -15,6 +15,8 @@ through one approval gate and can be undone.
 ![Platform: Linux | Windows](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey.svg)
 ![Status: V1](https://img.shields.io/badge/status-V1-orange.svg)
 
+**English** · [繁體中文](README.zh-TW.md)
+
 [Features](#features) · [Quick start](#quick-start) · [How it works](#how-it-works) ·
 [Security](#security-and-privacy) · [Development](#development) · [Decisions](docs/adr/)
 
