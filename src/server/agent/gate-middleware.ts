@@ -21,7 +21,7 @@ import { SKILL_TOOLS } from './skills.ts';
 import { chosenPlanMessage, planEffect } from './plan.ts';
 import { mcpEffect, type McpToolMap } from './mcp.ts';
 import type { ToolPolicy } from '../mcp/manager.ts';
-import { toolEffect } from './workspace.ts';
+import { READ_TOOLS, toolEffect } from './workspace.ts';
 
 export interface GateRun {
   gate: Gate;
@@ -52,9 +52,34 @@ function capped<T>(result: T): T {
   return result;
 }
 
+/** What the read-only research subagent is offered. Deep Agents gives it every tool Rocky has;
+ * the rest would only be refused below, so the model never sees them. */
+export const SUBAGENT_TOOLS = new Set([
+  ...READ_TOOLS,
+  ...MEMORY_READ_TOOLS,
+  'load_skill',
+]);
+
+function toolName(tool: unknown): string | undefined {
+  const t = tool as { name?: unknown; function?: { name?: unknown } };
+  const name = t.name ?? t.function?.name;
+  return typeof name === 'string' ? name : undefined;
+}
+
 export function createGateMiddleware(run: GateRun, actor: Actor) {
   return createMiddleware({
     name: actor === 'rocky' ? 'RockyActionGate' : 'RockyActionGateSubagent',
+    ...(actor === 'subagent'
+      ? {
+          wrapModelCall: (request, handler) =>
+            handler({
+              ...request,
+              tools: request.tools.filter((t) =>
+                SUBAGENT_TOOLS.has(toolName(t) ?? ''),
+              ),
+            }),
+        }
+      : {}),
     wrapToolCall: async (request, handler) =>
       capped(await gated(request, handler)),
   });

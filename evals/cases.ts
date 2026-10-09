@@ -587,6 +587,18 @@ export const CASES: Case[] = [
     check: (ctx) => [...noWrites(ctx), ...replyHas(ctx, /http\/query\.js/)],
   },
   {
+    // The only case that uses the research subagent (ADR 0022).
+    id: 'research-with-subagent',
+    prompt:
+      '請交給研究助手（task 工具）去查：parseQuery 定義在哪個檔案、被哪些檔案用到。查完告訴我結果，不要改任何檔案。',
+    files: findDef,
+    check: (ctx) => [
+      ...(ctx.tools.includes('task') ? [] : ['did not use the subagent']),
+      ...noWrites(ctx),
+      ...replyHas(ctx, /http\/query\.js/, /route\.js/),
+    ],
+  },
+  {
     id: 'add-npm-script',
     prompt:
       '在 package.json 加一個 check 腳本：node --check src/index.js。其他設定不要動。',
