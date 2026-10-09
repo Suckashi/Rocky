@@ -41,10 +41,14 @@ ADR 0018 的檢查發現：「需要時才問」與「放手」判斷完全相�
 
 ## 驗證
 
-| 平台                                            | 指令                                                                  | 結果  |
-| ----------------------------------------------- | --------------------------------------------------------------------- | ----- |
-| 雲端 Linux，Node 24.21.0                        | `npm run check`、`npm run build`                                      | 見 PR |
-| 同上，Chromium 1194                             | `node scripts/e2e.ts`、`node scripts/e2e-jobs.ts`（OpenCode 1.18.34） | 見 PR |
-| 同上，Command Code `deepseek/deepseek-v4-flash` | `npm run eval -- --repeat 3`                                          | 見 PR |
+| 平台                                            | 指令                                                                  | 結果                          |
+| ----------------------------------------------- | --------------------------------------------------------------------- | ----------------------------- |
+| 雲端 Linux，Node 24.21.0                        | `npm run check`、`npm run build`                                      | 通過，152 個測試，exit 0      |
+| 同上，Chromium 1194                             | `node scripts/e2e.ts`、`node scripts/e2e-jobs.ts`（OpenCode 1.18.34） | 通過，exit 0                  |
+| 同上，Command Code `deepseek/deepseek-v4-flash` | `npm run eval -- --repeat 3`                                          | 90/93，沒有題目退步（exit 0） |
+| 同上                                            | `npm run eval -- --only plan-before-refactor --repeat 5`              | 5/5                           |
 
+- 評測失敗的 3 次：`report-test-results` 和 `keep-secrets` 各 1 次是供應商連線中斷（`terminated`）。
+  `plan-before-refactor` 有 1 次在 `propose_plan` 之後收到供應商 400（`invalid_request_error`）；
+  單獨重跑 5 次全部通過，其中一次的工具順序和失敗那次相同，所以沒有改程式，但原因沒有查到。
 - 沒有在 Windows 上跑過。
