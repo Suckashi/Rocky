@@ -86,3 +86,15 @@ export function summarize(
     };
   });
 }
+
+/** A run that ended because the model provider failed (an HTTP error status, a dropped
+ * connection), not because Rocky did the task wrong. These runs are reported apart and left
+ * out of the score: they say nothing about Rocky (ADR 0026). */
+export function isProviderError(error: string): boolean {
+  return (
+    /^[45]\d\d\b/.test(error.trim()) ||
+    /\b(terminated|ECONNRESET|ETIMEDOUT|socket hang up|fetch failed)\b/i.test(
+      error,
+    )
+  );
+}

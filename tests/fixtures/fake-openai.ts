@@ -11,6 +11,8 @@ export interface ScriptedToolCall {
 export interface ScriptedReply {
   text?: string;
   toolCalls?: ScriptedToolCall[];
+  /** Answer with this HTTP error instead (a provider refusing the request). */
+  httpError?: { status: number; body: unknown };
 }
 
 export interface ChatRequestMessage {
@@ -167,6 +169,13 @@ export async function startFakeOpenAI(script: Script): Promise<FakeOpenAI> {
       });
       const reply = script(body.messages);
       const id = `chatcmpl-${++counter}`;
+      if (reply.httpError) {
+        res.writeHead(reply.httpError.status, {
+          'content-type': 'application/json',
+        });
+        res.end(JSON.stringify(reply.httpError.body));
+        return;
+      }
       if (!body.stream) {
         res.writeHead(200, { 'content-type': 'application/json' });
         res.end(JSON.stringify(completion(id, reply)));

@@ -21,6 +21,7 @@ import {
   summarize,
   type CaseSummary,
   type Tokens,
+  isProviderError,
 } from './gate.ts';
 
 const baseURL = process.env['ROCKY_EVAL_BASE_URL'];
@@ -66,6 +67,8 @@ interface Result {
   /** Model tokens for the whole run, from RUN_FINISHED usage. */
   tokens: Tokens | null;
   error?: string;
+  /** The provider broke the run (ADR 0026): reported, not scored. */
+  providerError?: true;
 }
 
 type Event = { type: string; [key: string]: unknown };
@@ -244,6 +247,7 @@ async function runCase(c: Case): Promise<Result> {
     ),
     tokens,
     ...(error ? { error } : {}),
+    ...(error && isProviderError(error) ? { providerError: true } : {}),
   };
 }
 
@@ -261,15 +265,20 @@ for (let round = 1; round <= repeat; round++) {
     const result = await runCase(c);
     results.push(result);
     console.log(
-      `${result.passed ? 'PASS' : 'FAIL'} (${result.seconds}s, tools: ${result.tools.join(', ') || 'none'}, asked: ${result.asked})` +
+      `${result.passed ? 'PASS' : result.providerError ? 'PROVIDER ERROR' : 'FAIL'} (${result.seconds}s, tools: ${result.tools.join(', ') || 'none'}, asked: ${result.asked})` +
         (result.problems.length
           ? `\n    ${result.problems.join('\n    ')}`
           : ''),
     );
   }
 }
-const passed = results.filter((r) => r.passed).length;
-const score = Math.round((passed / results.length) * 1000) / 1000;
+// Runs the provider broke are reported, not scored.
+const scored = results.filter((r) => !r.providerError);
+const providerErrors = results.length - scored.length;
+const passed = scored.filter((r) => r.passed).length;
+const score = scored.length
+  ? Math.round((passed / scored.length) * 1000) / 1000
+  : 0;
 const summary = {
   model,
   baseURL,
@@ -279,13 +288,17 @@ const summary = {
   date: new Date().toISOString(),
   score,
   passed,
-  total: results.length,
+  total: scored.length,
+  providerErrors,
   repeat,
   skipped: skipped.map((c) => c.id),
-  cases: summarize(results),
+  cases: summarize(scored),
 };
 console.log(
-  `\nscore ${passed}/${results.length} = ${score} (${model}, ${mode})`,
+  `\nscore ${passed}/${scored.length} = ${score} (${model}, ${mode})` +
+    (providerErrors
+      ? `; ${providerErrors} run(s) ended by provider errors, not scored`
+      : ''),
 );
 
 const here = import.meta.dirname;

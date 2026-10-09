@@ -33,6 +33,8 @@ let fake: FakeOpenAI;
 let plan: ScriptedToolCall[] = [];
 /** What the research subagent's model does on its first turn (when Rocky calls "task"). */
 let subPlan: ScriptedToolCall[] = [];
+/** Provider refusals answered before anything else, one per model request. */
+let refusals: { status: number; body: unknown }[] = [];
 
 function toolResults(messages: ChatRequestMessage[]): string[] {
   return messages
@@ -44,6 +46,8 @@ function toolResults(messages: ChatRequestMessage[]): string[] {
 
 beforeAll(async () => {
   fake = await startFakeOpenAI((messages) => {
+    const refusal = refusals.shift();
+    if (refusal) return { httpError: refusal };
     const results = toolResults(messages);
     const rocky = JSON.stringify(messages[0]?.content).includes(
       'You are Rocky',
@@ -339,6 +343,58 @@ describe('agent tools through the action gate', () => {
     expect(text).toContain('[truncated:');
     expect(text).not.toContain('could not be saved');
     expect(text).not.toContain('missing pass');
+  });
+});
+
+describe('provider refusals', () => {
+  const bare = {
+    status: 400,
+    body: {
+      error: {
+        message: 'invalid request error trace_id: x',
+        type: 'invalid_request_error',
+      },
+    },
+  };
+
+  it('sends a request again once when the provider refuses it without a reason', async () => {
+    const { call } = await setup('ask-when-needed');
+    plan = [{ name: 'read_file', args: { file_path: '/app.js' } }];
+    refusals = [bare];
+    const from = fake.requests.length;
+    const events = await run(call, 'p1');
+    expect(reply(events)).toContain('const answer = 41;');
+    expect(events.some((e) => e.type === 'RUN_ERROR')).toBe(false);
+    // The refused request, its retry, and the turn after the tool result.
+    expect(fake.requests.length - from).toBe(3);
+  });
+
+  it('does not retry a refusal that names its cause, nor a second bare refusal', async () => {
+    const { call } = await setup('ask-when-needed');
+    plan = [];
+    refusals = [
+      {
+        status: 400,
+        body: {
+          error: {
+            message: 'too long',
+            type: 'invalid_request_error',
+            code: 'context_length_exceeded',
+          },
+        },
+      },
+    ];
+    let from = fake.requests.length;
+    let events = await run(call, 'p2');
+    expect(events.some((e) => e.type === 'RUN_ERROR')).toBe(true);
+    expect(fake.requests.length - from).toBe(1);
+
+    refusals = [bare, bare];
+    from = fake.requests.length;
+    events = await run(call, 'p3');
+    expect(events.some((e) => e.type === 'RUN_ERROR')).toBe(true);
+    expect(fake.requests.length - from).toBe(2);
+    refusals = [];
   });
 });
 

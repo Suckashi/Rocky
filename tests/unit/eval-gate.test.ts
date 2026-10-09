@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { compareCases, summarize, type CaseSummary } from '../../evals/gate.ts';
+import {
+  compareCases,
+  isProviderError,
+  summarize,
+  type CaseSummary,
+} from '../../evals/gate.ts';
 
 const c = (id: string, passed: number, runs = 3): CaseSummary => ({
   id,
@@ -64,5 +69,17 @@ describe('eval gate', () => {
       },
       { id: 'b', passed: 1, runs: 1, seconds: 5, tokens: null },
     ]);
+  });
+
+  it('tells provider failures from task failures', () => {
+    expect(
+      isProviderError(
+        '400 {"message":"invalid request error trace_id: x","type":"invalid_request_error"}',
+      ),
+    ).toBe(true);
+    expect(isProviderError('503 Service Unavailable')).toBe(true);
+    expect(isProviderError('terminated')).toBe(true);
+    expect(isProviderError('model-not-configured')).toBe(false);
+    expect(isProviderError('did not propose a plan')).toBe(false);
   });
 });
