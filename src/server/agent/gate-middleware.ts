@@ -1,5 +1,5 @@
 // First line of defence: every tool call passes through the gate before it runs.
-// Unknown tools count as external actions; reads are checked too (secret reads ask).
+// The tool registry says what each call would do; reads are checked too (secret reads ask).
 import { ToolMessage } from '@langchain/core/messages';
 import {
   createMiddleware,
@@ -10,26 +10,14 @@ import type { Gate } from '../effects/gate.ts';
 import type { ReceiptStore } from '../effects/receipts.ts';
 import type { Actor } from '../effects/types.ts';
 import { currentEffect, currentPass } from './backend.ts';
-import { DOCUMENT_WRITE_TOOLS, documentEffect } from './documents.ts';
-import type { MemoryStore } from '../memory/store.ts';
-import {
-  MEMORY_READ_TOOLS,
-  MEMORY_WRITE_TOOLS,
-  memoryEffect,
-} from './memory.ts';
-import { SKILL_TOOLS } from './skills.ts';
-import { chosenPlanMessage, planEffect } from './plan.ts';
-import { mcpEffect, type McpToolMap } from './mcp.ts';
-import type { ToolPolicy } from '../mcp/manager.ts';
-import { READ_TOOLS, toolEffect } from './workspace.ts';
+import { chosenPlanMessage } from './plan.ts';
+import type { ToolRegistry } from './registry.ts';
 
 export interface GateRun {
   gate: Gate;
   receipts: ReceiptStore;
-  projectRoot: string | undefined;
-  memory?: MemoryStore;
-  /** This run's MCP tools and the user's per-tool approval settings. */
-  mcp?: { map: McpToolMap; policies: Record<string, ToolPolicy> };
+  /** This run's tools and what each call would do. */
+  tools: ToolRegistry;
   threadId: string;
   runId: string;
   signal: AbortSignal;
@@ -55,8 +43,12 @@ function capped<T>(result: T): T {
 /** What the read-only research subagent is offered. Deep Agents gives it every tool Rocky has;
  * the rest would only be refused below, so the model never sees them. */
 export const SUBAGENT_TOOLS = new Set([
-  ...READ_TOOLS,
-  ...MEMORY_READ_TOOLS,
+  'ls',
+  'read_file',
+  'glob',
+  'grep',
+  'read_document',
+  'search_memory',
   'load_skill',
 ]);
 
@@ -88,44 +80,10 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
     const { name, args, id = '' } = request.toolCall;
     const error = (content: string) =>
       new ToolMessage({ tool_call_id: id, status: 'error', content });
-    // Memory is Rocky's own folder: available without a project, judged with it as root.
-    if (MEMORY_READ_TOOLS.has(name) || SKILL_TOOLS.has(name))
-      return handler(request);
-    const memoryWrite = MEMORY_WRITE_TOOLS.has(name) && run.memory;
-    const mcpRef = run.mcp?.map.get(name);
-    if (
-      !memoryWrite &&
-      !mcpRef &&
-      !run.projectRoot &&
-      name !== 'write_todos' &&
-      name !== 'task'
-    ) {
-      return error(
-        'No project folder is selected yet, so files and commands are unavailable. Ask the user to choose one in Settings.',
-      );
-    }
-    const mapped =
-      name === 'propose_plan'
-        ? planEffect(args as Record<string, unknown>)
-        : mcpRef
-          ? mcpEffect(
-              mcpRef,
-              args as Record<string, unknown>,
-              run.mcp!.policies,
-            )
-          : memoryWrite
-            ? memoryEffect(name, args as Record<string, unknown>, memoryWrite)
-            : DOCUMENT_WRITE_TOOLS.has(name)
-              ? await documentEffect(
-                  name,
-                  args as Record<string, unknown>,
-                  run.projectRoot ?? '',
-                )
-              : toolEffect(
-                  name,
-                  args as Record<string, unknown>,
-                  run.projectRoot ?? '',
-                );
+    const mapped = await run.tools.effectOf(
+      name,
+      args as Record<string, unknown>,
+    );
     if ('none' in mapped) return handler(request);
     if ('error' in mapped) return error(mapped.error);
     // The subagent is read-only: anything with an effect is refused before the gate.
@@ -139,7 +97,7 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
       run.signal,
       {
         ...(mapped.before !== undefined ? { before: mapped.before } : {}),
-        ...(memoryWrite ? { root: memoryWrite.dir } : {}),
+        ...(mapped.root !== undefined ? { root: mapped.root } : {}),
       },
     );
     if (!result.allowed) return error(result.message);

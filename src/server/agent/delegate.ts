@@ -5,6 +5,7 @@ import { tool } from 'langchain';
 import { z } from 'zod';
 import { JobError, type JobRunner } from '../jobs/runner.ts';
 import type { JobStore } from '../jobs/store.ts';
+import type { ToolRegistry } from './registry.ts';
 
 const ERRORS: Record<string, string> = {
   'no-project': 'No project folder is selected.',
@@ -15,7 +16,28 @@ const ERRORS: Record<string, string> = {
   'model-not-configured': 'No model is configured.',
 };
 
-export function createDelegateTool(
+/** Starting a job is an outside action; looking jobs up reads Rocky's own data. */
+export function addJobTools(
+  tools: ToolRegistry,
+  runner: JobRunner,
+  jobs: JobStore,
+  context: { threadId: string; runId: string },
+): void {
+  tools
+    .add(createDelegateTool(runner, context), (args) => ({
+      effect: {
+        kind: 'delegate',
+        agent: 'opencode',
+        title: String(args['title'] ?? ''),
+        task: String(args['task'] ?? ''),
+      },
+    }))
+    .add(createCheckJobsTool(jobs, runner, context.threadId), () => ({
+      none: true,
+    }));
+}
+
+function createDelegateTool(
   runner: JobRunner,
   context: { threadId: string; runId: string },
 ) {

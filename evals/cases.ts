@@ -401,8 +401,7 @@ export const CASES: Case[] = [
     files: delegated,
     git: true,
     needs: 'opencode',
-    approve: (effect) =>
-      effect.kind === 'mcp' && effect.tool === 'delegate_to_opencode',
+    approve: (effect) => effect.kind === 'delegate',
     check: (ctx) => {
       const job = ctx.jobs[0];
       if (!job) return ['no job was started'];

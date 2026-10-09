@@ -149,6 +149,13 @@ function floorOf(
       detail: `mcp:${effect.server}/${effect.tool}`,
       grant: `external:mcp:${effect.server}/${effect.tool}`,
     };
+  // Starting a job hands work to another agent: an outside action, asked like one.
+  if (effect.kind === 'delegate')
+    return {
+      reason: 'external',
+      detail: `delegate:${effect.agent}`,
+      grant: `external:delegate:${effect.agent}`,
+    };
   return undefined;
 }
 

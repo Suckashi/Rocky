@@ -25,6 +25,8 @@ export function effectSummary(
       return t('effect.command', { command: commandLine(effect.argv) });
     case 'mcp':
       return t('effect.mcp', { server: effect.server, tool: effect.tool });
+    case 'delegate':
+      return t('effect.delegate', { title: effect.title });
     case 'plan':
       return t('effect.plan', { title: effect.title });
   }

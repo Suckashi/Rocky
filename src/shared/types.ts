@@ -32,6 +32,8 @@ export type Effect =
       args: unknown;
       readOnly: boolean;
     }
+  /** Handing a task to an external coding agent (ADR 0025); its own actions are asked one by one. */
+  | { kind: 'delegate'; agent: 'opencode'; title: string; task: string }
   /** The plan at the end of plan mode (ADR 0019): the user picks one option, asks for changes, or rejects. */
   | { kind: 'plan'; title: string; options: PlanOption[] };
 

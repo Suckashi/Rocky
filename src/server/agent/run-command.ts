@@ -4,9 +4,20 @@ import { tool } from 'langchain';
 import { z } from 'zod';
 import type { Executor } from '../effects/execute.ts';
 import { currentPass } from './backend.ts';
+import type { ToolRegistry } from './registry.ts';
 import { toolEffect } from './workspace.ts';
 
-export function createRunCommandTool(root: string, executor: Executor) {
+export function addRunCommandTool(
+  tools: ToolRegistry,
+  root: string,
+  executor: Executor,
+): void {
+  tools.add(createRunCommandTool(root, executor), (args) =>
+    toolEffect('run_command', args, root),
+  );
+}
+
+function createRunCommandTool(root: string, executor: Executor) {
   return tool(
     async (input, config) => {
       const pass = currentPass.getStore();

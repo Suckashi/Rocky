@@ -2,7 +2,7 @@
 // functions, so the content Rocky approves is exactly the content that gets written.
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import type { Effect } from '../effects/types.ts';
+import type { ToolEffect, ToolRegistry } from './registry.ts';
 
 /** Same rule as Deep Agents' FilesystemBackend in virtual mode: "/src/a.ts" under the project. */
 export function resolveVirtual(root: string, virtualPath: string): string {
@@ -52,10 +52,9 @@ export const READ_TOOLS = new Set([
 /** Tools with no effect outside the agent's own state. */
 export const NO_EFFECT_TOOLS = new Set(['write_todos', 'task']);
 
-export type ToolEffect =
-  { effect: Effect; before?: string } | { error: string } | { none: true };
+export type { ToolEffect } from './registry.ts';
 
-/** What a tool call would do, in gate terms. Unknown tools are treated as external actions. */
+/** What a file, document-read or command call would do, in gate terms. */
 export function toolEffect(
   name: string,
   args: Record<string, unknown>,
@@ -116,18 +115,33 @@ export function toolEffect(
         : root;
       return { effect: { kind: 'command', argv, cwd } };
     }
-    return {
-      effect: {
-        kind: 'mcp',
-        server: 'rocky',
-        tool: name,
-        args,
-        readOnly: false,
-      },
-    };
+    return { error: `Error: ${name} is not a file tool.` };
   } catch (error) {
     return {
       error: `Error: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 }
+
+/** Deep Agents' own file tools (on Rocky's backend), write_todos and task. Without a project
+ * the file tools have nothing to work on. */
+export function judgeWorkspaceTools(
+  tools: ToolRegistry,
+  root: string | undefined,
+): void {
+  for (const name of NO_EFFECT_TOOLS) tools.judge(name, () => ({ none: true }));
+  for (const name of [
+    'ls',
+    'read_file',
+    'glob',
+    'grep',
+    'write_file',
+    'edit_file',
+  ])
+    tools.judge(name, (args) =>
+      root ? toolEffect(name, args, root) : { error: NO_PROJECT },
+    );
+}
+
+export const NO_PROJECT =
+  'No project folder is selected yet, so files and commands are unavailable. Ask the user to choose one in Settings.';

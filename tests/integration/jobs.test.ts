@@ -225,7 +225,9 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
   it('asks to start, lets OpenCode work in a worktree, verifies, then applies and restores', async () => {
     const asked: string[] = [];
     const s = await setup('ask-when-needed', (effect) => {
-      asked.push(effect.tool ?? effect.kind);
+      asked.push(
+        effect.kind === 'delegate' ? 'delegate' : (effect.tool ?? effect.kind),
+      );
       return { decision: 'allow-once' };
     });
     const reply = await chat(s);
@@ -234,7 +236,7 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
     const queued = s.rocky.jobs.list()[0]!;
     const job = await s.rocky.jobRunner.wait(queued.id);
     // Starting a job is an outside action; edits and tests inside the worktree are not.
-    expect(asked).toEqual(['delegate_to_opencode']);
+    expect(asked).toEqual(['delegate']);
     // Asked later, Rocky can look the job up.
     const status = String(
       await createCheckJobsTool(s.rocky.jobs, s.rocky.jobRunner, 'j1').invoke(
@@ -256,7 +258,7 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
     // Starting the job is receipted and finished like any other action.
     const started = s.rocky.receipts
       .forThread('j1')
-      .find((r) => r.effect.kind === 'mcp');
+      .find((r) => r.effect.kind === 'delegate');
     expect(started).toMatchObject({ actor: 'rocky', outcome: 'succeeded' });
     // The project itself is untouched until the user applies the job.
     expect(readFileSync(join(s.project, 'math.js'), 'utf8')).toBe(BUGGY);
