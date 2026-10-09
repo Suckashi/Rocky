@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import type { RockyAgentRunner } from '../../agent/runner.ts';
 import type { ThreadStore } from '../../store/threads.ts';
+import { readBody } from '../body.ts';
 
 export function threadRoutes(
   store: ThreadStore,
@@ -11,12 +12,12 @@ export function threadRoutes(
 ): Hono {
   const app = new Hono();
   app.patch('/threads/:id', async (c) => {
-    const parsed = z
-      .object({ name: z.string().trim().min(1).max(80) })
-      .strict()
-      .safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) return c.json({ error: 'invalid-name' }, 400);
-    return store.rename(c.req.param('id'), parsed.data.name)
+    const body = await readBody(
+      c,
+      z.object({ name: z.string().trim().min(1).max(80) }).strict(),
+    );
+    if (!body) return c.json({ error: 'invalid-name' }, 400);
+    return store.rename(c.req.param('id'), body.name)
       ? c.json(store.thread(c.req.param('id')))
       : c.json({ error: 'not-found' }, 404);
   });

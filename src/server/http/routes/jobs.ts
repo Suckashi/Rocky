@@ -10,6 +10,7 @@ import { applyJob, applyPlan, discardWorkspace } from '../../jobs/apply.ts';
 import { jobThread, type JobRunner } from '../../jobs/runner.ts';
 import type { Job, JobStore } from '../../jobs/store.ts';
 import type { SettingsStore } from '../../store/settings.ts';
+import { readBody } from '../body.ts';
 
 const real = (p: string) => {
   try {
@@ -157,17 +158,19 @@ export function jobRoutes(deps: {
   });
 
   app.post('/jobs/:id/apply', async (c) => {
-    const parsed = z
-      .object({
-        items: z
-          .array(
-            z.object({ path: z.string(), contentHash: z.string() }).strict(),
-          )
-          .max(1000),
-      })
-      .strict()
-      .safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) return c.json({ error: 'invalid-apply' }, 400);
+    const body = await readBody(
+      c,
+      z
+        .object({
+          items: z
+            .array(
+              z.object({ path: z.string(), contentHash: z.string() }).strict(),
+            )
+            .max(1000),
+        })
+        .strict(),
+    );
+    if (!body) return c.json({ error: 'invalid-apply' }, 400);
     const job = jobs.get(c.req.param('id'));
     if (!job) return c.json({ error: 'not-found' }, 404);
     const project = await projectFor(job, settings);
@@ -177,7 +180,7 @@ export function jobRoutes(deps: {
         { gate, executor, jobs },
         job,
         project,
-        parsed.data.items,
+        body.items,
       );
       return result.ok ? c.json(result) : c.json(result, 409);
     } catch (error) {

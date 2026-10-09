@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type { McpManager, McpServerConfig } from '../../mcp/manager.ts';
 import type { EgressGuard } from '../../platform/egress.ts';
 import type { SettingsStore } from '../../store/settings.ts';
+import { readBody } from '../body.ts';
 
 /** Stands in for a saved secret value; sending it back keeps the saved value. */
 export const SAVED = '••••';
@@ -97,16 +98,16 @@ export function mcpRoutes(deps: {
   });
 
   app.put('/mcp/servers', async (c) => {
-    const parsed = z
-      .object({ servers: z.array(server).max(50) })
-      .strict()
-      .safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) return c.json({ error: 'invalid-mcp' }, 400);
-    const names = parsed.data.servers.map((s) => s.name);
+    const body = await readBody(
+      c,
+      z.object({ servers: z.array(server).max(50) }).strict(),
+    );
+    if (!body) return c.json({ error: 'invalid-mcp' }, 400);
+    const names = body.servers.map((s) => s.name);
     if (new Set(names).size !== names.length)
       return c.json({ error: 'duplicate-name' }, 400);
     const old = new Map(settings.mcpServers().map((s) => [s.name, s]));
-    const servers = parsed.data.servers.map((s) =>
+    const servers = body.servers.map((s) =>
       unmask(s as McpServerConfig, old.get(s.name)),
     );
     for (const s of servers) if (s.transport === 'http') egress.allow(s.url);
@@ -115,20 +116,18 @@ export function mcpRoutes(deps: {
   });
 
   app.put('/mcp/tools', async (c) => {
-    const parsed = z
-      .object({
-        server: name,
-        tool: z.string().min(1).max(200),
-        policy: z.enum(['ask', 'read-only', 'deny']),
-      })
-      .strict()
-      .safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) return c.json({ error: 'invalid-policy' }, 400);
-    settings.setToolPolicy(
-      parsed.data.server,
-      parsed.data.tool,
-      parsed.data.policy,
+    const body = await readBody(
+      c,
+      z
+        .object({
+          server: name,
+          tool: z.string().min(1).max(200),
+          policy: z.enum(['ask', 'read-only', 'deny']),
+        })
+        .strict(),
     );
+    if (!body) return c.json({ error: 'invalid-policy' }, 400);
+    settings.setToolPolicy(body.server, body.tool, body.policy);
     return c.json({ policies: settings.toolPolicies() });
   });
 
