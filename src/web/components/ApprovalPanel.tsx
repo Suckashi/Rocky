@@ -8,21 +8,6 @@ import { Diff } from './Diff.tsx';
 import { DocumentChange } from './DocumentPreview.tsx';
 import { isPreviewable } from './PreviewPane.tsx';
 
-/** Rocky's own request to start an external agent job. */
-function delegation(
-  approval: PendingApproval,
-): { title: string; task: string } | undefined {
-  const e = approval.effect;
-  if (
-    e.kind !== 'mcp' ||
-    e.server !== 'rocky' ||
-    e.tool !== 'delegate_to_opencode'
-  )
-    return undefined;
-  const args = (e.args ?? {}) as { title?: unknown; task?: unknown };
-  return { title: String(args.title ?? ''), task: String(args.task ?? '') };
-}
-
 export type Answer =
   | { decision: 'allow-once' | 'allow-session' | 'allow-always' }
   | { decision: 'reject'; reason?: string }
@@ -58,6 +43,8 @@ function grantLabel(grant: string, t: ReturnType<typeof useI18n>['t']): string {
     return t('grant.mcp', { tool: tail });
   if (kind === 'external' && sub === 'command')
     return t('grant.command', { program: tail });
+  if (kind === 'external' && sub === 'delegate')
+    return t('grant.delegate', { agent: tail });
   return grant;
 }
 
@@ -96,10 +83,11 @@ function Title({
       );
     case 'command':
       return <>{t('approval.title.command', { actor })}</>;
+    case 'delegate':
+      return (
+        <>{t('approval.title.delegate', { actor, title: effect.title })}</>
+      );
     case 'mcp': {
-      const job = delegation(approval);
-      if (job)
-        return <>{t('approval.title.delegate', { actor, title: job.title })}</>;
       // An external agent's request that is not an edit or a command: name what it asked for.
       if (effect.server === 'opencode') {
         const what = (effect.args as { title?: unknown } | undefined)?.title;
@@ -182,11 +170,10 @@ function Preview({
       </div>
     );
   }
-  const job = delegation(approval);
-  if (job) {
+  if (effect.kind === 'delegate') {
     return (
       <div className="approval-preview">
-        <p className="pre">{job.task}</p>
+        <p className="pre">{effect.task}</p>
         <span className="small muted">{t('approval.delegateNote')}</span>
       </div>
     );

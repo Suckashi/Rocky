@@ -26,11 +26,10 @@ export function addJobTools(
   tools
     .add(createDelegateTool(runner, context), (args) => ({
       effect: {
-        kind: 'mcp',
-        server: 'rocky',
-        tool: 'delegate_to_opencode',
-        args,
-        readOnly: false,
+        kind: 'delegate',
+        agent: 'opencode',
+        title: String(args['title'] ?? ''),
+        task: String(args['task'] ?? ''),
       },
     }))
     .add(createCheckJobsTool(jobs, runner, context.threadId), () => ({
