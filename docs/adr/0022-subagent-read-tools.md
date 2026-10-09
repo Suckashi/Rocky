@@ -25,4 +25,14 @@ ADR 0021 的 golden 檔顯示：Deep Agents 把 Rocky 的每個工具都給了�
 
 ## 驗證
 
-見 PR。
+| 平台                                            | 指令                                                                   | 結果                                                         |
+| ----------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------ |
+| 雲端 Linux，Node 24.21.0                        | `npm run check`                                                        | 通過，168 個測試，exit 0                                     |
+| 同上，Command Code `deepseek/deepseek-v4-flash` | `npm run eval -- --repeat 3`（新題目加入前的 31 題）                   | 90/93，沒有題目退步（exit 0）                                |
+| 同上                                            | `npm run eval -- --only research-with-subagent --repeat 5`，這次的程式 | 5/5，平均 32.7 秒                                            |
+| 同上                                            | 同一題，子代理改回 main 的程式                                         | 5/5，平均 39.7 秒；有一次子代理呼叫 `run_command` 被關卡擋下 |
+
+- 完整評測的 3 次失敗：`fix-emoji-truncate` 一次供應商 400；`delegate-to-opencode` 一次 OpenCode 沒有改檔；
+  `respect-rejection` 一次模型沒有嘗試刪除（ADR 0020 那次也是 2/3）。這三題都沒有用到子代理。
+- 各 5 次的樣本太小，時間差只能當參考，不能說變快。
+- 沒有在 Windows 上跑過。
