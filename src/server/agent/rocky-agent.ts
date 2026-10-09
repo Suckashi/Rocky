@@ -42,6 +42,7 @@ import type { McpManager } from '../mcp/manager.ts';
 import { createRunCommandTool } from './run-command.ts';
 import { projectInstructions, rockyPrompt, subagentPrompt } from './prompt.ts';
 import { AguiMapper } from './to-agui.ts';
+import { providerRetry } from './provider-retry.ts';
 
 // Deep Agents' shell tool takes a shell string with no approval point; Rocky has run_command.
 // Exclusions shape what the model sees; the gate middleware is the actual boundary.
@@ -280,6 +281,7 @@ export class RockyAgent extends AbstractAgent {
           // Cast: langchain's todo middleware types fail under exactOptionalPropertyTypes (ADR 0001).
           middleware: [
             todoListMiddleware() as unknown as AgentMiddleware,
+            providerRetry(),
             createGateMiddleware(run, 'rocky'),
           ],
           // The built-in subagent does not inherit middleware (ADR 0001, finding 1): gate it explicitly.
@@ -290,7 +292,10 @@ export class RockyAgent extends AbstractAgent {
               description:
                 'A read-only helper for research in the project: it searches and reads files (and documents) and reports what it found. It cannot change files, run commands or delegate.',
               systemPrompt: subagentPrompt(projectRoot),
-              middleware: [createGateMiddleware(run, 'subagent')],
+              middleware: [
+                providerRetry(),
+                createGateMiddleware(run, 'subagent'),
+              ],
             },
           ],
         });
