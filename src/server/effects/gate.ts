@@ -152,23 +152,18 @@ export class Gate {
             ? 'propose_plan'
             : effect.kind;
     if (verdict.decision === 'deny') {
-      const receipt = this.deps.receipts.intent(
+      return this.refuse(
         origin,
         effect,
         verdict,
         'denied',
         verdict.detail,
+        verdict.reason === 'plan-mode'
+          ? effect.kind === 'plan'
+            ? 'propose_plan is only for plan mode, which is off. Do the task directly.'
+            : `${tool} was not run: plan mode is on, so only reading is allowed. Finish exploring and present the plan with propose_plan; the user turns plan mode off by choosing an option.`
+          : `${tool} is not allowed (${verdict.reason}). Do not retry it.`,
       );
-      return {
-        allowed: false,
-        receipt,
-        message:
-          verdict.reason === 'plan-mode'
-            ? effect.kind === 'plan'
-              ? 'propose_plan is only for plan mode, which is off. Do the task directly.'
-              : `${tool} was not run: plan mode is on, so only reading is allowed. Finish exploring and present the plan with propose_plan; the user turns plan mode off by choosing an option.`
-            : `${tool} is not allowed (${verdict.reason}). Do not retry it.`,
-      };
     }
     if (verdict.decision === 'allow' && effect.kind === 'read') {
       return {
@@ -178,17 +173,7 @@ export class Gate {
       };
     }
     if (verdict.decision === 'allow') {
-      const receipt = this.deps.receipts.intent(
-        origin,
-        effect,
-        verdict,
-        'allowed',
-      );
-      return {
-        allowed: true,
-        receipt,
-        pass: this.passes.issue(verdict.contentHash, receipt.id),
-      };
+      return this.permit(origin, effect, verdict, 'allowed');
     }
 
     const approval: PendingApproval = {
@@ -218,33 +203,25 @@ export class Gate {
     this.changed(origin.threadId);
 
     if (answer === 'stopped') {
-      const receipt = this.deps.receipts.intent(
+      return this.refuse(
         origin,
         effect,
         verdict,
         'rejected',
         'stopped',
+        `${tool} was not run: the run was stopped.`,
       );
-      return {
-        allowed: false,
-        receipt,
-        message: `${tool} was not run: the run was stopped.`,
-      };
     }
     // The approval binds to the exact content the user saw; anything else means ask again.
     if (answer.contentHash !== verdict.contentHash) {
-      const receipt = this.deps.receipts.intent(
+      return this.refuse(
         origin,
         effect,
         verdict,
         'rejected',
         'content-changed',
+        `${tool} was not run: the approved content does not match. Ask again.`,
       );
-      return {
-        allowed: false,
-        receipt,
-        message: `${tool} was not run: the approved content does not match. Ask again.`,
-      };
     }
     if (effect.kind === 'plan') {
       return this.planAnswer(effect, origin, verdict, answer);
@@ -256,32 +233,24 @@ export class Gate {
       answer.decision === 'revise' ||
       (answer.decision === 'allow-always' && effect.kind !== 'command')
     ) {
-      const receipt = this.deps.receipts.intent(
+      return this.refuse(
         origin,
         effect,
         verdict,
         'rejected',
         'invalid-answer',
+        `${tool} was not run: the answer did not fit this request.`,
       );
-      return {
-        allowed: false,
-        receipt,
-        message: `${tool} was not run: the answer did not fit this request.`,
-      };
     }
     if (answer.decision === 'reject') {
-      const receipt = this.deps.receipts.intent(
+      return this.refuse(
         origin,
         effect,
         verdict,
         'rejected',
         answer.reason,
+        REJECTED_MESSAGE(tool, answer.reason),
       );
-      return {
-        allowed: false,
-        receipt,
-        message: REJECTED_MESSAGE(tool, answer.reason),
-      };
     }
     if (answer.decision === 'allow-session' && verdict.grant) {
       const set = this.grants.get(origin.threadId) ?? new Set<string>();
@@ -297,17 +266,7 @@ export class Gate {
     }
     if (answer.decision === 'allow-always' && effect.kind === 'command')
       this.deps.addRule({ decision: 'allow', prefix: alwaysRule(effect.argv) });
-    const receipt = this.deps.receipts.intent(
-      origin,
-      effect,
-      verdict,
-      'approved',
-    );
-    return {
-      allowed: true,
-      receipt,
-      pass: this.passes.issue(verdict.contentHash, receipt.id),
-    };
+    return this.permit(origin, effect, verdict, 'approved');
   }
 
   /**
@@ -322,36 +281,26 @@ export class Gate {
   ): GateResult {
     const verdict = decide(effect, this.context(origin.threadId, root));
     if (verdict.decision === 'deny') {
-      const receipt = this.deps.receipts.intent(
+      return this.refuse(
         origin,
         effect,
         verdict,
         'denied',
         verdict.detail,
+        verdict.reason,
       );
-      return { allowed: false, receipt, message: verdict.reason };
     }
     if (seenHash !== verdict.contentHash) {
-      const receipt = this.deps.receipts.intent(
+      return this.refuse(
         origin,
         effect,
         verdict,
         'rejected',
         'content-changed',
+        'content-changed',
       );
-      return { allowed: false, receipt, message: 'content-changed' };
     }
-    const receipt = this.deps.receipts.intent(
-      origin,
-      effect,
-      verdict,
-      'approved',
-    );
-    return {
-      allowed: true,
-      receipt,
-      pass: this.passes.issue(verdict.contentHash, receipt.id),
-    };
+    return this.permit(origin, effect, verdict, 'approved');
   }
 
   /** The plan that ends plan mode: choosing an option turns plan mode off for the conversation. */
@@ -388,21 +337,55 @@ export class Gate {
         : answer.decision === 'reject'
           ? answer.reason
           : undefined;
-    const receipt = this.deps.receipts.intent(
+    return this.refuse(
       origin,
       effect,
       verdict,
       'rejected',
       answer.decision === 'revise' ? `revise: ${feedback ?? ''}` : feedback,
+      answer.decision === 'revise'
+        ? `The user wants changes to the plan: ${feedback?.trim() || 'none given'}. Revise it and call propose_plan again; do not start the work yet.`
+        : `The user rejected the plan. Reason: ${feedback?.trim() || 'none given'}. Do not carry it out; ask the user how to proceed.`,
+    );
+  }
+
+  /** Records that the action may run and issues the pass for exactly this content. */
+  private permit(
+    origin: Origin,
+    effect: Effect,
+    verdict: { contentHash: string; reason: Reason },
+    decision: 'allowed' | 'approved',
+  ): GateResult {
+    const receipt = this.deps.receipts.intent(
+      origin,
+      effect,
+      verdict,
+      decision,
     );
     return {
-      allowed: false,
+      allowed: true,
       receipt,
-      message:
-        answer.decision === 'revise'
-          ? `The user wants changes to the plan: ${feedback?.trim() || 'none given'}. Revise it and call propose_plan again; do not start the work yet.`
-          : `The user rejected the plan. Reason: ${feedback?.trim() || 'none given'}. Do not carry it out; ask the user how to proceed.`,
+      pass: this.passes.issue(verdict.contentHash, receipt.id),
     };
+  }
+
+  /** Records that the action was not run (refused or rejected) and tells the caller why. */
+  private refuse(
+    origin: Origin,
+    effect: Effect,
+    verdict: { contentHash: string; reason: Reason },
+    decision: 'denied' | 'rejected',
+    detail: string | undefined,
+    message: string,
+  ): GateResult {
+    const receipt = this.deps.receipts.intent(
+      origin,
+      effect,
+      verdict,
+      decision,
+      detail,
+    );
+    return { allowed: false, receipt, message };
   }
 
   /** The user's answer to a pending approval. False when it is no longer pending. */

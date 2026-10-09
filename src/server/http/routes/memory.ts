@@ -7,6 +7,7 @@ import type { Gate } from '../../effects/gate.ts';
 import { contentHash } from '../../effects/hash.ts';
 import type { Effect } from '../../effects/types.ts';
 import type { MemoryStore } from '../../memory/store.ts';
+import { readBody } from '../body.ts';
 
 /** Deletions from the settings page are recorded under this pseudo-thread. */
 export const MEMORY_THREAD = 'memory';
@@ -37,21 +38,22 @@ export function memoryRoutes(deps: {
     }),
   );
   app.post('/memory/delete', async (c) => {
-    const parsed = z
-      .object({
-        file: z.string().regex(/^[^\\/]+\.md$/),
-        contentHash: z.string(),
-      })
-      .strict()
-      .safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) return c.json({ error: 'invalid-memory' }, 400);
-    if (!memory.get(parsed.data.file))
-      return c.json({ error: 'not-found' }, 404);
-    const effect = deletion(memory, parsed.data.file);
+    const body = await readBody(
+      c,
+      z
+        .object({
+          file: z.string().regex(/^[^\\/]+\.md$/),
+          contentHash: z.string(),
+        })
+        .strict(),
+    );
+    if (!body) return c.json({ error: 'invalid-memory' }, 400);
+    if (!memory.get(body.file)) return c.json({ error: 'not-found' }, 404);
+    const effect = deletion(memory, body.file);
     const result = gate.userAction(
       effect,
       { threadId: MEMORY_THREAD, runId: `memory:${Date.now()}`, actor: 'user' },
-      parsed.data.contentHash,
+      body.contentHash,
       memory.dir,
     );
     if (!result.allowed) return c.json({ error: result.message }, 409);

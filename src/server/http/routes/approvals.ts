@@ -13,6 +13,7 @@ import { PREVIEW_MAX_BYTES, previewResponse } from './preview.ts';
 import { toMarkdown } from '../../documents/read.ts';
 import type { SettingsStore } from '../../store/settings.ts';
 import type { ThreadStore } from '../../store/threads.ts';
+import { readBody } from '../body.ts';
 
 const answer = z.discriminatedUnion('decision', [
   z
@@ -93,9 +94,8 @@ export function approvalRoutes(
     );
   });
   app.post('/approvals/:id', async (c) => {
-    const parsed = answer.safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) return c.json({ error: 'invalid-decision' }, 400);
-    const body = parsed.data;
+    const body = await readBody(c, answer);
+    if (!body) return c.json({ error: 'invalid-decision' }, 400);
     const decision: UserDecision =
       body.decision === 'reject'
         ? {
@@ -110,13 +110,13 @@ export function approvalRoutes(
   });
   // Plan mode for one conversation (ADR 0019); it turns off when the user picks a plan.
   app.put('/threads/:id/plan', async (c) => {
-    const parsed = z
-      .object({ planning: z.boolean() })
-      .strict()
-      .safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) return c.json({ error: 'invalid-plan' }, 400);
-    threads.setPlanning(c.req.param('id'), parsed.data.planning);
-    return c.json({ planning: parsed.data.planning });
+    const body = await readBody(
+      c,
+      z.object({ planning: z.boolean() }).strict(),
+    );
+    if (!body) return c.json({ error: 'invalid-plan' }, 400);
+    threads.setPlanning(c.req.param('id'), body.planning);
+    return c.json({ planning: body.planning });
   });
   app.get('/threads/:id/receipts', (c) => {
     const list = receipts.forThread(c.req.param('id'));
@@ -183,23 +183,25 @@ export function approvalRoutes(
     return previewResponse(c, path, sha === null ? null : snapshots.read(sha));
   });
   app.post('/threads/:id/runs/:runId/restore', async (c) => {
-    const parsed = z
-      .object({
-        items: z
-          .array(
-            z.object({ path: z.string(), contentHash: z.string() }).strict(),
-          )
-          .max(1000),
-      })
-      .strict()
-      .safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) return c.json({ error: 'invalid-restore' }, 400);
+    const body = await readBody(
+      c,
+      z
+        .object({
+          items: z
+            .array(
+              z.object({ path: z.string(), contentHash: z.string() }).strict(),
+            )
+            .max(1000),
+        })
+        .strict(),
+    );
+    if (!body) return c.json({ error: 'invalid-restore' }, 400);
     try {
       const result = restoreRun(
         { gate, executor, receipts, snapshots },
         c.req.param('id'),
         c.req.param('runId'),
-        parsed.data.items,
+        body.items,
       );
       return result.ok ? c.json(result) : c.json(result, 409);
     } catch (error) {

@@ -8,7 +8,8 @@ import { describe, expect, it } from 'vitest';
 
 const src = resolve(import.meta.dirname, '../../src');
 
-/** Rocky's own parts each part may import. The server root (compose, main) and http wire
+/** Rocky's own parts each part may import, besides `shared` (the types both the server and
+ * the browser read), which every part may. The server root (compose, main) and http wire
  * everything together. */
 const MAY_IMPORT: Record<string, string[] | '*'> = {
   'server/effects': [],
@@ -32,7 +33,7 @@ const MAY_IMPORT: Record<string, string[] | '*'> = {
   'server/http': '*',
   server: '*',
   shared: [],
-  web: ['shared', 'assets'],
+  web: ['assets'],
 };
 
 /** Packages only their owners may import. */
@@ -104,7 +105,12 @@ describe('layers', () => {
       return specs
         .filter((s) => s.startsWith('.'))
         .map((s) => partOf(resolve(src, dirname(file), s)))
-        .filter((target) => target !== part && !allowed?.includes(target))
+        .filter(
+          (target) =>
+            target !== part &&
+            target !== 'shared' &&
+            !allowed?.includes(target),
+        )
         .map((target) => `${file} -> ${target}`);
     });
     expect(broken).toEqual([]);

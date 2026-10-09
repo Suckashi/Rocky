@@ -3,36 +3,20 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { composeRocky } from '../../src/server/compose.ts';
 import { EgressGuard } from '../../src/server/platform/egress.ts';
 import { startFakeOpenAI, type FakeOpenAI } from '../fixtures/fake-openai.ts';
+import { testRocky } from '../fixtures/rocky.ts';
 
 const PORT = 4317;
-const HOST = `127.0.0.1:${PORT}`;
-const token = 't'.repeat(43);
 const REPLY = '你好，我是 Rocky，有什麼可以幫你？';
 
 function server(dir: string) {
-  const rocky = composeRocky({
+  const { rocky, call } = testRocky({
     dataDir: dir,
-    token,
     port: PORT,
-    egress: new EgressGuard(() => {}),
     listModels: async () => ['m1', 'm2'],
   });
-  const { app, settings, threads } = rocky;
-  const call = (path: string, init: { method?: string; body?: unknown } = {}) =>
-    app.request(`http://${HOST}${path}`, {
-      method: init.method ?? 'GET',
-      headers: {
-        host: HOST,
-        authorization: `Bearer ${token}`,
-        ...(init.body !== undefined
-          ? { 'content-type': 'application/json' }
-          : {}),
-      },
-      ...(init.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
-    });
+  const { settings, threads } = rocky;
   return { call, settings, threads, rocky };
 }
 

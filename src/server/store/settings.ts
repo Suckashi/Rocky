@@ -11,8 +11,8 @@ interface Secrets {
   mcpServers?: McpServerConfig[];
 }
 
-export type Provider = 'openai-compatible' | 'openai' | 'ollama';
-export type Locale = 'zh-TW' | 'en';
+export type { Locale, Provider } from '../../shared/types.ts';
+import type { Locale, Mode, Provider } from '../../shared/types.ts';
 
 export interface ModelSettings {
   provider: Provider;
@@ -20,13 +20,11 @@ export interface ModelSettings {
   model: string;
 }
 
-export type ApprovalMode = 'ask-when-needed' | 'hands-off';
-
 export interface PublicSettings {
   locale: Locale;
   model: (ModelSettings & { hasApiKey: boolean }) | null;
   project: string | null;
-  mode: ApprovalMode;
+  mode: Mode;
 }
 
 export class SettingsStore {
@@ -69,11 +67,11 @@ export class SettingsStore {
     this.set('project', path);
   }
 
-  mode(): ApprovalMode {
-    return this.get<ApprovalMode>('mode') ?? 'ask-when-needed';
+  mode(): Mode {
+    return this.get<Mode>('mode') ?? 'ask-when-needed';
   }
 
-  setMode(mode: ApprovalMode): void {
+  setMode(mode: Mode): void {
     this.set('mode', mode);
   }
 

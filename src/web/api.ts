@@ -1,4 +1,25 @@
 // Calls Rocky's local API. The session cookie travels with same-origin requests.
+import type {
+  Actor,
+  Effect,
+  JobStatus,
+  Locale,
+  Mode,
+  Outcome,
+  Provider,
+  ReceiptDecision,
+} from '../shared/types.ts';
+
+export type {
+  Actor,
+  Effect,
+  JobStatus,
+  Locale,
+  Mode,
+  Outcome,
+  PlanOption,
+  Provider,
+} from '../shared/types.ts';
 export class ApiError extends Error {
   readonly status: number;
   constructor(status: number, code: string) {
@@ -26,9 +47,6 @@ export async function api<T>(
   return data as T;
 }
 
-export type Provider = 'openai-compatible' | 'openai' | 'ollama';
-export type Locale = 'zh-TW' | 'en';
-
 export interface ModelSettings {
   provider: Provider;
   baseURL: string;
@@ -36,7 +54,6 @@ export interface ModelSettings {
   hasApiKey: boolean;
 }
 
-export type Mode = 'ask-when-needed' | 'hands-off';
 export const MODES: Mode[] = ['ask-when-needed', 'hands-off'];
 
 export interface Settings {
@@ -44,34 +61,6 @@ export interface Settings {
   model: ModelSettings | null;
   project: string | null;
   mode: Mode;
-}
-
-export type Actor = 'rocky' | 'subagent' | 'opencode' | 'user';
-
-export type Effect =
-  | { kind: 'read'; path: string; secret?: true }
-  | {
-      kind: 'write';
-      path: string;
-      operation: 'create' | 'edit' | 'delete';
-      content?: string;
-      encoding?: 'base64';
-      preview?: string;
-    }
-  | { kind: 'command'; argv: string[]; cwd: string }
-  | {
-      kind: 'mcp';
-      server: string;
-      tool: string;
-      args: unknown;
-      readOnly: boolean;
-    }
-  | { kind: 'plan'; title: string; options: PlanOption[] };
-
-export interface PlanOption {
-  title: string;
-  summary: string;
-  steps: string[];
 }
 
 export interface PendingApproval {
@@ -92,9 +81,6 @@ export interface PendingApproval {
   createdAt: number;
 }
 
-export type Outcome =
-  'pending' | 'succeeded' | 'failed' | 'unknown' | 'not-run';
-
 export interface Receipt {
   id: string;
   threadId: string | null;
@@ -103,7 +89,7 @@ export interface Receipt {
   actor: Actor;
   effect: Effect;
   contentHash: string;
-  decision: 'allowed' | 'approved' | 'rejected' | 'denied';
+  decision: ReceiptDecision;
   reason: string;
   outcome: Outcome;
   detail: string | null;
@@ -134,17 +120,6 @@ export function displayPath(path: string, project: string | null): string {
     full.toLowerCase() === root.toLowerCase();
   return inside ? full.slice(root.length + 1) || '.' : full;
 }
-
-export type JobStatus =
-  | 'queued'
-  | 'running'
-  | 'verified'
-  | 'problems'
-  | 'failed'
-  | 'stopped'
-  | 'interrupted'
-  | 'applied'
-  | 'discarded';
 
 export interface JobResult {
   stopReason: string | null;

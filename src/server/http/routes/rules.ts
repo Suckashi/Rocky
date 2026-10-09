@@ -6,6 +6,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { splitPosix } from '../../effects/commands.ts';
 import type { RuleStore } from '../../effects/rules.ts';
+import { readBody } from '../body.ts';
 
 export type PatternError =
   'empty' | 'not-one-command' | 'star-not-last' | 'too-broad';
@@ -32,27 +33,29 @@ export function ruleRoutes(rules: RuleStore): Hono {
   const app = new Hono();
   app.get('/rules', (c) => c.json({ rules: rules.list() }));
   app.post('/rules', async (c) => {
-    const parsed = z
-      .object({
-        decision: z.enum(['allow', 'deny']),
-        pattern: z.string().max(1000),
-      })
-      .strict()
-      .safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) return c.json({ error: 'invalid-rule' }, 400);
-    const result = parsePattern(parsed.data.pattern, parsed.data.decision);
+    const body = await readBody(
+      c,
+      z
+        .object({
+          decision: z.enum(['allow', 'deny']),
+          pattern: z.string().max(1000),
+        })
+        .strict(),
+    );
+    if (!body) return c.json({ error: 'invalid-rule' }, 400);
+    const result = parsePattern(body.pattern, body.decision);
     if ('error' in result) return c.json({ error: result.error }, 400);
     const duplicate = rules
       .list()
       .some(
         (r) =>
-          r.decision === parsed.data.decision &&
+          r.decision === body.decision &&
           JSON.stringify(r.prefix) === JSON.stringify(result.prefix),
       );
     if (duplicate) return c.json({ error: 'duplicate' }, 409);
     return c.json({
       rule: rules.add({
-        decision: parsed.data.decision,
+        decision: body.decision,
         prefix: result.prefix,
       }),
     });

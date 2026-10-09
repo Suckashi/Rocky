@@ -4,13 +4,10 @@ import { mkdirSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { composeRocky } from '../../src/server/compose.ts';
-import { EgressGuard } from '../../src/server/platform/egress.ts';
 import type { JobResult } from '../../src/server/jobs/store.ts';
+import { testRocky } from '../fixtures/rocky.ts';
 
 const PORT = 4371;
-const HOST = `127.0.0.1:${PORT}`;
-const token = 'j'.repeat(43);
 
 const result = (changed: string[], exitCodes: number[]): JobResult => ({
   stopReason: 'end_turn',
@@ -31,19 +28,11 @@ describe('job cards and finished-job notifications', () => {
   it("lists a conversation's unsettled jobs with Rocky's own result", async () => {
     const dir = mkdtempSync(join(tmpdir(), 'rocky-job-cards-'));
     mkdirSync(join(dir, 'data'));
-    const rocky = composeRocky({
+    const { rocky, call: request } = testRocky({
       dataDir: join(dir, 'data'),
-      token,
       port: PORT,
-      egress: new EgressGuard(() => {}),
-      listModels: async () => [],
     });
-    const call = async (path: string) =>
-      (
-        await rocky.app.request(`http://${HOST}/api${path}`, {
-          headers: { host: HOST, authorization: `Bearer ${token}` },
-        })
-      ).json();
+    const call = async (path: string) => (await request(`/api${path}`)).json();
     const make = (threadId: string, title: string) =>
       rocky.jobs.create({ threadId, agent: 'opencode', title, task: 't' });
 

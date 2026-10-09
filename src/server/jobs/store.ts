@@ -3,20 +3,8 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
 
-export type JobStatus =
-  /** Waiting for its turn: one external agent job runs at a time. */
-  | 'queued'
-  | 'running'
-  /** Rocky checked the worktree against its approvals and the checks passed. */
-  | 'verified'
-  /** Finished, but verification found unapproved changes or failing checks. */
-  | 'problems'
-  | 'failed'
-  | 'stopped'
-  /** Rocky ended while the job ran; its outcome is unknown and it is never restarted. */
-  | 'interrupted'
-  | 'applied'
-  | 'discarded';
+export type { JobStatus } from '../../shared/types.ts';
+import type { JobStatus } from '../../shared/types.ts';
 
 export interface JobCheck {
   argv: string[];
