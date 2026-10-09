@@ -26,4 +26,13 @@
 
 ## 驗證
 
-見 PR。
+| 平台                                            | 指令                                                                     | 結果                          |
+| ----------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------- |
+| 雲端 Linux，Node 24.21.0                        | `npm run check`、`npm run build`                                         | 通過，171 個測試，exit 0      |
+| 同上，OpenCode 1.18.34                          | `ROCKY_REQUIRE_OPENCODE=1 npx vitest run tests/integration/jobs.test.ts` | 5 個通過                      |
+| 同上，Chromium 1194                             | `node scripts/e2e.ts`、`node scripts/e2e-jobs.ts`                        | 通過，exit 0                  |
+| 同上，Command Code `deepseek/deepseek-v4-flash` | `npm run eval -- --repeat 3`（32 題）                                    | 94/96，沒有題目退步（exit 0） |
+
+- 評測的 2 次失敗都是供應商回 400（`invalid_request_error`），一次在 `add-function-with-test`，一次在 `fix-missing-await`。
+  ADR 0019 起的四輪評測裡這個 400 出現過 5 次，都在工具呼叫之後；原因還沒查，可能是 Rocky 偶爾送出供應商不接受的訊息。
+- 沒有在 Windows 上跑過。
