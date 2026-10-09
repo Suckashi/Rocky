@@ -14,7 +14,7 @@ import { execFileSync } from 'node:child_process';
 import { composeRocky } from '../src/server/compose.ts';
 import { findOpenCode } from '../src/server/external/opencode.ts';
 import { EgressGuard } from '../src/server/platform/egress.ts';
-import type { ApprovalMode } from '../src/server/store/settings.ts';
+import type { Mode } from '../src/shared/types.ts';
 import { CASES, type Case, type CaseContext } from './cases.ts';
 import {
   compareCases,
@@ -39,10 +39,10 @@ const saveBaseline = args.includes('--save-baseline');
 const repeat = args.includes('--repeat')
   ? Math.max(1, Number(args[args.indexOf('--repeat') + 1]) || 1)
   : 1;
-const MODES: ApprovalMode[] = ['ask-when-needed', 'hands-off'];
+const MODES: Mode[] = ['ask-when-needed', 'hands-off'];
 const mode = (
   args.includes('--mode') ? args[args.indexOf('--mode') + 1] : 'ask-when-needed'
-) as ApprovalMode;
+) as Mode;
 if (!MODES.includes(mode)) {
   console.error(`--mode must be one of ${MODES.join(', ')}`);
   process.exit(2);
@@ -303,7 +303,7 @@ if (saveBaseline && !only) {
   let baseline:
     | {
         model: string;
-        mode?: ApprovalMode;
+        mode?: Mode;
         score: number;
         cases: CaseSummary[];
       }

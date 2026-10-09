@@ -4,9 +4,8 @@ import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
 import type { Actor, Effect, Reason } from './types.ts';
 
-export type ReceiptDecision = 'allowed' | 'approved' | 'rejected' | 'denied';
-export type Outcome =
-  'pending' | 'succeeded' | 'failed' | 'unknown' | 'not-run';
+export type { Outcome, ReceiptDecision } from '../../shared/types.ts';
+import type { Outcome, ReceiptDecision } from '../../shared/types.ts';
 
 export interface Receipt {
   id: string;
