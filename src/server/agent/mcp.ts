@@ -1,7 +1,7 @@
 // MCP tools for the agent. Each call is judged by the gate as an outside action unless the
 // user marked that tool read-only; "deny" hides nothing but refuses every call.
 import { tool } from 'langchain';
-import type { ToolEffect } from './workspace.ts';
+import type { ToolEffect, ToolRegistry } from './registry.ts';
 import {
   agentToolName,
   type McpManager,
@@ -14,9 +14,7 @@ export interface McpToolRef {
   tool: string;
 }
 
-export type McpToolMap = Map<string, McpToolRef>;
-
-export function mcpEffect(
+function mcpEffect(
   ref: McpToolRef,
   args: Record<string, unknown>,
   policies: Record<string, ToolPolicy>,
@@ -37,28 +35,30 @@ export function mcpEffect(
   };
 }
 
-export function createMcpTools(
+/** Each MCP tool is an outside action unless the user marked it read-only. */
+export function addMcpTools(
+  tools: ToolRegistry,
   manager: McpManager,
   statuses: McpStatus[],
+  policies: Record<string, ToolPolicy>,
   signal: AbortSignal,
-) {
-  const map: McpToolMap = new Map();
-  const tools = statuses.flatMap((status) =>
-    status.tools.map((t) => {
-      const name = agentToolName(t.server, t.name);
-      map.set(name, { server: t.server, tool: t.name });
-      return tool(
-        async (args: Record<string, unknown>) => {
-          const result = await manager.call(t.server, t.name, args, signal);
-          return result.isError ? `Error: ${result.text}` : result.text;
-        },
-        {
-          name,
-          description: `[MCP ${t.server}] ${t.description}`.slice(0, 1000),
-          schema: { type: 'object', properties: {}, ...t.inputSchema },
-        },
+): void {
+  for (const status of statuses)
+    for (const t of status.tools) {
+      const ref = { server: t.server, tool: t.name };
+      tools.add(
+        tool(
+          async (args: Record<string, unknown>) => {
+            const result = await manager.call(t.server, t.name, args, signal);
+            return result.isError ? `Error: ${result.text}` : result.text;
+          },
+          {
+            name: agentToolName(t.server, t.name),
+            description: `[MCP ${t.server}] ${t.description}`.slice(0, 1000),
+            schema: { type: 'object', properties: {}, ...t.inputSchema },
+          },
+        ),
+        (args) => mcpEffect(ref, args, policies),
       );
-    }),
-  );
-  return { tools, map };
+    }
 }

@@ -29,17 +29,19 @@ import type { Gate } from '../effects/gate.ts';
 import type { SettingsStore } from '../store/settings.ts';
 import { createRockyBackend } from './backend.ts';
 import { createGateMiddleware, type GateRun } from './gate-middleware.ts';
-import { createCheckJobsTool, createDelegateTool } from './delegate.ts';
+import { addJobTools } from './delegate.ts';
 import type { JobStore } from '../jobs/store.ts';
-import { createDocumentTools } from './documents.ts';
-import { createPlanTool, PLAN_MODE_PROMPT } from './plan.ts';
-import { createMemoryTools, memoryPrompt } from './memory.ts';
+import { addDocumentTools } from './documents.ts';
+import { addPlanTool, PLAN_MODE_PROMPT } from './plan.ts';
+import { addMemoryTools, memoryPrompt } from './memory.ts';
 import type { MemoryStore } from '../memory/store.ts';
 import type { SkillStore } from '../skills/store.ts';
-import { createSkillTool, skillsPrompt } from './skills.ts';
-import { createMcpTools } from './mcp.ts';
+import { addSkillTool, skillsPrompt } from './skills.ts';
+import { addMcpTools } from './mcp.ts';
 import type { McpManager } from '../mcp/manager.ts';
-import { createRunCommandTool } from './run-command.ts';
+import { addRunCommandTool } from './run-command.ts';
+import { ToolRegistry } from './registry.ts';
+import { judgeWorkspaceTools, NO_PROJECT } from './workspace.ts';
 import { projectInstructions, rockyPrompt, subagentPrompt } from './prompt.ts';
 import { AguiMapper } from './to-agui.ts';
 
@@ -214,25 +216,54 @@ export class RockyAgent extends AbstractAgent {
         const model = settings.model();
         if (!model) throw new ModelNotConfiguredError();
         const projectRoot = settings.project();
+        const planning = gate.planning(input.threadId);
+        // Every tool this run offers, registered with what a call would do (ADR 0024).
+        // Without a project only memory, skills and MCP tools work; anything unregistered
+        // is an outside action.
+        const tools = new ToolRegistry((name, args) =>
+          projectRoot
+            ? {
+                effect: {
+                  kind: 'mcp',
+                  server: 'rocky',
+                  tool: name,
+                  args,
+                  readOnly: false,
+                },
+              }
+            : { error: NO_PROJECT },
+        );
+        judgeWorkspaceTools(tools, projectRoot);
+        if (memory) addMemoryTools(tools, memory, executor);
         // MCP servers connect once and stay connected; a server that fails is skipped.
         const servers = settings.mcpServers();
-        const mcpTools =
-          mcp && servers.length
-            ? createMcpTools(mcp, await mcp.refresh(servers), controller.signal)
-            : undefined;
+        if (mcp && servers.length)
+          addMcpTools(
+            tools,
+            mcp,
+            await mcp.refresh(servers),
+            settings.toolPolicies(),
+            controller.signal,
+          );
+        if (skills && skills.list().length) addSkillTool(tools, skills);
+        if (projectRoot) {
+          if (planning) addPlanTool(tools);
+          addRunCommandTool(tools, projectRoot, executor);
+          addDocumentTools(tools, projectRoot, executor);
+          if (jobs && jobStore)
+            addJobTools(tools, jobs, jobStore, {
+              threadId: input.threadId,
+              runId: input.runId,
+            });
+        }
         const run: GateRun = {
           gate,
           receipts,
-          projectRoot,
-          ...(memory ? { memory } : {}),
-          ...(mcpTools
-            ? { mcp: { map: mcpTools.map, policies: settings.toolPolicies() } }
-            : {}),
+          tools,
           threadId: input.threadId,
           runId: input.runId,
           signal: controller.signal,
         };
-        const planning = gate.planning(input.threadId);
         const agent = createDeepAgent({
           model: new ChatOpenAI({
             model: model.model,
@@ -254,29 +285,7 @@ export class RockyAgent extends AbstractAgent {
           ...(projectRoot
             ? { backend: createRockyBackend(projectRoot, executor) }
             : {}),
-          tools: [
-            ...(memory ? createMemoryTools(memory, executor) : []),
-            ...(mcpTools?.tools ?? []),
-            ...(skills && skills.list().length
-              ? [createSkillTool(skills)]
-              : []),
-            ...(projectRoot
-              ? [
-                  ...(planning ? [createPlanTool()] : []),
-                  createRunCommandTool(projectRoot, executor),
-                  ...createDocumentTools(projectRoot, executor),
-                  ...(jobs && jobStore
-                    ? [
-                        createDelegateTool(jobs, {
-                          threadId: input.threadId,
-                          runId: input.runId,
-                        }),
-                        createCheckJobsTool(jobStore, jobs, input.threadId),
-                      ]
-                    : []),
-                ]
-              : []),
-          ],
+          tools: tools.tools(),
           // Cast: langchain's todo middleware types fail under exactOptionalPropertyTypes (ADR 0001).
           middleware: [
             todoListMiddleware() as unknown as AgentMiddleware,

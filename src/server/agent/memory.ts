@@ -7,10 +7,7 @@ import type { Executor } from '../effects/execute.ts';
 import type { Effect } from '../effects/types.ts';
 import { memoryMarkdown, type MemoryStore } from '../memory/store.ts';
 import { currentEffect, currentPass } from './backend.ts';
-import type { ToolEffect } from './workspace.ts';
-
-export const MEMORY_WRITE_TOOLS = new Set(['remember', 'forget']);
-export const MEMORY_READ_TOOLS = new Set(['search_memory']);
+import type { ToolEffect, ToolRegistry } from './registry.ts';
 
 export function memoryEffect(
   name: string,
@@ -28,6 +25,7 @@ export function memoryEffect(
     if (!exists) return { error: `Error: no memory titled "${title}".` };
     return {
       effect: { kind: 'write', path, operation: 'delete' },
+      root: memory.dir,
       ...(before ? { before } : {}),
     };
   }
@@ -37,7 +35,7 @@ export function memoryEffect(
     operation: exists ? 'edit' : 'create',
     content: memoryMarkdown(title, String(args['content'] ?? '')),
   };
-  return { effect, ...(before ? { before } : {}) };
+  return { effect, root: memory.dir, ...(before ? { before } : {}) };
 }
 
 export function memoryPrompt(memory: MemoryStore): string {
@@ -50,7 +48,20 @@ export function memoryPrompt(memory: MemoryStore): string {
     : 'No memories are saved yet.';
 }
 
-export function createMemoryTools(memory: MemoryStore, executor: Executor) {
+/** Memory is Rocky's own folder: its tools work without a project, judged with that folder as root. */
+export function addMemoryTools(
+  tools: ToolRegistry,
+  memory: MemoryStore,
+  executor: Executor,
+): void {
+  const [remember, forget, search] = createMemoryTools(memory, executor);
+  tools
+    .add(remember!, (args) => memoryEffect('remember', args, memory))
+    .add(forget!, (args) => memoryEffect('forget', args, memory))
+    .add(search!, () => ({ none: true }));
+}
+
+function createMemoryTools(memory: MemoryStore, executor: Executor) {
   const write = (verb: string) => () => {
     const pass = currentPass.getStore();
     const effect = currentEffect.getStore();

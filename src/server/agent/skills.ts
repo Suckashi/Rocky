@@ -3,9 +3,7 @@
 import { tool } from 'langchain';
 import { z } from 'zod';
 import type { SkillStore } from '../skills/store.ts';
-
-/** Tools that only read Rocky's own data (skills, jobs): they change nothing and skip the gate. */
-export const SKILL_TOOLS = new Set(['load_skill', 'check_jobs']);
+import type { ToolRegistry } from './registry.ts';
 
 export function skillsPrompt(skills: SkillStore): string | undefined {
   const list = skills.list();
@@ -16,7 +14,12 @@ export function skillsPrompt(skills: SkillStore): string | undefined {
   ].join('\n');
 }
 
-export function createSkillTool(skills: SkillStore) {
+/** Reading Rocky's own skills folder changes nothing: nothing to judge. */
+export function addSkillTool(tools: ToolRegistry, skills: SkillStore): void {
+  tools.add(createSkillTool(skills), () => ({ none: true }));
+}
+
+function createSkillTool(skills: SkillStore) {
   return tool(
     async ({ name, file }) => {
       try {
