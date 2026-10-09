@@ -150,7 +150,9 @@ export class Gate {
           ? 'run_command'
           : effect.kind === 'plan'
             ? 'propose_plan'
-            : effect.kind;
+            : effect.kind === 'delegate'
+              ? 'delegate_to_opencode'
+              : effect.kind;
     if (verdict.decision === 'deny') {
       return this.refuse(
         origin,

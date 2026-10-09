@@ -217,6 +217,22 @@ describe('decision order', () => {
     ).toBe('allow');
   });
 
+  it('handing a job to OpenCode is an outside action with its own category', () => {
+    const job: Effect = {
+      kind: 'delegate',
+      agent: 'opencode',
+      title: 'fix add',
+      task: 'Fix add() in math.js',
+    };
+    expect(decide(job, ctx())).toMatchObject({
+      decision: 'ask',
+      reason: 'external',
+      grant: 'external:delegate:opencode',
+    });
+    expect(decide(job, ctx({ mode: 'hands-off' })).decision).toBe('allow');
+    expect(decide(job, ctx({ planning: true })).reason).toBe('plan-mode');
+  });
+
   it('a read the agent marked secret without a path asks, even hands-off', () => {
     const c = ctx({ mode: 'hands-off' });
     expect(decide({ kind: 'read', path: '.', secret: true }, c)).toMatchObject({
