@@ -34,7 +34,6 @@ const DANGEROUS: Effect[] = [
 
 const OUTSIDE: Effect[] = [
   { kind: 'mcp', server: 'notes', tool: 'write', args: {}, readOnly: false },
-  { kind: 'network', method: 'POST', url: 'https://example.test/api' },
   { kind: 'write', path: '/etc/hosts', operation: 'edit', content: 'x' },
   { kind: 'write', path: `${ROOT}/README.md`, operation: 'delete' },
   { kind: 'command', argv: ['cp', 'a', '/tmp/elsewhere'], cwd: ROOT },
@@ -142,8 +141,14 @@ describe('success criterion 2: unknown outcomes are never redone automatically',
       port: 4320,
       egress: new EgressGuard(() => {}),
     });
-    expect(second.interruptedActions).toBe(1);
-    expect(second.interruptedJobs).toBe(1);
+    // Composing alone (a second instance that may still lose the port) changes nothing.
+    expect(second.receipts.get(pending.id)?.outcome).toBe('pending');
+    expect(second.jobs.get(job.id)?.status).toBe('queued');
+    expect(second.recoverInterrupted()).toEqual({
+      runs: 0,
+      actions: 1,
+      jobs: 1,
+    });
     expect(second.receipts.get(pending.id)?.outcome).toBe('unknown');
     expect(second.jobs.get(job.id)?.status).toBe('interrupted');
     expect(existsSync(target)).toBe(false);

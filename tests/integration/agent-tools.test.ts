@@ -3,6 +3,7 @@
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { EventSchemas } from '@ag-ui/core/schemas';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { composeRocky } from '../../src/server/compose.ts';
 import { toMarkdown } from '../../src/server/documents/read.ts';
@@ -112,10 +113,19 @@ async function run(
       forwardedProps: {},
     },
   });
-  return (await res.text())
+  const events = (await res.text())
     .split('\n')
     .filter((line) => line.startsWith('data:'))
     .map((line) => JSON.parse(line.slice(5).trim()) as Event);
+  // Every event Rocky streams must pass the AG-UI 1.0 schemas the browser relies on.
+  for (const event of events) {
+    const parsed = EventSchemas.safeParse(event);
+    if (!parsed.success)
+      throw new Error(
+        `${event.type} is not valid AG-UI: ${parsed.error.message}`,
+      );
+  }
+  return events;
 }
 
 async function nextApproval(
@@ -273,6 +283,27 @@ describe('agent tools through the action gate', () => {
     plan = [{ name: 'read_file', args: { file_path: '/app.js' } }];
     const text = reply(await run(call, 'e6'));
     expect(text).toContain('const answer = 41;');
+  });
+
+  it('gives the model a long document and a long command output, truncated but readable', async () => {
+    const { call, project } = await setup('hands-off');
+    writeFileSync(
+      join(project, 'long.md'),
+      `# 長文件\n\n${'很長的內容。'.repeat(20_000)}`,
+    );
+    writeFileSync(
+      join(project, 'print.js'),
+      "process.stdout.write('x'.repeat(200000));\n",
+    );
+    plan = [
+      { name: 'read_document', args: { file_path: '/long.md' } },
+      { name: 'run_command', args: { argv: ['node', 'print.js'] } },
+    ];
+    const text = reply(await run(call, 'e7'));
+    expect(text).toContain('# 長文件');
+    expect(text).toContain('[truncated:');
+    expect(text).not.toContain('could not be saved');
+    expect(text).not.toContain('missing pass');
   });
 });
 

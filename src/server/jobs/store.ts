@@ -56,7 +56,6 @@ export interface Job {
 
 export type JobEvent =
   | { type: 'message'; text: string }
-  | { type: 'thought'; text: string }
   | { type: 'tool'; id: string; title: string; kind: string; status: string }
   | {
       type: 'permission';

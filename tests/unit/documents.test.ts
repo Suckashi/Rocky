@@ -1,5 +1,6 @@
 // M4: the six formats with Chinese content: create from Markdown, read back, edit in place,
 // read again. Office edits must keep formatting and leave untouched parts alone.
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { fromMarkdown } from '../../src/server/documents/create.ts';
@@ -8,6 +9,14 @@ import { formatOf } from '../../src/server/documents/formats.ts';
 import { partBytes } from '../../src/server/documents/ooxml.ts';
 import { loadWorkbook, toMarkdown } from '../../src/server/documents/read.ts';
 import { decodeText } from '../../src/server/documents/text.ts';
+import { cmapEncodedPdf } from '../fixtures/cmap-pdf.ts';
+
+/** A system Traditional Chinese font collection, if this machine has one. */
+const systemTtc = [
+  'C:\\Windows\\Fonts\\msjh.ttc',
+  'C:\\Windows\\Fonts\\mingliu.ttc',
+  '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc',
+].find((path) => existsSync(path));
 
 const REPORT = `# 季度報告
 
@@ -147,6 +156,28 @@ describe('document formats', () => {
       }),
     ).rejects.toThrow(EditError);
   });
+
+  it('pdf: reads Chinese that needs the Adobe CJK CMaps (older Taiwanese office files)', async () => {
+    expect(await toMarkdown(cmapEncodedPdf('舊系統的中文'), 'pdf')).toContain(
+      '舊系統的中文',
+    );
+  });
+
+  it.runIf(systemTtc)(
+    'pdf: embeds a face taken out of a system .ttc font collection',
+    async () => {
+      const fixture = process.env['ROCKY_PDF_FONT'];
+      process.env['ROCKY_PDF_FONT'] = systemTtc!;
+      try {
+        const bytes = await fromMarkdown('繁體中文：系統字型', 'pdf');
+        expect(await toMarkdown(bytes, 'pdf')).toContain('繁體中文：系統字型');
+      } finally {
+        process.env['ROCKY_PDF_FONT'] = fixture;
+      }
+    },
+    // Parsing and subsetting a ~20 MB system font can take over 5 s on the Windows runner.
+    30_000,
+  );
 
   it('md: edits keep a BOM and CRLF line endings', async () => {
     const bom = Buffer.from([0xef, 0xbb, 0xbf]);

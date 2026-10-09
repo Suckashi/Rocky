@@ -1,9 +1,13 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import path, { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { skillsPrompt } from '../../src/server/agent/skills.ts';
-import { frontMatter, SkillStore } from '../../src/server/skills/store.ts';
+import {
+  frontMatter,
+  skillFile,
+  SkillStore,
+} from '../../src/server/skills/store.ts';
 
 function install(): SkillStore {
   const skills = new SkillStore(mkdtempSync(join(tmpdir(), 'rocky-skills-')));
@@ -48,5 +52,28 @@ describe('skills', () => {
     expect(() => skills.read('更新紀錄', '../outside.txt')).toThrow('outside');
     expect(() => skills.read('更新紀錄', '/etc/hostname')).toThrow('outside');
     expect(() => skills.read('nope')).toThrow('no skill');
+  });
+
+  it('refuses links, other drives and UNC paths that leave the skill folder', () => {
+    const skills = install();
+    symlinkSync(
+      join(skills.dir, 'outside.txt'),
+      join(skills.dir, 'changelog', 'link.txt'),
+    );
+    expect(() => skills.read('更新紀錄', 'link.txt')).toThrow('outside');
+    const root = 'C:\\Users\\me\\AppData\\Local\\Rocky\\skills\\changelog';
+    expect(skillFile(root, 'templates\\entry.md', path.win32)).toBe(
+      `${root}\\templates\\entry.md`,
+    );
+    for (const escape of [
+      'D:\\secrets.txt',
+      'D:secrets.txt',
+      '\\\\server\\share\\file.txt',
+      '..\\outside.txt',
+      'C:\\Windows\\win.ini',
+    ])
+      expect(() => skillFile(root, escape, path.win32), escape).toThrow(
+        'outside',
+      );
   });
 });

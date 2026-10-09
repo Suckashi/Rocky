@@ -132,8 +132,6 @@ export function decide(effect: Effect, ctx: PolicyContext): Verdict {
   }
   if (effect.kind === 'mcp' && !effect.readOnly)
     return external(`mcp:${effect.server}/${effect.tool}`);
-  if (effect.kind === 'network' && effect.method.toUpperCase() !== 'GET')
-    return external(`network:${effect.url}`);
 
   // 5. Approved for this session (exact key only).
   if (ctx.sessionApprovals.has(base.sessionKey))
@@ -150,16 +148,9 @@ export function decide(effect: Effect, ctx: PolicyContext): Verdict {
       return verdict('allow', 'allow-rule');
   }
 
-  // 7. The mode.
-  const reading =
-    effect.kind === 'read' ||
-    (effect.kind === 'network' && effect.method.toUpperCase() === 'GET');
-  if (ctx.mode === 'hands-off') return verdict('allow', 'mode');
-  if (ctx.mode === 'ask-when-needed') {
-    return effect.kind === 'network' && !reading
-      ? verdict('ask', 'mode')
-      : verdict('allow', 'mode');
-  }
+  // 7. The mode. Hands-off and ask-when-needed decide alike here: everything that
+  // still asks in either mode returned above (ADR 0018).
+  if (ctx.mode !== 'ask-always') return verdict('allow', 'mode');
   // ask-always: reads and the safe list run; everything else asks. Fetching pages asks too.
   if (effect.kind === 'read') return verdict('allow', 'mode');
   if (effect.kind === 'command' && analysis?.kind === 'parsed') {

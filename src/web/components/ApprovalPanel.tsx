@@ -94,8 +94,6 @@ function Title({
         </>
       );
     }
-    case 'network':
-      return <>{t('approval.title.network', { actor, url: effect.url })}</>;
   }
 }
 

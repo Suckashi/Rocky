@@ -1,7 +1,7 @@
 // Runs one job: a worktree of the project, OpenCode over ACP inside it, every permission
 // request through Rocky's gate, then Rocky's own verification (diff against what it
 // approved, and the project's tests). Nothing reaches the project until the user applies it.
-import { existsSync, mkdirSync, readFileSync, symlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import type { SessionNotification } from '@agentclientprotocol/sdk';
 import { contentHash } from '../effects/hash.ts';
@@ -14,6 +14,7 @@ import { permissionEffect } from '../external/permission.ts';
 import {
   addWorktree,
   hasUncommitted,
+  git,
   isGitRepo,
   toRepoPath,
   verifyWorktree,
@@ -53,11 +54,16 @@ const GUIDANCE = [
   'Finish with a short summary of what you changed and the test result.',
 ].join('\n');
 
-function hasTestScript(dir: string): boolean {
+/** Whether the project had a test script when the job started. Read from the base commit,
+ * so the agent cannot skip Rocky's check by deleting or renaming the script. */
+export async function baseHasTestScript(
+  worktree: string,
+  base: string,
+): Promise<boolean> {
   try {
-    const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as {
-      scripts?: Record<string, string>;
-    };
+    const pkg = JSON.parse(
+      await git(worktree, 'show', `${base}:package.json`),
+    ) as { scripts?: Record<string, string> };
     return typeof pkg.scripts?.['test'] === 'string';
   } catch {
     return false;
@@ -75,7 +81,6 @@ interface Prepared {
 
 export class JobRunner {
   private readonly deps: JobRunnerDeps;
-  private readonly listeners = new Set<(jobId: string) => void>();
   private readonly queue: { job: Job; prepared: Prepared }[] = [];
   private readonly controllers = new Map<string, AbortController>();
   private readonly finished = new Map<string, Promise<Job>>();
@@ -87,14 +92,6 @@ export class JobRunner {
   }
 
   /** Called whenever a job's timeline or status changes. */
-  subscribe(listener: (jobId: string) => void): () => void {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-
-  private changed(jobId: string): void {
-    for (const listener of this.listeners) listener(jobId);
-  }
 
   available(): boolean {
     return (this.deps.findAgent ?? findOpenCode)() !== undefined;
@@ -131,7 +128,6 @@ export class JobRunner {
       new Promise<Job>((resolve) => this.resolvers.set(job.id, resolve)),
     );
     this.queue.push({ job, prepared });
-    this.changed(job.id);
     void this.next();
     return this.deps.jobs.get(job.id)!;
   }
@@ -176,7 +172,6 @@ export class JobRunner {
     this.resolvers.get(jobId)?.(this.deps.jobs.get(jobId)!);
     this.resolvers.delete(jobId);
     this.finished.delete(jobId);
-    this.changed(jobId);
   }
 
   private async next(): Promise<void> {
@@ -188,7 +183,6 @@ export class JobRunner {
     const controller = new AbortController();
     this.controllers.set(job.id, controller);
     this.deps.jobs.setStatus(job.id, 'running');
-    this.changed(job.id);
     try {
       await this.execute(job, prepared, controller.signal);
     } finally {
@@ -208,7 +202,6 @@ export class JobRunner {
     const thread = jobThread(job.id);
     const event = (e: Parameters<JobStore['addEvent']>[1]) => {
       jobs.addEvent(job.id, e);
-      this.changed(job.id);
     };
     const warnings: string[] = [];
     let status: JobStatus = 'failed';
@@ -357,10 +350,9 @@ export class JobRunner {
       await agent.initialize();
       sessionId = await agent.newSession(worktree);
       jobs.setSession(job.id, sessionId);
-      if (signal.aborted) onAbort();
-
+      // Stopped while OpenCode was starting: never send it the task.
       let prompt = `${GUIDANCE}\n\nTask:\n${job.task}`;
-      for (let round = 0; ; round++) {
+      for (let round = 0; !signal.aborted; round++) {
         event({ type: 'prompt', text: round === 0 ? job.task : prompt });
         rejection = undefined;
         const response = await agent.prompt(sessionId, prompt);
@@ -375,7 +367,7 @@ export class JobRunner {
       agent = undefined;
 
       // 3. Rocky's own verification: what changed, and does it match what was approved.
-      const verification = await verifyWorktree(worktree, approved);
+      const verification = await verifyWorktree(worktree, tree.base, approved);
       result = { ...result, ...verification };
       // Approved actions OpenCode never reported back: their outcome is not known.
       for (const receiptId of receiptOf.values()) {
@@ -387,7 +379,7 @@ export class JobRunner {
       if (
         !signal.aborted &&
         verification.changed.length > 0 &&
-        hasTestScript(worktree)
+        (await baseHasTestScript(worktree, tree.base))
       ) {
         result.checks.push(
           await this.check(thread, worktree, ['npm', 'test'], signal),

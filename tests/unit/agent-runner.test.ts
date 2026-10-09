@@ -183,6 +183,11 @@ describe('RockyAgentRunner', () => {
     });
     expect(store.runs('t1')[0]!.outcome).toBe('unknown');
     expect(store.interruptedRuns()).toEqual([{ id: 'r1', threadId: 't1' }]);
+    // Recovery closes it once; it stays unknown and is not counted again.
+    expect(store.markInterrupted()).toBe(1);
+    expect(store.markInterrupted()).toBe(0);
+    expect(store.runs('t1')[0]!.outcome).toBe('unknown');
+    expect(store.interruptedRuns()).toEqual([]);
   });
 
   it('ignores the runtime clear-all endpoint; deleting is per thread', async () => {
