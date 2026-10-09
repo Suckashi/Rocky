@@ -8,7 +8,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { EventSchemas } from '@ag-ui/core/schemas';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { composeRocky } from '../../src/server/compose.ts';
@@ -21,6 +21,7 @@ import {
   startFakeOpenAI,
   type ChatRequestMessage,
   type FakeOpenAI,
+  type RecordedRequest,
   type ScriptedToolCall,
 } from '../fixtures/fake-openai.ts';
 
@@ -956,5 +957,69 @@ describe('without a project folder', () => {
     );
     const text = await res.text();
     expect(text).toContain('No project folder');
+  });
+});
+
+describe('what the model sees', () => {
+  // Golden files of the system prompt and tool definitions sent to the model, Rocky's own
+  // and the research subagent's. A change here changes the model's behaviour: review the
+  // diff, run the eval suite, then update with `npx vitest run -u`.
+  function render(request: RecordedRequest, dir: string): string {
+    const system = request.messages[0]?.content;
+    const prompt =
+      typeof system === 'string'
+        ? system
+        : (system as { text?: string }[]).map((p) => p.text ?? '').join('');
+    const tools = request.tools.map(
+      ({ function: f }) =>
+        `## ${f.name}\n\n${f.description ?? ''}\n\n\`\`\`json\n${JSON.stringify(f.parameters ?? {}, null, 2)}\n\`\`\``,
+    );
+    let out = `# System prompt\n\n${prompt}\n\n# Tools\n\n${tools.join('\n\n')}\n`;
+    // Machine-specific parts: the temporary folder and the operating system.
+    for (const form of [dir, JSON.stringify(dir).slice(1, -1)])
+      out = out.split(form).join('<tmp>');
+    return out
+      .replace(/<tmp>(\\\\|\\)/g, '<tmp>/')
+      .replace(/The computer runs \w+\./, 'The computer runs <os>.');
+  }
+
+  async function seen(threadId: string, planning: boolean) {
+    const { call, project } = await setup('ask-when-needed');
+    if (planning)
+      await call(`/api/threads/${threadId}/plan`, {
+        method: 'PUT',
+        body: { planning: true },
+      });
+    plan = [
+      {
+        name: 'task',
+        args: { description: 'look around', subagent_type: 'general-purpose' },
+      },
+    ];
+    subPlan = [];
+    const from = fake.requests.length;
+    await run(call, threadId);
+    const requests = fake.requests.slice(from);
+    const isRocky = (r: RecordedRequest) =>
+      JSON.stringify(r.messages[0]?.content).includes('You are Rocky');
+    const dir = dirname(project);
+    return {
+      rocky: render(requests.find(isRocky)!, dir),
+      subagent: render(
+        requests.find((r) => !isRocky(r))!,
+        dir,
+      ),
+    };
+  }
+
+  it('Rocky and the research subagent', async () => {
+    const { rocky, subagent } = await seen('g1', false);
+    await expect(rocky).toMatchFileSnapshot('../golden/rocky.md');
+    await expect(subagent).toMatchFileSnapshot('../golden/subagent.md');
+  });
+
+  it('Rocky in plan mode', async () => {
+    const { rocky } = await seen('g2', true);
+    await expect(rocky).toMatchFileSnapshot('../golden/rocky-plan-mode.md');
   });
 });

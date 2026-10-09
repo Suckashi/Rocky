@@ -22,6 +22,10 @@ export interface ChatRequestMessage {
 export interface RecordedRequest {
   messages: ChatRequestMessage[];
   toolNames: string[];
+  /** The tool definitions as sent: name, description and JSON schema. */
+  tools: {
+    function: { name: string; description?: string; parameters?: unknown };
+  }[];
   stream: boolean;
 }
 
@@ -152,12 +156,13 @@ export async function startFakeOpenAI(script: Script): Promise<FakeOpenAI> {
       }
       const body = JSON.parse(await readBody(req)) as {
         messages: ChatRequestMessage[];
-        tools?: { function: { name: string } }[];
+        tools?: RecordedRequest['tools'];
         stream?: boolean;
       };
       requests.push({
         messages: body.messages,
         toolNames: (body.tools ?? []).map((tool) => tool.function.name),
+        tools: body.tools ?? [],
         stream: body.stream === true,
       });
       const reply = script(body.messages);

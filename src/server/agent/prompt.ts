@@ -1,5 +1,6 @@
 // Rocky's base system prompt. Deep Agents gives non-Codex models no prompt of its own
-// (ADR 0001, finding 2). Changes here must run the eval suite once it exists (M2).
+// (ADR 0001, finding 2). Changes here change what the model sees: update tests/golden (ADR 0021)
+// and run the eval suite.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Locale } from '../store/settings.ts';
