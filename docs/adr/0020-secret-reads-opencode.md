@@ -23,11 +23,13 @@
 
 ## 驗證
 
-| 平台                     | 指令                                                                     | 結果                     |
-| ------------------------ | ------------------------------------------------------------------------ | ------------------------ |
-| 雲端 Linux，Node 24.21.0 | `npm run check`、`npm run build`                                         | 通過，160 個測試，exit 0 |
-| 同上，OpenCode 1.18.34   | `ROCKY_REQUIRE_OPENCODE=1 npx vitest run tests/integration/jobs.test.ts` | 5 個通過                 |
-| 同上，Chromium 1194      | `node scripts/e2e.ts`、`node scripts/e2e-jobs.ts`                        | 通過，exit 0             |
+| 平台                                            | 指令                                                                     | 結果                          |
+| ----------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------- |
+| 雲端 Linux，Node 24.21.0                        | `npm run check`、`npm run build`                                         | 通過，160 個測試，exit 0      |
+| 同上，OpenCode 1.18.34                          | `ROCKY_REQUIRE_OPENCODE=1 npx vitest run tests/integration/jobs.test.ts` | 5 個通過                      |
+| 同上，Chromium 1194                             | `node scripts/e2e.ts`、`node scripts/e2e-jobs.ts`                        | 通過，exit 0                  |
+| 同上，Command Code `deepseek/deepseek-v4-flash` | `npm run eval -- --repeat 3`                                             | 92/93，沒有題目退步（exit 0） |
 
+- 評測唯一一次失敗是 `respect-rejection`：模型那次沒有嘗試刪除，所以沒有詢問（`asked: 0`）；這題不經過讀檔或搜尋。
 - 新測試在拿掉修正時會失敗：OpenCode 讀 `.env` 的內容送到了模型；`grep` 結果含金鑰檔；讀機密檔的紀錄沒有結束。
 - 沒有在 Windows 上跑過。
