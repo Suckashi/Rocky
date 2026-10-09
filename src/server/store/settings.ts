@@ -20,7 +20,7 @@ export interface ModelSettings {
   model: string;
 }
 
-export type ApprovalMode = 'ask-always' | 'ask-when-needed' | 'hands-off';
+export type ApprovalMode = 'ask-when-needed' | 'hands-off';
 
 export interface PublicSettings {
   locale: Locale;
@@ -109,15 +109,6 @@ export class SettingsStore {
     if (policy === 'ask') delete all[`${server}/${tool}`];
     else all[`${server}/${tool}`] = policy;
     this.set('mcpToolPolicies', all);
-  }
-
-  /** Rule suggestions the user turned down (prefix keys); never offered again. */
-  dismissedSuggestions(): Set<string> {
-    return new Set(this.get<string[]>('dismissedRuleSuggestions') ?? []);
-  }
-
-  dismissSuggestion(key: string): void {
-    this.set('dismissedRuleSuggestions', [...this.dismissedSuggestions(), key]);
   }
 
   public(): PublicSettings {

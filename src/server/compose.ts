@@ -1,12 +1,10 @@
 // Builds every part of Rocky from a data folder. main.ts and the integration tests share it,
 // so tests exercise the same wiring as the real server.
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { RockyAgent } from './agent/rocky-agent.ts';
 import { RockyAgentRunner } from './agent/runner.ts';
 import { Executor } from './effects/execute.ts';
 import { Gate } from './effects/gate.ts';
-import { builtInSafeList } from './effects/policy.ts';
 import { ReceiptStore } from './effects/receipts.ts';
 import { RuleStore } from './effects/rules.ts';
 import { SnapshotStore } from './effects/snapshots.ts';
@@ -43,17 +41,6 @@ export interface ComposeOptions {
   findAgent?: () => string | undefined;
 }
 
-function packageScripts(projectRoot: string): Record<string, string> {
-  try {
-    const pkg = JSON.parse(
-      readFileSync(join(projectRoot, 'package.json'), 'utf8'),
-    ) as { scripts?: Record<string, string> };
-    return pkg.scripts ?? {};
-  } catch {
-    return {};
-  }
-}
-
 export function composeRocky(options: ComposeOptions) {
   const db = openDatabase(join(options.dataDir, 'rocky.sqlite'));
   const threads = new ThreadStore(db);
@@ -64,9 +51,11 @@ export function composeRocky(options: ComposeOptions) {
   const gate = new Gate({
     receipts,
     projectRoot: () => settings.project(),
-    defaultMode: () => settings.mode(),
+    mode: () => settings.mode(),
     rules: () => rules.list(),
-    safeList: (root) => builtInSafeList(packageScripts(root)),
+    addRule: (rule) => rules.add(rule),
+    planning: (threadId) => threads.planning(threadId),
+    setPlanning: (threadId, on) => threads.setPlanning(threadId, on),
     createdByRocky: (threadId, path) =>
       snapshots
         .forReceipts(receipts.forThread(threadId).map((r) => r.id))
@@ -118,7 +107,7 @@ export function composeRocky(options: ComposeOptions) {
     api: [
       settingsRoutes(settings, egress, options.listModels),
       threadRoutes(threads, runner),
-      approvalRoutes(gate, receipts, snapshots, executor),
+      approvalRoutes(gate, settings, threads, receipts, snapshots, executor),
       previewRoutes(settings),
       jobRoutes({
         jobs,
@@ -130,7 +119,7 @@ export function composeRocky(options: ComposeOptions) {
       }),
       memoryRoutes({ memory, gate, executor }),
       skillRoutes(skills),
-      ruleRoutes(rules, receipts, settings),
+      ruleRoutes(rules),
       mcpRoutes({ settings, manager: mcp, egress }),
     ],
     mounted: [copilotRoutes(agent, runner)],

@@ -31,6 +31,8 @@ export interface Case {
   rejectReason?: string;
   /** Requests this case approves (everything else is rejected). */
   approve?: (effect: Effect) => boolean;
+  /** Start the conversation in plan mode (ADR 0019). */
+  planning?: boolean;
   /** For a plan review: the option this case picks (0-based); otherwise plans are rejected. */
   choosePlan?: number;
   /** The project is a git repository with one commit. */
@@ -742,8 +744,9 @@ export const CASES: Case[] = [
   {
     id: 'plan-before-refactor',
     prompt:
-      '我想把 src 裡的 callback 改成 async/await，做法可能不只一種。先提出方案讓我選，選好再動手；不要改 test 裡的測試，改完跑測試。',
+      '我想把 src 裡的 callback 改成 async/await，做法可能不只一種。不要改 test 裡的測試，改完跑測試。',
     files: callbacks,
+    planning: true,
     choosePlan: 0,
     check: (ctx) => [
       ...(ctx.tools.includes('propose_plan') ? [] : ['did not propose a plan']),

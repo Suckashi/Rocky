@@ -118,11 +118,6 @@ export class JobRunner {
   async enqueue(input: JobInput): Promise<Job> {
     const prepared = await this.preflight();
     const job = this.deps.jobs.create({ ...input, agent: 'opencode' });
-    // The job asks in its own thread, with the conversation's approval mode.
-    this.deps.gate.setMode(
-      jobThread(job.id),
-      this.deps.gate.mode(input.threadId),
-    );
     this.finished.set(
       job.id,
       new Promise<Job>((resolve) => this.resolvers.set(job.id, resolve)),

@@ -62,6 +62,7 @@ for (const args of [
 const text = (m: ChatRequestMessage | undefined) =>
   JSON.stringify(m?.content ?? '');
 let worktree = '';
+let firstWorktree: string | undefined;
 const newestWorktree = () => {
   const dir = join(base, 'data', 'worktrees');
   return readdirSync(dir)
@@ -90,11 +91,23 @@ const fake = await startFakeOpenAI((messages) => {
     };
   }
   // OpenCode's model: edit math.js in the job's worktree, run the tests, summarise.
-  // The job running now has the newest worktree.
+  // The job running now has the newest worktree. The second job first cleans up with a
+  // dangerous command, which asks in the default mode.
   worktree = newestWorktree();
-  const step = Math.floor(
-    (messages.length - 1 - messages.lastIndexOf(lastUser!)) / 2,
-  );
+  firstWorktree ??= worktree;
+  const second = worktree !== firstWorktree;
+  const step =
+    Math.floor((messages.length - 1 - messages.lastIndexOf(lastUser!)) / 2) -
+    (second ? 1 : 0);
+  if (step === -1)
+    return {
+      toolCalls: [
+        {
+          name: 'bash',
+          args: { command: 'rm -rf build', description: 'Clean' },
+        },
+      ],
+    };
   if (step === 0)
     return {
       toolCalls: [
@@ -223,10 +236,9 @@ try {
     readFileSync(join(project, 'math.js'), 'utf8').includes('a + b'),
     'applying copies the verified change into the project',
   );
-  // A second job in ask-always mode: its edit asks on the job page, with a badge on the rail.
+  // A second job: its dangerous command asks on the job page, with a badge on the rail.
   page.on('dialog', (dialog) => void dialog.accept());
   await page.getByRole('button', { name: '對話' }).click();
-  await page.getByLabel('核准模式').selectOption('ask-always');
   await page.getByRole('textbox').fill('請再交給 OpenCode 修一次');
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 30_000 });
@@ -243,10 +255,10 @@ try {
     .locator('.job-card')
     .getByRole('link', { name: '查看工作' })
     .click();
-  await panel.getByText('OpenCode 想修改 math.js').waitFor({ timeout: 30_000 });
+  await panel.getByText('OpenCode 想執行指令').waitFor({ timeout: 30_000 });
   if (shots)
     await page.screenshot({ path: join(shots, 'm6-job-approval.png') });
-  // In ask-always every action asks (the edit, then OpenCode running the tests): approve each.
+  // Approve whatever asks until the job is done.
   const finished = page.locator('.job-head .badge', {
     hasText: /已驗證|有問題/,
   });

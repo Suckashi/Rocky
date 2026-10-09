@@ -1,7 +1,7 @@
 // One conversation: history from the local runner, streaming reply, tool cards, approvals
 // (in place of the input box), per-turn file changes, and actions with an unknown outcome.
 import { useAgent, useCopilotKit } from '@copilotkit/react-core/v2';
-import { ArrowUp, Square } from 'lucide-react';
+import { ArrowUp, ListChecks, Square } from 'lucide-react';
 import {
   useCallback,
   useEffect,
@@ -21,7 +21,6 @@ import { Roko, type RokoState } from './Roko.tsx';
 import { ToolCard, type ToolState } from './ToolCard.tsx';
 import { TurnChanges } from './TurnChanges.tsx';
 import { JobCards } from './JobCards.tsx';
-import { RuleSuggestion, type Suggestion } from './RuleSuggestion.tsx';
 import { UnknownOutcome } from './UnknownOutcome.tsx';
 
 const AGENT_ID = 'rocky';
@@ -133,9 +132,9 @@ export function Chat({
   const [error, setError] = useState('');
   const [pending, setPending] = useState<PendingApproval[]>([]);
   const [mode, setMode] = useState<Mode | null>(null);
+  const [planning, setPlanning] = useState(false);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const runningRef = useRef(false);
   // Enter pressed before the conversation finished loading: send once it has.
   const sendWhenLoaded = useRef(false);
@@ -144,7 +143,7 @@ export function Chat({
 
   const refresh = useCallback(async () => {
     const [approvals, log] = await Promise.all([
-      api<{ mode: Mode; pending: PendingApproval[] }>(
+      api<{ mode: Mode; planning: boolean; pending: PendingApproval[] }>(
         `/threads/${threadId}/approvals`,
       ),
       api<{ receipts: Receipt[]; snapshots: Snapshot[] }>(
@@ -153,12 +152,9 @@ export function Chat({
     ]);
     setPending(approvals.pending);
     setMode(approvals.mode);
+    setPlanning(approvals.planning);
     setReceipts(log.receipts);
     setSnapshots(log.snapshots);
-    // Roko's rule suggestions are a nicety: failing to load them changes nothing.
-    void api<{ suggestions: Suggestion[] }>('/rules/suggestions')
-      .then((r) => setSuggestions(r.suggestions))
-      .catch(() => undefined);
   }, [threadId]);
 
   useEffect(() => {
@@ -179,10 +175,12 @@ export function Chat({
         if (!runningRef.current) return;
         const state = event.snapshot as {
           mode?: Mode;
+          planning?: boolean;
           pendingApprovals?: PendingApproval[];
         };
         if (state.pendingApprovals) setPending(state.pendingApprovals);
         if (state.mode) setMode(state.mode);
+        if (state.planning !== undefined) setPlanning(state.planning);
       },
     });
     return () => events.unsubscribe();
@@ -240,7 +238,7 @@ export function Chat({
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'end' });
-  }, [agent.messages.length, running, pending.length, suggestions.length]);
+  }, [agent.messages.length, running, pending.length]);
 
   const send = async () => {
     const text = draft.trim();
@@ -285,9 +283,17 @@ export function Chat({
     setPending((list) => list.filter((a) => a.id !== approval.id));
   };
 
+  // The approval mode is one setting for every conversation (also in Settings).
   const changeMode = (next: Mode) => {
     setMode(next);
-    void api(`/threads/${threadId}/mode`, 'PUT', { mode: next }).catch(() =>
+    void api('/settings/mode', 'PUT', { mode: next }).catch(() => refresh());
+  };
+
+  // Plan mode is per conversation; it turns off by itself when the user picks a plan.
+  const togglePlanning = () => {
+    const next = !planning;
+    setPlanning(next);
+    void api(`/threads/${threadId}/plan`, 'PUT', { planning: next }).catch(() =>
       refresh(),
     );
   };
@@ -424,13 +430,6 @@ export function Chat({
           />
         ))}
         <JobCards threadId={threadId} refreshKey={agent.messages.length} />
-        {!running && pending.length === 0 && suggestions[0] && (
-          <RuleSuggestion
-            key={suggestions[0].prefix.join(' ')}
-            suggestion={suggestions[0]}
-            onDone={() => void refresh().catch(() => undefined)}
-          />
-        )}
         {running && pending.length === 0 && (
           <p className="thinking">{t('chat.thinking')}</p>
         )}
@@ -472,13 +471,25 @@ export function Chat({
               ref={input}
               value={draft}
               rows={2}
-              placeholder={t('chat.placeholder')}
+              placeholder={t(
+                planning ? 'chat.placeholder.plan' : 'chat.placeholder',
+              )}
               aria-label={t('chat.placeholder')}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={onKeyDown}
             />
             <div className="composer-bar">
               {mode && <ModeSelect value={mode} onChange={changeMode} />}
+              <button
+                type="button"
+                className={`plan-toggle${planning ? ' on' : ''}`}
+                aria-pressed={planning}
+                title={t('plan.toggle.hint')}
+                onClick={togglePlanning}
+              >
+                <ListChecks size={14} />
+                {t('plan.toggle')}
+              </button>
               <span className="spacer" />
               {running ? (
                 <button

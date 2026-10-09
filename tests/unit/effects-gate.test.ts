@@ -4,29 +4,33 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { Gate, type GateDeps } from '../../src/server/effects/gate.ts';
 import { contentHash } from '../../src/server/effects/hash.ts';
-import { builtInSafeList } from '../../src/server/effects/policy.ts';
 import { ReceiptStore } from '../../src/server/effects/receipts.ts';
 import { SnapshotStore } from '../../src/server/effects/snapshots.ts';
-import type { Effect, Mode } from '../../src/server/effects/types.ts';
+import type { Effect, Mode, Rule } from '../../src/server/effects/types.ts';
 import { openDatabase } from '../../src/server/store/db.ts';
 
-function setup(mode: Mode = 'ask-always') {
+function setup(mode: Mode = 'ask-when-needed') {
   const dir = mkdtempSync(join(tmpdir(), 'rocky-gate-'));
   const project = mkdtempSync(join(tmpdir(), 'rocky-project-'));
   const db = openDatabase(join(dir, 'rocky.sqlite'));
   const receipts = new ReceiptStore(db);
   const changes: string[] = [];
+  const rules: Rule[] = [];
+  const planning = new Set<string>();
   const deps: GateDeps = {
     receipts,
     projectRoot: () => project,
-    defaultMode: () => mode,
-    rules: () => [],
-    safeList: () => builtInSafeList(),
+    mode: () => mode,
+    rules: () => rules,
+    addRule: (rule) => rules.push(rule),
+    planning: (threadId) => planning.has(threadId),
+    setPlanning: (threadId, on) =>
+      on ? planning.add(threadId) : planning.delete(threadId),
     createdByRocky: () => false,
   };
   const gate = new Gate(deps);
   gate.subscribe('t1', () => changes.push('t1'));
-  return { gate, receipts, project, db, dir, changes };
+  return { gate, receipts, project, db, dir, changes, rules, planning };
 }
 
 const origin = { threadId: 't1', actor: 'rocky' as const, toolCallId: 'c1' };
@@ -80,14 +84,16 @@ describe('Gate', () => {
     const { gate, project, changes } = setup();
     const effect: Effect = {
       kind: 'command',
-      argv: ['npm', 'install'],
+      argv: ['git', 'push', '--force'],
       cwd: project,
     };
     const promise = gate.request(effect, origin);
     await until(() => gate.pending('t1').length === 1);
     const [pending] = gate.pending('t1');
     expect(pending).toMatchObject({
-      reason: 'mode',
+      reason: 'dangerous',
+      grant: 'dangerous:force-push',
+      always: ['git', 'push', '*'],
       toolCallId: 'c1',
       actor: 'rocky',
     });
@@ -107,7 +113,7 @@ describe('Gate', () => {
   it('treats an answer for other content as a rejection', async () => {
     const { gate, project } = setup();
     const promise = gate.request(
-      { kind: 'command', argv: ['npm', 'install'], cwd: project },
+      { kind: 'command', argv: ['git', 'push', '--force'], cwd: project },
       origin,
     );
     await until(() => gate.pending('t1').length === 1);
@@ -127,7 +133,7 @@ describe('Gate', () => {
   it('passes the rejection reason to the model and records not-run', async () => {
     const { gate, project } = setup();
     const promise = gate.request(
-      { kind: 'command', argv: ['npm', 'install'], cwd: project },
+      { kind: 'command', argv: ['git', 'push', '--force'], cwd: project },
       origin,
     );
     await until(() => gate.pending('t1').length === 1);
@@ -148,49 +154,111 @@ describe('Gate', () => {
     });
   });
 
-  it('remembers "allow for this session" for the exact same command only', async () => {
+  it('"allow for this conversation" covers the category, answers waiting questions of it, and stays in the thread', async () => {
     const { gate, project } = setup();
-    const effect: Effect = {
+    const push = (...rest: string[]): Effect => ({
       kind: 'command',
-      argv: ['npm', 'install'],
+      argv: ['git', 'push', '--force', ...rest],
       cwd: project,
-    };
-    const first = gate.request(effect, origin);
-    await until(() => gate.pending('t1').length === 1);
+    });
+    const first = gate.request(push(), origin);
+    const sibling = gate.request(push('origin', 'dev'), {
+      ...origin,
+      toolCallId: 'c2',
+    });
+    await until(() => gate.pending('t1').length === 2);
     const pending = gate.pending('t1')[0]!;
     gate.answer(pending.id, {
       decision: 'allow-session',
       contentHash: pending.contentHash,
     });
-    await first;
-    expect((await gate.request(effect, origin)).allowed).toBe(true);
+    expect((await first).allowed).toBe(true);
+    // The other force push already waiting is answered by the same grant.
+    expect((await sibling).allowed).toBe(true);
+    expect((await gate.request(push('origin', 'main'), origin)).allowed).toBe(
+      true,
+    );
+    // Another category still asks.
     const other = gate.request(
-      { ...effect, argv: ['npm', 'install', 'left-pad'] },
+      { kind: 'command', argv: ['rm', '-rf', 'build'], cwd: project },
       origin,
     );
     await until(() => gate.pending('t1').length === 1);
-    expect(gate.pending('t1')).toHaveLength(1);
     gate.answer(gate.pending('t1')[0]!.id, {
       decision: 'reject',
       contentHash: '',
     });
     await other;
     // Another conversation does not inherit it.
-    const elsewhere = gate.request(effect, { ...origin, threadId: 't2' });
+    const elsewhere = gate.request(push(), { ...origin, threadId: 't2' });
     await until(() => gate.pending('t2').length === 1);
-    expect(gate.pending('t2')).toHaveLength(1);
     gate.answer(gate.pending('t2')[0]!.id, {
       decision: 'reject',
       contentHash: '',
     });
-    await elsewhere;
+    expect((await elsewhere).allowed).toBe(false);
+  });
+
+  it('"always allow" saves the shown rule, so later commands it covers do not ask', async () => {
+    const { gate, project, rules } = setup();
+    const effect: Effect = {
+      kind: 'command',
+      argv: ['git', 'push', '--force', 'origin', 'main'],
+      cwd: project,
+    };
+    const first = gate.request(effect, origin);
+    await until(() => gate.pending('t1').length === 1);
+    const pending = gate.pending('t1')[0]!;
+    gate.answer(pending.id, {
+      decision: 'allow-always',
+      contentHash: pending.contentHash,
+    });
+    expect((await first).allowed).toBe(true);
+    expect(rules).toEqual([
+      { decision: 'allow', prefix: ['git', 'push', '*'] },
+    ]);
+    const again = await gate.request(effect, { ...origin, threadId: 't9' });
+    expect(again.allowed && again.receipt?.reason).toBe('allow-rule');
+  });
+
+  it('plan mode refuses changes, asks for the plan, and turns itself off when an option is chosen', async () => {
+    const { gate, project, planning } = setup('hands-off');
+    planning.add('t1');
+    const write = await gate.request(
+      {
+        kind: 'write',
+        path: join(project, 'a.txt'),
+        operation: 'create',
+        content: 'x',
+      },
+      origin,
+    );
+    expect(write.allowed).toBe(false);
+    if (!write.allowed) expect(write.message).toContain('plan mode');
+    const plan: Effect = {
+      kind: 'plan',
+      title: 'Refactor',
+      options: [{ title: 'Small', summary: 's', steps: ['a'] }],
+    };
+    const asked = gate.request(plan, origin);
+    await until(() => gate.pending('t1').length === 1);
+    const pending = gate.pending('t1')[0]!;
+    gate.answer(pending.id, {
+      decision: 'choose',
+      contentHash: pending.contentHash,
+      option: 0,
+    });
+    expect(await asked).toMatchObject({ allowed: true, choice: 0 });
+    expect(planning.has('t1')).toBe(false);
+    // Outside plan mode there is no plan to propose.
+    expect((await gate.request(plan, origin)).allowed).toBe(false);
   });
 
   it('cancels a pending question when the run stops', async () => {
     const { gate, project } = setup();
     const controller = new AbortController();
     const promise = gate.request(
-      { kind: 'command', argv: ['npm', 'install'], cwd: project },
+      { kind: 'command', argv: ['git', 'push', '--force'], cwd: project },
       origin,
       controller.signal,
     );
@@ -202,19 +270,30 @@ describe('Gate', () => {
     expect(result.receipt?.detail).toBe('stopped');
   });
 
-  it('denies reading secrets without a question and reads ordinary files without a receipt', async () => {
+  it('asks before reading a secret even in hands-off, and reads ordinary files without a receipt', async () => {
     const { gate, project, receipts } = setup('hands-off');
-    const denied = await gate.request(
+    const secret = gate.request(
       { kind: 'read', path: join(project, '.env') },
       origin,
     );
-    expect(denied.allowed).toBe(false);
+    await until(() => gate.pending('t1').length === 1);
+    expect(gate.pending('t1')[0]).toMatchObject({
+      reason: 'secret',
+      grant: 'secret:read',
+    });
+    gate.answer(gate.pending('t1')[0]!.id, {
+      decision: 'reject',
+      contentHash: '',
+    });
+    expect((await secret).allowed).toBe(false);
     const read = await gate.request(
       { kind: 'read', path: join(project, 'README.md') },
       origin,
     );
     expect(read).toMatchObject({ allowed: true, receipt: undefined });
-    expect(receipts.forThread('t1').map((r) => r.decision)).toEqual(['denied']);
+    expect(receipts.forThread('t1').map((r) => r.decision)).toEqual([
+      'rejected',
+    ]);
   });
 
   it('marks pending receipts unknown after a restart and lets the user confirm them', () => {

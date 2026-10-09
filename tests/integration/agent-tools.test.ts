@@ -1,6 +1,12 @@
 // The M2 tool flow end to end through the local server: a scripted model calls Rocky's
 // tools, the gate asks over AG-UI state, the user answers over the approvals API.
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { EventSchemas } from '@ag-ui/core/schemas';
@@ -54,7 +60,7 @@ beforeAll(async () => {
 });
 afterAll(() => fake.close());
 
-async function setup(mode: 'ask-always' | 'ask-when-needed' | 'hands-off') {
+async function setup(mode: 'ask-when-needed' | 'hands-off') {
   const dir = mkdtempSync(join(tmpdir(), 'rocky-tools-'));
   const project = join(dir, 'project');
   mkdirSync(project);
@@ -157,12 +163,14 @@ async function receipts(call: Call, threadId: string) {
 
 describe('agent tools through the action gate', () => {
   it('asks before an edit, writes only after approval, and keeps snapshots and a receipt', async () => {
-    const { call, project } = await setup('ask-always');
+    const { call, project } = await setup('ask-when-needed');
+    // AGENTS.md is protected, so changing it asks in the default mode.
+    writeFileSync(join(project, 'AGENTS.md'), 'const answer = 41;\n');
     plan = [
       {
         name: 'edit_file',
         args: {
-          file_path: '/app.js',
+          file_path: '/AGENTS.md',
           old_string: 'answer = 41',
           new_string: 'answer = 42',
         },
@@ -172,8 +180,9 @@ describe('agent tools through the action gate', () => {
     const approval = await nextApproval(call, 'e1');
     expect(approval.effect).toMatchObject({ kind: 'write', operation: 'edit' });
     expect(approval.before).toBe('const answer = 41;\n');
+    expect(approval.reason).toBe('protected');
     // Nothing is written while the question is open.
-    expect(readFileSync(join(project, 'app.js'), 'utf8')).toContain('41');
+    expect(readFileSync(join(project, 'AGENTS.md'), 'utf8')).toContain('41');
 
     const answered = await call(`/api/approvals/${approval.id}`, {
       method: 'POST',
@@ -182,7 +191,7 @@ describe('agent tools through the action gate', () => {
     expect(answered.status).toBe(200);
     const done = await events;
     expect(done.at(-1)?.type).toBe('RUN_FINISHED');
-    expect(readFileSync(join(project, 'app.js'), 'utf8')).toBe(
+    expect(readFileSync(join(project, 'AGENTS.md'), 'utf8')).toBe(
       'const answer = 42;\n',
     );
 
@@ -213,11 +222,11 @@ describe('agent tools through the action gate', () => {
   });
 
   it('treats an approval for different content as a rejection', async () => {
-    const { call, project } = await setup('ask-always');
+    const { call, project } = await setup('ask-when-needed');
     plan = [
       {
         name: 'write_file',
-        args: { file_path: '/new.txt', content: 'hello\n' },
+        args: { file_path: '/.github/new.yml', content: 'hello\n' },
       },
     ];
     const events = run(call, 'e2');
@@ -227,7 +236,7 @@ describe('agent tools through the action gate', () => {
       body: { decision: 'allow-once', contentHash: 'f'.repeat(64) },
     });
     expect(reply(await events)).toContain('does not match');
-    expect(() => readFileSync(join(project, 'new.txt'))).toThrow();
+    expect(() => readFileSync(join(project, '.github', 'new.yml'))).toThrow();
     const { receipts: list } = await receipts(call, 'e2');
     expect(list).toMatchObject([
       { decision: 'rejected', outcome: 'not-run', detail: 'content-changed' },
@@ -235,8 +244,10 @@ describe('agent tools through the action gate', () => {
   });
 
   it("passes the user's rejection reason back to the model", async () => {
-    const { call } = await setup('ask-always');
-    plan = [{ name: 'run_command', args: { argv: ['node', '--version'] } }];
+    const { call } = await setup('ask-when-needed');
+    plan = [
+      { name: 'run_command', args: { argv: ['git', 'reset', '--hard'] } },
+    ];
     const events = run(call, 'e3');
     const approval = await nextApproval(call, 'e3');
     await call(`/api/approvals/${approval.id}`, {
@@ -268,18 +279,25 @@ describe('agent tools through the action gate', () => {
     expect(list[0]?.effect).toMatchObject({ kind: 'command' });
   });
 
-  it('refuses to read secrets even in hands-off mode', async () => {
+  it('asks before reading a secret, even in hands-off mode', async () => {
     const { call } = await setup('hands-off');
     plan = [{ name: 'read_file', args: { file_path: '/.env' } }];
-    const text = reply(await run(call, 'e5'));
-    expect(text).toContain('not allowed');
+    const events = run(call, 'e5');
+    const ask = await nextApproval(call, 'e5');
+    expect(ask).toMatchObject({ reason: 'secret', grant: 'secret:read' });
+    await call(`/api/approvals/${ask.id}`, {
+      method: 'POST',
+      body: { decision: 'reject', contentHash: ask.contentHash },
+    });
+    const text = reply(await events);
+    expect(text).toContain('rejected');
     expect(text).not.toContain('do-not-read');
     const { receipts: list } = await receipts(call, 'e5');
-    expect(list).toMatchObject([{ decision: 'denied', outcome: 'not-run' }]);
+    expect(list).toMatchObject([{ decision: 'rejected', outcome: 'not-run' }]);
   });
 
   it('reads project files without asking', async () => {
-    const { call } = await setup('ask-always');
+    const { call } = await setup('ask-when-needed');
     plan = [{ name: 'read_file', args: { file_path: '/app.js' } }];
     const text = reply(await run(call, 'e6'));
     expect(text).toContain('const answer = 41;');
@@ -309,12 +327,13 @@ describe('agent tools through the action gate', () => {
 
 describe('document tools', () => {
   it('creates a docx only after approval of its exact bytes, and edits it in place', async () => {
-    const { call, project } = await setup('ask-always');
+    // .github is protected, so creating and editing the document there asks.
+    const { call, project } = await setup('ask-when-needed');
     plan = [
       {
         name: 'create_document',
         args: {
-          file_path: '/報告.docx',
+          file_path: '/.github/報告.docx',
           markdown: '# 季度報告\n\n營收成長**百分之十二**。',
         },
       },
@@ -334,12 +353,12 @@ describe('document tools', () => {
       body: { decision: 'allow-once', contentHash: approval.contentHash },
     });
     expect(reply(await events)).toContain('Created');
-    const bytes = readFileSync(join(project, '報告.docx'));
+    const bytes = readFileSync(join(project, '.github', '報告.docx'));
 
     // The side panel opens project files by the path the tools use; never secrets or outside.
     const file = (path: string) =>
       call(`/api/files/preview?path=${encodeURIComponent(path)}`);
-    const shown = (await (await file('/報告.docx')).json()) as {
+    const shown = (await (await file('/.github/報告.docx')).json()) as {
       html: string;
     };
     expect(shown.html).toContain('<h1>季度報告</h1>');
@@ -355,11 +374,11 @@ describe('document tools', () => {
       {
         name: 'edit_document',
         args: {
-          file_path: '/報告.docx',
+          file_path: '/.github/報告.docx',
           replacements: [{ find: '百分之十二', replace: '百分之十五' }],
         },
       },
-      { name: 'read_document', args: { file_path: '/報告.docx' } },
+      { name: 'read_document', args: { file_path: '/.github/報告.docx' } },
     ];
     const second = run(call, 'd2');
     const edit = await nextApproval(call, 'd2');
@@ -387,7 +406,7 @@ describe('document tools', () => {
     expect(text).toContain('營收成長**百分之十二**');
     expect(
       await toMarkdown(
-        new Uint8Array(readFileSync(join(project, '報告.docx'))),
+        new Uint8Array(readFileSync(join(project, '.github', '報告.docx'))),
         'docx',
       ),
     ).toContain('營收成長**百分之十五**');
@@ -431,7 +450,10 @@ describe('document tools', () => {
     });
     expect(restored.status).toBe(200);
     expect(
-      Buffer.compare(readFileSync(join(project, '報告.docx')), bytes),
+      Buffer.compare(
+        readFileSync(join(project, '.github', '報告.docx')),
+        bytes,
+      ),
     ).toBe(0);
   });
 });
@@ -674,13 +696,8 @@ describe('project instructions and the subagent', () => {
 });
 
 describe('permanent rules', () => {
-  it('an allow rule skips the question, a deny rule refuses, and neither touches dangerous commands', async () => {
-    const { call, rocky } = await setup('ask-always');
-    const added = await call('/api/rules', {
-      method: 'POST',
-      body: { decision: 'allow', pattern: `"${process.execPath}" --version` },
-    });
-    expect(added.status).toBe(200);
+  it('an allow rule passes the floor for what it covers, "always allow" adds one, and a deny rule refuses', async () => {
+    const { call, rocky } = await setup('ask-when-needed');
     expect(
       (
         await call('/api/rules', {
@@ -695,14 +712,14 @@ describe('permanent rules', () => {
     });
     await call('/api/rules', {
       method: 'POST',
-      body: { decision: 'allow', pattern: 'rm *' },
+      body: { decision: 'allow', pattern: 'git reset *' },
     });
 
-    // Allowed by the rule: no question even in ask-always.
+    // Dangerous, but covered by the allow rule: no question.
     plan = [
-      { name: 'run_command', args: { argv: [process.execPath, '--version'] } },
+      { name: 'run_command', args: { argv: ['git', 'reset', '--hard'] } },
     ];
-    expect(reply(await run(call, 'u1'))).toContain('exited with code 0');
+    await run(call, 'u1');
     expect(rocky.receipts.forThread('u1')[0]).toMatchObject({
       reason: 'allow-rule',
     });
@@ -716,25 +733,33 @@ describe('permanent rules', () => {
     ];
     expect(reply(await run(call, 'u2'))).toContain('not allowed');
 
-    // An allow rule never covers a dangerous command: it still asks.
+    // Not covered: asks, offering to always allow exactly what it showed.
     plan = [{ name: 'run_command', args: { argv: ['rm', '-rf', 'build'] } }];
     const dangerous = run(call, 'u3');
     const ask = await nextApproval(call, 'u3');
-    expect(ask.reason).toBe('dangerous');
+    expect(ask).toMatchObject({
+      reason: 'dangerous',
+      always: ['rm', '-rf', 'build'],
+    });
     await call(`/api/approvals/${ask.id}`, {
       method: 'POST',
-      body: { decision: 'reject', contentHash: ask.contentHash },
+      body: { decision: 'allow-always', contentHash: ask.contentHash },
     });
     await dangerous;
+    // The next time, in another conversation, it no longer asks.
+    await run(call, 'u4');
+    expect(rocky.receipts.forThread('u4')[0]).toMatchObject({
+      reason: 'allow-rule',
+    });
 
     // Rules are listed and removable.
     const { rules } = (await (await call('/api/rules')).json()) as {
       rules: { id: string; decision: string; prefix: string[] }[];
     };
     expect(rules.map((r) => [r.decision, r.prefix.join(' ')])).toEqual([
-      ['allow', `${process.execPath} --version`],
       ['deny', 'git push *'],
-      ['allow', 'rm *'],
+      ['allow', 'git reset *'],
+      ['allow', 'rm -rf build'],
     ]);
     for (const r of rules)
       expect(
@@ -745,110 +770,51 @@ describe('permanent rules', () => {
   }, 30_000);
 });
 
-describe("Roko's rule suggestions", () => {
-  it('suggests a rule after two approvals; accepting it stops the questions, dismissing hides it', async () => {
-    const { call, rocky } = await setup('ask-always');
-    const approveNext = async (thread: string) => {
-      const done = run(call, thread);
-      const ask = await nextApproval(call, thread);
-      await call(`/api/approvals/${ask.id}`, {
-        method: 'POST',
-        body: { decision: 'allow-once', contentHash: ask.contentHash },
-      });
-      return reply(await done);
-    };
-    type Suggestion = { prefix: string[]; count: number };
-    const suggestions = async () =>
-      (
-        (await (await call('/api/rules/suggestions')).json()) as {
-          suggestions: Suggestion[];
-        }
-      ).suggestions;
-
-    plan = [{ name: 'run_command', args: { argv: ['git', 'init', '-q'] } }];
-    await approveNext('g1');
-    expect(await suggestions()).toEqual([]);
-    plan = [
-      { name: 'run_command', args: { argv: ['git', 'init', '--quiet'] } },
-    ];
-    await approveNext('g2');
-    expect(await suggestions()).toMatchObject([
-      { prefix: ['git', 'init', '*'], count: 2 },
-    ]);
-
-    // Accepting adds exactly that allow rule; the next one runs without asking.
-    expect(
-      (
-        await call('/api/rules/suggestions/accept', {
-          method: 'POST',
-          body: { prefix: ['git', 'init', '*'] },
-        })
-      ).status,
-    ).toBe(200);
-    expect(rocky.rules.list()).toMatchObject([
-      { decision: 'allow', prefix: ['git', 'init', '*'] },
-    ]);
-    expect(await suggestions()).toEqual([]);
-    plan = [{ name: 'run_command', args: { argv: ['git', 'init', '-q'] } }];
-    expect(reply(await run(call, 'g3'))).toContain('exited with code 0');
-    // Something never suggested cannot be accepted through this door.
-    expect(
-      (
-        await call('/api/rules/suggestions/accept', {
-          method: 'POST',
-          body: { prefix: ['rm', '-rf', '*'] },
-        })
-      ).status,
-    ).toBe(409);
-
-    // A dismissed suggestion does not come back.
-    for (const thread of ['h1', 'h2']) {
-      plan = [
-        { name: 'run_command', args: { argv: ['git', 'tag', '--list'] } },
-      ];
-      await approveNext(thread);
-    }
-    expect(await suggestions()).toMatchObject([
-      { prefix: ['git', 'tag', '*'] },
-    ]);
-    await call('/api/rules/suggestions/dismiss', {
-      method: 'POST',
-      body: { prefix: ['git', 'tag', '*'] },
-    });
-    expect(await suggestions()).toEqual([]);
-  }, 60_000);
-});
-
-describe('plan review', () => {
+describe('plan mode', () => {
   const options = [
-    {
-      title: '只改 app.js',
-      summary: '最小改動',
-      steps: ['改 app.js'],
-      commands: [],
-    },
+    { title: '只改 app.js', summary: '最小改動', steps: ['改 app.js'] },
     {
       title: '改 app.js 並跑檢查',
       summary: '改完跑版本檢查',
       steps: ['改 app.js', '跑檢查'],
-      commands: [
-        [process.execPath, '--version'],
-        ['rm', '-rf', 'build'],
-      ],
     },
   ];
   const answer = (call: Call, id: string, body: Record<string, unknown>) =>
     call(`/api/approvals/${id}`, { method: 'POST', body });
+  const planning = async (call: Call, thread: string) =>
+    (
+      (await (await call(`/api/threads/${thread}/approvals`)).json()) as {
+        planning: boolean;
+      }
+    ).planning;
 
-  it('choosing an option approves exactly its commands; others and dangerous ones still ask', async () => {
-    const { call, rocky } = await setup('ask-always');
+  it('only reads while planning; choosing an option turns it off so the work can start', async () => {
+    const { call, project, rocky } = await setup('hands-off');
+    const on = await call('/api/threads/pl1/plan', {
+      method: 'PUT',
+      body: { planning: true },
+    });
+    expect(on.status).toBe(200);
+    expect(await planning(call, 'pl1')).toBe(true);
+
+    // A change is refused, even in hands-off.
+    plan = [
+      { name: 'write_file', args: { file_path: '/new.txt', content: 'x\n' } },
+    ];
+    expect(reply(await run(call, 'pl1', 'go', '1'))).toContain(
+      'plan mode is on',
+    );
+    expect(existsSync(join(project, 'new.txt'))).toBe(false);
+
     plan = [
       { name: 'propose_plan', args: { title: '把答案改成 42', options } },
     ];
-    const proposing = run(call, 'pl1', 'go', '1');
+    const proposing = run(call, 'pl1', 'go', '2');
     const ask = await nextApproval(call, 'pl1');
-    expect(ask.effect).toMatchObject({ kind: 'plan', title: '把答案改成 42' });
-    expect(ask.reason).toBe('plan');
+    expect(ask).toMatchObject({
+      reason: 'plan',
+      effect: { kind: 'plan', title: '把答案改成 42' },
+    });
     await answer(call, ask.id, {
       decision: 'choose',
       contentHash: ask.contentHash,
@@ -856,42 +822,30 @@ describe('plan review', () => {
     });
     const text = reply(await proposing);
     expect(text).toContain('The user chose option 2: 改 app.js 並跑檢查');
-    expect(rocky.receipts.forThread('pl1')[0]).toMatchObject({
+    expect(text).toContain('Plan mode is now off');
+    expect(await planning(call, 'pl1')).toBe(false);
+    expect(
+      rocky.receipts.forThread('pl1').find((r) => r.effect.kind === 'plan'),
+    ).toMatchObject({
       decision: 'approved',
       outcome: 'succeeded',
       detail: 'option 2: 改 app.js 並跑檢查',
     });
 
-    // Listed exactly: runs without asking, even in ask-always.
+    // Now the work runs under the approval mode.
     plan = [
-      { name: 'run_command', args: { argv: [process.execPath, '--version'] } },
+      { name: 'write_file', args: { file_path: '/new.txt', content: 'x\n' } },
     ];
-    expect(reply(await run(call, 'pl1', 'go', '2'))).toContain(
-      'exited with code 0',
-    );
-    expect(rocky.receipts.forThread('pl1').at(-1)).toMatchObject({
-      reason: 'session-approved',
-    });
-
-    // Not listed: asks. Listed but dangerous: still asks.
-    for (const [turn, argv] of [
-      ['3', [process.execPath, '--help']],
-      ['4', ['rm', '-rf', 'build']],
-    ] as const) {
-      plan = [{ name: 'run_command', args: { argv: [...argv] } }];
-      const running = run(call, 'pl1', 'go', turn);
-      const again = await nextApproval(call, 'pl1');
-      expect(again.effect).toMatchObject({ kind: 'command', argv });
-      await answer(call, again.id, {
-        decision: 'reject',
-        contentHash: again.contentHash,
-      });
-      await running;
-    }
+    await run(call, 'pl1', 'go', '3');
+    expect(existsSync(join(project, 'new.txt'))).toBe(true);
   }, 30_000);
 
-  it('asking for changes or rejecting sends the reason back and starts nothing', async () => {
+  it('asking for changes or rejecting sends the reason back and keeps planning', async () => {
     const { call } = await setup('hands-off');
+    await call('/api/threads/pl2/plan', {
+      method: 'PUT',
+      body: { planning: true },
+    });
     plan = [{ name: 'propose_plan', args: { title: '計畫', options } }];
     const first = run(call, 'pl2', 'go', '1');
     const ask = await nextApproval(call, 'pl2');
@@ -914,6 +868,7 @@ describe('plan review', () => {
     expect(reply(await second)).toContain(
       'rejected the plan. Reason: 先不要做',
     );
+    expect(await planning(call, 'pl2')).toBe(true);
 
     // More than three options is not a plan.
     plan = [

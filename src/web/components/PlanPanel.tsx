@@ -1,9 +1,9 @@
-// Plan review (ADR 0011): Rocky offers up to three ways to do a larger task. Choosing one
-// approves exactly the commands it lists; "ask for changes" sends feedback; Esc rejects.
+// The plan at the end of plan mode (ADR 0019): Rocky offers up to three ways to do the task.
+// Choosing one turns plan mode off and starts the work; "ask for changes" sends feedback;
+// Esc rejects.
 import { Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { PendingApproval, PlanOption } from '../api.ts';
-import { commandLine } from '../effects.ts';
 import { useI18n } from '../i18n/index.tsx';
 import type { Answer } from './ApprovalPanel.tsx';
 
@@ -125,16 +125,6 @@ export function PlanPanel({
                 <li key={i}>{step}</li>
               ))}
             </ol>
-            {option.commands.length > 0 && (
-              <span className="small muted">
-                {t('plan.commands')}
-                {option.commands.map((argv, i) => (
-                  <code key={i} className="mono plan-command">
-                    {commandLine(argv)}
-                  </code>
-                ))}
-              </span>
-            )}
           </button>
         ))}
       </div>

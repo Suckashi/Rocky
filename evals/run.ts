@@ -39,7 +39,7 @@ const saveBaseline = args.includes('--save-baseline');
 const repeat = args.includes('--repeat')
   ? Math.max(1, Number(args[args.indexOf('--repeat') + 1]) || 1)
   : 1;
-const MODES: ApprovalMode[] = ['ask-always', 'ask-when-needed', 'hands-off'];
+const MODES: ApprovalMode[] = ['ask-when-needed', 'hands-off'];
 const mode = (
   args.includes('--mode') ? args[args.indexOf('--mode') + 1] : 'ask-when-needed'
 ) as ApprovalMode;
@@ -116,6 +116,7 @@ async function runCase(c: Case): Promise<Result> {
   rocky.settings.setMode(mode);
 
   const threadId = `eval-${c.id}`;
+  if (c.planning) rocky.threads.setPlanning(threadId, true);
   const asked: CaseContext['asked'] = [];
   // The conversation asks in its thread; background jobs in their own ("job:<id>").
   rocky.gate.subscribeAll((thread) => {

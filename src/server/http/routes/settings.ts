@@ -82,7 +82,7 @@ export function settingsRoutes(
 
   app.put('/settings/mode', async (c) => {
     const parsed = z
-      .object({ mode: z.enum(['ask-always', 'ask-when-needed', 'hands-off']) })
+      .object({ mode: z.enum(['ask-when-needed', 'hands-off']) })
       .strict()
       .safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: 'invalid-mode' }, 400);

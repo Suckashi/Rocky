@@ -28,12 +28,15 @@ through one approval gate and can be undone.
 
 - **Works in your project.** Search, read, edit files and run commands inside the folder you
   choose, then run your tests to check the result. Rocky follows the project's `AGENTS.md`.
-- **Approvals that stay out of your way.** Three modes (always ask, ask when needed, hands
-  off). Dangerous commands and actions outside the project always ask, in every mode.
-  Approvals are bound to a hash of the exact content, so a changed command asks again.
+- **Approvals that stay out of your way.** Two modes. _Ask when needed_ (the default) asks
+  for dangerous commands, secrets, protected files and actions outside the project; _hands
+  off_ asks only before reading a secret. "Allow for this conversation" covers that kind of
+  action; "always allow" saves a command rule you can see and remove in Settings. Deny rules
+  hold in both modes. An approval is bound to a hash of the exact content it showed.
 - **Undo for every change.** Files are snapshotted before each write; each turn ends with a
   card listing what changed and a **Restore all** button. Every action leaves a receipt.
-- **Plan review.** For larger or ambiguous tasks Rocky proposes 1–3 options before it starts.
+- **Plan mode.** Turn on _Plan_ next to the input box: Rocky only reads, then proposes 1–3
+  options. Choosing one turns plan mode off and the work starts.
 - **Documents as first-class files.** PDF, Word, Excel, PowerPoint, Markdown and HTML are read
   as Markdown and created from Markdown; Word, Excel and PowerPoint are edited in place,
   keeping their formatting. Chinese text round-trips intact. A side panel previews the layout

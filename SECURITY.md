@@ -12,4 +12,4 @@ Rocky V1 is on `main` with no tagged release. Nothing here is a production secur
 
 - Rocky listens on 127.0.0.1 only and must never be exposed to a LAN or public network.
 - Every action that changes the outside world passes one action gate, is bound to a hash of its exact content, and leaves an operation log entry. Unknown outcomes are never retried automatically.
-- Rocky has no OS sandbox on any platform; commands run with your user's permissions. See [ADR 0007](docs/adr/0007-m2-tools-approvals-eval.md).
+- Rocky has no OS sandbox on any platform; commands run with your user's permissions. See [ADR 0007](docs/adr/0007-m2-tools-approvals-eval.md) and [ADR 0019](docs/adr/0019-lighter-guardrails-plan-mode.md); in hands-off mode dangerous commands run without asking.

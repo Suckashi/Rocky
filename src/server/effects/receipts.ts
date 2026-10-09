@@ -149,17 +149,6 @@ export class ReceiptStore {
     return row ? toReceipt(row) : undefined;
   }
 
-  /** Commands the user approved when asked (not allowed by mode or rules), newest first. */
-  approvedCommands(since: number): Receipt[] {
-    return (
-      this.db
-        .prepare(
-          "select * from receipts where kind = 'command' and decision = 'approved' and created_at >= ? order by created_at desc limit 500",
-        )
-        .all(since) as unknown as Row[]
-    ).map(toReceipt);
-  }
-
   forThread(threadId: string): Receipt[] {
     return (
       this.db

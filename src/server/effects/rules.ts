@@ -34,6 +34,12 @@ export class RuleStore {
   }
 
   add(rule: Rule): StoredRule {
+    const same = this.list().find(
+      (r) =>
+        r.decision === rule.decision &&
+        JSON.stringify(r.prefix) === JSON.stringify(rule.prefix),
+    );
+    if (same) return same;
     const id = randomUUID();
     const createdAt = Date.now();
     this.db
