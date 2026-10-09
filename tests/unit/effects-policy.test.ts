@@ -212,6 +212,16 @@ describe('decision order', () => {
     ).toBe('allow');
   });
 
+  it('a read the agent marked secret without a path asks, even hands-off', () => {
+    const c = ctx({ mode: 'hands-off' });
+    expect(decide({ kind: 'read', path: '.', secret: true }, c)).toMatchObject({
+      decision: 'ask',
+      reason: 'secret',
+      grant: 'secret:read',
+    });
+    expect(decide({ kind: 'read', path: '.' }, c).decision).toBe('allow');
+  });
+
   it('hands-off asks only to read a secret; every other floor runs', () => {
     const c = ctx({ mode: 'hands-off' });
     for (const effect of [

@@ -48,6 +48,20 @@ export function permissionEffect(
     };
   }
 
+  // OpenCode asks to read only the secret files its config lists (opencode.ts), and sends
+  // no path with the question; Rocky judges it as a secret read.
+  if (kind === 'read') {
+    const path =
+      typeof raw['filePath'] === 'string'
+        ? raw['filePath']
+        : request.toolCall.locations?.[0]?.path;
+    return {
+      effect: path
+        ? { kind: 'read', path: isAbsolute(path) ? path : resolve(cwd, path) }
+        : { kind: 'read', path: cwd, secret: true },
+    };
+  }
+
   if (kind === 'execute' && typeof raw['command'] === 'string') {
     const workdir =
       typeof raw['workdir'] === 'string' ? resolve(cwd, raw['workdir']) : cwd;

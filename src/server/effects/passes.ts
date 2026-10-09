@@ -17,6 +17,11 @@ export class PassBook {
     return pass;
   }
 
+  /** Passes issued and not yet used. */
+  get outstanding(): number {
+    return this.open.size;
+  }
+
   /** Consumes the pass if it was issued here, is unused and matches the content. */
   redeem(pass: Pass, contentHash: string): void {
     const issued = this.open.get(pass.id);

@@ -2,6 +2,7 @@
 // environment allowlist (Rocky's token never reaches it), Rocky-owned config in which
 // every tool with an effect asks, and the repository's own opencode.json ignored.
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync } from 'node:fs';
 import { delimiter, join } from 'node:path';
 
@@ -64,6 +65,37 @@ const LOCKDOWN = {
   OPENCODE_DISABLE_PROJECT_CONFIG: '1',
 };
 
+/** Secret files ask before OpenCode reads them, matching Rocky's own list (effects/paths.ts).
+ * OpenCode applies the last matching pattern; `*` also matches path separators. */
+const SECRET_NAMES = [
+  '.netrc',
+  '.npmrc',
+  '.pypirc',
+  'credentials',
+  'credentials.json',
+  ...['rsa', 'dsa', 'ecdsa', 'ed25519'].flatMap((k) => [
+    `id_${k}`,
+    `id_${k}.pub`,
+  ]),
+];
+const SECRET_DIRS = ['.ssh', '.aws', '.gnupg', '.azure', '.kube'];
+const READ_PERMISSION: Record<string, 'allow' | 'ask'> = Object.fromEntries([
+  ['*', 'allow'],
+  ...['*.env', '*.env.*'].map((p) => [p, 'ask']),
+  ...['pem', 'key', 'pfx', 'p12', 'keystore', 'jks'].map((e) => [
+    `*.${e}`,
+    'ask',
+  ]),
+  ...['/', '\\'].flatMap((sep) => [
+    ...SECRET_NAMES.map((n) => [`*${sep}${n}`, 'ask']),
+    ...SECRET_DIRS.map((d) => [`*${sep}${d}${sep}*`, 'ask']),
+  ]),
+  ...['example', 'sample', 'template', 'defaults'].map((x) => [
+    `*.env.${x}`,
+    'allow',
+  ]),
+]);
+
 export interface OpenCodeModel {
   baseURL: string;
   model: string;
@@ -92,7 +124,7 @@ export function openCodeConfig(model: OpenCodeModel): object {
     // Every tool with an effect asks; Rocky answers each request itself.
     permission: {
       '*': 'ask',
-      read: 'allow',
+      read: READ_PERMISSION,
       glob: 'allow',
       grep: 'allow',
       list: 'allow',
@@ -124,6 +156,9 @@ export function openCodeEnv(
     OPENCODE_CONFIG_CONTENT: JSON.stringify(openCodeConfig(model)),
     // The model key is the one secret OpenCode needs; Rocky's API token is never passed.
     ROCKY_MODEL_API_KEY: model.apiKey ?? 'not-needed',
+    // `opencode acp` also serves HTTP on a loopback port; without a password any local
+    // process could drive it. A new one each start, known only to OpenCode itself.
+    OPENCODE_SERVER_PASSWORD: randomBytes(24).toString('base64url'),
     NO_PROXY: '127.0.0.1,localhost',
     no_proxy: '127.0.0.1,localhost',
   });

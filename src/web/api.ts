@@ -49,7 +49,7 @@ export interface Settings {
 export type Actor = 'rocky' | 'subagent' | 'opencode' | 'user';
 
 export type Effect =
-  | { kind: 'read'; path: string }
+  | { kind: 'read'; path: string; secret?: true }
   | {
       kind: 'write';
       path: string;
