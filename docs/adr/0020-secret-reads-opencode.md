@@ -18,14 +18,20 @@
 ## 限制
 
 - OpenCode 不說是哪個檔，核准面板只能寫「想讀取一個機密檔」。
-- OpenCode 自己的 `grep`、`glob` 仍然直接放行；它用 ripgrep，預設略過隱藏檔與 `.gitignore` 裡的檔案，
-  但不在其中的金鑰檔（例如沒被忽略的 `server.key`）可能出現在結果裡。
+- **OpenCode 的 `grep`、`glob` 不會問。** 它的 `grep` 用 `rg --hidden`，隱藏檔也會搜，只略過 Git 忽略的檔案；
+  所以已經提交進 Git 的機密檔（例如被提交的 `.env`、`server.key`），內容的某幾行可能進到模型。`glob` 只列檔名。
+  派工的 worktree 只有已提交的檔案，沒提交的 `.env` 不會出現在裡面。改成每次搜尋都問太吵，而且放手模式下照樣放行，
+  所以不改，寫進 SECURITY.md。
+- **Windows 的大小寫**：Rocky 自己的判斷（`classifyPath`）在 Windows 上不分大小寫，`.ENV`、`Server.KEY` 都算機密檔。
+  OpenCode 1.18 的權限比對分大小寫，而且只支援 `*` 和 `?`，無法寫「不分大小寫」。所以在 Windows 上，每條規則多給
+  全大寫、每段字首大寫、只有第一個字母大寫三種寫法（`.ENV`、`.Env`、`Credentials.json`）；其他混合寫法（例如 `.eNv`）
+  OpenCode 會直接讀。漏掉的「不用問」寫法（例如 `.ENV.example`）只會多問。Linux 的檔名本來就分大小寫，兩邊一致。
 
 ## 驗證
 
 | 平台                                            | 指令                                                                     | 結果                          |
 | ----------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------- |
-| 雲端 Linux，Node 24.21.0                        | `npm run check`、`npm run build`                                         | 通過，160 個測試，exit 0      |
+| 雲端 Linux，Node 24.21.0                        | `npm run check`、`npm run build`                                         | 通過，162 個測試，exit 0      |
 | 同上，OpenCode 1.18.34                          | `ROCKY_REQUIRE_OPENCODE=1 npx vitest run tests/integration/jobs.test.ts` | 5 個通過                      |
 | 同上，Chromium 1194                             | `node scripts/e2e.ts`、`node scripts/e2e-jobs.ts`                        | 通過，exit 0                  |
 | 同上，Command Code `deepseek/deepseek-v4-flash` | `npm run eval -- --repeat 3`                                             | 92/93，沒有題目退步（exit 0） |

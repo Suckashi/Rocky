@@ -66,7 +66,8 @@ const LOCKDOWN = {
 };
 
 /** Secret files ask before OpenCode reads them, matching Rocky's own list (effects/paths.ts).
- * OpenCode applies the last matching pattern; `*` also matches path separators. */
+ * OpenCode 1.18 turns `\` into `/` before matching, `*` also matches `/`, the most specific
+ * (longest) pattern wins, and matching is case-sensitive on every platform. */
 const SECRET_NAMES = [
   '.netrc',
   '.npmrc',
@@ -79,22 +80,37 @@ const SECRET_NAMES = [
   ]),
 ];
 const SECRET_DIRS = ['.ssh', '.aws', '.gnupg', '.azure', '.kube'];
-const READ_PERMISSION: Record<string, 'allow' | 'ask'> = Object.fromEntries([
-  ['*', 'allow'],
-  ...['*.env', '*.env.*'].map((p) => [p, 'ask']),
-  ...['pem', 'key', 'pfx', 'p12', 'keystore', 'jks'].map((e) => [
-    `*.${e}`,
-    'ask',
-  ]),
-  ...['/', '\\'].flatMap((sep) => [
-    ...SECRET_NAMES.map((n) => [`*${sep}${n}`, 'ask']),
-    ...SECRET_DIRS.map((d) => [`*${sep}${d}${sep}*`, 'ask']),
-  ]),
-  ...['example', 'sample', 'template', 'defaults'].map((x) => [
-    `*.env.${x}`,
-    'allow',
-  ]),
-]);
+const SECRET_PATTERNS = [
+  '*.env',
+  '*.env.*',
+  ...['pem', 'key', 'pfx', 'p12', 'keystore', 'jks'].map((e) => `*.${e}`),
+  ...SECRET_NAMES.map((n) => `*/${n}`),
+  ...SECRET_DIRS.map((d) => `*/${d}/*`),
+];
+const NOT_SECRET_PATTERNS = ['example', 'sample', 'template', 'defaults'].map(
+  (x) => `*.env.${x}`,
+);
+
+/** Windows file names ignore case but OpenCode's patterns do not, and they have no
+ * character classes: add the usual spellings (.ENV, Server.Key, Credentials.json). Other
+ * mixes such as .eNv still read without asking. */
+function spellings(pattern: string): string[] {
+  const words = (p: string) =>
+    p.replace(/[a-z]+/g, (w) => w[0]!.toUpperCase() + w.slice(1));
+  const first = pattern.replace(/[a-z]/, (c) => c.toUpperCase());
+  return [...new Set([pattern, pattern.toUpperCase(), words(pattern), first])];
+}
+
+export function readPermission(
+  platform: NodeJS.Platform = process.platform,
+): Record<string, 'allow' | 'ask'> {
+  const forms = (p: string) => (platform === 'win32' ? spellings(p) : [p]);
+  return Object.fromEntries([
+    ['*', 'allow'],
+    ...SECRET_PATTERNS.flatMap(forms).map((p) => [p, 'ask']),
+    ...NOT_SECRET_PATTERNS.flatMap(forms).map((p) => [p, 'allow']),
+  ]);
+}
 
 export interface OpenCodeModel {
   baseURL: string;
@@ -124,7 +140,7 @@ export function openCodeConfig(model: OpenCodeModel): object {
     // Every tool with an effect asks; Rocky answers each request itself.
     permission: {
       '*': 'ask',
-      read: READ_PERMISSION,
+      read: readPermission(),
       glob: 'allow',
       grep: 'allow',
       list: 'allow',
