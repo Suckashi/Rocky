@@ -296,6 +296,43 @@ describe('agent tools through the action gate', () => {
     expect(list).toMatchObject([{ decision: 'rejected', outcome: 'not-run' }]);
   });
 
+  it('an approved secret read runs once, finishes its receipt and leaves no pass open', async () => {
+    const { call, rocky } = await setup('hands-off');
+    plan = [
+      { name: 'read_file', args: { file_path: '/app.js' } },
+      { name: 'read_file', args: { file_path: '/.env' } },
+    ];
+    const events = run(call, 'e5b');
+    const ask = await nextApproval(call, 'e5b');
+    await call(`/api/approvals/${ask.id}`, {
+      method: 'POST',
+      body: { decision: 'allow-once', contentHash: ask.contentHash },
+    });
+    expect(reply(await events)).toContain('do-not-read');
+    const { receipts: list } = await receipts(call, 'e5b');
+    expect(list).toMatchObject([
+      { decision: 'approved', outcome: 'succeeded' },
+    ]);
+    expect(rocky.gate.passes.outstanding).toBe(0);
+  });
+
+  it('leaves secret files out of a search unless that secret path was approved', async () => {
+    const { call, project } = await setup('hands-off');
+    // Not hidden, so the search itself does not skip it the way it skips .env.
+    writeFileSync(join(project, 'deploy.pem'), 'SECRET=do-not-read\n');
+    plan = [{ name: 'grep', args: { pattern: 'SECRET' } }];
+    expect(reply(await run(call, 'e5c'))).not.toContain('do-not-read');
+    plan = [{ name: 'grep', args: { pattern: 'SECRET', path: '/deploy.pem' } }];
+    const events = run(call, 'e5d');
+    const ask = await nextApproval(call, 'e5d');
+    expect(ask).toMatchObject({ reason: 'secret' });
+    await call(`/api/approvals/${ask.id}`, {
+      method: 'POST',
+      body: { decision: 'allow-once', contentHash: ask.contentHash },
+    });
+    expect(reply(await events)).toContain('do-not-read');
+  });
+
   it('reads project files without asking', async () => {
     const { call } = await setup('ask-when-needed');
     plan = [{ name: 'read_file', args: { file_path: '/app.js' } }];

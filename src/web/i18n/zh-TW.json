@@ -89,6 +89,7 @@
   "panel.project": "專案資料夾",
   "approval.region": "等你核准",
   "approval.title.read": "{actor}想讀取 {path}",
+  "approval.title.readSecretUnnamed": "{actor}想讀取一個機密檔（沒有說是哪一個）",
   "approval.title.create": "{actor}想新增檔案 {path}",
   "approval.title.edit": "{actor}想修改 {path}",
   "approval.title.delete": "{actor}想刪除 {path}",

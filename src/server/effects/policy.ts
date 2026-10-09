@@ -61,7 +61,7 @@ function floorOf(
       ctx.projectRoot,
       api,
     );
-    if (facts.secret)
+    if (facts.secret || (effect.kind === 'read' && effect.secret))
       return effect.kind === 'read'
         ? {
             reason: 'secret',

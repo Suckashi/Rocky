@@ -89,6 +89,7 @@
   "panel.project": "Project folder",
   "approval.region": "Waiting for your approval",
   "approval.title.read": "{actor}wants to read {path}",
+  "approval.title.readSecretUnnamed": "{actor}wants to read a secret file (it did not say which)",
   "approval.title.create": "{actor}wants to create {path}",
   "approval.title.edit": "{actor}wants to edit {path}",
   "approval.title.delete": "{actor}wants to delete {path}",

@@ -122,6 +122,11 @@ describe('paths', () => {
     expect(c('C:\\Code\\Other\\a.ts').relative).toBeUndefined();
     expect(c('.GIT\\config').protected).toBe(true);
     expect(c('D:\\x').relative).toBeUndefined();
+    // Secret names too, in any mix of case; Linux file names keep their case.
+    for (const name of ['.ENV', '.eNv', 'Server.KEY', '.SSH\\config', 'ID_RSA'])
+      expect(c(name).secret).toBe(true);
+    expect(c('.ENV.Example').secret).toBe(false);
+    expect(classifyPath('/w/.ENV', '/w', '/w', path.posix).secret).toBe(false);
   });
 });
 
@@ -210,6 +215,16 @@ describe('decision order', () => {
       decide({ kind: 'write', path: 'new.txt', operation: 'delete' }, c)
         .decision,
     ).toBe('allow');
+  });
+
+  it('a read the agent marked secret without a path asks, even hands-off', () => {
+    const c = ctx({ mode: 'hands-off' });
+    expect(decide({ kind: 'read', path: '.', secret: true }, c)).toMatchObject({
+      decision: 'ask',
+      reason: 'secret',
+      grant: 'secret:read',
+    });
+    expect(decide({ kind: 'read', path: '.' }, c).decision).toBe('allow');
   });
 
   it('hands-off asks only to read a secret; every other floor runs', () => {

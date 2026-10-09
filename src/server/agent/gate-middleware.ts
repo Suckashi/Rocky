@@ -1,5 +1,5 @@
 // First line of defence: every tool call passes through the gate before it runs.
-// Unknown tools count as external actions; reads are checked too (secrets are refused).
+// Unknown tools count as external actions; reads are checked too (secret reads ask).
 import { ToolMessage } from '@langchain/core/messages';
 import {
   createMiddleware,
@@ -130,15 +130,13 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
           : 'Error: no option was chosen.',
       });
     }
-    if (
-      effect.kind === 'read' ||
-      effect.kind === 'write' ||
-      effect.kind === 'command'
-    )
+    // Writes and commands go through the executor, which redeems the pass.
+    if (effect.kind === 'write' || effect.kind === 'command')
       return currentEffect.run(effect, () =>
         currentPass.run(result.pass, () => handler(request)),
       );
-    // Other tools act on their own (delegation, MCP): Rocky finishes their receipt here.
+    // Reads and other tools (delegation, MCP) act on their own: the pass is closed now and
+    // Rocky finishes their receipt here (an approved secret read has one).
     // A tool that throws may or may not have acted, so its outcome is unknown.
     run.gate.passes.redeem(result.pass, result.pass.contentHash);
     const receiptId = result.receipt?.id;

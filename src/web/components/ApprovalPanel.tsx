@@ -75,6 +75,8 @@ function Title({
   project = approval.root ?? project;
   switch (effect.kind) {
     case 'read':
+      if (effect.secret)
+        return <>{t('approval.title.readSecretUnnamed', { actor })}</>;
       return (
         <>
           {t('approval.title.read', {

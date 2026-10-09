@@ -22,6 +22,7 @@ import {
   type ChatRequestMessage,
   type FakeOpenAI,
   type ScriptedReply,
+  type ScriptedToolCall,
 } from '../fixtures/fake-openai.ts';
 
 const PORT = 4319;
@@ -84,9 +85,12 @@ describe('jobs without OpenCode', () => {
 describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
   let fake: FakeOpenAI;
   let current: Setup;
-  /** What OpenCode's scripted model does after a rejection reaches it; dangerFirst makes
-   * it start with a dangerous command, which asks in the default mode. */
-  const seen = { followUp: '', dangerFirst: false };
+  /** What OpenCode's scripted model does after a rejection reaches it; `first` makes it
+   * start with that tool call (a dangerous command, a secret read). */
+  const seen: {
+    followUp: string;
+    first: ((worktree: string) => ScriptedToolCall) | null;
+  } = { followUp: '', first: null };
 
   beforeAll(async () => {
     fake = await startFakeOpenAI((messages): ScriptedReply => {
@@ -119,15 +123,8 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
         return { text: '了解，不改檔。' };
       }
       const step = Math.floor(after / 2);
-      if (step === 0 && seen.dangerFirst)
-        return {
-          toolCalls: [
-            {
-              name: 'bash',
-              args: { command: 'rm -rf build', description: 'Clean' },
-            },
-          ],
-        };
+      if (step === 0 && seen.first)
+        return { toolCalls: [seen.first(worktree)] };
       if (step === 0)
         return {
           toolCalls: [
@@ -333,11 +330,14 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
         ? { decision: 'reject', reason: '先不要刪 build' }
         : { decision: 'allow-once' },
     );
-    seen.dangerFirst = true;
+    seen.first = () => ({
+      name: 'bash',
+      args: { command: 'rm -rf build', description: 'Clean' },
+    });
     await chat(s);
     const job = await s.rocky.jobRunner
       .wait(s.rocky.jobs.list()[0]!.id)
-      .finally(() => (seen.dangerFirst = false));
+      .finally(() => (seen.first = null));
     expect(job.result?.changed).toEqual([]);
     expect(readFileSync(join(job.worktree!, 'math.js'), 'utf8')).toBe(BUGGY);
     expect(seen.followUp).toContain('先不要刪 build');
@@ -347,6 +347,26 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
     });
     expect(discarded.status).toBe(200);
     expect(existsSync(job.worktree!)).toBe(false);
+  }, 120_000);
+
+  it('asks before OpenCode reads a secret file, even hands-off', async () => {
+    const asked: string[] = [];
+    const s = await setup('hands-off', (effect) => {
+      asked.push(effect.kind);
+      return { decision: 'reject', reason: '不要讀 .env' };
+    });
+    seen.first = (worktree) => {
+      writeFileSync(join(worktree, '.env'), 'API_KEY=sk-never-leaves\n');
+      return { name: 'read', args: { filePath: join(worktree, '.env') } };
+    };
+    await chat(s);
+    const job = await s.rocky.jobRunner
+      .wait(s.rocky.jobs.list()[0]!.id)
+      .finally(() => (seen.first = null));
+    expect(asked).toEqual(['read']);
+    expect(seen.followUp).toContain('不要讀 .env');
+    expect(JSON.stringify(fake.requests)).not.toContain('sk-never-leaves');
+    await s.call(`/api/jobs/${job.id}/discard`, { method: 'POST', body: {} });
   }, 120_000);
 
   it('queues jobs one at a time; a queued job can be stopped before it starts', async () => {

@@ -6,7 +6,13 @@ export type Actor = 'rocky' | 'subagent' | 'opencode' | 'user';
 export type Mode = 'ask-when-needed' | 'hands-off';
 
 export type Effect =
-  | { kind: 'read'; path: string }
+  | {
+      kind: 'read';
+      path: string;
+      /** The agent's own config marked it secret but it did not say which file (OpenCode
+       * sends no path with the question); path is then its worktree. */
+      secret?: true;
+    }
   | {
       kind: 'write';
       path: string;
