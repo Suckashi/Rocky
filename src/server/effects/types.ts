@@ -1,7 +1,6 @@
 // What an action is, who asked for it, and how Rocky decided.
 
 export type { Actor, Effect, Mode, PlanOption } from '../../shared/types.ts';
-import type { Effect } from '../../shared/types.ts';
 
 export type Decision = 'allow' | 'ask' | 'deny';
 
