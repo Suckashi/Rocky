@@ -11,12 +11,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { EventSchemas } from '@ag-ui/core/schemas';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { composeRocky } from '../../src/server/compose.ts';
 import { toMarkdown } from '../../src/server/documents/read.ts';
 import type { PendingApproval } from '../../src/server/effects/gate.ts';
 import type { Receipt } from '../../src/server/effects/receipts.ts';
 import type { Snapshot } from '../../src/server/effects/snapshots.ts';
-import { EgressGuard } from '../../src/server/platform/egress.ts';
 import {
   startFakeOpenAI,
   type ChatRequestMessage,
@@ -24,10 +22,9 @@ import {
   type RecordedRequest,
   type ScriptedToolCall,
 } from '../fixtures/fake-openai.ts';
+import { testRocky } from '../fixtures/rocky.ts';
 
 const PORT = 4318;
-const HOST = `127.0.0.1:${PORT}`;
-const token = 'k'.repeat(43);
 
 type Event = { type: string; [k: string]: unknown };
 
@@ -68,25 +65,7 @@ async function setup(mode: 'ask-when-needed' | 'hands-off') {
   mkdirSync(join(dir, 'data'));
   writeFileSync(join(project, 'app.js'), 'const answer = 41;\n');
   writeFileSync(join(project, '.env'), 'SECRET=do-not-read\n');
-  const rocky = composeRocky({
-    dataDir: join(dir, 'data'),
-    token,
-    port: PORT,
-    egress: new EgressGuard(() => {}),
-    listModels: async () => [],
-  });
-  const call = (path: string, init: { method?: string; body?: unknown } = {}) =>
-    rocky.app.request(`http://${HOST}${path}`, {
-      method: init.method ?? 'GET',
-      headers: {
-        host: HOST,
-        authorization: `Bearer ${token}`,
-        ...(init.body !== undefined
-          ? { 'content-type': 'application/json' }
-          : {}),
-      },
-      ...(init.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
-    });
+  const { rocky, call } = testRocky({ dataDir: join(dir, 'data'), port: PORT });
   await call('/api/settings/model', {
     method: 'PUT',
     body: { provider: 'openai-compatible', baseURL: fake.baseURL, model: 'f' },
@@ -922,39 +901,25 @@ describe('plan mode', () => {
 describe('without a project folder', () => {
   it('tells the model that files and commands are unavailable', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'rocky-tools-'));
-    const rocky = composeRocky({
-      dataDir: dir,
-      token,
-      port: PORT,
-      egress: new EgressGuard(() => {}),
-      listModels: async () => [],
-    });
+    const { rocky, call } = testRocky({ dataDir: dir, port: PORT });
     rocky.settings.setModel({
       provider: 'openai-compatible',
       baseURL: fake.baseURL,
       model: 'f',
     });
     plan = [{ name: 'read_file', args: { file_path: '/app.js' } }];
-    const res = await rocky.app.request(
-      `http://${HOST}/api/copilotkit/agent/rocky/run`,
-      {
-        method: 'POST',
-        headers: {
-          host: HOST,
-          authorization: `Bearer ${token}`,
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          threadId: 'n1',
-          runId: 'n1-r',
-          messages: [{ id: 'n1-u', role: 'user', content: 'read' }],
-          tools: [],
-          context: [],
-          state: {},
-          forwardedProps: {},
-        }),
+    const res = await call('/api/copilotkit/agent/rocky/run', {
+      method: 'POST',
+      body: {
+        threadId: 'n1',
+        runId: 'n1-r',
+        messages: [{ id: 'n1-u', role: 'user', content: 'read' }],
+        tools: [],
+        context: [],
+        state: {},
+        forwardedProps: {},
       },
-    );
+    });
     const text = await res.text();
     expect(text).toContain('No project folder');
   });

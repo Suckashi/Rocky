@@ -12,10 +12,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createCheckJobsTool } from '../../src/server/agent/delegate.ts';
-import { composeRocky } from '../../src/server/compose.ts';
 import { findOpenCode } from '../../src/server/external/opencode.ts';
 import { JobStore } from '../../src/server/jobs/store.ts';
-import { EgressGuard } from '../../src/server/platform/egress.ts';
 import { openDatabase } from '../../src/server/store/db.ts';
 import {
   startFakeOpenAI,
@@ -24,9 +22,9 @@ import {
   type ScriptedReply,
   type ScriptedToolCall,
 } from '../fixtures/fake-openai.ts';
+import { testRocky } from '../fixtures/rocky.ts';
 
 const PORT = 4319;
-const HOST = `127.0.0.1:${PORT}`;
 const token = 'j'.repeat(43);
 const BUGGY = 'export function add(a, b) {\n  return a - b;\n}\n';
 const FIXED = 'export function add(a, b) {\n  return a + b;\n}\n';
@@ -62,7 +60,7 @@ interface Setup {
     init?: { method?: string; body?: unknown },
   ) => Response | Promise<Response>;
   project: string;
-  rocky: ReturnType<typeof composeRocky>;
+  rocky: ReturnType<typeof testRocky>['rocky'];
 }
 
 describe('jobs without OpenCode', () => {
@@ -170,12 +168,10 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
     );
     gitRepo(project);
     mkdirSync(join(root, 'data'));
-    const rocky = composeRocky({
+    const { rocky, call } = testRocky({
       dataDir: join(root, 'data'),
-      token,
       port: PORT,
-      egress: new EgressGuard(() => {}),
-      listModels: async () => [],
+      token,
     });
     rocky.settings.setModel({
       provider: 'openai-compatible',
@@ -191,21 +187,6 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
         rocky.gate.answer(a.id, { ...choice, contentHash: a.contentHash });
       }
     });
-    const call = (
-      path: string,
-      init: { method?: string; body?: unknown } = {},
-    ) =>
-      rocky.app.request(`http://${HOST}${path}`, {
-        method: init.method ?? 'GET',
-        headers: {
-          host: HOST,
-          authorization: `Bearer ${token}`,
-          ...(init.body !== undefined
-            ? { 'content-type': 'application/json' }
-            : {}),
-        },
-        ...(init.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
-      });
     current = { call, project, rocky };
     return current;
   }
