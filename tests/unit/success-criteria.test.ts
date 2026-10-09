@@ -1,6 +1,8 @@
 // The V1 success criteria (ADR 0010), proven by tests:
-//   1. No outside action and no dangerous command runs without approval, in any mode,
-//      whatever the session approvals or allow rules say.
+//   1. In the default mode (ask-when-needed) no outside action and no dangerous command
+//      runs without approval unless the user allowed exactly that category or rule.
+//      Hands-off is the user's choice to skip these questions (ADR 0019); reading a secret
+//      asks in both modes, and deny rules hold in both.
 //   2. An action whose outcome is unknown is never redone automatically.
 import { existsSync, mkdirSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -8,9 +10,9 @@ import path, { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { composeRocky } from '../../src/server/compose.ts';
 import { Executor } from '../../src/server/effects/execute.ts';
-import { contentHash, sessionKey } from '../../src/server/effects/hash.ts';
+import { contentHash } from '../../src/server/effects/hash.ts';
 import { PassBook } from '../../src/server/effects/passes.ts';
-import { builtInSafeList, decide } from '../../src/server/effects/policy.ts';
+import { decide, type PolicyContext } from '../../src/server/effects/policy.ts';
 import { ReceiptStore } from '../../src/server/effects/receipts.ts';
 import { SnapshotStore } from '../../src/server/effects/snapshots.ts';
 import type { Effect, Mode } from '../../src/server/effects/types.ts';
@@ -19,7 +21,7 @@ import { EgressGuard } from '../../src/server/platform/egress.ts';
 import { openDatabase } from '../../src/server/store/db.ts';
 
 const ROOT = '/work/app';
-const MODES: Mode[] = ['ask-always', 'ask-when-needed', 'hands-off'];
+const MODES: Mode[] = ['ask-when-needed', 'hands-off'];
 
 const DANGEROUS: Effect[] = [
   ['rm', '-rf', 'build'],
@@ -40,27 +42,50 @@ const OUTSIDE: Effect[] = [
 ];
 
 describe('success criterion 1: nothing dangerous or outside runs without approval', () => {
-  const contexts = MODES.flatMap((mode) =>
-    [false, true].map((generous) => ({ mode, generous })),
-  );
-  it.each(contexts)(
-    'mode $mode, with session approvals and allow rules: $generous',
-    ({ mode, generous }) => {
-      for (const effect of [...DANGEROUS, ...OUTSIDE]) {
-        const verdict = decide(effect, {
-          projectRoot: ROOT,
-          mode,
-          // A user who already approved exactly this, and allow-listed everything.
-          sessionApprovals: new Set(generous ? [sessionKey(effect)] : []),
-          rules: generous ? [{ decision: 'allow', prefix: ['*'] }] : [],
-          safeList: builtInSafeList({ test: 'node --test' }),
-          existedBefore: () => true,
-          pathApi: path.posix,
-        });
-        expect(verdict.decision, JSON.stringify(effect)).not.toBe('allow');
-      }
-    },
-  );
+  const ctx = (over: Partial<PolicyContext>): PolicyContext => ({
+    projectRoot: ROOT,
+    mode: 'ask-when-needed',
+    planning: false,
+    rules: [],
+    grants: new Set(),
+    existedBefore: () => true,
+    pathApi: path.posix,
+    ...over,
+  });
+
+  it('ask-when-needed asks for every dangerous or outside action, even with other grants', () => {
+    const verdicts = [...DANGEROUS, ...OUTSIDE].map((effect) =>
+      decide(effect, ctx({})),
+    );
+    for (const [i, verdict] of verdicts.entries())
+      expect(
+        verdict.decision,
+        JSON.stringify([...DANGEROUS, ...OUTSIDE][i]),
+      ).toBe('ask');
+    // Granting one category leaves every other category asking.
+    for (const granted of verdicts) {
+      const others = [...DANGEROUS, ...OUTSIDE].filter(
+        (_, i) => verdicts[i]!.grant !== granted.grant,
+      );
+      for (const effect of others)
+        expect(
+          decide(effect, ctx({ grants: new Set([granted.grant!]) })).decision,
+        ).toBe('ask');
+    }
+  });
+
+  it.each(MODES)('deny rules hold and reading a secret asks in %s', (mode) => {
+    const rules = [{ decision: 'deny' as const, prefix: ['git', 'push', '*'] }];
+    expect(
+      decide(
+        { kind: 'command', argv: ['git', 'push', '--force'], cwd: ROOT },
+        ctx({ mode, rules }),
+      ).decision,
+    ).toBe('deny');
+    expect(
+      decide({ kind: 'read', path: `${ROOT}/.env` }, ctx({ mode })).decision,
+    ).toBe('ask');
+  });
 
   it('the executor refuses anything without a matching, unused pass', () => {
     const db = openDatabase(

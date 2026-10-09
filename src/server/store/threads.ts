@@ -106,9 +106,28 @@ export class ThreadStore {
   }
 
   remove(id: string): boolean {
+    this.setPlanning(id, false);
     return (
       this.db.prepare('delete from threads where id = ?').run(id).changes > 0
     );
+  }
+
+  /** Plan mode (ADR 0019): kept per conversation, also before its first message. */
+  planning(id: string): boolean {
+    return (
+      this.db.prepare('select 1 from planning where thread_id = ?').get(id) !==
+      undefined
+    );
+  }
+
+  setPlanning(id: string, on: boolean): void {
+    this.db
+      .prepare(
+        on
+          ? 'insert or ignore into planning (thread_id) values (?)'
+          : 'delete from planning where thread_id = ?',
+      )
+      .run(id);
   }
 
   /** Recorded before the run starts; a crash leaves it `unknown`, never `succeeded`. */

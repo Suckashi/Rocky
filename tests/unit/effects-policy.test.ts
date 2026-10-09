@@ -6,19 +6,19 @@ import {
 } from '../../src/server/effects/commands.ts';
 import { classifyPath } from '../../src/server/effects/paths.ts';
 import {
-  builtInSafeList,
+  alwaysRule,
   decide,
   type PolicyContext,
 } from '../../src/server/effects/policy.ts';
-import type { Effect, Mode } from '../../src/server/effects/types.ts';
+import type { Effect } from '../../src/server/effects/types.ts';
 
 const ROOT = '/work/app';
 const ctx = (over: Partial<PolicyContext> = {}): PolicyContext => ({
   projectRoot: ROOT,
   mode: 'ask-when-needed',
+  planning: false,
   rules: [],
-  sessionApprovals: new Set(),
-  safeList: builtInSafeList({ test: 'vitest' }),
+  grants: new Set(),
   existedBefore: () => false,
   pathApi: path.posix,
   ...over,
@@ -126,14 +126,22 @@ describe('paths', () => {
 });
 
 describe('decision order', () => {
-  it('deny rules beat everything, including a session approval', () => {
-    const effect = cmd('npm', 'publish');
-    const first = decide(effect, ctx());
+  const write = (p: string, content = 'x'): Effect => ({
+    kind: 'write',
+    path: p,
+    operation: 'edit',
+    content,
+  });
+
+  it('deny rules beat everything, including a grant and an allow rule', () => {
     const verdict = decide(
-      effect,
+      cmd('npm', 'publish'),
       ctx({
-        rules: [{ decision: 'deny', prefix: ['npm', 'publish', '*'] }],
-        sessionApprovals: new Set([first.sessionKey]),
+        mode: 'hands-off',
+        rules: [
+          { decision: 'deny', prefix: ['npm', 'publish', '*'] },
+          { decision: 'allow', prefix: ['npm', '*'] },
+        ],
       }),
     );
     expect(verdict).toMatchObject({ decision: 'deny', reason: 'deny-rule' });
@@ -147,82 +155,29 @@ describe('decision order', () => {
     expect(verdict.decision).toBe('deny');
   });
 
-  it.each<Mode>(['ask-always', 'ask-when-needed', 'hands-off'])(
-    'dangerous commands ask in %s mode',
-    (mode) => {
-      expect(decide(cmd('rm', '-rf', 'dist'), ctx({ mode }))).toMatchObject({
-        decision: 'ask',
-        reason: 'dangerous',
-      });
-    },
-  );
-
-  it('a session approval does not cover a dangerous command, and allow rules do not either', () => {
-    const effect = cmd('git', 'push', '--force');
-    const key = decide(effect, ctx()).sessionKey;
-    const verdict = decide(
-      effect,
-      ctx({
-        sessionApprovals: new Set([key]),
-        rules: [{ decision: 'allow', prefix: ['git', '*'] }],
-      }),
-    );
-    expect(verdict.reason).toBe('dangerous');
-  });
-
-  it('reading a secret is denied; writing one asks; writing a protected path asks', () => {
-    expect(
-      decide({ kind: 'read', path: '.env' }, ctx({ mode: 'hands-off' }))
-        .decision,
-    ).toBe('deny');
-    expect(
-      decide(
-        { kind: 'write', path: '.env', operation: 'edit', content: 'X=1' },
-        ctx({ mode: 'hands-off' }),
-      ),
-    ).toMatchObject({
+  it('ask-when-needed asks at every floor, with the category it would grant', () => {
+    const c = ctx();
+    expect(decide(cmd('rm', '-rf', 'dist'), c)).toMatchObject({
+      decision: 'ask',
+      reason: 'dangerous',
+      grant: 'dangerous:recursive-delete',
+    });
+    expect(decide({ kind: 'read', path: '.env' }, c)).toMatchObject({
       decision: 'ask',
       reason: 'secret',
+      grant: 'secret:read',
     });
-    expect(
-      decide(
-        { kind: 'write', path: 'AGENTS.md', operation: 'edit', content: '' },
-        ctx({ mode: 'hands-off' }),
-      ).reason,
-    ).toBe('protected');
-  });
-
-  it('a command reading a secret through an argument asks', () => {
-    expect(decide(cmd('cat', '.env'), ctx({ mode: 'hands-off' })).reason).toBe(
-      'secret',
+    expect(decide(write('.env'), c).grant).toBe('secret:write');
+    expect(decide(write('AGENTS.md'), c).grant).toBe('protected:write');
+    expect(decide(write('/etc/hosts'), c).grant).toBe(
+      'external:outside-project:write',
     );
-  });
-
-  it('files outside the project, deleting pre-existing files and MCP writes are external and ask', () => {
-    expect(
-      decide(
-        { kind: 'write', path: '/etc/hosts', operation: 'edit', content: '' },
-        ctx({ mode: 'hands-off' }),
-      ).reason,
-    ).toBe('external');
-    expect(
-      decide(
-        { kind: 'read', path: '/home/me/notes.txt' },
-        ctx({ mode: 'hands-off' }),
-      ).reason,
-    ).toBe('external');
     expect(
       decide(
         { kind: 'write', path: 'old.txt', operation: 'delete' },
-        ctx({ mode: 'hands-off', existedBefore: () => true }),
-      ).reason,
-    ).toBe('external');
-    expect(
-      decide(
-        { kind: 'write', path: 'new.txt', operation: 'delete' },
-        ctx({ mode: 'hands-off' }),
-      ).decision,
-    ).toBe('allow');
+        ctx({ existedBefore: () => true }),
+      ).grant,
+    ).toBe('external:delete-existing');
     expect(
       decide(
         {
@@ -232,111 +187,142 @@ describe('decision order', () => {
           args: {},
           readOnly: false,
         },
-        ctx({ mode: 'hands-off' }),
-      ).reason,
-    ).toBe('external');
-    expect(
-      decide(
-        { kind: 'mcp', server: 'gh', tool: 'list', args: {}, readOnly: true },
-        ctx({ mode: 'hands-off' }),
-      ).decision,
-    ).toBe('allow');
-    expect(
-      decide(cmd('cp', 'a.txt', '/tmp/a.txt'), ctx({ mode: 'hands-off' }))
-        .reason,
-    ).toBe('external');
+        c,
+      ).grant,
+    ).toBe('external:mcp:gh/create_issue');
+    expect(decide(cmd('cp', 'a.txt', '/tmp/a.txt'), c).grant).toBe(
+      'external:command:cp',
+    );
+    expect(decide(cmd('cat', '.env'), c).grant).toBe('secret:read');
   });
 
-  it('"allow for this session" covers only the exact argv and cwd', () => {
-    const key = decide(cmd('npm', 'run', 'deploy'), ctx()).sessionKey;
-    const c = ctx({ mode: 'ask-always', sessionApprovals: new Set([key]) });
-    expect(decide(cmd('npm', 'run', 'deploy'), c)).toMatchObject({
+  it('ask-when-needed lets project writes, reads and ordinary commands run', () => {
+    const c = ctx();
+    expect(decide(write('src/a.ts'), c).decision).toBe('allow');
+    expect(decide({ kind: 'read', path: 'src/a.ts' }, c).decision).toBe(
+      'allow',
+    );
+    expect(decide(cmd('npm', 'install'), c).decision).toBe('allow');
+    expect(decide(cmd('node', '-e', 'console.log(1)'), c).decision).toBe(
+      'allow',
+    );
+    expect(
+      decide({ kind: 'write', path: 'new.txt', operation: 'delete' }, c)
+        .decision,
+    ).toBe('allow');
+  });
+
+  it('hands-off asks only to read a secret; every other floor runs', () => {
+    const c = ctx({ mode: 'hands-off' });
+    for (const effect of [
+      cmd('rm', '-rf', 'dist'),
+      cmd('git', 'push', '--force', 'origin', 'main'),
+      write('.env'),
+      write('/etc/hosts'),
+      cmd('cp', 'a.txt', '/tmp/a.txt'),
+      {
+        kind: 'mcp',
+        server: 'gh',
+        tool: 'create_issue',
+        args: {},
+        readOnly: false,
+      } as Effect,
+    ])
+      expect(decide(effect, c).decision, JSON.stringify(effect)).toBe('allow');
+    expect(decide({ kind: 'read', path: '.env' }, c).reason).toBe('secret');
+    expect(decide(cmd('cat', '.env'), c).reason).toBe('secret');
+  });
+
+  it('a grant covers its whole category in the conversation, and nothing else', () => {
+    const c = ctx({ grants: new Set(['dangerous:recursive-delete']) });
+    expect(decide(cmd('rm', '-rf', 'dist'), c)).toMatchObject({
       decision: 'allow',
       reason: 'session-approved',
     });
-    expect(decide(cmd('npm', 'run', 'deploy', '--prod'), c).decision).toBe(
-      'ask',
-    );
-    expect(
-      decide(
-        { kind: 'command', argv: ['npm', 'run', 'deploy'], cwd: `${ROOT}/sub` },
-        c,
-      ).decision,
-    ).toBe('ask');
+    expect(decide(cmd('rm', '-r', 'build'), c).decision).toBe('allow');
+    expect(decide(cmd('git', 'push', '--force'), c).reason).toBe('dangerous');
   });
 
-  it('allow rules must cover every program in a compound command', () => {
+  it('an allow rule ("always allow") passes the floors for the commands it covers', () => {
     const rules = [
-      { decision: 'allow' as const, prefix: ['npm', 'test', '*'] },
+      { decision: 'allow' as const, prefix: ['git', 'push', '*'] },
     ];
+    expect(decide(cmd('git', 'push', '--force'), ctx({ rules }))).toMatchObject(
+      {
+        decision: 'allow',
+        reason: 'allow-rule',
+      },
+    );
+    // Every program in a compound command must be covered.
     expect(
-      decide(cmd('npm', 'test'), ctx({ mode: 'ask-always', rules })).reason,
-    ).toBe('allow-rule');
+      decide(cmd('sh', '-c', 'git push --force && rm -rf ~'), ctx({ rules }))
+        .decision,
+    ).toBe('ask');
+    // Reading a secret is never covered by an allow rule.
     expect(
       decide(
-        cmd('sh', '-c', 'npm test && curl -X POST https://x.test'),
-        ctx({ mode: 'ask-always', rules }),
-      ).decision,
-    ).toBe('ask');
+        cmd('cat', '.env'),
+        ctx({ rules: [{ decision: 'allow', prefix: ['cat', '*'] }] }),
+      ).reason,
+    ).toBe('secret');
   });
 
-  it('modes: ask-always asks for writes and unknown commands but runs reads and the safe list', () => {
-    const c = ctx({ mode: 'ask-always' });
+  it('plan mode runs only reads; the plan itself asks, and only in plan mode', () => {
+    const c = ctx({ planning: true, mode: 'hands-off' });
     expect(decide({ kind: 'read', path: 'src/a.ts' }, c).decision).toBe(
       'allow',
     );
     expect(
       decide(
-        { kind: 'write', path: 'src/a.ts', operation: 'edit', content: 'x' },
+        { kind: 'mcp', server: 'gh', tool: 'list', args: {}, readOnly: true },
         c,
       ).decision,
-    ).toBe('ask');
-    expect(decide(cmd('npm', 'test'), c)).toMatchObject({
-      decision: 'allow',
-      reason: 'safe-list',
+    ).toBe('allow');
+    for (const effect of [write('src/a.ts'), cmd('npm', 'test')])
+      expect(decide(effect, c)).toMatchObject({
+        decision: 'deny',
+        reason: 'plan-mode',
+      });
+    const plan: Effect = { kind: 'plan', title: 'x', options: [] };
+    expect(decide(plan, c)).toMatchObject({ decision: 'ask', reason: 'plan' });
+    expect(decide(plan, ctx())).toMatchObject({
+      decision: 'deny',
+      reason: 'plan-mode',
     });
-    expect(decide(cmd('git', 'status'), c).reason).toBe('safe-list');
-    expect(decide(cmd('npm', 'install'), c).decision).toBe('ask');
-    // A redirect writes a file, so the command is not on the safe list.
-    expect(decide(cmd('git', 'status', '>', 'out.txt'), c).decision).toBe(
-      'ask',
-    );
-  });
-
-  it('modes: ask-when-needed lets project writes and ordinary commands run; hands-off too', () => {
-    for (const mode of ['ask-when-needed', 'hands-off'] as Mode[]) {
-      expect(
-        decide(
-          { kind: 'write', path: 'src/a.ts', operation: 'edit', content: 'x' },
-          ctx({ mode }),
-        ).decision,
-      ).toBe('allow');
-      expect(decide(cmd('npm', 'install'), ctx({ mode })).decision).toBe(
-        'allow',
-      );
-    }
-  });
-
-  it('unparseable commands ask only in ask-always', () => {
-    const effect = cmd('node', '-e', 'console.log(1)');
-    expect(decide(effect, ctx({ mode: 'ask-always' })).reason).toBe(
-      'unparseable',
-    );
-    expect(decide(effect, ctx({ mode: 'ask-when-needed' })).decision).toBe(
-      'allow',
-    );
+    // Reading a secret still asks in plan mode.
+    expect(decide({ kind: 'read', path: '.env' }, c).decision).toBe('ask');
   });
 
   it('binds the content hash to the exact new content', () => {
-    const a = decide(
-      { kind: 'write', path: 'a.ts', operation: 'edit', content: 'one' },
-      ctx(),
-    );
-    const b = decide(
-      { kind: 'write', path: 'a.ts', operation: 'edit', content: 'two' },
-      ctx(),
-    );
+    const a = decide(write('a.ts', 'one'), ctx());
+    const b = decide(write('a.ts', 'two'), ctx());
     expect(a.contentHash).not.toBe(b.contentHash);
-    expect(a.sessionKey).toBe(b.sessionKey);
+  });
+});
+
+describe('always allow', () => {
+  it.each([
+    [
+      ['git', 'push', '--force', 'origin', 'main'],
+      ['git', 'push', '*'],
+    ],
+    [
+      ['npm', 'run', 'lint', '--', '--fix'],
+      ['npm', 'run', 'lint', '*'],
+    ],
+    [
+      ['/usr/bin/git', 'status'],
+      ['/usr/bin/git', 'status'],
+    ],
+    [
+      ['rm', '-rf', 'build'],
+      ['rm', '-rf', 'build'],
+    ],
+    [
+      ['node', 'scripts/x.js'],
+      ['node', 'scripts/x.js'],
+    ],
+  ])('%j saves %j', (argv, rule) => {
+    expect(alwaysRule(argv)).toEqual(rule);
   });
 });

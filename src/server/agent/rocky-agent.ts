@@ -32,7 +32,7 @@ import { createGateMiddleware, type GateRun } from './gate-middleware.ts';
 import { createCheckJobsTool, createDelegateTool } from './delegate.ts';
 import type { JobStore } from '../jobs/store.ts';
 import { createDocumentTools } from './documents.ts';
-import { createPlanTool } from './plan.ts';
+import { createPlanTool, PLAN_MODE_PROMPT } from './plan.ts';
 import { createMemoryTools, memoryPrompt } from './memory.ts';
 import type { MemoryStore } from '../memory/store.ts';
 import type { SkillStore } from '../skills/store.ts';
@@ -204,7 +204,8 @@ export class RockyAgent extends AbstractAgent {
         subscriber.next({
           type: EventType.STATE_SNAPSHOT,
           snapshot: {
-            mode: gate.mode(input.threadId),
+            mode: settings.mode(),
+            planning: gate.planning(input.threadId),
             pendingApprovals: gate.pending(input.threadId),
           },
         } as BaseEvent);
@@ -231,6 +232,7 @@ export class RockyAgent extends AbstractAgent {
           runId: input.runId,
           signal: controller.signal,
         };
+        const planning = gate.planning(input.threadId);
         const agent = createDeepAgent({
           model: new ChatOpenAI({
             model: model.model,
@@ -247,6 +249,7 @@ export class RockyAgent extends AbstractAgent {
               : []),
             ...(memory ? [memoryPrompt(memory)] : []),
             ...(skills && skillsPrompt(skills) ? [skillsPrompt(skills)!] : []),
+            ...(planning && projectRoot ? [PLAN_MODE_PROMPT] : []),
           ].join('\n\n'),
           ...(projectRoot
             ? { backend: createRockyBackend(projectRoot, executor) }
@@ -259,7 +262,7 @@ export class RockyAgent extends AbstractAgent {
               : []),
             ...(projectRoot
               ? [
-                  createPlanTool(),
+                  ...(planning ? [createPlanTool()] : []),
                   createRunCommandTool(projectRoot, executor),
                   ...createDocumentTools(projectRoot, executor),
                   ...(jobs && jobStore

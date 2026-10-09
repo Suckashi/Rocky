@@ -4,8 +4,7 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { PassBook, type Pass } from './passes.ts';
-import { sessionKey } from './hash.ts';
-import { decide, type PolicyContext } from './policy.ts';
+import { alwaysRule, decide, type PolicyContext } from './policy.ts';
 import type { Origin, Receipt, ReceiptStore } from './receipts.ts';
 import type { Effect, Mode, Reason, Rule } from './types.ts';
 
@@ -22,12 +21,18 @@ export interface PendingApproval {
   before: string | null;
   /** The folder paths are relative to, when it is not the project (an external agent's worktree). */
   root: string | null;
+  /** What "allow for this conversation" would allow (a category, see Verdict.grant). */
+  grant: string | null;
+  /** Commands only: the rule "always allow" would save. */
+  always: string[] | null;
   createdAt: number;
 }
 
 export type UserDecision =
   | { decision: 'allow-once'; contentHash: string }
   | { decision: 'allow-session'; contentHash: string }
+  /** Commands only: save PendingApproval.always as a permanent allow rule. */
+  | { decision: 'allow-always'; contentHash: string }
   | { decision: 'reject'; contentHash: string; reason?: string }
   /** Plans only: the option the user picked (0-based). */
   | { decision: 'choose'; contentHash: string; option: number }
@@ -48,9 +53,13 @@ export type GateResult =
 export interface GateDeps {
   receipts: ReceiptStore;
   projectRoot: () => string | undefined;
-  defaultMode: () => Mode;
+  mode: () => Mode;
   rules: () => Rule[];
-  safeList: (projectRoot: string) => string[][];
+  /** Saves an "always allow" rule the user chose in the approval panel. */
+  addRule: (rule: Rule) => void;
+  /** Plan mode for a conversation, and turning it off once the user picks a plan. */
+  planning: (threadId: string) => boolean;
+  setPlanning: (threadId: string, on: boolean) => void;
   /** Paths Rocky itself created in a thread (they may be deleted without asking). */
   createdByRocky: (threadId: string, absolutePath: string) => boolean;
 }
@@ -67,8 +76,7 @@ export class Gate {
   readonly passes = new PassBook();
   private readonly deps: GateDeps;
   private readonly waiting = new Map<string, Waiting>();
-  private readonly sessionApprovals = new Map<string, Set<string>>();
-  private readonly modes = new Map<string, Mode>();
+  private readonly grants = new Map<string, Set<string>>();
   private readonly listeners = new Map<string, Set<() => void>>();
   private readonly anyListeners = new Set<(threadId: string) => void>();
 
@@ -95,12 +103,9 @@ export class Gate {
     for (const listener of this.anyListeners) listener(threadId);
   }
 
-  mode(threadId: string): Mode {
-    return this.modes.get(threadId) ?? this.deps.defaultMode();
-  }
-
-  setMode(threadId: string, mode: Mode): void {
-    this.modes.set(threadId, mode);
+  /** Plan mode for a conversation (ADR 0019). */
+  planning(threadId: string): boolean {
+    return this.deps.planning(threadId);
   }
 
   pending(threadId: string): PendingApproval[] {
@@ -121,10 +126,10 @@ export class Gate {
     if (!projectRoot) throw new Error('no-project');
     return {
       projectRoot,
-      mode: this.mode(threadId),
+      mode: this.deps.mode(),
+      planning: this.deps.planning(threadId),
       rules: this.deps.rules(),
-      sessionApprovals: this.sessionApprovals.get(threadId) ?? new Set(),
-      safeList: this.deps.safeList(projectRoot),
+      grants: this.grants.get(threadId) ?? new Set(),
       existedBefore: (p) =>
         existsSync(p) && !this.deps.createdByRocky(threadId, p),
     };
@@ -139,11 +144,13 @@ export class Gate {
   ): Promise<GateResult> {
     const verdict = decide(effect, this.context(origin.threadId, preview.root));
     const tool =
-      effect.kind === 'command'
-        ? 'run_command'
-        : effect.kind === 'plan'
-          ? 'propose_plan'
-          : effect.kind;
+      verdict.reason === 'plan-mode' && effect.kind !== 'plan'
+        ? `${effect.kind === 'command' ? 'run_command' : effect.kind} (plan mode)`
+        : effect.kind === 'command'
+          ? 'run_command'
+          : effect.kind === 'plan'
+            ? 'propose_plan'
+            : effect.kind;
     if (verdict.decision === 'deny') {
       const receipt = this.deps.receipts.intent(
         origin,
@@ -155,7 +162,12 @@ export class Gate {
       return {
         allowed: false,
         receipt,
-        message: `${tool} is not allowed (${verdict.reason}). Do not retry it.`,
+        message:
+          verdict.reason === 'plan-mode'
+            ? effect.kind === 'plan'
+              ? 'propose_plan is only for plan mode, which is off. Do the task directly.'
+              : `${tool} was not run: plan mode is on, so only reading is allowed. Finish exploring and present the plan with propose_plan; the user turns plan mode off by choosing an option.`
+            : `${tool} is not allowed (${verdict.reason}). Do not retry it.`,
       };
     }
     if (verdict.decision === 'allow' && effect.kind === 'read') {
@@ -190,6 +202,8 @@ export class Gate {
       detail: verdict.detail ?? null,
       before: preview.before ?? null,
       root: preview.root ?? null,
+      grant: verdict.grant ?? null,
+      always: effect.kind === 'command' ? alwaysRule(effect.argv) : null,
       createdAt: Date.now(),
     };
     const answer = await new Promise<UserDecision | 'stopped'>((resolve) => {
@@ -233,10 +247,15 @@ export class Gate {
       };
     }
     if (effect.kind === 'plan') {
-      return this.planAnswer(effect, origin, verdict, answer, preview.root);
+      return this.planAnswer(effect, origin, verdict, answer);
     }
-    // Choosing and revising only make sense for plans; anything else is a rejection.
-    if (answer.decision === 'choose' || answer.decision === 'revise') {
+    // Choosing and revising only make sense for plans, "always" only for commands;
+    // anything else is a rejection.
+    if (
+      answer.decision === 'choose' ||
+      answer.decision === 'revise' ||
+      (answer.decision === 'allow-always' && effect.kind !== 'command')
+    ) {
       const receipt = this.deps.receipts.intent(
         origin,
         effect,
@@ -264,12 +283,20 @@ export class Gate {
         message: REJECTED_MESSAGE(tool, answer.reason),
       };
     }
-    if (answer.decision === 'allow-session') {
-      const set =
-        this.sessionApprovals.get(origin.threadId) ?? new Set<string>();
-      set.add(verdict.sessionKey);
-      this.sessionApprovals.set(origin.threadId, set);
+    if (answer.decision === 'allow-session' && verdict.grant) {
+      const set = this.grants.get(origin.threadId) ?? new Set<string>();
+      set.add(verdict.grant);
+      this.grants.set(origin.threadId, set);
+      // Questions of the same category already waiting in this conversation are answered too.
+      for (const other of this.pending(origin.threadId))
+        if (other.grant === verdict.grant)
+          this.answer(other.id, {
+            decision: 'allow-once',
+            contentHash: other.contentHash,
+          });
     }
+    if (answer.decision === 'allow-always' && effect.kind === 'command')
+      this.deps.addRule({ decision: 'allow', prefix: alwaysRule(effect.argv) });
     const receipt = this.deps.receipts.intent(
       origin,
       effect,
@@ -327,29 +354,17 @@ export class Gate {
     };
   }
 
-  /**
-   * A plan review: the chosen option's commands become approved for this conversation,
-   * exactly as listed (argv and the project folder), so running them does not ask again.
-   * Dangerous commands and outside actions still ask: the policy checks those first.
-   */
+  /** The plan that ends plan mode: choosing an option turns plan mode off for the conversation. */
   private planAnswer(
     effect: Extract<Effect, { kind: 'plan' }>,
     origin: Origin & { threadId: string },
-    verdict: { contentHash: string; reason: Reason; sessionKey: string },
+    verdict: { contentHash: string; reason: Reason },
     answer: UserDecision,
-    root: string | undefined,
   ): GateResult {
     if (answer.decision === 'choose') {
       const option = effect.options[answer.option];
       if (option) {
-        const cwd = root ?? this.deps.projectRoot();
-        if (cwd) {
-          const set =
-            this.sessionApprovals.get(origin.threadId) ?? new Set<string>();
-          for (const argv of option.commands)
-            set.add(sessionKey({ kind: 'command', argv, cwd }));
-          this.sessionApprovals.set(origin.threadId, set);
-        }
+        this.deps.setPlanning(origin.threadId, false);
         const receipt = this.deps.receipts.intent(
           origin,
           effect,

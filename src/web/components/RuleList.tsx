@@ -1,10 +1,9 @@
 // Permanent rules in Settings: command prefixes that are always allowed or always refused.
-// Always visible and removable; an allow rule never covers dangerous commands or outside actions.
+// Always visible and removable. "Always allow" in the approval panel adds allow rules here.
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError } from '../api.ts';
 import { commandLine } from '../effects.ts';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
-import { RuleSuggestion, type Suggestion } from './RuleSuggestion.tsx';
 
 interface Rule {
   id: string;
@@ -26,14 +25,10 @@ export function RuleList() {
   const [decision, setDecision] = useState<'allow' | 'deny'>('allow');
   const [pattern, setPattern] = useState('');
   const [error, setError] = useState('');
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
   const load = useCallback(() => {
     void api<{ rules: Rule[] }>('/rules')
       .then((r) => setRules(r.rules))
-      .catch(() => undefined);
-    void api<{ suggestions: Suggestion[] }>('/rules/suggestions')
-      .then((r) => setSuggestions(r.suggestions))
       .catch(() => undefined);
   }, []);
   useEffect(load, [load]);
@@ -62,13 +57,6 @@ export function RuleList() {
   return (
     <div className="memory-list">
       <p className="small muted">{t('rules.hint')}</p>
-      {suggestions.map((suggestion) => (
-        <RuleSuggestion
-          key={suggestion.prefix.join(' ')}
-          suggestion={suggestion}
-          onDone={load}
-        />
-      ))}
       {rules?.length === 0 && <p className="small muted">{t('rules.empty')}</p>}
       {rules && rules.length > 0 && (
         <ul className="rule-list">

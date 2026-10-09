@@ -101,6 +101,10 @@ const MIGRATIONS: string[] = [
    drop table jobs;
    alter table jobs_new rename to jobs;
    create index jobs_by_thread on jobs(thread_id, created_at);`,
+  // ADR 0019: plan mode per conversation; the strict "ask-always" mode is gone.
+  `create table planning (thread_id text primary key);
+   update settings set value = '"ask-when-needed"' where key = 'mode' and value = '"ask-always"';
+   delete from settings where key = 'dismissedRuleSuggestions';`,
 ];
 
 export function openDatabase(path: string): DatabaseSync {

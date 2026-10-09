@@ -2,6 +2,7 @@
 import { Maximize2, Minimize2, Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { displayPath, type PendingApproval } from '../api.ts';
+import { commandLine } from '../effects.ts';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { Diff } from './Diff.tsx';
 import { DocumentChange } from './DocumentPreview.tsx';
@@ -23,17 +24,42 @@ function delegation(
 }
 
 export type Answer =
-  | { decision: 'allow-once' | 'allow-session' }
+  | { decision: 'allow-once' | 'allow-session' | 'allow-always' }
   | { decision: 'reject'; reason?: string }
   | { decision: 'choose'; option: number }
   | { decision: 'revise'; feedback: string };
 
-const OPTIONS = [
-  'approval.allowOnce',
-  'approval.allowSession',
-  'approval.reject',
-  'approval.rejectWithReason',
-] as const satisfies readonly MessageKey[];
+type Option = 'once' | 'session' | 'always' | 'reject' | 'explain';
+
+/** The options for one question: "always" only for commands, "session" when there is a category. */
+function optionsFor(approval: PendingApproval): Option[] {
+  return [
+    'once',
+    ...(approval.grant ? (['session'] as const) : []),
+    ...(approval.always ? (['always'] as const) : []),
+    'reject',
+    'explain',
+  ];
+}
+
+/** A readable name for what "allow for this conversation" covers (ADR 0019). */
+function grantLabel(grant: string, t: ReturnType<typeof useI18n>['t']): string {
+  const [kind, sub, ...rest] = grant.split(':');
+  const tail = rest.join(':');
+  if (kind === 'dangerous') return t('grant.dangerous', { what: sub ?? '' });
+  if (kind === 'secret')
+    return t(sub === 'read' ? 'grant.secretRead' : 'grant.secretWrite');
+  if (kind === 'protected') return t('grant.protected');
+  if (kind === 'external' && sub === 'outside-project')
+    return t('grant.outside');
+  if (kind === 'external' && sub === 'delete-existing')
+    return t('grant.deleteExisting');
+  if (kind === 'external' && sub === 'mcp')
+    return t('grant.mcp', { tool: tail });
+  if (kind === 'external' && sub === 'command')
+    return t('grant.command', { program: tail });
+  return grant;
+}
 
 function Title({
   approval,
@@ -208,24 +234,46 @@ export function ApprovalPanel({
     if (explaining) reasonBox.current?.focus();
   }, [explaining]);
 
+  const options = optionsFor(approval);
+  const explainAt = options.indexOf('explain');
+  const rejectAt = options.indexOf('reject');
+  const label = (option: Option) =>
+    option === 'once'
+      ? t('approval.allowOnce')
+      : option === 'session'
+        ? t('approval.allowSession', {
+            what: grantLabel(approval.grant ?? '', t),
+          })
+        : option === 'always'
+          ? t('approval.allowAlways', {
+              rule: commandLine(approval.always ?? []),
+            })
+          : option === 'reject'
+            ? t('approval.reject')
+            : t('approval.rejectWithReason');
+
   const choose = async (index: number) => {
     if (busy) return;
-    if (index === 3 && !explaining) {
-      setSelected(3);
+    const option = options[index];
+    if (!option) return;
+    if (option === 'explain' && !explaining) {
+      setSelected(index);
       setExplaining(true);
       return;
     }
     const answer: Answer =
-      index === 0
+      option === 'once'
         ? { decision: 'allow-once' }
-        : index === 1
+        : option === 'session'
           ? { decision: 'allow-session' }
-          : {
-              decision: 'reject',
-              ...(index === 3 && reason.trim()
-                ? { reason: reason.trim() }
-                : {}),
-            };
+          : option === 'always'
+            ? { decision: 'allow-always' }
+            : {
+                decision: 'reject',
+                ...(option === 'explain' && reason.trim()
+                  ? { reason: reason.trim() }
+                  : {}),
+              };
     setBusy(true);
     setError('');
     try {
@@ -252,21 +300,26 @@ export function ApprovalPanel({
         event.preventDefault();
         if (full) setFull(false);
         else if (typing) setExplaining(false);
-        else void choose(2);
+        else void choose(rejectAt);
         return;
       }
       if (event.key === 'Enter') {
         event.preventDefault();
-        void choose(typing ? 3 : selected);
+        void choose(typing ? explainAt : selected);
         return;
       }
       if (typing) return;
-      if (/^[1-4]$/.test(event.key)) {
+      const n = Number(event.key);
+      if (Number.isInteger(n) && n >= 1 && n <= options.length) {
         event.preventDefault();
-        void choose(Number(event.key) - 1);
+        void choose(n - 1);
       } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
-        setSelected((s) => (s + (event.key === 'ArrowDown' ? 1 : 3)) % 4);
+        setSelected(
+          (s) =>
+            (s + (event.key === 'ArrowDown' ? 1 : options.length - 1)) %
+            options.length,
+        );
       }
     };
     window.addEventListener('keydown', onKey);
@@ -313,8 +366,8 @@ export function ApprovalPanel({
         role="listbox"
         aria-label={t('approval.region')}
       >
-        {OPTIONS.map((key, index) => (
-          <li key={key} role="option" aria-selected={selected === index}>
+        {options.map((option, index) => (
+          <li key={option} role="option" aria-selected={selected === index}>
             <button
               type="button"
               className={selected === index ? 'selected' : ''}
@@ -323,9 +376,9 @@ export function ApprovalPanel({
               onMouseEnter={() => setSelected(index)}
             >
               <kbd>{index + 1}</kbd>
-              {t(key)}
+              {label(option)}
             </button>
-            {index === 3 && explaining && (
+            {option === 'explain' && explaining && (
               <input
                 ref={reasonBox}
                 value={reason}
@@ -339,7 +392,9 @@ export function ApprovalPanel({
       </ol>
       <footer className="approval-foot">
         <span className="small muted">
-          {busy ? t('approval.sending') : t('approval.keys')}
+          {busy
+            ? t('approval.sending')
+            : t('approval.keys', { count: options.length })}
         </span>
         {error && (
           <span className="error small" role="alert">

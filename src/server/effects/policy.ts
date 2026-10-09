@@ -1,19 +1,21 @@
-// The decision order (ADR 0007). First rule with a verdict wins:
-// deny rules, dangerous commands, secrets/protected paths, external actions,
-// session approvals, allow rules, then the mode.
+// The decision order (ADR 0019). First rule with a verdict wins:
+// plan mode, deny rules, then the floors (secrets, protected paths, dangerous commands,
+// outside actions). In hands-off only reading a secret is still a floor. A floor is
+// passed by "allow for this conversation" (its category) or, for commands, an allow rule.
 import path, { type PlatformPath } from 'node:path';
 import { analyzeCommand, findDanger, programName } from './commands.ts';
-import { contentHash, sessionKey } from './hash.ts';
+import { contentHash } from './hash.ts';
 import { classifyPath, pathLikeArgs } from './paths.ts';
 import type { Decision, Effect, Mode, Reason, Rule, Verdict } from './types.ts';
 
 export interface PolicyContext {
   projectRoot: string;
   mode: Mode;
+  /** Plan mode for this conversation: only reads run until the user picks a plan. */
+  planning: boolean;
   rules: Rule[];
-  sessionApprovals: ReadonlySet<string>;
-  /** Commands that run without asking even in ask-always (argv prefixes, `*` wildcard). */
-  safeList: string[][];
+  /** Categories the user allowed for this conversation (Verdict.grant). */
+  grants: ReadonlySet<string>;
   /** True when the file existed before this work started (deleting it is external). */
   existedBefore: (absolutePath: string) => boolean;
   pathApi?: PlatformPath;
@@ -37,31 +39,152 @@ export function matchesPrefix(
   return argv.length === prefix.length;
 }
 
+interface Floor {
+  reason: 'secret' | 'protected' | 'dangerous' | 'external';
+  detail: string;
+  grant: string;
+  /** Reading a secret asks even in hands-off. */
+  secretRead?: boolean;
+}
+
+/** The first floor this action hits, if any. */
+function floorOf(
+  effect: Effect,
+  ctx: PolicyContext,
+  api: PlatformPath,
+  programs: { argv: string[]; redirects: string[] }[],
+): Floor | undefined {
+  if (effect.kind === 'read' || effect.kind === 'write') {
+    const facts = classifyPath(
+      effect.path,
+      ctx.projectRoot,
+      ctx.projectRoot,
+      api,
+    );
+    if (facts.secret)
+      return effect.kind === 'read'
+        ? {
+            reason: 'secret',
+            detail: facts.absolute,
+            grant: 'secret:read',
+            secretRead: true,
+          }
+        : { reason: 'secret', detail: facts.absolute, grant: 'secret:write' };
+    if (effect.kind === 'write' && facts.protected)
+      return {
+        reason: 'protected',
+        detail: facts.absolute,
+        grant: 'protected:write',
+      };
+    if (facts.relative === undefined)
+      return {
+        reason: 'external',
+        detail: `outside-project:${facts.absolute}`,
+        grant: `external:outside-project:${effect.kind}`,
+      };
+    if (
+      effect.kind === 'write' &&
+      effect.operation === 'delete' &&
+      ctx.existedBefore(facts.absolute)
+    )
+      return {
+        reason: 'external',
+        detail: `delete-existing:${facts.absolute}`,
+        grant: 'external:delete-existing',
+      };
+    return undefined;
+  }
+  if (effect.kind === 'command') {
+    const program = programName(programs[0]?.argv[0] ?? effect.argv[0] ?? '');
+    const danger = findDanger(programs);
+    if (danger)
+      return {
+        reason: 'dangerous',
+        detail: danger,
+        grant: `dangerous:${danger}`,
+      };
+    const cwd = classifyPath(effect.cwd, ctx.projectRoot, ctx.projectRoot, api);
+    if (cwd.relative === undefined)
+      return {
+        reason: 'external',
+        detail: `cwd-outside-project:${cwd.absolute}`,
+        grant: `external:command:${program}`,
+      };
+    for (const p of programs) {
+      for (const arg of [...pathLikeArgs(p.argv), ...p.redirects]) {
+        const facts = classifyPath(arg, ctx.projectRoot, effect.cwd, api);
+        const redirect = p.redirects.includes(arg);
+        if (facts.secret)
+          return redirect
+            ? {
+                reason: 'secret',
+                detail: facts.absolute,
+                grant: 'secret:write',
+              }
+            : {
+                reason: 'secret',
+                detail: facts.absolute,
+                grant: 'secret:read',
+                secretRead: true,
+              };
+        if (facts.protected && redirect)
+          return {
+            reason: 'protected',
+            detail: facts.absolute,
+            grant: 'protected:write',
+          };
+        if (facts.relative === undefined)
+          return {
+            reason: 'external',
+            detail: `path-outside-project:${facts.absolute}`,
+            grant: `external:command:${program}`,
+          };
+      }
+    }
+    return undefined;
+  }
+  if (effect.kind === 'mcp' && !effect.readOnly)
+    return {
+      reason: 'external',
+      detail: `mcp:${effect.server}/${effect.tool}`,
+      grant: `external:mcp:${effect.server}/${effect.tool}`,
+    };
+  return undefined;
+}
+
 export function decide(effect: Effect, ctx: PolicyContext): Verdict {
   const api = ctx.pathApi ?? path;
   const windows = api === path.win32;
-  const base = {
-    contentHash: contentHash(effect),
-    sessionKey: sessionKey(effect),
-  };
+  const hash = contentHash(effect);
   const verdict = (
     decision: Decision,
     reason: Reason,
     detail?: string,
+    grant?: string,
   ): Verdict => ({
     decision,
     reason,
+    contentHash: hash,
     ...(detail !== undefined ? { detail } : {}),
-    ...base,
+    ...(grant !== undefined ? { grant } : {}),
   });
 
-  // A plan is a question for the user by nature: it always asks, in every mode.
-  if (effect.kind === 'plan') return verdict('ask', 'plan');
+  // The plan that ends plan mode is a question for the user; outside plan mode there is none.
+  if (effect.kind === 'plan')
+    return ctx.planning
+      ? verdict('ask', 'plan')
+      : verdict('deny', 'plan-mode', 'not-planning');
 
-  // Every program a command really runs, after unwrapping.
+  // Every program a command really runs, after unwrapping. A command Rocky cannot
+  // unwrap is judged by its outer argv only.
   const analysis =
     effect.kind === 'command' ? analyzeCommand(effect.argv) : undefined;
-  const programs = analysis?.kind === 'parsed' ? analysis.commands : [];
+  const programs =
+    analysis?.kind === 'parsed'
+      ? analysis.commands
+      : effect.kind === 'command'
+        ? [{ argv: effect.argv, redirects: [] }]
+        : [];
 
   // 1. Deny rules.
   if (effect.kind === 'command') {
@@ -74,115 +197,46 @@ export function decide(effect: Effect, ctx: PolicyContext): Verdict {
     }
   }
 
-  // 2. Dangerous commands always ask; unparseable ones ask in ask-always.
-  if (effect.kind === 'command' && analysis) {
-    if (analysis.kind === 'parsed') {
-      const danger = findDanger(programs);
-      if (danger) return verdict('ask', 'dangerous', danger);
-    } else if (ctx.mode === 'ask-always') {
-      return verdict('ask', 'unparseable', analysis.reason);
-    }
-  }
+  // 2. Plan mode: only reads run.
+  const reading =
+    effect.kind === 'read' || (effect.kind === 'mcp' && effect.readOnly);
+  if (ctx.planning && !reading) return verdict('deny', 'plan-mode');
 
-  // 3. Secrets and protected paths; 4. external actions.
-  const external = (detail: string) => verdict('ask', 'external', detail);
-  if (effect.kind === 'read' || effect.kind === 'write') {
-    const facts = classifyPath(
-      effect.path,
-      ctx.projectRoot,
-      ctx.projectRoot,
-      api,
-    );
-    if (facts.secret) {
-      return effect.kind === 'read'
-        ? verdict('deny', 'secret', facts.absolute)
-        : verdict('ask', 'secret', facts.absolute);
-    }
-    if (effect.kind === 'write' && facts.protected)
-      return verdict('ask', 'protected', facts.absolute);
-    if (facts.relative === undefined)
-      return external(`outside-project:${facts.absolute}`);
-    if (
-      effect.kind === 'write' &&
-      effect.operation === 'delete' &&
-      ctx.existedBefore(facts.absolute)
-    ) {
-      return external(`delete-existing:${facts.absolute}`);
-    }
-  }
-  if (effect.kind === 'command') {
-    const cwdFacts = classifyPath(
-      effect.cwd,
-      ctx.projectRoot,
-      ctx.projectRoot,
-      api,
-    );
-    if (cwdFacts.relative === undefined)
-      return external(`cwd-outside-project:${cwdFacts.absolute}`);
-    for (const program of programs) {
-      for (const arg of [...pathLikeArgs(program.argv), ...program.redirects]) {
-        const facts = classifyPath(arg, ctx.projectRoot, effect.cwd, api);
-        if (facts.secret) return verdict('ask', 'secret', facts.absolute);
-        if (facts.protected && program.redirects.includes(arg))
-          return verdict('ask', 'protected', facts.absolute);
-        if (facts.relative === undefined)
-          return external(`path-outside-project:${facts.absolute}`);
-      }
-    }
-  }
-  if (effect.kind === 'mcp' && !effect.readOnly)
-    return external(`mcp:${effect.server}/${effect.tool}`);
-
-  // 5. Approved for this session (exact key only).
-  if (ctx.sessionApprovals.has(base.sessionKey))
-    return verdict('allow', 'session-approved');
-
-  // 6. Allow rules: every program in the command must be covered.
-  if (effect.kind === 'command') {
+  // 3. The floors.
+  const floor = floorOf(effect, ctx, api, programs);
+  if (!floor) return verdict('allow', 'mode');
+  if (ctx.mode === 'hands-off' && !floor.secretRead)
+    return verdict('allow', 'mode', floor.detail);
+  if (ctx.grants.has(floor.grant))
+    return verdict('allow', 'session-approved', floor.detail);
+  // 4. Allow rules ("always allow"): every program in the command must be covered.
+  if (effect.kind === 'command' && !floor.secretRead) {
     const allow = ctx.rules.filter((r) => r.decision === 'allow');
-    const covered = (argv: string[]) =>
-      allow.some((r) => matchesPrefix(argv, r.prefix, windows));
-    const all =
-      programs.length > 0 ? programs.map((p) => p.argv) : [effect.argv];
-    if (allow.length > 0 && all.every(covered))
-      return verdict('allow', 'allow-rule');
-  }
-
-  // 7. The mode. Hands-off and ask-when-needed decide alike here: everything that
-  // still asks in either mode returned above (ADR 0018).
-  if (ctx.mode !== 'ask-always') return verdict('allow', 'mode');
-  // ask-always: reads and the safe list run; everything else asks. Fetching pages asks too.
-  if (effect.kind === 'read') return verdict('allow', 'mode');
-  if (effect.kind === 'command' && analysis?.kind === 'parsed') {
-    const safe = (argv: string[]) =>
-      ctx.safeList.some((prefix) => matchesPrefix(argv, prefix, windows));
     if (
-      programs.length > 0 &&
-      programs.every((p) => p.redirects.length === 0 && safe(p.argv))
-    ) {
-      return verdict('allow', 'safe-list');
-    }
+      allow.length > 0 &&
+      programs.every((p) =>
+        allow.some((r) => matchesPrefix(p.argv, r.prefix, windows)),
+      )
+    )
+      return verdict('allow', 'allow-rule', floor.detail);
   }
-  return verdict('ask', 'mode');
+  return verdict('ask', floor.reason, floor.detail, floor.grant);
 }
 
-/** Built-in safe list: read-only git commands and the project's test/lint/typecheck/build scripts. */
-export function builtInSafeList(
-  packageScripts: Record<string, string> = {},
-): string[][] {
-  const list: string[][] = [
-    ['git', 'status', '*'],
-    ['git', 'diff', '*'],
-    ['git', 'log', '*'],
-    ['git', 'show', '*'],
-    ['git', 'branch'],
-    ['git', 'rev-parse', '*'],
-  ];
-  for (const script of ['test', 'lint', 'typecheck', 'build']) {
-    if (script in packageScripts) {
-      list.push(['npm', 'run', script, '*']);
-      if (script === 'test') list.push(['npm', 'test', '*']);
-    }
+/** The rule "always allow" saves for a command: its program and subcommand words (no
+ * paths, flags or values, at most three) then "*", or the exact argv when that would be
+ * only the program ("rm *" or "node *" would allow anything). */
+export function alwaysRule(argv: string[]): string[] {
+  const words: string[] = [];
+  for (const arg of argv) {
+    if (words.length === 3) break;
+    // The program may be a full path (rules compare its name); later words must be plain.
+    const plain =
+      words.length === 0 || /^[\p{L}\p{N}][\p{L}\p{N}_:-]*$/u.test(arg);
+    if (!plain) break;
+    words.push(arg);
   }
-  return list;
+  return words.length >= 2 && words.length < argv.length
+    ? [...words, '*']
+    : [...argv];
 }

@@ -1,40 +1,17 @@
-// propose_plan: for larger tasks Rocky offers 1–3 ways to do it before starting. The user
-// picks one (its listed commands become approved, exactly as written), asks for changes,
-// or rejects. The gate middleware handles the call; the tool body never runs.
+// propose_plan ends plan mode (ADR 0019): while plan mode is on Rocky only reads, then
+// offers 1–3 ways to do the task. The user picks one (plan mode turns off and the work
+// starts), asks for changes, or rejects. The gate middleware handles the call; the tool
+// body never runs. Outside plan mode the tool is not offered.
 import { tool } from 'langchain';
 import { z } from 'zod';
-import { splitPosix } from '../effects/commands.ts';
 import type { Effect, PlanOption } from '../effects/types.ts';
 import type { ToolEffect } from './workspace.ts';
-
-/** A command as argv, or as a command line Rocky splits (one plain command only). */
-const command = z.union([
-  z.array(z.string().max(1000)).min(1).max(50),
-  z.string().min(1).max(2000),
-]);
 
 const option = z.object({
   title: z.string().min(1).max(120),
   summary: z.string().max(2000).default(''),
   steps: z.array(z.string().max(500)).max(20).default([]),
-  commands: z
-    .array(command)
-    .max(20)
-    .default([])
-    .describe(
-      'Commands this option runs in the project root, e.g. [["npm","test"]]',
-    ),
 });
-
-/** Command lines become argv; anything with operators or that cannot be parsed is dropped. */
-function toArgv(c: string[] | string): string[] | undefined {
-  if (Array.isArray(c)) return c;
-  // On Windows a backslash in a command line is a path separator.
-  const parsed = splitPosix(c.trim(), {
-    literalBackslash: process.platform === 'win32',
-  });
-  return parsed?.length === 1 && parsed[0]!.length ? parsed[0] : undefined;
-}
 
 export const planSchema = z.object({
   title: z.string().min(1).max(200),
@@ -45,16 +22,12 @@ export function planEffect(args: Record<string, unknown>): ToolEffect {
   const parsed = planSchema.safeParse(args);
   if (!parsed.success)
     return {
-      error: `Error: invalid plan (${parsed.error.issues.map((i) => i.message).join('; ')}). Give 1 to 3 options, each with a title, summary, steps and commands as argv arrays.`,
+      error: `Error: invalid plan (${parsed.error.issues.map((i) => i.message).join('; ')}). Give 1 to 3 options, each with a title, summary and steps.`,
     };
   const options: PlanOption[] = parsed.data.options.map((o) => ({
     title: o.title,
     summary: o.summary,
     steps: o.steps,
-    commands: o.commands.flatMap((c) => {
-      const argv = toArgv(c);
-      return argv ? [argv] : [];
-    }),
   }));
   const effect: Effect = { kind: 'plan', title: parsed.data.title, options };
   return { effect };
@@ -64,20 +37,21 @@ export function chosenPlanMessage(option: PlanOption, index: number): string {
   return [
     `The user chose option ${index + 1}: ${option.title}.`,
     option.steps.map((s, i) => `${i + 1}. ${s}`).join('\n'),
-    option.commands.length
-      ? `These commands are approved for this conversation exactly as listed (run them with run_command in the project root): ${option.commands.map((c) => JSON.stringify(c)).join(', ')}. Anything else still goes through approval.`
-      : 'No commands were pre-approved; other actions still go through approval.',
-    'Carry out this option now.',
+    'Plan mode is now off. Carry out this option now; actions still follow the approval mode.',
   ].join('\n');
 }
+
+/** Added to the system prompt while plan mode is on. */
+export const PLAN_MODE_PROMPT =
+  'Plan mode is on: the user wants a plan before any change. Only read and search (files, documents, memory, read-only tools); writing files, running commands and other changes are refused. ' +
+  'When you understand the task, call propose_plan with 1 to 3 options (title, summary, steps) and wait. ' +
+  'If the user asks for changes, revise and call propose_plan again. Answer plain questions without a plan.';
 
 export function createPlanTool() {
   return tool(async () => 'Error: plans are handled by Rocky.', {
     name: 'propose_plan',
     description:
-      'Before a larger or ambiguous task (several files, several steps, or more than one reasonable approach), propose 1 to 3 options and wait for the user to choose. ' +
-      'Do not use it for small, clear tasks such as a one-line fix or answering a question. ' +
-      'List in each option the commands it will run (argv arrays); choosing the option approves exactly those.',
+      'Plan mode only: present 1 to 3 ways to do the task and wait for the user to choose one. Choosing an option ends plan mode so you can start the work.',
     schema: planSchema,
   });
 }

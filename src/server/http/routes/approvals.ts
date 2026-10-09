@@ -11,6 +11,8 @@ import { asContent, type SnapshotStore } from '../../effects/snapshots.ts';
 import { formatOf, isBinary } from '../../documents/formats.ts';
 import { PREVIEW_MAX_BYTES, previewResponse } from './preview.ts';
 import { toMarkdown } from '../../documents/read.ts';
+import type { SettingsStore } from '../../store/settings.ts';
+import type { ThreadStore } from '../../store/threads.ts';
 
 const answer = z.discriminatedUnion('decision', [
   z
@@ -18,6 +20,9 @@ const answer = z.discriminatedUnion('decision', [
     .strict(),
   z
     .object({ decision: z.literal('allow-session'), contentHash: z.string() })
+    .strict(),
+  z
+    .object({ decision: z.literal('allow-always'), contentHash: z.string() })
     .strict(),
   z
     .object({
@@ -52,6 +57,8 @@ const side = (c: Context) =>
 
 export function approvalRoutes(
   gate: Gate,
+  settings: SettingsStore,
+  threads: ThreadStore,
   receipts: ReceiptStore,
   snapshots: SnapshotStore,
   executor: Executor,
@@ -59,7 +66,11 @@ export function approvalRoutes(
   const app = new Hono();
   app.get('/threads/:id/approvals', (c) => {
     const id = c.req.param('id');
-    return c.json({ mode: gate.mode(id), pending: gate.pending(id) });
+    return c.json({
+      mode: settings.mode(),
+      planning: gate.planning(id),
+      pending: gate.pending(id),
+    });
   });
   // What a pending write would leave behind, or what the file looks like now.
   app.get('/approvals/:id/preview', (c) => {
@@ -97,14 +108,15 @@ export function approvalRoutes(
       ? c.json({ ok: true })
       : c.json({ error: 'not-pending' }, 409);
   });
-  app.put('/threads/:id/mode', async (c) => {
+  // Plan mode for one conversation (ADR 0019); it turns off when the user picks a plan.
+  app.put('/threads/:id/plan', async (c) => {
     const parsed = z
-      .object({ mode: z.enum(['ask-always', 'ask-when-needed', 'hands-off']) })
+      .object({ planning: z.boolean() })
       .strict()
       .safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) return c.json({ error: 'invalid-mode' }, 400);
-    gate.setMode(c.req.param('id'), parsed.data.mode);
-    return c.json({ mode: parsed.data.mode });
+    if (!parsed.success) return c.json({ error: 'invalid-plan' }, 400);
+    threads.setPlanning(c.req.param('id'), parsed.data.planning);
+    return c.json({ planning: parsed.data.planning });
   });
   app.get('/threads/:id/receipts', (c) => {
     const list = receipts.forThread(c.req.param('id'));

@@ -37,7 +37,6 @@ export function rockyPrompt(locale: Locale, project?: string): string {
           'Use run_command with argv (no shell) to run tests and checks; after changing code, run the relevant tests and report the real result.',
           'run_command runs real programs in the real folder: give paths relative to cwd (for example "src/app.js" or "build"), never starting with "/". Only the file tools use "/" for the project root.',
           "Some actions need the user's approval. If one is rejected, follow the reason given and choose a different approach.",
-          'For a larger or ambiguous task (several files or steps, or more than one reasonable approach), first call propose_plan with 1 to 3 options and wait for the choice; for small, clear tasks just do the work.',
         ].join('\n')
       : 'No project folder is selected yet, so you cannot read or change files or run commands. If the user asks, tell them to choose a folder in Settings.',
   ].join('\n');

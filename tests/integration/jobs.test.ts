@@ -84,8 +84,9 @@ describe('jobs without OpenCode', () => {
 describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
   let fake: FakeOpenAI;
   let current: Setup;
-  /** What OpenCode's scripted model does after a rejection reaches it. */
-  const seen = { followUp: '' };
+  /** What OpenCode's scripted model does after a rejection reaches it; dangerFirst makes
+   * it start with a dangerous command, which asks in the default mode. */
+  const seen = { followUp: '', dangerFirst: false };
 
   beforeAll(async () => {
     fake = await startFakeOpenAI((messages): ScriptedReply => {
@@ -118,6 +119,15 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
         return { text: '了解，不改檔。' };
       }
       const step = Math.floor(after / 2);
+      if (step === 0 && seen.dangerFirst)
+        return {
+          toolCalls: [
+            {
+              name: 'bash',
+              args: { command: 'rm -rf build', description: 'Clean' },
+            },
+          ],
+        };
       if (step === 0)
         return {
           toolCalls: [
@@ -146,7 +156,7 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
   afterAll(() => fake.close());
 
   async function setup(
-    mode: 'ask-always' | 'ask-when-needed',
+    mode: 'ask-when-needed' | 'hands-off',
     answer: (effect: { kind: string; tool?: string }) => {
       decision: 'allow-once' | 'reject';
       reason?: string;
@@ -317,17 +327,20 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
     expect(readFileSync(join(s.project, 'math.js'), 'utf8')).toBe(BUGGY);
   }, 120_000);
 
-  it('a rejected edit is not applied and the reason reaches OpenCode', async () => {
-    const s = await setup('ask-always', (effect) =>
-      effect.kind === 'write'
-        ? { decision: 'reject', reason: '先不要改 math.js' }
+  it('a rejected action is not run and the reason reaches OpenCode', async () => {
+    const s = await setup('ask-when-needed', (effect) =>
+      effect.kind === 'command'
+        ? { decision: 'reject', reason: '先不要刪 build' }
         : { decision: 'allow-once' },
     );
+    seen.dangerFirst = true;
     await chat(s);
-    const job = await s.rocky.jobRunner.wait(s.rocky.jobs.list()[0]!.id);
+    const job = await s.rocky.jobRunner
+      .wait(s.rocky.jobs.list()[0]!.id)
+      .finally(() => (seen.dangerFirst = false));
     expect(job.result?.changed).toEqual([]);
     expect(readFileSync(join(job.worktree!, 'math.js'), 'utf8')).toBe(BUGGY);
-    expect(seen.followUp).toContain('先不要改 math.js');
+    expect(seen.followUp).toContain('先不要刪 build');
     const discarded = await s.call(`/api/jobs/${job.id}/discard`, {
       method: 'POST',
       body: {},

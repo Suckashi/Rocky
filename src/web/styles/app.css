@@ -629,6 +629,22 @@ button.secondary {
   padding: 4px var(--space-2);
   font-size: 13px;
 }
+.plan-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  padding: 4px var(--space-2);
+  font-size: 13px;
+}
+.plan-toggle.on {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
 .turn-part {
   display: flex;
   flex-direction: column;
@@ -1030,27 +1046,6 @@ button.secondary {
   padding: 9px var(--space-2);
   background: var(--surface);
 }
-.rule-suggestion {
-  margin-left: 44px;
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius-lg);
-  background: var(--primary-soft);
-  padding: var(--space-3) var(--space-4);
-}
-.rule-suggestion-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-.rule-suggestion-body p {
-  margin: 0;
-}
-.memory-list .rule-suggestion {
-  margin-left: 0;
-}
 .plan-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1090,10 +1085,6 @@ button.secondary {
 .plan-steps {
   margin: 0;
   padding-left: 1.4em;
-}
-.plan-command {
-  display: block;
-  margin-top: 2px;
 }
 .plan-feedback {
   border: 1px solid var(--border-strong);

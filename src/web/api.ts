@@ -36,8 +36,8 @@ export interface ModelSettings {
   hasApiKey: boolean;
 }
 
-export type Mode = 'ask-always' | 'ask-when-needed' | 'hands-off';
-export const MODES: Mode[] = ['ask-always', 'ask-when-needed', 'hands-off'];
+export type Mode = 'ask-when-needed' | 'hands-off';
+export const MODES: Mode[] = ['ask-when-needed', 'hands-off'];
 
 export interface Settings {
   locale: Locale;
@@ -59,14 +59,19 @@ export type Effect =
       preview?: string;
     }
   | { kind: 'command'; argv: string[]; cwd: string }
-  | { kind: 'mcp'; server: string; tool: string; args: unknown }
+  | {
+      kind: 'mcp';
+      server: string;
+      tool: string;
+      args: unknown;
+      readOnly: boolean;
+    }
   | { kind: 'plan'; title: string; options: PlanOption[] };
 
 export interface PlanOption {
   title: string;
   summary: string;
   steps: string[];
-  commands: string[][];
 }
 
 export interface PendingApproval {
@@ -80,6 +85,10 @@ export interface PendingApproval {
   detail: string | null;
   before: string | null;
   root: string | null;
+  /** What "allow for this conversation" would allow (a category). */
+  grant: string | null;
+  /** Commands only: the rule "always allow" would save. */
+  always: string[] | null;
   createdAt: number;
 }
 

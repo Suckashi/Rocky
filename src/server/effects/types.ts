@@ -2,7 +2,8 @@
 
 /** 'user': actions the user started from the interface, such as restoring files. */
 export type Actor = 'rocky' | 'subagent' | 'opencode' | 'user';
-export type Mode = 'ask-always' | 'ask-when-needed' | 'hands-off';
+/** ask-when-needed asks at the floors; hands-off asks only to read secrets (ADR 0019). */
+export type Mode = 'ask-when-needed' | 'hands-off';
 
 export type Effect =
   | { kind: 'read'; path: string }
@@ -24,15 +25,13 @@ export type Effect =
       args: unknown;
       readOnly: boolean;
     }
-  /** Plan review (ADR 0011): the user picks one option, asks for changes, or rejects. */
+  /** The plan at the end of plan mode (ADR 0019): the user picks one option, asks for changes, or rejects. */
   | { kind: 'plan'; title: string; options: PlanOption[] };
 
 export interface PlanOption {
   title: string;
   summary: string;
   steps: string[];
-  /** Commands this option will run in the project root; choosing it approves exactly these. */
-  commands: string[][];
 }
 
 export type Decision = 'allow' | 'ask' | 'deny';
@@ -45,10 +44,10 @@ export type Reason =
   | 'external'
   | 'session-approved'
   | 'allow-rule'
-  | 'safe-list'
-  | 'unparseable'
   | 'mode'
-  | 'plan';
+  | 'plan'
+  /** In plan mode Rocky only reads; anything else is refused until the user picks a plan. */
+  | 'plan-mode';
 
 export interface Verdict {
   decision: Decision;
@@ -57,8 +56,9 @@ export interface Verdict {
   detail?: string;
   /** Binds an approval and a pass to this exact content. */
   contentHash: string;
-  /** What "allow for this session" remembers. */
-  sessionKey: string;
+  /** For a question: the category "allow for this conversation" remembers, e.g.
+   * "dangerous:recursive-delete", "external:command:git", "external:mcp:notes/write". */
+  grant?: string;
 }
 
 export interface Rule {

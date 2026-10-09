@@ -23,7 +23,8 @@ function check(condition: unknown, message: string): asserts condition {
   console.log(`ok - ${message}`);
 }
 
-// Asked to change something, the model edits /app.js; once a tool answered, it reports back.
+// Asked to change something, the model edits /AGENTS.md (protected, so it asks in the default
+// mode); once a tool answered, it reports back.
 const fake = await startFakeOpenAI((messages) => {
   const lastUser = messages.findLastIndex((m) => m.role === 'user');
   const results = messages.slice(lastUser + 1).filter((m) => m.role === 'tool');
@@ -51,13 +52,11 @@ const fake = await startFakeOpenAI((messages) => {
                 title: '只整理 app.js',
                 summary: '最小改動',
                 steps: ['改 app.js'],
-                commands: [],
               },
               {
                 title: '整理並檢查',
                 summary: '改完跑檢查',
                 steps: ['改 app.js', '跑檢查'],
-                commands: [[process.execPath, '--version']],
               },
             ],
           },
@@ -70,7 +69,7 @@ const fake = await startFakeOpenAI((messages) => {
         {
           name: 'create_document',
           args: {
-            file_path: '/簡報.pptx',
+            file_path: '/.github/簡報.pptx',
             markdown:
               '# 季度簡報\n\n- 營收成長\n- 成本下降\n\n## 下一步\n\n繼續努力',
           },
@@ -80,7 +79,7 @@ const fake = await startFakeOpenAI((messages) => {
   if (said.includes('檢查'))
     return {
       toolCalls: [
-        { name: 'run_command', args: { argv: ['npm', 'run', 'lint'] } },
+        { name: 'run_command', args: { argv: ['git', 'reset', '--hard'] } },
       ],
     };
   // A command that outlives its timeout: its outcome is unknown.
@@ -102,7 +101,7 @@ const fake = await startFakeOpenAI((messages) => {
         {
           name: 'edit_file',
           args: {
-            file_path: '/app.js',
+            file_path: '/AGENTS.md',
             old_string: 'answer = 41',
             new_string: 'answer = 42',
           },
@@ -113,7 +112,7 @@ const fake = await startFakeOpenAI((messages) => {
 });
 const project = join(mkdtempSync(join(tmpdir(), 'rocky-e2e-project-')), 'app');
 mkdirSync(project);
-const appFile = join(project, 'app.js');
+const appFile = join(project, 'AGENTS.md');
 writeFileSync(appFile, 'const answer = 41;\n');
 const shots = process.env['ROCKY_E2E_SCREENSHOTS'];
 // A skill installed by hand, as a user would.
@@ -193,18 +192,19 @@ try {
   await page.getByLabel('專案資料夾').fill(project);
   await page.getByRole('button', { name: '使用這個資料夾' }).click();
   await page.getByText('已設定').waitFor();
-  await page.getByLabel('核准模式').selectOption('ask-always');
+  await page.getByLabel('核准模式').selectOption('hands-off');
+  await page.getByLabel('核准模式').selectOption('ask-when-needed');
   await page.getByRole('button', { name: '回到對話' }).click();
   await page.getByRole('button', { name: '新對話' }).click();
   check(
-    (await page.getByLabel('核准模式').inputValue()) === 'ask-always',
-    'a new conversation starts in the default approval mode',
+    (await page.getByLabel('核准模式').inputValue()) === 'ask-when-needed',
+    'the conversation shows the approval mode chosen in Settings',
   );
   await page.getByRole('textbox').fill('請把 41 改成 42');
   await page.keyboard.press('Enter');
   const panel = page.getByRole('region', { name: '等你核准' });
   await panel.waitFor({ timeout: 20_000 });
-  await panel.getByText('Rocky 想修改 app.js').waitFor();
+  await panel.getByText('Rocky 想修改 AGENTS.md').waitFor();
   await panel.locator('.diff-add', { hasText: 'const answer = 42;' }).waitFor();
   check(
     readFileSync(appFile, 'utf8').includes('41'),
@@ -244,15 +244,13 @@ try {
     'key 4 rejects with a reason, the file is untouched and the reason reaches the model',
   );
 
-  // Memory: remembered in chat (ask-always mode asks first).
+  // Memory: remembered in chat, without a question in the default mode.
   await page.getByRole('textbox').fill('請記住部署環境');
   await page.keyboard.press('Enter');
-  await panel.waitFor({ timeout: 20_000 });
-  await page.keyboard.press('1');
   await page
     .locator('.reply', { hasText: 'Saved' })
     .waitFor({ timeout: 20_000 });
-  check(true, 'remembering asks in ask-always mode and saves');
+  check(true, 'remembering saves without asking in the default mode');
 
   // Documents: the side panel shows how the slides will look, before anything is written.
   const cards = await page.locator('.turn-changes').count();
@@ -260,14 +258,14 @@ try {
   await page.getByRole('textbox').fill('做一份簡報');
   await page.keyboard.press('Enter');
   await panel
-    .getByText('Rocky 想新增檔案 簡報.pptx')
+    .getByText('Rocky 想新增檔案 .github/簡報.pptx')
     .waitFor({ timeout: 20_000 });
   await panel.getByRole('button', { name: '版面預覽' }).click();
   const slides = side.frameLocator('iframe[title="修改後的版面預覽"]');
   await slides.locator('section.slide', { hasText: '季度簡報' }).waitFor();
   check(
     (await slides.locator('section.slide').count()) === 2 &&
-      !existsSync(join(project, '簡報.pptx')) &&
+      !existsSync(join(project, '.github', '簡報.pptx')) &&
       (await panel.getByRole('option').count()) === 4,
     'a new deck shows its slides in the side panel before it is written, beside the approval',
   );
@@ -298,14 +296,16 @@ try {
   await change.getByRole('button', { name: '看看' }).click();
   await change.locator('.diff-add', { hasText: '營收成長' }).waitFor();
   check(
-    existsSync(join(project, '簡報.pptx')),
+    existsSync(join(project, '.github', '簡報.pptx')),
     'the written deck opens from its tool card; the change card diffs its text',
   );
 
   // Replacing it: before and after side by side, then rejected.
   await page.getByRole('textbox').fill('再做一份簡報');
   await page.keyboard.press('Enter');
-  await panel.getByText('Rocky 想修改 簡報.pptx').waitFor({ timeout: 20_000 });
+  await panel
+    .getByText('Rocky 想修改 .github/簡報.pptx')
+    .waitFor({ timeout: 20_000 });
   await panel.getByRole('button', { name: '版面預覽' }).click();
   await side.getByRole('button', { name: '並排' }).click();
   await side
@@ -332,8 +332,6 @@ try {
   // An action whose outcome is unknown offers the two buttons; Rocky never redoes it.
   await page.getByRole('textbox').fill('跑一個會等很久的指令');
   await page.keyboard.press('Enter');
-  await panel.waitFor({ timeout: 20_000 });
-  await page.keyboard.press('1');
   const unknown = page.locator('.unknown-outcome');
   await unknown.waitFor({ timeout: 30_000 });
   await unknown.getByRole('button', { name: '沒成功，再做一次' }).waitFor();
@@ -344,32 +342,36 @@ try {
     'a timed-out command shows as unknown and the user can confirm it',
   );
 
-  // Roko suggests a rule after the same kind of command was approved twice.
-  for (const round of [1, 2]) {
-    const before = await page.locator('.reply').count();
-    await page.getByRole('textbox').fill(`幫我檢查程式碼（第 ${round} 次）`);
-    await page.keyboard.press('Enter');
-    await panel.waitFor({ timeout: 20_000 });
-    await page.keyboard.press('1');
-    await page.locator('.reply').nth(before).waitFor({ timeout: 20_000 });
-    await page.getByRole('button', { name: '送出' }).waitFor();
-  }
-  const suggestion = page.locator('.rule-suggestion');
-  await suggestion.getByText('npm run lint *').waitFor({ timeout: 20_000 });
-  if (shots) await page.screenshot({ path: join(shots, 'm5-suggestion.png') });
-  await suggestion.getByRole('button', { name: '設為永久規則' }).click();
-  await suggestion.waitFor({ state: 'detached' });
+  // "Always allow" saves the rule the panel shows; the same kind of command no longer asks.
   const replies = await page.locator('.reply').count();
-  await page.getByRole('textbox').fill('幫我檢查程式碼（第 3 次）');
+  await page.getByRole('textbox').fill('幫我檢查程式碼（第 1 次）');
   await page.keyboard.press('Enter');
+  await panel.waitFor({ timeout: 20_000 });
+  const always = panel.getByRole('option').nth(2);
+  await always.getByText('git reset *').waitFor();
+  if (shots) await page.screenshot({ path: join(shots, 'm5-always.png') });
+  await page.keyboard.press('3');
   await page.locator('.reply').nth(replies).waitFor({ timeout: 20_000 });
+  await page.getByRole('button', { name: '送出' }).waitFor();
+  await page.getByRole('textbox').fill('幫我檢查程式碼（第 2 次）');
+  await page.keyboard.press('Enter');
+  await page
+    .locator('.reply')
+    .nth(replies + 1)
+    .waitFor({ timeout: 20_000 });
   await page.getByRole('button', { name: '送出' }).waitFor();
   check(
     (await panel.count()) === 0,
-    "accepting Roko's suggestion adds a rule; the same kind of command no longer asks",
+    '"always allow" adds the shown rule; the same kind of command no longer asks',
   );
 
-  // Plan review: ask for changes with key 3, then choose option 2 with key 2.
+  // Plan mode: turn it on, ask for changes with key 3, then choose option 2 with key 2.
+  const planToggle = page.getByRole('button', { name: '規劃', exact: true });
+  await planToggle.click();
+  check(
+    (await planToggle.getAttribute('aria-pressed')) === 'true',
+    'the plan toggle turns plan mode on for this conversation',
+  );
   for (const [round, keys] of [
     [1, ['3']],
     [2, ['2']],
@@ -397,9 +399,13 @@ try {
   await page
     .locator('.reply', { hasText: 'The user chose option 2: 整理並檢查' })
     .waitFor();
+  await page
+    .getByRole('button', { name: '規劃', exact: true })
+    .and(page.locator('[aria-pressed="false"]'))
+    .waitFor();
   check(
     true,
-    'plan review: ask for changes, then choose an option with the number keys',
+    'plan mode: ask for changes, then choose an option with the number keys; choosing turns plan mode off',
   );
 
   // Settings: memory, skills and MCP.
@@ -422,7 +428,7 @@ try {
     .getByRole('button', { name: '移除' })
     .click();
   await page
-    .locator('.rule-list li', { hasText: 'npm run lint *' })
+    .locator('.rule-list li', { hasText: 'git reset *' })
     .getByRole('button', { name: '移除' })
     .click();
   await page.getByText('還沒有規則。').waitFor();
