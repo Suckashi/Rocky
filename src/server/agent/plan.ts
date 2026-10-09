@@ -5,7 +5,7 @@
 import { tool } from 'langchain';
 import { z } from 'zod';
 import type { Effect, PlanOption } from '../effects/types.ts';
-import type { ToolEffect } from './workspace.ts';
+import type { ToolEffect, ToolRegistry } from './registry.ts';
 
 const option = z.object({
   title: z.string().min(1).max(120),
@@ -47,7 +47,11 @@ export const PLAN_MODE_PROMPT =
   'When you understand the task, call propose_plan with 1 to 3 options (title, summary, steps) and wait. ' +
   'If the user asks for changes, revise and call propose_plan again. Answer plain questions without a plan.';
 
-export function createPlanTool() {
+export function addPlanTool(tools: ToolRegistry): void {
+  tools.add(createPlanTool(), planEffect);
+}
+
+function createPlanTool() {
   return tool(async () => 'Error: plans are handled by Rocky.', {
     name: 'propose_plan',
     description:

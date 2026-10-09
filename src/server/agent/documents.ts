@@ -15,12 +15,8 @@ import { toMarkdown } from '../documents/read.ts';
 import type { Executor } from '../effects/execute.ts';
 import type { Effect } from '../effects/types.ts';
 import { currentEffect, currentPass } from './backend.ts';
-import { resolveVirtual, type ToolEffect } from './workspace.ts';
-
-export const DOCUMENT_WRITE_TOOLS = new Set([
-  'create_document',
-  'edit_document',
-]);
+import type { ToolEffect, ToolRegistry } from './registry.ts';
+import { resolveVirtual, toolEffect } from './workspace.ts';
 
 const FORMATS = 'pdf, docx, xlsx, pptx, md or html';
 
@@ -35,7 +31,7 @@ async function currentMarkdown(path: string): Promise<string | undefined> {
 }
 
 /** The write a document tool call would make, computed once for the gate and the tool. */
-export async function documentEffect(
+async function documentEffect(
   name: string,
   args: Record<string, unknown>,
   root: string,
@@ -93,7 +89,19 @@ export async function documentEffect(
   }
 }
 
-export function createDocumentTools(root: string, executor: Executor) {
+export function addDocumentTools(
+  tools: ToolRegistry,
+  root: string,
+  executor: Executor,
+): void {
+  const [read, create, edit] = createDocumentTools(root, executor);
+  tools
+    .add(read!, (args) => toolEffect('read_document', args, root))
+    .add(create!, (args) => documentEffect('create_document', args, root))
+    .add(edit!, (args) => documentEffect('edit_document', args, root));
+}
+
+function createDocumentTools(root: string, executor: Executor) {
   const write = (verb: string) => () => {
     const pass = currentPass.getStore();
     const effect = currentEffect.getStore();
