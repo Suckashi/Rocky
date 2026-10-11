@@ -721,6 +721,21 @@ describe('commands Rocky reads past the first surprise (ADR 0028, third review)'
     ).toBe('allow');
   });
 
+  it('commands after a cd into a secret folder read it', () => {
+    expect(
+      decide(
+        cmd('sh', '-c', 'cd /home/u/.ssh && cat config'),
+        ctx({ mode: 'hands-off' }),
+      ),
+    ).toMatchObject({ decision: 'ask', grant: 'secret:read' });
+  });
+
+  it('a pathological command is judged without running out of stack', () => {
+    expect(() =>
+      decide(cmd('sh', '-c', '$('.repeat(20_000)), ctx()),
+    ).not.toThrow();
+  });
+
   it('process substitution, word lists and plain globs are neither places nor secrets', () => {
     for (const text of [
       'diff <(sort a.txt) <(sort b.txt)',

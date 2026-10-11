@@ -334,17 +334,35 @@ function floorsOf(
             });
           continue;
         }
-        const facts = classifyPath(word, ctx.projectRoot, base, api);
         // A variable or substitution inside a word may be empty: judge the word without it too.
         const plain = shell ? withoutExpansions(word) : word;
-        const plainFacts =
-          plain !== word && plain
-            ? classifyPath(plain, ctx.projectRoot, base, api)
-            : undefined;
+        const names = plain !== word && plain ? [word, plain] : [word];
+        if (role === 'arg' || role === 'value') {
+          if (!pathLike.has(raw)) {
+            // A plain word (a message, a script name) is no path; only its name can make it a
+            // secret. Resolving it on disk is left for Rocky's own file names.
+            if (
+              names.some(
+                (w) =>
+                  namesSecret(w, api) ||
+                  (own.named(w) &&
+                    own.has(
+                      classifyPath(w, ctx.projectRoot, base, api).absolute,
+                    )),
+              ) ||
+              globNamesSecret(word, api)
+            )
+              push(secretFloor(api.resolve(base, word), write));
+            continue;
+          }
+        }
+        const facts = classifyPath(word, ctx.projectRoot, base, api);
         if (
-          [facts, plainFacts].some(
-            (f) => f && (f.secret || own.has(f.absolute)),
-          ) ||
+          names.some((w) => {
+            const f =
+              w === word ? facts : classifyPath(w, ctx.projectRoot, base, api);
+            return f.secret || own.has(f.absolute);
+          }) ||
           globNamesSecret(word, api)
         )
           push(secretFloor(facts.absolute, write));
@@ -354,11 +372,7 @@ function floorsOf(
             detail: facts.absolute,
             grant: 'protected:write',
           });
-        // A plain word (a message, a script name) is only a path when it looks like one.
-        if (
-          facts.relative === undefined &&
-          (role === 'write' || role === 'read' || pathLike.has(raw))
-        )
+        if (facts.relative === undefined)
           external(`path-outside-project:${facts.absolute}`);
       }
       // cd changes the folder of the commands after it; to where, when Rocky can tell.
