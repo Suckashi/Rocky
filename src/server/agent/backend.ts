@@ -1,13 +1,13 @@
 // Rocky's file backend for Deep Agents: reads and searches go to FilesystemBackend (virtual
 // mode, rooted at the project); writes go through the executor with the pass the gate
 // middleware issued for this tool call. No pass, no write. A search leaves out secret files
-// unless the user approved searching that secret path itself.
+// (Rocky's own included) unless the user approved searching that secret path itself.
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { existsSync } from 'node:fs';
 import { FilesystemBackend, type BackendProtocolV2 } from 'deepagents';
 import type { Executor } from '../effects/execute.ts';
 import type { Pass } from '../effects/passes.ts';
-import { classifyPath } from '../effects/paths.ts';
+import { classifyPath, privateFiles } from '../effects/paths.ts';
 import type { Effect } from '../effects/types.ts';
 import { applyEdit, resolveVirtual } from './workspace.ts';
 
@@ -25,10 +25,14 @@ function requirePass(): Pass {
 export function createRockyBackend(
   root: string,
   executor: Executor,
+  ownSecrets: readonly string[] = [],
 ): BackendProtocolV2 {
   const files = new FilesystemBackend({ rootDir: root, virtualMode: true });
-  const isSecret = (virtualPath: string) =>
-    classifyPath(resolveVirtual(root, virtualPath), root).secret;
+  const own = privateFiles(ownSecrets);
+  const isSecret = (virtualPath: string) => {
+    const facts = classifyPath(resolveVirtual(root, virtualPath), root);
+    return facts.secret || own.has(facts.absolute);
+  };
   const fail = (error: unknown) => ({
     error: `Error: ${error instanceof Error ? error.message : String(error)}`,
   });

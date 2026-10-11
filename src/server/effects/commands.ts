@@ -6,9 +6,9 @@ export interface SimpleCommand {
   argv: string[];
   /** Redirect targets (`> file`), which are writes. */
   redirects: string[];
-  /** Split out of a string a shell runs, which expands ~, $VAR and %VAR% before the program
-   * sees them: such arguments are not the literal paths they look like. */
-  shell?: true;
+  /** Split out of a string a shell runs, which expands words like ~, $VAR (and %VAR% for
+   * cmd) before the program sees them: such words are not the literal paths they look like. */
+  shell?: 'posix' | 'cmd' | 'powershell';
 }
 
 export type Analysis =
@@ -131,10 +131,11 @@ export function splitCmd(text: string): string[][] | undefined {
   return commands.filter((argv) => argv.length > 0);
 }
 
-/** PowerShell statements: quotes, `;`, `|`, `&&`, `||`; script blocks and subexpressions are not modelled. */
+/** PowerShell statements: quotes, `;`, `|`, `&&`, `||`; script blocks and subexpressions are
+ * not modelled. A backslash is a path separator there (its escape is the backquote). */
 export function splitPowerShell(text: string): string[][] | undefined {
   if (/\$\(|\{|\}|@\(/.test(text)) return undefined;
-  return splitPosix(text.replace(/`/g, ''));
+  return splitPosix(text.replace(/`/g, ''), { literalBackslash: true });
 }
 
 function decodePowerShellBase64(encoded: string): string | undefined {
@@ -238,6 +239,7 @@ function unwrap(argv: string[], depth: number): Analysis {
   const nested = (
     splits: string[][] | undefined,
     reason: string,
+    shell: 'posix' | 'cmd' | 'powershell',
     substituted: string[] = [],
   ): Analysis => {
     if (!splits) return { kind: 'unparseable', reason };
@@ -252,7 +254,8 @@ function unwrap(argv: string[], depth: number): Analysis {
     }
     return {
       kind: 'parsed',
-      commands: commands.map((c) => ({ ...c, shell: true as const })),
+      // A command from an inner string keeps the innermost shell that split it.
+      commands: commands.map((c) => ({ ...c, shell: c.shell ?? shell })),
     };
   };
 
@@ -287,13 +290,13 @@ function unwrap(argv: string[], depth: number): Analysis {
         : { kind: 'unparseable', reason: 'shell-script' };
     const string = substitutions(rest[c + 1] ?? '');
     return string
-      ? nested(splitPosix(string.text), 'shell-string', string.inner)
+      ? nested(splitPosix(string.text), 'shell-string', 'posix', string.inner)
       : { kind: 'unparseable', reason: 'shell-string' };
   }
   if (name === 'cmd') {
     const c = rest.findIndex((t) => /^\/[ck]$/i.test(t));
     if (c === -1) return { kind: 'parsed', commands: [withRedirects(argv)] };
-    return nested(splitCmd(rest.slice(c + 1).join(' ')), 'cmd-string');
+    return nested(splitCmd(rest.slice(c + 1).join(' ')), 'cmd-string', 'cmd');
   }
   if (name === 'powershell' || name === 'pwsh') {
     const enc = rest.findIndex((t) => /^-(e|ec|encodedcommand)$/i.test(t));
@@ -302,6 +305,7 @@ function unwrap(argv: string[], depth: number): Analysis {
       return nested(
         decoded === undefined ? undefined : splitPowerShell(decoded),
         'powershell-encoded',
+        'powershell',
       );
     }
     const c = rest.findIndex((t) => /^-(c|command)$/i.test(t));
@@ -309,6 +313,7 @@ function unwrap(argv: string[], depth: number): Analysis {
       return nested(
         splitPowerShell(rest.slice(c + 1).join(' ')),
         'powershell-string',
+        'powershell',
       );
     if (rest.some((t) => /^-(f|file)$/i.test(t)))
       return { kind: 'unparseable', reason: 'script-file' };
@@ -418,22 +423,36 @@ export function dangerReason(
       return has(args, 'advfirewall', 'firewall')
         ? 'security-setting'
         : undefined;
-    case 'git':
-      if (has(args, 'push'))
-        return hasShortFlag(args, 'f') ||
-          args.some((a) => /^--force/i.test(a) || a.startsWith('+'))
+    case 'git': {
+      // The subcommand is the first word after git's own options (-C dir, -c key=value, ...);
+      // only its own arguments count, so "git stash push" or "git commit -m push" is no push.
+      let s = 0;
+      while (s < args.length && args[s]!.startsWith('-')) {
+        s +=
+          /^(-C|-c|--git-dir|--work-tree|--namespace|--exec-path|--config-env)$/.test(
+            args[s]!,
+          )
+            ? 2
+            : 1;
+      }
+      const sub = (args[s] ?? '').toLowerCase();
+      const own = args.slice(s + 1);
+      if (sub === 'push')
+        return hasShortFlag(own, 'f') ||
+          own.some((a) => /^--force/i.test(a) || a.startsWith('+'))
           ? 'force-push'
           : // Any push leaves the computer and cannot be taken back.
             'push';
-      if (has(args, 'reset') && has(args, '--hard')) return 'discard-changes';
-      if (has(args, 'clean') && args.some((a) => /^-[a-z]*f/.test(a)))
+      if (sub === 'reset' && has(own, '--hard')) return 'discard-changes';
+      if (sub === 'clean' && own.some((a) => /^-[a-z]*f/.test(a)))
         return 'discard-changes';
       if (
-        has(args, 'checkout', 'restore') &&
-        (has(args, '.', '--', '--force') || hasShortFlag(args, 'f'))
+        (sub === 'checkout' || sub === 'restore') &&
+        (has(own, '.', '--', '--force') || hasShortFlag(own, 'f'))
       )
         return 'discard-changes';
       return undefined;
+    }
     case 'find':
       return has(args, '-delete') || has(args, '-exec')
         ? 'find-delete-or-exec'
@@ -465,11 +484,17 @@ export function dangerReason(
   }
 }
 
-/** The first dangerous program among the commands, if any. */
-export function findDanger(commands: SimpleCommand[]): string | undefined {
+/** Every danger among the commands, in order. */
+export function findDangers(commands: SimpleCommand[]): string[] {
+  const found: string[] = [];
   for (let i = 0; i < commands.length; i++) {
     const reason = dangerReason(commands[i]!, commands[i + 1]);
-    if (reason) return reason;
+    if (reason && !found.includes(reason)) found.push(reason);
   }
-  return undefined;
+  return found;
+}
+
+/** The first dangerous program among the commands, if any. */
+export function findDanger(commands: SimpleCommand[]): string | undefined {
+  return findDangers(commands)[0];
 }

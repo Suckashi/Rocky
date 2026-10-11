@@ -122,6 +122,11 @@ export class Gate {
     return this.waiting.get(approvalId)?.approval;
   }
 
+  /** Rocky's own secret files (ADR 0028): searches leave them out too. */
+  get privateFiles(): readonly string[] {
+    return this.deps.privateFiles ?? [];
+  }
+
   /** root: judge paths against this folder instead of the project (an external agent's worktree). */
   context(threadId: string, root?: string): PolicyContext {
     const projectRoot = root ?? this.deps.projectRoot();

@@ -1,5 +1,15 @@
-import path from 'node:path';
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import path, { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { createRockyBackend } from '../../src/server/agent/backend.ts';
+import type { Executor } from '../../src/server/effects/execute.ts';
 import {
   analyzeCommand,
   findDanger,
@@ -227,6 +237,162 @@ describe('the promises of ADR 0019 hold (ADR 0028)', () => {
         ctx({ privateFiles }),
       ).decision,
     ).toBe('allow');
+  });
+
+  it('a path the shell expands is still checked for secrets', () => {
+    const privateFiles = ['/home/u/.local/share/rocky/secrets.json'];
+    for (const effect of [
+      cmd('sh', '-c', 'cat ~/.ssh/id_rsa'),
+      cmd('bash', '-c', 'cp $HOME/.aws/credentials .'),
+      cmd('sh', '-c', 'cat ${XDG_DATA_HOME}/rocky/secrets.json'),
+      cmd('cmd', '/c', 'type %USERPROFILE%\\.ssh\\id_ed25519'),
+      cmd('pwsh', '-c', 'Get-Content $env:USERPROFILE\\.ssh\\id_rsa'),
+    ])
+      expect(
+        decide(effect, ctx({ mode: 'hands-off', privateFiles })),
+      ).toMatchObject({
+        decision: 'ask',
+        reason: 'secret',
+        grant: 'secret:read',
+      });
+    // PowerShell's escape is the backquote: a backslash stays a path separator.
+    const windows = ctx({
+      mode: 'hands-off',
+      projectRoot: 'C:\\work\\app',
+      pathApi: path.win32,
+    });
+    expect(
+      decide(
+        {
+          kind: 'command',
+          argv: [
+            'powershell',
+            '-Command',
+            'Copy-Item C:\\Users\\u\\.ssh\\id_rsa .',
+          ],
+          cwd: 'C:\\work\\app',
+        },
+        windows,
+      ),
+    ).toMatchObject({ decision: 'ask', grant: 'secret:read' });
+  });
+
+  it('a word the shell replaces is a target for programs that take files', () => {
+    for (const effect of [
+      cmd('sh', '-c', 'cp -r dist $HOME'),
+      cmd('sh', '-c', 'mv build ~'),
+      cmd('sh', '-c', 'rm -f $(cat list)'),
+      cmd('sh', '-c', 'cd ~ && ls'),
+      cmd('cmd', '/c', 'copy x %USERPROFILE%'),
+    ])
+      expect(decide(effect, ctx())).toMatchObject({
+        decision: 'ask',
+        reason: 'external',
+      });
+    expect(decide(cmd('sh', '-c', 'echo $HOME'), ctx()).decision).toBe('allow');
+  });
+
+  it('a $ or % inside a word is literal text, not a path elsewhere', () => {
+    for (const effect of [
+      cmd('sh', '-c', "sed -i 's/foo$/bar/' src/x.ts"),
+      cmd('sh', '-c', "sed -i 's/$old/new/' src/x.ts"),
+      cmd('sh', '-c', "printf '%s/%s' a b"),
+      cmd('sh', '-c', 'grep -rn "a$" src/'),
+      // %VAR% is cmd's: other shells leave it alone.
+      cmd('sh', '-c', 'cat %HOME%/x.txt'),
+    ])
+      expect(decide(effect, ctx()).decision).toBe('allow');
+  });
+
+  it('every floor must be passed; a grant for one never lets another through', () => {
+    const both = cmd('sh', '-c', 'rm -rf dist && git push -f');
+    expect(
+      decide(both, ctx({ grants: new Set(['dangerous:recursive-delete']) })),
+    ).toMatchObject({ decision: 'ask', grant: 'dangerous:force-push' });
+    expect(
+      decide(
+        both,
+        ctx({
+          grants: new Set([
+            'dangerous:recursive-delete',
+            'dangerous:force-push',
+          ]),
+        }),
+      ),
+    ).toMatchObject({ decision: 'allow', reason: 'session-approved' });
+    const write = cmd('sh', '-c', 'echo x > .env && git push -f');
+    expect(
+      decide(write, ctx({ grants: new Set(['secret:write']) })),
+    ).toMatchObject({ decision: 'ask', grant: 'dangerous:force-push' });
+    // An outside path granted, the secret read in the same command still asks.
+    expect(
+      decide(
+        cmd('cat', '/etc/hosts', '.env'),
+        ctx({ grants: new Set(['external:command:cat']) }),
+      ),
+    ).toMatchObject({ decision: 'ask', grant: 'secret:read' });
+  });
+
+  it.each([
+    [['git', 'stash', 'push', '-m', 'wip']],
+    [['git', 'commit', '-m', 'push']],
+    [['git', '-c', 'core.pager=cat', 'log', 'push']],
+    [['git', 'checkout', '-b', 'push']],
+  ])('%j is no push', (argv) => {
+    expect(danger(argv)).toBeUndefined();
+  });
+
+  it("Rocky's own secret files are recognised through a link to the data folder", () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'rocky-private-'));
+    try {
+      mkdirSync(join(tmp, 'real', 'rocky'), { recursive: true });
+      writeFileSync(join(tmp, 'real', 'rocky', 'secrets.json'), '{}');
+      symlinkSync(join(tmp, 'real'), join(tmp, 'link'), 'junction');
+      const project = join(tmp, 'project');
+      mkdirSync(project);
+      const real = ctx({
+        projectRoot: project,
+        pathApi: path,
+        privateFiles: [join(tmp, 'link', 'rocky', 'secrets.json')],
+      });
+      expect(
+        decide(
+          { kind: 'read', path: join(tmp, 'real', 'rocky', 'secrets.json') },
+          { ...real, mode: 'hands-off' },
+        ),
+      ).toMatchObject({ decision: 'ask', grant: 'secret:read' });
+      const linked = ctx({
+        projectRoot: project,
+        pathApi: path,
+        privateFiles: [join(tmp, 'real', 'rocky', 'secrets.json')],
+      });
+      expect(
+        decide(
+          { kind: 'read', path: join(tmp, 'link', 'rocky', 'secrets.json') },
+          { ...linked, mode: 'hands-off' },
+        ),
+      ).toMatchObject({ decision: 'ask', grant: 'secret:read' });
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("a search leaves Rocky's own secret files out", async () => {
+    const project = mkdtempSync(join(tmpdir(), 'rocky-grep-'));
+    try {
+      writeFileSync(join(project, 'secrets.json'), '{"key":"TOKEN-1"}');
+      writeFileSync(join(project, 'notes.txt'), 'TOKEN-2');
+      const grep = (own: string[]) =>
+        createRockyBackend(project, {} as Executor, own).grep('TOKEN');
+      const paths = async (own: string[]) =>
+        ((await grep(own)).matches ?? []).map((m) => m.path).sort();
+      expect(await paths([])).toEqual(['/notes.txt', '/secrets.json']);
+      expect(await paths([join(project, 'secrets.json')])).toEqual([
+        '/notes.txt',
+      ]);
+    } finally {
+      rmSync(project, { recursive: true, force: true });
+    }
   });
 });
 

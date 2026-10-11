@@ -284,7 +284,13 @@ export class RockyAgent extends AbstractAgent {
             ...(planning && projectRoot ? [PLAN_MODE_PROMPT] : []),
           ].join('\n\n'),
           ...(projectRoot
-            ? { backend: createRockyBackend(projectRoot, executor) }
+            ? {
+                backend: createRockyBackend(
+                  projectRoot,
+                  executor,
+                  gate.privateFiles,
+                ),
+              }
             : {}),
           tools: tools.tools(),
           // Cast: langchain's todo middleware types fail under exactOptionalPropertyTypes (ADR 0001).

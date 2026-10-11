@@ -70,6 +70,41 @@ export function realPath(p: string, api: PlatformPath = path): string {
   }
 }
 
+function secretParts(parts: string[]): boolean {
+  const name = parts.at(-1) ?? '';
+  return (
+    !NOT_SECRET.has(name) &&
+    (SECRET_PATTERNS.some((pattern) => pattern.test(name)) ||
+      parts.some((p) => SECRET_DIRS.has(p)))
+  );
+}
+
+/** Whether a path names a secret by its own words, without resolving it (a path whose start
+ * a shell replaces, so only the rest can be judged). */
+export function namesSecret(p: string, api: PlatformPath = path): boolean {
+  const windows = api === path.win32;
+  return secretParts(
+    (windows ? p.toLowerCase() : p).split(/[\\/]/).filter(Boolean),
+  );
+}
+
+/** Rocky's own secret files (ADR 0028), resolved through links like every judged path. */
+export function privateFiles(
+  files: readonly string[],
+  api: PlatformPath = path,
+) {
+  const windows = api === path.win32;
+  const norm = (p: string) => (windows ? p.toLowerCase() : p);
+  const full = new Set(files.map((f) => norm(realPath(api.resolve(f), api))));
+  const names = new Set(files.map((f) => norm(api.basename(f))));
+  return {
+    /** An absolute path from classifyPath. */
+    has: (absolute: string) => full.has(norm(absolute)),
+    /** A path whose start a shell replaces: only its file name can be compared. */
+    named: (p: string) => names.has(norm(p.split(/[\\/]/).pop() ?? '')),
+  };
+}
+
 export function classifyPath(
   target: string,
   projectRoot: string,
@@ -84,10 +119,7 @@ export function classifyPath(
   const inside = rel === '' || (!rel.startsWith('..') && !api.isAbsolute(rel));
   const parts = segments(norm(absolute), api);
   const name = parts.at(-1) ?? '';
-  const secret =
-    !NOT_SECRET.has(name) &&
-    (SECRET_PATTERNS.some((pattern) => pattern.test(name)) ||
-      parts.some((p) => SECRET_DIRS.has(p)));
+  const secret = secretParts(parts);
   const relParts = inside ? segments(rel, api) : parts;
   const isProtected =
     relParts.some((p) => PROTECTED_DIRS.has(p.toLowerCase())) ||

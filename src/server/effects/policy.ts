@@ -1,16 +1,22 @@
 // The decision order (ADR 0019, 0028). First rule with a verdict wins:
 // plan mode, deny rules, then the floors (secrets, protected paths, dangerous commands,
-// outside actions). In hands-off only reading a secret is still a floor. A floor is
-// passed by "allow for this conversation" (its category) or, for commands, an allow rule.
+// outside actions). In hands-off only reading a secret is still a floor. Every floor an
+// action hits must be passed, each by "allow for this conversation" (its category); for
+// commands an allow rule passes them all except a secret read.
 import path, { type PlatformPath } from 'node:path';
 import {
   analyzeCommand,
-  findDanger,
+  findDangers,
   programName,
   type SimpleCommand,
 } from './commands.ts';
 import { contentHash } from './hash.ts';
-import { classifyPath, pathLikeArgs } from './paths.ts';
+import {
+  classifyPath,
+  namesSecret,
+  pathLikeArgs,
+  privateFiles,
+} from './paths.ts';
 import type { Decision, Effect, Mode, Reason, Rule, Verdict } from './types.ts';
 
 export interface PolicyContext {
@@ -65,28 +71,78 @@ function weight(floor: Floor): number {
   return 1;
 }
 
-function strongest(floors: (Floor | undefined)[]): Floor | undefined {
+function strongest(floors: Floor[]): Floor | undefined {
   let best: Floor | undefined;
-  for (const f of floors)
-    if (f && (!best || weight(f) > weight(best))) best = f;
+  for (const f of floors) if (!best || weight(f) > weight(best)) best = f;
   return best;
 }
 
-/** A word the shell replaces before the program sees it (~, $VAR, %VAR%, a substitution):
- * where it points is unknown, so it is not judged as a path inside the project. */
-const expanded = (arg: string) => /^~|\$|%[^%\s]+%/.test(arg);
+/** What a shell replaces at the start of a word before the program sees it: ~ and $VAR
+ * (and a substitution, see SUBSTITUTED), %VAR% in cmd. A `$` later in a word is judged
+ * literally (sed patterns, printf formats). */
+const EXPANSION: Record<NonNullable<SimpleCommand['shell']>, RegExp> = {
+  posix: /^(?:~[\w.-]*(?=$|\/)|\$\{\w+\}|\$\w+)/,
+  powershell: /^(?:~(?=$|[\\/])|\$\{[^}]+\}|\$(?:env:)?\w+)/i,
+  cmd: /^%\w+%/,
+};
 
-/** The strongest floor this action hits, if any. */
-function floorOf(
+/** Programs whose plain words are files, so even a bare `$HOME` or `~` is a target. */
+const FILE_PROGRAMS = new Set([
+  'cd',
+  'pushd',
+  'cat',
+  'cp',
+  'mv',
+  'rm',
+  'rmdir',
+  'mkdir',
+  'touch',
+  'ln',
+  'tee',
+  'chmod',
+  'chown',
+  'install',
+  'rsync',
+  'scp',
+  'tar',
+  'zip',
+  'unzip',
+  'dd',
+  'truncate',
+  'shred',
+  'copy',
+  'move',
+  'del',
+  'erase',
+  'ren',
+  'rename',
+  'md',
+  'rd',
+  'type',
+  'xcopy',
+  'robocopy',
+  'copy-item',
+  'move-item',
+  'remove-item',
+  'new-item',
+  'set-content',
+  'add-content',
+  'out-file',
+  'get-content',
+]);
+
+/** Every floor this action hits; each must be passed before it runs. */
+function floorsOf(
   effect: Effect,
   ctx: PolicyContext,
   api: PlatformPath,
   programs: SimpleCommand[],
-): Floor | undefined {
-  const windows = api === path.win32;
-  const norm = (p: string) => (windows ? p.toLowerCase() : p);
-  const privateFiles = new Set((ctx.privateFiles ?? []).map(norm));
-  const isPrivate = (absolute: string) => privateFiles.has(norm(absolute));
+): Floor[] {
+  const own = privateFiles(ctx.privateFiles ?? [], api);
+  const secretFloor = (detail: string, write: boolean): Floor =>
+    write
+      ? { reason: 'secret', detail, grant: 'secret:write' }
+      : { reason: 'secret', detail, grant: 'secret:read', secretRead: true };
   if (effect.kind === 'read' || effect.kind === 'write') {
     const facts = classifyPath(
       effect.path,
@@ -96,50 +152,46 @@ function floorOf(
     );
     if (
       facts.secret ||
-      isPrivate(facts.absolute) ||
+      own.has(facts.absolute) ||
       (effect.kind === 'read' && effect.secret)
     )
-      return effect.kind === 'read'
-        ? {
-            reason: 'secret',
-            detail: facts.absolute,
-            grant: 'secret:read',
-            secretRead: true,
-          }
-        : { reason: 'secret', detail: facts.absolute, grant: 'secret:write' };
+      return [secretFloor(facts.absolute, effect.kind === 'write')];
     if (effect.kind === 'write' && facts.protected)
-      return {
-        reason: 'protected',
-        detail: facts.absolute,
-        grant: 'protected:write',
-      };
+      return [
+        {
+          reason: 'protected',
+          detail: facts.absolute,
+          grant: 'protected:write',
+        },
+      ];
     if (facts.relative === undefined)
-      return {
-        reason: 'external',
-        detail: `outside-project:${facts.absolute}`,
-        grant: `external:outside-project:${effect.kind}`,
-      };
+      return [
+        {
+          reason: 'external',
+          detail: `outside-project:${facts.absolute}`,
+          grant: `external:outside-project:${effect.kind}`,
+        },
+      ];
     if (
       effect.kind === 'write' &&
       effect.operation === 'delete' &&
       ctx.existedBefore(facts.absolute)
     )
-      return {
-        reason: 'external',
-        detail: `delete-existing:${facts.absolute}`,
-        grant: 'external:delete-existing',
-      };
-    return undefined;
+      return [
+        {
+          reason: 'external',
+          detail: `delete-existing:${facts.absolute}`,
+          grant: 'external:delete-existing',
+        },
+      ];
+    return [];
   }
   if (effect.kind === 'command') {
-    const floors: (Floor | undefined)[] = [];
-    const danger = findDanger(programs);
-    if (danger)
-      floors.push({
-        reason: 'dangerous',
-        detail: danger,
-        grant: `dangerous:${danger}`,
-      });
+    const floors: Floor[] = findDangers(programs).map((danger) => ({
+      reason: 'dangerous',
+      detail: danger,
+      grant: `dangerous:${danger}`,
+    }));
     const cwd = classifyPath(effect.cwd, ctx.projectRoot, ctx.projectRoot, api);
     if (cwd.relative === undefined)
       floors.push({
@@ -150,32 +202,35 @@ function floorOf(
     // Every path of every program counts; the grant names the program that hit the floor.
     for (const p of programs) {
       const program = programName(p.argv[0] ?? '');
-      for (const arg of [...pathLikeArgs(p.argv), ...p.redirects]) {
+      const expansion = p.shell ? EXPANSION[p.shell] : undefined;
+      const replaced = (arg: string) => expansion?.exec(arg)?.[0];
+      const bare = FILE_PROGRAMS.has(program)
+        ? p.argv.filter((a, i) => i > 0 && replaced(a) !== undefined)
+        : [];
+      const targets = new Set([
+        ...pathLikeArgs(p.argv),
+        ...bare,
+        ...p.redirects,
+      ]);
+      for (const arg of targets) {
         const redirect = p.redirects.includes(arg);
-        if (p.shell && expanded(arg)) {
+        const start = replaced(arg);
+        if (start !== undefined) {
+          // Where it points is unknown: outside the project as far as Rocky can tell, and a
+          // secret when the rest of the path names one.
           floors.push({
             reason: 'external',
             detail: `shell-expanded-path:${arg}`,
             grant: `external:command:${program}`,
           });
+          const rest = arg.slice(start.length);
+          if (namesSecret(rest, api) || (rest && own.named(rest)))
+            floors.push(secretFloor(arg, redirect));
           continue;
         }
         const facts = classifyPath(arg, ctx.projectRoot, effect.cwd, api);
-        if (facts.secret || isPrivate(facts.absolute))
-          floors.push(
-            redirect
-              ? {
-                  reason: 'secret',
-                  detail: facts.absolute,
-                  grant: 'secret:write',
-                }
-              : {
-                  reason: 'secret',
-                  detail: facts.absolute,
-                  grant: 'secret:read',
-                  secretRead: true,
-                },
-          );
+        if (facts.secret || own.has(facts.absolute))
+          floors.push(secretFloor(facts.absolute, redirect));
         else if (facts.protected && redirect)
           floors.push({
             reason: 'protected',
@@ -190,22 +245,26 @@ function floorOf(
           });
       }
     }
-    return strongest(floors);
+    return floors;
   }
   if (effect.kind === 'mcp' && !effect.readOnly)
-    return {
-      reason: 'external',
-      detail: `mcp:${effect.server}/${effect.tool}`,
-      grant: `external:mcp:${effect.server}/${effect.tool}`,
-    };
+    return [
+      {
+        reason: 'external',
+        detail: `mcp:${effect.server}/${effect.tool}`,
+        grant: `external:mcp:${effect.server}/${effect.tool}`,
+      },
+    ];
   // Starting a job hands work to another agent: an outside action, asked like one.
   if (effect.kind === 'delegate')
-    return {
-      reason: 'external',
-      detail: `delegate:${effect.agent}`,
-      grant: `external:delegate:${effect.agent}`,
-    };
-  return undefined;
+    return [
+      {
+        reason: 'external',
+        detail: `delegate:${effect.agent}`,
+        grant: `external:delegate:${effect.agent}`,
+      },
+    ];
+  return [];
 }
 
 export function decide(effect: Effect, ctx: PolicyContext): Verdict {
@@ -258,15 +317,21 @@ export function decide(effect: Effect, ctx: PolicyContext): Verdict {
     effect.kind === 'read' || (effect.kind === 'mcp' && effect.readOnly);
   if (ctx.planning && !reading) return verdict('deny', 'plan-mode');
 
-  // 3. The floors.
-  const floor = floorOf(effect, ctx, api, programs);
-  if (!floor) return verdict('allow', 'mode');
-  if (ctx.mode === 'hands-off' && !floor.secretRead)
-    return verdict('allow', 'mode', floor.detail);
-  if (ctx.grants.has(floor.grant))
-    return verdict('allow', 'session-approved', floor.detail);
+  // 3. The floors. Every one must be passed: hands-off passes all but a secret read, and
+  // "allow for this conversation" passes its own category only.
+  const floors = floorsOf(effect, ctx, api, programs);
+  if (floors.length === 0) return verdict('allow', 'mode');
+  const byMode = (f: Floor) => ctx.mode === 'hands-off' && !f.secretRead;
+  const open = floors.filter((f) => !byMode(f) && !ctx.grants.has(f.grant));
+  if (open.length === 0)
+    return verdict(
+      'allow',
+      floors.every(byMode) ? 'mode' : 'session-approved',
+      strongest(floors)!.detail,
+    );
+  const floor = strongest(open)!;
   // 4. Allow rules ("always allow"): every program in the command must be covered.
-  if (effect.kind === 'command' && !floor.secretRead) {
+  if (effect.kind === 'command' && !open.some((f) => f.secretRead)) {
     const allow = ctx.rules.filter((r) => r.decision === 'allow');
     if (
       allow.length > 0 &&
