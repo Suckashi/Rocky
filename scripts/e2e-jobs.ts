@@ -91,8 +91,8 @@ const fake = await startFakeOpenAI((messages) => {
     };
   }
   // OpenCode's model: edit math.js in the job's worktree, run the tests, summarise.
-  // The job running now has the newest worktree. The second job first cleans up with a
-  // dangerous command, which asks in the default mode.
+  // The job running now has the newest worktree. The second job first pushes, which asks in
+  // the default mode (a push leaves the computer; this project has no remote, so it fails).
   worktree = newestWorktree();
   firstWorktree ??= worktree;
   const second = worktree !== firstWorktree;
@@ -104,7 +104,7 @@ const fake = await startFakeOpenAI((messages) => {
       toolCalls: [
         {
           name: 'bash',
-          args: { command: 'rm -rf build', description: 'Clean' },
+          args: { command: 'git push origin HEAD', description: 'Push' },
         },
       ],
     };
