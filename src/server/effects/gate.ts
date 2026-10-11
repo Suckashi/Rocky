@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs';
 import { PassBook, type Pass } from './passes.ts';
 import { alwaysRule, decide, type PolicyContext } from './policy.ts';
 import type { Origin, Receipt, ReceiptStore } from './receipts.ts';
-import type { Effect, Mode, Reason, Rule } from './types.ts';
+import type { Effect, Mode, Reason, Rule, Verdict } from './types.ts';
 
 export interface PendingApproval {
   id: string;
@@ -211,30 +211,37 @@ export class Gate {
     });
     this.waiting.delete(approval.id);
     this.changed(origin.threadId);
+    // The question may have been refreshed while it waited: record what the user saw.
+    const asked: Verdict = {
+      ...verdict,
+      reason: approval.reason,
+      ...(approval.detail !== null ? { detail: approval.detail } : {}),
+      ...(approval.grant !== null ? { grant: approval.grant } : {}),
+    };
 
     if (answer === 'stopped') {
       return this.refuse(
         origin,
         effect,
-        verdict,
+        asked,
         'rejected',
         'stopped',
         `${tool} was not run: the run was stopped.`,
       );
     }
     // The approval binds to the exact content the user saw; anything else means ask again.
-    if (answer.contentHash !== verdict.contentHash) {
+    if (answer.contentHash !== asked.contentHash) {
       return this.refuse(
         origin,
         effect,
-        verdict,
+        asked,
         'rejected',
         'content-changed',
         `${tool} was not run: the approved content does not match. Ask again.`,
       );
     }
     if (effect.kind === 'plan') {
-      return this.planAnswer(effect, origin, verdict, answer);
+      return this.planAnswer(effect, origin, asked, answer);
     }
     // Choosing and revising only make sense for plans, "always" only for commands;
     // anything else is a rejection.
@@ -246,7 +253,7 @@ export class Gate {
       return this.refuse(
         origin,
         effect,
-        verdict,
+        asked,
         'rejected',
         'invalid-answer',
         `${tool} was not run: the answer did not fit this request.`,
@@ -256,7 +263,7 @@ export class Gate {
       return this.refuse(
         origin,
         effect,
-        verdict,
+        asked,
         'rejected',
         answer.reason,
         REJECTED_MESSAGE(tool, answer.reason),
@@ -268,10 +275,9 @@ export class Gate {
       const set = this.grants.get(origin.threadId) ?? new Set<string>();
       set.add(grant);
       this.grants.set(origin.threadId, set);
-      // Questions already waiting in this conversation that the grant now lets through are
-      // answered too; one that still hits another floor asks about that floor (ADR 0028).
+      // Every question waiting in this conversation is judged again: one the grant now lets
+      // through is answered; one that still hits a floor asks about that floor (ADR 0028).
       for (const other of this.pending(origin.threadId)) {
-        if (other.grant !== grant) continue;
         const again = decide(
           other.effect,
           this.context(origin.threadId, other.root ?? undefined),
@@ -291,7 +297,7 @@ export class Gate {
     }
     if (answer.decision === 'allow-always' && effect.kind === 'command')
       this.deps.addRule({ decision: 'allow', prefix: alwaysRule(effect.argv) });
-    return this.permit(origin, effect, verdict, 'approved');
+    return this.permit(origin, effect, asked, 'approved');
   }
 
   /**

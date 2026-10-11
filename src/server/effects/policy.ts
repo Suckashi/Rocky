@@ -8,12 +8,15 @@ import {
   analyzeCommand,
   findDangers,
   programName,
+  SUBSTITUTED,
+  withoutExpansions,
   type Shell,
   type SimpleCommand,
 } from './commands.ts';
 import { contentHash } from './hash.ts';
 import {
   classifyPath,
+  globNamesSecret,
   namesProtected,
   namesSecret,
   pathLikeArgs,
@@ -176,11 +179,7 @@ const CHANGES_DIRECTORY = new Set([
 ]);
 
 /** Names that are no files: discarded output, the terminal. */
-const NOT_FILES = /^(?:\/dev\/(?:null|stdout|stderr|tty)|nul|con)$/i;
-
-/** A word with a glob may name a secret: `.env*` or `*.pem`. */
-const globNamesSecret = (word: string, api: PlatformPath) =>
-  /[*?[]/.test(word) && namesSecret(word.replace(/\[[^\]]*\]|[*?]/g, ''), api);
+const NOT_FILES = /^(?:\/dev\/(?:null|stdout|stderr|tty|fd\/\d+)|nul|con)$/i;
 
 /** Every floor this action hits; each must be passed before it runs. */
 function floorsOf(
@@ -233,32 +232,44 @@ function floorsOf(
     return floors;
   }
   if (effect.kind === 'command') {
-    const floors: Floor[] = findDangers(programs).map((danger) => ({
-      reason: 'dangerous',
-      detail: danger,
-      grant: `dangerous:${danger}`,
-    }));
+    const floors: Floor[] = [];
+    const seen = new Set<string>();
+    const push = (floor: Floor) => {
+      const key = `${floor.grant}\0${floor.detail}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      floors.push(floor);
+    };
+    for (const danger of findDangers(programs))
+      push({
+        reason: 'dangerous',
+        detail: danger,
+        grant: `dangerous:${danger}`,
+      });
     const cwd = classifyPath(effect.cwd, ctx.projectRoot, ctx.projectRoot, api);
     // A command run in a secret folder (~/.ssh) reads it.
-    if (cwd.secret) floors.push(secretFloor(cwd.absolute, false));
+    if (cwd.secret) push(secretFloor(cwd.absolute, false));
+    /** The folder the next program runs in; undefined after a cd Rocky cannot follow. */
+    let folder: string | undefined = effect.cwd;
     // Every path of every program counts; the grant names the program that hit the floor.
     for (const p of programs) {
       const program = programName(p.argv[0] ?? '') || 'shell';
-      const external = (detail: string) => {
-        if (
-          !floors.some(
-            (f) =>
-              f.detail === detail && f.grant === `external:command:${program}`,
-          )
+      const external = (detail: string) =>
+        push({
+          reason: 'external',
+          detail,
+          grant: `external:command:${program}`,
+        });
+      const here: string | undefined = p.elsewhere ? undefined : folder;
+      if (p.argv.length > 0) {
+        if (here === undefined) external('unknown-folder');
+        else if (
+          classifyPath(here, ctx.projectRoot, ctx.projectRoot, api).relative ===
+          undefined
         )
-          floors.push({
-            reason: 'external',
-            detail,
-            grant: `external:command:${program}`,
-          });
-      };
-      if (cwd.relative === undefined && p.argv.length > 0)
-        external(`cwd-outside-project:${cwd.absolute}`);
+          external(`cwd-outside-project:${here}`);
+      }
+      const base = here ?? effect.cwd;
       const shell = p.shell;
       /** The start the shell replaces in a word, if any. */
       const replaced = (word: string, value: boolean) =>
@@ -267,12 +278,9 @@ function floorsOf(
           ? EXPANSION[shell].exec(word)?.[0]
           : undefined;
       const fileProgram = FILE_PROGRAMS.has(program);
-      if (
-        shell &&
-        shell !== 'cmd' &&
-        CHANGES_DIRECTORY.has(program) &&
-        !p.argv.slice(1).some((a) => !a.startsWith('-'))
-      )
+      const changesFolder = CHANGES_DIRECTORY.has(program);
+      const operands = p.argv.slice(1).filter((a) => !a.startsWith('-'));
+      if (shell && shell !== 'cmd' && changesFolder && operands.length === 0)
         external('cd-home');
       // What each word is: a file the shell writes or reads, or a word the program gets.
       type Role = 'write' | 'read' | 'arg' | 'value';
@@ -300,35 +308,48 @@ function floorsOf(
         const write = role === 'write';
         let word = raw;
         if (shell && CURRENT.test(word))
-          word = effect.cwd + word.replace(CURRENT, '');
+          word = base + word.replace(CURRENT, '');
         const start =
           word === raw ? replaced(word, role === 'value') : undefined;
         if (start !== undefined) {
           // Where it points is unknown: outside the project as far as Rocky can tell, and a
-          // secret or protected file when the rest of the path names one.
+          // secret or protected file when the rest of the path names one. A bare
+          // substitution given to a program is a list of words (judged inside), not a place.
           const bare = start === word;
-          if (role !== 'arg' || !bare || fileProgram || /^~/.test(start))
+          if (
+            role !== 'arg' ||
+            !bare ||
+            /^~/.test(start) ||
+            (fileProgram && (start !== SUBSTITUTED || changesFolder))
+          )
             external(`shell-expanded-path:${raw}`);
           const rest = word.slice(start.length);
           if (namesSecret(rest, api) || (rest && own.named(rest)))
-            floors.push(secretFloor(raw, write));
+            push(secretFloor(raw, write));
           if (write && namesProtected(rest))
-            floors.push({
+            push({
               reason: 'protected',
               detail: raw,
               grant: 'protected:write',
             });
           continue;
         }
-        const facts = classifyPath(word, ctx.projectRoot, effect.cwd, api);
+        const facts = classifyPath(word, ctx.projectRoot, base, api);
+        // A variable or substitution inside a word may be empty: judge the word without it too.
+        const plain = shell ? withoutExpansions(word) : word;
+        const plainFacts =
+          plain !== word && plain
+            ? classifyPath(plain, ctx.projectRoot, base, api)
+            : undefined;
         if (
-          facts.secret ||
-          own.has(facts.absolute) ||
+          [facts, plainFacts].some(
+            (f) => f && (f.secret || own.has(f.absolute)),
+          ) ||
           globNamesSecret(word, api)
         )
-          floors.push(secretFloor(facts.absolute, write));
+          push(secretFloor(facts.absolute, write));
         if (write && facts.protected)
-          floors.push({
+          push({
             reason: 'protected',
             detail: facts.absolute,
             grant: 'protected:write',
@@ -336,9 +357,26 @@ function floorsOf(
         // A plain word (a message, a script name) is only a path when it looks like one.
         if (
           facts.relative === undefined &&
-          (role === 'write' || role === 'read' || pathLike.has(word))
+          (role === 'write' || role === 'read' || pathLike.has(raw))
         )
           external(`path-outside-project:${facts.absolute}`);
+      }
+      // cd changes the folder of the commands after it; to where, when Rocky can tell.
+      if (changesFolder || program === 'popd' || program === 'pop-location') {
+        const target = operands[0];
+        const known: string | false | undefined =
+          here !== undefined &&
+          target !== undefined &&
+          target !== '-' &&
+          changesFolder &&
+          (shell && CURRENT.test(target)
+            ? here + target.replace(CURRENT, '')
+            : replaced(target, false) === undefined && !/[$`]/.test(target)
+              ? target
+              : undefined);
+        folder = known
+          ? classifyPath(known, ctx.projectRoot, here, api).absolute
+          : undefined;
       }
     }
     return floors;
@@ -443,7 +481,13 @@ export function decide(effect: Effect, ctx: PolicyContext): Verdict {
           !r.prefix.includes('*') &&
           matchesPrefix(effect.argv, r.prefix, windows),
       ) ||
-        programs.every((p) => p.argv.length === 0 || covered(p.argv)))
+        programs.every(
+          (p) =>
+            (p.argv.length === 0 &&
+              p.redirects.length === 0 &&
+              !p.inputs?.length) ||
+            covered(p.argv),
+        ))
     )
       return verdict('allow', 'allow-rule', floor.detail);
   }

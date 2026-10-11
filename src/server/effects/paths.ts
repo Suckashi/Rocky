@@ -88,6 +88,71 @@ export function namesSecret(p: string, api: PlatformPath = path): boolean {
   );
 }
 
+/** Names a glob is tried against: when one matches, the glob may name a secret. */
+const SECRET_SAMPLES = [
+  '.env',
+  '.env.local',
+  '.env.production',
+  'id_rsa',
+  'id_dsa',
+  'id_ecdsa',
+  'id_ed25519',
+  'server.key',
+  'server.pem',
+  'cert.pfx',
+  'cert.p12',
+  'app.keystore',
+  'app.jks',
+  '.netrc',
+  '.npmrc',
+  '.pypirc',
+  'credentials',
+  'credentials.json',
+  'secrets.json',
+  'api-token',
+  ...SECRET_DIRS,
+];
+
+/** Whether a word with a glob (`*`, `?`, `[...]`) may match a secret name (`.e*`, `.en?`). */
+export function globNamesSecret(
+  word: string,
+  api: PlatformPath = path,
+): boolean {
+  if (!/[*?[]/.test(word)) return false;
+  const windows = api === path.win32;
+  return (
+    (windows ? word.toLowerCase() : word)
+      .split(/[\\/]/)
+      // A glob made of wildcards alone names nothing in particular (`public/*`).
+      .filter(
+        (part) =>
+          /[*?[]/.test(part) &&
+          part.replace(/\[[^\]]*\]|[*?]/g, '').length >= 2,
+      )
+      .some((part) => {
+        let pattern: RegExp;
+        try {
+          pattern = new RegExp(
+            `^${part
+              .replace(/[.+^${}()|\\]/g, '\\$&')
+              .replace(/\*/g, '.*')
+              .replace(/\?/g, '.')
+              .replace(/\[!/g, '[^')}$`,
+          );
+        } catch {
+          // An unclosed [ is a literal character to the shell.
+          return false;
+        }
+        // The shell's globs match a name starting with a dot only when they start with one.
+        return SECRET_SAMPLES.some(
+          (name) =>
+            (part.startsWith('.') || !name.startsWith('.')) &&
+            pattern.test(name),
+        );
+      })
+  );
+}
+
 /** Whether a path names a protected file by its own words, without resolving it. */
 export function namesProtected(p: string): boolean {
   const parts = p.toLowerCase().split(/[\\/]/).filter(Boolean);
