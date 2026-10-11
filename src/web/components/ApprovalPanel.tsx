@@ -210,6 +210,11 @@ export function ApprovalPanel({
   const [full, setFull] = useState(false);
   const reasonBox = useRef<HTMLInputElement>(null);
   const panel = useRef<HTMLElement>(null);
+  // Focus and highlight move together, so Enter on a focused option and the option shown as
+  // selected are always the same one.
+  const optionButtons = useRef<(HTMLButtonElement | null)[]>([]);
+  const optionFocused = () =>
+    optionButtons.current.some((b) => b && b === document.activeElement);
 
   // A new question starts fresh.
   useEffect(() => {
@@ -309,11 +314,12 @@ export function ApprovalPanel({
         void choose(n - 1);
       } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
-        setSelected(
-          (s) =>
-            (s + (event.key === 'ArrowDown' ? 1 : options.length - 1)) %
-            options.length,
-        );
+        const next =
+          (selected + (event.key === 'ArrowDown' ? 1 : options.length - 1)) %
+          options.length;
+        const button = optionButtons.current[next];
+        if (button) button.focus();
+        else setSelected(next);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -367,7 +373,13 @@ export function ApprovalPanel({
               className={selected === index ? 'selected' : ''}
               disabled={busy}
               onClick={() => void choose(index)}
-              onMouseEnter={() => setSelected(index)}
+              ref={(button) => {
+                optionButtons.current[index] = button;
+              }}
+              onMouseEnter={(event) => {
+                if (optionFocused()) event.currentTarget.focus();
+                else setSelected(index);
+              }}
               onFocus={() => setSelected(index)}
             >
               <kbd>{index + 1}</kbd>

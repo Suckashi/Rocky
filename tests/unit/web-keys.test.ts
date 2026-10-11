@@ -16,6 +16,8 @@ describe('panel shortcut targets', () => {
     expect(isActivatable(el('BUTTON'))).toBe(true);
     expect(isActivatable(el('A'))).toBe(true);
     expect(isActivatable(el('DIV', { role: 'button' }))).toBe(true);
+    expect(isActivatable(el('SPAN', { role: 'link' }))).toBe(true);
+    expect(isActivatable(el('SUMMARY'))).toBe(true);
     // The panel itself (focused when a question arrives) is not a control.
     expect(isActivatable(el('SECTION'))).toBe(false);
     expect(isActivatable(null)).toBe(false);

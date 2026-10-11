@@ -230,11 +230,29 @@ try {
     'restore all puts the file back',
   );
 
-  // Enter on a focused control does what that control says: Tab to "拒絕", press Enter.
+  // Enter on a focused control does what that control says, never "Allow once".
   await page.getByRole('textbox').fill('用鍵盤再改');
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
-  await panel.getByRole('button', { name: /^\d 拒絕$/ }).focus();
+  await panel.getByRole('button', { name: '全螢幕預覽' }).focus();
+  await page.keyboard.press('Enter');
+  await panel.getByRole('button', { name: '結束全螢幕' }).waitFor();
+  await page.keyboard.press('Escape');
+  check(
+    readFileSync(appFile, 'utf8').includes('41'),
+    'Enter on a focused button in the panel runs that button, not "Allow once"',
+  );
+  // Arrow keys move focus with the highlight: from option 1 down to "拒絕", then Enter.
+  await panel.getByRole('button', { name: /^1 / }).focus();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  check(
+    (await panel
+      .getByRole('button', { name: /^\d 拒絕$/ })
+      .evaluate((b) => b === document.activeElement)) &&
+      (await panel.locator('button.selected').innerText()).includes('拒絕'),
+    'arrow keys move focus and highlight together',
+  );
   await page.keyboard.press('Enter');
   await page
     .locator('.reply', { hasText: 'rejected' })
@@ -242,7 +260,7 @@ try {
     .waitFor({ timeout: 20_000 });
   check(
     readFileSync(appFile, 'utf8').includes('41'),
-    'Enter on the focused Reject option rejects; it never approves',
+    'Enter on the option reached with the arrow keys rejects; it never approves',
   );
 
   await page.getByRole('textbox').fill('再改一次');
