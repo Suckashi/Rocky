@@ -17,8 +17,10 @@ LangChain v1 只要裝了 `wrapToolCall` 中介層（Rocky 一定有），工具
 
 在 `gate-middleware.ts` 的 `gated()` 外面包一層，成為處理工具失敗的唯一地方：
 
-1. 工具拋出錯誤時，回給模型一個錯誤結果（`Error: <工具> failed: …`），這一輪繼續。只有「停止」（run 的
-   signal 已中止）和 LangGraph 自己的流程控制（`isGraphBubbleUp`：interrupt、parent command）照樣往外拋。
+1. 工具拋出錯誤時，回給模型一個錯誤結果（`Error: <工具> failed: …`），這一輪繼續。照樣往外拋的只有：「停止」
+   （run 的 signal 已中止）、LangGraph 自己的流程控制（`isGraphBubbleUp`：interrupt、parent command），以及研究子代理
+   （`task`）裡模型服務商的失敗（HTTP 錯誤或連線中斷）：它不是工具的錯，和 Rocky 自己遇到時一樣結束這一輪，
+   評測照樣記成服務商錯誤（ADR 0026）。
 2. 寫入與指令：工具結束後通行證若還沒用掉，代表沒走到執行器：收回通行證（`PassBook.discard`），紀錄標成
    「沒有執行」（`the tool did not run`）。執行器自己拋錯時照舊記成「結果不明」。
 3. 工具自己的判斷先跑（它的錯誤訊息最清楚，例如規劃工具會說「給 1 到 3 個方案」）；判斷通過後、問使用者之前，

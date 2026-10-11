@@ -6,6 +6,7 @@ import { GraphInterrupt } from '@langchain/langgraph';
 import { tool } from 'langchain';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
+import { currentPass } from '../../src/server/agent/backend.ts';
 import { createGateMiddleware } from '../../src/server/agent/gate-middleware.ts';
 import { ToolRegistry } from '../../src/server/agent/registry.ts';
 import { testRocky } from '../fixtures/rocky.ts';
@@ -31,7 +32,8 @@ function setup(signal = new AbortController().signal) {
     .judge('fake_read', () => ({
       effect: { kind: 'read', path: join(project, 'a.txt') },
     }))
-    .judge('fake_none', () => ({ none: true }));
+    .judge('fake_none', () => ({ none: true }))
+    .judge('task', () => ({ none: true }));
   const mw = createGateMiddleware(
     {
       gate: rocky.gate,
@@ -81,13 +83,48 @@ describe('gate middleware failures', () => {
       expect(String(result.content)).toContain('EBUSY');
     }
     expect(rocky.gate.passes.outstanding).toBe(0);
-    // The write never reached the executor: not run. The read may have acted: unknown.
+    // The write never reached the executor: not run. (The read needed no receipt.)
     expect(
       rocky.receipts
         .forThread('t1')
         .map((r) => r.outcome)
         .sort(),
     ).toEqual(['not-run']);
+  });
+
+  it('keeps the executor\'s "unknown" when the tool failed after acting', async () => {
+    const { rocky, call } = setup();
+    const result = (await call('fake_write', async () => {
+      // What Executor.write does when the write itself fails (EBUSY on Windows).
+      const pass = currentPass.getStore()!;
+      rocky.gate.passes.redeem(pass, pass.contentHash);
+      rocky.receipts.finish(pass.receiptId, 'unknown', 'EBUSY');
+      throw new Error('EBUSY');
+    })) as ToolMessage;
+    expect(result.status).toBe('error');
+    expect(rocky.receipts.forThread('t1')).toMatchObject([
+      { outcome: 'unknown', detail: 'EBUSY' },
+    ]);
+  });
+
+  it('a tool rejecting with null still gives an error result', async () => {
+    const { call } = setup();
+    const result = (await call('fake_none', () =>
+      Promise.reject(null),
+    )) as ToolMessage;
+    expect(result.status).toBe('error');
+  });
+
+  it('a provider failure inside the research subagent still ends the run', async () => {
+    const { call } = setup();
+    const refusal = Object.assign(new Error('400 invalid request'), {
+      status: 400,
+    });
+    await expect(
+      call('task', async () => {
+        throw new Error('subagent failed', { cause: refusal });
+      }),
+    ).rejects.toThrow('subagent failed');
   });
 
   it('lets Stop and LangGraph control flow pass through', async () => {

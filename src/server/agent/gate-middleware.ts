@@ -12,6 +12,7 @@ import type { ReceiptStore } from '../effects/receipts.ts';
 import type { Actor } from '../effects/types.ts';
 import { currentEffect, currentPass } from './backend.ts';
 import { chosenPlanMessage } from './plan.ts';
+import { isProviderFailure } from './provider-retry.ts';
 import type { ToolRegistry } from './registry.ts';
 
 export interface GateRun {
@@ -80,7 +81,8 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
   /**
    * The one place a tool call's failure is handled (ADR 0027). A tool that throws gives the
    * model an error result instead of ending the run, so it can tell the user or try another
-   * way; only Stop and LangGraph's own control flow pass through. A write or command whose
+   * way; only Stop, LangGraph's own control flow and a provider failure inside the research
+   * subagent pass through. A write or command whose
    * tool never reached the executor has its pass withdrawn and its receipt marked not run.
    */
   async function gated(request: ToolCallRequest, handler: ToolCallHandler) {
@@ -88,7 +90,13 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
     try {
       return await judged(request, handler);
     } catch (thrown) {
-      if (run.signal.aborted || isGraphBubbleUp(thrown)) throw thrown;
+      if (
+        run.signal.aborted ||
+        (thrown != null && isGraphBubbleUp(thrown)) ||
+        // The research subagent's model failed: the run ends as it would for Rocky's own.
+        (name === 'task' && isProviderFailure(thrown))
+      )
+        throw thrown;
       return new ToolMessage({
         tool_call_id: id,
         status: 'error',
