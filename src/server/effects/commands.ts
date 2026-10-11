@@ -140,11 +140,16 @@ interface Flavor {
  * that closes it. Never fails: an unclosed quote or substitution runs to the end of the text,
  * so every command in it is still judged.
  */
+/** How deep one scan follows `$(` inside `$(`; deeper ones run to the end of the text. Later
+ * passes over the inner text continue, up to MAX_DEPTH. */
+const MAX_SCAN = 32;
+
 function scan(
   text: string,
   from: number,
   flavor: Flavor,
   untilParen: boolean,
+  level = 0,
 ): ShellSplit & { end: number } {
   const ps = flavor.powershell === true;
   const literalBackslash = flavor.literalBackslash === true || ps;
@@ -234,10 +239,13 @@ function scan(
   };
   /** A substitution starting at `i` (its content at `i + 2`): returns where it ends. */
   const substitute = (i: number, how: 'plain' | 'double'): number => {
-    const sub = scan(text, i + 2, flavor, true);
-    inner.push(text.slice(i + 2, sub.end));
+    const end =
+      level < MAX_SCAN
+        ? scan(text, i + 2, flavor, true, level + 1).end
+        : text.length;
+    inner.push(text.slice(i + 2, end));
     add(SUBSTITUTED, how);
-    return sub.end;
+    return end;
   };
   /** At a newline: skip the bodies of the heredocs opened on the line just ended. */
   const skipBodies = (newline: number): number => {
@@ -274,9 +282,12 @@ function scan(
       const c = body[i]!;
       if (c === '\\') i++;
       else if (c === '$' && body[i + 1] === '(') {
-        const sub = scan(body, i + 2, flavor, true);
-        found.push(body.slice(i + 2, sub.end));
-        i = sub.end;
+        const end =
+          level < MAX_SCAN
+            ? scan(body, i + 2, flavor, true, level + 1).end
+            : body.length;
+        found.push(body.slice(i + 2, end));
+        i = end;
       } else if (c === '`') {
         const end = closingBackquote(body, i + 1);
         if (end < body.length) found.push(body.slice(i + 1, end));
@@ -358,10 +369,13 @@ function scan(
       !ps
     ) {
       // <(...) and >(...): a pipe to that command, given as a file name.
-      const sub = scan(text, i + 2, flavor, true);
-      inner.push(text.slice(i + 2, sub.end));
+      const end =
+        level < MAX_SCAN
+          ? scan(text, i + 2, flavor, true, level + 1).end
+          : text.length;
+      inner.push(text.slice(i + 2, end));
       add(PROCESS_PIPE, 'single');
-      i = sub.end;
+      i = end;
     } else if (!ps && c === '`') {
       const end = closingBackquote(text, i + 1);
       inner.push(text.slice(i + 1, end));
