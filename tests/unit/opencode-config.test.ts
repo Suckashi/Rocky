@@ -141,6 +141,19 @@ describe('OpenCode permission requests', () => {
         [diff('/wt/c.js', 'a'), diff('/wt/b.js', 'b')],
       ),
     ).toMatchObject([{ kind: 'mcp', server: 'opencode', tool: 'edit' }]);
+    // One moved file, or one diff for two files: one outside action.
+    expect(
+      patch(
+        [{ filePath: '/wt/a.js', movePath: '/wt/c.js' }],
+        [diff('/wt/c.js', 'a')],
+      ),
+    ).toMatchObject([{ kind: 'mcp' }]);
+    expect(
+      patch(
+        [{ filePath: '/wt/a.js' }, { filePath: '/wt/b.js' }],
+        [diff('/wt/a.js', 'a')],
+      ),
+    ).toMatchObject([{ kind: 'mcp' }]);
     // A file whose patch did not apply has no diff: one outside action.
     expect(
       patch(

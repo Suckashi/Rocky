@@ -49,9 +49,8 @@ export function permissionEffects(
   const diffs = (content ?? []).filter(isDiff);
 
   if (kind === 'edit' || kind === 'delete') {
-    if (diffs.length === 1) return [writeOf(diffs[0]!, cwd)];
     // OpenCode's patch lists its files and sends one diff per file. Judged file by file
-    // only when every file has its diff and none moves (a move also deletes a file,
+    // only when every listed file has its diff and none moves (a move also deletes a file,
     // which no diff shows); otherwise it stays one outside action below.
     const files = Array.isArray(raw['files'])
       ? (raw['files'] as unknown[])
@@ -62,7 +61,9 @@ export function permissionEffects(
         f !== null &&
         typeof (f as { movePath?: unknown }).movePath === 'string',
     );
-    if (diffs.length > 1 && diffs.length === files.length && !moves)
+    const complete =
+      files.length === 0 ? diffs.length === 1 : diffs.length === files.length;
+    if (diffs.length > 0 && complete && !moves)
       return diffs.map((d) => writeOf(d, cwd));
   }
 

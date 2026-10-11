@@ -196,6 +196,25 @@ describe('Gate', () => {
     );
   });
 
+  it('allowing force pushes for the conversation also answers a waiting plain push', async () => {
+    const { gate, project } = setup();
+    const run = (argv: string[], toolCallId: string) =>
+      gate.request(
+        { kind: 'command', argv, cwd: project },
+        { ...origin, toolCallId },
+      );
+    const force = run(['git', 'push', '--force'], 'c1');
+    const plain = run(['git', 'push'], 'c2');
+    await until(() => gate.pending('t1').length === 2);
+    const asked = gate.pending('t1').find((a) => a.toolCallId === 'c1')!;
+    gate.answer(asked.id, {
+      decision: 'allow-session',
+      contentHash: asked.contentHash,
+    });
+    expect((await force).allowed).toBe(true);
+    expect((await plain).allowed).toBe(true);
+  });
+
   it("a waiting question from a job's worktree is judged again by the worktree's rules", async () => {
     const { gate, project } = setup();
     const ask = (argv: string[], toolCallId: string) =>
