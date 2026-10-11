@@ -1,9 +1,14 @@
-// The decision order (ADR 0019). First rule with a verdict wins:
+// The decision order (ADR 0019, 0028). First rule with a verdict wins:
 // plan mode, deny rules, then the floors (secrets, protected paths, dangerous commands,
 // outside actions). In hands-off only reading a secret is still a floor. A floor is
 // passed by "allow for this conversation" (its category) or, for commands, an allow rule.
 import path, { type PlatformPath } from 'node:path';
-import { analyzeCommand, findDanger, programName } from './commands.ts';
+import {
+  analyzeCommand,
+  findDanger,
+  programName,
+  type SimpleCommand,
+} from './commands.ts';
 import { contentHash } from './hash.ts';
 import { classifyPath, pathLikeArgs } from './paths.ts';
 import type { Decision, Effect, Mode, Reason, Rule, Verdict } from './types.ts';
@@ -18,6 +23,9 @@ export interface PolicyContext {
   grants: ReadonlySet<string>;
   /** True when the file existed before this work started (deleting it is external). */
   existedBefore: (absolutePath: string) => boolean;
+  /** Rocky's own secret files (the model key and MCP tokens, the API token): secrets
+   * wherever the project is. */
+  privateFiles?: readonly string[];
   pathApi?: PlatformPath;
 }
 
@@ -47,13 +55,38 @@ interface Floor {
   secretRead?: boolean;
 }
 
-/** The first floor this action hits, if any. */
+/** How much a floor matters when one action hits several: a secret read must never hide
+ * behind a dangerous or outside floor (which hands-off and grants let through). */
+function weight(floor: Floor): number {
+  if (floor.secretRead) return 5;
+  if (floor.reason === 'secret') return 4;
+  if (floor.reason === 'protected') return 3;
+  if (floor.reason === 'dangerous') return 2;
+  return 1;
+}
+
+function strongest(floors: (Floor | undefined)[]): Floor | undefined {
+  let best: Floor | undefined;
+  for (const f of floors)
+    if (f && (!best || weight(f) > weight(best))) best = f;
+  return best;
+}
+
+/** A word the shell replaces before the program sees it (~, $VAR, %VAR%, a substitution):
+ * where it points is unknown, so it is not judged as a path inside the project. */
+const expanded = (arg: string) => /^~|\$|%[^%\s]+%/.test(arg);
+
+/** The strongest floor this action hits, if any. */
 function floorOf(
   effect: Effect,
   ctx: PolicyContext,
   api: PlatformPath,
-  programs: { argv: string[]; redirects: string[] }[],
+  programs: SimpleCommand[],
 ): Floor | undefined {
+  const windows = api === path.win32;
+  const norm = (p: string) => (windows ? p.toLowerCase() : p);
+  const privateFiles = new Set((ctx.privateFiles ?? []).map(norm));
+  const isPrivate = (absolute: string) => privateFiles.has(norm(absolute));
   if (effect.kind === 'read' || effect.kind === 'write') {
     const facts = classifyPath(
       effect.path,
@@ -61,7 +94,11 @@ function floorOf(
       ctx.projectRoot,
       api,
     );
-    if (facts.secret || (effect.kind === 'read' && effect.secret))
+    if (
+      facts.secret ||
+      isPrivate(facts.absolute) ||
+      (effect.kind === 'read' && effect.secret)
+    )
       return effect.kind === 'read'
         ? {
             reason: 'secret',
@@ -95,53 +132,65 @@ function floorOf(
     return undefined;
   }
   if (effect.kind === 'command') {
-    const program = programName(programs[0]?.argv[0] ?? effect.argv[0] ?? '');
+    const floors: (Floor | undefined)[] = [];
     const danger = findDanger(programs);
     if (danger)
-      return {
+      floors.push({
         reason: 'dangerous',
         detail: danger,
         grant: `dangerous:${danger}`,
-      };
+      });
     const cwd = classifyPath(effect.cwd, ctx.projectRoot, ctx.projectRoot, api);
     if (cwd.relative === undefined)
-      return {
+      floors.push({
         reason: 'external',
         detail: `cwd-outside-project:${cwd.absolute}`,
-        grant: `external:command:${program}`,
-      };
+        grant: `external:command:${programName(programs[0]?.argv[0] ?? effect.argv[0] ?? '')}`,
+      });
+    // Every path of every program counts; the grant names the program that hit the floor.
     for (const p of programs) {
+      const program = programName(p.argv[0] ?? '');
       for (const arg of [...pathLikeArgs(p.argv), ...p.redirects]) {
-        const facts = classifyPath(arg, ctx.projectRoot, effect.cwd, api);
         const redirect = p.redirects.includes(arg);
-        if (facts.secret)
-          return redirect
-            ? {
-                reason: 'secret',
-                detail: facts.absolute,
-                grant: 'secret:write',
-              }
-            : {
-                reason: 'secret',
-                detail: facts.absolute,
-                grant: 'secret:read',
-                secretRead: true,
-              };
-        if (facts.protected && redirect)
-          return {
+        if (p.shell && expanded(arg)) {
+          floors.push({
+            reason: 'external',
+            detail: `shell-expanded-path:${arg}`,
+            grant: `external:command:${program}`,
+          });
+          continue;
+        }
+        const facts = classifyPath(arg, ctx.projectRoot, effect.cwd, api);
+        if (facts.secret || isPrivate(facts.absolute))
+          floors.push(
+            redirect
+              ? {
+                  reason: 'secret',
+                  detail: facts.absolute,
+                  grant: 'secret:write',
+                }
+              : {
+                  reason: 'secret',
+                  detail: facts.absolute,
+                  grant: 'secret:read',
+                  secretRead: true,
+                },
+          );
+        else if (facts.protected && redirect)
+          floors.push({
             reason: 'protected',
             detail: facts.absolute,
             grant: 'protected:write',
-          };
-        if (facts.relative === undefined)
-          return {
+          });
+        else if (facts.relative === undefined)
+          floors.push({
             reason: 'external',
             detail: `path-outside-project:${facts.absolute}`,
             grant: `external:command:${program}`,
-          };
+          });
       }
     }
-    return undefined;
+    return strongest(floors);
   }
   if (effect.kind === 'mcp' && !effect.readOnly)
     return {

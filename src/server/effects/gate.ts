@@ -62,6 +62,8 @@ export interface GateDeps {
   setPlanning: (threadId: string, on: boolean) => void;
   /** Paths Rocky itself created in a thread (they may be deleted without asking). */
   createdByRocky: (threadId: string, absolutePath: string) => boolean;
+  /** Rocky's own secret files, secrets wherever the project is (ADR 0028). */
+  privateFiles?: readonly string[];
 }
 
 interface Waiting {
@@ -132,6 +134,7 @@ export class Gate {
       grants: this.grants.get(threadId) ?? new Set(),
       existedBefore: (p) =>
         existsSync(p) && !this.deps.createdByRocky(threadId, p),
+      privateFiles: this.deps.privateFiles ?? [],
     };
   }
 

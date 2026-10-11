@@ -6,6 +6,9 @@ export interface SimpleCommand {
   argv: string[];
   /** Redirect targets (`> file`), which are writes. */
   redirects: string[];
+  /** Split out of a string a shell runs, which expands ~, $VAR and %VAR% before the program
+   * sees them: such arguments are not the literal paths they look like. */
+  shell?: true;
 }
 
 export type Analysis =
@@ -154,6 +157,64 @@ const INLINE_CODE: Record<string, string[]> = {
   bun: ['-e', '--eval'],
 };
 
+/** Stands in for a `$(...)` or backquoted command whose output the shell inserts. */
+export const SUBSTITUTED = '$SUBSTITUTED';
+
+/**
+ * Pulls command substitutions (`$(...)`, backquotes) out of a shell string so both the outer
+ * command and every inner command can be judged. Single quotes keep them literal. Undefined
+ * when they are not balanced.
+ */
+export function substitutions(
+  text: string,
+): { text: string; inner: string[] } | undefined {
+  const inner: string[] = [];
+  let out = '';
+  let quote: '"' | "'" | null = null;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]!;
+    if (quote === "'") {
+      if (c === "'") quote = null;
+      out += c;
+      continue;
+    }
+    if (c === '\\' && i + 1 < text.length) {
+      out += c + text[++i];
+      continue;
+    }
+    if (c === "'" && !quote) quote = "'";
+    else if (c === '"') quote = quote === '"' ? null : '"';
+    if (c === '$' && text[i + 1] === '(') {
+      let depth = 1;
+      let j = i + 2;
+      let q: '"' | "'" | null = null;
+      for (; j < text.length && depth > 0; j++) {
+        const d = text[j]!;
+        if (q) {
+          if (d === q) q = null;
+        } else if (d === "'" || d === '"') q = d;
+        else if (d === '(') depth++;
+        else if (d === ')') depth--;
+      }
+      if (depth !== 0) return undefined;
+      inner.push(text.slice(i + 2, j - 1));
+      out += SUBSTITUTED;
+      i = j - 1;
+      continue;
+    }
+    if (c === '`') {
+      const end = text.indexOf('`', i + 1);
+      if (end === -1) return undefined;
+      inner.push(text.slice(i + 1, end));
+      out += SUBSTITUTED;
+      i = end;
+      continue;
+    }
+    out += c;
+  }
+  return quote ? undefined : { text: out, inner };
+}
+
 function withRedirects(argv: string[]): SimpleCommand {
   const words: string[] = [];
   const redirects: string[] = [];
@@ -173,15 +234,26 @@ function unwrap(argv: string[], depth: number): Analysis {
   if (argv.length === 0) return { kind: 'parsed', commands: [] };
   const name = programName(argv[0]!);
   const rest = argv.slice(1);
-  const nested = (splits: string[][] | undefined, reason: string): Analysis => {
+  // Commands split out of a string the shell runs: their words are shell-expanded.
+  const nested = (
+    splits: string[][] | undefined,
+    reason: string,
+    substituted: string[] = [],
+  ): Analysis => {
     if (!splits) return { kind: 'unparseable', reason };
     const commands: SimpleCommand[] = [];
-    for (const inner of splits) {
+    for (const inner of [
+      ...splits,
+      ...substituted.map((s) => ['sh', '-c', s]),
+    ]) {
       const result = unwrap(inner, depth + 1);
       if (result.kind === 'unparseable') return result;
       commands.push(...result.commands);
     }
-    return { kind: 'parsed', commands };
+    return {
+      kind: 'parsed',
+      commands: commands.map((c) => ({ ...c, shell: true as const })),
+    };
   };
 
   if (
@@ -213,7 +285,10 @@ function unwrap(argv: string[], depth: number): Analysis {
       return rest.length === 0
         ? { kind: 'parsed', commands: [withRedirects(argv)] }
         : { kind: 'unparseable', reason: 'shell-script' };
-    return nested(splitPosix(rest[c + 1] ?? ''), 'shell-string');
+    const string = substitutions(rest[c + 1] ?? '');
+    return string
+      ? nested(splitPosix(string.text), 'shell-string', string.inner)
+      : { kind: 'unparseable', reason: 'shell-string' };
   }
   if (name === 'cmd') {
     const c = rest.findIndex((t) => /^\/[ck]$/i.test(t));
@@ -344,18 +419,18 @@ export function dangerReason(
         ? 'security-setting'
         : undefined;
     case 'git':
-      if (
-        has(args, 'push') &&
-        (has(args, '--force', '-f', '--force-with-lease') ||
-          args.some((a) => a.startsWith('+')))
-      )
-        return 'force-push';
+      if (has(args, 'push'))
+        return hasShortFlag(args, 'f') ||
+          args.some((a) => /^--force/i.test(a) || a.startsWith('+'))
+          ? 'force-push'
+          : // Any push leaves the computer and cannot be taken back.
+            'push';
       if (has(args, 'reset') && has(args, '--hard')) return 'discard-changes';
       if (has(args, 'clean') && args.some((a) => /^-[a-z]*f/.test(a)))
         return 'discard-changes';
       if (
         has(args, 'checkout', 'restore') &&
-        has(args, '.', '--', '-f', '--force')
+        (has(args, '.', '--', '--force') || hasShortFlag(args, 'f'))
       )
         return 'discard-changes';
       return undefined;

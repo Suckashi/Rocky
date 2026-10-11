@@ -80,17 +80,27 @@ describe('dangerous commands, through wrappers', () => {
   it.each([
     [['npm', 'test']],
     [['git', 'status']],
-    [['git', 'push', 'origin', 'main']],
     [['rm', 'notes.txt']],
     [['ls', '-la']],
   ])('%j is not dangerous', (argv) => {
     expect(danger(argv)).toBeUndefined();
   });
 
-  it('marks substitutions and inline code as unparseable', () => {
-    expect(danger(['sh', '-c', 'rm $(cat list)'])).toBe(
+  it('judges the commands inside substitutions too (ADR 0028)', () => {
+    expect(danger(['sh', '-c', 'rm $(cat list)'])).toBeUndefined();
+    expect(danger(['sh', '-c', 'rm -rf $(cat list)'])).toBe('recursive-delete');
+    expect(danger(['sh', '-c', 'echo $(rm -rf build)'])).toBe(
+      'recursive-delete',
+    );
+    expect(danger(['bash', '-c', 'echo "`git push -f`"'])).toBe('force-push');
+    // Inside single quotes nothing is substituted.
+    expect(danger(['sh', '-c', "echo '$(rm -rf build)'"])).toBeUndefined();
+    expect(danger(['sh', '-c', 'echo $(unbalanced'])).toBe(
       'unparseable:shell-string',
     );
+  });
+
+  it('marks inline code as unparseable', () => {
     expect(danger(['node', '-e', 'require("fs").rmSync("/")'])).toBe(
       'unparseable:inline-code',
     );
@@ -127,6 +137,96 @@ describe('paths', () => {
       expect(c(name).secret).toBe(true);
     expect(c('.ENV.Example').secret).toBe(false);
     expect(classifyPath('/w/.ENV', '/w', '/w', path.posix).secret).toBe(false);
+  });
+});
+
+describe('the promises of ADR 0019 hold (ADR 0028)', () => {
+  it.each([
+    [['git', 'push', '-f']],
+    [['git', 'push', '-uf', 'origin', 'main']],
+    [['git', 'push', '-fu', 'origin', 'main']],
+    [['git', 'push', '--force-with-lease=main', 'origin', 'main']],
+    [['git', 'push', '--force-if-includes', 'origin', 'main']],
+    [['git', 'push', 'origin', '+main']],
+    [['git', '-C', '.', 'push', '-f']],
+    [['sh', '-c', 'git push -uf origin main']],
+  ])('%j is a force push', (argv) => {
+    expect(danger(argv)).toBe('force-push');
+  });
+
+  it('every push asks in the default mode; hands-off lets it run', () => {
+    expect(danger(['git', 'push', 'origin', 'main'])).toBe('push');
+    expect(decide(cmd('git', 'push'), ctx())).toMatchObject({
+      decision: 'ask',
+      grant: 'dangerous:push',
+    });
+    expect(
+      decide(cmd('git', 'push'), ctx({ mode: 'hands-off' })).decision,
+    ).toBe('allow');
+    expect(danger(['git', 'checkout', '-qf', 'main'])).toBe('discard-changes');
+  });
+
+  it('a secret read is never hidden behind an outside path or a dangerous command', () => {
+    for (const mode of ['ask-when-needed', 'hands-off'] as const)
+      for (const effect of [
+        cmd('cat', '/etc/hosts', '.env'),
+        cmd('tar', 'czf', '/tmp/backup.tgz', '.', '.env'),
+        cmd('sh', '-c', 'rm -rf dist && cat .env'),
+        cmd('sh', '-c', 'cp ~/notes.txt . && cat .env'),
+      ])
+        expect(decide(effect, ctx({ mode }))).toMatchObject({
+          decision: 'ask',
+          reason: 'secret',
+          grant: 'secret:read',
+        });
+  });
+
+  it('a grant names the program that hit the floor, not the first one', () => {
+    expect(
+      decide(cmd('sh', '-c', 'git status && cp a.txt /tmp/a.txt'), ctx()).grant,
+    ).toBe('external:command:cp');
+  });
+
+  it('paths the shell expands are not taken for project paths', () => {
+    for (const effect of [
+      cmd('bash', '-c', 'echo export X=1 >> ~/.bashrc'),
+      cmd('sh', '-c', 'cp build/app ~/bin/app'),
+      cmd('sh', '-c', 'rm $HOME/.config/app/old.json'),
+      cmd('sh', '-c', 'cat ${HOME}/notes.txt'),
+      cmd('sh', '-c', 'cp a.txt $(mktemp -d)/a.txt'),
+    ])
+      expect(decide(effect, ctx())).toMatchObject({
+        decision: 'ask',
+        reason: 'external',
+      });
+    // A program given argv directly sees the literal words: "~/x" is a folder named ~.
+    expect(decide(cmd('ls', '~/x'), ctx()).decision).toBe('allow');
+    // Ordinary shell commands in the project are unaffected.
+    expect(
+      decide(cmd('sh', '-c', 'npm test && git status'), ctx()).decision,
+    ).toBe('allow');
+  });
+
+  it("Rocky's own secret files are secrets wherever the project is", () => {
+    const data = '/home/u/.local/share/rocky';
+    const privateFiles = [`${data}/secrets.json`, `${data}/api-token`];
+    for (const mode of ['ask-when-needed', 'hands-off'] as const) {
+      // The project contains the data folder (the home folder chosen as the project).
+      const home = ctx({ mode, projectRoot: '/home/u', privateFiles });
+      expect(
+        decide({ kind: 'read', path: `${data}/secrets.json` }, home),
+      ).toMatchObject({ decision: 'ask', grant: 'secret:read' });
+      expect(
+        decide(cmd('cat', `${data}/api-token`), ctx({ mode, privateFiles })),
+      ).toMatchObject({ decision: 'ask', grant: 'secret:read' });
+    }
+    // A project file with the same name is not Rocky's.
+    expect(
+      decide(
+        { kind: 'read', path: `${ROOT}/secrets.json` },
+        ctx({ privateFiles }),
+      ).decision,
+    ).toBe('allow');
   });
 });
 

@@ -69,6 +69,9 @@ const LOCKDOWN = {
  * OpenCode 1.18 turns `\` into `/` before matching, `*` also matches `/`, the most specific
  * (longest) pattern wins, and matching is case-sensitive on every platform. */
 const SECRET_NAMES = [
+  // Rocky's own (ADR 0028): a job's worktree sits inside Rocky's data folder.
+  'secrets.json',
+  'api-token',
   '.netrc',
   '.npmrc',
   '.pypirc',
