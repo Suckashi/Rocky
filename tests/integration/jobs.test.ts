@@ -87,7 +87,7 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
    * start with that tool call (a dangerous command, a secret read). */
   const seen: {
     followUp: string;
-    first: ((worktree: string) => ScriptedToolCall) | null;
+    first: ((worktree: string) => ScriptedToolCall | ScriptedToolCall[]) | null;
   } = { followUp: '', first: null };
 
   beforeAll(async () => {
@@ -122,7 +122,7 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
       }
       const step = Math.floor(after / 2);
       if (step === 0 && seen.first)
-        return { toolCalls: [seen.first(worktree)] };
+        return { toolCalls: [seen.first(worktree)].flat() };
       if (step === 0)
         return {
           toolCalls: [
@@ -156,6 +156,8 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
       decision: 'allow-once' | 'reject';
       reason?: string;
     },
+    // OpenCode offers apply_patch instead of edit and write to models named gpt-*.
+    model = 'f',
   ): Promise<Setup> {
     const root = mkdtempSync(join(tmpdir(), 'rocky-jobs-'));
     const project = join(root, 'project');
@@ -176,7 +178,7 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
     rocky.settings.setModel({
       provider: 'openai-compatible',
       baseURL: fake.baseURL,
-      model: 'f',
+      model,
     });
     rocky.settings.setProject(project);
     rocky.settings.setMode(mode);
@@ -310,12 +312,12 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
   it('a rejected action is not run and the reason reaches OpenCode', async () => {
     const s = await setup('ask-when-needed', (effect) =>
       effect.kind === 'command'
-        ? { decision: 'reject', reason: '先不要刪 build' }
+        ? { decision: 'reject', reason: '先不要推送' }
         : { decision: 'allow-once' },
     );
     seen.first = () => ({
       name: 'bash',
-      args: { command: 'rm -rf build', description: 'Clean' },
+      args: { command: 'git push origin HEAD', description: 'Push' },
     });
     await chat(s);
     const job = await s.rocky.jobRunner
@@ -323,13 +325,69 @@ describe.runIf(hasOpenCode())('delegating to OpenCode', () => {
       .finally(() => (seen.first = null));
     expect(job.result?.changed).toEqual([]);
     expect(readFileSync(join(job.worktree!, 'math.js'), 'utf8')).toBe(BUGGY);
-    expect(seen.followUp).toContain('先不要刪 build');
+    expect(seen.followUp).toContain('先不要推送');
     const discarded = await s.call(`/api/jobs/${job.id}/discard`, {
       method: 'POST',
       body: {},
     });
     expect(discarded.status).toBe(200);
     expect(existsSync(job.worktree!)).toBe(false);
+  }, 120_000);
+
+  it('the worktree is a throwaway copy: a patch to several files and a recursive delete in it run without asking', async () => {
+    const asked: string[] = [];
+    const s = await setup(
+      'ask-when-needed',
+      (effect) => {
+        asked.push(effect.kind);
+        return { decision: 'allow-once' };
+      },
+      'gpt-5.1',
+    );
+    seen.first = (worktree) => {
+      mkdirSync(join(worktree, 'build'));
+      writeFileSync(join(worktree, 'build', 'old.js'), 'old\n');
+      return [
+        {
+          name: 'apply_patch',
+          args: {
+            patchText: [
+              '*** Begin Patch',
+              '*** Update File: math.js',
+              '@@',
+              ' export function add(a, b) {',
+              '-  return a - b;',
+              '+  return a + b;',
+              ' }',
+              '*** Add File: AGENTS.md',
+              '+Run node --test before finishing.',
+              '*** End Patch',
+            ].join('\n'),
+          },
+        },
+        {
+          name: 'bash',
+          args: { command: 'rm -rf build', description: 'Clean' },
+        },
+      ];
+    };
+    await chat(s);
+    const job = await s.rocky.jobRunner
+      .wait(s.rocky.jobs.list()[0]!.id)
+      .finally(() => (seen.first = null));
+    // Only starting the job asked; the protected AGENTS.md waits for Apply like any file.
+    expect(asked).toEqual(['delegate']);
+    expect(existsSync(join(job.worktree!, 'build'))).toBe(false);
+    expect(job.status).toBe('verified');
+    expect([...job.result!.changed].sort()).toEqual(['AGENTS.md', 'math.js']);
+    expect(job.result?.unapproved).toEqual([]);
+    expect(job.result?.mismatched).toEqual([]);
+    // Each file of the patch has its own receipt.
+    const writes = s.rocky.receipts
+      .forThread(`job:${job.id}`)
+      .filter((r) => r.effect.kind === 'write');
+    expect(writes.map((r) => r.outcome)).toEqual(['succeeded', 'succeeded']);
+    await s.call(`/api/jobs/${job.id}/discard`, { method: 'POST', body: {} });
   }, 120_000);
 
   it('asks before OpenCode reads a secret file, even hands-off', async () => {

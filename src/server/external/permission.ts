@@ -25,27 +25,45 @@ const isDiff = (c: unknown): c is DiffContent =>
   typeof (c as { path?: unknown }).path === 'string' &&
   typeof (c as { newText?: unknown }).newText === 'string';
 
-export function permissionEffect(
+function writeOf(diff: DiffContent, cwd: string): MappedPermission {
+  const path = isAbsolute(diff.path) ? diff.path : resolve(cwd, diff.path);
+  const exists = existsSync(path);
+  return {
+    effect: {
+      kind: 'write',
+      path,
+      operation: exists ? 'edit' : 'create',
+      content: diff.newText,
+    },
+    ...(exists ? { before: readFileSync(path, 'utf8') } : {}),
+  };
+}
+
+/** One effect per thing the request does: a change to several files is one write per file. */
+export function permissionEffects(
   request: RequestPermissionRequest,
   cwd: string,
-): MappedPermission {
+): MappedPermission[] {
   const { kind, content, rawInput, title } = request.toolCall;
   const raw = (rawInput ?? {}) as Record<string, unknown>;
   const diffs = (content ?? []).filter(isDiff);
 
-  if (diffs.length === 1 && (kind === 'edit' || kind === 'delete')) {
-    const diff = diffs[0]!;
-    const path = isAbsolute(diff.path) ? diff.path : resolve(cwd, diff.path);
-    const exists = existsSync(path);
-    return {
-      effect: {
-        kind: 'write',
-        path,
-        operation: exists ? 'edit' : 'create',
-        content: diff.newText,
-      },
-      ...(exists ? { before: readFileSync(path, 'utf8') } : {}),
-    };
+  if (kind === 'edit' || kind === 'delete') {
+    if (diffs.length === 1) return [writeOf(diffs[0]!, cwd)];
+    // OpenCode's patch lists its files and sends one diff per file. Judged file by file
+    // only when every file has its diff and none moves (a move also deletes a file,
+    // which no diff shows); otherwise it stays one outside action below.
+    const files = Array.isArray(raw['files'])
+      ? (raw['files'] as unknown[])
+      : [];
+    const moves = files.some(
+      (f) =>
+        typeof f === 'object' &&
+        f !== null &&
+        typeof (f as { movePath?: unknown }).movePath === 'string',
+    );
+    if (diffs.length > 1 && diffs.length === files.length && !moves)
+      return diffs.map((d) => writeOf(d, cwd));
   }
 
   // OpenCode asks to read only the secret files its config lists (opencode.ts), and sends
@@ -55,34 +73,40 @@ export function permissionEffect(
       typeof raw['filePath'] === 'string'
         ? raw['filePath']
         : request.toolCall.locations?.[0]?.path;
-    return {
-      effect: path
-        ? { kind: 'read', path: isAbsolute(path) ? path : resolve(cwd, path) }
-        : { kind: 'read', path: cwd, secret: true },
-    };
+    return [
+      {
+        effect: path
+          ? { kind: 'read', path: isAbsolute(path) ? path : resolve(cwd, path) }
+          : { kind: 'read', path: cwd, secret: true },
+      },
+    ];
   }
 
   if (kind === 'execute' && typeof raw['command'] === 'string') {
     const workdir =
       typeof raw['workdir'] === 'string' ? resolve(cwd, raw['workdir']) : cwd;
     // OpenCode runs the command line through a shell; the gate analyses it as one.
-    return {
-      effect: {
-        kind: 'command',
-        argv: ['sh', '-c', raw['command']],
-        cwd: workdir,
+    return [
+      {
+        effect: {
+          kind: 'command',
+          argv: ['sh', '-c', raw['command']],
+          cwd: workdir,
+        },
       },
-    };
+    ];
   }
 
-  // Anything else (several files at once, fetch, its own MCP tools) is an outside action.
-  return {
-    effect: {
-      kind: 'mcp',
-      server: 'opencode',
-      tool: kind ?? title ?? 'other',
-      args: { title: title ?? null, content: content ?? null, rawInput: raw },
-      readOnly: false,
+  // Anything else (a patch that moves files, fetch, its own MCP tools) is an outside action.
+  return [
+    {
+      effect: {
+        kind: 'mcp',
+        server: 'opencode',
+        tool: kind ?? title ?? 'other',
+        args: { title: title ?? null, content: content ?? null, rawInput: raw },
+        readOnly: false,
+      },
     },
-  };
+  ];
 }

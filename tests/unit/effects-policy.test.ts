@@ -574,6 +574,86 @@ describe('shell strings are read the way the shell reads them (ADR 0028)', () =>
   });
 });
 
+describe("a job's worktree is a throwaway copy (ADR 0029)", () => {
+  const WT = '/data/worktrees/j1';
+  const job = (over: Partial<PolicyContext> = {}) =>
+    ctx({ projectRoot: WT, worktree: true, ...over });
+  const run = (...argv: string[]): Effect => ({
+    kind: 'command',
+    argv,
+    cwd: WT,
+  });
+
+  it('a recursive delete of literal paths inside it runs', () => {
+    for (const effect of [
+      run('rm', '-rf', 'build'),
+      run('sh', '-c', 'rm -rf dist out/tmp && npm run build'),
+      run('cmd', '/c', 'rd /s /q build'),
+      run('pwsh', '-c', 'Remove-Item -Recurse -Force build'),
+    ])
+      expect(decide(effect, job())).toMatchObject({ decision: 'allow' });
+    // The same command in the project still asks.
+    expect(decide(cmd('rm', '-rf', 'build'), ctx())).toMatchObject({
+      decision: 'ask',
+      grant: 'dangerous:recursive-delete',
+    });
+  });
+
+  it('a delete it cannot follow still asks', () => {
+    for (const effect of [
+      // A glob or a variable could reach the project's node_modules linked into it.
+      run('sh', '-c', 'rm -rf dist/*'),
+      run('sh', '-c', 'rm -rf $OUT'),
+      run('rm', '-rf', '~/x'),
+      // After cd, relative paths mean another folder ("cd" alone is the home folder).
+      run('sh', '-c', 'cd && rm -rf Documents'),
+      run('sh', '-c', 'cd sub; rm -rf build'),
+      // Its .git points into the project's repository; the root is the whole copy.
+      run('rm', '-rf', '.git'),
+      run('rm', '-rf', '.'),
+      run('rm', '-rf', '../other'),
+    ])
+      expect(decide(effect, job()).decision).toBe('ask');
+  });
+
+  it('protected files inside it run; its .git and secrets still ask', () => {
+    const write = (p: string): Effect => ({
+      kind: 'write',
+      path: `${WT}/${p}`,
+      operation: 'edit',
+      content: 'x',
+    });
+    for (const p of [
+      'AGENTS.md',
+      '.github/workflows/ci.yml',
+      '.vscode/settings.json',
+    ])
+      expect(decide(write(p), job()).decision).toBe('allow');
+    expect(decide(run('sh', '-c', 'echo x >> AGENTS.md'), job()).decision).toBe(
+      'allow',
+    );
+    expect(decide(write('.git/config'), job())).toMatchObject({
+      decision: 'ask',
+      reason: 'protected',
+    });
+    expect(decide(write('.env'), job())).toMatchObject({
+      decision: 'ask',
+      reason: 'secret',
+    });
+    expect(decide(write('AGENTS.md'), ctx({ projectRoot: WT }))).toMatchObject({
+      decision: 'ask',
+      reason: 'protected',
+    });
+  });
+
+  it('a push still asks: it leaves the computer', () => {
+    expect(decide(run('git', 'push', 'origin', 'HEAD'), job())).toMatchObject({
+      decision: 'ask',
+      grant: 'dangerous:push',
+    });
+  });
+});
+
 describe('decision order', () => {
   const write = (p: string, content = 'x'): Effect => ({
     kind: 'write',

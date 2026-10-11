@@ -6,7 +6,7 @@
 import path, { type PlatformPath } from 'node:path';
 import {
   analyzeCommand,
-  findDangers,
+  dangerReason,
   programName,
   type Shell,
   type SimpleCommand,
@@ -18,6 +18,7 @@ import {
   namesSecret,
   pathLikeArgs,
   privateFiles,
+  type PathFacts,
 } from './paths.ts';
 import type { Decision, Effect, Mode, Reason, Rule, Verdict } from './types.ts';
 
@@ -34,6 +35,9 @@ export interface PolicyContext {
   /** Rocky's own secret files (the model key and MCP tokens, the API token): secrets
    * wherever the project is. */
   privateFiles?: readonly string[];
+  /** projectRoot is a job's worktree: a throwaway copy that reaches the project only when the
+   * user applies its diff. Recursive deletes and protected files inside it run (ADR 0029). */
+  worktree?: boolean;
   pathApi?: PlatformPath;
 }
 
@@ -182,6 +186,35 @@ const NOT_FILES = /^(?:\/dev\/(?:null|stdout|stderr|tty)|nul|con)$/i;
 const globNamesSecret = (word: string, api: PlatformPath) =>
   /[*?[]/.test(word) && namesSecret(word.replace(/\[[^\]]*\]|[*?]/g, ''), api);
 
+/** Below a job's worktree root and outside its `.git`, which points into the project's repository. */
+const inWorktree = (facts: PathFacts) =>
+  facts.relative !== undefined &&
+  facts.relative !== '.' &&
+  !facts.relative.split('/').some((p) => p.toLowerCase() === '.git');
+
+/** Every target of a recursive delete is a literal path inside the job's worktree: no glob or
+ * variable (they could reach the project's node_modules, linked into the worktree). */
+function deletesInsideWorktree(
+  p: SimpleCommand,
+  ctx: PolicyContext,
+  cwd: string,
+  api: PlatformPath,
+): boolean {
+  const targets = p.argv
+    .slice(1)
+    .filter((a) => !a.startsWith('-') && !/^\/[a-z?]$/i.test(a));
+  return (
+    classifyPath(cwd, ctx.projectRoot, ctx.projectRoot, api).relative !==
+      undefined &&
+    targets.length > 0 &&
+    targets.every(
+      (t) =>
+        !/[*?[\]{}$`%~]/.test(t) &&
+        inWorktree(classifyPath(t, ctx.projectRoot, cwd, api)),
+    )
+  );
+}
+
 /** Every floor this action hits; each must be passed before it runs. */
 function floorsOf(
   effect: Effect,
@@ -208,7 +241,11 @@ function floorsOf(
       (effect.kind === 'read' && effect.secret)
     )
       floors.push(secretFloor(facts.absolute, effect.kind === 'write'));
-    if (effect.kind === 'write' && facts.protected)
+    if (
+      effect.kind === 'write' &&
+      facts.protected &&
+      !(ctx.worktree && inWorktree(facts))
+    )
       floors.push({
         reason: 'protected',
         detail: facts.absolute,
@@ -233,11 +270,33 @@ function floorsOf(
     return floors;
   }
   if (effect.kind === 'command') {
-    const floors: Floor[] = findDangers(programs).map((danger) => ({
-      reason: 'dangerous',
-      detail: danger,
-      grant: `dangerous:${danger}`,
-    }));
+    const floors: Floor[] = [];
+    // After cd, a command's relative paths mean another folder.
+    const movesAround = programs.some((p) => {
+      const name = programName(p.argv[0] ?? '');
+      return (
+        CHANGES_DIRECTORY.has(name) ||
+        name === 'popd' ||
+        name === 'pop-location'
+      );
+    });
+    programs.forEach((p, i) => {
+      const danger = dangerReason(p, programs[i + 1]);
+      if (!danger || floors.some((f) => f.detail === danger)) return;
+      // A job's worktree is a throwaway copy: deleting folders inside it runs.
+      if (
+        danger === 'recursive-delete' &&
+        ctx.worktree &&
+        !movesAround &&
+        deletesInsideWorktree(p, ctx, effect.cwd, api)
+      )
+        return;
+      floors.push({
+        reason: 'dangerous',
+        detail: danger,
+        grant: `dangerous:${danger}`,
+      });
+    });
     const cwd = classifyPath(effect.cwd, ctx.projectRoot, ctx.projectRoot, api);
     // A command run in a secret folder (~/.ssh) reads it.
     if (cwd.secret) floors.push(secretFloor(cwd.absolute, false));
@@ -327,7 +386,7 @@ function floorsOf(
           globNamesSecret(word, api)
         )
           floors.push(secretFloor(facts.absolute, write));
-        if (write && facts.protected)
+        if (write && facts.protected && !(ctx.worktree && inWorktree(facts)))
           floors.push({
             reason: 'protected',
             detail: facts.absolute,

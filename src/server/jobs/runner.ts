@@ -10,7 +10,7 @@ import type { Gate } from '../effects/gate.ts';
 import type { ReceiptStore } from '../effects/receipts.ts';
 import { AcpAgent } from '../external/acp.ts';
 import { findOpenCode, spawnOpenCode } from '../external/opencode.ts';
-import { permissionEffect } from '../external/permission.ts';
+import { permissionEffects } from '../external/permission.ts';
 import {
   addWorktree,
   hasUncommitted,
@@ -238,7 +238,7 @@ export class JobRunner {
 
       // 2. OpenCode over ACP. Every permission request goes through the gate.
       const approved = new Map<string, string>();
-      const receiptOf = new Map<string, string>();
+      const receiptOf = new Map<string, string[]>();
       let rejection: string | undefined;
       let text = '';
       let lastText = '';
@@ -261,46 +261,62 @@ export class JobRunner {
         {
           decide: async (request) => {
             flush();
-            const mapped = permissionEffect(request, worktree);
             const id = request.toolCall.toolCallId;
-            const decision = await gate.request(
-              mapped.effect,
-              origin(id),
-              signal,
-              {
-                root: worktree,
-                ...(mapped.before !== undefined
-                  ? { before: mapped.before }
-                  : {}),
-              },
-            );
             const title = request.toolCall.title ?? request.toolCall.kind ?? '';
-            if (!decision.allowed) {
-              rejection = decision.message;
+            const parts = permissionEffects(request, worktree);
+            // A change to several files is judged file by file; one refusal refuses it all.
+            const allowed: string[] = [];
+            for (const mapped of parts) {
+              const decision = await gate.request(
+                mapped.effect,
+                origin(id),
+                signal,
+                {
+                  root: worktree,
+                  worktree: true,
+                  ...(mapped.before !== undefined
+                    ? { before: mapped.before }
+                    : {}),
+                },
+              );
+              const label =
+                parts.length > 1 && mapped.effect.kind === 'write'
+                  ? toRepoPath(worktree, mapped.effect.path)
+                  : title;
+              if (!decision.allowed) {
+                rejection = decision.message;
+                for (const receiptId of allowed)
+                  receipts.cancel(
+                    receiptId,
+                    'another file in the same change was rejected',
+                  );
+                event({
+                  type: 'permission',
+                  id,
+                  title: label,
+                  decision: 'reject',
+                  receiptId: decision.receipt.id,
+                });
+                return 'reject';
+              }
+              // Rocky does not execute it; the pass is used up here and OpenCode acts.
+              gate.passes.redeem(decision.pass, contentHash(mapped.effect));
+              if (decision.receipt) allowed.push(decision.receipt.id);
               event({
                 type: 'permission',
                 id,
-                title,
-                decision: 'reject',
-                receiptId: decision.receipt.id,
+                title: label,
+                decision: 'allow',
+                receiptId: decision.receipt?.id ?? null,
               });
-              return 'reject';
             }
-            // Rocky does not execute it; the pass is used up here and OpenCode acts.
-            gate.passes.redeem(decision.pass, contentHash(mapped.effect));
-            if (decision.receipt) receiptOf.set(id, decision.receipt.id);
-            if (mapped.effect.kind === 'write')
-              approved.set(
-                toRepoPath(worktree, mapped.effect.path),
-                mapped.effect.content ?? '',
-              );
-            event({
-              type: 'permission',
-              id,
-              title,
-              decision: 'allow',
-              receiptId: decision.receipt?.id ?? null,
-            });
+            receiptOf.set(id, allowed);
+            for (const { effect } of parts)
+              if (effect.kind === 'write')
+                approved.set(
+                  toRepoPath(worktree, effect.path),
+                  effect.content ?? '',
+                );
             return 'allow';
           },
           update: (notification: SessionNotification) => {
@@ -331,13 +347,12 @@ export class JobRunner {
                 kind: u.kind ?? 'other',
                 status: u.status,
               });
-              const receiptId = receiptOf.get(u.toolCallId);
-              if (receiptId && receipts.get(receiptId)?.outcome === 'pending') {
-                receipts.finish(
-                  receiptId,
-                  u.status === 'completed' ? 'succeeded' : 'failed',
-                );
-              }
+              for (const receiptId of receiptOf.get(u.toolCallId) ?? [])
+                if (receipts.get(receiptId)?.outcome === 'pending')
+                  receipts.finish(
+                    receiptId,
+                    u.status === 'completed' ? 'succeeded' : 'failed',
+                  );
             }
           },
         },
@@ -365,7 +380,7 @@ export class JobRunner {
       const verification = await verifyWorktree(worktree, tree.base, approved);
       result = { ...result, ...verification };
       // Approved actions OpenCode never reported back: their outcome is not known.
-      for (const receiptId of receiptOf.values()) {
+      for (const receiptId of [...receiptOf.values()].flat()) {
         if (receipts.get(receiptId)?.outcome === 'pending')
           receipts.finish(receiptId, 'unknown', 'not reported by OpenCode');
       }
@@ -411,7 +426,7 @@ export class JobRunner {
       effect,
       { threadId: thread, runId: thread, actor: 'rocky' },
       signal,
-      { root: worktree },
+      { root: worktree, worktree: true },
     );
     if (!decision.allowed)
       return { argv, exitCode: null, output: decision.message };
