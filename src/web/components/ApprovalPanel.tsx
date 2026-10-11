@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { displayPath, type PendingApproval } from '../api.ts';
 import { commandLine } from '../effects.ts';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
+import { isActivatable, isEditable } from '../keys.ts';
 import { Diff } from './Diff.tsx';
 import { DocumentChange } from './DocumentPreview.tsx';
 import { isPreviewable } from './PreviewPane.tsx';
@@ -285,6 +286,9 @@ export function ApprovalPanel({
         return;
       }
       const typing = event.target === reasonBox.current;
+      // A field elsewhere keeps its keys; a focused button or link keeps Enter, so pressing
+      // Enter on "Reject" or "Stop" does what that control says, never "Allow once".
+      if (!typing && isEditable(event.target)) return;
       if (event.key === 'Escape') {
         event.preventDefault();
         if (full) setFull(false);
@@ -293,6 +297,7 @@ export function ApprovalPanel({
         return;
       }
       if (event.key === 'Enter') {
+        if (!typing && isActivatable(event.target)) return;
         event.preventDefault();
         void choose(typing ? explainAt : selected);
         return;
@@ -363,6 +368,7 @@ export function ApprovalPanel({
               disabled={busy}
               onClick={() => void choose(index)}
               onMouseEnter={() => setSelected(index)}
+              onFocus={() => setSelected(index)}
             >
               <kbd>{index + 1}</kbd>
               {label(option)}

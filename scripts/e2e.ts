@@ -230,6 +230,21 @@ try {
     'restore all puts the file back',
   );
 
+  // Enter on a focused control does what that control says: Tab to "拒絕", press Enter.
+  await page.getByRole('textbox').fill('用鍵盤再改');
+  await page.keyboard.press('Enter');
+  await panel.waitFor({ timeout: 20_000 });
+  await panel.getByRole('button', { name: /^\d 拒絕$/ }).focus();
+  await page.keyboard.press('Enter');
+  await page
+    .locator('.reply', { hasText: 'rejected' })
+    .first()
+    .waitFor({ timeout: 20_000 });
+  check(
+    readFileSync(appFile, 'utf8').includes('41'),
+    'Enter on the focused Reject option rejects; it never approves',
+  );
+
   await page.getByRole('textbox').fill('再改一次');
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
