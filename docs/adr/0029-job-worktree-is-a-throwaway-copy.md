@@ -50,4 +50,16 @@ ADR 0028 把所有推送都算成危險指令，這件事已經解決。
 
 ## 驗證
 
-見 PR。
+| 平台                                       | 指令                    | 結果                                                 |
+| ------------------------------------------ | ----------------------- | ---------------------------------------------------- |
+| 雲端 Linux，Node 24.21.0，OpenCode 1.18.34 | `npm run check`         | 通過，267 個測試（含真 OpenCode 的派工測試），exit 0 |
+| 同上，Playwright 內建 Chromium             | `npm run test:e2e`      | exit 0，27 步                                        |
+| 同上，假模型＋真 OpenCode                  | `npm run test:e2e:jobs` | exit 0，10 步                                        |
+
+- 真 OpenCode 的整合測試：模型名稱是 `gpt-5.1` 時，OpenCode 用 `apply_patch` 一次改 `math.js` 和 `AGENTS.md`，
+  再跑 `rm -rf build`；只有開始派工時問了一次，兩個檔案各有一筆「成功」紀錄，工作結果是「已驗證」。
+  拿掉這次的程式改動，同一個測試會多問兩次（修補和刪除）。
+- 每項規則各自做了單獨拿掉的檢查，拿掉任何一項都會讓測試失敗。
+- 原本把 `rm -rf build` 當成「會問的指令」的整合測試和派工 e2e，改用 `git push`。CI 不跑派工 e2e。
+- 評測裡沒有在 worktree 裡判斷的題目，所以沒有為這部分另外跑評測。
+- 沒有在 Windows 上跑過；PowerShell 和 cmd 的規則只用 `path.win32` 判斷過。
