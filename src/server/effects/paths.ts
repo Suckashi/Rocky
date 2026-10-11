@@ -88,6 +88,15 @@ export function namesSecret(p: string, api: PlatformPath = path): boolean {
   );
 }
 
+/** Whether a path names a protected file by its own words, without resolving it. */
+export function namesProtected(p: string): boolean {
+  const parts = p.toLowerCase().split(/[\\/]/).filter(Boolean);
+  return (
+    parts.some((part) => PROTECTED_DIRS.has(part)) ||
+    PROTECTED_FILES.has(parts.at(-1) ?? '')
+  );
+}
+
 /** Rocky's own secret files (ADR 0028), resolved through links like every judged path. */
 export function privateFiles(
   files: readonly string[],

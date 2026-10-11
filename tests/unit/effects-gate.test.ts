@@ -154,6 +154,48 @@ describe('Gate', () => {
     });
   });
 
+  it('"allow for this conversation" leaves a waiting question that still hits another floor', async () => {
+    const { gate, project } = setup();
+    const run = (argv: string[], toolCallId: string) =>
+      gate.request(
+        { kind: 'command', argv, cwd: project },
+        {
+          ...origin,
+          toolCallId,
+        },
+      );
+    const first = run(['rm', '-rf', 'build'], 'c1');
+    const both = run(
+      ['sh', '-c', 'rm -rf dist && git push --force origin main'],
+      'c2',
+    );
+    await until(() => gate.pending('t1').length === 2);
+    const asked = gate.pending('t1').find((a) => a.toolCallId === 'c1')!;
+    gate.answer(asked.id, {
+      decision: 'allow-session',
+      contentHash: asked.contentHash,
+    });
+    expect((await first).allowed).toBe(true);
+    // Its recursive delete is granted now; the question is about the force push instead.
+    await until(() => gate.pending('t1').length === 1);
+    const left = gate.pending('t1')[0]!;
+    expect(left).toMatchObject({
+      toolCallId: 'c2',
+      reason: 'dangerous',
+      detail: 'force-push',
+      grant: 'dangerous:force-push',
+    });
+    gate.answer(left.id, {
+      decision: 'allow-session',
+      contentHash: left.contentHash,
+    });
+    expect((await both).allowed).toBe(true);
+    // Both categories are now granted for the conversation.
+    expect(gate.context('t1').grants).toEqual(
+      new Set(['dangerous:recursive-delete', 'dangerous:force-push']),
+    );
+  });
+
   it('"allow for this conversation" covers the category, answers waiting questions of it, and stays in the thread', async () => {
     const { gate, project } = setup();
     const push = (...rest: string[]): Effect => ({

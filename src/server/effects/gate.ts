@@ -262,17 +262,32 @@ export class Gate {
         REJECTED_MESSAGE(tool, answer.reason),
       );
     }
-    if (answer.decision === 'allow-session' && verdict.grant) {
+    // The question may have been refreshed while it waited (see below): grant what it showed.
+    const grant = approval.grant;
+    if (answer.decision === 'allow-session' && grant) {
       const set = this.grants.get(origin.threadId) ?? new Set<string>();
-      set.add(verdict.grant);
+      set.add(grant);
       this.grants.set(origin.threadId, set);
-      // Questions of the same category already waiting in this conversation are answered too.
-      for (const other of this.pending(origin.threadId))
-        if (other.grant === verdict.grant)
+      // Questions already waiting in this conversation that the grant now lets through are
+      // answered too; one that still hits another floor asks about that floor (ADR 0028).
+      for (const other of this.pending(origin.threadId)) {
+        if (other.grant !== grant) continue;
+        const again = decide(
+          other.effect,
+          this.context(origin.threadId, other.root ?? undefined),
+        );
+        if (again.decision === 'allow')
           this.answer(other.id, {
             decision: 'allow-once',
             contentHash: other.contentHash,
           });
+        else if (again.decision === 'ask') {
+          other.reason = again.reason;
+          other.detail = again.detail ?? null;
+          other.grant = again.grant ?? null;
+          this.changed(origin.threadId);
+        }
+      }
     }
     if (answer.decision === 'allow-always' && effect.kind === 'command')
       this.deps.addRule({ decision: 'allow', prefix: alwaysRule(effect.argv) });
