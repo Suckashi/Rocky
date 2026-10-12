@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rewriteRelativeImportExtensions": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "lib": ["ES2024"],
+    "jsx": "preserve",
+    "sourceMap": false,
+    "declaration": false
+  },
+  "include": ["src/server", "src/shared"],
+  "exclude": ["node_modules", "src/**/*.test.ts"]
+}

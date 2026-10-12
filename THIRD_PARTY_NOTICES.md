@@ -2,7 +2,7 @@
 
 Rocky source is Apache-2.0 (see `LICENSE`). Roko artwork is excluded; see `NOTICE` and `assets/roko/README.md`.
 
-Dependencies keep their own licenses; exact versions are pinned in `package-lock.json`.
+Dependencies keep their own licenses; exact versions are pinned in `npm-shrinkwrap.json`.
 
 ## OpenDots
 

@@ -1,12 +1,12 @@
 {
-  "name": "rocky",
-  "version": "0.0.0",
+  "name": "@suckashi/rocky",
+  "version": "0.1.0",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
-      "name": "rocky",
-      "version": "0.0.0",
+      "name": "@suckashi/rocky",
+      "version": "0.1.0",
       "license": "Apache-2.0",
       "dependencies": {
         "@ag-ui/client": "1.0.1",
@@ -45,6 +45,9 @@
         "rxjs": "7.8.1",
         "unpdf": "1.8.1",
         "zod": "4.3.6"
+      },
+      "bin": {
+        "rocky": "bin/rocky.js"
       },
       "devDependencies": {
         "@eslint/js": "10.0.1",

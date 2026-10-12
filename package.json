@@ -1,13 +1,21 @@
 {
-  "name": "rocky",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@suckashi/rocky",
+  "version": "0.1.0",
   "description": "Single-user local AI engineering partner",
   "license": "Apache-2.0",
   "type": "module",
   "engines": {
     "node": ">=24.12.0 <25"
   },
+  "bin": {
+    "rocky": "bin/rocky.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "NOTICE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -20,7 +28,9 @@
     "start": "vite build && node src/server/start.ts",
     "test:e2e": "vite build && node scripts/e2e.ts",
     "test:e2e:jobs": "vite build && node scripts/e2e-jobs.ts",
-    "eval": "node evals/run.ts"
+    "eval": "node evals/run.ts",
+    "build:server": "tsc -p tsconfig.build.json",
+    "prepack": "vite build && npm run build:server"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -78,5 +88,8 @@
   },
   "scarfSettings": {
     "enabled": false
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
