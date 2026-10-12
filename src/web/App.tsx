@@ -3,6 +3,7 @@ import { CopilotKitProvider } from '@copilotkit/react-core/v2';
 import {
   Briefcase,
   MessageSquare,
+  PanelLeft,
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -96,6 +97,8 @@ function Shell({
     () => threadFromHash() ?? crypto.randomUUID(),
   );
   const [refreshKey, setRefreshKey] = useState(0);
+  /** Narrow windows fold the conversation list into a drawer opened from the rail. */
+  const [threadsOpen, setThreadsOpen] = useState(false);
   const [roko, setRoko] = useState<RokoState>('idle');
   const jobsWaiting = useJobsWaiting();
   const preview = usePreviewPane();
@@ -129,6 +132,19 @@ function Shell({
 
   const onActivity = useCallback(() => setRefreshKey((k) => k + 1), []);
 
+  useEffect(() => {
+    if (!threadsOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setThreadsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [threadsOpen]);
+  const openThread = (id: string) => {
+    setThreadId(id);
+    setThreadsOpen(false);
+  };
+
   if (view === 'onboarding') {
     return (
       <Onboarding
@@ -149,16 +165,28 @@ function Shell({
   }
   return preview.provider(
     <div
-      className={`shell${view === 'jobs' ? ' jobs-view' : ''}${preview.open ? ' previewing' : ''}`}
+      className={`shell${view === 'jobs' ? ' jobs-view' : ''}${preview.open ? ' previewing' : ''}${threadsOpen ? ' threads-open' : ''}`}
     >
       <nav className="rail" aria-label={t('app.name')}>
         <img src="/rocky/mark.svg" alt={t('app.name')} width={28} height={28} />
         <button
           type="button"
+          className="icon-button threads-toggle"
+          aria-label={t(view === 'jobs' ? 'jobs.title' : 'nav.threads')}
+          aria-expanded={threadsOpen}
+          onClick={() => setThreadsOpen((open) => !open)}
+        >
+          <PanelLeft size={18} />
+        </button>
+        <button
+          type="button"
           className={`icon-button${view === 'chat' ? ' active' : ''}`}
           aria-label={t('nav.chat')}
           aria-current={view === 'chat' ? 'page' : undefined}
-          onClick={() => setView('chat')}
+          onClick={() => {
+            setView('chat');
+            setThreadsOpen(false);
+          }}
         >
           <MessageSquare size={18} />
         </button>
@@ -171,7 +199,10 @@ function Shell({
               : t('nav.jobs')
           }
           aria-current={view === 'jobs' ? 'page' : undefined}
-          onClick={() => setView('jobs')}
+          onClick={() => {
+            setView('jobs');
+            setThreadsOpen(false);
+          }}
         >
           <Briefcase size={18} />
           {jobsWaiting > 0 && (
@@ -197,14 +228,15 @@ function Shell({
           onSelect={(id) => {
             setApplyJob(false);
             setJobId(id);
+            setThreadsOpen(false);
           }}
         />
       ) : (
         <>
           <ThreadList
             selected={threadId}
-            onSelect={setThreadId}
-            onNew={() => setThreadId(crypto.randomUUID())}
+            onSelect={openThread}
+            onNew={() => openThread(crypto.randomUUID())}
             refreshKey={refreshKey}
           />
           <Chat
@@ -218,6 +250,13 @@ function Shell({
           />
         </>
       )}
+      <button
+        type="button"
+        className="threads-backdrop"
+        tabIndex={-1}
+        aria-label={t('nav.threadsClose')}
+        onClick={() => setThreadsOpen(false)}
+      />
       {preview.pane}
       <aside className="panel">
         <div className={`presence ${roko}`}>

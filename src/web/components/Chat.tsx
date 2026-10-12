@@ -1,7 +1,7 @@
 // One conversation: history from the local runner, streaming reply, tool cards, approvals
 // (in place of the input box), per-turn file changes, and actions with an unknown outcome.
 import { useAgent, useCopilotKit } from '@copilotkit/react-core/v2';
-import { ArrowUp, ListChecks, Square } from 'lucide-react';
+import { ArrowUp, Check, Copy, ListChecks, Square } from 'lucide-react';
 import {
   useCallback,
   useEffect,
@@ -79,7 +79,39 @@ function InlineCode({ children }: { children?: ReactNode }) {
   );
 }
 
+/** A fenced code block with a copy button that shows on hover or focus. */
+function CodeBlock({ children }: { children?: ReactNode }) {
+  const { t } = useI18n();
+  const pre = useRef<HTMLPreElement>(null);
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 1600);
+    return () => clearTimeout(timer);
+  }, [copied]);
+  return (
+    <div className="code-block">
+      <pre ref={pre}>{children}</pre>
+      <button
+        type="button"
+        className={`copy${copied ? ' copied' : ''}`}
+        aria-label={t(copied ? 'chat.copied' : 'chat.copy')}
+        title={t(copied ? 'chat.copied' : 'chat.copy')}
+        onClick={() =>
+          void navigator.clipboard
+            ?.writeText(pre.current?.textContent ?? '')
+            .then(() => setCopied(true))
+            .catch(() => undefined)
+        }
+      >
+        {copied ? <Check size={14} /> : <Copy size={14} />}
+      </button>
+    </div>
+  );
+}
+
 const markdownComponents: Components = {
+  pre: ({ children }) => <CodeBlock>{children}</CodeBlock>,
   img: ({ alt }) => <span>{alt}</span>,
   a: ({ href, children }) => (
     <a href={href} target="_blank" rel="noreferrer">
@@ -93,6 +125,13 @@ const markdownComponents: Components = {
       <InlineCode>{children}</InlineCode>
     ),
 };
+
+/** Ways to begin a conversation; a click puts the words in the input box, never sends them. */
+const STARTERS = [
+  'chat.starter.explain',
+  'chat.starter.improve',
+  'chat.starter.readme',
+] as const;
 
 export function Chat({
   threadId,
@@ -362,6 +401,20 @@ export function Chat({
           <div className="empty">
             <Roko state="waving" size={120} />
             <p>{t('chat.empty')}</p>
+            <div className="starters">
+              {STARTERS.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    setDraft(t(key));
+                    input.current?.focus();
+                  }}
+                >
+                  {t(key)}
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {messages.map((message, index) => {
