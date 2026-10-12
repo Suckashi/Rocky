@@ -40,6 +40,10 @@ Rocky 只能 `git clone` 後 `npm ci`、`npm start`。擁有者想用一個 npm 
 ## 限制
 
 - **還沒發佈。** 發佈到 npm 屬於部署，要擁有者明確同意；在那之前只能從 `npm pack` 產生的 `.tgz` 安裝。
-- 沒有在 Windows 上驗證全域安裝與 `rocky.cmd` 啟動；也沒有在全域安裝的版本上跑 e2e 或模型。
+- **從 Git 直接安裝失敗。** `npm install -g "git+file:///…/Rocky#<分支>"` 試了兩次都 exit 254：解開依賴時出現大量
+  `TAR_ENTRY_ERROR`（`lstat` ENOENT），接著 `@scarf/scarf` 的 postinstall 因為資料夾不在而 `spawn sh ENOENT`。
+  原因還沒查；`npm install -g github:Suckashi/Rocky` 預期也一樣，所以不寫進 README。
+- 沒有在 Windows 上驗證全域安裝與 `rocky.cmd` 啟動，也沒有跑改過鎖定檔名稱的 `Start-Rocky.ps1`；也沒有在全域安裝的
+  版本上跑 e2e 或模型。
 - 使用者那邊 `engine-strict` 不生效（`.npmrc` 不隨套件），Node 版本不對只會警告；啟動時 Node 24 才有的功能會直接失敗。
 - 第一次安裝仍然很大（約 1000 個套件），見 ADR 0004。
