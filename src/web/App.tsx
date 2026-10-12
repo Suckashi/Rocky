@@ -258,9 +258,9 @@ function Shell({
         onClick={() => setThreadsOpen(false)}
       />
       {preview.pane}
-      <aside className="panel">
+      <aside className="panel" aria-label={t('panel.label')}>
         <div className={`presence ${roko}`}>
-          <Roko state={roko} size={128} />
+          <Roko state={roko} size={128} follow />
           <strong>
             {t(
               roko === 'waiting'

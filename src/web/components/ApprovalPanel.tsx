@@ -361,13 +361,9 @@ export function ApprovalPanel({
         ) : null}
       </p>
       <Preview approval={approval} project={project} />
-      <ol
-        className="approval-options"
-        role="listbox"
-        aria-label={t('approval.region')}
-      >
+      <ol className="approval-options" aria-label={t('approval.region')}>
         {options.map((option, index) => (
-          <li key={option} role="option" aria-selected={selected === index}>
+          <li key={option}>
             <button
               type="button"
               className={selected === index ? 'selected' : ''}

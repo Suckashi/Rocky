@@ -1,5 +1,6 @@
 // One tool call in the transcript: what it did, its state, and its result on demand.
-import { Check, CircleSlash, LoaderCircle } from 'lucide-react';
+import { Check, ChevronRight, CircleSlash, LoaderCircle } from 'lucide-react';
+import { useState } from 'react';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { commandLine } from '../effects.ts';
 import { filePreview, isPreviewable, useOpenPreview } from './PreviewPane.tsx';
@@ -56,6 +57,7 @@ export function ToolCard({
 }) {
   const { t } = useI18n();
   const openPreview = useOpenPreview();
+  const [open, setOpen] = useState(false);
   let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(args || '{}') as Record<string, unknown>;
@@ -87,40 +89,50 @@ export function ToolCard({
     ) : (
       <CircleSlash size={14} />
     );
+  const head = (
+    <>
+      <span className="tool-icon" role="img" aria-label={t(`tool.${state}`)}>
+        {icon}
+      </span>
+      <span className="tool-name">{label}</span>
+      <span className="tool-target mono">{target(parsed)}</span>
+      {state === 'interrupted' && (
+        <span className="badge warn">{t('tool.interrupted')}</span>
+      )}
+    </>
+  );
   return (
-    <details className={`tool-card ${state}`}>
-      <summary>
-        <span className="tool-icon" aria-label={t(`tool.${state}`)}>
-          {icon}
-        </span>
-        <span className="tool-name">{label}</span>
-        <span className="tool-target mono">{target(parsed)}</span>
-        {state === 'interrupted' && (
-          <span className="badge warn">{t('tool.interrupted')}</span>
+    <div className={`tool-card ${state}${open ? ' open' : ''}`}>
+      <div className="tool-head">
+        {result !== undefined ? (
+          <button
+            type="button"
+            className="tool-toggle"
+            aria-expanded={open}
+            onClick={() => setOpen((o) => !o)}
+          >
+            {head}
+            <ChevronRight size={14} className="tool-chevron" aria-hidden />
+          </button>
+        ) : (
+          <div className="tool-toggle">{head}</div>
         )}
         {file && (
           <button
             type="button"
             className="link small"
-            onClick={(e) => {
-              e.preventDefault();
-              openPreview(filePreview(file));
-            }}
+            onClick={() => openPreview(filePreview(file))}
           >
             {t('preview.open')}
           </button>
         )}
         {jobId && (
-          <a
-            className="link small"
-            href={`#/jobs/${jobId}`}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <a className="link small" href={`#/jobs/${jobId}`}>
             {t('jobs.view')}
           </a>
         )}
-      </summary>
-      {result !== undefined && (
+      </div>
+      {open && result !== undefined && (
         <div className="tool-result">
           <span className="label">{t('tool.output')}</span>
           <pre className="code">
@@ -130,6 +142,6 @@ export function ToolCard({
           </pre>
         </div>
       )}
-    </details>
+    </div>
   );
 }

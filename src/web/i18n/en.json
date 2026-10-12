@@ -64,6 +64,7 @@
   "chat.error.too-long": "This conversation is too long to send. Start a new conversation to continue.",
   "chat.connectError": "The conversation did not load. Reload the page.",
   "chat.you": "You",
+  "panel.label": "Roko's status",
   "panel.idle": "Roko is standing by",
   "panel.running": "Working on your message",
   "panel.failed": "The last turn had a problem",

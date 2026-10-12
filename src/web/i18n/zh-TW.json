@@ -64,6 +64,7 @@
   "chat.error.too-long": "這段對話太長，無法再送出。請開一個新對話繼續。",
   "chat.connectError": "對話載入失敗，請重新整理頁面。",
   "chat.you": "你",
+  "panel.label": "Roko 的狀態",
   "panel.idle": "Roko 在旁邊待命",
   "panel.running": "正在處理你的訊息",
   "panel.failed": "上一輪出了問題",

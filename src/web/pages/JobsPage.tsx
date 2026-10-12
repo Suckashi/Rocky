@@ -539,6 +539,7 @@ export function JobsPage({
         <p className="small muted">{t('jobs.network')}</p>
       </aside>
       <main className="jobs-main">
+        <h1 className="sr-only">{t('jobs.title')}</h1>
         {selected ? (
           <JobDetail
             key={selected}
@@ -549,7 +550,7 @@ export function JobsPage({
           />
         ) : (
           <div className="empty">
-            <Roko state="idle" size={120} />
+            <Roko state="idle" size={120} follow />
             <p>{t('jobs.select')}</p>
           </div>
         )}

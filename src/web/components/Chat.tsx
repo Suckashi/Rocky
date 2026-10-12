@@ -395,11 +395,12 @@ export function Chat({
   );
 
   return (
-    <section className="chat">
+    <main className="chat">
+      <h1 className="sr-only">{t('nav.chat')}</h1>
       <div className="transcript" aria-live="polite">
         {loaded && !visible && (
           <div className="empty">
-            <Roko state="waving" size={120} />
+            <Roko state="waving" size={120} follow />
             <p>{t('chat.empty')}</p>
             <div className="starters">
               {STARTERS.map((key) => (
@@ -591,6 +592,6 @@ export function Chat({
           </div>
         </form>
       )}
-    </section>
+    </main>
   );
 }

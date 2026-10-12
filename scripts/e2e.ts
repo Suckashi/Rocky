@@ -476,7 +476,7 @@ try {
   check(
     (await slides.locator('section.slide').count()) === 2 &&
       !existsSync(join(project, '.github', '簡報.pptx')) &&
-      (await panel.getByRole('option').count()) === 4,
+      (await panel.locator('.approval-options > li').count()) === 4,
     'a new deck shows its slides in the side panel before it is written, beside the approval',
   );
   if (shots) await page.screenshot({ path: join(shots, 'm4-preview.png') });
@@ -557,7 +557,7 @@ try {
   await page.getByRole('textbox').fill('幫我檢查程式碼（第 1 次）');
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
-  const always = panel.getByRole('option').nth(2);
+  const always = panel.locator('.approval-options > li').nth(2);
   await always.getByText('git reset *').waitFor();
   if (shots) await page.screenshot({ path: join(shots, 'm5-always.png') });
   await page.keyboard.press('3');

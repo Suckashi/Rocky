@@ -27,7 +27,7 @@ export function Onboarding({
       </header>
       <main className="onboarding-main">
         <section className="intro">
-          <Roko state="waving" size={192} />
+          <Roko state="waving" size={192} follow />
           <h1>
             {t('roko.greeting')}
             <br />
