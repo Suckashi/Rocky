@@ -31,4 +31,11 @@
 
 ## 驗證
 
-見 PR。
+- Cloud Linux、Node 24.21.0、OpenCode 1.18.34：`npm run check`（合併 #34–#38 之後 332 個測試，含真的 OpenCode 的整合
+  測試）exit 0。
+- 實際模型（Command Code `deepseek/deepseek-v4-flash`，ask-when-needed）：
+  - 修正前先確認：存下的紀錄裡有 17 則帶 `subagentRunId` 的訊息，之後每一輪都會送給模型。
+  - 完整評估 `--repeat 3`：99/99，和基準比沒有案例退步，沒有提供者錯誤。這次執行開始時，還沒有「停止」的修正和
+    評估程式的改動。
+  - 最終程式碼上 `research-follow-up` 和 `research-with-subagent` 各 3/3。
+- 每個修正單獨拿掉後都有單元測試失敗；評估程式的兩輪流程本身沒有單元測試。沒在 Windows 上跑。
