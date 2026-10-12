@@ -89,7 +89,8 @@ export function mcpRoutes(deps: {
 
   app.get('/mcp', async (c) => {
     const servers = settings.mcpServers();
-    const status = await manager.refresh(servers);
+    // Opening Settings tries a failed server again at once.
+    const status = await manager.refresh(servers, { retry: true });
     return c.json({
       servers: servers.map(mask),
       status,
