@@ -263,11 +263,12 @@ describe('shutdown', () => {
 });
 
 describe('web UI files', () => {
-  it('lets the browser keep hashed build files, but not the page or the API', async () => {
+  it('gzips text and lets the browser keep hashed build files, but not the page', async () => {
     const web = mkdtempSync(join(tmpdir(), 'rocky-web-'));
     mkdirSync(join(web, 'assets'));
     writeFileSync(join(web, 'index.html'), '<!doctype html>');
     writeFileSync(join(web, 'assets', 'index-abc123.js'), 'export {};');
+    writeFileSync(join(web, 'assets', 'big.js'), `// ${'x'.repeat(4096)}\n`);
     const app = createApp({
       token,
       codes: new LoginCodes(),
@@ -285,6 +286,11 @@ describe('web UI files', () => {
     const page = await get('/');
     expect(page.status).toBe(200);
     expect(page.headers.get('cache-control')).toBeNull();
+    const big = await app.request(`http://${HOST}/assets/big.js`, {
+      headers: { host: HOST, 'accept-encoding': 'gzip' },
+    });
+    expect(big.headers.get('content-encoding')).toBe('gzip');
+    expect(await big.text()).not.toBe('');
     const missing = await get('/assets/missing.js');
     expect(missing.status).toBe(404);
     expect(missing.headers.get('cache-control')).toBeNull();

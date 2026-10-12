@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
 // The web UI is built into dist/web and served by Rocky's own server. Roko and the Rocky
@@ -7,6 +8,14 @@ export default defineConfig({
   root: 'src/web',
   publicDir: '../../assets',
   plugins: [react()],
+  // CopilotKit's chat components (unused here) pull in streamdown; see src/web/vendor/streamdown.tsx.
+  resolve: {
+    alias: {
+      streamdown: fileURLToPath(
+        new URL('./src/web/vendor/streamdown.tsx', import.meta.url),
+      ),
+    },
+  },
   build: { outDir: '../../dist/web', emptyOutDir: true },
   server: {
     host: '127.0.0.1',

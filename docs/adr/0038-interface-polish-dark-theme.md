@@ -27,8 +27,12 @@
 - 全域快捷鍵：`Ctrl/⌘+Shift+O` 開新對話，在欄位外按 `/` 回到輸入框（以 `aria-keyshortcuts` 標示）。
 - 伺服器對 `/assets/*`（Vite 以內容雜湊命名）回 `Cache-Control: public, max-age=31536000, immutable`；
   `/assets/` 下找不到的檔案回 404，不再退回 index.html，以免頁面被當成腳本永久快取。
-- 不拆 CopilotKit：主程式約 2.2 MB，多半是 `@copilotkit/react-core/v2` 的 provider 連帶引用的
-  聊天介面（KaTeX、mermaid、a2ui），只改 import 路徑拆不掉；要拆得換掉或修改依賴，留給另一個決定。
+- 網頁建置把 `streamdown` 換成 `src/web/vendor/streamdown.tsx`：CopilotKit 只在它自己的聊天元件
+  （Rocky 沒用）引用它，真品會把 KaTeX、parse5 帶進主程式。主程式 2,205 KB → 1,614 KB。
+- 伺服器對網頁檔 gzip（`hono/compress`，只掛在 `/api` 之後的網頁路由，聊天串流不受影響）；
+  `/roko/*`、`/rocky/*` 快取一天；index.html 預先載入 Roko 的圖。
+- `src/web/zod-config.ts` 在所有依賴之前設定 zod `jitless`：CSP 本來就禁止 eval，zod 的快速路徑從來跑不了；
+  先講清楚就不會再用 `Function('')` 試探而在瀏覽器留下 CSP 違規紀錄。
 - 不使用網路字型（維持 `tokens.css` 原本的做法），只在字型清單前面加上 Windows 的 Segoe UI Variable。
 
 ## 驗證（雲端 Linux，Node 24.21.0，Playwright 的 Chromium）
@@ -47,6 +51,16 @@
     CPU 降速 4 倍 FCP 680 ms、LCP 772 ms、TBT 314 ms（超過 200 ms，Rocky 只在桌機執行）。
   - 對照 Webby Apps & Software 的項目（內容、結構與導覽、視覺設計含包容性、功能、互動性、創新、整體體驗）
     逐項補強：設定目錄與窄視窗抽屜（導覽）、深色與 AA 對比（視覺與包容）、快捷鍵（互動）、Roko 視線（創新）。
-  - 這些是自我檢查，不是評審結果；Roko 圖（3 MB）依 owner 的紀錄保持原檔。
+  - Lighthouse 12.8.2（Chromium，本機伺服器，帶登入 cookie）：
+
+    | 階段                        | 桌面 效能／無障礙／最佳實務 | 桌面 LCP、TBT | 行動 效能 |
+    | --------------------------- | --------------------------- | ------------- | --------- |
+    | 改之前                      | 62／100／96                 | 4.2 s、230 ms | 53        |
+    | gzip、快取、streamdown、zod | 82／100／100                | 3.2 s、30 ms  | 60        |
+
+    LCP 的元素是 Roko 的精靈圖；Lighthouse 以 10 Mbps 模擬，3 MB 的圖本身就要約 2.4 秒。圖檔要不要
+    重新編碼（無損 WebP 2.27 MB 逐像素相同；有損 q90 約 0.65 MB）需要 owner 決定，素材 README 要求動用前先問。
+
+  - 這些是自我檢查，不是評審結果。
 - `npm run test:e2e:jobs`：沒有執行，這台機器沒有安裝 OpenCode。
 - 沒有在 Windows 上看過實際畫面。
