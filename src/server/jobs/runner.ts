@@ -16,6 +16,8 @@ import {
   hasUncommitted,
   git,
   isGitRepo,
+  repoRoot,
+  samePath,
   toRepoPath,
   verifyWorktree,
 } from '../external/worktree.ts';
@@ -221,17 +223,30 @@ export class JobRunner {
       // 1. A worktree at HEAD, on its own branch, under Rocky's data folder.
       const branch = `rocky/job-${job.id.slice(0, 8)}`;
       mkdirSync(join(dataDir, 'worktrees'), { recursive: true });
+      // The worktree mirrors the whole repository, which may be above the project folder.
+      const repo = await repoRoot(project);
       const tree = await addWorktree(
-        project,
+        repo,
         join(dataDir, 'worktrees', job.id),
         branch,
       );
       const worktree = tree.path;
-      jobs.setWorkspace(job.id, { worktree, branch, baseCommit: tree.base });
+      jobs.setWorkspace(job.id, {
+        worktree,
+        branch,
+        baseCommit: tree.base,
+        repo,
+      });
       if (await hasUncommitted(project)) warnings.push('uncommitted-changes');
-      // Installed dependencies are not in Git; share the project's so tests can run.
+      // Installed dependencies are not in Git; share the project's so tests can run. Only
+      // when the project is the repository's top folder: a subfolder's dependencies at the
+      // worktree's top would be the wrong ones (ADR 0031).
       const modules = join(project, 'node_modules');
-      if (existsSync(modules) && !existsSync(join(worktree, 'node_modules'))) {
+      if (
+        samePath(project, repo) &&
+        existsSync(modules) &&
+        !existsSync(join(worktree, 'node_modules'))
+      ) {
         symlinkSync(modules, join(worktree, 'node_modules'), 'junction');
       }
       event({ type: 'status', text: 'worktree-ready' });

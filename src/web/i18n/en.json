@@ -217,6 +217,8 @@
   "jobs.error.content-changed": "The files changed after you confirmed. Review them again.",
   "jobs.error.not-applicable": "This job can't be applied now.",
   "jobs.error.denied": "A rule blocked applying: {path}",
+  "jobs.error.write-failed": "{path} could not be written. The files before it are written; you can apply again.",
+  "jobs.error.discard-failed": "The job's folder could not be removed: a file may be in use, or the worktree is locked (git worktree unlock). Try again after that.",
   "jobs.actionError": "Not done: {error}",
   "tool.delegate_to_opencode": "Hand to OpenCode",
   "approval.title.delegate": "{actor}wants to hand a job to OpenCode: {title}",
@@ -333,5 +335,10 @@
   "grant.command": "{program} touching paths outside the project",
   "plan.toggle": "Plan",
   "plan.toggle.hint": "Plan mode: Rocky only reads, proposes options for you to pick, and starts only after you choose",
-  "chat.placeholder.plan": "Plan mode: say what you want done; Rocky proposes a plan first…"
+  "chat.placeholder.plan": "Plan mode: say what you want done; Rocky proposes a plan first…",
+  "jobs.error.busy": "This job is being applied or discarded. Wait until that finishes.",
+  "jobs.leftover": "The changes are applied, but the job's folder could not be removed.",
+  "jobs.cleanUp": "Remove the job's folder",
+  "jobs.status.worktree-ready": "Worktree ready",
+  "jobs.status.cleanup-failed": "Job folder not removed"
 }
