@@ -28,6 +28,10 @@ Rocky 只能 `git clone` 後 `npm ci`、`npm start`。擁有者想用一個 npm 
 6. `files` 放 `bin`、`dist`、`NOTICE`、`THIRD_PARTY_NOTICES.md`、`npm-shrinkwrap.json`（npm 另外自動帶 `LICENSE`、
    README）。`assets/` 已由 Vite 複製進 `dist/web`，不另外放。
 7. 開發流程不變：`npm start` 仍直接跑 `src/server/start.ts`。
+8. 只有網頁用的依賴（`react`、`react-dom`、`react-markdown`、`lucide-react`、`@copilotkit/react-core`）放在
+   devDependencies：網頁在發佈前就建置進 `dist/web`，安裝的人用不到它們。正式依賴從 989 個降到 589 個，
+   `node_modules` 從 991 MB 降到 567 MB（`npm ci --omit=dev`，清空快取後 44 秒和 45 秒，時間沒有變）。
+   之後新增只有網頁用的套件，也放進 devDependencies。把伺服器整個打包的評估見 ADR 0037。
 
 ## shrinkwrap 什麼時候有效
 
