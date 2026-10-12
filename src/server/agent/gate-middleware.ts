@@ -23,6 +23,9 @@ export interface GateRun {
   threadId: string;
   runId: string;
   signal: AbortSignal;
+  /** The project folder when the run started: paths are judged against it even if the
+   * user opens another project while the run is going. */
+  root?: string;
 }
 
 /** Tool results above Deep Agents' eviction threshold (20k tokens, about 80k characters)
@@ -131,7 +134,9 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
       run.signal,
       {
         ...(mapped.before !== undefined ? { before: mapped.before } : {}),
-        ...(mapped.root !== undefined ? { root: mapped.root } : {}),
+        ...((mapped.root ?? run.root) !== undefined
+          ? { root: (mapped.root ?? run.root)! }
+          : {}),
       },
     );
     if (!result.allowed) return error(result.message);

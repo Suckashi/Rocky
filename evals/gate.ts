@@ -29,10 +29,22 @@ export const BLOCKING_DROP = 0.5;
 const rate = (c: CaseSummary) => (c.runs > 0 ? c.passed / c.runs : 0);
 const label = (c: CaseSummary) => `${c.passed}/${c.runs}`;
 
+/** `missing`: baseline cases still in the suite with no scored run now (every run ended by
+ * a provider error). Nothing can be said about them, so the gate cannot pass. Cases the run
+ * skipped on purpose (`skipped`, e.g. OpenCode not installed) are left out; cases no longer
+ * in the suite (`suite`) are `removed`, reported but not blocking. */
 export function compareCases(
   baseline: CaseSummary[],
   current: CaseSummary[],
-): { blocking: Regression[]; minor: Regression[]; added: string[] } {
+  skipped: string[] = [],
+  suite?: string[],
+): {
+  blocking: Regression[];
+  minor: Regression[];
+  added: string[];
+  missing: string[];
+  removed: string[];
+} {
   const before = new Map(baseline.map((c) => [c.id, c]));
   const blocking: Regression[] = [];
   const minor: Regression[] = [];
@@ -48,7 +60,13 @@ export function compareCases(
     const entry = { id: now.id, baseline: label(was), now: label(now) };
     (drop >= BLOCKING_DROP - 1e-9 ? blocking : minor).push(entry);
   }
-  return { blocking, minor, added };
+  const now = new Set(current.map((c) => c.id));
+  const absent = baseline
+    .map((c) => c.id)
+    .filter((id) => !now.has(id) && !skipped.includes(id));
+  const removed = suite ? absent.filter((id) => !suite.includes(id)) : [];
+  const missing = absent.filter((id) => !removed.includes(id));
+  return { blocking, minor, added, missing, removed };
 }
 
 /** Per-case totals from individual runs, in first-seen order. */

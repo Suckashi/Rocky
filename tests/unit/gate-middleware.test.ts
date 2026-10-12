@@ -12,14 +12,17 @@ import { ToolRegistry } from '../../src/server/agent/registry.ts';
 import { testRocky } from '../fixtures/rocky.ts';
 
 // The gate middleware is the one place a tool call's failure is handled (ADR 0027).
-function setup(signal = new AbortController().signal) {
+function setup(
+  signal = new AbortController().signal,
+  mode: 'hands-off' | 'ask-when-needed' = 'hands-off',
+) {
   const dir = mkdtempSync(join(tmpdir(), 'rocky-mw-'));
   const project = join(dir, 'project');
   mkdirSync(project);
   mkdirSync(join(dir, 'data'));
   const { rocky } = testRocky({ dataDir: join(dir, 'data'), port: 4330 });
   rocky.settings.setProject(project);
-  rocky.settings.setMode('hands-off');
+  rocky.settings.setMode(mode);
   const tools = new ToolRegistry(() => ({ error: 'unregistered' }))
     .judge('fake_write', () => ({
       effect: {
@@ -42,6 +45,7 @@ function setup(signal = new AbortController().signal) {
       threadId: 't1',
       runId: 'r1',
       signal,
+      root: project,
     },
     'rocky',
   );
@@ -56,7 +60,7 @@ function setup(signal = new AbortController().signal) {
         handler: () => Promise<unknown>,
       ) => Promise<unknown>
     )({ toolCall: { name, args: {}, id: 'c1' }, ...extra }, handler);
-  return { rocky, call };
+  return { rocky, call, dir };
 }
 
 describe('gate middleware failures', () => {
@@ -173,5 +177,18 @@ describe('gate middleware failures', () => {
       'invalid arguments for fake_write',
     );
     expect(rocky.receipts.forThread('t1')).toEqual([]);
+  });
+
+  it('judges against the folder the run started in, even after the project changes', async () => {
+    const { rocky, call, dir } = setup(undefined, 'ask-when-needed');
+    // The user opens another project while this turn is still running.
+    mkdirSync(join(dir, 'other'));
+    rocky.settings.setProject(join(dir, 'other'));
+    const result = await Promise.race([
+      call('fake_read', async () => 'read'),
+      new Promise((r) => setTimeout(() => r('asked'), 500)),
+    ]);
+    expect(result).toBe('read');
+    expect(rocky.gate.pending('t1')).toEqual([]);
   });
 });
