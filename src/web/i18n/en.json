@@ -153,6 +153,8 @@
   "changes.restored": "Restored {count} files.",
   "changes.error.content-changed": "The files changed after you confirmed. Review them again before restoring.",
   "changes.error.denied": "A rule blocked the restore: {path}",
+  "changes.damaged": "A saved version of this file is damaged and cannot be shown. Restoring skips it; the other files restore as usual.",
+  "changes.error.snapshot-damaged": "The saved earlier version is damaged, so it cannot be shown or restored. No file was changed.",
   "changes.error": "Restore failed: {error}",
   "changes.loading": "Loading…",
   "receipt.unknown": "Not sure whether this worked: {action}",

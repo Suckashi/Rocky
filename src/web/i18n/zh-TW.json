@@ -153,6 +153,8 @@
   "changes.restored": "已還原 {count} 個檔案。",
   "changes.error.content-changed": "檔案在你確認之後又變了，請重新查看再還原。",
   "changes.error.denied": "還原被規則擋下：{path}",
+  "changes.damaged": "這個檔案存下的版本已經損壞，無法顯示；還原時會略過它，其他檔案照常還原。",
+  "changes.error.snapshot-damaged": "這一輪存下的舊版本已經損壞，無法顯示或還原。檔案沒有被改動。",
   "changes.error": "還原失敗：{error}",
   "changes.loading": "載入中…",
   "receipt.unknown": "不確定剛剛有沒有成功：{action}",

@@ -7,7 +7,11 @@ import type { Executor } from '../../effects/execute.ts';
 import type { Gate, UserDecision } from '../../effects/gate.ts';
 import { planRestore, restoreRun, runChanges } from '../../effects/restore.ts';
 import type { ReceiptStore } from '../../effects/receipts.ts';
-import { asContent, type SnapshotStore } from '../../effects/snapshots.ts';
+import {
+  asContent,
+  SnapshotDamaged,
+  type SnapshotStore,
+} from '../../effects/snapshots.ts';
 import { formatOf, isBinary } from '../../documents/formats.ts';
 import { PREVIEW_MAX_BYTES, previewResponse } from './preview.ts';
 import { toMarkdown } from '../../documents/read.ts';
@@ -124,18 +128,33 @@ export function approvalRoutes(
     return c.json({ receipts: list, snapshots: snaps });
   });
   // One turn's file changes with before/after text, and the restore plan the user approves.
+  // A damaged snapshot is never shown as a file's old content, nor written back.
+  app.onError((error, c) => {
+    if (error instanceof SnapshotDamaged)
+      return c.json({ ok: false, error: 'snapshot-damaged' }, 409);
+    throw error;
+  });
   app.get('/threads/:id/runs/:runId/changes', async (c) => {
     const [threadId, runId] = [c.req.param('id'), c.req.param('runId')];
     const plan = new Map(
       planRestore(receipts, snapshots, threadId, runId).map((i) => [i.path, i]),
     );
-    /** The text to diff; undefined when there is none to show (too large or unreadable). */
+    let damaged: boolean;
+    /** The text to diff; undefined when there is none to show (too large, unreadable or
+     * damaged). */
     const text = async (
       sha: string | null,
       path: string,
     ): Promise<string | null | undefined> => {
       if (sha === null) return null;
-      const blob = snapshots.read(sha);
+      let blob: Buffer;
+      try {
+        blob = snapshots.read(sha);
+      } catch (error) {
+        if (!(error instanceof SnapshotDamaged)) throw error;
+        damaged = true;
+        return undefined;
+      }
       const content = asContent(blob);
       if (blob.length <= PREVIEW_LIMIT && !content.encoding)
         return content.content;
@@ -152,7 +171,9 @@ export function approvalRoutes(
     };
     const changes = [];
     for (const change of runChanges(receipts, snapshots, threadId, runId)) {
-      const item = plan.get(change.path)!;
+      // Missing from the plan: its earlier version is damaged and cannot be restored.
+      const item = plan.get(change.path);
+      damaged = false;
       const before = await text(change.beforeSha, change.path);
       const after = await text(change.afterSha, change.path);
       changes.push({
@@ -161,10 +182,11 @@ export function approvalRoutes(
         deleted: change.afterSha === null,
         before: before ?? null,
         after: after ?? null,
-        tooLarge: before === undefined || after === undefined,
+        tooLarge: !damaged && (before === undefined || after === undefined),
         document: formatOf(change.path) !== undefined,
-        modifiedSince: item.modifiedSince,
-        contentHash: item.contentHash,
+        damaged: damaged || item === undefined,
+        modifiedSince: item?.modifiedSince ?? false,
+        contentHash: item?.contentHash ?? null,
       });
     }
     return c.json({ changes });
@@ -205,6 +227,7 @@ export function approvalRoutes(
       );
       return result.ok ? c.json(result) : c.json(result, 409);
     } catch (error) {
+      if (error instanceof SnapshotDamaged) throw error;
       return c.json(
         { ok: false, error: error instanceof Error ? error.message : 'failed' },
         500,

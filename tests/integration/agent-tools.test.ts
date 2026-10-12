@@ -1,5 +1,6 @@
 // The M2 tool flow end to end through the local server: a scripted model calls Rocky's
 // tools, the gate asks over AG-UI state, the user answers over the approvals API.
+import { createHash } from 'node:crypto';
 import {
   existsSync,
   mkdirSync,
@@ -572,6 +573,63 @@ describe('document tools', () => {
 });
 
 describe('restoring a turn', () => {
+  it("a damaged snapshot is skipped; the turn's other files still restore", async () => {
+    const { call, project, rocky } = await setup('hands-off');
+    plan = [
+      {
+        name: 'edit_file',
+        args: {
+          file_path: '/app.js',
+          old_string: 'answer = 41',
+          new_string: 'answer = 42',
+        },
+      },
+      { name: 'write_file', args: { file_path: '/new.txt', content: 'hi\n' } },
+    ];
+    await run(call, 'r9');
+    // The earlier app.js, cut off on disk (a crash or a full disk before writes were atomic).
+    const sha = createHash('sha256')
+      .update('const answer = 41;\n')
+      .digest('hex');
+    const blob = join(project, '..', 'data', 'snapshots', sha.slice(0, 2), sha);
+    writeFileSync(blob, 'const ans');
+    type Change = {
+      path: string;
+      damaged: boolean;
+      before: string | null;
+      contentHash: string | null;
+    };
+    const list = async () =>
+      (
+        (await (await call('/api/threads/r9/runs/r9-r/changes')).json()) as {
+          changes: Change[];
+        }
+      ).changes;
+    const changes = await list();
+    const app = changes.find((c) => c.path.endsWith('app.js'))!;
+    expect(app).toMatchObject({
+      damaged: true,
+      before: null,
+      contentHash: null,
+    });
+    const added = changes.find((c) => c.path.endsWith('new.txt'))!;
+    expect(added.damaged).toBe(false);
+    const restored = await call('/api/threads/r9/runs/r9-r/restore', {
+      method: 'POST',
+      body: { items: [{ path: added.path, contentHash: added.contentHash }] },
+    });
+    expect(restored.status).toBe(200);
+    expect(existsSync(join(project, 'new.txt'))).toBe(false);
+    expect(readFileSync(join(project, 'app.js'), 'utf8')).toBe(
+      'const answer = 42;\n',
+    );
+    // Saving the same content again repairs the stored copy.
+    rocky.snapshots.put(Buffer.from('const answer = 41;\n'));
+    expect((await list()).find((c) => c.path.endsWith('app.js'))).toMatchObject(
+      { damaged: false, before: 'const answer = 41;\n' },
+    );
+  });
+
   it('shows the changes and puts every file back through the gate', async () => {
     const { call, project } = await setup('hands-off');
     plan = [

@@ -71,7 +71,11 @@ const LOCKDOWN = {
 const SECRET_NAMES = [
   // Rocky's own (ADR 0028): a job's worktree sits inside Rocky's data folder.
   'secrets.json',
+  // The temporary and kept-aside copies (effects/atomic-write.ts, store/settings.ts).
+  'secrets.json.tmp',
+  'secrets.json.broken',
   'api-token',
+  'api-token.tmp',
   '.netrc',
   '.npmrc',
   '.pypirc',

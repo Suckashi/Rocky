@@ -27,7 +27,8 @@ import { settingsRoutes, type ListModels } from './http/routes/settings.ts';
 import { threadRoutes } from './http/routes/threads.ts';
 import { EgressGuard } from './platform/egress.ts';
 import { openDatabase } from './store/db.ts';
-import { SettingsStore } from './store/settings.ts';
+import { SettingsStore, secretsFiles } from './store/settings.ts';
+import { tokenFiles } from './http/token.ts';
 import { ThreadStore } from './store/threads.ts';
 
 export interface ComposeOptions {
@@ -62,8 +63,8 @@ export function composeRocky(options: ComposeOptions) {
         .some((s) => s.path === path && s.beforeSha === null),
     // The model key and MCP tokens, and the API token (http/token.ts).
     privateFiles: [
-      join(options.dataDir, 'secrets.json'),
-      join(options.dataDir, 'api-token'),
+      ...secretsFiles(options.dataDir),
+      ...tokenFiles(options.dataDir),
     ],
   });
   const executor = new Executor({ passes: gate.passes, receipts, snapshots });
