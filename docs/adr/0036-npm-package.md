@@ -20,29 +20,65 @@ Rocky 只能 `git clone` 後 `npm ci`、`npm start`。擁有者想用一個 npm 
 3. 伺服器用 `tsconfig.build.json` 編譯（`npm run build:server`）：沿用 `tsconfig.json`，加上
    `rewriteRelativeImportExtensions`，`src/server` 與 `src/shared` 輸出到 `dist/`。`erasableSyntaxOnly` 早已開著，
    所以編譯只拿掉型別，不改寫程式。`main.ts` 找 `dist/web` 的路徑從 `dist/server/` 算過去不變。
-4. `prepack` 跑 `vite build` 與 `build:server`，套件帶著建置好的 `dist/web` 和 `dist/server`；`files` 只放
-   `bin`、`dist`、`NOTICE`、`THIRD_PARTY_NOTICES.md`（npm 另外自動帶 `LICENSE`、README）。`assets/` 已由 Vite 複製進
-   `dist/web`，不另外放。
-5. `package-lock.json` 改成 `npm-shrinkwrap.json`。它會隨套件發佈，`npm install -g` 也照它安裝；`npm ci` 和
-   `Start-Rocky.ps1` 照常使用它。
-6. 開發流程不變：`npm start` 仍直接跑 `src/server/start.ts`。
+4. `prepare` 跑 `vite build` 與 `build:server`，套件帶著建置好的 `dist/web` 和 `dist/server`。用 `prepare` 不用
+   `prepack`：從 Git 打包時 npm（pacote）只跑 `prepare`，`prepack` 不會跑，套件裡就沒有 `dist/`。代價是開發時每次
+   `npm ci`／`npm install` 後也會建置一次。
+5. `package-lock.json` 改成 `npm-shrinkwrap.json`，並且**要列在 `files` 裡**：npm 11 不會自動把它放進套件。
+   `npm ci` 和 `Start-Rocky.ps1` 照常使用它。
+6. `files` 放 `bin`、`dist`、`NOTICE`、`THIRD_PARTY_NOTICES.md`、`npm-shrinkwrap.json`（npm 另外自動帶 `LICENSE`、
+   README）。`assets/` 已由 Vite 複製進 `dist/web`，不另外放。
+7. 開發流程不變：`npm start` 仍直接跑 `src/server/start.ts`。
+
+## shrinkwrap 什麼時候有效
+
+npm 只看 registry 對這個版本標的 `_hasShrinkwrap`，不會自己打開套件找。npmjs.org 在發佈時依套件內容設定它（例如
+`@salesforce/cli` 是 `true`，套件裡有 `npm-shrinkwrap.json`）。所以：
+
+- **從 npmjs.org 安裝：** 照 shrinkwrap 安裝。
+- **從 `.tgz` 或 Git 安裝：** 沒有這個標記，npm 照 `package.json` 的範圍重新解析，間接依賴會拿到較新的版本。
+
+## Git 直接安裝為什麼失敗
+
+`npm install -g github:Suckashi/Rocky`（試的是 `git+file://`）會失敗，原因在 npm，不在 Rocky：
+
+1. npm 為了準備 Git 套件，會在暫存的 clone 裡另外跑一個 `npm install --force`。
+2. 外層的設定以 `npm_config_*` 環境變數傳給它，其中包括 `global=true` 和 `prefix`。
+3. 所以這個巢狀的 npm 也在全域模式下執行，操作的是外層正在安裝的那個全域資料夾：它的 log 裡有 838 筆 `REMOVE`、
+   0 筆 `ADD`。外層解壓到一半的檔案被刪掉（`TAR_ENTRY_ERROR` lstat ENOENT），`@scarf/scarf` 的資料夾也不見了
+   （`spawn sh ENOENT`，exit 254）。
+4. 改成 `prepare` 後一樣失敗，只是換成 `vite: not found`（exit 127）：巢狀 npm 沒把依賴裝進 clone。
+
+不是全域模式時沒有這個問題，所以從 Git 安裝要分兩步：
+
+```sh
+npm pack github:Suckashi/Rocky
+npm install -g ./suckashi-rocky-0.1.0.tgz
+```
 
 ## 驗證了什麼（雲端 Linux，Node 24.21.0，npm 11.19.0）
 
-| 項目                                                                                 | 結果                                                                          |
-| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| `npm pack`                                                                           | ✅ 553 個檔案，壓縮後 7.5 MB，解開 20.7 MB                                    |
-| `npm install -g --prefix <暫存> <tgz>`                                               | ✅ exit 0；沒有裝到 vite、typescript；版本與鎖定檔一致                        |
-| 用裝好的 `rocky` 啟動（`ROCKY_DATA_DIR`、`ROCKY_PORT=4399`、`ROCKY_OPEN_BROWSER=0`） | ✅ 印出登入連結；`/` 與 `/roko/...` 回 200；資料寫在資料資料夾                |
-| 全域安裝時 Scarf 的安裝遙測（`SCARF_VERBOSE=true`、新的 `TMPDIR`）                   | ✅ 回報 `Scarf has been disabled via a package.json in the dependency chain.` |
-| `npm run check`                                                                      | ✅ exit 0（327 通過、5 略過）                                                 |
+| 項目                                                                                                              | 結果                                                                          |
+| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `npm pack`                                                                                                        | ✅ 554 個檔案，含 `npm-shrinkwrap.json`                                       |
+| `npm install -g` 本機 `.tgz`                                                                                      | ✅ exit 0；沒有 vite、typescript；**沒有**照 shrinkwrap（57 個版本不同）      |
+| 發佈到本機 verdaccio，模擬 npmjs.org 標上 `_hasShrinkwrap`，再 `npm install -g`                                   | ✅ exit 0；1027 個鎖定套件版本全部相同；另外多裝 8 個 dev 套件（見限制）      |
+| 同上但沒有標記                                                                                                    | 和 `.tgz` 一樣，沒有照 shrinkwrap                                             |
+| `npm install -g git+file://…`（`prepack`／`prepare` 各一次）                                                      | ❌ exit 254／127，原因見上                                                    |
+| `npm pack git+file://…`（`prepare`）再 `npm install -g` 產生的 `.tgz`                                             | ✅ exit 0；`dist/` 在；用 `prepack` 時套件只有 7 個檔案                       |
+| 用裝好的 `rocky` 啟動（`.tgz`、Git 打包、verdaccio 三種，`ROCKY_DATA_DIR`、`ROCKY_PORT`、`ROCKY_OPEN_BROWSER=0`） | ✅ 印出登入連結；`/` 回 200（`.tgz` 那次也查了 `/roko/...`）                  |
+| 全域安裝時 Scarf 的安裝遙測（`SCARF_VERBOSE=true`、新的 `TMPDIR`）                                                | ✅ 回報 `Scarf has been disabled via a package.json in the dependency chain.` |
+| `npm ci`（含 `prepare` 建置）                                                                                     | ✅ 53 秒，產生 `dist/`                                                        |
+| `npm run check`                                                                                                   | ✅ exit 0（327 通過、5 略過）                                                 |
+
+verdaccio 只在本機 127.0.0.1 執行，沒有發佈到 npmjs.org。
 
 ## 限制
 
-- **還沒發佈。** 發佈到 npm 屬於部署，要擁有者明確同意；在那之前只能從 `npm pack` 產生的 `.tgz` 安裝。
-- **從 Git 直接安裝失敗。** `npm install -g "git+file:///…/Rocky#<分支>"` 試了兩次都 exit 254：解開依賴時出現大量
-  `TAR_ENTRY_ERROR`（`lstat` ENOENT），接著 `@scarf/scarf` 的 postinstall 因為資料夾不在而 `spawn sh ENOENT`。
-  原因還沒查；`npm install -g github:Suckashi/Rocky` 預期也一樣，所以不寫進 README。
+- **還沒發佈。** 發佈到 npm 屬於部署，要擁有者明確同意。發佈後要用 `npm view @suckashi/rocky _hasShrinkwrap`
+  確認是 `true`。
+- **從 `.tgz` 或 Git 安裝時版本沒有鎖定**（見上）。
+- 照 shrinkwrap 安裝時會多裝 `vitest` 等 8 個 dev 套件：`@copilotkit/channels-core` 把 `vitest` 列為可選的 peer
+  dependency。執行時不會載入它們。
 - 沒有在 Windows 上驗證全域安裝與 `rocky.cmd` 啟動，也沒有跑改過鎖定檔名稱的 `Start-Rocky.ps1`；也沒有在全域安裝的
   版本上跑 e2e 或模型。
 - 使用者那邊 `engine-strict` 不生效（`.npmrc` 不隨套件），Node 版本不對只會警告；啟動時 Node 24 才有的功能會直接失敗。

@@ -14,7 +14,8 @@
     "bin",
     "dist",
     "NOTICE",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "npm-shrinkwrap.json"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -30,7 +31,7 @@
     "test:e2e:jobs": "vite build && node scripts/e2e-jobs.ts",
     "eval": "node evals/run.ts",
     "build:server": "tsc -p tsconfig.build.json",
-    "prepack": "vite build && npm run build:server"
+    "prepare": "vite build && npm run build:server"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
