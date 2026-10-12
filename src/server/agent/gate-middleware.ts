@@ -1,6 +1,7 @@
 // First line of defence: every tool call passes through the gate before it runs.
 // The tool registry says what each call would do; reads are checked too (secret reads ask).
 import { ToolMessage } from '@langchain/core/messages';
+import { isGraphBubbleUp } from '@langchain/langgraph';
 import {
   createMiddleware,
   type ToolCallHandler,
@@ -11,6 +12,7 @@ import type { ReceiptStore } from '../effects/receipts.ts';
 import type { Actor } from '../effects/types.ts';
 import { currentEffect, currentPass } from './backend.ts';
 import { chosenPlanMessage } from './plan.ts';
+import { isProviderFailure } from './provider-retry.ts';
 import type { ToolRegistry } from './registry.ts';
 
 export interface GateRun {
@@ -76,7 +78,34 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
       capped(await gated(request, handler)),
   });
 
+  /**
+   * The one place a tool call's failure is handled (ADR 0027). A tool that throws gives the
+   * model an error result instead of ending the run, so it can tell the user or try another
+   * way; only Stop, LangGraph's own control flow and a provider failure inside the research
+   * subagent pass through. A write or command whose
+   * tool never reached the executor has its pass withdrawn and its receipt marked not run.
+   */
   async function gated(request: ToolCallRequest, handler: ToolCallHandler) {
+    const { name, id = '' } = request.toolCall;
+    try {
+      return await judged(request, handler);
+    } catch (thrown) {
+      if (
+        run.signal.aborted ||
+        (thrown != null && isGraphBubbleUp(thrown)) ||
+        // The research subagent's model failed: the run ends as it would for Rocky's own.
+        (name === 'task' && isProviderFailure(thrown))
+      )
+        throw thrown;
+      return new ToolMessage({
+        tool_call_id: id,
+        status: 'error',
+        content: `Error: ${name} failed: ${messageOf(thrown)}`,
+      });
+    }
+  }
+
+  async function judged(request: ToolCallRequest, handler: ToolCallHandler) {
     const { name, args, id = '' } = request.toolCall;
     const error = (content: string) =>
       new ToolMessage({ tool_call_id: id, status: 'error', content });
@@ -84,8 +113,13 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
       name,
       args as Record<string, unknown>,
     );
-    if ('none' in mapped) return handler(request);
+    // The tool's own judge explains its errors best; after that, arguments the tool would
+    // refuse anyway are refused before anyone is asked.
     if ('error' in mapped) return error(mapped.error);
+    const invalid = schemaProblem(request.tool, args);
+    if (invalid)
+      return error(`Error: invalid arguments for ${name}: ${invalid}`);
+    if ('none' in mapped) return handler(request);
     // The subagent is read-only: anything with an effect is refused before the gate.
     if (actor === 'subagent' && mapped.effect.kind !== 'read')
       return error(
@@ -113,11 +147,23 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
           : 'Error: no option was chosen.',
       });
     }
-    // Writes and commands go through the executor, which redeems the pass.
-    if (effect.kind === 'write' || effect.kind === 'command')
-      return currentEffect.run(effect, () =>
-        currentPass.run(result.pass, () => handler(request)),
-      );
+    // Writes and commands go through the executor, which redeems the pass and finishes the
+    // receipt. If the tool stops before that (bad input, the text to replace is gone), nothing
+    // ran: withdraw the pass and say so in the receipt.
+    if (effect.kind === 'write' || effect.kind === 'command') {
+      const pass = result.pass;
+      try {
+        return await currentEffect.run(effect, () =>
+          currentPass.run(pass, () => handler(request)),
+        );
+      } finally {
+        if (run.gate.passes.isOpen(pass)) {
+          run.gate.passes.discard(pass);
+          if (result.receipt)
+            run.receipts.cancel(result.receipt.id, 'the tool did not run');
+        }
+      }
+    }
     // Reads and other tools (delegation, MCP) act on their own: the pass is closed now and
     // Rocky finishes their receipt here (an approved secret read has one).
     // A tool that throws may or may not have acted, so its outcome is unknown.
@@ -137,4 +183,26 @@ export function createGateMiddleware(run: GateRun, actor: Actor) {
       throw thrown;
     }
   }
+}
+
+function messageOf(thrown: unknown): string {
+  return thrown instanceof Error ? thrown.message : String(thrown);
+}
+
+/** The tool's own argument check (Zod), when it has one; MCP tools carry JSON Schema and are skipped. */
+function schemaProblem(tool: unknown, args: unknown): string | undefined {
+  const schema = (tool as { schema?: unknown } | undefined)?.schema as
+    | {
+        safeParse?: (value: unknown) => {
+          success: boolean;
+          error?: { issues?: { path?: unknown[]; message: string }[] };
+        };
+      }
+    | undefined;
+  if (typeof schema?.safeParse !== 'function') return undefined;
+  const parsed = schema.safeParse(args);
+  if (parsed.success) return undefined;
+  return (parsed.error?.issues ?? [])
+    .map((i) => `${(i.path ?? []).join('.') || 'arguments'}: ${i.message}`)
+    .join('; ');
 }

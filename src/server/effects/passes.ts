@@ -22,6 +22,16 @@ export class PassBook {
     return this.open.size;
   }
 
+  /** Issued here and not yet used. */
+  isOpen(pass: Pass): boolean {
+    return this.open.get(pass.id) === pass;
+  }
+
+  /** Withdraws a pass that will not be used (the tool never reached the executor). */
+  discard(pass: Pass): void {
+    this.open.delete(pass.id);
+  }
+
   /** Consumes the pass if it was issued here, is unused and matches the content. */
   redeem(pass: Pass, contentHash: string): void {
     const issued = this.open.get(pass.id);
