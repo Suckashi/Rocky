@@ -134,6 +134,8 @@ function JobDetail({
         'content-changed',
         'not-applicable',
         'denied',
+        'write-failed',
+        'discard-failed',
       ].includes(code)
       ? t(`jobs.error.${code}` as MessageKey, { path: '' })
       : t('jobs.actionError', { error: code });

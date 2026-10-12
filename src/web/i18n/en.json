@@ -216,6 +216,8 @@
   "jobs.error.content-changed": "The files changed after you confirmed. Review them again.",
   "jobs.error.not-applicable": "This job can't be applied now.",
   "jobs.error.denied": "A rule blocked applying: {path}",
+  "jobs.error.write-failed": "A file could not be written. The files already written stay as they are; you can apply again.",
+  "jobs.error.discard-failed": "The job's folder could not be removed (a file may be in use). Try discarding again later.",
   "jobs.actionError": "Not done: {error}",
   "tool.delegate_to_opencode": "Hand to OpenCode",
   "approval.title.delegate": "{actor}wants to hand a job to OpenCode: {title}",

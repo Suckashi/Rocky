@@ -16,6 +16,7 @@ import {
   hasUncommitted,
   git,
   isGitRepo,
+  repoRoot,
   toRepoPath,
   verifyWorktree,
 } from '../external/worktree.ts';
@@ -221,13 +222,20 @@ export class JobRunner {
       // 1. A worktree at HEAD, on its own branch, under Rocky's data folder.
       const branch = `rocky/job-${job.id.slice(0, 8)}`;
       mkdirSync(join(dataDir, 'worktrees'), { recursive: true });
+      // The worktree mirrors the whole repository, which may be above the project folder.
+      const repo = await repoRoot(project);
       const tree = await addWorktree(
-        project,
+        repo,
         join(dataDir, 'worktrees', job.id),
         branch,
       );
       const worktree = tree.path;
-      jobs.setWorkspace(job.id, { worktree, branch, baseCommit: tree.base });
+      jobs.setWorkspace(job.id, {
+        worktree,
+        branch,
+        baseCommit: tree.base,
+        repo,
+      });
       if (await hasUncommitted(project)) warnings.push('uncommitted-changes');
       // Installed dependencies are not in Git; share the project's so tests can run.
       const modules = join(project, 'node_modules');

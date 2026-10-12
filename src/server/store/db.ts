@@ -105,6 +105,8 @@ const MIGRATIONS: string[] = [
   `create table planning (thread_id text primary key);
    update settings set value = '"ask-when-needed"' where key = 'mode' and value = '"ask-always"';
    delete from settings where key = 'dismissedRuleSuggestions';`,
+  // ADR 0031: a job remembers the repository its worktree came from.
+  `alter table jobs add column repo text;`,
 ];
 
 export function openDatabase(path: string): DatabaseSync {

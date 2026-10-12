@@ -16,6 +16,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addWorktree,
   changedFiles,
+  removeWorktree,
   verifyWorktree,
 } from '../../src/server/external/worktree.ts';
 import { applyPlan } from '../../src/server/jobs/apply.ts';
@@ -55,6 +56,7 @@ const job = (worktree: string, base: string): Job => ({
   worktree,
   branch: 'rocky/job-test',
   baseCommit: base,
+  repo: null,
   sessionId: null,
   result: null,
   createdAt: 0,
@@ -138,5 +140,62 @@ describe('worktree changes', () => {
     // The agent removes the script; Rocky still runs the check.
     writeFileSync(join(second.path, 'package.json'), '{}');
     expect(await baseHasTestScript(second.path, second.base)).toBe(true);
+  });
+
+  it('does not warn about changes when Git only converted line endings', async () => {
+    for (const setup of [
+      (repo: string) => sh(repo, 'config', 'core.autocrlf', 'true'),
+      (repo: string) =>
+        writeFileSync(join(repo, '.gitattributes'), '* text=auto eol=crlf\n'),
+    ]) {
+      const root = mkdtempSync(join(tmpdir(), 'rocky-crlf-'));
+      const repo = join(root, 'project');
+      mkdirSync(join(repo, 'src'), { recursive: true });
+      sh(repo, 'init', '-q');
+      sh(repo, 'config', 'user.email', 'test@example.com');
+      sh(repo, 'config', 'user.name', 'Test');
+      sh(repo, 'config', 'core.autocrlf', 'false');
+      setup(repo);
+      // A Git for Windows checkout: LF in the repository, CRLF on disk.
+      writeFileSync(join(repo, 'src', 'a.ts'), 'export const a = 1;\r\n');
+      writeFileSync(join(repo, 'src', 'old.ts'), 'export const old = 1;\r\n');
+      sh(repo, 'add', '-A');
+      sh(repo, 'commit', '-q', '-m', 'base');
+      expect(sh(repo, 'status', '--porcelain')).toBe('');
+      const tree = await addWorktree(repo, join(root, 'wt'), 'rocky/job-crlf');
+      writeFileSync(join(tree.path, 'src', 'a.ts'), 'export const a = 2;\n');
+      sh(tree.path, 'rm', '-q', 'src/old.ts');
+      const plan = await applyPlan(job(tree.path, tree.base), repo);
+      expect(plan.map((i) => [i.path, i.modifiedSince])).toEqual([
+        ['src/a.ts', false],
+        ['src/old.ts', false],
+      ]);
+      // Real changes in the project after the job started still count.
+      writeFileSync(join(repo, 'src', 'a.ts'), 'export const a = 9;\r\n');
+      execFileSync('git', ['-C', repo, 'rm', '-q', 'src/old.ts']);
+      writeFileSync(join(tree.path, 'src', 'b.ts'), 'b\n');
+      writeFileSync(join(repo, 'src', 'b.ts'), 'mine\r\n');
+      await verifyWorktree(tree.path, tree.base, new Map());
+      const again = await applyPlan(job(tree.path, tree.base), repo);
+      expect(again.map((i) => [i.path, i.modifiedSince]).sort()).toEqual([
+        ['src/a.ts', true],
+        ['src/b.ts', true],
+        ['src/old.ts', true],
+      ]);
+    }
+  });
+
+  it('reports a worktree it could not remove; one already gone is no error', async () => {
+    const { repo, worktree } = await project();
+    sh(repo, 'worktree', 'lock', worktree);
+    await expect(
+      removeWorktree(repo, worktree, 'rocky/job-test'),
+    ).rejects.toThrow();
+    expect(existsSync(worktree)).toBe(true);
+    sh(repo, 'worktree', 'unlock', worktree);
+    await removeWorktree(repo, worktree, 'rocky/job-test');
+    expect(existsSync(worktree)).toBe(false);
+    expect(sh(repo, 'branch', '--list', 'rocky/job-test')).toBe('');
+    await removeWorktree(repo, worktree, 'rocky/job-test');
   });
 });

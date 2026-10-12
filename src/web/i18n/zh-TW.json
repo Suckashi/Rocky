@@ -216,6 +216,8 @@
   "jobs.error.content-changed": "檔案在你確認之後又變了，請重新查看。",
   "jobs.error.not-applicable": "這個工作現在不能套用。",
   "jobs.error.denied": "套用被規則擋下：{path}",
+  "jobs.error.write-failed": "有檔案沒寫進去。已寫入的檔案保持原樣，可以再套用一次。",
+  "jobs.error.discard-failed": "工作資料夾沒能移除（可能有檔案正在使用中），請稍後再捨棄一次。",
   "jobs.actionError": "沒有完成：{error}",
   "tool.delegate_to_opencode": "交給 OpenCode",
   "approval.title.delegate": "{actor}想把工作交給 OpenCode：{title}",

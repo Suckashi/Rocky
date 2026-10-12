@@ -327,7 +327,11 @@ export class Gate {
     seenHash: string,
     root?: string,
   ): GateResult {
-    const verdict = decide(effect, this.context(origin.threadId, root));
+    // Plan mode holds back the model, not the owner's own Restore or Apply click.
+    const verdict = decide(effect, {
+      ...this.context(origin.threadId, root),
+      planning: false,
+    });
     if (verdict.decision === 'deny') {
       return this.refuse(
         origin,

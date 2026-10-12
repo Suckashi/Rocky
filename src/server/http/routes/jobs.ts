@@ -5,7 +5,7 @@ import { z } from 'zod';
 import type { Executor } from '../../effects/execute.ts';
 import type { Gate } from '../../effects/gate.ts';
 import type { ReceiptStore } from '../../effects/receipts.ts';
-import { git } from '../../external/worktree.ts';
+import { git, repoRoot } from '../../external/worktree.ts';
 import { applyJob, applyPlan, discardWorkspace } from '../../jobs/apply.ts';
 import { jobThread, type JobRunner } from '../../jobs/runner.ts';
 import type { Job, JobStore } from '../../jobs/store.ts';
@@ -20,7 +20,8 @@ const real = (p: string) => {
   }
 };
 
-/** The job's worktree must belong to the current project folder. */
+/** Jobs from before ADR 0031 did not record their repository: the job's worktree must
+ * belong to the current project folder. */
 async function projectFor(
   job: Job,
   settings: SettingsStore,
@@ -39,6 +40,21 @@ async function projectFor(
   } catch {
     return undefined;
   }
+}
+
+/** The repository a job's work goes back to. A job records it (ADR 0031); its changes are
+ * applied only while the current project is in that repository. */
+async function applyTarget(
+  job: Job,
+  settings: SettingsStore,
+): Promise<string | undefined> {
+  if (!job.repo) return projectFor(job, settings);
+  const project = settings.project();
+  if (!project) return undefined;
+  const top = await repoRoot(project).catch(() => undefined);
+  return top && top.toLowerCase() === real(job.repo).toLowerCase()
+    ? job.repo
+    : undefined;
 }
 
 /** A job that stopped running: its result is final. */
@@ -146,9 +162,9 @@ export function jobRoutes(deps: {
   app.get('/jobs/:id/apply', async (c) => {
     const job = jobs.get(c.req.param('id'));
     if (!job) return c.json({ error: 'not-found' }, 404);
-    const project = await projectFor(job, settings);
-    if (!project) return c.json({ error: 'project-changed' }, 409);
-    const plan = await applyPlan(job, project);
+    const repo = await applyTarget(job, settings);
+    if (!repo) return c.json({ error: 'project-changed' }, 409);
+    const plan = await applyPlan(job, repo);
     return c.json({
       items: plan.map(({ effect, ...item }) => ({
         ...item,
@@ -173,13 +189,13 @@ export function jobRoutes(deps: {
     if (!body) return c.json({ error: 'invalid-apply' }, 400);
     const job = jobs.get(c.req.param('id'));
     if (!job) return c.json({ error: 'not-found' }, 404);
-    const project = await projectFor(job, settings);
-    if (!project) return c.json({ error: 'project-changed' }, 409);
+    const repo = await applyTarget(job, settings);
+    if (!repo) return c.json({ error: 'project-changed' }, 409);
     try {
       const result = await applyJob(
         { gate, executor, jobs },
         job,
-        project,
+        repo,
         body.items,
       );
       return result.ok ? c.json(result) : c.json(result, 409);
@@ -200,8 +216,16 @@ export function jobRoutes(deps: {
       job.status === 'applied'
     )
       return c.json({ error: 'not-discardable' }, 409);
-    const project = await projectFor(job, settings);
-    if (project) await discardWorkspace(job, project);
+    // Cleaned up in the job's own repository, whatever project is open now.
+    const repo = job.repo ?? (await projectFor(job, settings));
+    if (repo) {
+      try {
+        await discardWorkspace(job, repo);
+      } catch {
+        // Still there (locked, a file in use): stay discardable so it can be tried again.
+        return c.json({ error: 'discard-failed' }, 500);
+      }
+    }
     jobs.setStatus(job.id, 'discarded');
     return c.json({ ok: true });
   });

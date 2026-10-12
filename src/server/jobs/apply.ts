@@ -27,27 +27,33 @@ export interface ApplyItem {
 /** The run id an applied job's writes are recorded under (restorable as one turn). */
 export const applyRunId = (jobId: string) => `apply:${jobId}`;
 
-async function baseContent(
-  project: string,
+/** Whether the project's file differs from the base commit as Git sees it: through the
+ * project's own line-ending settings and filters, like `git status` (a CRLF checkout of an
+ * LF file is no change). When Git cannot tell, the file counts as changed. */
+async function changedSinceBase(
+  repo: string,
   base: string,
   path: string,
-): Promise<string | null> {
-  try {
-    return await git(project, 'show', `${base}:${path}`);
-  } catch {
-    return null;
-  }
+  exists: boolean,
+): Promise<boolean> {
+  const blob = await git(repo, 'rev-parse', '--verify', '-q', `${base}:${path}`)
+    .then((s) => s.trim())
+    .catch(() => null);
+  if (!exists || blob === null) return exists !== (blob !== null);
+  const now = await git(repo, 'hash-object', '--', path)
+    .then((s) => s.trim())
+    .catch(() => '');
+  return now !== blob;
 }
 
-export async function applyPlan(
-  job: Job,
-  project: string,
-): Promise<ApplyItem[]> {
+/** The plan to copy a job's changes into `repo`, the repository its worktree came from
+ * (paths in the worktree are relative to the repository's top folder). */
+export async function applyPlan(job: Job, repo: string): Promise<ApplyItem[]> {
   if (!job.worktree || !job.baseCommit) return [];
   const items: ApplyItem[] = [];
   for (const path of await changedFiles(job.worktree, job.baseCommit)) {
     const source = join(job.worktree, path);
-    const target = join(project, ...path.split('/'));
+    const target = join(repo, ...path.split('/'));
     const afterBlob = existsSync(source) ? readFileSync(source) : null;
     const after = afterBlob ? asContent(afterBlob) : null;
     const current = existsSync(target) ? readFileSync(target, 'utf8') : null;
@@ -64,8 +70,12 @@ export async function applyPlan(
       path,
       effect,
       contentHash: contentHash(effect),
-      modifiedSince:
-        current !== (await baseContent(project, job.baseCommit, path)),
+      modifiedSince: await changedSinceBase(
+        repo,
+        job.baseCommit,
+        path,
+        current !== null,
+      ),
       before: current,
       after: after && !after.encoding ? after.content : null,
     });
@@ -77,29 +87,38 @@ export type ApplyResult =
   | { ok: true; applied: string[] }
   | {
       ok: false;
-      error: 'not-applicable' | 'content-changed' | 'denied';
+      error: 'not-applicable' | 'content-changed' | 'denied' | 'write-failed';
       path?: string;
+      /** Files already written when a later one failed (restorable like any write). */
+      applied?: string[];
     };
 
 export async function applyJob(
   deps: { gate: Gate; executor: Executor; jobs: JobStore },
   job: Job,
-  project: string,
+  repo: string,
   seen: { path: string; contentHash: string }[],
 ): Promise<ApplyResult> {
   if (job.status !== 'verified' && job.status !== 'problems')
     return { ok: false, error: 'not-applicable' };
-  const plan = await applyPlan(job, project);
+  const plan = await applyPlan(job, repo);
   const same =
     plan.length === seen.length &&
     plan.every((item, i) => item.path === seen[i]?.path);
   if (!same) return { ok: false, error: 'content-changed' };
+  // Every file must still be what the user saw before the first one is written.
+  const changed = plan.find(
+    (item, i) => item.contentHash !== seen[i]!.contentHash,
+  );
+  if (changed)
+    return { ok: false, error: 'content-changed', path: changed.path };
   const applied: string[] = [];
   for (const [i, item] of plan.entries()) {
     const result = deps.gate.userAction(
       item.effect,
       { threadId: job.threadId, runId: applyRunId(job.id), actor: 'user' },
       seen[i]!.contentHash,
+      repo,
     );
     if (!result.allowed) {
       return {
@@ -107,21 +126,27 @@ export async function applyJob(
         error:
           result.message === 'content-changed' ? 'content-changed' : 'denied',
         path: item.path,
+        applied,
       };
     }
-    deps.executor.write(result.pass, item.effect);
+    try {
+      deps.executor.write(result.pass, item.effect);
+    } catch {
+      // The files before it are written; applying again writes the same content.
+      return { ok: false, error: 'write-failed', path: item.path, applied };
+    }
     applied.push(item.path);
   }
   deps.jobs.setStatus(job.id, 'applied');
-  await discardWorkspace(job, project);
+  // The work is in the project now; a worktree that cannot be removed only leaves a folder.
+  await discardWorkspace(job, repo).catch(() =>
+    deps.jobs.addEvent(job.id, { type: 'status', text: 'cleanup-failed' }),
+  );
   return { ok: true, applied };
 }
 
 /** Removes the job's worktree and branch. The job record and its timeline stay. */
-export async function discardWorkspace(
-  job: Job,
-  project: string,
-): Promise<void> {
+export async function discardWorkspace(job: Job, repo: string): Promise<void> {
   if (job.worktree && job.branch)
-    await removeWorktree(project, job.worktree, job.branch);
+    await removeWorktree(repo, job.worktree, job.branch);
 }

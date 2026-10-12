@@ -2,6 +2,7 @@
 // Rocky reads the result with git and checks it against what it approved.
 import { execFile } from 'node:child_process';
 import {
+  existsSync,
   lstatSync,
   readFileSync,
   realpathSync,
@@ -30,6 +31,13 @@ export async function isGitRepo(dir: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/** The top folder of the repository a folder belongs to, resolved through links. */
+export async function repoRoot(dir: string): Promise<string> {
+  return realpathSync.native(
+    (await git(dir, 'rev-parse', '--show-toplevel')).trim(),
+  );
 }
 
 /** A new branch and worktree at the project's HEAD; returns the real path and the commit. */
@@ -67,8 +75,18 @@ export async function removeWorktree(
   branch: string,
 ): Promise<void> {
   unlinkSharedModules(path);
-  await git(repo, 'worktree', 'remove', '--force', path).catch(() => '');
-  await git(repo, 'branch', '-D', branch).catch(() => '');
+  // Gone already is fine; anything left behind (a locked worktree, a file in use on
+  // Windows) is reported, so the job is not marked discarded with its folder still there.
+  await git(repo, 'worktree', 'remove', '--force', path).catch(
+    (error: unknown) => {
+      if (existsSync(path)) throw error;
+    },
+  );
+  await git(repo, 'worktree', 'prune').catch(() => '');
+  await git(repo, 'branch', '-D', branch).catch(async (error: unknown) => {
+    const left = await git(repo, 'branch', '--list', branch).catch(() => '');
+    if (left.trim()) throw error;
+  });
 }
 
 const EXCLUDE_SHARED = `:(exclude)${SHARED_MODULES}`;
