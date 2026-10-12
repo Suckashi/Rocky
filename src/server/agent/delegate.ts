@@ -14,6 +14,7 @@ const ERRORS: Record<string, string> = {
   'opencode-not-found':
     'OpenCode is not installed on this computer (npm i -g opencode-ai). Tell the user; do the task yourself only if they ask.',
   'model-not-configured': 'No model is configured.',
+  'shutting-down': 'Rocky is shutting down; no new job starts.',
 };
 
 /** Starting a job is an outside action; looking jobs up reads Rocky's own data. */

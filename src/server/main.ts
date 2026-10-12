@@ -75,3 +75,5 @@ const shutdown = createShutdown({
 });
 process.on('SIGINT', () => void shutdown());
 process.on('SIGTERM', () => void shutdown());
+// A closed terminal (on Windows, its console window) ends Rocky the same way.
+process.on('SIGHUP', () => void shutdown());
