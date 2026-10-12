@@ -60,6 +60,11 @@ export function composeRocky(options: ComposeOptions) {
       snapshots
         .forReceipts(receipts.forThread(threadId).map((r) => r.id))
         .some((s) => s.path === path && s.beforeSha === null),
+    // The model key and MCP tokens, and the API token (http/token.ts).
+    privateFiles: [
+      join(options.dataDir, 'secrets.json'),
+      join(options.dataDir, 'api-token'),
+    ],
   });
   const executor = new Executor({ passes: gate.passes, receipts, snapshots });
   const memory = new MemoryStore(options.dataDir);

@@ -4,7 +4,7 @@
 // over everything, in every mode.
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { splitPosix } from '../../effects/commands.ts';
+import { splitShell } from '../../effects/commands.ts';
 import type { RuleStore } from '../../effects/rules.ts';
 import { readBody } from '../body.ts';
 
@@ -19,11 +19,17 @@ export function parsePattern(
   pattern: string,
   decision: 'allow' | 'deny',
 ): { prefix: string[] } | { error: PatternError } {
-  const commands = splitPosix(pattern.trim(), { literalBackslash: true });
-  if (!commands || commands.length === 0 || commands[0]!.length === 0)
-    return { error: 'empty' };
-  if (commands.length !== 1) return { error: 'not-one-command' };
-  const prefix = commands[0]!;
+  const split = splitShell(pattern.trim(), { literalBackslash: true });
+  const first = split?.commands[0];
+  if (!split || !first || first.argv.length === 0) return { error: 'empty' };
+  if (
+    split.commands.length !== 1 ||
+    split.inner.length > 0 ||
+    first.redirects.length > 0 ||
+    first.inputs.length > 0
+  )
+    return { error: 'not-one-command' };
+  const prefix = first.argv;
   if (prefix.slice(0, -1).includes('*')) return { error: 'star-not-last' };
   if (decision === 'allow' && prefix[0] === '*') return { error: 'too-broad' };
   return { prefix };

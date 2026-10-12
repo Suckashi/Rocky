@@ -317,6 +317,20 @@ describe('agent tools through the action gate', () => {
     expect(reply(await events)).toContain('do-not-read');
   });
 
+  it("asks before reading Rocky's own secrets file, even in hands-off mode", async () => {
+    const { call, project } = await setup('hands-off');
+    const secrets = join(dirname(project), 'data', 'secrets.json');
+    plan = [{ name: 'run_command', args: { argv: ['cat', secrets] } }];
+    const events = run(call, 'e5s');
+    const ask = await nextApproval(call, 'e5s');
+    expect(ask).toMatchObject({ reason: 'secret', grant: 'secret:read' });
+    await call(`/api/approvals/${ask.id}`, {
+      method: 'POST',
+      body: { decision: 'reject', contentHash: ask.contentHash },
+    });
+    expect(reply(await events)).toContain('rejected');
+  });
+
   it('reads project files without asking', async () => {
     const { call } = await setup('ask-when-needed');
     plan = [{ name: 'read_file', args: { file_path: '/app.js' } }];
