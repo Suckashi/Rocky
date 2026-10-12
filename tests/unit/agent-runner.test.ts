@@ -17,10 +17,16 @@ import { ThreadStore } from '../../src/server/store/threads.ts';
 class ScriptedAgent extends AbstractAgent {
   mode: 'reply' | 'fail' | 'hang' = 'reply';
   reply = '你好，我是 Roko。';
+  /** Sends a state snapshot naming the run right after it starts. */
+  snapshots = false;
+  /** Sends an event into the run in progress. */
+  push: (event: BaseEvent) => void = () => undefined;
   override clone(): ScriptedAgent {
     const copy = new ScriptedAgent({ agentId: this.agentId ?? 'rocky' });
     copy.mode = this.mode;
     copy.reply = this.reply;
+    copy.snapshots = this.snapshots;
+    copy.push = (event) => this.push(event);
     return copy;
   }
   private abort?: () => void;
@@ -35,6 +41,12 @@ class ScriptedAgent extends AbstractAgent {
         threadId: input.threadId,
         runId: input.runId,
       } as BaseEvent);
+      if (this.snapshots)
+        sub.next({
+          type: EventType.STATE_SNAPSHOT,
+          snapshot: { run: input.runId },
+        } as BaseEvent);
+      this.push = (event) => sub.next(event);
       if (this.mode === 'fail') {
         sub.error(new Error('model unreachable'));
         return;
@@ -170,6 +182,38 @@ describe('RockyAgentRunner', () => {
       outcome: 'failed',
       error: 'stopped',
     });
+  });
+
+  it("connect replays finished runs without their state, and forwards the live run's", async () => {
+    const { runner } = open();
+    const agent = new ScriptedAgent({ agentId: 'rocky' });
+    agent.snapshots = true;
+    await runOnce(runner, agent, input('t1', 'r1', 'first'));
+    agent.mode = 'hang';
+    const live = runner.run({
+      threadId: 't1',
+      agent,
+      input: input('t1', 'r2', 'second'),
+    });
+    live.subscribe({ error: () => undefined });
+    await new Promise((r) => setTimeout(r, 20));
+    const seen: BaseEvent[] = [];
+    runner
+      .connect({ threadId: 't1' })
+      .subscribe({ next: (e) => seen.push(e), error: () => undefined });
+    // A question the live run asks after the page reconnected.
+    agent.push({
+      type: EventType.STATE_SNAPSHOT,
+      snapshot: { run: 'r2', later: true },
+    } as BaseEvent);
+    await new Promise((r) => setTimeout(r, 20));
+    const snapshots = seen
+      .filter((e) => e.type === EventType.STATE_SNAPSHOT)
+      .map((e) => (e as BaseEvent & { snapshot: unknown }).snapshot);
+    expect(snapshots).toEqual([{ run: 'r2' }, { run: 'r2', later: true }]);
+    // The finished run's messages are still replayed.
+    expect(types(seen)).toContain(EventType.TEXT_MESSAGE_CONTENT);
+    await runner.stop({ threadId: 't1' });
   });
 
   it('leaves a run interrupted by a crash as unknown, never succeeded', () => {

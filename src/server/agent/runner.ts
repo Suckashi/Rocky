@@ -171,6 +171,13 @@ export class RockyAgentRunner extends AgentRunner {
     );
     const emitted = new Set<string>();
     for (const event of history) {
+      // A finished run's state (mode, plan mode, pending questions) is out of date; the page
+      // reads the current state itself, and a live run sends its own (ADR 0030).
+      if (
+        event.type === EventType.STATE_SNAPSHOT ||
+        event.type === EventType.STATE_DELTA
+      )
+        continue;
       out.next(event);
       const id = messageIdOf(event);
       if (id) emitted.add(id);

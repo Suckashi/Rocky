@@ -11,8 +11,21 @@ import {
   type ReactNode,
 } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
-import { api, type Mode, type PendingApproval, type Receipt } from '../api.ts';
+import {
+  api,
+  ApiError,
+  type Mode,
+  type PendingApproval,
+  type Receipt,
+  type Settings,
+} from '../api.ts';
 import { useI18n } from '../i18n/index.tsx';
+import {
+  placeChangeCards,
+  runsWithChanges,
+  type Snapshot,
+} from '../change-cards.ts';
+import { runFailure } from '../run-errors.ts';
 import { ApprovalPanel, type Answer } from './ApprovalPanel.tsx';
 import { PlanPanel } from './PlanPanel.tsx';
 import { filePreview, isPreviewable, useOpenPreview } from './PreviewPane.tsx';
@@ -40,33 +53,6 @@ function textOf(content: unknown): string {
 interface ToolCall {
   id: string;
   function: { name: string; arguments: string };
-}
-
-interface Snapshot {
-  receiptId: string;
-  path: string;
-}
-
-/** Files each run changed (by Rocky, not by the user's restores), and its last tool call. */
-function runsWithChanges(receipts: Receipt[], snapshots: Snapshot[]) {
-  const paths = new Map<string, string[]>();
-  for (const s of snapshots) {
-    paths.set(s.receiptId, [...(paths.get(s.receiptId) ?? []), s.path]);
-  }
-  const runs = new Map<string, { files: Set<string>; lastToolCall: string }>();
-  for (const r of receipts) {
-    if (r.actor === 'user' || r.outcome !== 'succeeded' || !r.runId) continue;
-    const files = paths.get(r.id);
-    if (!files || !r.toolCallId) continue;
-    const run = runs.get(r.runId) ?? {
-      files: new Set<string>(),
-      lastToolCall: r.toolCallId,
-    };
-    files.forEach((f) => run.files.add(f));
-    run.lastToolCall = r.toolCallId;
-    runs.set(r.runId, run);
-  }
-  return runs;
 }
 
 /** Inline code that names a previewable file opens it in the preview panel. */
@@ -111,13 +97,19 @@ const markdownComponents: Components = {
 export function Chat({
   threadId,
   project,
+  mode,
   onActivity,
   onState,
+  onSettings,
 }: {
   threadId: string;
   project: string | null;
+  /** The approval mode, one setting for every conversation; App owns it. */
+  mode: Mode;
   onActivity: () => void;
   onState: (state: RokoState) => void;
+  /** The settings changed here (the approval mode); App keeps the one copy. */
+  onSettings: (settings: Settings) => void;
 }) {
   const { t } = useI18n();
   const { agent, isReady } = useAgent({
@@ -131,11 +123,13 @@ export function Chat({
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
   const [pending, setPending] = useState<PendingApproval[]>([]);
-  const [mode, setMode] = useState<Mode | null>(null);
   const [planning, setPlanning] = useState(false);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
-  const runningRef = useRef(false);
+  // Set when the run request itself fails (refused, too large, offline): no RUN_ERROR comes.
+  const failed = useRef<unknown>(undefined);
+  // Whether the server started the run: then it has the message, whatever happens next.
+  const started = useRef(false);
   // Enter pressed before the conversation finished loading: send once it has.
   const sendWhenLoaded = useRef(false);
   const bottom = useRef<HTMLDivElement>(null);
@@ -151,7 +145,6 @@ export function Chat({
       ),
     ]);
     setPending(approvals.pending);
-    setMode(approvals.mode);
     setPlanning(approvals.planning);
     setReceipts(log.receipts);
     setSnapshots(log.snapshots);
@@ -170,16 +163,20 @@ export function Chat({
             : t('chat.error', { error: event.message }),
         );
       },
-      // Replayed history carries old snapshots; only a live run speaks for the present.
+      onRunStartedEvent: () => {
+        started.current = true;
+      },
+      onRunFailed: ({ error }) => {
+        failed.current = error;
+      },
+      // Only a live run sends state: the server leaves it out of replayed history (ADR 0030),
+      // so a page that reconnects to a running turn also sees its new questions.
       onStateSnapshotEvent: ({ event }) => {
-        if (!runningRef.current) return;
         const state = event.snapshot as {
-          mode?: Mode;
           planning?: boolean;
           pendingApprovals?: PendingApproval[];
         };
         if (state.pendingApprovals) setPending(state.pendingApprovals);
-        if (state.mode) setMode(state.mode);
         if (state.planning !== undefined) setPlanning(state.planning);
       },
     });
@@ -193,12 +190,17 @@ export function Chat({
     sendWhenLoaded.current = false;
     void copilotkit
       .connectAgent({ agent })
-      .then(() => active && setLoaded(true))
+      .then(() => {
+        if (!active) return;
+        setLoaded(true);
+        // connect returns once a running turn has finished: read what it left behind.
+        void refresh().catch(() => undefined);
+      })
       .catch(() => active && setError(t('chat.connectError')));
     return () => {
       active = false;
     };
-  }, [agent, copilotkit, isReady, t]);
+  }, [agent, copilotkit, isReady, refresh, t]);
 
   // A turn that just finished well shows Roko's jump for a moment.
   const [justDone, setJustDone] = useState(false);
@@ -252,16 +254,27 @@ export function Chat({
     }
     setError('');
     setRunning(true);
-    runningRef.current = true;
     setDraft('');
+    const before = [...agent.messages];
     agent.addMessage({ id: crypto.randomUUID(), role: 'user', content: text });
+    failed.current = undefined;
+    started.current = false;
     try {
       await copilotkit.runAgent({ agent });
-      setJustDone(true);
+      if (failed.current === undefined) setJustDone(true);
+      else {
+        const failure = runFailure(failed.current);
+        setError(t(failure.key, failure.params));
+        if (!started.current) {
+          // The server never took the message: take it back and give the text back,
+          // ahead of anything typed since.
+          agent.setMessages(before);
+          setDraft((typed) => (typed.trim() ? `${text}\n${typed}` : text));
+        }
+      }
     } catch (e) {
       setError(t('chat.error', { error: e instanceof Error ? e.message : '' }));
     } finally {
-      runningRef.current = false;
       setRunning(false);
       onActivity();
       void refresh().catch(() => undefined);
@@ -276,17 +289,27 @@ export function Chat({
   }, [loaded]);
 
   const answer = async (approval: PendingApproval, choice: Answer) => {
-    await api(`/approvals/${approval.id}`, 'POST', {
-      ...choice,
-      contentHash: approval.contentHash,
-    });
+    try {
+      await api(`/approvals/${approval.id}`, 'POST', {
+        ...choice,
+        contentHash: approval.contentHash,
+      });
+    } catch (e) {
+      // Already answered or gone (another tab, a restart): show what is waiting now.
+      if (e instanceof ApiError && e.status === 409) {
+        await refresh();
+        return;
+      }
+      throw e;
+    }
     setPending((list) => list.filter((a) => a.id !== approval.id));
   };
 
   // The approval mode is one setting for every conversation (also in Settings).
   const changeMode = (next: Mode) => {
-    setMode(next);
-    void api('/settings/mode', 'PUT', { mode: next }).catch(() => refresh());
+    void api<Settings>('/settings/mode', 'PUT', { mode: next })
+      .then(onSettings)
+      .catch(() => undefined);
   };
 
   // Plan mode is per conversation; it turns off by itself when the user picks a plan.
@@ -320,21 +343,10 @@ export function Chat({
     m.role === 'assistant' ? ((m.toolCalls ?? []) as ToolCall[]) : [];
 
   // Each run's change card goes at the end of the turn that holds its last tool call.
-  const cardsAt = new Map<number, { runId: string; count: number }[]>();
-  for (const [runId, run] of runsWithChanges(receipts, snapshots)) {
-    const anchor = messages.findIndex((m) =>
-      toolCallsOf(m).some((c) => c.id === run.lastToolCall),
-    );
-    if (anchor < 0) continue;
-    const nextUser = messages.findIndex(
-      (m, i) => i > anchor && m.role === 'user',
-    );
-    const at = (nextUser < 0 ? messages.length : nextUser) - 1;
-    cardsAt.set(at, [
-      ...(cardsAt.get(at) ?? []),
-      { runId, count: run.files.size },
-    ]);
-  }
+  const { at: cardsAt, unanchored } = placeChangeCards(
+    messages,
+    runsWithChanges(receipts, snapshots),
+  );
   const unknown = receipts.filter((r) => r.outcome === 'unknown');
   const visible = messages.some(
     (m) =>
@@ -417,6 +429,18 @@ export function Chat({
             </div>
           );
         })}
+        {loaded &&
+          !running &&
+          unanchored.map((card) => (
+            <TurnChanges
+              key={card.runId}
+              threadId={threadId}
+              runId={card.runId}
+              count={card.count}
+              project={project}
+              onRestored={() => void refresh().catch(() => undefined)}
+            />
+          ))}
         {unknown.map((receipt) => (
           <UnknownOutcome
             key={receipt.id}
@@ -479,7 +503,7 @@ export function Chat({
               onKeyDown={onKeyDown}
             />
             <div className="composer-bar">
-              {mode && <ModeSelect value={mode} onChange={changeMode} />}
+              <ModeSelect value={mode} onChange={changeMode} />
               <button
                 type="button"
                 className={`plan-toggle${planning ? ' on' : ''}`}

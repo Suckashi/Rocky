@@ -36,4 +36,17 @@ describe('tool registry', () => {
       'first',
     ]);
   });
+
+  it("refuses a name registered twice, so one tool cannot take another's judge", () => {
+    const tools = new ToolRegistry(() => ({ none: true })).add(
+      make('a'),
+      () => ({ none: true }),
+    );
+    expect(() => tools.add(make('a'), () => ({ none: true }))).toThrow(
+      /registered twice/,
+    );
+    expect(() => tools.judge('a', () => ({ none: true }))).toThrow(
+      /registered twice/,
+    );
+  });
 });

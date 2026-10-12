@@ -1,4 +1,4 @@
-// The approval mode, next to the input box (per conversation) or in Settings (default).
+// The approval mode, next to the input box or in Settings: one setting for every conversation.
 import { MODES, type Mode } from '../api.ts';
 import { useI18n } from '../i18n/index.tsx';
 

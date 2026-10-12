@@ -22,9 +22,16 @@ export type {
 } from '../shared/types.ts';
 export class ApiError extends Error {
   readonly status: number;
-  constructor(status: number, code: string) {
+  /** The rest of the error response (for example the file an apply stopped at). */
+  readonly data: Record<string, unknown>;
+  constructor(
+    status: number,
+    code: string,
+    data: Record<string, unknown> = {},
+  ) {
     super(code);
     this.status = status;
+    this.data = data;
   }
 }
 
@@ -38,11 +45,14 @@ export async function api<T>(
     headers: body === undefined ? {} : { 'content-type': 'application/json' },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
-  const data = (await response.json().catch(() => ({}))) as { error?: string };
+  const data = (await response.json().catch(() => ({}))) as {
+    error?: string;
+  } & Record<string, unknown>;
   if (!response.ok)
     throw new ApiError(
       response.status,
       data.error ?? `http-${response.status}`,
+      data,
     );
   return data as T;
 }
@@ -106,7 +116,11 @@ export interface FileChange {
   /** One of the six document formats: a layout preview is available. */
   document: boolean;
   modifiedSince: boolean;
-  contentHash: string;
+  /** A saved version of this file is damaged: not shown, and (if it is the earlier one) not
+   * restored. */
+  damaged: boolean;
+  /** null: cannot be restored. */
+  contentHash: string | null;
 }
 
 /** A path inside the project shown relative to it, with forward slashes. */

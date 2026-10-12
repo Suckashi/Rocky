@@ -36,6 +36,8 @@ export interface Job {
   worktree: string | null;
   branch: string | null;
   baseCommit: string | null;
+  /** The repository (its top folder) the worktree came from; null for jobs before ADR 0031. */
+  repo: string | null;
   sessionId: string | null;
   result: JobResult | null;
   createdAt: number;
@@ -67,6 +69,7 @@ interface JobRow {
   worktree: string | null;
   branch: string | null;
   base_commit: string | null;
+  repo: string | null;
   session_id: string | null;
   result: string | null;
   created_at: number;
@@ -85,6 +88,7 @@ const toJob = (r: JobRow): Job => ({
   worktree: r.worktree,
   branch: r.branch,
   baseCommit: r.base_commit,
+  repo: r.repo,
   sessionId: r.session_id,
   result: r.result ? (JSON.parse(r.result) as JobResult) : null,
   createdAt: r.created_at,
@@ -151,13 +155,13 @@ export class JobStore {
 
   setWorkspace(
     id: string,
-    w: { worktree: string; branch: string; baseCommit: string },
+    w: { worktree: string; branch: string; baseCommit: string; repo: string },
   ): void {
     this.db
       .prepare(
-        'update jobs set worktree = ?, branch = ?, base_commit = ? where id = ?',
+        'update jobs set worktree = ?, branch = ?, base_commit = ?, repo = ? where id = ?',
       )
-      .run(w.worktree, w.branch, w.baseCommit, id);
+      .run(w.worktree, w.branch, w.baseCommit, w.repo, id);
   }
 
   setSession(id: string, sessionId: string): void {

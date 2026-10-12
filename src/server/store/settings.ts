@@ -1,14 +1,28 @@
 // User settings. The model API key lives in its own user-only file and is never sent to
 // the browser: the UI only learns whether one is set.
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import type { DatabaseSync } from 'node:sqlite';
 import { join } from 'node:path';
 import type { McpServerConfig, ToolPolicy } from '../mcp/manager.ts';
+import {
+  renameRetrying,
+  tempOf,
+  writeFileAtomic,
+} from '../effects/atomic-write.ts';
 
 interface Secrets {
   modelApiKey?: string;
   /** MCP server settings can carry tokens (env, headers), so they live with the secrets. */
   mcpServers?: McpServerConfig[];
+}
+
+const brokenOf = (file: string) => `${file}.broken`;
+
+/** Every file the model key and MCP tokens can be in: the file itself, the temporary file a
+ * write goes through, and an unreadable copy kept aside. All are private (ADR 0028). */
+export function secretsFiles(dataDir: string): string[] {
+  const file = join(dataDir, 'secrets.json');
+  return [file, tempOf(file), brokenOf(file)];
 }
 
 export type { Locale, Provider } from '../../shared/types.ts';
@@ -123,10 +137,23 @@ export class SettingsStore {
 
   private readSecrets(): Secrets {
     if (!existsSync(this.secretsFile)) return {};
-    return JSON.parse(readFileSync(this.secretsFile, 'utf8')) as Secrets;
+    // A byte-order mark (some editors add one) is not part of the JSON.
+    const text = readFileSync(this.secretsFile, 'utf8').replace(/^\uFEFF/, '');
+    try {
+      return JSON.parse(text) as Secrets;
+    } catch {
+      // Unreadable (cut off before writes were atomic): keep it aside for the owner, and
+      // start without the key and MCP servers rather than not at all.
+      // An older kept-aside copy is replaced: the newest is the one most likely current.
+      renameRetrying(this.secretsFile, brokenOf(this.secretsFile));
+      console.error(
+        `secrets.json could not be read; moved to ${brokenOf(this.secretsFile)}. Enter the model key again in Settings.`,
+      );
+      return {};
+    }
   }
 
   private writeSecrets(secrets: Secrets): void {
-    writeFileSync(this.secretsFile, JSON.stringify(secrets), { mode: 0o600 });
+    writeFileAtomic(this.secretsFile, JSON.stringify(secrets));
   }
 }

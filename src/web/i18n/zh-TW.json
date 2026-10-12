@@ -54,6 +54,7 @@
   "chat.thinking": "Roko 正在思考…",
   "chat.error": "這一輪沒有完成：{error}",
   "chat.error.model-not-configured": "還沒設定模型，請先到設定頁選擇模型。",
+  "chat.error.too-long": "這段對話太長，無法再送出。請開一個新對話繼續。",
   "chat.connectError": "對話載入失敗，請重新整理頁面。",
   "chat.you": "你",
   "panel.idle": "Roko 在旁邊待命",
@@ -153,6 +154,8 @@
   "changes.restored": "已還原 {count} 個檔案。",
   "changes.error.content-changed": "檔案在你確認之後又變了，請重新查看再還原。",
   "changes.error.denied": "還原被規則擋下：{path}",
+  "changes.damaged": "這個檔案存下的版本已經損壞，無法顯示；還原時會略過它，其他檔案照常還原。",
+  "changes.error.snapshot-damaged": "這一輪存下的舊版本已經損壞，無法顯示或還原。檔案沒有被改動。",
   "changes.error": "還原失敗：{error}",
   "changes.loading": "載入中…",
   "receipt.unknown": "不確定剛剛有沒有成功：{action}",
@@ -216,6 +219,8 @@
   "jobs.error.content-changed": "檔案在你確認之後又變了，請重新查看。",
   "jobs.error.not-applicable": "這個工作現在不能套用。",
   "jobs.error.denied": "套用被規則擋下：{path}",
+  "jobs.error.write-failed": "{path} 沒寫進去。在它之前的檔案已經寫入，可以再套用一次。",
+  "jobs.error.discard-failed": "工作資料夾沒能移除：可能有檔案正在使用中，或這個 worktree 被鎖住了（git worktree unlock）。處理後再試一次。",
   "jobs.actionError": "沒有完成：{error}",
   "tool.delegate_to_opencode": "交給 OpenCode",
   "approval.title.delegate": "{actor}想把工作交給 OpenCode：{title}",
@@ -332,5 +337,10 @@
   "grant.command": "{program} 碰到專案外的路徑",
   "plan.toggle": "規劃",
   "plan.toggle.hint": "規劃模式：Rocky 只讀不改，先提出方案讓你選，選定後才開始做",
-  "chat.placeholder.plan": "規劃模式：說說要做什麼，Rocky 會先提出方案…"
+  "chat.placeholder.plan": "規劃模式：說說要做什麼，Rocky 會先提出方案…",
+  "jobs.error.busy": "這個工作正在套用或捨棄，請等它完成。",
+  "jobs.leftover": "改動已套用，但工作資料夾沒能移除。",
+  "jobs.cleanUp": "移除工作資料夾",
+  "jobs.status.worktree-ready": "工作副本已建立",
+  "jobs.status.cleanup-failed": "工作資料夾沒能移除"
 }

@@ -42,18 +42,34 @@ function childEnv(): NodeJS.ProcessEnv {
 
 /** Ends a process and everything it started: taskkill /T on Windows, the process group elsewhere. */
 export function killTree(child: ChildProcess): void {
-  if (child.pid === undefined || child.exitCode !== null) return;
+  if (
+    child.pid === undefined ||
+    child.exitCode !== null ||
+    child.signalCode !== null
+  )
+    return;
   if (process.platform === 'win32') {
+    // A taskkill that cannot start must not end Rocky; the caller's deadline still applies.
     spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], {
       windowsHide: true,
       stdio: 'ignore',
-    });
+    }).on('error', () => undefined);
   } else {
     try {
       process.kill(-child.pid, 'SIGKILL');
     } catch {
       child.kill('SIGKILL');
     }
+  }
+}
+
+/** After a process that led its own group (detached) has exited: end what it left running. */
+export function endGroup(child: ChildProcess): void {
+  if (process.platform === 'win32' || child.pid === undefined) return;
+  try {
+    process.kill(-child.pid, 'SIGKILL');
+  } catch {
+    // No process left in the group.
   }
 }
 
