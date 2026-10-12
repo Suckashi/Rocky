@@ -46,6 +46,8 @@ export interface JobInput {
 /** Follow-up prompts after a rejection (OpenCode ends its turn on every reject). */
 const MAX_FOLLOW_UPS = 3;
 const CHECK_TIMEOUT_MS = 10 * 60_000;
+/** How long a stopped job waits for OpenCode to cancel before ending it. */
+const STOP_GRACE_MS = 2000;
 
 const GUIDANCE = [
   "You are working in a git worktree of the user's project. Rocky, the user's assistant, approves each change and command.",
@@ -86,6 +88,8 @@ export class JobRunner {
   private readonly finished = new Map<string, Promise<Job>>();
   private readonly resolvers = new Map<string, (job: Job) => void>();
   private active: string | undefined;
+  /** Set at shutdown: nothing new starts. */
+  private closing = false;
 
   constructor(deps: JobRunnerDeps) {
     this.deps = deps;
@@ -99,6 +103,7 @@ export class JobRunner {
 
   /** Checks that fail before any job exists, with a code the model and the UI can explain. */
   private async preflight(): Promise<Prepared> {
+    if (this.closing) throw new JobError('shutting-down');
     const { settings } = this.deps;
     const project = settings.project();
     if (!project) throw new JobError('no-project');
@@ -123,7 +128,7 @@ export class JobRunner {
       new Promise<Job>((resolve) => this.resolvers.set(job.id, resolve)),
     );
     this.queue.push({ job, prepared });
-    void this.next();
+    this.continue();
     return this.deps.jobs.get(job.id)!;
   }
 
@@ -157,10 +162,17 @@ export class JobRunner {
     return true;
   }
 
-  /** At shutdown: stop the running job and drop the queue (they become interrupted next start). */
-  close(): void {
-    this.queue.length = 0;
+  /**
+   * At shutdown: drop the queue (those jobs become interrupted next start), stop the running
+   * job and wait until it has ended OpenCode and recorded that it stopped.
+   */
+  async close(): Promise<void> {
+    // No new job starts, and the running one ends OpenCode without the usual grace period.
+    this.closing = true;
+    for (const { job } of this.queue.splice(0)) this.settle(job.id);
+    const running = [...this.controllers.keys()].map((id) => this.wait(id));
     for (const controller of this.controllers.values()) controller.abort();
+    await Promise.all(running);
   }
 
   private settle(jobId: string): void {
@@ -170,7 +182,7 @@ export class JobRunner {
   }
 
   private async next(): Promise<void> {
-    if (this.active) return;
+    if (this.active || this.closing) return;
     const item = this.queue.shift();
     if (!item) return;
     const { job, prepared } = item;
@@ -184,8 +196,15 @@ export class JobRunner {
       this.controllers.delete(job.id);
       this.active = undefined;
       this.settle(job.id);
-      void this.next();
+      this.continue();
     }
+  }
+
+  /** Starts the next queued job; a failure there is logged, never left unhandled. */
+  private continue(): void {
+    this.next().catch((error: unknown) =>
+      console.error('job queue failed:', error),
+    );
   }
 
   private async execute(
@@ -213,9 +232,16 @@ export class JobRunner {
 
     let agent: AcpAgent | undefined;
     let sessionId: string | undefined;
+    // Stop asks OpenCode to cancel; one that does not answer in time is ended, which ends
+    // the request it is working on too. The timer reads `agent` when it fires, so a job
+    // stopped while OpenCode was still starting ends it as well.
+    let stopTimer: ReturnType<typeof setTimeout> | undefined;
+    const end = () => void agent?.close().catch(() => undefined);
     const onAbort = () => {
       if (agent && sessionId) void agent.cancel(sessionId);
+      stopTimer = setTimeout(end, this.closing ? 0 : STOP_GRACE_MS);
     };
+    const receiptOf = new Map<string, string[]>();
     signal.addEventListener('abort', onAbort, { once: true });
     try {
       // 1. A worktree at HEAD, on its own branch, under Rocky's data folder.
@@ -238,7 +264,6 @@ export class JobRunner {
 
       // 2. OpenCode over ACP. Every permission request goes through the gate.
       const approved = new Map<string, string>();
-      const receiptOf = new Map<string, string[]>();
       let rejection: string | undefined;
       let text = '';
       let lastText = '';
@@ -256,6 +281,8 @@ export class JobRunner {
         actor: 'opencode' as const,
       });
 
+      // Stopped while the worktree was made: OpenCode is never started.
+      if (signal.aborted) throw new Error('stopped');
       agent = new AcpAgent(
         spawnOpenCode(bin, join(dataDir, 'opencode'), worktree, model),
         {
@@ -356,6 +383,8 @@ export class JobRunner {
             }
           },
         },
+        // OpenCode leads its own process group outside Windows (spawnOpenCode).
+        { group: process.platform !== 'win32' },
       );
       await agent.initialize();
       sessionId = await agent.newSession(worktree);
@@ -379,11 +408,6 @@ export class JobRunner {
       // 3. Rocky's own verification: what changed, and does it match what was approved.
       const verification = await verifyWorktree(worktree, tree.base, approved);
       result = { ...result, ...verification };
-      // Approved actions OpenCode never reported back: their outcome is not known.
-      for (const receiptId of [...receiptOf.values()].flat()) {
-        if (receipts.get(receiptId)?.outcome === 'pending')
-          receipts.finish(receiptId, 'unknown', 'not reported by OpenCode');
-      }
 
       // 4. Rocky runs the checks itself, through the gate like any other command.
       if (
@@ -409,7 +433,14 @@ export class JobRunner {
       status = signal.aborted ? 'stopped' : 'failed';
     } finally {
       signal.removeEventListener('abort', onAbort);
+      clearTimeout(stopTimer);
       if (agent) await agent.close();
+      // Approved actions OpenCode never reported back (also when it was stopped or failed):
+      // their outcome is not known.
+      for (const receiptId of [...receiptOf.values()].flat()) {
+        if (receipts.get(receiptId)?.outcome === 'pending')
+          receipts.finish(receiptId, 'unknown', 'not reported by OpenCode');
+      }
       jobs.finish(job.id, status, result);
       event({ type: 'status', text: status });
     }

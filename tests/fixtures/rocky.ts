@@ -9,6 +9,8 @@ export interface TestRockyOptions {
   port: number;
   token?: string;
   listModels?: () => Promise<string[]>;
+  /** The external agent's executable, instead of looking for OpenCode. */
+  findAgent?: () => string | undefined;
 }
 
 export type Call = (
@@ -25,6 +27,7 @@ export function testRocky(options: TestRockyOptions) {
     port: options.port,
     egress: new EgressGuard(() => {}),
     listModels: options.listModels ?? (async () => []),
+    ...(options.findAgent ? { findAgent: options.findAgent } : {}),
   });
   const call: Call = (path, init = {}) =>
     Promise.resolve(
