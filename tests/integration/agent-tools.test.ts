@@ -360,6 +360,32 @@ describe('agent tools through the action gate', () => {
   });
 });
 
+describe('tool failures', () => {
+  it('a tool that throws gives the model an error instead of ending the turn', async () => {
+    const { call, project } = await setup('hands-off');
+    writeFileSync(join(project, 'broken.docx'), 'not a zip file');
+    plan = [{ name: 'read_document', args: { file_path: '/broken.docx' } }];
+    const events = await run(call, 'tf1');
+    expect(events.some((e) => e.type === 'RUN_ERROR')).toBe(false);
+    expect(reply(events)).toContain('Error: read_document failed');
+  });
+
+  it('arguments the tool would refuse are refused before anything is asked or recorded', async () => {
+    const { call, rocky } = await setup('ask-when-needed');
+    plan = [
+      {
+        name: 'run_command',
+        args: { argv: ['git', 'reset', '--hard'], timeout_seconds: 900 },
+      },
+    ];
+    const events = await run(call, 'tf2');
+    expect(reply(events)).toContain('invalid arguments for run_command');
+    const { receipts: list } = await receipts(call, 'tf2');
+    expect(list).toEqual([]);
+    expect(rocky.gate.passes.outstanding).toBe(0);
+  });
+});
+
 describe('provider refusals', () => {
   const bare = {
     status: 400,

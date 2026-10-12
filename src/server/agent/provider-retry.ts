@@ -16,6 +16,23 @@ export function isUnexplainedRefusal(error: unknown): boolean {
   return false;
 }
 
+/** The model provider failed (an HTTP error from it, or the connection to it): not a tool's
+ * fault. Such a failure inside the research subagent ends the run like one in Rocky's own
+ * loop (ADR 0026, 0027). */
+export function isProviderFailure(error: unknown): boolean {
+  for (let e = error, depth = 0; e && depth < 5; depth++) {
+    const x = e as { status?: unknown; name?: unknown };
+    if (typeof x.status === 'number' && x.status >= 400) return true;
+    if (
+      x.name === 'APIConnectionError' ||
+      x.name === 'APIConnectionTimeoutError'
+    )
+      return true;
+    e = (e as { cause?: unknown }).cause;
+  }
+  return false;
+}
+
 export function providerRetry(): AgentMiddleware {
   return modelRetryMiddleware({
     maxRetries: 1,
