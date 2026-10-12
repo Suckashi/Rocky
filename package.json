@@ -1,13 +1,22 @@
 {
-  "name": "rocky",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@suckashi/rocky",
+  "version": "0.1.0",
   "description": "Single-user local AI engineering partner",
   "license": "Apache-2.0",
   "type": "module",
   "engines": {
     "node": ">=24.12.0 <25"
   },
+  "bin": {
+    "rocky": "bin/rocky.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "NOTICE",
+    "THIRD_PARTY_NOTICES.md",
+    "npm-shrinkwrap.json"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -20,9 +29,12 @@
     "start": "vite build && node src/server/start.ts",
     "test:e2e": "vite build && node scripts/e2e.ts",
     "test:e2e:jobs": "vite build && node scripts/e2e-jobs.ts",
-    "eval": "node evals/run.ts"
+    "eval": "node evals/run.ts",
+    "build:server": "tsc -p tsconfig.build.json",
+    "prepare": "vite build && npm run build:server"
   },
   "devDependencies": {
+    "@copilotkit/react-core": "1.77.0",
     "@eslint/js": "10.0.1",
     "@types/cross-spawn": "6.0.6",
     "@types/node": "24.19.1",
@@ -31,8 +43,12 @@
     "@vitejs/plugin-react": "6.1.2",
     "eslint": "10.12.0",
     "globals": "17.13.0",
+    "lucide-react": "1.52.0",
     "playwright-core": "1.63.0",
     "prettier": "3.9.9",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-markdown": "10.1.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.0",
     "vite": "8.3.2",
@@ -42,7 +58,6 @@
     "@ag-ui/client": "1.0.1",
     "@ag-ui/core": "1.0.1",
     "@agentclientprotocol/sdk": "1.7.0",
-    "@copilotkit/react-core": "1.77.0",
     "@copilotkit/runtime": "1.77.0",
     "@copilotkit/shared": "1.77.0",
     "@hono/node-server": "2.1.3",
@@ -63,20 +78,19 @@
     "jszip": "3.10.2",
     "langchain": "1.5.15",
     "langsmith": "0.9.0",
-    "lucide-react": "1.52.0",
     "mammoth": "1.13.0",
     "markdown-it": "15.0.2",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "6.1.200",
     "pptxgenjs": "4.0.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "react-markdown": "10.1.0",
     "rxjs": "7.8.1",
     "unpdf": "1.8.1",
     "zod": "4.3.6"
   },
   "scarfSettings": {
     "enabled": false
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

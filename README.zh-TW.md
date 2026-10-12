@@ -70,6 +70,16 @@ Rocky 已經在執行時，會直接重新打開瀏覽器：
 powershell -ExecutionPolicy Bypass -File .\Start-Rocky.ps1
 ```
 
+也可以把 Rocky 裝成 `rocky` 指令：先從 GitHub 打包，再全域安裝。一定要分兩步，因為 npm 準備 Git 套件的方式，
+直接 `npm install -g` Git 網址會失敗（[ADR 0036](docs/adr/0036-npm-package.md)）。用這個方式安裝時，間接依賴不會鎖定在
+固定的版本。
+
+```sh
+npm pack github:Suckashi/Rocky
+npm install -g ./suckashi-rocky-0.1.0.tgz
+rocky
+```
+
 Rocky 在 Linux 上開發和測試。Windows 上，CI 會跑 `npm run check` 和建置；瀏覽器測試、啟動器、派工和評估只在
 手動執行 `scripts/verify-windows.ps1` 時才在 Windows 上跑，每份 ADR 都記錄有沒有跑。macOS 沒有測試過。
 

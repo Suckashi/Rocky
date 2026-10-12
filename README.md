@@ -79,6 +79,17 @@ run (`npm ci`), starts Rocky, and reopens the browser if Rocky is already runnin
 powershell -ExecutionPolicy Bypass -File .\Start-Rocky.ps1
 ```
 
+To install Rocky as a `rocky` command instead, pack it from GitHub, then install the
+package globally. It must be two steps: a one-step `npm install -g` from Git fails because of how
+npm prepares Git packages ([ADR 0036](docs/adr/0036-npm-package.md)). Installed this way,
+indirect dependencies are not held to the pinned versions.
+
+```sh
+npm pack github:Suckashi/Rocky
+npm install -g ./suckashi-rocky-0.1.0.tgz
+rocky
+```
+
 Rocky is developed and tested on Linux. On Windows, CI runs `npm run check` and the build;
 the browser tests, launcher, delegation and evaluation run there only when
 `scripts/verify-windows.ps1` is run by hand, and each ADR records whether it was. macOS is
