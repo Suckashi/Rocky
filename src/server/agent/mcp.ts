@@ -46,6 +46,8 @@ export function addMcpTools(
   for (const status of statuses)
     for (const t of status.tools) {
       const ref = { server: t.server, tool: t.name };
+      // A server that lists one tool twice gets it once; a turn never fails over it.
+      if (tools.has(agentToolName(t.server, t.name))) continue;
       tools.add(
         tool(
           async (args: Record<string, unknown>) => {

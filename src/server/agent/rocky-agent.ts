@@ -242,7 +242,7 @@ export class RockyAgent extends AbstractAgent {
           addMcpTools(
             tools,
             mcp,
-            await mcp.refresh(servers),
+            await mcp.refresh(servers, { signal: controller.signal }),
             settings.toolPolicies(),
             controller.signal,
           );

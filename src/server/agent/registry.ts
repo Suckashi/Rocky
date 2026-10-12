@@ -36,13 +36,26 @@ export class ToolRegistry {
 
   /** A tool Rocky defines: offered to the model, in registration order, and judged by `judge`. */
   add(tool: AgentTool & { name: string }, judge: Judge): this {
+    this.claim(tool.name);
     this.own.push(tool);
     this.judges.set(tool.name, judge);
     return this;
   }
 
+  /** Whether a tool or judge already has this name. */
+  has(name: string): boolean {
+    return this.judges.has(name);
+  }
+
+  /** One name, one judge: a second tool with the same name would be judged as the first. */
+  private claim(name: string): void {
+    if (this.judges.has(name))
+      throw new Error(`tool "${name}" registered twice`);
+  }
+
   /** A tool another layer offers (Deep Agents' file tools, write_todos, task). */
   judge(name: string, judge: Judge): this {
+    this.claim(name);
     this.judges.set(name, judge);
     return this;
   }
