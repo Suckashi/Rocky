@@ -68,6 +68,8 @@ export interface GateDeps {
 
 interface Waiting {
   approval: PendingApproval;
+  /** Asked from a job's worktree (ADR 0029): judged again the same way. */
+  worktree: boolean;
   resolve: (decision: UserDecision | 'stopped') => void;
 }
 
@@ -127,8 +129,9 @@ export class Gate {
     return this.deps.privateFiles ?? [];
   }
 
-  /** root: judge paths against this folder instead of the project (an external agent's worktree). */
-  context(threadId: string, root?: string): PolicyContext {
+  /** root: judge paths against this folder instead of the project; worktree: it is a job's
+   * worktree (ADR 0029). */
+  context(threadId: string, root?: string, worktree = false): PolicyContext {
     const projectRoot = root ?? this.deps.projectRoot();
     if (!projectRoot) throw new Error('no-project');
     return {
@@ -140,6 +143,7 @@ export class Gate {
       existedBefore: (p) =>
         existsSync(p) && !this.deps.createdByRocky(threadId, p),
       privateFiles: this.deps.privateFiles ?? [],
+      ...(worktree ? { worktree } : {}),
     };
   }
 
@@ -148,9 +152,12 @@ export class Gate {
     effect: Effect,
     origin: Origin & { threadId: string },
     signal?: AbortSignal,
-    preview: { before?: string; root?: string } = {},
+    preview: { before?: string; root?: string; worktree?: boolean } = {},
   ): Promise<GateResult> {
-    const verdict = decide(effect, this.context(origin.threadId, preview.root));
+    const verdict = decide(
+      effect,
+      this.context(origin.threadId, preview.root, preview.worktree),
+    );
     const tool =
       verdict.reason === 'plan-mode' && effect.kind !== 'plan'
         ? `${effect.kind === 'command' ? 'run_command' : effect.kind} (plan mode)`
@@ -202,7 +209,11 @@ export class Gate {
       createdAt: Date.now(),
     };
     const answer = await new Promise<UserDecision | 'stopped'>((resolve) => {
-      this.waiting.set(approval.id, { approval, resolve });
+      this.waiting.set(approval.id, {
+        approval,
+        worktree: preview.worktree ?? false,
+        resolve,
+      });
       this.changed(origin.threadId);
       if (signal?.aborted) resolve('stopped');
       signal?.addEventListener('abort', () => resolve('stopped'), {
@@ -277,10 +288,16 @@ export class Gate {
       this.grants.set(origin.threadId, set);
       // Every question waiting in this conversation is judged again: one the grant now lets
       // through is answered; one that still hits a floor asks about that floor (ADR 0028).
-      for (const other of this.pending(origin.threadId)) {
+      for (const waiting of [...this.waiting.values()]) {
+        const other = waiting.approval;
+        if (other.threadId !== origin.threadId) continue;
         const again = decide(
           other.effect,
-          this.context(origin.threadId, other.root ?? undefined),
+          this.context(
+            origin.threadId,
+            other.root ?? undefined,
+            waiting.worktree,
+          ),
         );
         if (again.decision === 'allow')
           this.answer(other.id, {

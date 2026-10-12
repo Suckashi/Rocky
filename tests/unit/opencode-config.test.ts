@@ -5,7 +5,7 @@ import {
   openCodeEnv,
   readPermission,
 } from '../../src/server/external/opencode.ts';
-import { permissionEffect } from '../../src/server/external/permission.ts';
+import { permissionEffects } from '../../src/server/external/permission.ts';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -84,23 +84,86 @@ describe('OpenCode permission requests', () => {
 
   it('a read question without a path is judged as a secret read in the worktree', () => {
     expect(
-      permissionEffect(
+      permissionEffects(
         request({ toolCallId: 't', kind: 'read', rawInput: {}, locations: [] }),
         '/wt',
-      ).effect,
+      )[0]!.effect,
     ).toEqual({ kind: 'read', path: '/wt', secret: true });
   });
 
   it('a read question with a path is judged on that path', () => {
     expect(
-      permissionEffect(
+      permissionEffects(
         request({
           toolCallId: 't',
           kind: 'read',
           rawInput: { filePath: 'config/.env' },
         }),
         '/wt',
-      ).effect,
+      )[0]!.effect,
     ).toEqual({ kind: 'read', path: resolve('/wt', 'config/.env') });
+  });
+
+  it('a patch to several files is one write per file, unless a file moves', () => {
+    const diff = (path: string, newText: string) => ({
+      type: 'diff',
+      path,
+      oldText: '',
+      newText,
+    });
+    const patch = (files: object[], content: object[]) =>
+      permissionEffects(
+        request({
+          toolCallId: 't',
+          kind: 'edit',
+          title: `${files.length} files`,
+          rawInput: { files },
+          content,
+        }),
+        '/wt',
+      ).map((m) => m.effect);
+    expect(
+      patch(
+        [{ filePath: '/wt/a.js' }, { filePath: '/wt/b.js' }],
+        [diff('/wt/a.js', 'a'), diff('/wt/b.js', 'b')],
+      ),
+    ).toEqual([
+      { kind: 'write', path: '/wt/a.js', operation: 'create', content: 'a' },
+      { kind: 'write', path: '/wt/b.js', operation: 'create', content: 'b' },
+    ]);
+    // A move also deletes a file, which no diff shows: one outside action.
+    expect(
+      patch(
+        [
+          { filePath: '/wt/a.js', movePath: '/wt/c.js' },
+          { filePath: '/wt/b.js' },
+        ],
+        [diff('/wt/c.js', 'a'), diff('/wt/b.js', 'b')],
+      ),
+    ).toMatchObject([{ kind: 'mcp', server: 'opencode', tool: 'edit' }]);
+    // One moved file, or one diff for two files: one outside action.
+    expect(
+      patch(
+        [{ filePath: '/wt/a.js', movePath: '/wt/c.js' }],
+        [diff('/wt/c.js', 'a')],
+      ),
+    ).toMatchObject([{ kind: 'mcp' }]);
+    expect(
+      patch(
+        [{ filePath: '/wt/a.js' }, { filePath: '/wt/b.js' }],
+        [diff('/wt/a.js', 'a')],
+      ),
+    ).toMatchObject([{ kind: 'mcp' }]);
+    // A file whose patch did not apply has no diff: one outside action.
+    expect(
+      patch(
+        [
+          { filePath: '/wt/a.js' },
+          { filePath: '/wt/b.js' },
+          { filePath: '/wt/d.js' },
+        ],
+        [diff('/wt/a.js', 'a'), diff('/wt/b.js', 'b')],
+      ),
+    ).toMatchObject([{ kind: 'mcp' }]);
   });
 });

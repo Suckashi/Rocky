@@ -215,6 +215,28 @@ describe('Gate', () => {
     expect((await plain).allowed).toBe(true);
   });
 
+  it("a waiting question from a job's worktree is judged again by the worktree's rules", async () => {
+    const { gate, project } = setup();
+    const ask = (argv: string[], toolCallId: string) =>
+      gate.request(
+        { kind: 'command', argv, cwd: project },
+        { ...origin, toolCallId },
+        undefined,
+        { root: project, worktree: true },
+      );
+    const push = ask(['git', 'push'], 'c1');
+    // In a worktree the delete runs; only the push asks.
+    const both = ask(['sh', '-c', 'rm -rf build && git push'], 'c2');
+    await until(() => gate.pending('t1').length === 2);
+    const asked = gate.pending('t1').find((a) => a.toolCallId === 'c1')!;
+    gate.answer(asked.id, {
+      decision: 'allow-session',
+      contentHash: asked.contentHash,
+    });
+    expect((await push).allowed).toBe(true);
+    expect((await both).allowed).toBe(true);
+  });
+
   it('"allow for this conversation" covers the category, answers waiting questions of it, and stays in the thread', async () => {
     const { gate, project } = setup();
     const push = (...rest: string[]): Effect => ({
