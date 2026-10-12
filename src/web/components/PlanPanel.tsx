@@ -5,6 +5,7 @@ import { Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { PendingApproval, PlanOption } from '../api.ts';
 import { useI18n } from '../i18n/index.tsx';
+import { isEditable } from '../keys.ts';
 import type { Answer } from './ApprovalPanel.tsx';
 
 export function PlanPanel({
@@ -61,6 +62,8 @@ export function PlanPanel({
     const onKey = (event: KeyboardEvent) => {
       if (event.isComposing) return;
       const typing = event.target === box.current;
+      // A field elsewhere keeps its keys (digits typed there must not pick a plan).
+      if (!typing && isEditable(event.target)) return;
       if (event.key === 'Escape') {
         event.preventDefault();
         if (typing) setRevising(false);

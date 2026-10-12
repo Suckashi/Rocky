@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { displayPath, type PendingApproval } from '../api.ts';
 import { commandLine } from '../effects.ts';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
+import { isActivatable, isEditable } from '../keys.ts';
 import { Diff } from './Diff.tsx';
 import { DocumentChange } from './DocumentPreview.tsx';
 import { isPreviewable } from './PreviewPane.tsx';
@@ -209,6 +210,11 @@ export function ApprovalPanel({
   const [full, setFull] = useState(false);
   const reasonBox = useRef<HTMLInputElement>(null);
   const panel = useRef<HTMLElement>(null);
+  // Focus and highlight move together, so Enter on a focused option and the option shown as
+  // selected are always the same one.
+  const optionButtons = useRef<(HTMLButtonElement | null)[]>([]);
+  const optionFocused = () =>
+    optionButtons.current.some((b) => b && b === document.activeElement);
 
   // A new question starts fresh.
   useEffect(() => {
@@ -285,6 +291,9 @@ export function ApprovalPanel({
         return;
       }
       const typing = event.target === reasonBox.current;
+      // A field elsewhere keeps its keys; a focused button or link keeps Enter, so pressing
+      // Enter on "Reject" or "Stop" does what that control says, never "Allow once".
+      if (!typing && isEditable(event.target)) return;
       if (event.key === 'Escape') {
         event.preventDefault();
         if (full) setFull(false);
@@ -293,6 +302,7 @@ export function ApprovalPanel({
         return;
       }
       if (event.key === 'Enter') {
+        if (!typing && isActivatable(event.target)) return;
         event.preventDefault();
         void choose(typing ? explainAt : selected);
         return;
@@ -304,11 +314,12 @@ export function ApprovalPanel({
         void choose(n - 1);
       } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
-        setSelected(
-          (s) =>
-            (s + (event.key === 'ArrowDown' ? 1 : options.length - 1)) %
-            options.length,
-        );
+        const next =
+          (selected + (event.key === 'ArrowDown' ? 1 : options.length - 1)) %
+          options.length;
+        const button = optionButtons.current[next];
+        if (button) button.focus();
+        else setSelected(next);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -362,7 +373,14 @@ export function ApprovalPanel({
               className={selected === index ? 'selected' : ''}
               disabled={busy}
               onClick={() => void choose(index)}
-              onMouseEnter={() => setSelected(index)}
+              ref={(button) => {
+                optionButtons.current[index] = button;
+              }}
+              onMouseEnter={(event) => {
+                if (optionFocused()) event.currentTarget.focus();
+                else setSelected(index);
+              }}
+              onFocus={() => setSelected(index)}
             >
               <kbd>{index + 1}</kbd>
               {label(option)}
