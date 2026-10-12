@@ -39,7 +39,9 @@ export function TurnChanges({
       setView(next);
     } catch (e) {
       setMessage(
-        t('changes.error', { error: e instanceof Error ? e.message : '' }),
+        e instanceof ApiError && e.message === 'snapshot-damaged'
+          ? t('changes.error.snapshot-damaged')
+          : t('changes.error', { error: e instanceof Error ? e.message : '' }),
       );
     } finally {
       setBusy(false);
@@ -54,10 +56,12 @@ export function TurnChanges({
         `${base}/restore`,
         'POST',
         {
-          items: changes.map((c) => ({
-            path: c.path,
-            contentHash: c.contentHash,
-          })),
+          // A file whose earlier version is damaged is not in the server's plan either.
+          items: changes.flatMap((c) =>
+            c.contentHash === null
+              ? []
+              : [{ path: c.path, contentHash: c.contentHash }],
+          ),
         },
       );
       setMessage(t('changes.restored', { count: result.restored.length }));
@@ -67,7 +71,9 @@ export function TurnChanges({
       const code = e instanceof Error ? e.message : '';
       setMessage(
         e instanceof ApiError &&
-          (code === 'content-changed' || code === 'denied')
+          (code === 'content-changed' ||
+            code === 'denied' ||
+            code === 'snapshot-damaged')
           ? t(`changes.error.${code}` as MessageKey, { path: '' })
           : t('changes.error', { error: code }),
       );
@@ -120,6 +126,11 @@ export function TurnChanges({
                   {displayPath(c.path, project)}
                 </span>
               </div>
+              {c.damaged && (
+                <p className="warn small" role="note">
+                  {t('changes.damaged')}
+                </p>
+              )}
               {c.modifiedSince && (
                 <p className="warn small" role="note">
                   {t('changes.modifiedSince')}

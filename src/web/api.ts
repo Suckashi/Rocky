@@ -116,7 +116,11 @@ export interface FileChange {
   /** One of the six document formats: a layout preview is available. */
   document: boolean;
   modifiedSince: boolean;
-  contentHash: string;
+  /** A saved version of this file is damaged: not shown, and (if it is the earlier one) not
+   * restored. */
+  damaged: boolean;
+  /** null: cannot be restored. */
+  contentHash: string | null;
 }
 
 /** A path inside the project shown relative to it, with forward slashes. */

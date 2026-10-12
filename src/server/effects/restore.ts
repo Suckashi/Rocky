@@ -6,7 +6,7 @@ import type { Executor } from './execute.ts';
 import type { Gate } from './gate.ts';
 import { contentHash } from './hash.ts';
 import type { ReceiptStore } from './receipts.ts';
-import { asContent, type SnapshotStore } from './snapshots.ts';
+import { asContent, SnapshotDamaged, type SnapshotStore } from './snapshots.ts';
 import type { Effect } from './types.ts';
 
 type WriteEffect = Extract<Effect, { kind: 'write' }>;
@@ -62,22 +62,33 @@ export function planRestore(
   threadId: string,
   runId: string,
 ): RestoreItem[] {
-  return runChanges(receipts, snapshots, threadId, runId).map((change) => {
+  // A file whose saved earlier version is damaged cannot be restored; the others still can.
+  return runChanges(receipts, snapshots, threadId, runId).flatMap((change) => {
+    let before: Buffer | null;
+    try {
+      before =
+        change.beforeSha === null ? null : snapshots.read(change.beforeSha);
+    } catch (error) {
+      if (error instanceof SnapshotDamaged) return [];
+      throw error;
+    }
     const effect: WriteEffect =
-      change.beforeSha === null
+      before === null
         ? { kind: 'write', path: change.path, operation: 'delete' }
         : {
             kind: 'write',
             path: change.path,
             operation: existsSync(change.path) ? 'edit' : 'create',
-            ...asContent(snapshots.read(change.beforeSha)),
+            ...asContent(before),
           };
-    return {
-      path: change.path,
-      effect,
-      contentHash: contentHash(effect),
-      modifiedSince: shaOf(change.path) !== change.afterSha,
-    };
+    return [
+      {
+        path: change.path,
+        effect,
+        contentHash: contentHash(effect),
+        modifiedSince: shaOf(change.path) !== change.afterSha,
+      },
+    ];
   });
 }
 

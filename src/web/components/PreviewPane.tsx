@@ -71,7 +71,9 @@ function Version({ url, side }: { url: string; side: Side }) {
               ? t('preview.gone')
               : e instanceof ApiError && e.status === 415
                 ? t('preview.unsupported')
-                : code,
+                : code === 'snapshot-damaged'
+                  ? t('changes.error.snapshot-damaged')
+                  : code,
         });
       });
     return () => {

@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-// Which part of Rocky may depend on which (ADR 0021). The action gate (effects) and the
+// Which part of Rocky may depend on which (ADR 0021, 0033). The action gate (effects) and the
 // leaf libraries depend on nothing else in Rocky; each SDK stays inside the part that owns it.
 // A new dependency that breaks these lines must change this table on purpose.
 
@@ -19,7 +19,7 @@ const MAY_IMPORT: Record<string, string[] | '*'> = {
   'server/documents': [],
   'server/skills': ['server/effects'],
   'server/external': ['server/effects'],
-  'server/store': ['server/mcp'],
+  'server/store': ['server/effects', 'server/mcp'],
   'server/jobs': ['server/effects', 'server/external', 'server/store'],
   'server/agent': [
     'server/documents',
