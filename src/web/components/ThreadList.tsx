@@ -36,7 +36,13 @@ export function ThreadList({
 
   return (
     <aside className="threads" aria-label={t('nav.threads')}>
-      <button type="button" className="new-thread" onClick={onNew}>
+      <button
+        type="button"
+        className="new-thread"
+        title={t('threads.newHint')}
+        aria-keyshortcuts="Control+Shift+O Meta+Shift+O"
+        onClick={onNew}
+      >
         <Plus size={16} />
         {t('threads.new')}
       </button>

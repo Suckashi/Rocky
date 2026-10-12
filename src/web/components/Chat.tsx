@@ -553,6 +553,7 @@ export function Chat({
                 planning ? 'chat.placeholder.plan' : 'chat.placeholder',
               )}
               aria-label={t('chat.placeholder')}
+              aria-keyshortcuts="/"
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={onKeyDown}
             />

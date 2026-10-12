@@ -42,6 +42,7 @@
   "nav.threads": "Conversations",
   "nav.threadsClose": "Close conversations",
   "threads.new": "New chat",
+  "threads.newHint": "New chat (Ctrl/⌘+Shift+O); press / to jump to the input box",
   "threads.recent": "Recent",
   "threads.empty": "Your first conversation will appear here.",
   "threads.untitled": "New chat",

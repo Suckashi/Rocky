@@ -13,6 +13,7 @@ import { usePreviewPane } from './components/PreviewPane.tsx';
 import { Roko, type RokoState } from './components/Roko.tsx';
 import { ThreadList } from './components/ThreadList.tsx';
 import { I18nProvider, useI18n, type MessageKey } from './i18n/index.tsx';
+import { isEditable } from './keys.ts';
 import { Locked } from './pages/Locked.tsx';
 import { JobsPage } from './pages/JobsPage.tsx';
 import { Onboarding } from './pages/Onboarding.tsx';
@@ -144,6 +145,39 @@ function Shell({
     setThreadId(id);
     setThreadsOpen(false);
   };
+
+  // Keyboard: Ctrl/⌘+Shift+O starts a conversation; "/" outside a field goes to the input box.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.isComposing) return;
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === 'o'
+      ) {
+        e.preventDefault();
+        setView('chat');
+        setThreadId(crypto.randomUUID());
+        setThreadsOpen(false);
+        return;
+      }
+      if (
+        e.key === '/' &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        !isEditable(e.target)
+      ) {
+        const box =
+          document.querySelector<HTMLTextAreaElement>('.composer textarea');
+        if (!box) return;
+        e.preventDefault();
+        box.focus();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   if (view === 'onboarding') {
     return (

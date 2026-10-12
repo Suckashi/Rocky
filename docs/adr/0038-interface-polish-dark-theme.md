@@ -24,6 +24,11 @@
   停 2.5 秒回到原本動畫；工作中、等待、失敗的狀態動畫不會被打斷。
 - 核准選項改成一般清單裡的按鈕（焦點本來就在按鈕上，`listbox/option` 角色不正確）；工具卡從
   `<details>` 改成有 `aria-expanded` 的切換按鈕，「預覽」不再包在 `<summary>` 裡。
+- 全域快捷鍵：`Ctrl/⌘+Shift+O` 開新對話，在欄位外按 `/` 回到輸入框（以 `aria-keyshortcuts` 標示）。
+- 伺服器對 `/assets/*`（Vite 以內容雜湊命名）回 `Cache-Control: public, max-age=31536000, immutable`；
+  `/assets/` 下找不到的檔案回 404，不再退回 index.html，以免頁面被當成腳本永久快取。
+- 不拆 CopilotKit：主程式約 2.2 MB，多半是 `@copilotkit/react-core/v2` 的 provider 連帶引用的
+  聊天介面（KaTeX、mermaid、a2ui），只改 import 路徑拆不掉；要拆得換掉或修改依賴，留給另一個決定。
 - 不使用網路字型（維持 `tokens.css` 原本的做法），只在字型清單前面加上 Windows 的 Segoe UI Variable。
 
 ## 驗證（雲端 Linux，Node 24.21.0，Playwright 的 Chromium）
@@ -38,6 +43,10 @@
   - 文字與底色對比：亮暗兩套都 ≥ 4.5:1。
   - 320、390、768、1024、1920px 寬：頁面沒有水平捲動。
   - 鍵盤 Tab 的焦點外框看得到。
-  - 這些是自我檢查，不是評審結果；效能（約 2.2 MB 的 JS、3 MB 的 Roko 圖）沒有處理，素材依 owner 的紀錄保持原檔。
+  - 載入（Playwright 的 Chromium，本機伺服器，5 次中位數）：不降速 FCP 176 ms、LCP 264 ms、TBT 21 ms；
+    CPU 降速 4 倍 FCP 680 ms、LCP 772 ms、TBT 314 ms（超過 200 ms，Rocky 只在桌機執行）。
+  - 對照 Webby Apps & Software 的項目（內容、結構與導覽、視覺設計含包容性、功能、互動性、創新、整體體驗）
+    逐項補強：設定目錄與窄視窗抽屜（導覽）、深色與 AA 對比（視覺與包容）、快捷鍵（互動）、Roko 視線（創新）。
+  - 這些是自我檢查，不是評審結果；Roko 圖（3 MB）依 owner 的紀錄保持原檔。
 - `npm run test:e2e:jobs`：沒有執行，這台機器沒有安裝 OpenCode。
 - 沒有在 Windows 上看過實際畫面。

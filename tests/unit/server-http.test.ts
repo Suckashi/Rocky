@@ -1,4 +1,10 @@
-import { mkdtempSync, readFileSync, statSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -253,5 +259,34 @@ describe('shutdown', () => {
       report: () => {},
     })();
     expect(codes).toEqual([0]);
+  });
+});
+
+describe('web UI files', () => {
+  it('lets the browser keep hashed build files, but not the page or the API', async () => {
+    const web = mkdtempSync(join(tmpdir(), 'rocky-web-'));
+    mkdirSync(join(web, 'assets'));
+    writeFileSync(join(web, 'index.html'), '<!doctype html>');
+    writeFileSync(join(web, 'assets', 'index-abc123.js'), 'export {};');
+    const app = createApp({
+      token,
+      codes: new LoginCodes(),
+      port: PORT,
+      webRoot: web,
+    });
+    const get = (path: string) =>
+      app.request(`http://${HOST}${path}`, { headers: { host: HOST } });
+
+    const asset = await get('/assets/index-abc123.js');
+    expect(asset.status).toBe(200);
+    expect(asset.headers.get('cache-control')).toBe(
+      'public, max-age=31536000, immutable',
+    );
+    const page = await get('/');
+    expect(page.status).toBe(200);
+    expect(page.headers.get('cache-control')).toBeNull();
+    const missing = await get('/assets/missing.js');
+    expect(missing.status).toBe(404);
+    expect(missing.headers.get('cache-control')).toBeNull();
   });
 });

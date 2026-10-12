@@ -76,7 +76,16 @@ export function createApp(options: AppOptions): Hono {
   app.all('/api/*', (c) => c.json({ error: 'not-found' }, 404));
 
   if (options.webRoot) {
+    // Vite names built files by content hash, so a browser can keep them for good and
+    // reuse its compiled code on the next launch instead of asking again.
+    app.use('/assets/*', async (c, next) => {
+      await next();
+      if (c.res.status === 200)
+        c.header('Cache-Control', 'public, max-age=31536000, immutable');
+    });
     app.use('/*', serveStatic({ root: options.webRoot }));
+    // A missing build file is a 404, never the page: the page must not be kept as a script.
+    app.all('/assets/*', (c) => c.text('not found', 404));
     app.get('*', serveStatic({ root: options.webRoot, path: 'index.html' }));
   }
   app.onError((error, c) => {

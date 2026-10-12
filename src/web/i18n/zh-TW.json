@@ -42,6 +42,7 @@
   "nav.threads": "對話列表",
   "nav.threadsClose": "關閉對話列表",
   "threads.new": "新對話",
+  "threads.newHint": "新對話（Ctrl/⌘+Shift+O）；按 / 回到輸入框",
   "threads.recent": "最近",
   "threads.empty": "你的第一個對話會出現在這裡。",
   "threads.untitled": "新對話",
