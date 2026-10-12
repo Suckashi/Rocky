@@ -28,6 +28,23 @@ function check(condition: unknown, message: string): asserts condition {
 const fake = await startFakeOpenAI((messages) => {
   const lastUser = messages.findLastIndex((m) => m.role === 'user');
   const results = messages.slice(lastUser + 1).filter((m) => m.role === 'tool');
+  // Two questions in one turn: 41 → 42, then back to 41.
+  if (
+    JSON.stringify(messages[lastUser]?.content ?? '').includes('來回') &&
+    results.length < 2
+  )
+    return {
+      toolCalls: [
+        {
+          name: 'edit_file',
+          args: {
+            file_path: '/AGENTS.md',
+            old_string: results.length === 0 ? 'answer = 41' : 'answer = 42',
+            new_string: results.length === 0 ? 'answer = 42' : 'answer = 41',
+          },
+        },
+      ],
+    };
   if (results.length > 0)
     return { text: `已處理。工具回覆：${String(results.at(-1)!.content)}` };
   const said = JSON.stringify(messages[lastUser]?.content ?? '');
@@ -157,10 +174,16 @@ try {
   const page: Page = await context.newPage();
   current = page;
   const errors: string[] = [];
+  /** Errors a step causes on purpose (a refused run, a request cut off by a reload). */
+  let expected: RegExp | undefined;
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
-    // The browser logs every 4xx; a 400 is the expected answer to the invalid input this test sends.
-    if (message.type() === 'error' && !message.text().includes('status of 400'))
+    // The browser logs every 4xx; these are the answers to what this test sends on purpose.
+    if (
+      message.type() === 'error' &&
+      !/status of (400|409|413)/.test(message.text()) &&
+      !expected?.test(message.text())
+    )
       errors.push(message.text());
   });
 
@@ -276,6 +299,120 @@ try {
     readFileSync(appFile, 'utf8').includes('41'),
     'key 4 rejects with a reason, the file is untouched and the reason reaches the model',
   );
+
+  // A run the server refuses says why and gives the text back (here: the conversation is
+  // too long to send).
+  expected = /HTTP 413/;
+  await page.route('**/api/copilotkit/**', (route) =>
+    route.request().method() === 'POST' &&
+    route.request().url().endsWith('/run')
+      ? route.fulfill({
+          status: 413,
+          contentType: 'application/json',
+          body: '{"error":"too-large"}',
+        })
+      : route.fallback(),
+  );
+  await page.getByRole('textbox').fill('這句送不出去');
+  await page.keyboard.press('Enter');
+  await page
+    .getByRole('alert')
+    .filter({ hasText: '這段對話太長，無法再送出' })
+    .waitFor({ timeout: 20_000 });
+  check(
+    (await page.getByRole('textbox').inputValue()) === '這句送不出去' &&
+      (await page
+        .locator('.bubble.user', { hasText: '這句送不出去' })
+        .count()) === 0 &&
+      (await page.getByText('這輪完成了').count()) === 0,
+    'a refused run says the conversation is too long and gives the text back',
+  );
+  await page.unroute('**/api/copilotkit/**');
+  await page.getByRole('textbox').fill('');
+
+  // Reloading in the middle of a turn: the next question of that turn still shows up.
+  expected = /network error/;
+  await page.getByRole('textbox').fill('請來回改兩次');
+  await page.keyboard.press('Enter');
+  await panel.waitFor({ timeout: 20_000 });
+  await page.reload();
+  await panel.getByText('Rocky 想修改 AGENTS.md').waitFor({ timeout: 20_000 });
+  await page.keyboard.press('1');
+  await panel
+    .locator('.diff-add', { hasText: 'const answer = 41;' })
+    .waitFor({ timeout: 20_000 });
+  await page.keyboard.press('1');
+  await page.getByRole('button', { name: '送出' }).waitFor({ timeout: 20_000 });
+  check(
+    readFileSync(appFile, 'utf8') === 'const answer = 41;\n' &&
+      (await panel.count()) === 0,
+    "after a reload during a turn, the turn's next question shows up and the turn ends",
+  );
+  expected = undefined;
+
+  // The approval mode is one setting: chosen next to the input box, Settings shows it too.
+  await page.getByLabel('核准模式').selectOption('hands-off');
+  await page.getByRole('button', { name: '設定' }).click();
+  const shown = await page.getByLabel('核准模式').inputValue();
+  await page.getByLabel('核准模式').selectOption('ask-when-needed');
+  await page.getByRole('button', { name: '回到對話' }).click();
+  check(
+    shown === 'hands-off',
+    'the mode chosen next to the input box is the one Settings shows',
+  );
+
+  // A question answered elsewhere (another tab, a restart) gives the input box back.
+  // The page sees a question the server no longer has, until it answers it.
+  let stale = true;
+  await page.route('**/api/approvals/answered-elsewhere', (route) => {
+    stale = false;
+    return route.fallback();
+  });
+  await page.route('**/api/threads/*/approvals', (route) =>
+    !stale
+      ? route.fallback()
+      : route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({
+            mode: 'ask-when-needed',
+            planning: false,
+            pending: [
+              {
+                id: 'answered-elsewhere',
+                threadId: 'x',
+                toolCallId: null,
+                actor: 'rocky',
+                effect: {
+                  kind: 'command',
+                  argv: ['npm', 'test'],
+                  cwd: project,
+                },
+                contentHash: 'h',
+                reason: 'dangerous',
+                detail: 'push',
+                before: null,
+                root: null,
+                grant: 'dangerous:push',
+                always: ['npm', 'test'],
+                createdAt: 0,
+              },
+            ],
+          }),
+        }),
+  );
+  await page.reload();
+  await panel.waitFor({ timeout: 20_000 });
+  await page.keyboard.press('1');
+  await page.getByRole('textbox').waitFor({ timeout: 20_000 });
+  check(
+    (await page
+      .getByRole('alert')
+      .filter({ hasText: 'not-pending' })
+      .count()) === 0,
+    'answering a question that is already gone brings the input box back, without a raw code',
+  );
+  await page.unroute('**/api/threads/*/approvals');
+  await page.unroute('**/api/approvals/answered-elsewhere');
 
   // Memory: remembered in chat, without a question in the default mode.
   await page.getByRole('textbox').fill('請記住部署環境');

@@ -54,6 +54,7 @@
   "chat.thinking": "Roko 正在思考…",
   "chat.error": "這一輪沒有完成：{error}",
   "chat.error.model-not-configured": "還沒設定模型，請先到設定頁選擇模型。",
+  "chat.error.too-long": "這段對話太長，無法再送出。請開一個新對話繼續。",
   "chat.connectError": "對話載入失敗，請重新整理頁面。",
   "chat.you": "你",
   "panel.idle": "Roko 在旁邊待命",

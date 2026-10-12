@@ -213,6 +213,7 @@ function Shell({
             project={settings.project}
             onActivity={onActivity}
             onState={setRoko}
+            onSettings={setSettings}
           />
         </>
       )}

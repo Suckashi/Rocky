@@ -1,6 +1,6 @@
 // The HTTP app: security first, then the API, then the built web UI.
 import { serveStatic } from '@hono/node-server/serve-static';
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { setCookie } from 'hono/cookie';
 import {
@@ -9,7 +9,13 @@ import {
   SESSION_COOKIE,
   type GuardOptions,
 } from './security.ts';
+import { COPILOT_BASE_PATH } from './copilot.ts';
 import type { LoginCodes } from './login-codes.ts';
+
+/** The largest chat turn Rocky accepts: the conversation so far plus the new message. */
+export const CHAT_BODY_LIMIT = 32 * 1024 * 1024;
+
+const bodyLimitError = (c: Context) => c.json({ error: 'too-large' }, 413);
 
 export interface AppOptions extends GuardOptions {
   codes: LoginCodes;
@@ -45,12 +51,16 @@ export function createApp(options: AppOptions): Hono {
     return c.redirect('/', 302);
   });
 
-  app.use(
-    '/api/*',
-    bodyLimit({
-      maxSize: 2_000_000,
-      onError: (c) => c.json({ error: 'too-large' }, 413),
-    }),
+  const tooLarge = bodyLimitError;
+  const apiLimit = bodyLimit({ maxSize: 2_000_000, onError: tooLarge });
+  // A chat turn carries the whole conversation (the model sees a summarized history), so
+  // it gets more room than the other routes (ADR 0030).
+  const chatLimit = bodyLimit({ maxSize: CHAT_BODY_LIMIT, onError: tooLarge });
+  app.use('/api/*', (c, next) =>
+    (c.req.path.startsWith(`${COPILOT_BASE_PATH}/`) ? chatLimit : apiLimit)(
+      c,
+      next,
+    ),
   );
   app.use('/api/*', authGuard(options));
   app.get('/api/health', (c) => c.json({ ok: true }));
@@ -69,7 +79,10 @@ export function createApp(options: AppOptions): Hono {
     app.get('*', serveStatic({ root: options.webRoot, path: 'index.html' }));
   }
   app.onError((error, c) => {
-    console.error('request failed:', error.name, error.message);
+    console.error(
+      `request failed: ${c.req.method} ${c.req.path}\n`,
+      error.stack ?? `${error.name}: ${error.message}`,
+    );
     return c.json({ error: 'internal' }, 500);
   });
   return app;
