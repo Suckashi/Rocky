@@ -102,6 +102,12 @@ export class Gate {
     return () => this.anyListeners.delete(listener);
   }
 
+  /** Plan mode on or off from the interface: a running turn sends the new state. */
+  setPlanning(threadId: string, on: boolean): void {
+    this.deps.setPlanning(threadId, on);
+    this.changed(threadId);
+  }
+
   private changed(threadId: string): void {
     for (const listener of this.listeners.get(threadId) ?? []) listener();
     for (const listener of this.anyListeners) listener(threadId);

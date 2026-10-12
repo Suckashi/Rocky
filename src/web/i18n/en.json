@@ -54,6 +54,7 @@
   "chat.thinking": "Roko is thinking…",
   "chat.error": "This turn did not finish: {error}",
   "chat.error.model-not-configured": "No model yet. Choose one in Settings first.",
+  "chat.error.too-long": "This conversation is too long to send. Start a new conversation to continue.",
   "chat.connectError": "The conversation did not load. Reload the page.",
   "chat.you": "You",
   "panel.idle": "Roko is standing by",

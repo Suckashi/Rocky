@@ -115,7 +115,7 @@ export function approvalRoutes(
       z.object({ planning: z.boolean() }).strict(),
     );
     if (!body) return c.json({ error: 'invalid-plan' }, 400);
-    threads.setPlanning(c.req.param('id'), body.planning);
+    gate.setPlanning(c.req.param('id'), body.planning);
     return c.json({ planning: body.planning });
   });
   app.get('/threads/:id/receipts', (c) => {

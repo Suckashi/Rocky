@@ -211,8 +211,10 @@ function Shell({
             key={threadId}
             threadId={threadId}
             project={settings.project}
+            mode={settings.mode}
             onActivity={onActivity}
             onState={setRoko}
+            onSettings={setSettings}
           />
         </>
       )}
