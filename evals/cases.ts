@@ -25,6 +25,9 @@ export interface CaseContext {
 export interface Case {
   id: string;
   prompt: string;
+  /** A second message in the same conversation, sent with the first turn's history as the
+   * browser keeps it; the case is judged on the second turn. */
+  followUp?: string;
   files: Record<string, string>;
   /** Binary files (documents), made when the case starts. */
   documents?: Record<string, () => Promise<Uint8Array>>;
@@ -596,6 +599,21 @@ export const CASES: Case[] = [
       ...(ctx.tools.includes('task') ? [] : ['did not use the subagent']),
       ...noWrites(ctx),
       ...replyHas(ctx, /http\/query\.js/, /route\.js/),
+    ],
+  },
+  {
+    // The turn after a research subagent ran: its history goes back to the model.
+    id: 'research-follow-up',
+    prompt:
+      '請交給研究助手（task 工具）去查：parseQuery 定義在哪個檔案、被哪些檔案用到。查完告訴我結果，不要改任何檔案。',
+    followUp:
+      '剛才查到的檔案裡，各是在第幾行定義或用到 parseQuery？直接回答，不要改任何檔案。',
+    files: findDef,
+    check: (ctx) => [
+      // The first turn has to have used the subagent, or the history has nothing to test.
+      ...(ctx.tools.includes('task') ? [] : ['did not use the subagent']),
+      ...noWrites(ctx),
+      ...replyHas(ctx, /query\.js/, /route\.js/),
     ],
   },
   {

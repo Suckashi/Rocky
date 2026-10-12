@@ -157,39 +157,58 @@ async function runCase(c: Case): Promise<Result> {
   });
 
   const started = Date.now();
-  const timeout = AbortSignal.timeout(CASE_TIMEOUT_MS);
   let events: Event[] = [];
+  /** Every turn's events, for the tools used and the tokens spent. */
+  const allEvents: Event[] = [];
   let error: string | undefined;
-  try {
-    const res = await rocky.app.request(
-      `http://${HOST}/api/copilotkit/agent/rocky/run`,
-      {
-        method: 'POST',
-        signal: timeout,
-        headers: {
-          host: HOST,
-          authorization: `Bearer ${token}`,
-          'content-type': 'application/json',
+  /** A provider rejecting the second turn's request (4xx) means the history Rocky built
+   * was wrong: a failure of Rocky, not of the provider. */
+  let historyRejected = false;
+  /** One turn, with the conversation so far as the browser would send it. */
+  const send = async (runId: string, messages: unknown[]) => {
+    try {
+      const res = await rocky.app.request(
+        `http://${HOST}/api/copilotkit/agent/rocky/run`,
+        {
+          method: 'POST',
+          signal: AbortSignal.timeout(CASE_TIMEOUT_MS),
+          headers: {
+            host: HOST,
+            authorization: `Bearer ${token}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            threadId,
+            runId,
+            messages,
+            tools: [],
+            context: [],
+            state: {},
+            forwardedProps: {},
+          }),
         },
-        body: JSON.stringify({
-          threadId,
-          runId: `${threadId}-run`,
-          messages: [{ id: `${threadId}-u`, role: 'user', content: c.prompt }],
-          tools: [],
-          context: [],
-          state: {},
-          forwardedProps: {},
-        }),
-      },
-    );
-    events = (await res.text())
-      .split('\n')
-      .filter((line) => line.startsWith('data:'))
-      .map((line) => JSON.parse(line.slice(5).trim()) as Event);
-    const failure = events.find((e) => e.type === 'RUN_ERROR');
-    if (failure) error = String(failure['message'] ?? failure['code']);
-  } catch (e) {
-    error = e instanceof Error ? e.message : String(e);
+      );
+      events = (await res.text())
+        .split('\n')
+        .filter((line) => line.startsWith('data:'))
+        .map((line) => JSON.parse(line.slice(5).trim()) as Event);
+      allEvents.push(...events);
+      const failure = events.find((e) => e.type === 'RUN_ERROR');
+      if (failure) error = String(failure['message'] ?? failure['code']);
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    }
+  };
+  await send(`${threadId}-run`, [
+    { id: `${threadId}-u`, role: 'user', content: c.prompt },
+  ]);
+  // The second turn carries the first turn's history as stored for the browser.
+  if (c.followUp && !error) {
+    await send(`${threadId}-run2`, [
+      ...rocky.runner.getThreadMessages(threadId),
+      { id: `${threadId}-u2`, role: 'user', content: c.followUp },
+    ]);
+    historyRejected = error !== undefined && /^4\d\d\b/.test(error.trim());
   }
   // Delegated jobs run in the background: the case is judged after they finish.
   await Promise.all(
@@ -204,12 +223,13 @@ async function runCase(c: Case): Promise<Result> {
     .filter((e) => e.type === 'TEXT_MESSAGE_CONTENT')
     .map((e) => String(e['delta']))
     .join('');
-  const tools = events
+  const tools = allEvents
     .filter((e) => e.type === 'TOOL_CALL_START')
     .map((e) => String(e['toolCallName']));
   const receipts = rocky.receipts.forThread(threadId);
-  const usage = (events.find((e) => e.type === 'RUN_FINISHED')?.['usage'] ??
-    []) as {
+  const usage = allEvents
+    .filter((e) => e.type === 'RUN_FINISHED')
+    .flatMap((e) => (e['usage'] ?? []) as unknown[]) as {
     inputTokens?: number;
     outputTokens?: number;
     cachedInputTokens?: number;
@@ -247,7 +267,9 @@ async function runCase(c: Case): Promise<Result> {
     ),
     tokens,
     ...(error ? { error } : {}),
-    ...(error && isProviderError(error) ? { providerError: true } : {}),
+    ...(error && isProviderError(error) && !historyRejected
+      ? { providerError: true }
+      : {}),
   };
 }
 
@@ -336,9 +358,11 @@ if (saveBaseline && !only) {
       `baseline is for ${baseline.model} (${baseline.mode ?? 'ask-when-needed'}); not compared`,
     );
   } else if (baseline) {
-    const { blocking, minor, added } = compareCases(
+    const { blocking, minor, added, missing, removed } = compareCases(
       baseline.cases,
       summary.cases,
+      summary.skipped,
+      CASES.map((c) => c.id),
     );
     for (const r of minor)
       console.log(
@@ -347,11 +371,21 @@ if (saveBaseline && !only) {
     if (added.length)
       console.log(`new cases, not in the baseline: ${added.join(', ')}`);
     console.log(`baseline score ${baseline.score}, now ${score}`);
+    for (const id of missing)
+      console.error(
+        `NOT SCORED: ${id} (no run finished without a provider error)`,
+      );
+    if (removed.length)
+      console.log(
+        `cases no longer in the suite: ${removed.join(', ')} (save the baseline again)`,
+      );
     if (blocking.length) {
       for (const r of blocking)
         console.error(`REGRESSION: ${r.id} ${r.baseline} → ${r.now}`);
       process.exit(1);
     }
+    // A case that was not scored could have regressed: the gate cannot say it did not.
+    if (missing.length) process.exit(1);
     console.log('no case regressed');
   }
 }

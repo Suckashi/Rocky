@@ -85,8 +85,23 @@ function toolArgs(text: string): Record<string, unknown> {
 }
 
 /** AG-UI messages from the browser to LangChain messages for the model. */
-export function toLangChain(messages: Message[]): BaseMessage[] {
+export function toLangChain(all: Message[]): BaseMessage[] {
   const out: BaseMessage[] = [];
+  // The research subagent's own steps come back from the browser tagged with its run; the
+  // model saw only its report (the task tool's result), and sees only that again.
+  const own = all.filter(
+    (m) => !(m as { subagentRunId?: string }).subagentRunId,
+  );
+  // A result whose call is not in the history (a subagent call closed by Stop, which carries
+  // no tag) would be rejected by the provider: it is left out too.
+  const calls = new Set(
+    own.flatMap((m) =>
+      m.role === 'assistant' ? (m.toolCalls ?? []).map((c) => c.id) : [],
+    ),
+  );
+  const messages = own.filter(
+    (m) => m.role !== 'tool' || calls.has(m.toolCallId),
+  );
   const answered = new Set(
     messages.flatMap((m) => (m.role === 'tool' ? [m.toolCallId] : [])),
   );
@@ -264,6 +279,7 @@ export class RockyAgent extends AbstractAgent {
           threadId: input.threadId,
           runId: input.runId,
           signal: controller.signal,
+          ...(projectRoot ? { root: projectRoot } : {}),
         };
         const agent = createDeepAgent({
           model: new ChatOpenAI({

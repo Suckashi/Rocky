@@ -35,6 +35,28 @@ describe('eval gate', () => {
     expect(result.added).toEqual(['new']);
   });
 
+  it('a baseline case with no scored run now is reported, unless it was skipped on purpose', () => {
+    // b: every run ended by a provider error, so it is absent from the scored cases.
+    const result = compareCases(
+      [c('a', 3), c('b', 3), c('job', 3)],
+      [c('a', 3)],
+      ['job'],
+    );
+    expect(result.missing).toEqual(['b']);
+    expect(result.blocking).toEqual([]);
+  });
+
+  it('a case removed from the suite is reported apart and does not block', () => {
+    const result = compareCases(
+      [c('a', 3), c('old', 3)],
+      [c('a', 3)],
+      [],
+      ['a'],
+    );
+    expect(result.missing).toEqual([]);
+    expect(result.removed).toEqual(['old']);
+  });
+
   it('compares rates when the repeat count differs', () => {
     expect(compareCases([c('a', 3, 3)], [c('a', 0, 1)]).blocking).toHaveLength(
       1,
