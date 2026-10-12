@@ -7,8 +7,8 @@
 **A local-first AI engineering partner for one person and one computer.**
 
 Rocky chats with you, works in your project folders, reads and writes Office documents,
-and hands larger coding tasks to an external coding agent. Every change it makes goes
-through one approval gate and can be undone.
+and hands larger coding tasks to an external coding agent. Every action it takes goes
+through one approval gate, and the files it writes can be restored.
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 ![Node.js 24](https://img.shields.io/badge/node-24-339933.svg)
@@ -33,8 +33,10 @@ through one approval gate and can be undone.
   off_ asks only before reading a secret. "Allow for this conversation" covers that kind of
   action; "always allow" saves a command rule you can see and remove in Settings. Deny rules
   hold in both modes. An approval is bound to a hash of the exact content it showed.
-- **Undo for every change.** Files are snapshotted before each write; each turn ends with a
-  card listing what changed and a **Restore all** button. Every action leaves a receipt.
+- **Undo for file changes.** Every file Rocky writes, edits or deletes (Office documents,
+  memory and applied jobs included) is snapshotted first; each turn ends with a card listing
+  those files and a **Restore all** button. What a command or an MCP tool changes is not
+  snapshotted and cannot be restored this way. Every action leaves a receipt.
 - **Plan mode.** Turn on _Plan_ next to the input box: Rocky only reads, then proposes 1–3
   options. Choosing one turns plan mode off and the work starts.
 - **Documents as first-class files.** PDF, Word, Excel, PowerPoint, Markdown and HTML are read
@@ -77,7 +79,10 @@ run (`npm ci`), starts Rocky, and reopens the browser if Rocky is already runnin
 powershell -ExecutionPolicy Bypass -File .\Start-Rocky.ps1
 ```
 
-Rocky is verified on Linux and Windows; macOS is untested.
+Rocky is developed and tested on Linux. On Windows, CI runs `npm run check` and the build;
+the browser tests, launcher, delegation and evaluation run there only when
+`scripts/verify-windows.ps1` is run by hand, and each ADR records whether it was. macOS is
+untested.
 
 ### First run
 
@@ -111,7 +116,7 @@ Browser (React, zh-TW / en)
 Rocky (one Node.js process)
  ├─ Agent        Deep Agents + LangChain, OpenAI-compatible models
  ├─ Action gate  policy → approval → single-use pass → execute → receipt
- ├─ Snapshots    content-addressed copies of every file before it changes
+ ├─ Snapshots    content-addressed copies of each file before Rocky writes it
  ├─ Jobs         OpenCode over ACP, one Git worktree per job, queued
  ├─ MCP client   your stdio / HTTP servers
  ├─ Documents    pure Node libraries for pdf, docx, xlsx, pptx, md, html
@@ -121,8 +126,9 @@ Rocky (one Node.js process)
 Every tool call passes the **action gate** before it runs, including calls from OpenCode, MCP
 and the Restore button. The functions that write files or run commands accept only a
 single-use pass issued by the gate for that exact content, so nothing can skip the gate.
-Commands run as argument lists, never through a shell. An action whose outcome is unknown
-is never retried automatically.
+Commands run as argument lists, not as shell strings. The one exception is Windows, where
+`.cmd` and `.bat` programs such as `npm` can only start through `cmd.exe`; their arguments
+are escaped for it. An action whose outcome is unknown is never retried automatically.
 
 The reasoning behind each design choice is recorded in the
 [architecture decision records](docs/adr/).
@@ -172,13 +178,17 @@ docs/adr/     architecture decision records
 
 ## Project status
 
-Rocky V1 is feature-complete. It is verified on Linux, and on Windows with
-`scripts/verify-windows.ps1`; macOS is untested. There is no packaged release yet. Known limitations include:
+Rocky V1 is feature-complete. It is developed and tested on Linux; on Windows, CI runs
+`npm run check` and the build, and everything else only when `scripts/verify-windows.ps1` is
+run by hand (each ADR says whether it was). macOS is untested. There is no packaged release
+yet. Known limitations include:
 
 - No operating-system sandbox; commands run with your permissions.
 - Only OpenCode is supported for delegation.
 - Layout previews are drawn by Rocky and can differ from how Office shows the file.
 - Scanned (image-only) PDFs cannot be read.
+- Restore covers files Rocky writes; files changed by a command or an MCP tool are not
+  snapshotted.
 
 ## Contributing
 
