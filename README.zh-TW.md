@@ -7,7 +7,7 @@
 **只在你自己電腦上執行的 AI 工程夥伴，一個人、一台電腦。**
 
 Rocky 陪你對話、在你的專案資料夾裡工作、讀寫 Office 文件，也能把較大的寫程式工作交給外部的
-coding agent。它做的每一個改動都經過同一道核准關卡，而且都能還原。
+coding agent。它做的每一個動作都經過同一道核准關卡；它寫的檔案都能還原。
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 ![Node.js 24](https://img.shields.io/badge/node-24-339933.svg)
@@ -30,7 +30,8 @@ coding agent。它做的每一個改動都經過同一道核准關卡，而且�
 - **不煩人的核准。** 兩種模式。「需要時才問」（預設）在危險指令、機密檔、受保護檔案、專案外的動作時問你；
   「放手」只在讀機密檔前問。「這個對話都允許」放行同一類動作；「一律允許」存成一條指令規則，可以在設定頁看到和移除。
   禁止規則在兩種模式都有效。核准綁定它顯示的內容的雜湊。
-- **每個改動都能還原。** 每次寫檔前先存快照；每一輪結束時有一張卡片列出改了什麼，附「全部還原」按鈕。
+- **檔案改動能還原。** Rocky 寫入、修改或刪除的每個檔案（包括 Office 文件、記憶和套用的派工）都先存快照；
+  每一輪結束時有一張卡片列出這些檔案，附「全部還原」按鈕。指令或 MCP 工具改到的東西沒有快照，不能這樣還原。
   每個動作都留有操作紀錄。
 - **規劃模式。** 打開輸入框旁的「規劃」：Rocky 只讀不改，接著提出 1～3 個方案；選定後規劃自動關閉、開始動手。
 - **文件是一等公民。** PDF、Word、Excel、PowerPoint、Markdown、HTML 都能讀成 Markdown，也能從 Markdown 建立；
@@ -69,7 +70,8 @@ Rocky 已經在執行時，會直接重新打開瀏覽器：
 powershell -ExecutionPolicy Bypass -File .\Start-Rocky.ps1
 ```
 
-Rocky 在 Linux 與 Windows 上驗證過；macOS 沒有測試過。
+Rocky 在 Linux 上開發和測試。Windows 上，CI 會跑 `npm run check` 和建置；瀏覽器測試、啟動器、派工和評估只在
+手動執行 `scripts/verify-windows.ps1` 時才在 Windows 上跑，每份 ADR 都記錄有沒有跑。macOS 沒有測試過。
 
 ### 第一次使用
 
@@ -101,7 +103,7 @@ Rocky 在 Linux 與 Windows 上驗證過；macOS 沒有測試過。
 Rocky（單一 Node.js 程序）
  ├─ Agent      Deep Agents + LangChain，OpenAI 相容模型
  ├─ 動作關卡   政策 → 核准 → 一次性通行證 → 執行 → 操作紀錄
- ├─ 快照       每個檔案改動前的內容定址備份
+ ├─ 快照       Rocky 寫入檔案前的內容定址備份
  ├─ 背景工作   透過 ACP 啟動 OpenCode，一個工作一個 Git worktree，依序排隊
  ├─ MCP client 你設定的 stdio／HTTP 伺服器
  ├─ 文件       處理 pdf、docx、xlsx、pptx、md、html 的純 Node 函式庫
@@ -110,7 +112,8 @@ Rocky（單一 Node.js 程序）
 
 每個工具呼叫在執行前都要經過**動作關卡**，包括 OpenCode、MCP 與「還原」按鈕發出的動作。
 真正寫檔、執行指令的函式只接受關卡針對那份內容發出的一次性通行證，所以沒有任何路徑能繞過關卡。
-指令一律以參數陣列執行，不經過 shell。結果不明的動作絕不會自動重做。
+指令一律以參數陣列執行，不組成 shell 字串。唯一的例外在 Windows：`npm` 這類 `.cmd`、`.bat` 程式只能透過
+`cmd.exe` 啟動，參數會先為它跳脫。結果不明的動作絕不會自動重做。
 
 每項設計的理由記在[架構決策紀錄（ADR）](docs/adr/)。
 
@@ -156,13 +159,15 @@ docs/adr/     架構決策紀錄
 
 ## 專案狀態
 
-Rocky V1 的功能已完成，在 Linux 上驗證過，Windows 上用 `scripts/verify-windows.ps1` 驗證過；macOS 沒有測試過。
-目前還沒有正式發佈的安裝檔。已知限制：
+Rocky V1 的功能已完成，在 Linux 上開發和測試；Windows 上 CI 會跑 `npm run check` 和建置，其餘只在手動執行
+`scripts/verify-windows.ps1` 時才跑（每份 ADR 都記錄有沒有跑）。macOS 沒有測試過。目前還沒有正式發佈的安裝檔。
+已知限制：
 
 - 沒有作業系統層級的沙箱，指令以你的權限執行。
 - 派工只支援 OpenCode。
 - 版面預覽由 Rocky 自己繪製，可能和 Office 實際開啟的樣子不同。
 - 掃描的 PDF（只有圖片）讀不出文字。
+- 還原只涵蓋 Rocky 寫的檔案；指令或 MCP 工具改到的檔案沒有快照。
 
 ## 參與開發
 
