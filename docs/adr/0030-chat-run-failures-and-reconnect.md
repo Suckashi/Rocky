@@ -42,6 +42,6 @@
 
 ## 驗證
 
-Cloud Linux、Node 24.21.0、Playwright 的 Chromium：`npm run check`（279 個測試）和 `npm run test:e2e`（35 步）都
-exit 0。e2e 用攔截的請求重現 413 和送出後才斷掉的串流，也重新整理進行中的一輪、回答已過期的問題。每個修正單獨
+Cloud Linux、Node 24.21.0、Playwright 的 Chromium、OpenCode 1.18.34：`npm run check`（284 個測試，含真的 OpenCode
+的整合測試）、`npm run test:e2e`（35 步）和 `npm run test:e2e:jobs`（10 步）都 exit 0。e2e 用攔截的請求重現 413 和送出後才斷掉的串流，也重新整理進行中的一輪、回答已過期的問題。每個修正單獨
 拿掉後都有測試失敗；規劃模式路由改走關卡這一行沒有單元測試，由關卡本身的測試涵蓋。沒在 Windows 上跑。
