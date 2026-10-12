@@ -120,9 +120,10 @@ describe('local API security', () => {
     const auth = { authorization: `Bearer ${token}` };
     const codes = new LoginCodes();
     const chat = new Hono();
-    chat.post('/api/copilotkit/agent/rocky/run', async (c) =>
-      c.json({ bytes: (await c.req.text()).length }),
-    );
+    for (const path of ['/api/copilotkit/agent/rocky/run', '/api/copilotkit'])
+      chat.post(path, async (c) =>
+        c.json({ bytes: (await c.req.text()).length }),
+      );
     const app = createApp({ token, codes, port: PORT, mounted: [chat] });
     const post = (path: string, bytes: number) =>
       app.request(`http://${HOST}${path}`, {
@@ -144,6 +145,15 @@ describe('local API security', () => {
         .status,
     ).toBe(413);
     expect((await post('/api/anything', 3_000_000)).status).toBe(413);
+    // The bare base path (CopilotKit's single endpoint) is a chat turn too.
+    expect((await post('/api/copilotkit', 3_000_000)).status).toBe(200);
+    // Without the token nothing is read: 401, not a body that fills memory first.
+    const stranger = await app.request(`http://${HOST}/api/anything`, {
+      method: 'POST',
+      headers: { host: HOST, 'content-type': 'application/json' },
+      body: 'x'.repeat(3_000_000),
+    });
+    expect(stranger.status).toBe(401);
   });
 
   it('trades a one-time login code for an HttpOnly session cookie', async () => {

@@ -56,13 +56,14 @@ export function createApp(options: AppOptions): Hono {
   // A chat turn carries the whole conversation (the model sees a summarized history), so
   // it gets more room than the other routes (ADR 0030).
   const chatLimit = bodyLimit({ maxSize: CHAT_BODY_LIMIT, onError: tooLarge });
-  app.use('/api/*', (c, next) =>
-    (c.req.path.startsWith(`${COPILOT_BASE_PATH}/`) ? chatLimit : apiLimit)(
-      c,
-      next,
-    ),
-  );
+  // The token is checked first, from headers only, so nobody else can make Rocky read a body.
   app.use('/api/*', authGuard(options));
+  app.use('/api/*', (c, next) =>
+    (c.req.path === COPILOT_BASE_PATH ||
+      c.req.path.startsWith(`${COPILOT_BASE_PATH}/`)
+      ? chatLimit
+      : apiLimit)(c, next),
+  );
   app.get('/api/health', (c) => c.json({ ok: true }));
   // The launcher (which can read the token file) asks a running Rocky for a fresh login URL.
   app.post('/api/login-code', (c) =>

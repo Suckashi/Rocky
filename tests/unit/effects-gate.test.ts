@@ -40,6 +40,13 @@ const until = async (check: () => boolean) => {
 };
 
 describe('Gate', () => {
+  it('plan mode changed from the interface reaches a running turn', () => {
+    const { gate, planning, changes } = setup();
+    gate.setPlanning('t1', true);
+    expect(planning.has('t1')).toBe(true);
+    expect(changes).toEqual(['t1']);
+  });
+
   it('allows without asking, records an intent receipt and issues a single-use pass', async () => {
     const { gate, project } = setup('ask-when-needed');
     const effect: Effect = {

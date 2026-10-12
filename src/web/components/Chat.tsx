@@ -97,12 +97,15 @@ const markdownComponents: Components = {
 export function Chat({
   threadId,
   project,
+  mode,
   onActivity,
   onState,
   onSettings,
 }: {
   threadId: string;
   project: string | null;
+  /** The approval mode, one setting for every conversation; App owns it. */
+  mode: Mode;
   onActivity: () => void;
   onState: (state: RokoState) => void;
   /** The settings changed here (the approval mode); App keeps the one copy. */
@@ -120,12 +123,13 @@ export function Chat({
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
   const [pending, setPending] = useState<PendingApproval[]>([]);
-  const [mode, setMode] = useState<Mode | null>(null);
   const [planning, setPlanning] = useState(false);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   // Set when the run request itself fails (refused, too large, offline): no RUN_ERROR comes.
   const failed = useRef<unknown>(undefined);
+  // Whether the server started the run: then it has the message, whatever happens next.
+  const started = useRef(false);
   // Enter pressed before the conversation finished loading: send once it has.
   const sendWhenLoaded = useRef(false);
   const bottom = useRef<HTMLDivElement>(null);
@@ -141,7 +145,6 @@ export function Chat({
       ),
     ]);
     setPending(approvals.pending);
-    setMode(approvals.mode);
     setPlanning(approvals.planning);
     setReceipts(log.receipts);
     setSnapshots(log.snapshots);
@@ -160,6 +163,9 @@ export function Chat({
             : t('chat.error', { error: event.message }),
         );
       },
+      onRunStartedEvent: () => {
+        started.current = true;
+      },
       onRunFailed: ({ error }) => {
         failed.current = error;
       },
@@ -167,12 +173,10 @@ export function Chat({
       // so a page that reconnects to a running turn also sees its new questions.
       onStateSnapshotEvent: ({ event }) => {
         const state = event.snapshot as {
-          mode?: Mode;
           planning?: boolean;
           pendingApprovals?: PendingApproval[];
         };
         if (state.pendingApprovals) setPending(state.pendingApprovals);
-        if (state.mode) setMode(state.mode);
         if (state.planning !== undefined) setPlanning(state.planning);
       },
     });
@@ -251,18 +255,22 @@ export function Chat({
     setError('');
     setRunning(true);
     setDraft('');
-    const id = crypto.randomUUID();
-    agent.addMessage({ id, role: 'user', content: text });
+    const before = [...agent.messages];
+    agent.addMessage({ id: crypto.randomUUID(), role: 'user', content: text });
     failed.current = undefined;
+    started.current = false;
     try {
       await copilotkit.runAgent({ agent });
       if (failed.current === undefined) setJustDone(true);
       else {
-        // The server never took the message: take it back and give the text back.
         const failure = runFailure(failed.current);
         setError(t(failure.key, failure.params));
-        agent.setMessages(agent.messages.filter((m) => m.id !== id));
-        setDraft(text);
+        if (!started.current) {
+          // The server never took the message: take it back and give the text back,
+          // ahead of anything typed since.
+          agent.setMessages(before);
+          setDraft((typed) => (typed.trim() ? `${text}\n${typed}` : text));
+        }
       }
     } catch (e) {
       setError(t('chat.error', { error: e instanceof Error ? e.message : '' }));
@@ -299,10 +307,9 @@ export function Chat({
 
   // The approval mode is one setting for every conversation (also in Settings).
   const changeMode = (next: Mode) => {
-    setMode(next);
     void api<Settings>('/settings/mode', 'PUT', { mode: next })
       .then(onSettings)
-      .catch(() => refresh());
+      .catch(() => undefined);
   };
 
   // Plan mode is per conversation; it turns off by itself when the user picks a plan.
@@ -496,7 +503,7 @@ export function Chat({
               onKeyDown={onKeyDown}
             />
             <div className="composer-bar">
-              {mode && <ModeSelect value={mode} onChange={changeMode} />}
+              <ModeSelect value={mode} onChange={changeMode} />
               <button
                 type="button"
                 className={`plan-toggle${planning ? ' on' : ''}`}

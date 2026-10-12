@@ -181,7 +181,7 @@ try {
     // The browser logs every 4xx; these are the answers to what this test sends on purpose.
     if (
       message.type() === 'error' &&
-      !/status of (400|409|413)/.test(message.text()) &&
+      !/status of (400|413)/.test(message.text()) &&
       !expected?.test(message.text())
     )
       errors.push(message.text());
@@ -329,9 +329,35 @@ try {
   );
   await page.unroute('**/api/copilotkit/**');
   await page.getByRole('textbox').fill('');
+  // A run the server started and then lost keeps the message: the server has it.
+  expected = /HTTP|terminated|network|stream/i;
+  await page.route('**/api/copilotkit/**', (route) =>
+    route.request().method() === 'POST' &&
+    route.request().url().endsWith('/run')
+      ? route.fulfill({
+          status: 200,
+          contentType: 'text/event-stream',
+          body: `data: ${JSON.stringify({ type: 'RUN_STARTED', threadId: 'x', runId: 'cut' })}\n\ndata: {broken\n\n`,
+        })
+      : route.fallback(),
+  );
+  await page.getByRole('textbox').fill('這一輪會斷掉');
+  await page.keyboard.press('Enter');
+  await page.getByRole('alert').waitFor({ timeout: 20_000 });
+  check(
+    (await page.getByRole('textbox').inputValue()) === '' &&
+      (await page
+        .locator('.bubble.user', { hasText: '這一輪會斷掉' })
+        .count()) === 1,
+    'a run that broke after the server took it keeps the message and does not give the text back',
+  );
+  await page.unroute('**/api/copilotkit/**');
+  expected = undefined;
 
   // Reloading in the middle of a turn: the next question of that turn still shows up.
   expected = /network error/;
+  const handled = await page.locator('.reply', { hasText: '已處理' }).count();
+  const cardsBefore = await page.locator('.turn-changes').count();
   await page.getByRole('textbox').fill('請來回改兩次');
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
@@ -342,7 +368,16 @@ try {
     .locator('.diff-add', { hasText: 'const answer = 41;' })
     .waitFor({ timeout: 20_000 });
   await page.keyboard.press('1');
+  await page
+    .locator('.reply', { hasText: '已處理' })
+    .nth(handled)
+    .waitFor({ timeout: 20_000 });
   await page.getByRole('button', { name: '送出' }).waitFor({ timeout: 20_000 });
+  // The turn's change card, so later steps count the cards after it.
+  await page
+    .locator('.turn-changes')
+    .nth(cardsBefore)
+    .waitFor({ timeout: 20_000 });
   check(
     readFileSync(appFile, 'utf8') === 'const answer = 41;\n' &&
       (await panel.count()) === 0,
@@ -351,7 +386,10 @@ try {
   expected = undefined;
 
   // The approval mode is one setting: chosen next to the input box, Settings shows it too.
-  await page.getByLabel('核准模式').selectOption('hands-off');
+  await Promise.all([
+    page.waitForResponse((r) => r.url().endsWith('/api/settings/mode')),
+    page.getByLabel('核准模式').selectOption('hands-off'),
+  ]);
   await page.getByRole('button', { name: '設定' }).click();
   const shown = await page.getByLabel('核准模式').inputValue();
   await page.getByLabel('核准模式').selectOption('ask-when-needed');
@@ -400,10 +438,12 @@ try {
           }),
         }),
   );
+  expected = /status of 409/;
   await page.reload();
   await panel.waitFor({ timeout: 20_000 });
   await page.keyboard.press('1');
   await page.getByRole('textbox').waitFor({ timeout: 20_000 });
+  expected = undefined;
   check(
     (await page
       .getByRole('alert')
