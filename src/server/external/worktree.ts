@@ -7,6 +7,7 @@ import {
   readFileSync,
   realpathSync,
   rmdirSync,
+  rmSync,
   unlinkSync,
 } from 'node:fs';
 import { join, relative, sep } from 'node:path';
@@ -34,6 +35,37 @@ export async function isGitRepo(dir: string): Promise<boolean> {
 }
 
 /** The top folder of the repository a folder belongs to, resolved through links. */
+/** The same folder: real paths, compared without case on Windows only (elsewhere `Proj`
+ * and `proj` are two folders). */
+export function samePath(a: string, b: string): boolean {
+  const real = (p: string) => {
+    try {
+      return realpathSync.native(p);
+    } catch {
+      return p;
+    }
+  };
+  const [x, y] = [real(a), real(b)];
+  return process.platform === 'win32'
+    ? x.toLowerCase() === y.toLowerCase()
+    : x === y;
+}
+
+/** Whether `repo` has `path` registered as one of its worktrees. */
+export async function listsWorktree(
+  repo: string,
+  path: string,
+): Promise<boolean> {
+  try {
+    return (await git(repo, 'worktree', 'list', '--porcelain'))
+      .split('\n')
+      .filter((l) => l.startsWith('worktree '))
+      .some((l) => samePath(l.slice(9), path));
+  } catch {
+    return false;
+  }
+}
+
 export async function repoRoot(dir: string): Promise<string> {
   return realpathSync.native(
     (await git(dir, 'rev-parse', '--show-toplevel')).trim(),
@@ -75,6 +107,16 @@ export async function removeWorktree(
   branch: string,
 ): Promise<void> {
   unlinkSharedModules(path);
+  // A repository that was moved, deleted or cloned again no longer knows this worktree. The
+  // folder is Rocky's own (in its data folder), so it is removed directly.
+  if (!samePath(repo, path) && !(await listsWorktree(repo, path))) {
+    rmSync(path, { recursive: true, force: true });
+    if (existsSync(repo)) {
+      await git(repo, 'worktree', 'prune').catch(() => '');
+      await git(repo, 'branch', '-D', branch).catch(() => '');
+    }
+    return;
+  }
   // Gone already is fine; anything left behind (a locked worktree, a file in use on
   // Windows) is reported, so the job is not marked discarded with its folder still there.
   await git(repo, 'worktree', 'remove', '--force', path).catch(

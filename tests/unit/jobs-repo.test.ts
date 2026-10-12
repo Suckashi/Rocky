@@ -7,10 +7,11 @@ import {
   mkdtempSync,
   readFileSync,
   realpathSync,
+  renameSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { addWorktree, repoRoot } from '../../src/server/external/worktree.ts';
 import { testRocky } from '../fixtures/rocky.ts';
@@ -32,11 +33,15 @@ function repo(root: string, name: string) {
   return realpathSync.native(dir);
 }
 
-/** A finished job on `project`'s repository whose worktree edited sub/b.txt. */
-async function setup(projectOf: (a: string) => string) {
+/** A finished job on `project`'s repository whose worktree edited sub/b.txt. `legacy`: a
+ * job from before ADR 0031, which did not record its repository. */
+async function setup(
+  projectOf: (a: string) => string,
+  { legacy = false, names = ['a', 'b'] } = {},
+) {
   const root = mkdtempSync(join(tmpdir(), 'rocky-jobs-repo-'));
-  const a = repo(root, 'a');
-  const b = repo(root, 'b');
+  const a = repo(root, names[0]!);
+  const b = repo(root, names[1]!);
   mkdirSync(join(root, 'data'));
   const { rocky, call } = testRocky({
     dataDir: join(root, 'data'),
@@ -58,6 +63,8 @@ async function setup(projectOf: (a: string) => string) {
     baseCommit: tree.base,
     repo: top,
   });
+  if (legacy)
+    rocky.db.prepare('update jobs set repo = null where id = ?').run(job.id);
   writeFileSync(join(tree.path, 'sub', 'b.txt'), 'b2\n');
   rocky.jobs.finish(job.id, 'verified', null);
   return {
@@ -102,6 +109,40 @@ describe("a job's own repository", () => {
     expect(existsSync(join(a, 'sub', 'sub'))).toBe(false);
   });
 
+  it('applies a job from before ADR 0031 to the repository top folder too', async () => {
+    const { call, a, job } = await setup((a) => join(a, 'sub'), {
+      legacy: true,
+    });
+    expect(job.repo).toBeNull();
+    const plan = (await (
+      await call(`/api/jobs/${job.id}/apply`)
+    ).json()) as Plan;
+    const applied = await call(`/api/jobs/${job.id}/apply`, {
+      method: 'POST',
+      body: {
+        items: plan.items.map(({ path, contentHash }) => ({
+          path,
+          contentHash,
+        })),
+      },
+    });
+    expect(applied.status).toBe(200);
+    expect(readFileSync(join(a, 'sub', 'b.txt'), 'utf8')).toBe('b2\n');
+    expect(existsSync(join(a, 'sub', 'sub'))).toBe(false);
+  });
+
+  it.skipIf(process.platform === 'win32')(
+    'tells apart repositories whose names differ only in case',
+    async () => {
+      const { rocky, call, job } = await setup((a) => a, {
+        names: ['Proj', 'proj'],
+      });
+      const other = join(dirname(job.repo!), 'proj');
+      rocky.settings.setProject(other);
+      expect((await call(`/api/jobs/${job.id}/apply`)).status).toBe(409);
+    },
+  );
+
   it('keeps paths right after switching between folders of one repository', async () => {
     const { rocky, call, a, job } = await setup((a) => a);
     rocky.settings.setProject(join(a, 'sub'));
@@ -144,12 +185,88 @@ describe("a job's own repository", () => {
     ).toBe(200);
   });
 
+  it('discards a job whose repository was moved away', async () => {
+    const { rocky, call, a, job, worktree } = await setup((a) => a);
+    renameSync(a, `${a}-moved`);
+    rocky.settings.setProject(`${a}-moved`);
+    const discarded = await call(`/api/jobs/${job.id}/discard`, {
+      method: 'POST',
+      body: {},
+    });
+    expect(discarded.status).toBe(200);
+    expect(existsSync(worktree)).toBe(false);
+    expect(rocky.jobs.get(job.id)?.status).toBe('discarded');
+  });
+
+  it('an applied job whose worktree stayed behind can still be cleaned up', async () => {
+    const { rocky, call, a, job, worktree } = await setup((a) => a);
+    git(a, 'worktree', 'lock', worktree);
+    const plan = (await (
+      await call(`/api/jobs/${job.id}/apply`)
+    ).json()) as Plan;
+    const applied = await call(`/api/jobs/${job.id}/apply`, {
+      method: 'POST',
+      body: {
+        items: plan.items.map(({ path, contentHash }) => ({
+          path,
+          contentHash,
+        })),
+      },
+    });
+    expect(applied.status).toBe(200);
+    const detail = async () =>
+      (await (await call(`/api/jobs/${job.id}`)).json()) as {
+        leftover: boolean;
+      };
+    expect((await detail()).leftover).toBe(true);
+    git(a, 'worktree', 'unlock', worktree);
+    const cleaned = await call(`/api/jobs/${job.id}/discard`, {
+      method: 'POST',
+      body: {},
+    });
+    expect(cleaned.status).toBe(200);
+    expect(existsSync(worktree)).toBe(false);
+    expect(git(a, 'branch', '--list', 'rocky/*')).toBe('');
+    expect(rocky.jobs.get(job.id)?.status).toBe('applied');
+    expect((await detail()).leftover).toBe(false);
+    expect(
+      (await call(`/api/jobs/${job.id}/discard`, { method: 'POST', body: {} }))
+        .status,
+    ).toBe(409);
+  });
+
+  it('apply and discard sent together leave the job and the project in agreement', async () => {
+    const { rocky, call, a, job } = await setup((a) => a);
+    const plan = (await (
+      await call(`/api/jobs/${job.id}/apply`)
+    ).json()) as Plan;
+    const [applied, discarded] = await Promise.all([
+      call(`/api/jobs/${job.id}/apply`, {
+        method: 'POST',
+        body: {
+          items: plan.items.map(({ path, contentHash }) => ({
+            path,
+            contentHash,
+          })),
+        },
+      }),
+      call(`/api/jobs/${job.id}/discard`, { method: 'POST', body: {} }),
+    ]);
+    expect([applied.status, discarded.status].filter((s) => s === 200)).toEqual(
+      [200],
+    );
+    // The project has the change exactly when the job says it was applied.
+    const written = readFileSync(join(a, 'sub', 'b.txt'), 'utf8') === 'b2\n';
+    expect(written).toBe(rocky.jobs.get(job.id)?.status === 'applied');
+  });
+
   it("applies even while the conversation is in plan mode: the click is the owner's", async () => {
     const { call, a, job } = await setup((a) => a);
-    await call(`/api/threads/${job.threadId}/plan`, {
+    const planning = await call(`/api/threads/${job.threadId}/plan`, {
       method: 'PUT',
       body: { planning: true },
     });
+    expect(planning.status).toBe(200);
     const plan = (await (
       await call(`/api/jobs/${job.id}/apply`)
     ).json()) as Plan;

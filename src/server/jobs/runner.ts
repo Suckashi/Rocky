@@ -17,6 +17,7 @@ import {
   git,
   isGitRepo,
   repoRoot,
+  samePath,
   toRepoPath,
   verifyWorktree,
 } from '../external/worktree.ts';
@@ -237,9 +238,15 @@ export class JobRunner {
         repo,
       });
       if (await hasUncommitted(project)) warnings.push('uncommitted-changes');
-      // Installed dependencies are not in Git; share the project's so tests can run.
+      // Installed dependencies are not in Git; share the project's so tests can run. Only
+      // when the project is the repository's top folder: a subfolder's dependencies at the
+      // worktree's top would be the wrong ones (ADR 0031).
       const modules = join(project, 'node_modules');
-      if (existsSync(modules) && !existsSync(join(worktree, 'node_modules'))) {
+      if (
+        samePath(project, repo) &&
+        existsSync(modules) &&
+        !existsSync(join(worktree, 'node_modules'))
+      ) {
         symlinkSync(modules, join(worktree, 'node_modules'), 'junction');
       }
       event({ type: 'status', text: 'worktree-ready' });

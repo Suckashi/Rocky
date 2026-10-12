@@ -40,6 +40,21 @@ function UnifiedDiff({ text }: { text: string }) {
   );
 }
 
+/** Status events the catalogs name (others are shown as recorded). */
+const STATUS_TEXT = new Set([
+  'running',
+  'verified',
+  'problems',
+  'failed',
+  'stopped',
+  'interrupted',
+  'applied',
+  'discarded',
+  'queued',
+  'worktree-ready',
+  'cleanup-failed',
+]);
+
 function Timeline({ events }: { events: JobEvent[] }) {
   const { t } = useI18n();
   return (
@@ -66,7 +81,11 @@ function Timeline({ events }: { events: JobEvent[] }) {
             );
             break;
           case 'status':
-            label = t('jobs.event.status', { text: e.text });
+            label = t('jobs.event.status', {
+              text: STATUS_TEXT.has(e.text)
+                ? t(`jobs.status.${e.text}` as MessageKey)
+                : e.text,
+            });
             break;
         }
         return (
@@ -102,6 +121,7 @@ function JobDetail({
     receipts: Receipt[];
     pending: PendingApproval[];
     position: number | null;
+    leftover: boolean;
   } | null>(null);
   const [plan, setPlan] = useState<ApplyItem[] | null>(null);
   const [message, setMessage] = useState('');
@@ -136,8 +156,11 @@ function JobDetail({
         'denied',
         'write-failed',
         'discard-failed',
+        'busy',
       ].includes(code)
-      ? t(`jobs.error.${code}` as MessageKey, { path: '' })
+      ? t(`jobs.error.${code}` as MessageKey, {
+          path: typeof e.data['path'] === 'string' ? e.data['path'] : '',
+        })
       : t('jobs.actionError', { error: code });
   };
 
@@ -406,6 +429,23 @@ function JobDetail({
             project={project}
             onRestored={onChanged}
           />
+          {detail.leftover && (
+            <div className="row">
+              <p className="warn small">{t('jobs.leftover')}</p>
+              <button
+                type="button"
+                className="secondary"
+                disabled={busy}
+                onClick={() =>
+                  void act(async () => {
+                    await api(`/jobs/${id}/discard`, 'POST', {});
+                  })
+                }
+              >
+                {t('jobs.cleanUp')}
+              </button>
+            </div>
+          )}
         </section>
       )}
 
