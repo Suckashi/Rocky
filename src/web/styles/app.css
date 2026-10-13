@@ -2051,6 +2051,16 @@ button.tool-toggle {
 .unknown-outcome p {
   margin: 0;
 }
+button.small-button {
+  min-height: 30px;
+  padding: 0 var(--space-3);
+  font-size: 13px;
+}
+.restore-status {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
+}
 .change-list {
   display: flex;
   flex-direction: column;

@@ -272,6 +272,20 @@ try {
     readFileSync(appFile, 'utf8') === 'const answer = 41;\n',
     'restore all puts the file back',
   );
+  // The restore can be undone; then one file restores from its own row.
+  await page.getByRole('button', { name: '復原', exact: true }).click();
+  await page.getByText('已復原，檔案回到這輪改完的樣子。').waitFor();
+  check(
+    readFileSync(appFile, 'utf8') === 'const answer = 42;\n',
+    'undo after a restore writes back what the turn left',
+  );
+  await page.getByRole('button', { name: '查看變更' }).click();
+  await page.getByRole('button', { name: '還原這個檔案' }).click();
+  await page.getByText('已還原 AGENTS.md。').waitFor();
+  check(
+    readFileSync(appFile, 'utf8') === 'const answer = 41;\n',
+    'one file restores from its own row',
+  );
 
   // Enter on a focused control does what that control says, never "Allow once".
   await page.getByRole('textbox').fill('用鍵盤再改');

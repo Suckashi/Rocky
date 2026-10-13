@@ -1,5 +1,6 @@
-// "Restore all" for one turn: put every file the run changed back the way it was before the
-// run, from snapshots. Each restore is a normal write through the gate and the executor.
+// Restore for one turn: put the files the run changed back the way they were before the run
+// (all of them, or the ones the user picked), or undo that by writing the run's result back.
+// From snapshots; each restore is a normal write through the gate and the executor.
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import type { Executor } from './execute.ts';
@@ -56,18 +57,24 @@ function shaOf(path: string): string | null {
     : null;
 }
 
+/** "before": back to how the files were before the run (restore). "after": back to how the
+ *  run left them (undo a restore). */
+export type RestoreTarget = 'before' | 'after';
+
 export function planRestore(
   receipts: ReceiptStore,
   snapshots: SnapshotStore,
   threadId: string,
   runId: string,
+  target: RestoreTarget = 'before',
 ): RestoreItem[] {
-  // A file whose saved earlier version is damaged cannot be restored; the others still can.
+  // A file whose saved version is damaged cannot be restored; the others still can.
   return runChanges(receipts, snapshots, threadId, runId).flatMap((change) => {
+    const wanted = target === 'before' ? change.beforeSha : change.afterSha;
+    const other = target === 'before' ? change.afterSha : change.beforeSha;
     let before: Buffer | null;
     try {
-      before =
-        change.beforeSha === null ? null : snapshots.read(change.beforeSha);
+      before = wanted === null ? null : snapshots.read(wanted);
     } catch (error) {
       if (error instanceof SnapshotDamaged) return [];
       throw error;
@@ -86,17 +93,24 @@ export function planRestore(
         path: change.path,
         effect,
         contentHash: contentHash(effect),
-        modifiedSince: shaOf(change.path) !== change.afterSha,
+        modifiedSince: shaOf(change.path) !== other,
       },
     ];
   });
 }
 
 export type RestoreResult =
-  | { ok: true; restored: string[] }
+  | {
+      ok: true;
+      restored: string[];
+      /** What undoes this restore: the same files, written back the other way. */
+      undo: { path: string; contentHash: string }[];
+    }
   | { ok: false; error: 'content-changed' | 'denied'; path?: string };
 
-/** Restores exactly the plan the user saw (by content hash); anything else is refused. */
+/** Restores exactly what the user saw (by content hash); anything else is refused. The whole
+ *  plan must match, unless the user picked some files ("partial"): then each picked file must
+ *  be in the plan. */
 export function restoreRun(
   deps: {
     gate: Gate;
@@ -107,12 +121,33 @@ export function restoreRun(
   threadId: string,
   runId: string,
   seen: { path: string; contentHash: string }[],
+  options: {
+    partial?: boolean | undefined;
+    target?: RestoreTarget | undefined;
+  } = {},
 ): RestoreResult {
-  const plan = planRestore(deps.receipts, deps.snapshots, threadId, runId);
-  const sameShape =
-    plan.length === seen.length &&
-    plan.every((item, i) => item.path === seen[i]?.path);
-  if (!sameShape) return { ok: false, error: 'content-changed' };
+  const target = options.target ?? 'before';
+  const full = planRestore(
+    deps.receipts,
+    deps.snapshots,
+    threadId,
+    runId,
+    target,
+  );
+  let plan: RestoreItem[];
+  if (options.partial) {
+    const byPath = new Map(full.map((item) => [item.path, item]));
+    const picked = seen.map((s) => byPath.get(s.path));
+    if (seen.length === 0 || picked.some((item) => item === undefined))
+      return { ok: false, error: 'content-changed' };
+    plan = picked as RestoreItem[];
+  } else {
+    const sameShape =
+      full.length === seen.length &&
+      full.every((item, i) => item.path === seen[i]?.path);
+    if (!sameShape) return { ok: false, error: 'content-changed' };
+    plan = full;
+  }
   const restored: string[] = [];
   for (const [i, item] of plan.entries()) {
     const result = deps.gate.userAction(
@@ -131,5 +166,19 @@ export function restoreRun(
     deps.executor.write(result.pass, item.effect);
     restored.push(item.path);
   }
-  return { ok: true, restored };
+  // Planned now, after the writes: whether undoing creates or edits a file depends on them.
+  const back = new Map(
+    planRestore(
+      deps.receipts,
+      deps.snapshots,
+      threadId,
+      runId,
+      target === 'before' ? 'after' : 'before',
+    ).map((item) => [item.path, item.contentHash]),
+  );
+  const undo = restored.flatMap((path) => {
+    const contentHash = back.get(path);
+    return contentHash ? [{ path, contentHash }] : [];
+  });
+  return { ok: true, restored, undo };
 }

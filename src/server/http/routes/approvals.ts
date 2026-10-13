@@ -214,6 +214,10 @@ export function approvalRoutes(
               z.object({ path: z.string(), contentHash: z.string() }).strict(),
             )
             .max(1000),
+          /** Only the listed files (one file's "restore", or undoing a restore). */
+          partial: z.boolean().optional(),
+          /** "after" writes back what the run left: undoing a restore. */
+          target: z.enum(['before', 'after']).optional(),
         })
         .strict(),
     );
@@ -224,6 +228,7 @@ export function approvalRoutes(
         c.req.param('id'),
         c.req.param('runId'),
         body.items,
+        { partial: body.partial, target: body.target },
       );
       return result.ok ? c.json(result) : c.json(result, 409);
     } catch (error) {
