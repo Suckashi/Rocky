@@ -1,5 +1,5 @@
 // Replaces the input box while Rocky waits for a decision. One question at a time, in order.
-import { Maximize2, Minimize2, CircleStop } from 'lucide-react';
+import { Maximize2, Minimize2, CircleStop, ShieldAlert } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { displayPath, type PendingApproval } from '../api.ts';
 import { commandLine } from '../effects.ts';
@@ -361,7 +361,8 @@ export function ApprovalPanel({
           {full ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
         </button>
       </header>
-      <p className="small muted">
+      <p className={`small approval-why${noDefault ? ' risky' : ' muted'}`}>
+        {noDefault && <ShieldAlert size={14} aria-hidden="true" />}
         {t('approval.why', {
           reason: t(`approval.reason.${approval.reason}` as MessageKey),
         })}

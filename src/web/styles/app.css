@@ -497,9 +497,8 @@ body:has(.centered) {
   gap: var(--space-3);
   padding: 0 var(--space-6);
   border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 96%, transparent);
-  backdrop-filter: saturate(1.4) blur(14px);
-  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  /* Solid: text scrolling under a see-through bar reads as ghosted, half-legible lines. */
+  background: var(--surface);
 }
 .topbar h1 {
   font-size: 18px;
@@ -827,9 +826,7 @@ body:has(.centered) {
     gap: var(--space-1);
     overflow-x: auto;
     padding: var(--space-2) var(--space-4);
-    background: color-mix(in srgb, var(--bg) 92%, transparent);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--bg);
     border-bottom: 1px solid var(--border);
     scrollbar-width: none;
     mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
@@ -2177,6 +2174,22 @@ button.small-button,
   background: var(--code-bg);
   color: var(--code-text);
   font-size: 12px;
+}
+/* Why Rocky asks. A risky reason is the line to read first: warning colour and a shield. */
+.approval-why {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+}
+.approval-why.risky {
+  color: var(--warn);
+  font-weight: 600;
+}
+.approval-why.risky .mono {
+  color: var(--text-muted);
+  font-weight: 400;
 }
 .approval-options {
   list-style: none;
