@@ -1179,17 +1179,6 @@ body:has(.centered) {
   position: relative;
   z-index: 3;
 }
-/* The words come along: headline and folder button move down with Roko, at its pace. */
-.chat .empty > p,
-.chat .empty > .empty-note,
-.chat .empty > .choose-folder {
-  transition: transform 900ms cubic-bezier(0.45, 0, 0.55, 1);
-}
-.chat .empty.typing > p,
-.chat .empty.typing > .empty-note,
-.chat .empty.typing > .choose-folder {
-  transform: translateY(var(--copy-y, 120px));
-}
 .chat .empty.typing > .roko {
   /* A walk: an even pace, easing in and out at the ends. */
   transition: transform 900ms cubic-bezier(0.45, 0, 0.55, 1);
@@ -1723,32 +1712,12 @@ body:has(.centered) {
     translate: 0 -3px;
   }
 }
-/* Waiting on you: Roko leans towards the question and an amber ring keeps calling, slowly. */
+/* Waiting on you: Roko leans towards the question, its eyes glowing at a faster beat. */
 .stage.waiting .roko {
   rotate: 4deg;
-}
-.stage.waiting::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  left: calc(var(--space-5) + 14px);
-  bottom: -2px;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  opacity: 0;
-  animation: call 2.4s ease-out infinite;
-}
-@keyframes call {
-  0% {
-    opacity: 0.55;
-    transform: scale(0.6);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.25);
-  }
+  animation:
+    perch var(--dur-slow) var(--ease-spring) both,
+    glow 1.2s ease-in-out infinite;
 }
 .stage.running .stage-chip::before,
 .stage.waiting .stage-chip::before {
@@ -2914,11 +2883,6 @@ button.small-button,
   .stage .roko {
     left: calc(var(--space-3) + 6px);
     scale: 0.75;
-  }
-  .stage.waiting::before {
-    left: calc(var(--space-3) + 2px);
-    width: 62px;
-    height: 62px;
   }
   .stage-chip {
     left: calc(var(--space-3) + 76px);

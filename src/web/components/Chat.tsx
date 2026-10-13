@@ -209,12 +209,6 @@ export function Chat({
     view.style.setProperty('--dock-x', `${dx}px`);
     view.style.setProperty('--dock-y', `${dy}px`);
     view.style.setProperty('--dock-scale', String(size / from.width));
-    // The headline and button close half the distance to the input box.
-    const copy = view.querySelector<HTMLElement>(':scope > p');
-    if (copy) {
-      const room = to.top - copy.getBoundingClientRect().bottom - 120;
-      view.style.setProperty('--copy-y', `${Math.max(0, room / 2)}px`);
-    }
     if (prefersReducedMotion()) return;
     setWalking(dx < 0 ? 'walkingLeft' : 'walkingRight');
     const arrived = setTimeout(() => setWalking(null), 900);
