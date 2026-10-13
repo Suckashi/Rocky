@@ -6,7 +6,14 @@ import faces from '../../../assets/roko/roko-faces.json' with { type: 'json' };
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 
 export type RokoState =
-  'idle' | 'waving' | 'running' | 'failed' | 'waiting' | 'done' | 'resting';
+  | 'idle'
+  | 'waving'
+  | 'running'
+  | 'failed'
+  | 'waiting'
+  | 'done'
+  | 'resting'
+  | 'reading';
 
 /** Sprite rows per state; a finished turn plays the jump. */
 const ROW: Record<RokoState, keyof typeof manifest.animations> = {
@@ -18,6 +25,8 @@ const ROW: Record<RokoState, keyof typeof manifest.animations> = {
   done: 'jumping',
   // Nothing to do yet: Roko dozes (the sheet's "review" row, eyes half closed).
   resting: 'review',
+  // Looking through files: the same row, eyes on the work.
+  reading: 'review',
 };
 
 const { cellWidth, cellHeight, columns, rows } = manifest.grid;

@@ -33,7 +33,7 @@ import { PlanPanel } from './PlanPanel.tsx';
 import { filePreview, isPreviewable, useOpenPreview } from './PreviewPane.tsx';
 import { ModeSelect } from './ModeSelect.tsx';
 import { Roko, type RokoState } from './Roko.tsx';
-import { ToolCard, type ToolState } from './ToolCard.tsx';
+import { LOOKING, ToolCard, toolSummary, type ToolState } from './ToolCard.tsx';
 import { TurnChanges } from './TurnChanges.tsx';
 import { JobCards } from './JobCards.tsx';
 import { UnknownOutcome } from './UnknownOutcome.tsx';
@@ -368,6 +368,18 @@ export function Chat({
   const lastUser = messages.findLastIndex((m) => m.role === 'user');
   const toolCallsOf = (m: (typeof messages)[number]): ToolCall[] =>
     m.role === 'assistant' ? ((m.toolCalls ?? []) as ToolCall[]) : [];
+  // What Roko is doing this moment: the turn's latest tool call still without a result. Its
+  // status says it in words, and looking tools get the reading pose.
+  const doing =
+    roko === 'running'
+      ? messages
+          .slice(lastUser + 1)
+          .flatMap(toolCallsOf)
+          .filter((call) => !results.has(call.id))
+          .at(-1)
+      : undefined;
+  const pose: RokoState =
+    doing && LOOKING.has(doing.function.name) ? 'reading' : roko;
 
   // Each run's change card goes at the end of the turn that holds its last tool call.
   const { at: cardsAt, unanchored } = placeChangeCards(
@@ -522,7 +534,8 @@ export function Chat({
           />
         ))}
         <JobCards threadId={threadId} refreshKey={agent.messages.length} />
-        {running && pending.length === 0 && (
+        {/* While a tool runs, Roko's status on the input box already says what it is doing. */}
+        {running && pending.length === 0 && !doing && (
           <p className="thinking">{t('chat.thinking')}</p>
         )}
         {error && (
@@ -536,19 +549,23 @@ export function Chat({
         // Roko sits on the input box's top edge: its pose and the chip beside it say what it
         // is doing, and it turns to the pointer while idle.
         <div className={`stage ${roko}`} role="status">
-          <Roko state={roko} size={88} follow />
+          <Roko state={pose} size={88} follow />
           <span className="stage-chip">
-            {t(
-              roko === 'waiting'
-                ? 'panel.waiting'
-                : roko === 'done'
-                  ? 'panel.done'
-                  : roko === 'running'
-                    ? 'panel.running'
-                    : roko === 'failed'
-                      ? 'panel.failed'
-                      : 'panel.idle',
-            )}
+            <span className="stage-text">
+              {doing
+                ? toolSummary(doing.function.name, doing.function.arguments, t)
+                : t(
+                    roko === 'waiting'
+                      ? 'panel.waiting'
+                      : roko === 'done'
+                        ? 'panel.done'
+                        : roko === 'running'
+                          ? 'panel.running'
+                          : roko === 'failed'
+                            ? 'panel.failed'
+                            : 'panel.idle',
+                  )}
+            </span>
           </span>
         </div>
       )}

@@ -607,6 +607,12 @@ try {
   // An action whose outcome is unknown offers the two buttons; Rocky never redoes it.
   await page.getByRole('textbox').fill('跑一個會等很久的指令');
   await page.keyboard.press('Enter');
+  // While it runs, Roko's status says what it is doing, not just "thinking".
+  await page
+    .locator('.stage-chip', { hasText: '執行指令：' })
+    .waitFor({ timeout: 20_000 });
+  check(true, "Roko's status names the command while it runs");
+  if (shots) await page.screenshot({ path: join(shots, 'm5-doing.png') });
   const unknown = page.locator('.unknown-outcome');
   await unknown.waitFor({ timeout: 30_000 });
   await unknown.getByRole('button', { name: '沒成功，再做一次' }).waitFor();

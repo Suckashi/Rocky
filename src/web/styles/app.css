@@ -1652,8 +1652,16 @@ body:has(.centered) {
   font-weight: 600;
   color: var(--text-muted);
   white-space: nowrap;
+  /* A long command line ends in an ellipsis instead of running across the input box. */
+  max-width: calc(100% - var(--space-5) - 120px);
+}
+.stage-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .stage-chip::before {
+  flex: none;
   content: '';
   width: 7px;
   height: 7px;

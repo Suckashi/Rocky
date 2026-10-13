@@ -53,6 +53,36 @@ function target(args: Record<string, unknown>): string {
   return '';
 }
 
+/** A tool call in a few words, for Roko's status while the call runs ("讀取檔案：app.js"). */
+export function toolSummary(
+  name: string,
+  args: string,
+  t: (key: MessageKey, params?: Record<string, string | number>) => string,
+): string {
+  let parsed: Record<string, unknown> = {};
+  try {
+    parsed = JSON.parse(args || '{}') as Record<string, unknown>;
+  } catch {
+    // Arguments still streaming in: the label alone.
+  }
+  const label = KNOWN.has(name)
+    ? t(`tool.${name}` as MessageKey)
+    : t('tool.other', { name });
+  const what = target(parsed);
+  return what ? t('tool.summary', { label, target: what }) : label;
+}
+
+/** Tools that only look: Roko reads (the sheet's "review" row) instead of running. */
+export const LOOKING = new Set([
+  'ls',
+  'read_file',
+  'glob',
+  'grep',
+  'read_document',
+  'search_memory',
+  'load_skill',
+]);
+
 export type ToolState = 'running' | 'waiting' | 'done' | 'interrupted';
 
 export function ToolCard({
