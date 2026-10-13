@@ -1521,37 +1521,43 @@ body:has(.centered) {
 }
 
 /* ---------- Roko above the input box ---------- */
-.presence-bar {
+/* Roko on stage: perched on the top edge of the input box (or the approval panel that takes
+   its place), feet on the border, with its status in a chip beside it. */
+.stage {
   position: relative;
-  z-index: 1;
-  isolation: isolate;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
+  z-index: 2;
+  height: 0;
   max-width: 860px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 var(--space-5) var(--space-2);
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-muted);
-  animation: fade var(--dur) var(--ease-out);
 }
-.presence-bar + .composer::before,
-.chat > .composer::before {
-  display: none;
-}
-.presence-bar .roko {
-  margin: 0;
+.stage .roko {
+  position: absolute;
+  left: calc(var(--space-5) + 10px);
+  bottom: -12px;
+  transform-origin: 50% 100%;
   transition: filter var(--dur-slow) var(--ease-out);
+  animation: perch var(--dur-slow) var(--ease-spring) both;
 }
-.presence-bar > span:not(.roko) {
+.stage-chip {
+  position: absolute;
+  left: calc(var(--space-5) + 104px);
+  bottom: 10px;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  padding: 4px var(--space-3) 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
-.presence-bar > span:not(.roko)::before {
+.stage-chip::before {
   content: '';
   width: 7px;
   height: 7px;
@@ -1559,29 +1565,46 @@ body:has(.centered) {
   background: var(--text-subtle);
   transition: background-color var(--dur) var(--ease-out);
 }
-/* Roko's eyes light the moment: amber while working, a steady glow when done. */
-.presence-bar.running .roko,
-.presence-bar.waiting .roko {
+/* Roko's eyes light the moment: amber while working or waiting on you. */
+.stage.running .roko,
+.stage.waiting .roko {
   filter: drop-shadow(0 0 14px var(--accent-glow));
-  animation: glow 2.4s ease-in-out infinite;
+  animation:
+    perch var(--dur-slow) var(--ease-spring) both,
+    glow 2.4s ease-in-out infinite;
 }
-.presence-bar.running span::before,
-.presence-bar.waiting span::before {
+.stage.running .stage-chip::before,
+.stage.waiting .stage-chip::before {
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent-glow);
   animation: breathe 1.4s ease-in-out infinite;
 }
-.presence-bar.waiting {
+.stage.waiting .stage-chip {
   color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
-.presence-bar.done span::before {
+.stage.done .stage-chip::before {
   background: var(--ok);
 }
-.presence-bar.failed {
+.stage.failed .stage-chip {
   color: var(--bad);
 }
-.presence-bar.failed span::before {
+.stage.failed .stage-chip::before {
   background: var(--bad);
+}
+/* Room above the input box for Roko, so the last lines never sit behind it. */
+.chat:has(.stage) .transcript {
+  padding-bottom: 96px;
+}
+.stage + .composer::before,
+.chat > .composer::before {
+  display: none;
+}
+@keyframes perch {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92);
+  }
 }
 @keyframes glow {
   0%,
@@ -2515,9 +2538,6 @@ button.tool-toggle {
   .chip {
     max-width: 96px;
   }
-  .presence-bar {
-    padding: 0 var(--space-4) var(--space-2);
-  }
   .topbar {
     padding: 0 var(--space-4);
   }
@@ -2560,6 +2580,17 @@ button.tool-toggle {
   }
   .turn-changes > .row:first-child > .spacer {
     display: none;
+  }
+  .stage .roko {
+    left: calc(var(--space-3) + 6px);
+    scale: 0.75;
+  }
+  .stage-chip {
+    left: calc(var(--space-3) + 76px);
+    bottom: 6px;
+  }
+  .chat:has(.stage) .transcript {
+    padding-bottom: 76px;
   }
 }
 

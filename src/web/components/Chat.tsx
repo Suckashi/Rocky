@@ -498,9 +498,11 @@ export function Chat({
         <div ref={bottom} />
       </div>
       {visible && (
-        <div className={`presence-bar ${roko}`} role="status">
-          <Roko state={roko} size={34} face follow />
-          <span>
+        // Roko sits on the input box's top edge: its pose and the chip beside it say what it
+        // is doing, and it turns to the pointer while idle.
+        <div className={`stage ${roko}`} role="status">
+          <Roko state={roko} size={88} follow />
+          <span className="stage-chip">
             {t(
               roko === 'waiting'
                 ? 'panel.waiting'
