@@ -209,7 +209,10 @@ export function ApprovalPanel({
   const [selected, setSelected] = useState(noDefault ? -1 : 0);
   const [reason, setReason] = useState('');
   const [explaining, setExplaining] = useState(false);
-  const [busy, setBusy] = useState(false);
+  // Busy only for the question being answered: the next question can arrive (the run goes
+  // on) before the answer's request returns, and a key pressed on it must count.
+  const [answering, setAnswering] = useState<string | null>(null);
+  const busy = answering === approval.id;
   const [error, setError] = useState('');
   const [full, setFull] = useState(false);
   const reasonBox = useRef<HTMLInputElement>(null);
@@ -273,7 +276,7 @@ export function ApprovalPanel({
                   ? { reason: reason.trim() }
                   : {}),
               };
-    setBusy(true);
+    setAnswering(approval.id);
     setError('');
     try {
       await onAnswer(approval, answer);
@@ -282,7 +285,7 @@ export function ApprovalPanel({
         t('approval.failed', { error: e instanceof Error ? e.message : '' }),
       );
     } finally {
-      setBusy(false);
+      setAnswering((current) => (current === approval.id ? null : current));
     }
   };
 

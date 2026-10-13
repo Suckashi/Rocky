@@ -1197,6 +1197,11 @@ body:has(.centered) {
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
+/* A short conversation sits on the input box, like a chat (owner's choice): the space goes
+   above it, and the last message stays next to Roko and the input. */
+.transcript > :first-child:not(.empty) {
+  margin-top: auto;
+}
 .turn-part {
   display: flex;
   flex-direction: column;
