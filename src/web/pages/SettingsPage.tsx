@@ -1,5 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { api, type Settings } from '../api.ts';
 import { LanguageSwitch } from '../components/LanguageSwitch.tsx';
 import { ThemeSwitch } from '../components/ThemeSwitch.tsx';
@@ -18,31 +18,57 @@ interface Section {
   body: ReactNode;
 }
 
-/** The section nearest the top of the window, for the side navigation. */
-function useCurrentSection(ids: string[]): string | undefined {
+/**
+ * The section being read, for the side navigation: the first one near the top of the window,
+ * or the last one in view once the page is scrolled to the end (short last sections never
+ * reach the top). A section picked in the navigation stays current while the page scrolls to it.
+ */
+function useCurrentSection(
+  ids: string[],
+): [string | undefined, (id: string) => void] {
   const [current, setCurrent] = useState(ids[0]);
+  const picked = useRef(0);
   const key = ids.join(' ');
   useEffect(() => {
     if (!('IntersectionObserver' in window)) return;
+    const order = key.split(' ');
     const visible = new Set<string>();
+    const scroller = document.querySelector('.settings');
+    const update = () => {
+      if (Date.now() < picked.current) return;
+      const shown = order.filter((id) => visible.has(id));
+      const atEnd =
+        scroller !== null &&
+        scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
+      const next = atEnd ? shown.at(-1) : shown[0];
+      if (next) setCurrent(next);
+    };
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) visible.add(entry.target.id);
           else visible.delete(entry.target.id);
         }
-        const first = key.split(' ').find((id) => visible.has(id));
-        if (first) setCurrent(first);
+        update();
       },
       { rootMargin: '-80px 0px -55% 0px' },
     );
-    for (const id of key.split(' ')) {
+    for (const id of order) {
       const element = document.getElementById(id);
       if (element) observer.observe(element);
     }
-    return () => observer.disconnect();
+    scroller?.addEventListener('scroll', update, { passive: true });
+    return () => {
+      observer.disconnect();
+      scroller?.removeEventListener('scroll', update);
+    };
   }, [key]);
-  return current;
+  const pick = (id: string) => {
+    // Long enough for the smooth scroll to land.
+    picked.current = Date.now() + 1000;
+    setCurrent(id);
+  };
+  return [current, pick];
 }
 
 export function SettingsPage({
@@ -104,7 +130,7 @@ export function SettingsPage({
     { id: 'settings-skills', title: 'settings.skills', body: <SkillList /> },
     { id: 'settings-mcp', title: 'settings.mcp', body: <McpSettings /> },
   ];
-  const current = useCurrentSection(sections.map((s) => s.id));
+  const [current, pick] = useCurrentSection(sections.map((s) => s.id));
   return (
     <div className="settings">
       <header className="topbar">
@@ -124,6 +150,7 @@ export function SettingsPage({
               aria-current={current === section.id ? 'true' : undefined}
               onClick={(e) => {
                 e.preventDefault();
+                pick(section.id);
                 document
                   .getElementById(section.id)
                   ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
