@@ -128,6 +128,7 @@
   "approval.reject": "Reject",
   "approval.rejectWithReason": "Reject and explain",
   "approval.reasonPlaceholder": "Tell Roko why, or what to do instead (Enter to send)",
+  "approval.keysPick": "Risky, so nothing is preselected: press 1–{count} to choose, Esc to reject, Ctrl+E for full screen",
   "approval.keys": "Press 1–{count} to choose, Enter to confirm, Esc to reject, Ctrl+E for full screen",
   "approval.more": "{count} more waiting",
   "approval.expand": "Full-screen preview",

@@ -257,6 +257,15 @@ try {
   await page.getByRole('textbox').fill('用鍵盤再改');
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
+  // A protected file: nothing is preselected, so a bare Enter approves nothing.
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(500);
+  check(
+    (await panel.count()) === 1 &&
+      (await panel.locator('button.selected').count()) === 0 &&
+      readFileSync(appFile, 'utf8').includes('41'),
+    'a protected-file approval preselects nothing; Enter alone approves nothing',
+  );
   await panel.getByRole('button', { name: '全螢幕預覽' }).focus();
   await page.keyboard.press('Enter');
   await panel.getByRole('button', { name: '結束全螢幕' }).waitFor();

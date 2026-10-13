@@ -189,6 +189,9 @@ function Preview({
   return null;
 }
 
+/** Reasons where a stray Enter must not approve: nothing is chosen until the user picks. */
+const NO_DEFAULT = new Set(['protected', 'dangerous', 'secret', 'external']);
+
 export function ApprovalPanel({
   approvals,
   project,
@@ -202,7 +205,8 @@ export function ApprovalPanel({
 }) {
   const { t } = useI18n();
   const approval = approvals[0]!;
-  const [selected, setSelected] = useState(0);
+  const noDefault = NO_DEFAULT.has(approval.reason);
+  const [selected, setSelected] = useState(noDefault ? -1 : 0);
   const [reason, setReason] = useState('');
   const [explaining, setExplaining] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -218,7 +222,7 @@ export function ApprovalPanel({
 
   // A new question starts fresh.
   useEffect(() => {
-    setSelected(0);
+    setSelected(NO_DEFAULT.has(approval.reason) ? -1 : 0);
     setReason('');
     setExplaining(false);
     setError('');
@@ -315,8 +319,13 @@ export function ApprovalPanel({
       } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
         const next =
-          (selected + (event.key === 'ArrowDown' ? 1 : options.length - 1)) %
-          options.length;
+          selected < 0
+            ? event.key === 'ArrowDown'
+              ? 0
+              : options.length - 1
+            : (selected +
+                (event.key === 'ArrowDown' ? 1 : options.length - 1)) %
+              options.length;
         const button = optionButtons.current[next];
         if (button) button.focus();
         else setSelected(next);
@@ -397,7 +406,9 @@ export function ApprovalPanel({
         <span className="small muted">
           {busy
             ? t('approval.sending')
-            : t('approval.keys', { count: options.length })}
+            : t(noDefault ? 'approval.keysPick' : 'approval.keys', {
+                count: options.length,
+              })}
         </span>
         {error && (
           <span className="error small" role="alert">

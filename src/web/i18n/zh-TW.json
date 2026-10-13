@@ -128,6 +128,7 @@
   "approval.reject": "拒絕",
   "approval.rejectWithReason": "拒絕並說明",
   "approval.reasonPlaceholder": "告訴 Roko 為什麼，或該怎麼做（Enter 送出）",
+  "approval.keysPick": "有風險的動作不預選：按 1–{count} 選擇，Esc 拒絕，Ctrl+E 全螢幕",
   "approval.keys": "按 1–{count} 選擇，Enter 確定，Esc 拒絕，Ctrl+E 全螢幕",
   "approval.more": "還有 {count} 件",
   "approval.expand": "全螢幕預覽",
