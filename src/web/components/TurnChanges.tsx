@@ -77,9 +77,34 @@ export function TurnChanges({
   );
   const card = useRef<HTMLDivElement>(null);
   // An opened diff or confirmation scrolls fully into view instead of under the input box.
+  // The diff renders a moment after the view opens, so the card is followed while it grows,
+  // for a short while only (after that, scrolling is the user's).
   useEffect(() => {
-    if (view !== 'closed')
-      card.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    const element = card.current;
+    if (view === 'closed' || !element) return;
+    // Chromium's block: 'nearest' leaves a card with a bottom scroll margin where it is, so
+    // the direction is picked here: the end into view, or the top if it is taller than the
+    // window onto the conversation.
+    const show = () => {
+      const view = element.closest('.transcript');
+      if (!view) return;
+      const box = element.getBoundingClientRect();
+      const port = view.getBoundingClientRect();
+      const margin =
+        parseFloat(getComputedStyle(element).scrollMarginBottom) || 0;
+      if (box.height + margin > port.height)
+        element.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      else if (box.bottom + margin > port.bottom || box.top < port.top)
+        element.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    };
+    show();
+    const grows = new ResizeObserver(show);
+    grows.observe(element);
+    const stop = setTimeout(() => grows.disconnect(), 1200);
+    return () => {
+      clearTimeout(stop);
+      grows.disconnect();
+    };
   }, [view]);
   const base = `/threads/${threadId}/runs/${encodeURIComponent(runId)}`;
 

@@ -182,21 +182,14 @@ a.button.primary:active {
   background: var(--primary-press);
   transform: translateY(1px);
 }
-/* Disabled keeps the button's own kind, faded: the main action stays amber (so it still
-   reads as the main action, just not yet), the others a flat sunken fill. The page says
-   in words what is missing. */
+/* Disabled is one neutral look in both themes: a flat sunken fill with a readable label
+   (never faded brand colour, which reads as broken). Next to it the page says in words
+   what is still missing. */
 button.primary:disabled,
-button.icon-button.primary:disabled {
-  background: var(--primary);
-  color: var(--primary-text);
-  border: 1px solid transparent;
-  box-shadow: none;
-  cursor: not-allowed;
-  opacity: 0.45;
-}
+button.icon-button.primary:disabled,
 button.secondary:disabled {
   background: var(--surface-sunken);
-  color: var(--text-subtle);
+  color: var(--text-muted);
   border: 1px solid var(--border);
   box-shadow: none;
   cursor: not-allowed;
@@ -1122,9 +1115,10 @@ body:has(.centered) {
 .transcript {
   flex: 1;
   /* The last lines fade out above Roko's status and the input box, never under them. */
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent);
   overflow-y: auto;
-  padding: var(--space-6) var(--space-5) var(--space-7);
+  /* Room at the end for the fade and the top of Roko's head, so the last card ends clear. */
+  padding: var(--space-6) var(--space-5) 72px;
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -2087,7 +2081,7 @@ button.tool-toggle {
 /* Scrolled into view clear of the transcript's bottom fade, and of Roko on the input box. */
 .turn-changes,
 .unknown-outcome {
-  scroll-margin-bottom: 40px;
+  scroll-margin-bottom: 72px;
 }
 
 .unknown-outcome {
@@ -2699,7 +2693,7 @@ button.small-button,
 }
 @media (max-width: 720px) {
   .transcript {
-    padding: var(--space-4) var(--space-4) var(--space-4);
+    padding: var(--space-4) var(--space-4) 56px;
   }
   .composer {
     padding: 0 var(--space-3) var(--space-3);
