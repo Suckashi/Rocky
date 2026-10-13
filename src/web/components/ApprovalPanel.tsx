@@ -355,6 +355,12 @@ export function ApprovalPanel({
             {t('approval.more', { count: approvals.length - 1 })}
           </span>
         )}
+        {/* Stopping the turn is a way out of the question, not one of its answers: it sits
+            with the card's controls, away from the options. */}
+        <button type="button" className="secondary stop" onClick={onStop}>
+          <CircleStop size={15} aria-hidden="true" />
+          {t('chat.stop')}
+        </button>
         <button
           type="button"
           className="icon-button"
@@ -369,7 +375,13 @@ export function ApprovalPanel({
         {t('approval.why', {
           reason: t(`approval.reason.${approval.reason}` as MessageKey),
         })}
-        {approval.detail ? (
+        {/* A file the title already names is not repeated here. */}
+        {approval.detail &&
+        !(
+          'path' in approval.effect &&
+          displayPath(approval.detail, project) ===
+            displayPath(String(approval.effect.path), project)
+        ) ? (
           <span className="mono" title={approval.detail}>
             {' '}
             · {displayPath(approval.detail, project)}
@@ -430,10 +442,6 @@ export function ApprovalPanel({
             {error}
           </span>
         )}
-        <button type="button" className="secondary stop" onClick={onStop}>
-          <CircleStop size={15} aria-hidden="true" />
-          {t('chat.stop')}
-        </button>
       </footer>
     </section>
   );
