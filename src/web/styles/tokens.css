@@ -48,6 +48,8 @@
   --diff-del-bg: #fbe9e6;
   --diff-del-text: #8a2a24;
   --paper-bg: #e9e3d8;
+  /* Roko's stone in the page: a faint grain (inline SVG noise, no request). */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .22 0 0 0 0 .14 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   --floor-shadow: rgb(48 34 20 / 26%);
   --selection: rgb(240 162 56 / 28%);
   --scrollbar: rgb(42 36 32 / 18%);
