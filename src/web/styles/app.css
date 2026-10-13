@@ -775,8 +775,15 @@ body:has(.centered) {
 }
 
 /* ---------- Settings ---------- */
+/* Settings is a view inside the app: the rail stays, the page scrolls on its own. */
+.shell.settings-view {
+  grid-template-columns: var(--rail-width) minmax(0, 1fr);
+}
 .settings {
-  min-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
 }
 .settings-layout {
   display: grid;
@@ -798,6 +805,12 @@ body:has(.centered) {
 }
 .settings-main > .card {
   scroll-margin-top: 88px;
+}
+.section-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
 }
 .settings .topbar .link {
   gap: var(--space-2);
@@ -834,6 +847,22 @@ body:has(.centered) {
   }
   .settings-main > .card {
     scroll-margin-top: 124px;
+  }
+}
+/* Wide windows: each section is a row, its name on the left and its controls on the right. */
+@media (min-width: 1240px) {
+  .settings-main {
+    max-width: 980px;
+  }
+  .settings-main > .card {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--space-4) var(--space-6);
+    align-items: start;
+  }
+  .settings-main > .card > h2 {
+    position: sticky;
+    top: 88px;
   }
 }
 @media (min-width: 1100px) {
@@ -2674,7 +2703,8 @@ button.tool-toggle {
 /* Phones: the rail becomes a top bar, so the conversation gets the full width. */
 @media (max-width: 600px) {
   .shell,
-  .shell.previewing {
+  .shell.previewing,
+  .shell.settings-view {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: 52px minmax(0, 1fr);
   }

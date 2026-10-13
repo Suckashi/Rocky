@@ -187,30 +187,23 @@ function Shell({
       />
     );
   }
-  if (view === 'settings') {
-    return (
-      <SettingsPage
-        settings={settings}
-        onChange={setSettings}
-        onBack={() => setView('chat')}
-      />
-    );
-  }
   return preview.provider(
     <div
-      className={`shell${view === 'jobs' ? ' jobs-view' : ''}${preview.open ? ' previewing' : ''}${threadsOpen ? ' threads-open' : ''}`}
+      className={`shell${view === 'jobs' ? ' jobs-view' : ''}${view === 'settings' ? ' settings-view' : ''}${preview.open ? ' previewing' : ''}${threadsOpen ? ' threads-open' : ''}`}
     >
       <nav className="rail" aria-label={t('app.name')}>
         <img src="/rocky/mark.svg" alt={t('app.name')} width={28} height={28} />
-        <button
-          type="button"
-          className="icon-button threads-toggle"
-          aria-label={t(view === 'jobs' ? 'jobs.title' : 'nav.threads')}
-          aria-expanded={threadsOpen}
-          onClick={() => setThreadsOpen((open) => !open)}
-        >
-          <PanelLeft size={18} />
-        </button>
+        {view !== 'settings' && (
+          <button
+            type="button"
+            className="icon-button threads-toggle"
+            aria-label={t(view === 'jobs' ? 'jobs.title' : 'nav.threads')}
+            aria-expanded={threadsOpen}
+            onClick={() => setThreadsOpen((open) => !open)}
+          >
+            <PanelLeft size={18} />
+          </button>
+        )}
         <button
           type="button"
           className={`icon-button${view === 'chat' ? ' active' : ''}`}
@@ -248,7 +241,8 @@ function Shell({
         </button>
         <button
           type="button"
-          className="icon-button bottom"
+          className={`icon-button bottom${view === 'settings' ? ' active' : ''}`}
+          aria-current={view === 'settings' ? 'page' : undefined}
           aria-label={t('nav.settings')}
           title={t('nav.settings')}
           onClick={() => setView('settings')}
@@ -256,7 +250,13 @@ function Shell({
           <SettingsIcon size={18} />
         </button>
       </nav>
-      {view === 'jobs' ? (
+      {view === 'settings' ? (
+        <SettingsPage
+          settings={settings}
+          onChange={setSettings}
+          onBack={() => setView('chat')}
+        />
+      ) : view === 'jobs' ? (
         <JobsPage
           selected={jobId}
           project={settings.project}

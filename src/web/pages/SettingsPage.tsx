@@ -130,7 +130,7 @@ export function SettingsPage({
           {sections.map((section) => (
             <section key={section.id} id={section.id} className="card">
               <h2>{t(section.title)}</h2>
-              {section.body}
+              <div className="section-body">{section.body}</div>
             </section>
           ))}
         </main>
