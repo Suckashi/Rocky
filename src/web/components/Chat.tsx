@@ -536,6 +536,10 @@ export function Chat({
                     // The approval panel shows the action that waits, and the turn's change
                     // card shows the files written: no second card for either.
                     if (state === 'waiting') return null;
+                    // The call in progress is reported once, by Roko's status on the input
+                    // box; its row joins the transcript when it is done.
+                    if (state === 'running' && call.id === doing?.id)
+                      return null;
                     if (state === 'done' && inCards.has(call.id)) return null;
                     return (
                       <ToolCard
