@@ -424,7 +424,7 @@ export function Chat({
             <div key={message.id} className="turn-part">
               {text && (
                 <div className="reply">
-                  <Roko state="idle" size={34} face />
+                  <Roko state="idle" size={40} face />
                   <div className="markdown">
                     <ReactMarkdown components={markdownComponents}>
                       {textOf(message.content)}

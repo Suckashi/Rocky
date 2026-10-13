@@ -496,7 +496,7 @@ body:has(.centered) {
   gap: var(--space-3);
   padding: 0 var(--space-6);
   border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
   backdrop-filter: saturate(1.4) blur(14px);
   -webkit-backdrop-filter: saturate(1.4) blur(14px);
 }
@@ -1526,7 +1526,10 @@ body:has(.centered) {
 .stage {
   position: relative;
   z-index: 2;
-  height: 0;
+  /* Real height in the layout: the transcript ends above Roko, so nothing scrolls behind
+     it; only the top of its head reaches into the transcript's fade. */
+  height: 66px;
+  flex: none;
   max-width: 860px;
   width: 100%;
   margin: 0 auto;
@@ -1592,9 +1595,47 @@ body:has(.centered) {
 .stage.failed .stage-chip::before {
   background: var(--bad);
 }
+/* A ground shadow on the border: it stays put when Roko jumps, so the jump reads. */
+.stage::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: calc(var(--space-5) + 24px);
+  bottom: -5px;
+  width: 60px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--floor-shadow), transparent);
+}
+/* Roko's eyes are the light source: while it works, the input box glows with them. */
+.chat:has(.stage.running) .composer-box {
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--border-strong));
+  animation: composer-glow 2.4s ease-in-out infinite;
+}
+@keyframes composer-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent),
+      var(--shadow-md);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent),
+      0 0 26px var(--accent-glow),
+      var(--shadow-md);
+  }
+}
+.in-use {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--touch);
+}
 /* Room above the input box for Roko, so the last lines never sit behind it. */
-.chat:has(.stage) .transcript {
-  padding-bottom: 96px;
+/* Auto-scroll aims at the transcript's last element; keep it clear of the bottom fade. */
+.transcript > :last-child {
+  scroll-margin-bottom: 28px;
 }
 .stage + .composer::before,
 .chat > .composer::before {
@@ -1656,6 +1697,33 @@ button.chip:hover {
 }
 
 /* ---------- Empty states ---------- */
+.centered .actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+.centered .code-block.inline,
+.install .code-block.inline {
+  margin: 0;
+}
+.centered .code-block.inline pre {
+  margin: 0;
+  padding: 6px 44px 6px var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--code-bg);
+  color: var(--code-text);
+  font: 13px/1.6 var(--font-mono);
+}
+.centered .code-block.inline .copy {
+  top: 50%;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+  transform: translateY(-50%);
+  opacity: 1;
+}
 @media (min-width: 1101px) {
   .shell:has(.jobs-main > .empty.no-jobs) {
     grid-template-columns: var(--rail-width) minmax(0, 1fr);
@@ -1939,11 +2007,12 @@ button.tool-toggle {
 .turn-changes > .row:first-child {
   font-weight: 600;
 }
-/* Scrolled into view clear of the transcript's bottom fade. */
+/* Scrolled into view clear of the transcript's bottom fade, and of Roko on the input box. */
 .turn-changes,
 .unknown-outcome {
   scroll-margin-bottom: 40px;
 }
+
 .unknown-outcome {
   background: var(--warn-soft);
   border-color: color-mix(in srgb, var(--warn) 45%, transparent);
@@ -2589,8 +2658,12 @@ button.tool-toggle {
     left: calc(var(--space-3) + 76px);
     bottom: 6px;
   }
-  .chat:has(.stage) .transcript {
-    padding-bottom: 76px;
+  .stage {
+    height: 50px;
+  }
+  .stage::after {
+    left: calc(var(--space-3) + 16px);
+    width: 46px;
   }
 }
 
