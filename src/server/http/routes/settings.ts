@@ -1,4 +1,4 @@
-// Settings API: language and model. The API key is write-only from the browser's side.
+// Settings API: language, theme and model. The API key is write-only from the browser's side.
 import { statSync } from 'node:fs';
 import { isAbsolute } from 'node:path';
 import { Hono } from 'hono';
@@ -60,6 +60,16 @@ export function settingsRoutes(
     );
     if (!body) return c.json({ error: 'invalid-locale' }, 400);
     settings.setLocale(body.locale);
+    return c.json(settings.public());
+  });
+
+  app.put('/settings/theme', async (c) => {
+    const body = await readBody(
+      c,
+      z.object({ theme: z.enum(['system', 'light', 'dark']) }).strict(),
+    );
+    if (!body) return c.json({ error: 'invalid-theme' }, 400);
+    settings.setTheme(body.theme);
     return c.json(settings.public());
   });
 

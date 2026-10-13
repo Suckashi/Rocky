@@ -14,6 +14,7 @@ import { Roko } from './components/Roko.tsx';
 import { ThreadList } from './components/ThreadList.tsx';
 import { I18nProvider, useI18n, type MessageKey } from './i18n/index.tsx';
 import { isEditable } from './keys.ts';
+import { applyTheme } from './components/ThemeSwitch.tsx';
 import { Locked } from './pages/Locked.tsx';
 import { JobsPage } from './pages/JobsPage.tsx';
 import { Onboarding } from './pages/Onboarding.tsx';
@@ -315,9 +316,10 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (settings)
-      document.documentElement.lang =
-        settings.locale === 'zh-TW' ? 'zh-Hant' : 'en';
+    if (!settings) return;
+    document.documentElement.lang =
+      settings.locale === 'zh-TW' ? 'zh-Hant' : 'en';
+    applyTheme(settings.theme);
   }, [settings]);
 
   const locale = settings?.locale ?? 'zh-TW';

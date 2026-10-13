@@ -215,6 +215,26 @@ try {
   await page.getByLabel('專案資料夾').fill(project);
   await page.getByRole('button', { name: '使用這個資料夾' }).click();
   await page.getByText('已設定').waitFor();
+  // Appearance: dark is applied at once and kept across a reload; system goes back.
+  await page.getByRole('radio', { name: '深色' }).click();
+  await page.waitForFunction(
+    () => document.documentElement.dataset['theme'] === 'dark',
+  );
+  const darkBg = await page.evaluate(
+    () => getComputedStyle(document.body).backgroundColor,
+  );
+  await page.reload();
+  await page.getByRole('button', { name: '設定' }).click();
+  check(
+    darkBg === 'rgb(21, 18, 15)' &&
+      (await page.evaluate(() => document.documentElement.dataset['theme'])) ===
+        'dark',
+    'the dark theme applies at once and is kept after a reload',
+  );
+  await page.getByRole('radio', { name: '跟隨系統' }).click();
+  await page.waitForFunction(
+    () => document.documentElement.dataset['theme'] === undefined,
+  );
   await page.getByLabel('核准模式').selectOption('hands-off');
   await page.getByLabel('核准模式').selectOption('ask-when-needed');
   await page.getByRole('button', { name: '回到對話' }).click();

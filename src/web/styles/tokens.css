@@ -94,8 +94,10 @@
   --dur-slow: 420ms;
 }
 
+/* Dark: when the system is dark and the user has not chosen light, or when the user chose
+   dark (Settings › General). Both blocks hold the same values. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     color-scheme: dark;
 
     --bg: #15120f;
@@ -150,4 +152,59 @@
     --shadow-overlay: 0 8px 40px rgb(0 0 0 / 60%);
     --ring: 0 0 0 3px rgb(245 176 79 / 30%);
   }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #15120f;
+  --bg-glow: rgb(245 170 70 / 10%);
+  --surface: #1d1916;
+  --surface-muted: #221d19;
+  --surface-sunken: #110e0c;
+  --surface-raised: #2a241f;
+  --border: #332b25;
+  --border-strong: #463c34;
+  --input-border: #7d6f62;
+  --field-bg: #161310;
+  --text: #f2ece5;
+  --text-muted: #c9bdb0;
+  --text-subtle: #a09385;
+  --primary: #f2a640;
+  --primary-hover: #f6b357;
+  --primary-press: #e3952d;
+  --primary-text: #1d1206;
+  --primary-soft: #33261a;
+  --primary-soft-strong: #45321d;
+  --link: #f6bb6c;
+  --bubble-bg: #3a3029;
+  --bubble-text: #f6efe8;
+  --focus: #f6bb6c;
+  --accent: #f5b04f;
+  --accent-glow: rgb(245 176 79 / 22%);
+  --ok: #6fcf97;
+  --ok-soft: #14291c;
+  --bad: #f28b82;
+  --bad-soft: #331a17;
+  --warn: #f39a5a;
+  --on-warn: #1d1006;
+  --warn-soft: #33200f;
+  --code-bg: #2a241f;
+  --code-text: #efe7dd;
+  --code-inline-bg: #2e2721;
+  --diff-add-bg: #13291c;
+  --diff-add-text: #8fe0b0;
+  --diff-del-bg: #331716;
+  --diff-del-text: #f5a39b;
+  --paper-bg: #2b2620;
+  --floor-shadow: rgb(0 0 0 / 55%);
+  --selection: rgb(245 176 79 / 30%);
+  --scrollbar: rgb(242 236 229 / 14%);
+  --scrollbar-hover: rgb(242 236 229 / 26%);
+
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 8px rgb(0 0 0 / 20%);
+  --shadow-md: 0 2px 4px rgb(0 0 0 / 30%), 0 10px 28px rgb(0 0 0 / 35%);
+  --shadow-lg: 0 4px 10px rgb(0 0 0 / 35%), 0 22px 56px rgb(0 0 0 / 50%);
+  --shadow-overlay: 0 8px 40px rgb(0 0 0 / 60%);
+  --ring: 0 0 0 3px rgb(245 176 79 / 30%);
 }

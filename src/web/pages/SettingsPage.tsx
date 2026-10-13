@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { api, type Settings } from '../api.ts';
 import { LanguageSwitch } from '../components/LanguageSwitch.tsx';
+import { ThemeSwitch } from '../components/ThemeSwitch.tsx';
 import { McpSettings } from '../components/McpSettings.tsx';
 import { MemoryList } from '../components/MemoryList.tsx';
 import { ModeSelect } from '../components/ModeSelect.tsx';
@@ -59,10 +60,16 @@ export function SettingsPage({
       id: 'settings-general',
       title: 'settings.general',
       body: (
-        <div className="row">
-          <span>{t('settings.language')}</span>
-          <LanguageSwitch settings={settings} onChange={onChange} />
-        </div>
+        <>
+          <div className="row">
+            <span>{t('settings.language')}</span>
+            <LanguageSwitch settings={settings} onChange={onChange} />
+          </div>
+          <div className="row">
+            <span>{t('settings.theme')}</span>
+            <ThemeSwitch settings={settings} onChange={onChange} />
+          </div>
+        </>
       ),
     },
     {

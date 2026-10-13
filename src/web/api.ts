@@ -8,6 +8,7 @@ import type {
   Outcome,
   Provider,
   ReceiptDecision,
+  Theme,
 } from '../shared/types.ts';
 
 export type {
@@ -19,6 +20,7 @@ export type {
   Outcome,
   PlanOption,
   Provider,
+  Theme,
 } from '../shared/types.ts';
 export class ApiError extends Error {
   readonly status: number;
@@ -68,6 +70,7 @@ export const MODES: Mode[] = ['ask-when-needed', 'hands-off'];
 
 export interface Settings {
   locale: Locale;
+  theme: Theme;
   model: ModelSettings | null;
   project: string | null;
   mode: Mode;

@@ -25,8 +25,8 @@ export function secretsFiles(dataDir: string): string[] {
   return [file, tempOf(file), brokenOf(file)];
 }
 
-export type { Locale, Provider } from '../../shared/types.ts';
-import type { Locale, Mode, Provider } from '../../shared/types.ts';
+export type { Locale, Provider, Theme } from '../../shared/types.ts';
+import type { Locale, Mode, Provider, Theme } from '../../shared/types.ts';
 
 export interface ModelSettings {
   provider: Provider;
@@ -36,6 +36,7 @@ export interface ModelSettings {
 
 export interface PublicSettings {
   locale: Locale;
+  theme: Theme;
   model: (ModelSettings & { hasApiKey: boolean }) | null;
   project: string | null;
   mode: Mode;
@@ -71,6 +72,14 @@ export class SettingsStore {
 
   setLocale(locale: Locale): void {
     this.set('locale', locale);
+  }
+
+  theme(): Theme {
+    return this.get<Theme>('theme') ?? 'system';
+  }
+
+  setTheme(theme: Theme): void {
+    this.set('theme', theme);
   }
 
   project(): string | undefined {
@@ -127,6 +136,7 @@ export class SettingsStore {
     const model = this.model();
     return {
       locale: this.locale(),
+      theme: this.theme(),
       model: model
         ? { ...model, hasApiKey: this.apiKey() !== undefined }
         : null,
