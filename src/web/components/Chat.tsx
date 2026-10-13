@@ -511,9 +511,10 @@ export function Chat({
           if (!text && calls.length === 0 && cards.length === 0) return null;
           return (
             <div key={message.id} className="turn-part">
+              {/* One Roko on screen, the one on the input box: replies are its words set as
+                  plain text, the user's are in bubbles. */}
               {text && (
                 <div className="reply">
-                  <Roko state="idle" size={40} face />
                   <div className="markdown">
                     <ReactMarkdown components={markdownComponents}>
                       {textOf(message.content)}

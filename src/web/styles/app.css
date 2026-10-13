@@ -1280,9 +1280,6 @@ body:has(.centered) {
   gap: var(--space-3);
   align-items: flex-start;
 }
-.reply > .roko {
-  margin-top: -3px;
-}
 
 /* Markdown replies: a calm reading measure and full typographic set. */
 .markdown {
@@ -1451,7 +1448,7 @@ body:has(.centered) {
 
 .thinking {
   color: var(--text-subtle);
-  margin: 0 0 0 44px;
+  margin: 0;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -2022,7 +2019,6 @@ button.chip:hover {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  margin-left: 44px;
 }
 .tool-card {
   border: 1px solid var(--border);
@@ -2103,9 +2099,9 @@ button.tool-toggle {
   padding: 0 var(--space-3) var(--space-3);
   animation: fade var(--dur) var(--ease-out);
 }
+/* Aligned with the replies' text. */
 .turn-changes,
 .unknown-outcome {
-  margin-left: 44px;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -2505,7 +2501,6 @@ button.small-button,
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  margin-left: 44px;
 }
 .job-cards:empty {
   display: none;
