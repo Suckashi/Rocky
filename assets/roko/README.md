@@ -34,11 +34,3 @@ On 2026-10-13 the owner approved lossless WebP copies for the UI, so pages load 
 - Checked after encoding: every RGBA pixel of each row equals the PNG's, including fully
   transparent ones. `sha256sum assets/roko/rows/*.webp` lists the current hashes.
 - The same rights note applies: it is the owner's artwork, not covered by Apache-2.0.
-
-## Face centres (`roko-faces.json`)
-
-The centre of Roko's visor in each 192 × 208 cell, measured from `roko-spritesheet.png` with
-Pillow and NumPy (the bounding box of opaque, near-black visor pixels). The UI crops its
-small round face avatar around these points, so the face stays in frame while Roko jumps,
-leans or runs. It is measured data about the artwork, not a change to it.
-

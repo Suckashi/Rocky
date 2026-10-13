@@ -349,14 +349,6 @@ button.icon-button.primary:hover:not(:disabled) {
   flex: none;
   image-rendering: auto;
 }
-/* Roko's face as an avatar: the stone and visor fill a round tile. */
-.roko.face {
-  border-radius: 50%;
-  background-color: var(--surface-sunken);
-  box-shadow:
-    0 0 0 1px var(--border),
-    var(--shadow-xs);
-}
 
 /* Large Roko stands on the page: a soft floor shadow under its feet, not a box. */
 .empty > .roko,

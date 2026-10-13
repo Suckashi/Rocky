@@ -2,7 +2,6 @@
 // row per file so the first screen only waits for the row it shows (assets/roko/README.md).
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import manifest from '../../../assets/roko/roko-manifest.json' with { type: 'json' };
-import faces from '../../../assets/roko/roko-faces.json' with { type: 'json' };
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 
 export type RokoState =
@@ -34,17 +33,6 @@ const FPS = manifest.playback.suggestedStartingFps;
 const LOOK = manifest.lookDirections;
 /** States calm enough for Roko to turn towards the pointer; the others carry news. */
 const CAN_LOOK = new Set<RokoState>(['idle', 'waving']);
-/** The face crop for small sizes: a square this wide (cell px) around the visor. The visor
- *  moves from frame to frame (Roko jumps, leans, runs), so each cell has its own centre,
- *  measured from the artwork into roko-faces.json. */
-const FACE_SPAN = 96;
-/** The head sits a little above the visor's centre. */
-const FACE_LIFT = 8;
-function faceCentre(row: number, column: number): [number, number] {
-  const cells = faces.cells as Record<string, (number[] | null)[]>;
-  const centre = cells[String(row)]?.[column];
-  return centre ? [centre[0]!, centre[1]!] : [cellWidth / 2, cellHeight * 0.65];
-}
 /** How long Roko keeps looking after the pointer stops. */
 const LOOK_REST_MS = 2500;
 
@@ -163,14 +151,11 @@ export function Roko({
   state = 'idle',
   size = 96,
   follow = false,
-  face = false,
 }: {
   state?: RokoState;
   size?: number;
   /** Turn towards the pointer while idle or waving. */
   follow?: boolean;
-  /** Show only the visor and eyes, for small sizes where the whole body would not read. */
-  face?: boolean;
 }) {
   const { t } = useI18n();
   const animation = manifest.animations[ROW[state]];
@@ -191,22 +176,19 @@ export function Roko({
     row: animation.row,
     column: animation.columns[frame] ?? 0,
   };
-  const scale = face ? size / FACE_SPAN : size / cellWidth;
-  const [faceX, faceY] = face ? faceCentre(cell.row, cell.column) : [0, 0];
-  const offsetX = face ? faceX - FACE_SPAN / 2 : 0;
-  const offsetY = face ? faceY - FACE_LIFT - FACE_SPAN / 2 : 0;
+  const scale = size / cellWidth;
   return (
     <span
       ref={element}
       role="img"
       aria-label={t(`roko.alt.${state}` as MessageKey)}
-      className={face ? 'roko face' : 'roko'}
+      className="roko"
       style={{
         width: size,
-        height: face ? size : Math.round(cellHeight * scale),
+        height: Math.round(cellHeight * scale),
         backgroundImage: `url(${rowImage(cell.row)})`,
         backgroundSize: `${columns * cellWidth * scale}px ${cellHeight * scale}px`,
-        backgroundPosition: `${-(cell.column * cellWidth + offsetX) * scale}px ${-offsetY * scale}px`,
+        backgroundPosition: `${-cell.column * cellWidth * scale}px 0px`,
         // Turns around its own axis; composes with any transform or scale on the element.
         rotate: cell.mirrored ? 'y 180deg' : undefined,
       }}
