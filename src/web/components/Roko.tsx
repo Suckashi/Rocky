@@ -2,6 +2,7 @@
 // row per file so the first screen only waits for the row it shows (assets/roko/README.md).
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import manifest from '../../../assets/roko/roko-manifest.json' with { type: 'json' };
+import faces from '../../../assets/roko/roko-faces.json' with { type: 'json' };
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 
 export type RokoState =
@@ -22,8 +23,17 @@ const FPS = manifest.playback.suggestedStartingFps;
 const LOOK = manifest.lookDirections;
 /** States calm enough for Roko to turn towards the pointer; the others carry news. */
 const CAN_LOOK = new Set<RokoState>(['idle', 'waving']);
-/** The face crop for small sizes: a square of the cell centred on the visor, in cell px. */
-const FACE = { x: 107, y: 125, span: 100 };
+/** The face crop for small sizes: a square this wide (cell px) around the visor. The visor
+ *  moves from frame to frame (Roko jumps, leans, runs), so each cell has its own centre,
+ *  measured from the artwork into roko-faces.json. */
+const FACE_SPAN = 96;
+/** The head sits a little above the visor's centre. */
+const FACE_LIFT = 8;
+function faceCentre(row: number, column: number): [number, number] {
+  const cells = faces.cells as Record<string, (number[] | null)[]>;
+  const centre = cells[String(row)]?.[column];
+  return centre ? [centre[0]!, centre[1]!] : [cellWidth / 2, cellHeight * 0.65];
+}
 /** How long Roko keeps looking after the pointer stops. */
 const LOOK_REST_MS = 2500;
 
@@ -125,13 +135,14 @@ export function Roko({
     );
     return () => clearInterval(timer);
   }, [animation]);
-  const scale = face ? size / FACE.span : size / cellWidth;
-  const offsetX = face ? FACE.x - FACE.span / 2 : 0;
-  const offsetY = face ? FACE.y - FACE.span / 2 : 0;
   const cell: Cell = look ?? {
     row: animation.row,
     column: animation.columns[frame] ?? 0,
   };
+  const scale = face ? size / FACE_SPAN : size / cellWidth;
+  const [faceX, faceY] = face ? faceCentre(cell.row, cell.column) : [0, 0];
+  const offsetX = face ? faceX - FACE_SPAN / 2 : 0;
+  const offsetY = face ? faceY - FACE_LIFT - FACE_SPAN / 2 : 0;
   return (
     <span
       ref={element}

@@ -8,7 +8,7 @@
   "roko.alt.failed": "Roko 遇到問題",
   "roko.alt.waiting": "Roko 在等你決定",
   "locked.title": "請從啟動程式開啟 Rocky",
-  "locked.body": "為了安全，Rocky 只接受從啟動程式開啟的瀏覽器分頁。請重新執行啟動程式（或 npm start），它會自動打開正確的網址。",
+  "locked.body": "為了安全，Rocky 只接受從啟動程式開啟的瀏覽器分頁。請重新執行啟動程式（或 npm start），它會自動打開正確的網址。",
   "lang.zh-TW": "繁體中文",
   "lang.en": "English",
   "onboarding.title": "選好模型就能開始。",

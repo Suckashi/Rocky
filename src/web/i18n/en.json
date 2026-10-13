@@ -8,7 +8,7 @@
   "roko.alt.failed": "Roko ran into a problem",
   "roko.alt.waiting": "Roko waiting for your decision",
   "locked.title": "Open Rocky from its launcher",
-  "locked.body": "For safety, Rocky only accepts browser tabs opened by its launcher. Run the launcher (or npm start) again and it will open the right address.",
+  "locked.body": "For safety, Rocky only accepts browser tabs opened by its launcher. Run the launcher (or npm start) again and it will open the right address.",
   "lang.zh-TW": "繁體中文",
   "lang.en": "English",
   "onboarding.title": "Pick a model and you're ready.",
