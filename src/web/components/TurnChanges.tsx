@@ -9,6 +9,32 @@ import { DocumentChange } from './DocumentPreview.tsx';
 
 type Item = { path: string; contentHash: string };
 
+/**
+ * The card's state, kept per thread and run outside the component. The card moves while a
+ * turn streams in (it sits after the turn's last message), and React mounts it afresh in
+ * its new place; without this an opened diff would close under the user's cursor.
+ */
+const remembered = new Map<string, Map<string, unknown>>();
+function useRemembered<T>(
+  card: string,
+  name: string,
+  initial: T,
+): [T, (value: T | ((old: T) => T)) => void] {
+  const store = remembered.get(card) ?? new Map<string, unknown>();
+  remembered.set(card, store);
+  const [value, setValue] = useState<T>(() =>
+    store.has(name) ? (store.get(name) as T) : initial,
+  );
+  const set = (next: T | ((old: T) => T)) =>
+    setValue((old) => {
+      const updated =
+        typeof next === 'function' ? (next as (old: T) => T)(old) : next;
+      store.set(name, updated);
+      return updated;
+    });
+  return [value, set];
+}
+
 export function TurnChanges({
   threadId,
   runId,
@@ -23,14 +49,27 @@ export function TurnChanges({
   onRestored: () => void;
 }) {
   const { t } = useI18n();
-  const [changes, setChanges] = useState<FileChange[] | null>(null);
-  const [view, setView] = useState<'closed' | 'diff' | 'confirm'>('closed');
-  const [message, setMessage] = useState('');
+  const key = `${threadId}/${runId}`;
+  const [changes, setChanges] = useRemembered<FileChange[] | null>(
+    key,
+    'changes',
+    null,
+  );
+  const [view, setView] = useRemembered<'closed' | 'diff' | 'confirm'>(
+    key,
+    'view',
+    'closed',
+  );
+  const [message, setMessage] = useRemembered(key, 'message', '');
   const [busy, setBusy] = useState(false);
   /** What undoes the last restore (written back the way the turn left the files). */
-  const [undo, setUndo] = useState<Item[] | null>(null);
+  const [undo, setUndo] = useRemembered<Item[] | null>(key, 'undo', null);
   /** Files restored from their own row, so the row says so. */
-  const [restoredPaths, setRestoredPaths] = useState<Set<string>>(new Set());
+  const [restoredPaths, setRestoredPaths] = useRemembered<Set<string>>(
+    key,
+    'restored',
+    new Set(),
+  );
   const card = useRef<HTMLDivElement>(null);
   // An opened diff or confirmation scrolls fully into view instead of under the input box.
   useEffect(() => {

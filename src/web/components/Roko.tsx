@@ -37,7 +37,7 @@ function faceCentre(row: number, column: number): [number, number] {
 /** How long Roko keeps looking after the pointer stops. */
 const LOOK_REST_MS = 2500;
 
-type Cell = { row: number; column: number };
+type Cell = { row: number; column: number; mirrored?: boolean };
 
 const rowImage = (row: number) => `/roko/rows/roko-row-${row}.webp`;
 
@@ -86,12 +86,18 @@ function useLook(
         // 0° is up, clockwise, as the manifest's look frames are laid out.
         const angle = ((Math.atan2(dx, -dy) * 180) / Math.PI + 360) % 360;
         const index = Math.round(angle / LOOK.stepDegrees) % LOOK.count;
-        const next = LOOK.frames[index];
+        // The left-facing renders do not match the right-facing ones (visor and shading
+        // differ), so Roko looks left with the right-facing frame, mirrored.
+        const half = LOOK.count / 2;
+        const mirrored = index > half;
+        const next = LOOK.frames[mirrored ? LOOK.count - index : index];
         if (next)
           setLook((current) =>
-            current?.row === next.row && current.column === next.column
+            current?.row === next.row &&
+            current.column === next.column &&
+            !!current.mirrored === mirrored
               ? current
-              : { row: next.row, column: next.column },
+              : { row: next.row, column: next.column, mirrored },
           );
       });
       clearTimeout(rest);
@@ -155,6 +161,8 @@ export function Roko({
         backgroundImage: `url(${rowImage(cell.row)})`,
         backgroundSize: `${columns * cellWidth * scale}px ${cellHeight * scale}px`,
         backgroundPosition: `${-(cell.column * cellWidth + offsetX) * scale}px ${-offsetY * scale}px`,
+        // Turns around its own axis; composes with any transform or scale on the element.
+        rotate: cell.mirrored ? 'y 180deg' : undefined,
       }}
     />
   );
