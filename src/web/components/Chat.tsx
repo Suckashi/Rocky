@@ -284,6 +284,35 @@ export function Chat({
     bottom.current?.scrollIntoView({ block: 'end' });
   }, [agent.messages.length, running, pending.length]);
 
+  // Stay at the newest line while it grows (a reply streaming in, a card appearing, the window
+  // getting narrower), as long as the user was already there; scrolling up lets go.
+  const transcript = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const view = transcript.current;
+    if (!view) return;
+    let stuck = true;
+    const onScroll = () => {
+      stuck = view.scrollHeight - view.scrollTop - view.clientHeight < 80;
+    };
+    const keep = () => {
+      if (stuck) view.scrollTo({ top: view.scrollHeight, behavior: 'instant' });
+    };
+    view.addEventListener('scroll', onScroll, { passive: true });
+    const resized = new ResizeObserver(keep);
+    resized.observe(view);
+    const changed = new MutationObserver(keep);
+    changed.observe(view, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+    return () => {
+      view.removeEventListener('scroll', onScroll);
+      resized.disconnect();
+      changed.disconnect();
+    };
+  }, []);
+
   const send = async () => {
     const text = draft.trim();
     if (!text || running) return;
@@ -414,7 +443,7 @@ export function Chat({
   return (
     <main className="chat">
       <h1 className="sr-only">{t('nav.chat')}</h1>
-      <div className="transcript" aria-live="polite">
+      <div ref={transcript} className="transcript" aria-live="polite">
         {loaded && !visible && (
           <div className={draft.trim() ? 'empty typing' : 'empty'}>
             <Roko state="idle" size={208} follow />
