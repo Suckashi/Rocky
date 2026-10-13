@@ -1,6 +1,7 @@
 // Model settings: provider preset, address, API key (write-only), model, connection test.
 // On the first-run page the form has no save button of its own: the page's one "start"
-// button saves it (`onReady` hands the page the save, or null while the form is incomplete).
+// button saves it. `onReady` hands the page the save and whether the form is complete; a save
+// of an incomplete form marks the missing fields and moves the cursor to the first one.
 import { useEffect, useRef, useState } from 'react';
 import {
   api,
@@ -30,7 +31,7 @@ export function ModelForm({
 }: {
   current: ModelSettings | null;
   onSaved: (settings: Settings) => void;
-  onReady?: (save: (() => Promise<boolean>) | null) => void;
+  onReady?: (form: { complete: boolean; save: () => Promise<boolean> }) => void;
 }) {
   const { t } = useI18n();
   const [provider, setProvider] = useState<Provider>(
@@ -93,11 +94,26 @@ export function ModelForm({
   };
 
   const complete = model.trim() !== '' && baseURL.trim() !== '';
-  const latest = useRef(save);
-  latest.current = save;
+  const [missing, setMissing] = useState(false);
+  const baseURLBox = useRef<HTMLInputElement>(null);
+  const modelBox = useRef<HTMLInputElement>(null);
+  const submit = async (): Promise<boolean> => {
+    if (!complete) {
+      setMissing(true);
+      (baseURL.trim() ? modelBox : baseURLBox).current?.focus();
+      return false;
+    }
+    return save();
+  };
+  const latest = useRef(submit);
+  latest.current = submit;
   useEffect(() => {
-    onReady?.(complete ? () => latest.current() : null);
+    onReady?.({ complete, save: () => latest.current() });
   }, [complete, onReady]);
+  const required = (value: string) =>
+    missing && !value.trim() ? (
+      <span className="bad small">{t('model.required')}</span>
+    ) : null;
 
   return (
     <div className="model-form">
@@ -123,8 +139,11 @@ export function ModelForm({
       <div className="fields">
         <label>
           {t('model.baseURL')}
+          {required(baseURL)}
           <input
+            ref={baseURLBox}
             className="mono"
+            aria-invalid={missing && !baseURL.trim() ? true : undefined}
             value={baseURL}
             onChange={(e) => setBaseURL(e.target.value)}
             spellCheck={false}
@@ -164,8 +183,11 @@ export function ModelForm({
         </div>
         <label>
           {t('model.model')}
+          {required(model)}
           <input
+            ref={modelBox}
             className="mono"
+            aria-invalid={missing && !model.trim() ? true : undefined}
             list="rocky-models"
             value={model}
             placeholder={t('model.model.placeholder')}

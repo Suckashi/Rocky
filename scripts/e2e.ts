@@ -190,6 +190,16 @@ try {
   await page.goto(url);
   await page.getByText('選好模型就能開始').waitFor();
   check(true, 'onboarding shows in Traditional Chinese by default');
+  // Starting with the model missing marks it and moves the cursor there; nothing is saved.
+  await page.getByRole('button', { name: '開始和 Roko 對話' }).click();
+  await page.getByText('（必填）').waitFor();
+  check(
+    (await page.evaluate(() =>
+      document.activeElement?.getAttribute('list'),
+    )) === 'rocky-models' &&
+      (await page.getByText('選好模型就能開始').count()) === 1,
+    'starting without a model marks the field and stays on the first-run page',
+  );
   await page.getByLabel('網址').fill(fake.baseURL);
   await page.getByRole('combobox', { name: '模型' }).fill('fake-model');
   // One action on the first-run page: starting saves the model.

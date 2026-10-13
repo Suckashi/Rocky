@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { Settings } from '../api.ts';
 import { LanguageSwitch } from '../components/LanguageSwitch.tsx';
 import { ModelForm } from '../components/ModelForm.tsx';
@@ -16,23 +16,30 @@ export function Onboarding({
   onDone: () => void;
 }) {
   const { t } = useI18n();
-  // One action: "start" saves the model form, then opens the conversation.
-  const [saveModel, setSaveModel] = useState<(() => Promise<boolean>) | null>(
+  // One action: "start" saves the model form, then opens the conversation. It can always be
+  // pressed; with something missing, the form marks it instead of the button going grey.
+  const form = useRef<{ complete: boolean; save: () => Promise<boolean> }>(
     null,
   );
+  const [complete, setComplete] = useState(false);
   const [starting, setStarting] = useState(false);
   const onReady = useCallback(
-    (save: (() => Promise<boolean>) | null) => setSaveModel(() => save),
+    (next: { complete: boolean; save: () => Promise<boolean> }) => {
+      form.current = next;
+      setComplete(next.complete);
+    },
     [],
   );
   const start = async () => {
-    if (!saveModel) return onDone();
+    // Nothing typed over a model that is already set: keep it.
+    if (!form.current || (!form.current.complete && settings.model))
+      return onDone();
     setStarting(true);
-    const saved = await saveModel();
+    const saved = await form.current.save();
     setStarting(false);
     if (saved) onDone();
   };
-  const ready = saveModel !== null || settings.model !== null;
+  const ready = complete || settings.model !== null;
   return (
     <div className="onboarding">
       <header className="topbar">
@@ -82,7 +89,7 @@ export function Onboarding({
             <button
               type="button"
               className="primary"
-              disabled={!ready || starting}
+              disabled={starting}
               onClick={() => void start()}
             >
               {t('onboarding.start')}

@@ -38,6 +38,7 @@
   "model.test.failed": "Could not connect: {error}",
   "model.save": "Save",
   "model.saved": "Saved",
+  "model.required": "(required)",
   "model.notConfigured": "No model yet. Pick one in Settings to start.",
   "nav.chat": "Chat",
   "nav.settings": "Settings",

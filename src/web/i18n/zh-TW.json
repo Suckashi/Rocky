@@ -38,6 +38,7 @@
   "model.test.failed": "連不上：{error}",
   "model.save": "儲存",
   "model.saved": "已儲存",
+  "model.required": "（必填）",
   "model.notConfigured": "還沒設定模型。到設定頁選一個模型就能開始。",
   "nav.chat": "對話",
   "nav.settings": "設定",

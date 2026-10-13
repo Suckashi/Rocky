@@ -68,7 +68,7 @@ export function ProjectForm({
           </span>
         ) : null}
         {dirty || !current ? (
-          <button type="submit" className="primary" disabled={!dirty}>
+          <button type="submit" className="secondary" disabled={!dirty}>
             {t('project.save')}
           </button>
         ) : (
