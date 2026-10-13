@@ -236,9 +236,10 @@ export function TurnChanges({
         >
           {t(view === 'diff' ? 'changes.hide' : 'changes.view')}
         </button>
+        {/* Undoing the whole turn is the rarer, heavier choice: a quiet link, and it asks first. */}
         <button
           type="button"
-          className="secondary danger"
+          className="link danger-link small"
           disabled={busy}
           onClick={() => void open('confirm')}
         >

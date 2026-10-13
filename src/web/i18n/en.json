@@ -59,7 +59,7 @@
   "chat.stop": "Stop this turn",
   "chat.empty": "What would you like to do? Just say it.",
   "chat.empty.project": "Roko reads, edits and runs commands in the “{name}” folder.",
-  "chat.empty.noProject": "Choose a project folder so Roko can read and edit files →",
+  "chat.empty.noProject": "Choose a project folder so Roko can read and edit files",
   "chat.copy": "Copy",
   "chat.copied": "Copied",
   "chat.starter.explain": "Explain how this project is organized",

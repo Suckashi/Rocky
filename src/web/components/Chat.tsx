@@ -401,9 +401,10 @@ export function Chat({
             ) : (
               <button
                 type="button"
-                className="link empty-note"
+                className="primary choose-folder"
                 onClick={onOpenSettings}
               >
+                <FolderOpen size={15} aria-hidden="true" />
                 {t('chat.empty.noProject')}
               </button>
             )}

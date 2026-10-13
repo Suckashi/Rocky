@@ -59,7 +59,7 @@
   "chat.stop": "停止這一輪",
   "chat.empty": "有什麼想做的？直接說就好。",
   "chat.empty.project": "Roko 會在「{name}」資料夾裡讀檔、改檔、跑指令。",
-  "chat.empty.noProject": "先選一個專案資料夾，Roko 才能讀檔和改檔 →",
+  "chat.empty.noProject": "選一個專案資料夾，Roko 就能開始讀檔和改檔",
   "chat.copy": "複製",
   "chat.copied": "已複製",
   "chat.starter.explain": "說明這個專案的結構",

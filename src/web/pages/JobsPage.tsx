@@ -566,11 +566,13 @@ export function JobsPage({
             {!list.available && (
               <div className="install">
                 <span>{t('jobs.install')}</span>
-                <CodeBlock inline>{t('jobs.installCommand')}</CodeBlock>
-                <button type="button" className="secondary" onClick={load}>
-                  <RotateCw size={15} aria-hidden="true" />
-                  {t('locked.retry')}
-                </button>
+                <div className="row">
+                  <CodeBlock inline>{t('jobs.installCommand')}</CodeBlock>
+                  <button type="button" className="secondary" onClick={load}>
+                    <RotateCw size={15} aria-hidden="true" />
+                    {t('locked.retry')}
+                  </button>
+                </div>
               </div>
             )}
           </div>

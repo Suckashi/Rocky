@@ -1165,12 +1165,29 @@ body:has(.centered) {
     opacity var(--dur) var(--ease-out);
 }
 .chat .empty.typing > .roko {
-  transform: translateY(56px) scale(0.92);
+  transform: translateY(132px) scale(0.86);
+}
+/* The suggestions are for an empty box: once there are words they fold away. */
+.chat .empty > .starters,
+.chat .empty > .choose-folder {
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out),
+    visibility 0s;
+}
+.chat .empty.typing > .starters {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out),
+    visibility 0s var(--dur);
 }
 .chat .empty.typing > p,
 .chat .empty.typing > .empty-note,
-.chat .empty.typing > .starters {
-  transform: translateY(40px) scale(0.94);
+.chat .empty.typing > .choose-folder {
+  transform: translateY(120px);
 }
 @media (prefers-reduced-motion: reduce) {
   .chat .empty.typing > * {
@@ -1821,7 +1838,8 @@ button.chip:hover {
 .install {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  text-align: left;
   gap: var(--space-2);
   margin-top: var(--space-2);
   padding: var(--space-3) var(--space-4);
@@ -2086,6 +2104,14 @@ button.tool-toggle {
 }
 .turn-changes > .row:first-child {
   font-weight: 600;
+}
+button.link.danger-link {
+  color: var(--bad);
+  font-weight: 500;
+  padding: 0 var(--space-1);
+}
+.chat .empty > .choose-folder {
+  margin-top: var(--space-1);
 }
 .changed-files {
   list-style: none;
@@ -2803,7 +2829,7 @@ button.small-button,
   }
   .turn-changes > .row:first-child {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr auto;
   }
   .turn-changes > .row:first-child > span:first-child {
     grid-column: 1 / -1;
