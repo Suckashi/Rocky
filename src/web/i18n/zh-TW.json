@@ -88,7 +88,7 @@
   "project.hint": "Roko 只在這個資料夾裡讀檔、改檔、跑指令。請貼上完整路徑，例如 D:\\Code\\my-app。",
   "project.placeholder": "資料夾的完整路徑",
   "project.save": "使用這個資料夾",
-  "project.inUse": "使用中",
+  "project.inUse": "已設定",
   "project.saved": "已設定",
   "project.none": "還沒選專案資料夾",
   "project.error.invalid-project": "請輸入完整路徑（例如 D:\\Code\\my-app）。",

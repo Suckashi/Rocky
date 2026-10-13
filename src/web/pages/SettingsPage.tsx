@@ -66,6 +66,11 @@ export function SettingsPage({
       ),
     },
     {
+      id: 'settings-model',
+      title: 'settings.model',
+      body: <ModelForm current={settings.model} onSaved={onChange} />,
+    },
+    {
       id: 'settings-project',
       title: 'settings.project',
       body: <ProjectForm current={settings.project} onSaved={onChange} />,
@@ -91,11 +96,6 @@ export function SettingsPage({
     { id: 'settings-memory', title: 'settings.memory', body: <MemoryList /> },
     { id: 'settings-skills', title: 'settings.skills', body: <SkillList /> },
     { id: 'settings-mcp', title: 'settings.mcp', body: <McpSettings /> },
-    {
-      id: 'settings-model',
-      title: 'settings.model',
-      body: <ModelForm current={settings.model} onSaved={onChange} />,
-    },
   ];
   const current = useCurrentSection(sections.map((s) => s.id));
   return (

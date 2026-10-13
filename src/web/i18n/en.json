@@ -88,7 +88,7 @@
   "project.hint": "Roko reads, edits and runs commands only inside this folder. Paste its full path, for example D:\\Code\\my-app.",
   "project.placeholder": "Full path of the folder",
   "project.save": "Use this folder",
-  "project.inUse": "In use",
+  "project.inUse": "Set",
   "project.saved": "Set",
   "project.none": "No project folder yet",
   "project.error.invalid-project": "Enter a full path (for example D:\\Code\\my-app).",

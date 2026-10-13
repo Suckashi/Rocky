@@ -1466,10 +1466,12 @@ body:has(.centered) {
   flex: none;
 }
 .mode-select {
-  border-color: var(--border);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background-color: var(--primary-soft);
+  font-weight: 500;
   border-radius: var(--radius-full);
   background: var(--surface-muted);
-  color: var(--text-muted);
+  color: var(--text);
   padding: 4px 26px 4px var(--space-3);
   font-size: 13px;
   min-height: 30px;
@@ -2037,14 +2039,16 @@ button.tool-toggle {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-left: 4px solid var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, var(--border-strong));
   border-radius: var(--radius-lg);
   background: var(--surface);
   padding: var(--space-4) var(--space-5);
   max-height: 60vh;
   overflow: auto;
-  box-shadow: var(--shadow-lg);
+  box-shadow:
+    inset 0 2px 0 var(--accent),
+    0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent),
+    var(--shadow-lg);
   animation: pop var(--dur-slow) var(--ease-out) both;
 }
 .approval:focus {
