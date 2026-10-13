@@ -197,7 +197,18 @@ try {
   await page.getByText('選好模型就能開始').waitFor({ state: 'detached' });
 
   const box = page.getByRole('textbox');
+  await page.locator('.empty .roko').waitFor();
   await box.fill('你好，請自我介紹');
+  // Roko reads along: typing turns its gaze (the look rows) towards the words.
+  await page.waitForFunction(
+    () =>
+      [...document.querySelectorAll<HTMLElement>('.roko')].some((roko) =>
+        /roko-row-(9|10)\./.test(roko.style.backgroundImage),
+      ),
+    undefined,
+    { timeout: 5_000 },
+  );
+  check(true, 'Roko looks towards the words while the user types');
   await page.keyboard.press('Enter');
   await page.getByText('測試回覆').waitFor({ timeout: 20_000 });
   check(true, 'a Chinese message gets a streamed reply rendered as Markdown');

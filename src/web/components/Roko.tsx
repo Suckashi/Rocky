@@ -61,7 +61,30 @@ function prefersReducedMotion(): boolean {
   );
 }
 
-/** The look frame pointing from Roko towards a mouse or pen, until it rests. */
+/** Where the caret sits in a text box, roughly: the end of the text before it on its line. */
+let measure: CanvasRenderingContext2D | null | undefined;
+function caretPoint(
+  box: HTMLTextAreaElement | HTMLInputElement,
+): [number, number] {
+  const rect = box.getBoundingClientRect();
+  const style = getComputedStyle(box);
+  measure ??= document.createElement('canvas').getContext('2d');
+  const before = box.value.slice(0, box.selectionStart ?? box.value.length);
+  const line = before.slice(before.lastIndexOf('\n') + 1);
+  let width = line.length * parseFloat(style.fontSize);
+  if (measure) {
+    measure.font = style.font;
+    width = measure.measureText(line).width;
+  }
+  const left = rect.left + parseFloat(style.paddingLeft);
+  return [
+    Math.min(left + width, rect.right),
+    rect.top + Math.min(rect.height / 2, 24),
+  ];
+}
+
+/** The look frame pointing from Roko towards a mouse or pen, or towards the words being
+ *  typed (Roko reads along), until it rests. */
 function useLook(
   enabled: boolean,
   target: RefObject<HTMLElement | null>,
@@ -72,14 +95,13 @@ function useLook(
     if (!enabled) return;
     let frame = 0;
     let rest: ReturnType<typeof setTimeout> | undefined;
-    const onMove = (event: PointerEvent) => {
-      if (event.pointerType === 'touch') return;
+    const aim = (x: number, y: number) => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const box = target.current?.getBoundingClientRect();
         if (!box) return;
-        const dx = event.clientX - (box.left + box.width / 2);
-        const dy = event.clientY - (box.top + box.height / 2);
+        const dx = x - (box.left + box.width / 2);
+        const dy = y - (box.top + box.height / 2);
         // Over Roko itself there is no direction to look in.
         if (Math.hypot(dx, dy) < box.width * 0.35) {
           setLook(undefined);
@@ -105,9 +127,22 @@ function useLook(
       clearTimeout(rest);
       rest = setTimeout(() => setLook(undefined), LOOK_REST_MS);
     };
+    const onMove = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch') aim(event.clientX, event.clientY);
+    };
+    const onInput = (event: Event) => {
+      const box = event.target;
+      if (
+        box instanceof HTMLTextAreaElement ||
+        (box instanceof HTMLInputElement && box.type === 'text')
+      )
+        aim(...caretPoint(box));
+    };
     window.addEventListener('pointermove', onMove, { passive: true });
+    window.addEventListener('input', onInput, { passive: true });
     return () => {
       window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('input', onInput);
       cancelAnimationFrame(frame);
       clearTimeout(rest);
     };
