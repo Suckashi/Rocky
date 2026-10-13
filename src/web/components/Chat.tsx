@@ -465,20 +465,23 @@ export function Chat({
                 {t('chat.empty.noProject')}
               </button>
             )}
-            <div className="starters">
-              {STARTERS.map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => {
-                    setDraft(t(key));
-                    input.current?.focus();
-                  }}
-                >
-                  {t(key)}
-                </button>
-              ))}
-            </div>
+            {/* The suggestions are about a project, so they wait until there is one. */}
+            {project && (
+              <div className="starters">
+                {STARTERS.map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      setDraft(t(key));
+                      input.current?.focus();
+                    }}
+                  >
+                    {t(key)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
         {messages.map((message, index) => {

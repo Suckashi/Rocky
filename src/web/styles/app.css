@@ -715,8 +715,14 @@ body:has(.centered) {
 }
 .provider-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
+}
+/* Too narrow for three side by side: one list, never two cards and an orphan. */
+@media (max-width: 480px) {
+  .provider-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .provider {
   text-align: left;
@@ -830,7 +836,8 @@ body:has(.centered) {
     background: var(--bg);
     border-bottom: 1px solid var(--border);
     scrollbar-width: none;
-    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    /* A wide fade at the end says the strip goes on. */
+    mask-image: linear-gradient(to right, #000 calc(100% - 64px), transparent);
   }
   .settings-nav a {
     flex: none;

@@ -18,9 +18,12 @@ const REPLY = '你好！我是 Rocky。這是**測試回覆**。';
 const port = 4390 + Math.floor(Math.random() * 9);
 const root = join(import.meta.dirname, '..');
 
+/** The last step that passed, so an error caught later says roughly when it happened. */
+let lastStep = 'start';
 function check(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(`e2e failed: ${message}`);
   console.log(`ok - ${message}`);
+  lastStep = message;
 }
 
 // Asked to change something, the model edits /AGENTS.md (protected, so it asks in the default
@@ -176,7 +179,9 @@ try {
   const errors: string[] = [];
   /** Errors a step causes on purpose (a refused run, a request cut off by a reload). */
   let expected: RegExp | undefined;
-  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('pageerror', (error) =>
+    errors.push(`${error.message} (after: ${lastStep})`),
+  );
   page.on('console', (message) => {
     // The browser logs every 4xx; these are the answers to what this test sends on purpose.
     if (
@@ -184,7 +189,7 @@ try {
       !/status of (400|413)/.test(message.text()) &&
       !expected?.test(message.text())
     )
-      errors.push(message.text());
+      errors.push(`${message.text()} (after: ${lastStep})`);
   });
 
   await page.goto(url);
