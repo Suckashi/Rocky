@@ -180,11 +180,11 @@ try {
     });
   await page.getByLabel('網址').fill(fake.baseURL);
   await page.getByRole('combobox', { name: '模型' }).fill('fake-model');
-  await page.getByRole('button', { name: '儲存' }).first().click();
   await page.getByLabel('專案資料夾').fill(project);
   await page.getByRole('button', { name: '使用這個資料夾' }).click();
   await page.getByText('已設定').waitFor();
   await page.getByRole('button', { name: '開始和 Roko 對話' }).click();
+  await page.getByText('選好模型就能開始').waitFor({ state: 'detached' });
 
   await page.getByRole('textbox').fill('請交給 OpenCode 修好 add');
   await page.keyboard.press('Enter');

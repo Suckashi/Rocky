@@ -192,9 +192,9 @@ try {
   check(true, 'onboarding shows in Traditional Chinese by default');
   await page.getByLabel('網址').fill(fake.baseURL);
   await page.getByRole('combobox', { name: '模型' }).fill('fake-model');
-  await page.getByRole('button', { name: '儲存' }).click();
-  await page.getByText('已儲存').waitFor();
+  // One action on the first-run page: starting saves the model.
   await page.getByRole('button', { name: '開始和 Roko 對話' }).click();
+  await page.getByText('選好模型就能開始').waitFor({ state: 'detached' });
 
   const box = page.getByRole('textbox');
   await box.fill('你好，請自我介紹');

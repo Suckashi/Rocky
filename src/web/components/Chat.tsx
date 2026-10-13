@@ -375,7 +375,7 @@ export function Chat({
       <div className="transcript" aria-live="polite">
         {loaded && !visible && (
           <div className="empty">
-            <Roko state="waving" size={176} follow />
+            <Roko state="idle" size={176} follow />
             <p>{t('chat.empty')}</p>
             <div className="starters">
               {STARTERS.map((key) => (

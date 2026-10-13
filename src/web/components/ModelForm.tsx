@@ -1,5 +1,7 @@
 // Model settings: provider preset, address, API key (write-only), model, connection test.
-import { useState } from 'react';
+// On the first-run page the form has no save button of its own: the page's one "start"
+// button saves it (`onReady` hands the page the save, or null while the form is incomplete).
+import { useEffect, useRef, useState } from 'react';
 import {
   api,
   type ModelSettings,
@@ -24,9 +26,11 @@ type Test =
 export function ModelForm({
   current,
   onSaved,
+  onReady,
 }: {
   current: ModelSettings | null;
   onSaved: (settings: Settings) => void;
+  onReady?: (save: (() => Promise<boolean>) | null) => void;
 }) {
   const { t } = useI18n();
   const [provider, setProvider] = useState<Provider>(
@@ -69,7 +73,7 @@ export function ModelForm({
     }
   };
 
-  const save = async () => {
+  const save = async (): Promise<boolean> => {
     setError('');
     try {
       const settings = await api<Settings>('/settings/model', 'PUT', {
@@ -81,10 +85,19 @@ export function ModelForm({
       setSaved(true);
       setApiKey('');
       onSaved(settings);
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : '');
+      return false;
     }
   };
+
+  const complete = model.trim() !== '' && baseURL.trim() !== '';
+  const latest = useRef(save);
+  latest.current = save;
+  useEffect(() => {
+    onReady?.(complete ? () => latest.current() : null);
+  }, [complete, onReady]);
 
   return (
     <div className="model-form">
@@ -164,18 +177,22 @@ export function ModelForm({
               test.models.map((m) => <option key={m} value={m} />)}
           </datalist>
         </label>
-        <div className="row">
-          <button
-            type="button"
-            className="primary"
-            disabled={!model.trim() || !baseURL.trim()}
-            onClick={() => void save()}
-          >
-            {t('model.save')}
-          </button>
-          {saved && <span className="ok">{t('model.saved')}</span>}
-          {error && <span className="bad">{error}</span>}
-        </div>
+        {onReady ? (
+          error && <p className="bad">{error}</p>
+        ) : (
+          <div className="row">
+            <button
+              type="button"
+              className="primary"
+              disabled={!complete}
+              onClick={() => void save()}
+            >
+              {t('model.save')}
+            </button>
+            {saved && <span className="ok">{t('model.saved')}</span>}
+            {error && <span className="bad">{error}</span>}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react';
 import type { Settings } from '../api.ts';
 import { LanguageSwitch } from '../components/LanguageSwitch.tsx';
 import { ModelForm } from '../components/ModelForm.tsx';
@@ -15,6 +16,23 @@ export function Onboarding({
   onDone: () => void;
 }) {
   const { t } = useI18n();
+  // One action: "start" saves the model form, then opens the conversation.
+  const [saveModel, setSaveModel] = useState<(() => Promise<boolean>) | null>(
+    null,
+  );
+  const [starting, setStarting] = useState(false);
+  const onReady = useCallback(
+    (save: (() => Promise<boolean>) | null) => setSaveModel(() => save),
+    [],
+  );
+  const start = async () => {
+    if (!saveModel) return onDone();
+    setStarting(true);
+    const saved = await saveModel();
+    setStarting(false);
+    if (saved) onDone();
+  };
+  const ready = saveModel !== null || settings.model !== null;
   return (
     <div className="onboarding">
       <header className="topbar">
@@ -44,14 +62,18 @@ export function Onboarding({
             <span className="step">1</span>
             {t('onboarding.step1')}
           </h2>
-          <ModelForm current={settings.model} onSaved={onChange} />
+          <ModelForm
+            current={settings.model}
+            onSaved={onChange}
+            onReady={onReady}
+          />
           <h2>
             <span className="step">2</span>
             {t('onboarding.step2')}
           </h2>
           <ProjectForm current={settings.project} onSaved={onChange} />
           <div className="row end">
-            {!settings.model && (
+            {!ready && (
               <span className="small muted">{t('onboarding.needModel')}</span>
             )}
             <button type="button" className="secondary" onClick={onDone}>
@@ -60,8 +82,8 @@ export function Onboarding({
             <button
               type="button"
               className="primary"
-              disabled={!settings.model}
-              onClick={onDone}
+              disabled={!ready || starting}
+              onClick={() => void start()}
             >
               {t('onboarding.start')}
             </button>
