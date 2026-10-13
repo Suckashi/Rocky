@@ -182,14 +182,22 @@ a.button.primary:active {
   background: var(--primary-press);
   transform: translateY(1px);
 }
-/* Disabled is neutral in both themes: no brand colour, readable text, and a dashed
-   outline on no fill, so it is never mistaken for a live (solid) button. */
+/* Disabled keeps the button's own kind, faded: the main action stays amber (so it still
+   reads as the main action, just not yet), the others a flat sunken fill. The page says
+   in words what is missing. */
 button.primary:disabled,
-button.secondary:disabled,
 button.icon-button.primary:disabled {
-  background: transparent;
+  background: var(--primary);
+  color: var(--primary-text);
+  border: 1px solid transparent;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+button.secondary:disabled {
+  background: var(--surface-sunken);
   color: var(--text-subtle);
-  border: 1px dashed var(--border-strong);
+  border: 1px solid var(--border);
   box-shadow: none;
   cursor: not-allowed;
   opacity: 1;
