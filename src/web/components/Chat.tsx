@@ -185,31 +185,27 @@ export function Chat({
   const composerBox = useRef<HTMLFormElement>(null);
   const typing = draft.trim() !== '';
   const [walking, setWalking] = useState<RokoState | null>(null);
-  const walkedOut = useRef(false);
-  // While the first message is typed, Roko walks from the middle of the page down to the
-  // input box, at the size it has there during the conversation; back when the box is
-  // emptied. The way there is measured, so it lands in the same place at any window size.
+  // While the first message is typed, Roko walks from the middle of the page onto the input
+  // box, at the size it has there during the conversation; emptied, it is home again. The
+  // way there is measured, so it lands in the same place at any window size.
   useLayoutEffect(() => {
     const view = emptyView.current;
     const roko = view?.querySelector<HTMLElement>(':scope > .roko');
     const form = composerBox.current;
     if (!view || !roko || !form) return;
     if (!typing) {
-      if (!walkedOut.current || prefersReducedMotion()) return;
-      walkedOut.current = false;
-      const back = view.style.getPropertyValue('--dock-x').startsWith('-');
-      setWalking(back ? 'walkingRight' : 'walkingLeft');
-      const home = setTimeout(() => setWalking(null), 900);
-      return () => clearTimeout(home);
+      setWalking(null);
+      return;
     }
-    walkedOut.current = true;
     const from = roko.getBoundingClientRect();
     const to = form.getBoundingClientRect();
     const phone = window.matchMedia('(max-width: 600px)').matches;
     const size = phone ? 66 : 88;
-    const dx = to.left + (phone ? 18 : 34) - from.left;
-    // Feet just above the conversation's bottom fade (the conversation area clips there).
-    const dy = to.top - 22 - from.bottom;
+    // Measured between bottom centres (the point Roko scales about).
+    const dx =
+      to.left + (phone ? 18 : 34) + size / 2 - (from.left + from.width / 2);
+    // Feet on the input box's top edge, where it sits during the conversation.
+    const dy = to.top + 12 - from.bottom;
     view.style.setProperty('--dock-x', `${dx}px`);
     view.style.setProperty('--dock-y', `${dy}px`);
     view.style.setProperty('--dock-scale', String(size / from.width));
