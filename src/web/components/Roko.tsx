@@ -20,14 +20,16 @@ export type RokoState =
 const ROW: Record<RokoState, keyof typeof manifest.animations> = {
   idle: 'idle',
   waving: 'waving',
-  running: 'running',
+  // At work: Roko holds a glowing slate (row 11, from the owner's 2026-10 poses).
+  running: 'working',
   failed: 'failed',
-  waiting: 'waiting',
+  // Waiting on the user: a raised hand and an exclamation (row 11).
+  waiting: 'raise-hand',
   done: 'jumping',
   // Nothing to do yet: Roko dozes (the sheet's "review" row, eyes half closed).
   resting: 'review',
-  // Looking through files: the same row, eyes on the work.
-  reading: 'review',
+  // Looking through files: Roko reads a book (row 11).
+  reading: 'reading-book',
   // On its way somewhere (to the input box, and back).
   walkingLeft: 'running-left',
   walkingRight: 'running-right',

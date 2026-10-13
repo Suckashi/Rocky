@@ -20,15 +20,15 @@
   "image": {
     "file": "roko-spritesheet.png",
     "width": 1536,
-    "height": 2288,
+    "height": 2496,
     "format": "PNG",
     "colorMode": "RGBA",
-    "sizeBytes": 3057640,
-    "sha256": "0d47eb7f7495849818b8285fee2df7722ba76a8e8f22145cb147817516cf0ef3"
+    "sizeBytes": 3281501,
+    "sha256": "aaf6eefd3ed91107af056c5ed9babf4cc4eb5c86d2785596a8b5d75ede48cdf5"
   },
   "grid": {
     "columns": 8,
-    "rows": 11,
+    "rows": 12,
     "cellWidth": 192,
     "cellHeight": 208,
     "indices": "zero-based",
@@ -72,6 +72,22 @@
     "review": {
       "row": 8,
       "columns": [0, 1, 2, 3, 4, 5]
+    },
+    "reading-book": {
+      "row": 11,
+      "columns": [0]
+    },
+    "working": {
+      "row": 11,
+      "columns": [1]
+    },
+    "raise-hand": {
+      "row": 11,
+      "columns": [2]
+    },
+    "sitting": {
+      "row": 11,
+      "columns": [3]
     }
   },
   "lookDirections": {

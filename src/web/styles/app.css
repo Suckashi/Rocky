@@ -1699,9 +1699,8 @@ body:has(.centered) {
     translate: 0 -3px;
   }
 }
-/* Waiting on you: Roko leans towards the question, its eyes glowing at a faster beat. */
+/* Waiting on you: the raised-hand pose, its eyes glowing at a faster beat. */
 .stage.waiting .roko {
-  rotate: 4deg;
   animation:
     perch var(--dur-slow) var(--ease-spring) both,
     glow 1.2s ease-in-out infinite;
