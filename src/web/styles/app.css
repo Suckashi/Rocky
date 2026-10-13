@@ -2142,11 +2142,6 @@ button.tool-toggle {
 .turn-changes > .row:first-child {
   font-weight: 600;
 }
-button.link.danger-link {
-  color: var(--bad);
-  font-weight: 500;
-  padding: 0 var(--space-1);
-}
 .chat .empty > .choose-folder {
   margin-top: var(--space-1);
 }
