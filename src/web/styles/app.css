@@ -1153,15 +1153,6 @@ body:has(.centered) {
   border-radius: 50%;
   background: radial-gradient(closest-side, var(--bg-glow), transparent);
 }
-/* While the first message is typed, the page leans in: Roko steps towards the input box
-   (and reads along); the rest steps back, scaled down but at full contrast. */
-.chat .empty > p,
-.chat .empty > .empty-note,
-.chat .empty > .starters {
-  transition:
-    transform var(--dur-slow) var(--ease-out),
-    opacity var(--dur) var(--ease-out);
-}
 /* A new conversation has nothing to scroll: no clipping or fade, so Roko can walk all the
    way onto the input box. */
 .transcript:has(> .empty) {
@@ -1182,6 +1173,23 @@ body:has(.centered) {
     opacity: 0;
   }
 }
+/* The page's entrance animation leaves .empty its own layer; while Roko perches on the input
+   box that layer has to sit above the box. */
+.chat .empty.typing {
+  position: relative;
+  z-index: 3;
+}
+/* The words come along: headline and folder button move down with Roko, at its pace. */
+.chat .empty > p,
+.chat .empty > .empty-note,
+.chat .empty > .choose-folder {
+  transition: transform 900ms cubic-bezier(0.45, 0, 0.55, 1);
+}
+.chat .empty.typing > p,
+.chat .empty.typing > .empty-note,
+.chat .empty.typing > .choose-folder {
+  transform: translateY(var(--copy-y, 120px));
+}
 .chat .empty.typing > .roko {
   /* A walk: an even pace, easing in and out at the ends. */
   transition: transform 900ms cubic-bezier(0.45, 0, 0.55, 1);
@@ -1193,8 +1201,7 @@ body:has(.centered) {
   opacity: 0;
 }
 /* The suggestions are for an empty box: once there are words they fold away. */
-.chat .empty > .starters,
-.chat .empty > .choose-folder {
+.chat .empty > .starters {
   transition:
     opacity var(--dur) var(--ease-out),
     transform var(--dur-slow) var(--ease-out),
