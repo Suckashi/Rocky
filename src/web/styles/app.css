@@ -211,11 +211,20 @@ button.secondary.danger:hover:not(:disabled) {
   background: var(--bad-soft);
   border-color: color-mix(in srgb, var(--bad) 40%, transparent);
 }
+/* Stopping the turn is a way out, not one of the answers: a quiet text button. */
 button.secondary.stop {
   min-height: 32px;
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-2);
   gap: 6px;
   font-size: 13px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+}
+button.secondary.stop:hover {
+  background: var(--bad-soft);
+  color: var(--bad);
 }
 button.secondary:active:not(:disabled) {
   transform: translateY(1px);
@@ -1117,7 +1126,7 @@ body:has(.centered) {
   mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent);
   overflow-y: auto;
   /* Room at the end for the fade and the top of Roko's head, so the last card ends clear. */
-  padding: var(--space-6) var(--space-5) 72px;
+  padding: var(--space-6) var(--space-5) 44px;
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -1144,6 +1153,29 @@ body:has(.centered) {
   inset: -30% -60% -10%;
   border-radius: 50%;
   background: radial-gradient(closest-side, var(--bg-glow), transparent);
+}
+/* While the first message is typed, the page leans in: Roko steps towards the input box
+   (and reads along); the rest steps back, scaled down but at full contrast. */
+.chat .empty > .roko,
+.chat .empty > p,
+.chat .empty > .empty-note,
+.chat .empty > .starters {
+  transition:
+    transform var(--dur-slow) var(--ease-out),
+    opacity var(--dur) var(--ease-out);
+}
+.chat .empty.typing > .roko {
+  transform: translateY(56px) scale(0.92);
+}
+.chat .empty.typing > p,
+.chat .empty.typing > .empty-note,
+.chat .empty.typing > .starters {
+  transform: translateY(40px) scale(0.94);
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat .empty.typing > * {
+    transform: none;
+  }
 }
 .chat .empty > .empty-note {
   margin-top: calc(-1 * var(--space-1));

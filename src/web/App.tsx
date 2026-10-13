@@ -262,6 +262,7 @@ function Shell({
           selected={jobId}
           project={settings.project}
           autoApply={applyJob}
+          onOpenChat={() => setView('chat')}
           onSelect={(id) => {
             setApplyJob(false);
             setJobId(id);

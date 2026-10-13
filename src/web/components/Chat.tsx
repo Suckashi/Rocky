@@ -388,7 +388,7 @@ export function Chat({
       <h1 className="sr-only">{t('nav.chat')}</h1>
       <div className="transcript" aria-live="polite">
         {loaded && !visible && (
-          <div className="empty">
+          <div className={draft.trim() ? 'empty typing' : 'empty'}>
             <Roko state="idle" size={208} follow />
             <p>{t('chat.empty')}</p>
             {/* Where Roko will work, so the first message has a place to start from. */}

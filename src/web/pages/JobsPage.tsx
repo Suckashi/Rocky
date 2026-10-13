@@ -12,7 +12,7 @@ import {
 } from '../api.ts';
 import { ApprovalPanel, type Answer } from '../components/ApprovalPanel.tsx';
 import { Diff } from '../components/Diff.tsx';
-import { Info } from 'lucide-react';
+import { Info, RotateCw } from 'lucide-react';
 import { CodeBlock } from '../components/CodeBlock.tsx';
 import { Roko } from '../components/Roko.tsx';
 import { TurnChanges } from '../components/TurnChanges.tsx';
@@ -481,11 +481,14 @@ export function JobsPage({
   project,
   autoApply = false,
   onSelect,
+  onOpenChat,
 }: {
   selected: string | undefined;
   project: string | null;
   autoApply?: boolean;
   onSelect: (id: string) => void;
+  /** The way out of an empty list: jobs start in a conversation. */
+  onOpenChat?: () => void;
 }) {
   const { t } = useI18n();
   const [list, setList] = useState<{ available: boolean; jobs: Job[] } | null>(
@@ -555,10 +558,19 @@ export function JobsPage({
             <Roko state="resting" size={160} />
             <p>{t('jobs.none')}</p>
             <span className="empty-note">{t('jobs.empty')}</span>
+            {onOpenChat && list.available && (
+              <button type="button" className="primary" onClick={onOpenChat}>
+                {t('jobs.toChat')}
+              </button>
+            )}
             {!list.available && (
               <div className="install">
                 <span>{t('jobs.install')}</span>
                 <CodeBlock inline>{t('jobs.installCommand')}</CodeBlock>
+                <button type="button" className="secondary" onClick={load}>
+                  <RotateCw size={15} aria-hidden="true" />
+                  {t('locked.retry')}
+                </button>
               </div>
             )}
           </div>
