@@ -157,6 +157,7 @@
   "tool.task": "交給子 agent",
   "tool.other": "工具 {name}",
   "tool.summary": "{label}：{target}",
+  "tool.elapsed": "{what} · {seconds} 秒",
   "tool.running": "進行中",
   "tool.done": "完成",
   "tool.interrupted": "已中斷",

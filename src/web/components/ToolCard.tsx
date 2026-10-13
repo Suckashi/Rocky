@@ -68,7 +68,17 @@ export function toolSummary(
   const label = KNOWN.has(name)
     ? t(`tool.${name}` as MessageKey)
     : t('tool.other', { name });
-  const what = target(parsed);
+  // A command by its program's name, not its full path; a long line is cut short.
+  const argv = Array.isArray(parsed['argv'])
+    ? parsed['argv'].map(String)
+    : null;
+  const full = argv
+    ? commandLine([
+        (argv[0] ?? '').split(/[\\/]/).pop() ?? '',
+        ...argv.slice(1),
+      ])
+    : target(parsed);
+  const what = full.length > 48 ? `${full.slice(0, 47)}…` : full;
   return what ? t('tool.summary', { label, target: what }) : label;
 }
 

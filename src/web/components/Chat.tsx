@@ -110,6 +110,21 @@ const shortHint = {
   read: () => window.matchMedia?.(SHORT_HINT).matches ?? false,
 };
 
+/** Seconds since `key` was first seen (0 when there is none); ticks once a second. */
+function useElapsed(key: string | undefined): number {
+  const [since, setSince] = useState<{ key: string; at: number } | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!key) return;
+    setSince((old) => (old?.key === key ? old : { key, at: Date.now() }));
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [key]);
+  return key && since?.key === key
+    ? Math.max(0, Math.floor((now - since.at) / 1000))
+    : 0;
+}
+
 /** Ways to begin a conversation; a click puts the words in the input box, never sends them. */
 const STARTERS = [
   'chat.starter.explain',
@@ -380,6 +395,7 @@ export function Chat({
       : undefined;
   const pose: RokoState =
     doing && LOOKING.has(doing.function.name) ? 'reading' : roko;
+  const seconds = useElapsed(doing?.id);
 
   // Each run's change card goes at the end of the turn that holds its last tool call.
   const { at: cardsAt, unanchored } = placeChangeCards(
@@ -543,7 +559,7 @@ export function Chat({
             {error}
           </p>
         )}
-        <div ref={bottom} />
+        <div ref={bottom} className="transcript-end" />
       </div>
       {visible && (
         // Roko sits on the input box's top edge: its pose and the chip beside it say what it
@@ -553,7 +569,20 @@ export function Chat({
           <span className="stage-chip">
             <span className="stage-text">
               {doing
-                ? toolSummary(doing.function.name, doing.function.arguments, t)
+                ? seconds >= 3
+                  ? t('tool.elapsed', {
+                      what: toolSummary(
+                        doing.function.name,
+                        doing.function.arguments,
+                        t,
+                      ),
+                      seconds,
+                    })
+                  : toolSummary(
+                      doing.function.name,
+                      doing.function.arguments,
+                      t,
+                    )
                 : t(
                     roko === 'waiting'
                       ? 'panel.waiting'

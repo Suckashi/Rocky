@@ -1251,6 +1251,11 @@ body:has(.centered) {
 .transcript > :first-child:not(.empty) {
   margin-top: auto;
 }
+/* The newest line is scrolled to this marker, which keeps it clear of the fade and of Roko. */
+.transcript-end {
+  flex: none;
+  scroll-margin-bottom: 44px;
+}
 .turn-part {
   display: flex;
   flex-direction: column;

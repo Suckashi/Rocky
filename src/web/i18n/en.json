@@ -157,6 +157,7 @@
   "tool.task": "Hand off to a subagent",
   "tool.other": "Tool {name}",
   "tool.summary": "{label}: {target}",
+  "tool.elapsed": "{what} · {seconds}s",
   "tool.running": "Running",
   "tool.done": "Done",
   "tool.interrupted": "Interrupted",
