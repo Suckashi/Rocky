@@ -366,7 +366,7 @@ export function ApprovalPanel({
           <li key={option}>
             <button
               type="button"
-              className={selected === index ? 'selected' : ''}
+              className={`${selected === index ? 'selected' : ''}${option === 'reject' || option === 'explain' ? ' reject' : ''}`}
               disabled={busy}
               onClick={() => void choose(index)}
               ref={(button) => {
@@ -404,13 +404,9 @@ export function ApprovalPanel({
             {error}
           </span>
         )}
-        <button
-          type="button"
-          className="icon-button"
-          aria-label={t('chat.stop')}
-          onClick={onStop}
-        >
-          <Square size={16} />
+        <button type="button" className="secondary stop" onClick={onStop}>
+          <Square size={14} aria-hidden="true" />
+          {t('chat.stop')}
         </button>
       </footer>
     </section>

@@ -242,7 +242,7 @@ try {
   );
   await page.locator('.tool-card', { hasText: '修改檔案' }).first().waitFor();
   check(true, 'the edit shows as a tool card with a change card for the turn');
-  await page.getByRole('button', { name: '看看' }).click();
+  await page.getByRole('button', { name: '查看變更' }).click();
   await page.locator('.turn-changes .diff-del', { hasText: '41' }).waitFor();
   if (shots) await page.screenshot({ path: join(shots, 'm2-changes.png') });
   await page.getByRole('button', { name: '全部還原' }).click();
@@ -503,7 +503,7 @@ try {
     .frameLocator('iframe')
     .locator('section.slide', { hasText: '下一步' })
     .waitFor();
-  await change.getByRole('button', { name: '看看' }).click();
+  await change.getByRole('button', { name: '查看變更' }).click();
   await change.locator('.diff-add', { hasText: '營收成長' }).waitFor();
   check(
     existsSync(join(project, '.github', '簡報.pptx')),

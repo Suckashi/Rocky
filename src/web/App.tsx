@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError, type Settings } from './api.ts';
 import { Chat } from './components/Chat.tsx';
 import { usePreviewPane } from './components/PreviewPane.tsx';
-import { Roko, type RokoState } from './components/Roko.tsx';
+import { Roko } from './components/Roko.tsx';
 import { ThreadList } from './components/ThreadList.tsx';
 import { I18nProvider, useI18n, type MessageKey } from './i18n/index.tsx';
 import { isEditable } from './keys.ts';
@@ -100,7 +100,6 @@ function Shell({
   const [refreshKey, setRefreshKey] = useState(0);
   /** Narrow windows fold the conversation list into a drawer opened from the rail. */
   const [threadsOpen, setThreadsOpen] = useState(false);
-  const [roko, setRoko] = useState<RokoState>('idle');
   const jobsWaiting = useJobsWaiting();
   const preview = usePreviewPane();
 
@@ -278,9 +277,10 @@ function Shell({
             threadId={threadId}
             project={settings.project}
             mode={settings.mode}
+            model={settings.model?.model ?? null}
             onActivity={onActivity}
-            onState={setRoko}
             onSettings={setSettings}
+            onOpenSettings={() => setView('settings')}
           />
         </>
       )}
@@ -292,52 +292,6 @@ function Shell({
         onClick={() => setThreadsOpen(false)}
       />
       {preview.pane}
-      <aside className="panel" aria-label={t('panel.label')}>
-        <div className={`presence ${roko}`}>
-          <Roko state={roko} size={128} follow />
-          <strong>
-            {t(
-              roko === 'waiting'
-                ? 'panel.waiting'
-                : roko === 'done'
-                  ? 'panel.done'
-                  : roko === 'running'
-                    ? 'panel.running'
-                    : roko === 'failed'
-                      ? 'panel.failed'
-                      : 'panel.idle',
-            )}
-          </strong>
-        </div>
-        <div className="panel-section">
-          <span className="label">{t('panel.project')}</span>
-          {settings.project ? (
-            <span className="mono small">{settings.project}</span>
-          ) : (
-            <button
-              type="button"
-              className="link"
-              onClick={() => setView('settings')}
-            >
-              {t('project.none')}
-            </button>
-          )}
-        </div>
-        <div className="panel-section">
-          <span className="label">{t('panel.model')}</span>
-          {settings.model ? (
-            <span className="mono small">{settings.model.model}</span>
-          ) : (
-            <button
-              type="button"
-              className="link"
-              onClick={() => setView('settings')}
-            >
-              {t('model.notConfigured')}
-            </button>
-          )}
-        </div>
-      </aside>
     </div>,
   );
 }

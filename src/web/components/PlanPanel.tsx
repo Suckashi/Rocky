@@ -150,13 +150,9 @@ export function PlanPanel({
           {t('plan.reject')}
         </button>
         <span className="spacer" />
-        <button
-          type="button"
-          className="icon-button"
-          aria-label={t('chat.stop')}
-          onClick={onStop}
-        >
-          <Square size={16} />
+        <button type="button" className="secondary stop" onClick={onStop}>
+          <Square size={14} aria-hidden="true" />
+          {t('chat.stop')}
         </button>
       </div>
       {revising && (

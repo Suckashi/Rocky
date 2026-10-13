@@ -88,7 +88,7 @@ a:hover {
   color: var(--text-subtle);
 }
 .small {
-  font-size: 12px;
+  font-size: 13px;
 }
 .ok {
   color: var(--ok);
@@ -168,14 +168,14 @@ a.button.primary {
   font-weight: 600;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 14%),
-    0 1px 2px rgb(31 33 45 / 18%);
+    0 1px 2px rgb(48 34 20 / 18%);
 }
 button.primary:hover:not(:disabled),
 a.button.primary:hover {
   background: var(--primary-hover);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 14%),
-    0 4px 12px rgb(82 105 187 / 28%);
+    0 4px 14px var(--accent-glow);
 }
 button.primary:active:not(:disabled),
 a.button.primary:active {
@@ -183,9 +183,10 @@ a.button.primary:active {
   transform: translateY(1px);
 }
 button.primary:disabled {
-  opacity: 0.45;
+  background: var(--surface-sunken);
+  color: var(--text-subtle);
   cursor: default;
-  box-shadow: none;
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 button.secondary {
   background: var(--surface);
@@ -194,8 +195,20 @@ button.secondary {
   box-shadow: var(--shadow-xs);
 }
 button.secondary:hover:not(:disabled) {
-  border-color: var(--text-subtle);
-  background: var(--surface-muted);
+  background: var(--surface-sunken);
+}
+button.secondary.danger {
+  color: var(--bad);
+}
+button.secondary.danger:hover:not(:disabled) {
+  background: var(--bad-soft);
+  border-color: color-mix(in srgb, var(--bad) 40%, transparent);
+}
+button.secondary.stop {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  gap: 6px;
+  font-size: 13px;
 }
 button.secondary:active:not(:disabled) {
   transform: translateY(1px);
@@ -256,7 +269,7 @@ button.icon-button.primary:hover:not(:disabled) {
   cursor: default;
 }
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -269,7 +282,7 @@ button.icon-button.primary:hover:not(:disabled) {
 .approval-options input,
 .plan-feedback,
 .mode-select {
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--input-border);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
@@ -293,8 +306,24 @@ button.icon-button.primary:hover:not(:disabled) {
 .approval-options input:focus,
 .plan-feedback:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--focus);
   box-shadow: var(--ring);
+}
+/* One look for every drop-down: the native arrow is replaced by a drawn chevron. */
+.fields select,
+.rule-form select,
+.mcp-settings select {
+  appearance: none;
+  padding-right: 30px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 52%,
+    calc(100% - 11px) 52%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
 }
 ::placeholder {
   color: var(--text-subtle);
@@ -403,21 +432,23 @@ button.icon-button.primary:hover:not(:disabled) {
 }
 .centered .roko,
 .intro .roko {
-  filter: drop-shadow(0 18px 24px rgb(31 33 45 / 16%));
+  filter: drop-shadow(0 18px 24px rgb(48 34 20 / 16%));
 }
 
-/* Atmosphere behind onboarding and single-message pages: a soft dawn of brand and amber. */
-.onboarding,
-body:has(.centered) {
+/* One light source: the amber of Roko's eyes, glowing from behind it. */
+.onboarding {
   background:
-    radial-gradient(ellipse 60% 50% at 18% 0%, var(--bg-glow), transparent 70%),
     radial-gradient(
-      ellipse 40% 40% at 90% 100%,
-      var(--accent-glow),
-      transparent 70%
+      circle at max(18%, 230px) 260px,
+      var(--bg-glow),
+      transparent 420px
     ),
     var(--bg);
-  background-attachment: fixed;
+}
+body:has(.centered) {
+  background:
+    radial-gradient(circle at 50% 42%, var(--bg-glow), transparent 360px),
+    var(--bg);
 }
 .onboarding {
   min-height: 100%;
@@ -623,6 +654,17 @@ body:has(.centered) {
   border-radius: var(--radius-xl);
   animation: pop var(--dur-slow) var(--ease-out) 120ms both;
 }
+.onboarding-main > .card > .row.end:last-child {
+  position: sticky;
+  bottom: 0;
+  margin: 0 calc(-1 * var(--space-6)) calc(-1 * var(--space-6));
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
 .onboarding-main > .card > h2:not(:first-child) {
   margin-top: var(--space-3);
   padding-top: var(--space-5);
@@ -678,10 +720,6 @@ body:has(.centered) {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  background: var(--surface-muted);
 }
 .fields label {
   display: flex;
@@ -795,9 +833,7 @@ body:has(.centered) {
 .shell {
   height: 100%;
   display: grid;
-  grid-template-columns:
-    var(--rail-width) var(--threads-width) minmax(0, 1fr)
-    var(--panel-width);
+  grid-template-columns: var(--rail-width) var(--threads-width) minmax(0, 1fr);
 }
 .rail {
   display: flex;
@@ -1049,7 +1085,7 @@ body:has(.centered) {
   box-shadow: var(--shadow-sm);
 }
 .empty .roko {
-  filter: drop-shadow(0 14px 18px rgb(31 33 45 / 14%));
+  filter: drop-shadow(0 14px 18px rgb(48 34 20 / 14%));
 }
 .turn-part {
   display: flex;
@@ -1060,15 +1096,15 @@ body:has(.centered) {
 .bubble.user {
   align-self: flex-end;
   max-width: min(80%, 620px);
-  background: var(--primary);
-  color: var(--primary-text);
+  background: var(--bubble-bg);
+  color: var(--bubble-text);
   padding: 10px var(--space-4);
   border-radius: 18px 18px 6px 18px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 12%),
-    0 2px 8px rgb(82 105 187 / 22%);
+    0 2px 8px rgb(48 34 20 / 18%);
 }
 .reply {
   display: flex;
@@ -1206,7 +1242,8 @@ body:has(.centered) {
   border-radius: var(--radius);
   overflow-x: auto;
   line-height: 1.6;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 6%);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--code-text) 14%, transparent);
 }
 .markdown pre code {
   font-size: 13px;
@@ -1317,6 +1354,7 @@ body:has(.centered) {
 }
 .composer-box {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border-strong);
@@ -1341,14 +1379,15 @@ body:has(.centered) {
   outline: none;
 }
 .composer-box:focus-within {
-  border-color: var(--primary);
-  box-shadow: var(--ring), var(--shadow-md);
+  border-color: var(--text-subtle);
 }
 .composer-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2);
+  min-width: 0;
 }
 .composer-bar .icon-button.primary {
   border-radius: var(--radius-full);
@@ -1408,68 +1447,48 @@ body:has(.centered) {
   font-weight: 600;
 }
 
-/* ---------- Roko's panel ---------- */
-.panel {
-  border-left: 1px solid var(--border);
-  background: var(--surface);
-  padding: var(--space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  overflow-y: auto;
-}
-.presence {
+/* ---------- Roko above the input box ---------- */
+.presence-bar {
   position: relative;
+  z-index: 1;
   isolation: isolate;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-5) var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  background: var(--surface-muted);
-  text-align: center;
-  overflow: hidden;
-  transition:
-    background-color var(--dur-slow) var(--ease-out),
-    border-color var(--dur-slow) var(--ease-out);
+  gap: var(--space-3);
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--space-5) var(--space-2);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  animation: fade var(--dur) var(--ease-out);
 }
-/* Roko's eyes light the card: amber while working, brand blue while waiting on you. */
-.presence::before {
+.presence-bar::after {
   content: '';
   position: absolute;
   z-index: -1;
-  left: 50%;
-  top: 44%;
-  width: 180px;
-  height: 180px;
-  margin: -90px 0 0 -90px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--accent-glow), transparent 68%);
-  opacity: 0;
-  transition: opacity var(--dur-slow) var(--ease-out);
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: var(--space-5);
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
 }
-.presence.running::before,
-.presence.done::before {
-  opacity: 1;
+.presence-bar + .composer::before {
+  display: none;
 }
-.presence.running::before {
-  animation: breathe 2.4s ease-in-out infinite;
+.presence-bar .roko {
+  margin: -16px 0 -6px;
+  transition: filter var(--dur-slow) var(--ease-out);
 }
-.presence.waiting::before {
-  opacity: 1;
-  background: radial-gradient(circle, var(--bg-glow), transparent 68%);
-  animation: breathe 2.4s ease-in-out infinite;
-}
-.presence strong {
-  font-family: var(--font-display);
-  font-size: 15px;
+.presence-bar > span:not(.roko) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
 }
-.presence strong::before {
+.presence-bar > span:not(.roko)::before {
   content: '';
   width: 7px;
   height: 7px;
@@ -1477,49 +1496,75 @@ body:has(.centered) {
   background: var(--text-subtle);
   transition: background-color var(--dur) var(--ease-out);
 }
-.presence.running strong::before {
+/* Roko's eyes light the moment: amber while working, a steady glow when done. */
+.presence-bar.running .roko,
+.presence-bar.waiting .roko {
+  filter: drop-shadow(0 0 14px var(--accent-glow));
+  animation: glow 2.4s ease-in-out infinite;
+}
+.presence-bar.running span::before,
+.presence-bar.waiting span::before {
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent-glow);
   animation: breathe 1.4s ease-in-out infinite;
 }
-.presence.done strong::before {
+.presence-bar.waiting {
+  color: var(--text);
+}
+.presence-bar.done span::before {
   background: var(--ok);
 }
-.presence.waiting strong::before {
-  background: var(--primary);
-  animation: breathe 1.4s ease-in-out infinite;
+.presence-bar.failed {
+  color: var(--bad);
 }
-.presence.failed strong::before {
+.presence-bar.failed span::before {
   background: var(--bad);
 }
-.presence.waiting {
-  background: var(--primary-soft);
-  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+@keyframes glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px var(--accent-glow));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px var(--accent-glow));
+  }
 }
-.presence.failed {
-  background: var(--warn-soft);
-  border-color: color-mix(in srgb, var(--warn) 30%, transparent);
+
+/* Project and model, beside the mode and plan controls. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 180px;
+  min-height: 30px;
+  padding: 4px var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 13px;
+  white-space: nowrap;
 }
-.panel-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border);
+.chip > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.presence + .panel-section {
-  padding-top: 0;
-  border-top: 0;
+.chip svg {
+  flex: none;
 }
-.panel-section .label {
-  text-transform: none;
+button.chip {
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
-.panel-section .mono {
+button.chip:hover {
+  border-color: var(--border-strong);
   color: var(--text);
-  overflow-wrap: anywhere;
-  padding: 6px var(--space-2);
-  background: var(--surface-sunken);
-  border-radius: var(--radius-sm);
+}
+.chip.model {
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
 
 /* ---------- Badges, code, diffs ---------- */
@@ -1743,24 +1788,22 @@ button.tool-toggle {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  border: 1px solid color-mix(in srgb, var(--primary) 55%, transparent);
-  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-lg);
   background: var(--surface);
   padding: var(--space-4) var(--space-5);
   max-height: 60vh;
   overflow: auto;
-  box-shadow:
-    0 0 0 4px var(--primary-soft),
-    var(--shadow-lg);
+  box-shadow: var(--shadow-lg);
   animation: pop var(--dur-slow) var(--ease-out) both;
 }
 .approval:focus {
   outline: none;
 }
 .approval:focus-visible {
-  box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--primary) 35%, transparent),
-    var(--shadow-lg);
+  /* Focus moves here on its own when Rocky asks; the accent bar already marks it. */
+  outline: none;
 }
 .approval.fullscreen {
   position: fixed;
@@ -1768,7 +1811,7 @@ button.tool-toggle {
   max-height: none;
   z-index: 10;
   box-shadow:
-    0 0 0 100vmax rgb(16 17 23 / 40%),
+    0 0 0 100vmax rgb(21 18 15 / 45%),
     var(--shadow-overlay);
 }
 .approval.fullscreen .diff {
@@ -1854,7 +1897,18 @@ button.tool-toggle {
   background: var(--surface);
   color: var(--text-muted);
 }
-.approval-options button.selected kbd {
+.approval-options button.reject kbd {
+  color: var(--bad);
+}
+.approval-options button.reject.selected {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+}
+.approval-options button.reject.selected kbd {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+.approval-options button.selected:not(.reject) kbd {
   border-color: var(--primary);
   color: var(--link);
 }
@@ -2078,9 +2132,32 @@ button.tool-toggle {
   white-space: nowrap;
 }
 .mcp-add summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 1px dashed var(--input-border);
+  border-radius: var(--radius);
+  color: var(--text);
   cursor: pointer;
+  list-style: none;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.mcp-add summary::-webkit-details-marker {
+  display: none;
+}
+.mcp-add summary::before {
+  content: '+';
+  font-size: 16px;
+  line-height: 1;
   color: var(--link);
-  padding: var(--space-2) 0;
+}
+.mcp-add summary:hover {
+  background: var(--surface-sunken);
+}
+.mcp-add[open] summary {
+  margin-bottom: var(--space-3);
 }
 .rule-pattern {
   flex: 1;
@@ -2115,9 +2192,6 @@ button.tool-toggle {
   grid-template-columns:
     var(--rail-width) var(--threads-width) minmax(0, 1fr)
     auto;
-}
-.shell.previewing .panel {
-  display: none;
 }
 .preview-pane {
   position: relative;
@@ -2197,9 +2271,6 @@ button.tool-toggle {
   .shell.previewing {
     grid-template-columns: var(--rail-width) var(--threads-width) minmax(0, 1fr);
   }
-  .panel {
-    display: none;
-  }
   .preview-pane {
     position: fixed;
     top: 0;
@@ -2272,6 +2343,15 @@ button.tool-toggle {
   .bubble.user {
     max-width: 88%;
   }
+  .chip.model {
+    display: none;
+  }
+  .chip {
+    max-width: 120px;
+  }
+  .presence-bar {
+    padding: 0 var(--space-3) var(--space-2);
+  }
   .topbar {
     padding: 0 var(--space-4);
   }
@@ -2297,6 +2377,10 @@ button.tool-toggle {
   }
   .approval.fullscreen {
     inset: var(--space-2);
+  }
+  .onboarding-main > .card > .row.end:last-child {
+    margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
+    padding: var(--space-3) var(--space-4);
   }
 }
 

@@ -1,7 +1,15 @@
 // One conversation: history from the local runner, streaming reply, tool cards, approvals
 // (in place of the input box), per-turn file changes, and actions with an unknown outcome.
 import { useAgent, useCopilotKit } from '@copilotkit/react-core/v2';
-import { ArrowUp, Check, Copy, ListChecks, Square } from 'lucide-react';
+import {
+  ArrowUp,
+  Check,
+  Copy,
+  Cpu,
+  FolderOpen,
+  ListChecks,
+  Square,
+} from 'lucide-react';
 import {
   useCallback,
   useEffect,
@@ -126,6 +134,11 @@ const markdownComponents: Components = {
     ),
 };
 
+/** Touch screens have no Enter or Shift+Enter to explain. */
+const coarsePointer =
+  typeof window !== 'undefined' &&
+  (window.matchMedia?.('(pointer: coarse)').matches ?? false);
+
 /** Ways to begin a conversation; a click puts the words in the input box, never sends them. */
 const STARTERS = [
   'chat.starter.explain',
@@ -137,18 +150,21 @@ export function Chat({
   threadId,
   project,
   mode,
+  model,
   onActivity,
-  onState,
   onSettings,
+  onOpenSettings,
 }: {
   threadId: string;
   project: string | null;
   /** The approval mode, one setting for every conversation; App owns it. */
   mode: Mode;
+  /** The configured model's name, shown beside the input box. */
+  model: string | null;
   onActivity: () => void;
-  onState: (state: RokoState) => void;
   /** The settings changed here (the approval mode); App keeps the one copy. */
   onSettings: (settings: Settings) => void;
+  onOpenSettings: () => void;
 }) {
   const { t } = useI18n();
   const { agent, isReady } = useAgent({
@@ -249,19 +265,16 @@ export function Chat({
     return () => clearTimeout(timer);
   }, [justDone]);
 
-  useEffect(() => {
-    onState(
-      pending.length > 0
-        ? 'waiting'
-        : error
-          ? 'failed'
-          : running
-            ? 'running'
-            : justDone
-              ? 'done'
-              : 'idle',
-    );
-  }, [error, running, pending.length, justDone, onState]);
+  const roko: RokoState =
+    pending.length > 0
+      ? 'waiting'
+      : error
+        ? 'failed'
+        : running
+          ? 'running'
+          : justDone
+            ? 'done'
+            : 'idle';
 
   // Tell the user when Rocky starts waiting while the window is in the background.
   const waitingCount = useRef(0);
@@ -518,6 +531,24 @@ export function Chat({
         )}
         <div ref={bottom} />
       </div>
+      {visible && (
+        <div className={`presence-bar ${roko}`} role="status">
+          <Roko state={roko} size={56} follow />
+          <span>
+            {t(
+              roko === 'waiting'
+                ? 'panel.waiting'
+                : roko === 'done'
+                  ? 'panel.done'
+                  : roko === 'running'
+                    ? 'panel.running'
+                    : roko === 'failed'
+                      ? 'panel.failed'
+                      : 'panel.idle',
+            )}
+          </span>
+        </div>
+      )}
       {pending.length > 0 ? (
         <div className="composer">
           {pending[0]!.effect.kind === 'plan' ? (
@@ -550,7 +581,11 @@ export function Chat({
               value={draft}
               rows={2}
               placeholder={t(
-                planning ? 'chat.placeholder.plan' : 'chat.placeholder',
+                planning
+                  ? 'chat.placeholder.plan'
+                  : coarsePointer
+                    ? 'chat.placeholder.touch'
+                    : 'chat.placeholder',
               )}
               aria-label={t('chat.placeholder')}
               aria-keyshortcuts="/"
@@ -569,15 +604,36 @@ export function Chat({
                 <ListChecks size={14} />
                 {t('plan.toggle')}
               </button>
+              <button
+                type="button"
+                className="chip"
+                title={project ?? undefined}
+                aria-label={`${t('panel.project')}: ${project ?? t('project.none')}`}
+                onClick={onOpenSettings}
+              >
+                <FolderOpen size={13} aria-hidden="true" />
+                <span>
+                  {project
+                    ? (project.split(/[\\/]/).filter(Boolean).pop() ?? project)
+                    : t('project.none')}
+                </span>
+              </button>
+              {model && (
+                <span className="chip model" title={model}>
+                  <Cpu size={13} aria-hidden="true" />
+                  <span className="sr-only">{t('panel.model')}: </span>
+                  <span>{model}</span>
+                </span>
+              )}
               <span className="spacer" />
               {running ? (
                 <button
                   type="button"
-                  className="icon-button"
-                  aria-label={t('chat.stop')}
+                  className="secondary stop"
                   onClick={() => copilotkit.stopAgent({ agent })}
                 >
-                  <Square size={16} />
+                  <Square size={14} aria-hidden="true" />
+                  {t('chat.stop')}
                 </button>
               ) : (
                 <button

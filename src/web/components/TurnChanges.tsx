@@ -107,7 +107,7 @@ export function TurnChanges({
         </button>
         <button
           type="button"
-          className="secondary"
+          className="secondary danger"
           disabled={busy}
           onClick={() => void open('confirm')}
         >
