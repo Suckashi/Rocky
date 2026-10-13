@@ -187,7 +187,7 @@
   "tool.waiting": "等你決定",
   "threads.close": "關閉列表",
   "onboarding.needModel": "先選好模型並儲存，就能開始。",
-  "jobs.empty": "在對話裡請 Roko「交給 OpenCode」，工作就會出現在這裡。",
+  "jobs.empty": "在對話裡請 Roko「交給 OpenCode」，工作就會出現在這裡。",
   "jobs.select": "選一個工作查看詳情。",
   "jobs.unavailable": "這台電腦沒有找到 OpenCode。安裝後（npm i -g opencode-ai）就能把寫程式的工作交給它。",
   "jobs.network": "OpenCode 每次啟動會連到 registry.npmjs.org 檢查外掛；PATH 上沒有 rg 時會從 GitHub 下載 ripgrep。",

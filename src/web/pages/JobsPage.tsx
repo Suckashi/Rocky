@@ -551,7 +551,7 @@ export function JobsPage({
             onChanged={load}
           />
         ) : list?.jobs.length === 0 ? (
-          <div className="empty">
+          <div className="empty no-jobs">
             <Roko state="idle" size={160} follow />
             <p>{t('jobs.none')}</p>
             <span className="empty-note">{t('jobs.empty')}</span>

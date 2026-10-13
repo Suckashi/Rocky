@@ -187,7 +187,7 @@
   "tool.waiting": "Waiting for you",
   "threads.close": "Close list",
   "onboarding.needModel": "Choose a model and save it to start.",
-  "jobs.empty": "Ask Roko in a conversation to “hand it to OpenCode” and the job shows up here.",
+  "jobs.empty": "Ask Roko in a conversation to “hand it to OpenCode” and the job shows up here.",
   "jobs.select": "Choose a job to see its details.",
   "jobs.unavailable": "OpenCode was not found on this computer. Install it (npm i -g opencode-ai) to hand coding work to it.",
   "jobs.network": "Each time it starts, OpenCode contacts registry.npmjs.org to check plugins; without rg on PATH it downloads ripgrep from GitHub.",

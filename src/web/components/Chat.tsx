@@ -444,6 +444,8 @@ export function Chat({
                             ? 'waiting'
                             : 'running'
                           : 'interrupted';
+                    // The approval panel shows the action that waits; no second card for it.
+                    if (state === 'waiting') return null;
                     return (
                       <ToolCard
                         key={call.id}
