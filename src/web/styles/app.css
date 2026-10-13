@@ -1163,8 +1163,18 @@ body:has(.centered) {
     transform var(--dur-slow) var(--ease-out),
     opacity var(--dur) var(--ease-out);
 }
+/* Roko's walk to the input box: the distance is measured in Chat.tsx (--dock-*). */
+.chat .empty > .roko {
+  transform-origin: 0 100%;
+  /* A walk, both ways: an even pace, easing in and out at the ends. */
+  transition: transform 900ms cubic-bezier(0.45, 0, 0.55, 1);
+}
 .chat .empty.typing > .roko {
-  transform: translateY(132px) scale(0.86);
+  transform: translate(var(--dock-x, 0), var(--dock-y, 132px))
+    scale(var(--dock-scale, 0.86));
+}
+.chat .empty.typing > .roko::before {
+  opacity: 0;
 }
 /* The suggestions are for an empty box: once there are words they fold away. */
 .chat .empty > .starters,
@@ -1183,11 +1193,7 @@ body:has(.centered) {
     transform var(--dur-slow) var(--ease-out),
     visibility 0s var(--dur);
 }
-.chat .empty.typing > p,
-.chat .empty.typing > .empty-note,
-.chat .empty.typing > .choose-folder {
-  transform: translateY(120px);
-}
+
 @media (prefers-reduced-motion: reduce) {
   .chat .empty.typing > * {
     transform: none;

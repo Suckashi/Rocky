@@ -302,6 +302,8 @@
   "roko.alt.done": "Roko 開心地跳起來",
   "roko.alt.resting": "Roko 正在休息，等有事可做",
   "roko.alt.reading": "Roko 正在讀",
+  "roko.alt.walkingLeft": "Roko 走向輸入框",
+  "roko.alt.walkingRight": "Roko 走向輸入框",
   "panel.done": "這輪完成了",
   "approval.title.agentOther": "{actor}想做一件要你確認的事：{title}",
   "settings.rules": "永久規則",

@@ -12,7 +12,9 @@ export type RokoState =
   | 'waiting'
   | 'done'
   | 'resting'
-  | 'reading';
+  | 'reading'
+  | 'walkingLeft'
+  | 'walkingRight';
 
 /** Sprite rows per state; a finished turn plays the jump. */
 const ROW: Record<RokoState, keyof typeof manifest.animations> = {
@@ -26,6 +28,9 @@ const ROW: Record<RokoState, keyof typeof manifest.animations> = {
   resting: 'review',
   // Looking through files: the same row, eyes on the work.
   reading: 'review',
+  // On its way somewhere (to the input box, and back).
+  walkingLeft: 'running-left',
+  walkingRight: 'running-right',
 };
 
 const { cellWidth, cellHeight, columns, rows } = manifest.grid;
@@ -137,6 +142,10 @@ function useLook(
     };
     window.addEventListener('pointermove', onMove, { passive: true });
     window.addEventListener('input', onInput, { passive: true });
+    // Free to look again (after a walk, say) while words are being typed: look at them now.
+    const active = document.activeElement;
+    if (active instanceof HTMLTextAreaElement && active.value.trim())
+      aim(...caretPoint(active));
     return () => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('input', onInput);

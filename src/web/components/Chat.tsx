@@ -5,6 +5,7 @@ import { ArrowUp, Cpu, FolderOpen, ListChecks, CircleStop } from 'lucide-react';
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -110,6 +111,12 @@ const shortHint = {
   read: () => window.matchMedia?.(SHORT_HINT).matches ?? false,
 };
 
+function prefersReducedMotion(): boolean {
+  return (
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+  );
+}
+
 /** Seconds since `key` was first seen (0 when there is none); ticks once a second. */
 function useElapsed(key: string | undefined): number {
   const [since, setSince] = useState<{ key: string; at: number } | null>(null);
@@ -174,6 +181,43 @@ export function Chat({
   // Enter pressed before the conversation finished loading: send once it has.
   const sendWhenLoaded = useRef(false);
   const bottom = useRef<HTMLDivElement>(null);
+  const emptyView = useRef<HTMLDivElement>(null);
+  const composerBox = useRef<HTMLFormElement>(null);
+  const typing = draft.trim() !== '';
+  const [walking, setWalking] = useState<RokoState | null>(null);
+  const walkedOut = useRef(false);
+  // While the first message is typed, Roko walks from the middle of the page down to the
+  // input box, at the size it has there during the conversation; back when the box is
+  // emptied. The way there is measured, so it lands in the same place at any window size.
+  useLayoutEffect(() => {
+    const view = emptyView.current;
+    const roko = view?.querySelector<HTMLElement>(':scope > .roko');
+    const form = composerBox.current;
+    if (!view || !roko || !form) return;
+    if (!typing) {
+      if (!walkedOut.current || prefersReducedMotion()) return;
+      walkedOut.current = false;
+      const back = view.style.getPropertyValue('--dock-x').startsWith('-');
+      setWalking(back ? 'walkingRight' : 'walkingLeft');
+      const home = setTimeout(() => setWalking(null), 900);
+      return () => clearTimeout(home);
+    }
+    walkedOut.current = true;
+    const from = roko.getBoundingClientRect();
+    const to = form.getBoundingClientRect();
+    const phone = window.matchMedia('(max-width: 600px)').matches;
+    const size = phone ? 66 : 88;
+    const dx = to.left + (phone ? 18 : 34) - from.left;
+    // Feet just above the conversation's bottom fade (the conversation area clips there).
+    const dy = to.top - 22 - from.bottom;
+    view.style.setProperty('--dock-x', `${dx}px`);
+    view.style.setProperty('--dock-y', `${dy}px`);
+    view.style.setProperty('--dock-scale', String(size / from.width));
+    if (prefersReducedMotion()) return;
+    setWalking(dx < 0 ? 'walkingLeft' : 'walkingRight');
+    const arrived = setTimeout(() => setWalking(null), 900);
+    return () => clearTimeout(arrived);
+  }, [typing]);
   const shortPlaceholder = useSyncExternalStore(
     shortHint.subscribe,
     shortHint.read,
@@ -445,8 +489,8 @@ export function Chat({
       <h1 className="sr-only">{t('nav.chat')}</h1>
       <div ref={transcript} className="transcript" aria-live="polite">
         {loaded && !visible && (
-          <div className={draft.trim() ? 'empty typing' : 'empty'}>
-            <Roko state="idle" size={208} follow />
+          <div ref={emptyView} className={typing ? 'empty typing' : 'empty'}>
+            <Roko state={walking ?? 'idle'} size={208} follow />
             <p>{t('chat.empty')}</p>
             {/* Where Roko will work, so the first message has a place to start from. */}
             {project ? (
@@ -655,6 +699,7 @@ export function Chat({
         </div>
       ) : (
         <form
+          ref={composerBox}
           className="composer"
           onSubmit={(e) => {
             e.preventDefault();

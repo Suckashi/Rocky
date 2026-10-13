@@ -214,6 +214,16 @@ try {
   const box = page.getByRole('textbox');
   await page.locator('.empty .roko').waitFor();
   await box.fill('你好，請自我介紹');
+  // The first words send Roko walking (a walking row) from the middle down to the input box.
+  await page.waitForFunction(
+    () =>
+      [...document.querySelectorAll<HTMLElement>('.empty > .roko')].some(
+        (roko) => /roko-row-(1|2)\./.test(roko.style.backgroundImage),
+      ),
+    undefined,
+    { timeout: 2_000 },
+  );
+  check(true, 'Roko walks to the input box when the first words are typed');
   // Roko reads along: typing turns its gaze (the look rows) towards the words.
   await page.waitForFunction(
     () =>

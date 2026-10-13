@@ -302,6 +302,8 @@
   "roko.alt.done": "Roko jumps for joy",
   "roko.alt.resting": "Roko is resting until there is work",
   "roko.alt.reading": "Roko is reading",
+  "roko.alt.walkingLeft": "Roko walks over",
+  "roko.alt.walkingRight": "Roko walks over",
   "panel.done": "Done with this turn",
   "approval.title.agentOther": "{actor}wants to do something that needs your approval: {title}",
   "settings.rules": "Permanent rules",
