@@ -14,6 +14,7 @@
   --border-strong: #d6cbba;
   /* Field outlines meet 3:1 against the surface (WCAG 1.4.11). */
   --input-border: #958676;
+  --field-bg: #fffdf9;
   --text: #2a2420;
   --text-muted: #544a42;
   --text-subtle: #6b6158;
@@ -73,6 +74,7 @@
   --radius: 9px;
   --radius-lg: 14px;
   --radius-xl: 20px;
+  --radius-control: 10px;
   --radius-full: 999px;
   --space-1: 4px;
   --space-2: 8px;
@@ -105,6 +107,7 @@
     --border: #332b25;
     --border-strong: #463c34;
     --input-border: #7d6f62;
+    --field-bg: #161310;
     --text: #f2ece5;
     --text-muted: #c9bdb0;
     --text-subtle: #a09385;

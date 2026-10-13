@@ -1,15 +1,7 @@
 // One conversation: history from the local runner, streaming reply, tool cards, approvals
 // (in place of the input box), per-turn file changes, and actions with an unknown outcome.
 import { useAgent, useCopilotKit } from '@copilotkit/react-core/v2';
-import {
-  ArrowUp,
-  Check,
-  Copy,
-  Cpu,
-  FolderOpen,
-  ListChecks,
-  Square,
-} from 'lucide-react';
+import { ArrowUp, Cpu, FolderOpen, ListChecks, CircleStop } from 'lucide-react';
 import {
   useCallback,
   useEffect,
@@ -43,6 +35,7 @@ import { ToolCard, type ToolState } from './ToolCard.tsx';
 import { TurnChanges } from './TurnChanges.tsx';
 import { JobCards } from './JobCards.tsx';
 import { UnknownOutcome } from './UnknownOutcome.tsx';
+import { CodeBlock } from './CodeBlock.tsx';
 
 const AGENT_ID = 'rocky';
 
@@ -84,37 +77,6 @@ function InlineCode({ children }: { children?: ReactNode }) {
     >
       <code>{text}</code>
     </button>
-  );
-}
-
-/** A fenced code block with a copy button that shows on hover or focus. */
-function CodeBlock({ children }: { children?: ReactNode }) {
-  const { t } = useI18n();
-  const pre = useRef<HTMLPreElement>(null);
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    if (!copied) return;
-    const timer = setTimeout(() => setCopied(false), 1600);
-    return () => clearTimeout(timer);
-  }, [copied]);
-  return (
-    <div className="code-block">
-      <pre ref={pre}>{children}</pre>
-      <button
-        type="button"
-        className={`copy${copied ? ' copied' : ''}`}
-        aria-label={t(copied ? 'chat.copied' : 'chat.copy')}
-        title={t(copied ? 'chat.copied' : 'chat.copy')}
-        onClick={() =>
-          void navigator.clipboard
-            ?.writeText(pre.current?.textContent ?? '')
-            .then(() => setCopied(true))
-            .catch(() => undefined)
-        }
-      >
-        {copied ? <Check size={14} /> : <Copy size={14} />}
-      </button>
-    </div>
   );
 }
 
@@ -535,7 +497,7 @@ export function Chat({
       </div>
       {visible && (
         <div className={`presence-bar ${roko}`} role="status">
-          <Roko state={roko} size={48} follow />
+          <Roko state={roko} size={36} follow />
           <span>
             {t(
               roko === 'waiting'
@@ -634,7 +596,7 @@ export function Chat({
                   className="secondary stop"
                   onClick={() => copilotkit.stopAgent({ agent })}
                 >
-                  <Square size={14} aria-hidden="true" />
+                  <CircleStop size={15} aria-hidden="true" />
                   {t('chat.stop')}
                 </button>
               ) : (

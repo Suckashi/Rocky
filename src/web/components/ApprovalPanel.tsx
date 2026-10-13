@@ -1,5 +1,5 @@
 // Replaces the input box while Rocky waits for a decision. One question at a time, in order.
-import { Maximize2, Minimize2, Square } from 'lucide-react';
+import { Maximize2, Minimize2, CircleStop } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { displayPath, type PendingApproval } from '../api.ts';
 import { commandLine } from '../effects.ts';
@@ -405,7 +405,7 @@ export function ApprovalPanel({
           </span>
         )}
         <button type="button" className="secondary stop" onClick={onStop}>
-          <Square size={14} aria-hidden="true" />
+          <CircleStop size={15} aria-hidden="true" />
           {t('chat.stop')}
         </button>
       </footer>

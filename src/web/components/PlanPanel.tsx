@@ -1,7 +1,7 @@
 // The plan at the end of plan mode (ADR 0019): Rocky offers up to three ways to do the task.
 // Choosing one turns plan mode off and starts the work; "ask for changes" sends feedback;
 // Esc rejects.
-import { Square } from 'lucide-react';
+import { CircleStop } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { PendingApproval, PlanOption } from '../api.ts';
 import { useI18n } from '../i18n/index.tsx';
@@ -151,7 +151,7 @@ export function PlanPanel({
         </button>
         <span className="spacer" />
         <button type="button" className="secondary stop" onClick={onStop}>
-          <Square size={14} aria-hidden="true" />
+          <CircleStop size={15} aria-hidden="true" />
           {t('chat.stop')}
         </button>
       </div>

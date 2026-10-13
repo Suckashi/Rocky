@@ -107,9 +107,6 @@ export function ToolCard({
       {state === 'interrupted' && (
         <span className="badge warn">{t('tool.interrupted')}</span>
       )}
-      {state === 'waiting' && (
-        <span className="badge waiting">{t('tool.waiting')}</span>
-      )}
     </>
   );
   return (

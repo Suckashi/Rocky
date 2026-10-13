@@ -12,6 +12,8 @@ import {
 } from '../api.ts';
 import { ApprovalPanel, type Answer } from '../components/ApprovalPanel.tsx';
 import { Diff } from '../components/Diff.tsx';
+import { Info } from 'lucide-react';
+import { CodeBlock } from '../components/CodeBlock.tsx';
 import { Roko } from '../components/Roko.tsx';
 import { TurnChanges } from '../components/TurnChanges.tsx';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
@@ -511,9 +513,6 @@ export function JobsPage({
         {list && !list.available && list.jobs.length > 0 && (
           <p className="small warn">{t('jobs.unavailable')}</p>
         )}
-        {list?.jobs.length === 0 && (
-          <p className="small muted">{t('jobs.none')}</p>
-        )}
         <ul>
           {list?.jobs.map((job) => (
             <li key={job.id} className={job.id === selected ? 'active' : ''}>
@@ -536,7 +535,10 @@ export function JobsPage({
             </li>
           ))}
         </ul>
-        <p className="small muted">{t('jobs.network')}</p>
+        <p className="small muted info-note">
+          <Info size={14} aria-hidden="true" />
+          <span>{t('jobs.network')}</span>
+        </p>
       </aside>
       <main className="jobs-main">
         <h1 className="sr-only">{t('jobs.title')}</h1>
@@ -556,7 +558,7 @@ export function JobsPage({
             {!list.available && (
               <div className="install">
                 <span>{t('jobs.install')}</span>
-                <code>{t('jobs.installCommand')}</code>
+                <CodeBlock inline>{t('jobs.installCommand')}</CodeBlock>
               </div>
             )}
           </div>

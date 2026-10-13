@@ -182,14 +182,12 @@ a.button.primary:active {
   background: var(--primary-press);
   transform: translateY(1px);
 }
+/* Disabled keeps its shape and colour, faded: still recognisably the same button. */
 button.primary:disabled,
 button.secondary:disabled {
-  background: transparent;
-  color: var(--text-subtle);
   cursor: not-allowed;
   box-shadow: none;
-  border: 1px dashed var(--input-border);
-  opacity: 1;
+  opacity: 0.45;
 }
 button.secondary {
   background: var(--surface);
@@ -260,9 +258,6 @@ button.icon-button.primary {
   color: var(--primary-text);
 }
 button.icon-button.primary:disabled {
-  background: var(--surface-sunken);
-  color: var(--text-subtle);
-  border: 0;
   cursor: not-allowed;
 }
 button.icon-button.primary:hover:not(:disabled) {
@@ -284,17 +279,13 @@ button.icon-button.primary:hover:not(:disabled) {
 .fields select,
 .rule-form input,
 .rule-form select,
+.mcp-settings select,
 .approval-options input,
 .plan-feedback,
-.mode-select,
-.plan-toggle,
-.composer-bar .icon-button {
-  flex: none;
-}
 .mode-select {
   border: 1px solid var(--input-border);
-  border-radius: var(--radius);
-  background: var(--surface);
+  border-radius: var(--radius-control);
+  background: var(--field-bg);
   color: var(--text);
   transition:
     border-color var(--dur-fast) var(--ease-out),
@@ -456,6 +447,7 @@ button.icon-button.primary:hover:not(:disabled) {
 }
 .centered p {
   margin: 0;
+  text-wrap: balance;
   color: var(--text-muted);
   font-size: 15px;
   max-width: 42ch;
@@ -637,6 +629,7 @@ body:has(.centered) {
 }
 .intro p {
   margin: 0;
+  text-wrap: balance;
   color: var(--text-muted);
   font-size: 15px;
   line-height: 1.8;
@@ -1040,6 +1033,8 @@ body:has(.centered) {
 }
 .transcript {
   flex: 1;
+  /* The last lines fade out above Roko's status and the input box, never under them. */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
   overflow-y: auto;
   padding: var(--space-6) var(--space-5) var(--space-7);
   display: flex;
@@ -1409,6 +1404,11 @@ body:has(.centered) {
 .composer-bar .icon-button.primary {
   border-radius: var(--radius-full);
 }
+.mode-select,
+.plan-toggle,
+.composer-bar .icon-button {
+  flex: none;
+}
 .mode-select {
   border-color: var(--border);
   border-radius: var(--radius-full);
@@ -1482,22 +1482,12 @@ body:has(.centered) {
   color: var(--text-muted);
   animation: fade var(--dur) var(--ease-out);
 }
-.presence-bar::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  left: 0;
-  right: 0;
-  bottom: 100%;
-  height: var(--space-5);
-  background: linear-gradient(to bottom, transparent, var(--bg));
-  pointer-events: none;
-}
-.presence-bar + .composer::before {
+.presence-bar + .composer::before,
+.chat > .composer::before {
   display: none;
 }
 .presence-bar .roko {
-  margin: -16px 0 -6px;
+  margin: -8px 0 -4px;
   transition: filter var(--dur-slow) var(--ease-out);
 }
 .presence-bar > span:not(.roko) {
@@ -1589,6 +1579,7 @@ button.chip:hover {
 /* ---------- Empty states ---------- */
 .empty-note {
   max-width: 44ch;
+  text-wrap: balance;
   color: var(--text-muted);
   font-size: 14px;
 }
@@ -1599,11 +1590,39 @@ button.chip:hover {
   gap: var(--space-2);
   margin-top: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent);
   border-radius: var(--radius-lg);
   background: var(--warn-soft);
   color: var(--text);
   font-size: 14px;
+}
+.install .code-block.inline {
+  margin: 0;
+}
+.install .code-block.inline pre {
+  margin: 0;
+  padding: 6px 44px 6px var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--code-bg);
+  color: var(--code-text);
+  font: 13px/1.6 var(--font-mono);
+}
+.install .code-block.inline .copy {
+  top: 50%;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+  transform: translateY(-50%);
+  opacity: 1;
+}
+.info-note {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+.info-note svg {
+  flex: none;
+  margin-top: 3px;
 }
 .install code {
   font-family: var(--font-mono);
@@ -1830,6 +1849,11 @@ button.tool-toggle {
 }
 .turn-changes > .row:first-child {
   font-weight: 600;
+}
+/* Scrolled into view clear of the transcript's bottom fade. */
+.turn-changes,
+.unknown-outcome {
+  scroll-margin-bottom: 40px;
 }
 .unknown-outcome {
   background: var(--warn-soft);
@@ -2447,8 +2471,11 @@ button.tool-toggle {
     inset: var(--space-2);
   }
   .onboarding-main > .card > .row.end:last-child {
-    margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
-    padding: var(--space-3) var(--space-4);
+    position: static;
+    margin: 0;
+    padding: var(--space-3) 0 0;
+    box-shadow: none;
+    background: none;
   }
   .drawer-close {
     display: inline-flex;
