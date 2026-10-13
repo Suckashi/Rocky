@@ -1707,6 +1707,49 @@ body:has(.centered) {
     perch var(--dur-slow) var(--ease-spring) both,
     glow 2.4s ease-in-out infinite;
 }
+/* Each state in the body, not only in the label: working, Roko keeps a quick, busy rhythm. */
+.stage.running .roko {
+  animation:
+    perch var(--dur-slow) var(--ease-spring) both,
+    glow 2.4s ease-in-out infinite,
+    busy 0.7s ease-in-out infinite;
+}
+@keyframes busy {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -3px;
+  }
+}
+/* Waiting on you: Roko leans towards the question and an amber ring keeps calling, slowly. */
+.stage.waiting .roko {
+  rotate: 4deg;
+}
+.stage.waiting::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: calc(var(--space-5) + 14px);
+  bottom: -2px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  animation: call 2.4s ease-out infinite;
+}
+@keyframes call {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
 .stage.running .stage-chip::before,
 .stage.waiting .stage-chip::before {
   background: var(--accent);
@@ -2871,6 +2914,11 @@ button.small-button,
   .stage .roko {
     left: calc(var(--space-3) + 6px);
     scale: 0.75;
+  }
+  .stage.waiting::before {
+    left: calc(var(--space-3) + 2px);
+    width: 62px;
+    height: 62px;
   }
   .stage-chip {
     left: calc(var(--space-3) + 76px);
