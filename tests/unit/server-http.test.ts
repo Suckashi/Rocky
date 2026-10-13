@@ -294,5 +294,8 @@ describe('web UI files', () => {
     const missing = await get('/assets/missing.js');
     expect(missing.status).toBe(404);
     expect(missing.headers.get('cache-control')).toBeNull();
+    const gone = await get('/roko/rows/roko-row-99.webp');
+    expect(gone.status).toBe(404);
+    expect(gone.headers.get('cache-control')).toBeNull();
   });
 });

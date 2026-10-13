@@ -95,8 +95,9 @@ export function createApp(options: AppOptions): Hono {
           c.header('Cache-Control', 'public, max-age=86400');
       });
     app.use('/*', serveStatic({ root: options.webRoot }));
-    // A missing build file is a 404, never the page: the page must not be kept as a script.
-    app.all('/assets/*', (c) => c.text('not found', 404));
+    // A missing file is a 404, never the page: the page must not be kept as a script or image.
+    for (const path of ['/assets/*', '/roko/*', '/rocky/*'])
+      app.all(path, (c) => c.text('not found', 404));
     app.get('*', serveStatic({ root: options.webRoot, path: 'index.html' }));
   }
   app.onError((error, c) => {

@@ -30,14 +30,17 @@
 - 網頁建置把 `streamdown` 換成 `src/web/vendor/streamdown.tsx`：CopilotKit 只在它自己的聊天元件
   （Rocky 沒用）引用它，真品會把 KaTeX、parse5 帶進主程式。主程式 2,205 KB → 1,614 KB。
 - 伺服器對網頁檔 gzip（`hono/compress`，只掛在 `/api` 之後的網頁路由，聊天串流不受影響）；
-  `/roko/*`、`/rocky/*` 快取一天；index.html 預先載入 Roko 的圖。
+  `/roko/*`、`/rocky/*` 快取一天；`/assets`、`/roko`、`/rocky` 下找不到的檔案一律 404。
+- **Roko 的圖改為每列一個無損 WebP**（`assets/roko/rows/`，owner 於 2026-10-13 同意）：每個像素都和原始
+  PNG 相同；原始 PNG 留在 repo 當來源紀錄。第一個畫面只等它要顯示的那一列（揮手列 113 KB，整張 PNG
+  3 MB），index.html 預先載入揮手與待命兩列，其餘在瀏覽器閒置時補齊。
 - `src/web/zod-config.ts` 在所有依賴之前設定 zod `jitless`：CSP 本來就禁止 eval，zod 的快速路徑從來跑不了；
   先講清楚就不會再用 `Function('')` 試探而在瀏覽器留下 CSP 違規紀錄。
 - 不使用網路字型（維持 `tokens.css` 原本的做法），只在字型清單前面加上 Windows 的 Segoe UI Variable。
 
 ## 驗證（雲端 Linux，Node 24.21.0，Playwright 的 Chromium）
 
-- `npm run check`：通過（30 個測試檔，327 通過、5 略過）。
+- `npm run check`：通過（30 個測試檔，328 通過、5 略過）。
 - `npm run test:e2e`：35 項全部通過。改版前在同一環境跑過一次，第 23 項（簡報的變更卡 diff）逾時；
   改版後通過，無法確定是改版修好還是時序偶發。
 - 用 Awwwards 的評分面向當檢查清單（設計、易用性、創意、內容，加上 Developer Award 的語意、
@@ -53,13 +56,13 @@
     逐項補強：設定目錄與窄視窗抽屜（導覽）、深色與 AA 對比（視覺與包容）、快捷鍵（互動）、Roko 視線（創新）。
   - Lighthouse 12.8.2（Chromium，本機伺服器，帶登入 cookie）：
 
-    | 階段                        | 桌面 效能／無障礙／最佳實務 | 桌面 LCP、TBT | 行動 效能 |
-    | --------------------------- | --------------------------- | ------------- | --------- |
-    | 改之前                      | 62／100／96                 | 4.2 s、230 ms | 53        |
-    | gzip、快取、streamdown、zod | 82／100／100                | 3.2 s、30 ms  | 60        |
+    | 階段                        | 桌面 效能／無障礙／最佳實務 | 桌面 LCP、TBT | 行動 效能、TBT |
+    | --------------------------- | --------------------------- | ------------- | -------------- |
+    | 改之前                      | 62／100／96                 | 4.2 s、230 ms | 53、220 ms     |
+    | gzip、快取、streamdown、zod | 82／100／100                | 3.2 s、30 ms  | 60、320 ms     |
+    | Roko 改為每列無損 WebP      | 99／100／100                | 0.9 s、10 ms  | 74、130 ms     |
 
-    LCP 的元素是 Roko 的精靈圖；Lighthouse 以 10 Mbps 模擬，3 MB 的圖本身就要約 2.4 秒。圖檔要不要
-    重新編碼（無損 WebP 2.27 MB 逐像素相同；有損 q90 約 0.65 MB）需要 owner 決定，素材 README 要求動用前先問。
+    行動版的模擬是慢速 4G 加 4 倍降速，主要卡在 1.6 MB 的主程式；Rocky 只在桌機執行。
 
   - 這些是自我檢查，不是評審結果。
 - `npm run test:e2e:jobs`：沒有執行，這台機器沒有安裝 OpenCode。

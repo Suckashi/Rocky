@@ -1,4 +1,5 @@
-// Roko, the mascot: one shared spritesheet (192 × 208 cells, 8 fps) from assets/roko.
+// Roko, the mascot: the spritesheet from assets/roko (192 × 208 cells, 8 fps), served one
+// row per file so the first screen only waits for the row it shows (assets/roko/README.md).
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import manifest from '../../../assets/roko/roko-manifest.json' with { type: 'json' };
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
@@ -25,6 +26,20 @@ const CAN_LOOK = new Set<RokoState>(['idle', 'waving']);
 const LOOK_REST_MS = 2500;
 
 type Cell = { row: number; column: number };
+
+const rowImage = (row: number) => `/roko/rows/roko-row-${row}.webp`;
+
+/** Once the page is idle, fetch every row so a change of state never waits on the network. */
+let warmed = false;
+function warmRows() {
+  if (warmed) return;
+  warmed = true;
+  const load = () => {
+    for (let row = 0; row < rows; row++) new Image().src = rowImage(row);
+  };
+  if ('requestIdleCallback' in window) requestIdleCallback(load);
+  else setTimeout(load, 1000);
+}
 
 function prefersReducedMotion(): boolean {
   return (
@@ -95,6 +110,7 @@ export function Roko({
   const [frame, setFrame] = useState(0);
   const element = useRef<HTMLSpanElement>(null);
   const look = useLook(follow && CAN_LOOK.has(state), element);
+  useEffect(warmRows, []);
   useEffect(() => {
     setFrame(0);
     if (prefersReducedMotion()) return;
@@ -118,9 +134,9 @@ export function Roko({
       style={{
         width: size,
         height: Math.round(cellHeight * scale),
-        backgroundImage: 'url(/roko/roko-spritesheet.png)',
-        backgroundSize: `${columns * cellWidth * scale}px ${rows * cellHeight * scale}px`,
-        backgroundPosition: `${-cell.column * cellWidth * scale}px ${-cell.row * cellHeight * scale}px`,
+        backgroundImage: `url(${rowImage(cell.row)})`,
+        backgroundSize: `${columns * cellWidth * scale}px ${cellHeight * scale}px`,
+        backgroundPosition: `${-cell.column * cellWidth * scale}px 0px`,
       }}
     />
   );

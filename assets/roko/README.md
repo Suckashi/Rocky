@@ -21,3 +21,16 @@ or redistributing the artwork; do not infer an MIT/Apache grant from the code li
 No trademark or character-rights clearance is asserted. The manifest's historical
 verification flag describes the import pack, not current Rocky test results.
 The UI uses it in `src/web/components/Roko.tsx`.
+
+## Runtime copies (`rows/roko-row-<n>.webp`)
+
+On 2026-10-13 the owner approved lossless WebP copies for the UI, so pages load less
+(ADR 0038). The PNG above stays unchanged as the source of record and is not loaded by the UI.
+
+- One file per sprite row (`n` = 0–10, each 1536 × 208 RGBA), so the first screen only waits
+  for the row it shows (the waving row is 113,338 bytes; all eleven are 2,146,136 bytes).
+- Made from `roko-spritesheet.png` with Pillow: crop row `n` (`y = n × 208`), then save with
+  `lossless=True, exact=True, method=6`.
+- Checked after encoding: every RGBA pixel of each row equals the PNG's, including fully
+  transparent ones. `sha256sum assets/roko/rows/*.webp` lists the current hashes.
+- The same rights note applies: it is the owner's artwork, not covered by Apache-2.0.
