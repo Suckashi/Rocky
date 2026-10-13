@@ -22,6 +22,8 @@ const FPS = manifest.playback.suggestedStartingFps;
 const LOOK = manifest.lookDirections;
 /** States calm enough for Roko to turn towards the pointer; the others carry news. */
 const CAN_LOOK = new Set<RokoState>(['idle', 'waving']);
+/** The face crop for small sizes: a square of the cell centred on the visor, in cell px. */
+const FACE = { x: 107, y: 125, span: 100 };
 /** How long Roko keeps looking after the pointer stops. */
 const LOOK_REST_MS = 2500;
 
@@ -99,11 +101,14 @@ export function Roko({
   state = 'idle',
   size = 96,
   follow = false,
+  face = false,
 }: {
   state?: RokoState;
   size?: number;
   /** Turn towards the pointer while idle or waving. */
   follow?: boolean;
+  /** Show only the visor and eyes, for small sizes where the whole body would not read. */
+  face?: boolean;
 }) {
   const { t } = useI18n();
   const animation = manifest.animations[ROW[state]];
@@ -120,7 +125,9 @@ export function Roko({
     );
     return () => clearInterval(timer);
   }, [animation]);
-  const scale = size / cellWidth;
+  const scale = face ? size / FACE.span : size / cellWidth;
+  const offsetX = face ? FACE.x - FACE.span / 2 : 0;
+  const offsetY = face ? FACE.y - FACE.span / 2 : 0;
   const cell: Cell = look ?? {
     row: animation.row,
     column: animation.columns[frame] ?? 0,
@@ -130,13 +137,13 @@ export function Roko({
       ref={element}
       role="img"
       aria-label={t(`roko.alt.${state}` as MessageKey)}
-      className="roko"
+      className={face ? 'roko face' : 'roko'}
       style={{
         width: size,
-        height: Math.round(cellHeight * scale),
+        height: face ? size : Math.round(cellHeight * scale),
         backgroundImage: `url(${rowImage(cell.row)})`,
         backgroundSize: `${columns * cellWidth * scale}px ${cellHeight * scale}px`,
-        backgroundPosition: `${-cell.column * cellWidth * scale}px 0px`,
+        backgroundPosition: `${-(cell.column * cellWidth + offsetX) * scale}px ${-offsetY * scale}px`,
       }}
     />
   );

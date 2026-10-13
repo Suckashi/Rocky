@@ -182,12 +182,17 @@ a.button.primary:active {
   background: var(--primary-press);
   transform: translateY(1px);
 }
-/* Disabled keeps its shape and colour, faded: still recognisably the same button. */
+/* Disabled is neutral in both themes: no brand colour, readable text, never mistaken
+   for a live button. */
 button.primary:disabled,
-button.secondary:disabled {
-  cursor: not-allowed;
+button.secondary:disabled,
+button.icon-button.primary:disabled {
+  background: var(--surface-sunken);
+  color: var(--text-subtle);
+  border: 1px solid var(--border);
   box-shadow: none;
-  opacity: 0.45;
+  cursor: not-allowed;
+  opacity: 1;
 }
 button.secondary {
   background: var(--surface);
@@ -257,9 +262,6 @@ button.icon-button.primary {
   background: var(--primary);
   color: var(--primary-text);
 }
-button.icon-button.primary:disabled {
-  cursor: not-allowed;
-}
 button.icon-button.primary:hover:not(:disabled) {
   background: var(--primary-hover);
   color: var(--primary-text);
@@ -322,7 +324,7 @@ button.icon-button.primary:hover:not(:disabled) {
   background-position:
     calc(100% - 16px) 52%,
     calc(100% - 11px) 52%;
-  background-size: 5px 5px;
+  background-size: 4px 4px;
   background-repeat: no-repeat;
   cursor: pointer;
 }
@@ -336,6 +338,14 @@ button.icon-button.primary:hover:not(:disabled) {
   background-repeat: no-repeat;
   flex: none;
   image-rendering: auto;
+}
+/* Roko's face as an avatar: the stone and visor fill a round tile. */
+.roko.face {
+  border-radius: 50%;
+  background-color: var(--surface-sunken);
+  box-shadow:
+    0 0 0 1px var(--border),
+    var(--shadow-xs);
 }
 
 /* Large Roko stands on the page: a soft floor shadow under its feet, not a box. */
@@ -448,6 +458,8 @@ button.icon-button.primary:hover:not(:disabled) {
 .centered p {
   margin: 0;
   text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
   color: var(--text-muted);
   font-size: 15px;
   max-width: 42ch;
@@ -630,6 +642,8 @@ body:has(.centered) {
 .intro p {
   margin: 0;
   text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
   color: var(--text-muted);
   font-size: 15px;
   line-height: 1.8;
@@ -1129,7 +1143,7 @@ body:has(.centered) {
   align-items: flex-start;
 }
 .reply > .roko {
-  margin-top: -6px;
+  margin-top: -3px;
 }
 
 /* Markdown replies: a calm reading measure and full typographic set. */
@@ -1487,7 +1501,7 @@ body:has(.centered) {
   display: none;
 }
 .presence-bar .roko {
-  margin: -8px 0 -4px;
+  margin: 0;
   transition: filter var(--dur-slow) var(--ease-out);
 }
 .presence-bar > span:not(.roko) {
@@ -1580,6 +1594,8 @@ button.chip:hover {
 .empty-note {
   max-width: 44ch;
   text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
   color: var(--text-muted);
   font-size: 14px;
 }
@@ -1633,14 +1649,13 @@ button.chip:hover {
   color: var(--code-text);
   user-select: all;
 }
-.threads-head {
+.threads-top {
   display: flex;
+  gap: var(--space-2);
   align-items: center;
-  justify-content: space-between;
-  padding-right: var(--space-1);
 }
-.threads-head .label {
-  padding: var(--space-4) var(--space-2) var(--space-1);
+.threads-top .new-thread {
+  flex: 1;
 }
 .drawer-close {
   display: none;
@@ -2492,6 +2507,44 @@ button.tool-toggle {
   }
 }
 
+/* Phones: the rail becomes a top bar, so the conversation gets the full width. */
+@media (max-width: 600px) {
+  .shell,
+  .shell.previewing {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 52px minmax(0, 1fr);
+  }
+  .rail {
+    flex-direction: row;
+    padding: 0 var(--space-3);
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .rail img {
+    margin: 0 var(--space-2) 0 0;
+  }
+  .rail .bottom {
+    margin: 0 0 0 auto;
+  }
+  .rail .icon-button.active::before {
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: -7px;
+    width: auto;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+  }
+  .threads {
+    top: 52px;
+    left: 0;
+    width: min(300px, 86vw);
+    transform: translateX(-100%);
+  }
+  .shell.threads-open .threads-backdrop {
+    inset: 52px 0 0 0;
+  }
+}
 @media (max-width: 400px) {
   /* The smallest phones keep the folder as an icon; its name stays in the label. */
   .composer-bar .chip > span {

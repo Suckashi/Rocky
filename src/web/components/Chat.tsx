@@ -424,7 +424,7 @@ export function Chat({
             <div key={message.id} className="turn-part">
               {text && (
                 <div className="reply">
-                  <Roko state="idle" size={36} />
+                  <Roko state="idle" size={34} face />
                   <div className="markdown">
                     <ReactMarkdown components={markdownComponents}>
                       {textOf(message.content)}
@@ -497,7 +497,7 @@ export function Chat({
       </div>
       {visible && (
         <div className={`presence-bar ${roko}`} role="status">
-          <Roko state={roko} size={36} follow />
+          <Roko state={roko} size={34} face follow />
           <span>
             {t(
               roko === 'waiting'

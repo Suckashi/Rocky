@@ -39,18 +39,17 @@ export function ThreadList({
 
   return (
     <aside className="threads" aria-label={t('nav.threads')}>
-      <button
-        type="button"
-        className="new-thread"
-        title={t('threads.newHint')}
-        aria-keyshortcuts="Control+Shift+O Meta+Shift+O"
-        onClick={onNew}
-      >
-        <Plus size={16} />
-        {t('threads.new')}
-      </button>
-      <div className="threads-head">
-        <span className="label">{t('threads.recent')}</span>
+      <div className="threads-top">
+        <button
+          type="button"
+          className="new-thread"
+          title={t('threads.newHint')}
+          aria-keyshortcuts="Control+Shift+O Meta+Shift+O"
+          onClick={onNew}
+        >
+          <Plus size={16} />
+          {t('threads.new')}
+        </button>
         {onClose && (
           <button
             type="button"
@@ -62,6 +61,7 @@ export function ThreadList({
           </button>
         )}
       </div>
+      <span className="label">{t('threads.recent')}</span>
       {threads.error && <p className="bad small">{t('threads.loadError')}</p>}
       {threads.threads.length === 0 && !threads.isLoading && (
         <p className="muted small">{t('threads.empty')}</p>

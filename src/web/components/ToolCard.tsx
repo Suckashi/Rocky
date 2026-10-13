@@ -43,7 +43,12 @@ function target(args: Record<string, unknown>): string {
     'title',
     'query',
   ]) {
-    if (typeof args[key] === 'string') return args[key];
+    const value = args[key];
+    if (typeof value !== 'string') continue;
+    // File tools see the project folder as "/"; show the path the way the user knows it.
+    return key === 'file_path' || key === 'path'
+      ? value.replace(/^\/+/, '') || '/'
+      : value;
   }
   return '';
 }

@@ -227,7 +227,7 @@ try {
   await page.keyboard.press('Enter');
   const panel = page.getByRole('region', { name: '等你核准' });
   await panel.waitFor({ timeout: 20_000 });
-  await panel.getByText('Rocky 想修改 AGENTS.md').waitFor();
+  await panel.getByText('Roko 想修改 AGENTS.md').waitFor();
   await panel.locator('.diff-add', { hasText: 'const answer = 42;' }).waitFor();
   check(
     readFileSync(appFile, 'utf8').includes('41'),
@@ -290,7 +290,7 @@ try {
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
   await page.keyboard.press('4');
-  await page.getByPlaceholder('告訴 Rocky 為什麼').fill('先不要改，請先跑測試');
+  await page.getByPlaceholder('告訴 Roko 為什麼').fill('先不要改，請先跑測試');
   await page.keyboard.press('Enter');
   await page
     .locator('.reply', { hasText: '先不要改，請先跑測試' })
@@ -362,7 +362,7 @@ try {
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
   await page.reload();
-  await panel.getByText('Rocky 想修改 AGENTS.md').waitFor({ timeout: 20_000 });
+  await panel.getByText('Roko 想修改 AGENTS.md').waitFor({ timeout: 20_000 });
   await page.keyboard.press('1');
   await panel
     .locator('.diff-add', { hasText: 'const answer = 41;' })
@@ -468,7 +468,7 @@ try {
   await page.getByRole('textbox').fill('做一份簡報');
   await page.keyboard.press('Enter');
   await panel
-    .getByText('Rocky 想新增檔案 .github/簡報.pptx')
+    .getByText('Roko 想新增檔案 .github/簡報.pptx')
     .waitFor({ timeout: 20_000 });
   await panel.getByRole('button', { name: '版面預覽' }).click();
   const slides = side.frameLocator('iframe[title="修改後的版面預覽"]');
@@ -514,7 +514,7 @@ try {
   await page.getByRole('textbox').fill('再做一份簡報');
   await page.keyboard.press('Enter');
   await panel
-    .getByText('Rocky 想修改 .github/簡報.pptx')
+    .getByText('Roko 想修改 .github/簡報.pptx')
     .waitFor({ timeout: 20_000 });
   await panel.getByRole('button', { name: '版面預覽' }).click();
   await side.getByRole('button', { name: '並排' }).click();
@@ -590,7 +590,7 @@ try {
     await page.getByRole('textbox').fill(`幫我規劃整理專案（第 ${round} 次）`);
     await page.keyboard.press('Enter');
     await page
-      .getByText('Rocky 提出 2 個方案：整理專案')
+      .getByText('Roko 提出 2 個方案：整理專案')
       .waitFor({ timeout: 20_000 });
     if (round === 1) {
       if (shots) await page.screenshot({ path: join(shots, 'm5-plan.png') });
