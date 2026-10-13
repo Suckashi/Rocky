@@ -182,11 +182,14 @@ a.button.primary:active {
   background: var(--primary-press);
   transform: translateY(1px);
 }
-button.primary:disabled {
-  background: var(--surface-sunken);
+button.primary:disabled,
+button.secondary:disabled {
+  background: transparent;
   color: var(--text-subtle);
-  cursor: default;
-  box-shadow: inset 0 0 0 1px var(--border);
+  cursor: not-allowed;
+  box-shadow: none;
+  border: 1px dashed var(--input-border);
+  opacity: 1;
 }
 button.secondary {
   background: var(--surface);
@@ -213,10 +216,6 @@ button.secondary.stop {
 button.secondary:active:not(:disabled) {
   transform: translateY(1px);
   box-shadow: none;
-}
-button.secondary:disabled {
-  opacity: 0.5;
-  cursor: default;
 }
 a.button {
   text-decoration: none;
@@ -260,6 +259,12 @@ button.icon-button.primary {
   background: var(--primary);
   color: var(--primary-text);
 }
+button.icon-button.primary:disabled {
+  background: var(--surface-sunken);
+  color: var(--text-subtle);
+  border: 0;
+  cursor: not-allowed;
+}
 button.icon-button.primary:hover:not(:disabled) {
   background: var(--primary-hover);
   color: var(--primary-text);
@@ -281,6 +286,11 @@ button.icon-button.primary:hover:not(:disabled) {
 .rule-form select,
 .approval-options input,
 .plan-feedback,
+.mode-select,
+.plan-toggle,
+.composer-bar .icon-button {
+  flex: none;
+}
 .mode-select {
   border: 1px solid var(--input-border);
   border-radius: var(--radius);
@@ -335,6 +345,26 @@ button.icon-button.primary:hover:not(:disabled) {
   background-repeat: no-repeat;
   flex: none;
   image-rendering: auto;
+}
+
+/* Large Roko stands on the page: a soft floor shadow under its feet, not a box. */
+.empty > .roko,
+.centered > .roko,
+.intro > .roko {
+  position: relative;
+}
+.empty > .roko::after,
+.centered > .roko::after,
+.intro > .roko::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 18%;
+  right: 18%;
+  bottom: 2%;
+  height: 11%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--floor-shadow), transparent);
 }
 
 /* ---------- Motion ---------- */
@@ -429,10 +459,6 @@ button.icon-button.primary:hover:not(:disabled) {
   color: var(--text-muted);
   font-size: 15px;
   max-width: 42ch;
-}
-.centered .roko,
-.intro .roko {
-  filter: drop-shadow(0 18px 24px rgb(48 34 20 / 16%));
 }
 
 /* One light source: the amber of Roko's eyes, glowing from behind it. */
@@ -661,9 +687,8 @@ body:has(.centered) {
   padding: var(--space-4) var(--space-6);
   border-top: 1px solid var(--border);
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: var(--surface);
+  box-shadow: 0 -10px 16px -6px var(--surface);
 }
 .onboarding-main > .card > h2:not(:first-child) {
   margin-top: var(--space-3);
@@ -1016,7 +1041,7 @@ body:has(.centered) {
 .transcript {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-6) var(--space-5) var(--space-5);
+  padding: var(--space-6) var(--space-5) var(--space-7);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -1084,9 +1109,6 @@ body:has(.centered) {
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
-.empty .roko {
-  filter: drop-shadow(0 14px 18px rgb(48 34 20 / 14%));
-}
 .turn-part {
   display: flex;
   flex-direction: column;
@@ -1112,12 +1134,7 @@ body:has(.centered) {
   align-items: flex-start;
 }
 .reply > .roko {
-  margin-top: -2px;
-  border-radius: 50%;
-  background-color: var(--surface);
-  box-shadow:
-    0 0 0 1px var(--border),
-    var(--shadow-xs);
+  margin-top: -6px;
 }
 
 /* Markdown replies: a calm reading measure and full typographic set. */
@@ -1383,7 +1400,7 @@ body:has(.centered) {
 }
 .composer-bar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2);
@@ -1532,6 +1549,8 @@ body:has(.centered) {
 
 /* Project and model, beside the mode and plan controls. */
 .chip {
+  flex: 0 1 auto;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -1565,6 +1584,54 @@ button.chip:hover {
 .chip.model {
   font-family: var(--font-mono);
   font-size: 12px;
+}
+
+/* ---------- Empty states ---------- */
+.empty-note {
+  max-width: 44ch;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.install {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--warn-soft);
+  color: var(--text);
+  font-size: 14px;
+}
+.install code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 4px var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--code-bg);
+  color: var(--code-text);
+  user-select: all;
+}
+.threads-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: var(--space-1);
+}
+.threads-head .label {
+  padding: var(--space-4) var(--space-2) var(--space-1);
+}
+.drawer-close {
+  display: none;
+}
+.badge.waiting {
+  background: var(--primary-soft);
+  color: var(--link);
+}
+.tool-card.waiting .tool-icon {
+  color: var(--link);
 }
 
 /* ---------- Badges, code, diffs ---------- */
@@ -2169,7 +2236,8 @@ button.tool-toggle {
   min-height: var(--touch);
 }
 .rule-form select {
-  padding: 9px var(--space-2);
+  min-width: 96px;
+  padding: 9px 30px 9px var(--space-3);
   min-height: var(--touch);
 }
 
@@ -2321,7 +2389,7 @@ button.tool-toggle {
     inset: 0 0 0 var(--rail-width);
     border: 0;
     padding: 0;
-    background: rgb(16 17 23 / 32%);
+    background: rgb(21 18 15 / 45%);
     animation: fade var(--dur) var(--ease-out);
     cursor: default;
   }
@@ -2381,6 +2449,37 @@ button.tool-toggle {
   .onboarding-main > .card > .row.end:last-child {
     margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
     padding: var(--space-3) var(--space-4);
+  }
+  .drawer-close {
+    display: inline-flex;
+  }
+  .turn-changes > .row:first-child {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .turn-changes > .row:first-child > span:first-child {
+    grid-column: 1 / -1;
+  }
+  .turn-changes > .row:first-child > .spacer {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  /* The smallest phones keep the folder as an icon; its name stays in the label. */
+  .composer-bar .chip > span {
+    display: none;
+  }
+  .composer-bar {
+    gap: var(--space-1);
+    padding: var(--space-1) 6px 6px;
+  }
+  .composer-bar .chip,
+  .plan-toggle {
+    padding: 4px var(--space-2);
+  }
+  .mode-select {
+    padding-left: var(--space-2);
   }
 }
 

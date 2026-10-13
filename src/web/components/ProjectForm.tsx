@@ -32,6 +32,8 @@ export function ProjectForm({
     }
   };
 
+  // Filled only when there is something new to save; the saved folder needs no button.
+  const dirty = !!path.trim() && path.trim() !== current;
   return (
     <form
       className="project-form"
@@ -64,7 +66,11 @@ export function ProjectForm({
             {status}
           </span>
         ) : null}
-        <button type="submit" className="primary" disabled={!path.trim()}>
+        <button
+          type="submit"
+          className={dirty ? 'primary' : 'secondary'}
+          disabled={!dirty}
+        >
           {t('project.save')}
         </button>
       </div>

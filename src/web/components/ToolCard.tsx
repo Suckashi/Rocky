@@ -1,5 +1,11 @@
 // One tool call in the transcript: what it did, its state, and its result on demand.
-import { Check, ChevronRight, CircleSlash, LoaderCircle } from 'lucide-react';
+import {
+  Check,
+  ChevronRight,
+  CircleSlash,
+  Hourglass,
+  LoaderCircle,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { commandLine } from '../effects.ts';
@@ -42,7 +48,7 @@ function target(args: Record<string, unknown>): string {
   return '';
 }
 
-export type ToolState = 'running' | 'done' | 'interrupted';
+export type ToolState = 'running' | 'waiting' | 'done' | 'interrupted';
 
 export function ToolCard({
   name,
@@ -82,7 +88,9 @@ export function ToolCard({
     ? t(`tool.${name}` as MessageKey)
     : t('tool.other', { name });
   const icon =
-    state === 'running' ? (
+    state === 'waiting' ? (
+      <Hourglass size={14} />
+    ) : state === 'running' ? (
       <LoaderCircle size={14} className="spin" />
     ) : state === 'done' ? (
       <Check size={14} />
@@ -98,6 +106,9 @@ export function ToolCard({
       <span className="tool-target mono">{target(parsed)}</span>
       {state === 'interrupted' && (
         <span className="badge warn">{t('tool.interrupted')}</span>
+      )}
+      {state === 'waiting' && (
+        <span className="badge waiting">{t('tool.waiting')}</span>
       )}
     </>
   );

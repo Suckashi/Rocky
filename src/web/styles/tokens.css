@@ -47,6 +47,7 @@
   --diff-del-bg: #fbe9e6;
   --diff-del-text: #8a2a24;
   --paper-bg: #e9e3d8;
+  --floor-shadow: rgb(48 34 20 / 26%);
   --selection: rgb(240 162 56 / 28%);
   --scrollbar: rgb(42 36 32 / 18%);
   --scrollbar-hover: rgb(42 36 32 / 32%);
@@ -134,6 +135,7 @@
     --diff-del-bg: #331716;
     --diff-del-text: #f5a39b;
     --paper-bg: #2b2620;
+    --floor-shadow: rgb(0 0 0 / 55%);
     --selection: rgb(245 176 79 / 30%);
     --scrollbar: rgb(242 236 229 / 14%);
     --scrollbar-hover: rgb(242 236 229 / 26%);

@@ -1,6 +1,6 @@
 // "N files changed this turn [View] [Restore all]". Restoring shows the plan first; the
 // confirmation is bound to the content the user saw, and the server checks it again.
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api, ApiError, displayPath, type FileChange } from '../api.ts';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { Diff } from './Diff.tsx';
@@ -24,6 +24,12 @@ export function TurnChanges({
   const [view, setView] = useState<'closed' | 'diff' | 'confirm'>('closed');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const card = useRef<HTMLDivElement>(null);
+  // An opened diff or confirmation scrolls fully into view instead of under the input box.
+  useEffect(() => {
+    if (view !== 'closed')
+      card.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [view]);
   const base = `/threads/${threadId}/runs/${encodeURIComponent(runId)}`;
 
   const open = async (next: 'diff' | 'confirm') => {
@@ -93,7 +99,7 @@ export function TurnChanges({
     );
 
   return (
-    <div className="turn-changes">
+    <div className="turn-changes" ref={card}>
       <div className="row">
         <span>{t('changes.summary', { count })}</span>
         <span className="spacer" />

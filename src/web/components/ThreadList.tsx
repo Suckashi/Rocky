@@ -1,6 +1,6 @@
 // Conversation list from the local runner (CopilotKit's thread endpoints).
 import { useThreads } from '@copilotkit/react-core/v2';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { api } from '../api.ts';
 import { useI18n } from '../i18n/index.tsx';
@@ -10,11 +10,14 @@ export function ThreadList({
   onSelect,
   onNew,
   refreshKey,
+  onClose,
 }: {
   selected: string;
   onSelect: (id: string) => void;
   onNew: () => void;
   refreshKey: number;
+  /** Closes the list where it is a drawer (narrow windows). */
+  onClose?: () => void;
 }) {
   const { t } = useI18n();
   const threads = useThreads({
@@ -46,7 +49,19 @@ export function ThreadList({
         <Plus size={16} />
         {t('threads.new')}
       </button>
-      <div className="label">{t('threads.recent')}</div>
+      <div className="threads-head">
+        <span className="label">{t('threads.recent')}</span>
+        {onClose && (
+          <button
+            type="button"
+            className="icon-button drawer-close"
+            aria-label={t('threads.close')}
+            onClick={onClose}
+          >
+            <X size={16} />
+          </button>
+        )}
+      </div>
       {threads.error && <p className="bad small">{t('threads.loadError')}</p>}
       {threads.threads.length === 0 && !threads.isLoading && (
         <p className="muted small">{t('threads.empty')}</p>

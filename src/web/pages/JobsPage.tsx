@@ -508,11 +508,11 @@ export function JobsPage({
     <>
       <aside className="threads" aria-label={t('jobs.title')}>
         <span className="label">{t('jobs.title')}</span>
-        {list && !list.available && (
+        {list && !list.available && list.jobs.length > 0 && (
           <p className="small warn">{t('jobs.unavailable')}</p>
         )}
         {list?.jobs.length === 0 && (
-          <p className="small muted">{t('jobs.empty')}</p>
+          <p className="small muted">{t('jobs.none')}</p>
         )}
         <ul>
           {list?.jobs.map((job) => (
@@ -548,9 +548,21 @@ export function JobsPage({
             autoApply={autoApply}
             onChanged={load}
           />
+        ) : list?.jobs.length === 0 ? (
+          <div className="empty">
+            <Roko state="idle" size={160} follow />
+            <p>{t('jobs.none')}</p>
+            <span className="empty-note">{t('jobs.empty')}</span>
+            {!list.available && (
+              <div className="install">
+                <span>{t('jobs.install')}</span>
+                <code>{t('jobs.installCommand')}</code>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="empty">
-            <Roko state="idle" size={120} follow />
+            <Roko state="idle" size={160} follow />
             <p>{t('jobs.select')}</p>
           </div>
         )}

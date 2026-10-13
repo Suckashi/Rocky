@@ -413,7 +413,7 @@ export function Chat({
       <div className="transcript" aria-live="polite">
         {loaded && !visible && (
           <div className="empty">
-            <Roko state="waving" size={120} follow />
+            <Roko state="waving" size={176} follow />
             <p>{t('chat.empty')}</p>
             <div className="starters">
               {STARTERS.map((key) => (
@@ -462,7 +462,7 @@ export function Chat({
             <div key={message.id} className="turn-part">
               {text && (
                 <div className="reply">
-                  <Roko state="idle" size={32} />
+                  <Roko state="idle" size={36} />
                   <div className="markdown">
                     <ReactMarkdown components={markdownComponents}>
                       {textOf(message.content)}
@@ -478,7 +478,9 @@ export function Chat({
                       result !== undefined
                         ? 'done'
                         : running && index > lastUser
-                          ? 'running'
+                          ? pending.length > 0
+                            ? 'waiting'
+                            : 'running'
                           : 'interrupted';
                     return (
                       <ToolCard
@@ -533,7 +535,7 @@ export function Chat({
       </div>
       {visible && (
         <div className={`presence-bar ${roko}`} role="status">
-          <Roko state={roko} size={56} follow />
+          <Roko state={roko} size={48} follow />
           <span>
             {t(
               roko === 'waiting'

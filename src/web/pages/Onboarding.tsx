@@ -51,6 +51,9 @@ export function Onboarding({
           </h2>
           <ProjectForm current={settings.project} onSaved={onChange} />
           <div className="row end">
+            {!settings.model && (
+              <span className="small muted">{t('onboarding.needModel')}</span>
+            )}
             <button type="button" className="secondary" onClick={onDone}>
               {t('onboarding.later')}
             </button>

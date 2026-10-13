@@ -215,6 +215,7 @@ function Shell({
           type="button"
           className={`icon-button${view === 'chat' ? ' active' : ''}`}
           aria-label={t('nav.chat')}
+          title={t('nav.chat')}
           aria-current={view === 'chat' ? 'page' : undefined}
           onClick={() => {
             setView('chat');
@@ -231,6 +232,7 @@ function Shell({
               ? t('nav.jobsWaiting', { count: jobsWaiting })
               : t('nav.jobs')
           }
+          title={t('nav.jobs')}
           aria-current={view === 'jobs' ? 'page' : undefined}
           onClick={() => {
             setView('jobs');
@@ -248,6 +250,7 @@ function Shell({
           type="button"
           className="icon-button bottom"
           aria-label={t('nav.settings')}
+          title={t('nav.settings')}
           onClick={() => setView('settings')}
         >
           <SettingsIcon size={18} />
@@ -271,6 +274,7 @@ function Shell({
             onSelect={openThread}
             onNew={() => openThread(crypto.randomUUID())}
             refreshKey={refreshKey}
+            onClose={() => setThreadsOpen(false)}
           />
           <Chat
             key={threadId}
