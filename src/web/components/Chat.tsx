@@ -7,6 +7,7 @@ import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
@@ -96,10 +97,17 @@ const markdownComponents: Components = {
     ),
 };
 
-/** Touch screens have no Enter or Shift+Enter to explain. */
-const coarsePointer =
-  typeof window !== 'undefined' &&
-  (window.matchMedia?.('(pointer: coarse)').matches ?? false);
+/** Touch screens have no Enter or Shift+Enter to explain, and a phone-wide box has no room
+ *  for the hint (it would wrap to two lines). Follows the window as it is resized. */
+const SHORT_HINT = '(pointer: coarse), (max-width: 600px)';
+const shortHint = {
+  subscribe: (change: () => void) => {
+    const query = window.matchMedia?.(SHORT_HINT);
+    query?.addEventListener('change', change);
+    return () => query?.removeEventListener('change', change);
+  },
+  read: () => window.matchMedia?.(SHORT_HINT).matches ?? false,
+};
 
 /** Ways to begin a conversation; a click puts the words in the input box, never sends them. */
 const STARTERS = [
@@ -150,6 +158,10 @@ export function Chat({
   // Enter pressed before the conversation finished loading: send once it has.
   const sendWhenLoaded = useRef(false);
   const bottom = useRef<HTMLDivElement>(null);
+  const shortPlaceholder = useSyncExternalStore(
+    shortHint.subscribe,
+    shortHint.read,
+  );
   const input = useRef<HTMLTextAreaElement>(null);
 
   const refresh = useCallback(async () => {
@@ -551,7 +563,7 @@ export function Chat({
               placeholder={t(
                 planning
                   ? 'chat.placeholder.plan'
-                  : coarsePointer
+                  : shortPlaceholder
                     ? 'chat.placeholder.touch'
                     : 'chat.placeholder',
               )}
