@@ -1143,6 +1143,18 @@ body:has(.centered) {
   text-align: center;
   animation: rise var(--dur-slow) var(--ease-out) both;
 }
+/* A warm pool of light where Roko stands in a new conversation. */
+.chat .empty > .roko::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -30% -60% -10%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--bg-glow), transparent);
+}
+.chat .empty > .empty-note {
+  margin-top: calc(-1 * var(--space-1));
+}
 .empty p {
   margin: 0;
   font-family: var(--font-display);
@@ -2045,6 +2057,33 @@ button.tool-toggle {
 .turn-changes > .row:first-child {
   font-weight: 600;
 }
+.changed-files {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.changed-files li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.changed-files .mono {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* A turn whose every tool card is shown elsewhere (approval panel, change card). */
+.tool-cards:empty {
+  display: none;
+}
+/* A document's layout preview, under its diff. */
+.doc-preview-link {
+  align-self: flex-end;
+}
 /* Scrolled into view clear of the transcript's bottom fade, and of Roko on the input box. */
 .turn-changes,
 .unknown-outcome {
@@ -2205,24 +2244,40 @@ button.small-button,
 .approval-options {
   gap: var(--space-1);
 }
+/* Refusing is quiet until it is picked: neutral text, red only on hover and selection. */
 .approval-options button.reject {
-  color: var(--bad);
+  color: var(--text-muted);
 }
 .approval-options button.reject:hover {
   background: var(--bad-soft);
-}
-.approval-options button.reject kbd {
   color: var(--bad);
+}
+/* The expected answer (no risk): a filled amber row, like the primary button. */
+.approval-options button.expected {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-text);
+  font-weight: 600;
+}
+.approval-options button.expected:hover,
+.approval-options button.expected.selected {
+  background: var(--primary-hover);
+}
+.approval-options button.expected kbd {
+  border-color: color-mix(in srgb, var(--primary-text) 45%, transparent);
+  color: var(--primary-text);
+  background: transparent;
 }
 .approval-options button.reject.selected {
   border-color: var(--bad);
   background: var(--bad-soft);
+  color: var(--bad);
 }
 .approval-options button.reject.selected kbd {
   border-color: var(--bad);
   color: var(--bad);
 }
-.approval-options button.selected:not(.reject) kbd {
+.approval-options button.selected:not(.reject, .expected) kbd {
   border-color: var(--primary);
   color: var(--link);
 }

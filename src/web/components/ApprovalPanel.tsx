@@ -366,7 +366,10 @@ export function ApprovalPanel({
           reason: t(`approval.reason.${approval.reason}` as MessageKey),
         })}
         {approval.detail ? (
-          <span className="mono"> · {approval.detail}</span>
+          <span className="mono" title={approval.detail}>
+            {' '}
+            · {displayPath(approval.detail, project)}
+          </span>
         ) : null}
       </p>
       <Preview approval={approval} project={project} />
@@ -375,7 +378,15 @@ export function ApprovalPanel({
           <li key={option}>
             <button
               type="button"
-              className={`${selected === index ? 'selected' : ''}${option === 'reject' || option === 'explain' ? ' reject' : ''}`}
+              className={[
+                selected === index && 'selected',
+                (option === 'reject' || option === 'explain') && 'reject',
+                // Without a risk, "allow once" is the expected answer and looks like it;
+                // a risky question keeps every answer the same weight (nothing preselected).
+                option === 'once' && !noDefault && 'expected',
+              ]
+                .filter(Boolean)
+                .join(' ')}
               disabled={busy}
               onClick={() => void choose(index)}
               ref={(button) => {

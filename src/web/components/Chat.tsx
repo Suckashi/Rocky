@@ -25,6 +25,7 @@ import {
   placeChangeCards,
   runsWithChanges,
   type Snapshot,
+  shownInChangeCards,
 } from '../change-cards.ts';
 import { runFailure } from '../run-errors.ts';
 import { ApprovalPanel, type Answer } from './ApprovalPanel.tsx';
@@ -373,6 +374,7 @@ export function Chat({
     messages,
     runsWithChanges(receipts, snapshots),
   );
+  const inCards = shownInChangeCards(receipts, snapshots);
   const unknown = receipts.filter((r) => r.outcome === 'unknown');
   const visible = messages.some(
     (m) =>
@@ -387,8 +389,24 @@ export function Chat({
       <div className="transcript" aria-live="polite">
         {loaded && !visible && (
           <div className="empty">
-            <Roko state="idle" size={176} follow />
+            <Roko state="idle" size={208} follow />
             <p>{t('chat.empty')}</p>
+            {/* Where Roko will work, so the first message has a place to start from. */}
+            {project ? (
+              <span className="empty-note">
+                {t('chat.empty.project', {
+                  name: project.split(/[\\/]/).filter(Boolean).pop() ?? project,
+                })}
+              </span>
+            ) : (
+              <button
+                type="button"
+                className="link empty-note"
+                onClick={onOpenSettings}
+              >
+                {t('chat.empty.noProject')}
+              </button>
+            )}
             <div className="starters">
               {STARTERS.map((key) => (
                 <button
@@ -412,6 +430,7 @@ export function Chat({
               threadId={threadId}
               runId={card.runId}
               count={card.count}
+              files={card.files}
               project={project}
               onRestored={() => void refresh().catch(() => undefined)}
             />
@@ -456,8 +475,10 @@ export function Chat({
                             ? 'waiting'
                             : 'running'
                           : 'interrupted';
-                    // The approval panel shows the action that waits; no second card for it.
+                    // The approval panel shows the action that waits, and the turn's change
+                    // card shows the files written: no second card for either.
                     if (state === 'waiting') return null;
+                    if (state === 'done' && inCards.has(call.id)) return null;
                     return (
                       <ToolCard
                         key={call.id}
@@ -482,6 +503,7 @@ export function Chat({
               threadId={threadId}
               runId={card.runId}
               count={card.count}
+              files={card.files}
               project={project}
               onRestored={() => void refresh().catch(() => undefined)}
             />

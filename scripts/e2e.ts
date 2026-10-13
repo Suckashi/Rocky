@@ -271,8 +271,13 @@ try {
     readFileSync(appFile, 'utf8') === 'const answer = 42;\n',
     'key 1 approves once and the file is written',
   );
-  await page.locator('.tool-card', { hasText: '修改檔案' }).first().waitFor();
-  check(true, 'the edit shows as a tool card with a change card for the turn');
+  await page
+    .locator('.turn-changes .changed-files', { hasText: 'AGENTS.md' })
+    .waitFor();
+  check(
+    (await page.locator('.tool-card', { hasText: '修改檔案' }).count()) === 0,
+    "the edit shows once, in the turn's change card (no second tool card for it)",
+  );
   await page.getByRole('button', { name: '查看變更' }).click();
   await page.locator('.turn-changes .diff-del', { hasText: '41' }).waitFor();
   if (shots) await page.screenshot({ path: join(shots, 'm2-changes.png') });
@@ -524,7 +529,7 @@ try {
   await panel
     .getByText('Roko 想新增檔案 .github/簡報.pptx')
     .waitFor({ timeout: 20_000 });
-  await panel.getByRole('button', { name: '版面預覽' }).click();
+  await panel.getByRole('button', { name: '在側邊看排版後的樣子' }).click();
   const slides = side.frameLocator('iframe[title="修改後的版面預覽"]');
   await slides.locator('section.slide', { hasText: '季度簡報' }).waitFor();
   check(
@@ -548,11 +553,7 @@ try {
   await page.keyboard.press('1');
   const change = page.locator('.turn-changes').nth(cards);
   await change.waitFor({ timeout: 20_000 });
-  await page
-    .locator('.tool-card', { hasText: '簡報.pptx' })
-    .last()
-    .getByRole('button', { name: '預覽' })
-    .click();
+  await change.getByRole('button', { name: '預覽' }).click();
   await side
     .frameLocator('iframe')
     .locator('section.slide', { hasText: '下一步' })
@@ -561,7 +562,7 @@ try {
   await change.locator('.diff-add', { hasText: '營收成長' }).waitFor();
   check(
     existsSync(join(project, '.github', '簡報.pptx')),
-    'the written deck opens from its tool card; the change card diffs its text',
+    'the written deck opens from its change card, which also diffs its text',
   );
 
   // Replacing it: before and after side by side, then rejected.
@@ -570,7 +571,7 @@ try {
   await panel
     .getByText('Roko 想修改 .github/簡報.pptx')
     .waitFor({ timeout: 20_000 });
-  await panel.getByRole('button', { name: '版面預覽' }).click();
+  await panel.getByRole('button', { name: '在側邊看排版後的樣子' }).click();
   await side.getByRole('button', { name: '並排' }).click();
   await side
     .frameLocator('iframe[title="修改前的版面預覽"]')

@@ -6,6 +6,7 @@ import { api, ApiError, displayPath, type FileChange } from '../api.ts';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { Diff } from './Diff.tsx';
 import { DocumentChange } from './DocumentPreview.tsx';
+import { filePreview, isPreviewable, useOpenPreview } from './PreviewPane.tsx';
 
 type Item = { path: string; contentHash: string };
 
@@ -39,16 +40,20 @@ export function TurnChanges({
   threadId,
   runId,
   count,
+  files = [],
   project,
   onRestored,
 }: {
   threadId: string;
   runId: string;
   count: number;
+  /** The changed files, listed while the diff is closed. */
+  files?: string[];
   project: string | null;
   onRestored: () => void;
 }) {
   const { t } = useI18n();
+  const openPreview = useOpenPreview();
   const key = `${threadId}/${runId}`;
   const [changes, setChanges] = useRemembered<FileChange[] | null>(
     key,
@@ -215,6 +220,27 @@ export function TurnChanges({
           {t('changes.restoreAll')}
         </button>
       </div>
+      {view === 'closed' && files.length > 0 && (
+        <ul className="changed-files">
+          {files.map((file) => {
+            const shown = displayPath(file, project);
+            return (
+              <li key={file}>
+                <span className="mono small">{shown}</span>
+                {shown !== file && isPreviewable(file) && (
+                  <button
+                    type="button"
+                    className="link small"
+                    onClick={() => openPreview(filePreview(shown))}
+                  >
+                    {t('preview.open')}
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
       {busy && <p className="small muted">{t('changes.loading')}</p>}
       {view !== 'closed' && changes && (
         <div className="change-list">
