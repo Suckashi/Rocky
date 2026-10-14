@@ -18,9 +18,12 @@ const REPLY = '你好！我是 Rocky。這是**測試回覆**。';
 const port = 4390 + Math.floor(Math.random() * 9);
 const root = join(import.meta.dirname, '..');
 
+/** The last step that passed, so an error caught later says roughly when it happened. */
+let lastStep = 'start';
 function check(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(`e2e failed: ${message}`);
   console.log(`ok - ${message}`);
+  lastStep = message;
 }
 
 // Asked to change something, the model edits /AGENTS.md (protected, so it asks in the default
@@ -176,7 +179,9 @@ try {
   const errors: string[] = [];
   /** Errors a step causes on purpose (a refused run, a request cut off by a reload). */
   let expected: RegExp | undefined;
-  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('pageerror', (error) =>
+    errors.push(`${error.message} (after: ${lastStep})`),
+  );
   page.on('console', (message) => {
     // The browser logs every 4xx; these are the answers to what this test sends on purpose.
     if (
@@ -184,20 +189,51 @@ try {
       !/status of (400|413)/.test(message.text()) &&
       !expected?.test(message.text())
     )
-      errors.push(message.text());
+      errors.push(`${message.text()} (after: ${lastStep})`);
   });
 
   await page.goto(url);
   await page.getByText('選好模型就能開始').waitFor();
   check(true, 'onboarding shows in Traditional Chinese by default');
+  // Starting with the model missing marks it and moves the cursor there; nothing is saved.
+  await page.getByRole('button', { name: '開始和 Roko 對話' }).click();
+  await page.getByText('（必填）').waitFor();
+  check(
+    (await page.evaluate(() =>
+      document.activeElement?.getAttribute('list'),
+    )) === 'rocky-models' &&
+      (await page.getByText('選好模型就能開始').count()) === 1,
+    'starting without a model marks the field and stays on the first-run page',
+  );
   await page.getByLabel('網址').fill(fake.baseURL);
   await page.getByRole('combobox', { name: '模型' }).fill('fake-model');
-  await page.getByRole('button', { name: '儲存' }).click();
-  await page.getByText('已儲存').waitFor();
+  // One action on the first-run page: starting saves the model.
   await page.getByRole('button', { name: '開始和 Roko 對話' }).click();
+  await page.getByText('選好模型就能開始').waitFor({ state: 'detached' });
 
   const box = page.getByRole('textbox');
+  await page.locator('.empty .roko').waitFor();
   await box.fill('你好，請自我介紹');
+  // The first words send Roko walking (a walking row) from the middle down to the input box.
+  await page.waitForFunction(
+    () =>
+      [...document.querySelectorAll<HTMLElement>('.empty > .roko')].some(
+        (roko) => /roko-row-(1|2)\./.test(roko.style.backgroundImage),
+      ),
+    undefined,
+    { timeout: 2_000 },
+  );
+  check(true, 'Roko walks to the input box when the first words are typed');
+  // Roko reads along: typing turns its gaze (the look rows) towards the words.
+  await page.waitForFunction(
+    () =>
+      [...document.querySelectorAll<HTMLElement>('.roko')].some((roko) =>
+        /roko-row-(9|10)\./.test(roko.style.backgroundImage),
+      ),
+    undefined,
+    { timeout: 5_000 },
+  );
+  check(true, 'Roko looks towards the words while the user types');
   await page.keyboard.press('Enter');
   await page.getByText('測試回覆').waitFor({ timeout: 20_000 });
   check(true, 'a Chinese message gets a streamed reply rendered as Markdown');
@@ -215,6 +251,26 @@ try {
   await page.getByLabel('專案資料夾').fill(project);
   await page.getByRole('button', { name: '使用這個資料夾' }).click();
   await page.getByText('已設定').waitFor();
+  // Appearance: dark is applied at once and kept across a reload; system goes back.
+  await page.getByRole('radio', { name: '深色' }).click();
+  await page.waitForFunction(
+    () => document.documentElement.dataset['theme'] === 'dark',
+  );
+  const darkBg = await page.evaluate(
+    () => getComputedStyle(document.body).backgroundColor,
+  );
+  await page.reload();
+  await page.getByRole('button', { name: '設定' }).click();
+  check(
+    darkBg === 'rgb(21, 18, 15)' &&
+      (await page.evaluate(() => document.documentElement.dataset['theme'])) ===
+        'dark',
+    'the dark theme applies at once and is kept after a reload',
+  );
+  await page.getByRole('radio', { name: '跟隨系統' }).click();
+  await page.waitForFunction(
+    () => document.documentElement.dataset['theme'] === undefined,
+  );
   await page.getByLabel('核准模式').selectOption('hands-off');
   await page.getByLabel('核准模式').selectOption('ask-when-needed');
   await page.getByRole('button', { name: '回到對話' }).click();
@@ -227,7 +283,7 @@ try {
   await page.keyboard.press('Enter');
   const panel = page.getByRole('region', { name: '等你核准' });
   await panel.waitFor({ timeout: 20_000 });
-  await panel.getByText('Rocky 想修改 AGENTS.md').waitFor();
+  await panel.getByText('Roko 想修改 AGENTS.md').waitFor();
   await panel.locator('.diff-add', { hasText: 'const answer = 42;' }).waitFor();
   check(
     readFileSync(appFile, 'utf8').includes('41'),
@@ -240,9 +296,14 @@ try {
     readFileSync(appFile, 'utf8') === 'const answer = 42;\n',
     'key 1 approves once and the file is written',
   );
-  await page.locator('.tool-card', { hasText: '修改檔案' }).first().waitFor();
-  check(true, 'the edit shows as a tool card with a change card for the turn');
-  await page.getByRole('button', { name: '看看' }).click();
+  await page
+    .locator('.turn-changes .changed-files', { hasText: 'AGENTS.md' })
+    .waitFor();
+  check(
+    (await page.locator('.tool-card', { hasText: '修改檔案' }).count()) === 0,
+    "the edit shows once, in the turn's change card (no second tool card for it)",
+  );
+  await page.getByRole('button', { name: '查看變更' }).click();
   await page.locator('.turn-changes .diff-del', { hasText: '41' }).waitFor();
   if (shots) await page.screenshot({ path: join(shots, 'm2-changes.png') });
   await page.getByRole('button', { name: '全部還原' }).click();
@@ -252,11 +313,34 @@ try {
     readFileSync(appFile, 'utf8') === 'const answer = 41;\n',
     'restore all puts the file back',
   );
+  // The restore can be undone; then one file restores from its own row.
+  await page.getByRole('button', { name: '復原', exact: true }).click();
+  await page.getByText('已復原，檔案回到這輪改完的樣子。').waitFor();
+  check(
+    readFileSync(appFile, 'utf8') === 'const answer = 42;\n',
+    'undo after a restore writes back what the turn left',
+  );
+  await page.getByRole('button', { name: '查看變更' }).click();
+  await page.getByRole('button', { name: '還原這個檔案' }).click();
+  await page.getByText('已還原 AGENTS.md。').waitFor();
+  check(
+    readFileSync(appFile, 'utf8') === 'const answer = 41;\n',
+    'one file restores from its own row',
+  );
 
   // Enter on a focused control does what that control says, never "Allow once".
   await page.getByRole('textbox').fill('用鍵盤再改');
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
+  // A protected file: nothing is preselected, so a bare Enter approves nothing.
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(500);
+  check(
+    (await panel.count()) === 1 &&
+      (await panel.locator('button.selected').count()) === 0 &&
+      readFileSync(appFile, 'utf8').includes('41'),
+    'a protected-file approval preselects nothing; Enter alone approves nothing',
+  );
   await panel.getByRole('button', { name: '全螢幕預覽' }).focus();
   await page.keyboard.press('Enter');
   await panel.getByRole('button', { name: '結束全螢幕' }).waitFor();
@@ -290,7 +374,7 @@ try {
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
   await page.keyboard.press('4');
-  await page.getByPlaceholder('告訴 Rocky 為什麼').fill('先不要改，請先跑測試');
+  await page.getByPlaceholder('告訴 Roko 為什麼').fill('先不要改，請先跑測試');
   await page.keyboard.press('Enter');
   await page
     .locator('.reply', { hasText: '先不要改，請先跑測試' })
@@ -362,7 +446,7 @@ try {
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
   await page.reload();
-  await panel.getByText('Rocky 想修改 AGENTS.md').waitFor({ timeout: 20_000 });
+  await panel.getByText('Roko 想修改 AGENTS.md').waitFor({ timeout: 20_000 });
   await page.keyboard.press('1');
   await panel
     .locator('.diff-add', { hasText: 'const answer = 41;' })
@@ -468,15 +552,15 @@ try {
   await page.getByRole('textbox').fill('做一份簡報');
   await page.keyboard.press('Enter');
   await panel
-    .getByText('Rocky 想新增檔案 .github/簡報.pptx')
+    .getByText('Roko 想新增檔案 .github/簡報.pptx')
     .waitFor({ timeout: 20_000 });
-  await panel.getByRole('button', { name: '版面預覽' }).click();
+  await panel.getByRole('button', { name: '在側邊看排版後的樣子' }).click();
   const slides = side.frameLocator('iframe[title="修改後的版面預覽"]');
   await slides.locator('section.slide', { hasText: '季度簡報' }).waitFor();
   check(
     (await slides.locator('section.slide').count()) === 2 &&
       !existsSync(join(project, '.github', '簡報.pptx')) &&
-      (await panel.getByRole('option').count()) === 4,
+      (await panel.locator('.approval-options > li').count()) === 4,
     'a new deck shows its slides in the side panel before it is written, beside the approval',
   );
   if (shots) await page.screenshot({ path: join(shots, 'm4-preview.png') });
@@ -494,29 +578,25 @@ try {
   await page.keyboard.press('1');
   const change = page.locator('.turn-changes').nth(cards);
   await change.waitFor({ timeout: 20_000 });
-  await page
-    .locator('.tool-card', { hasText: '簡報.pptx' })
-    .last()
-    .getByRole('button', { name: '預覽' })
-    .click();
+  await change.getByRole('button', { name: '預覽' }).click();
   await side
     .frameLocator('iframe')
     .locator('section.slide', { hasText: '下一步' })
     .waitFor();
-  await change.getByRole('button', { name: '看看' }).click();
+  await change.getByRole('button', { name: '查看變更' }).click();
   await change.locator('.diff-add', { hasText: '營收成長' }).waitFor();
   check(
     existsSync(join(project, '.github', '簡報.pptx')),
-    'the written deck opens from its tool card; the change card diffs its text',
+    'the written deck opens from its change card, which also diffs its text',
   );
 
   // Replacing it: before and after side by side, then rejected.
   await page.getByRole('textbox').fill('再做一份簡報');
   await page.keyboard.press('Enter');
   await panel
-    .getByText('Rocky 想修改 .github/簡報.pptx')
+    .getByText('Roko 想修改 .github/簡報.pptx')
     .waitFor({ timeout: 20_000 });
-  await panel.getByRole('button', { name: '版面預覽' }).click();
+  await panel.getByRole('button', { name: '在側邊看排版後的樣子' }).click();
   await side.getByRole('button', { name: '並排' }).click();
   await side
     .frameLocator('iframe[title="修改前的版面預覽"]')
@@ -542,6 +622,12 @@ try {
   // An action whose outcome is unknown offers the two buttons; Rocky never redoes it.
   await page.getByRole('textbox').fill('跑一個會等很久的指令');
   await page.keyboard.press('Enter');
+  // While it runs, Roko's status says what it is doing, not just "thinking".
+  await page
+    .locator('.stage-chip', { hasText: '執行指令：' })
+    .waitFor({ timeout: 20_000 });
+  check(true, "Roko's status names the command while it runs");
+  if (shots) await page.screenshot({ path: join(shots, 'm5-doing.png') });
   const unknown = page.locator('.unknown-outcome');
   await unknown.waitFor({ timeout: 30_000 });
   await unknown.getByRole('button', { name: '沒成功，再做一次' }).waitFor();
@@ -557,7 +643,7 @@ try {
   await page.getByRole('textbox').fill('幫我檢查程式碼（第 1 次）');
   await page.keyboard.press('Enter');
   await panel.waitFor({ timeout: 20_000 });
-  const always = panel.getByRole('option').nth(2);
+  const always = panel.locator('.approval-options > li').nth(2);
   await always.getByText('git reset *').waitFor();
   if (shots) await page.screenshot({ path: join(shots, 'm5-always.png') });
   await page.keyboard.press('3');
@@ -590,7 +676,7 @@ try {
     await page.getByRole('textbox').fill(`幫我規劃整理專案（第 ${round} 次）`);
     await page.keyboard.press('Enter');
     await page
-      .getByText('Rocky 提出 2 個方案：整理專案')
+      .getByText('Roko 提出 2 個方案：整理專案')
       .waitFor({ timeout: 20_000 });
     if (round === 1) {
       if (shots) await page.screenshot({ path: join(shots, 'm5-plan.png') });

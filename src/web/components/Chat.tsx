@@ -1,12 +1,14 @@
 // One conversation: history from the local runner, streaming reply, tool cards, approvals
 // (in place of the input box), per-turn file changes, and actions with an unknown outcome.
 import { useAgent, useCopilotKit } from '@copilotkit/react-core/v2';
-import { ArrowUp, ListChecks, Square } from 'lucide-react';
+import { ArrowUp, Cpu, FolderOpen, ListChecks, CircleStop } from 'lucide-react';
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
@@ -24,6 +26,7 @@ import {
   placeChangeCards,
   runsWithChanges,
   type Snapshot,
+  shownInChangeCards,
 } from '../change-cards.ts';
 import { runFailure } from '../run-errors.ts';
 import { ApprovalPanel, type Answer } from './ApprovalPanel.tsx';
@@ -31,10 +34,11 @@ import { PlanPanel } from './PlanPanel.tsx';
 import { filePreview, isPreviewable, useOpenPreview } from './PreviewPane.tsx';
 import { ModeSelect } from './ModeSelect.tsx';
 import { Roko, type RokoState } from './Roko.tsx';
-import { ToolCard, type ToolState } from './ToolCard.tsx';
+import { LOOKING, ToolCard, toolSummary, type ToolState } from './ToolCard.tsx';
 import { TurnChanges } from './TurnChanges.tsx';
 import { JobCards } from './JobCards.tsx';
 import { UnknownOutcome } from './UnknownOutcome.tsx';
+import { CodeBlock } from './CodeBlock.tsx';
 
 const AGENT_ID = 'rocky';
 
@@ -80,6 +84,7 @@ function InlineCode({ children }: { children?: ReactNode }) {
 }
 
 const markdownComponents: Components = {
+  pre: ({ children }) => <CodeBlock>{children}</CodeBlock>,
   img: ({ alt }) => <span>{alt}</span>,
   a: ({ href, children }) => (
     <a href={href} target="_blank" rel="noreferrer">
@@ -94,22 +99,65 @@ const markdownComponents: Components = {
     ),
 };
 
+/** Touch screens have no Enter or Shift+Enter to explain, and a phone-wide box has no room
+ *  for the hint (it would wrap to two lines). Follows the window as it is resized. */
+const SHORT_HINT = '(pointer: coarse), (max-width: 600px)';
+const shortHint = {
+  subscribe: (change: () => void) => {
+    const query = window.matchMedia?.(SHORT_HINT);
+    query?.addEventListener('change', change);
+    return () => query?.removeEventListener('change', change);
+  },
+  read: () => window.matchMedia?.(SHORT_HINT).matches ?? false,
+};
+
+function prefersReducedMotion(): boolean {
+  return (
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+  );
+}
+
+/** Seconds since `key` was first seen (0 when there is none); ticks once a second. */
+function useElapsed(key: string | undefined): number {
+  const [since, setSince] = useState<{ key: string; at: number } | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!key) return;
+    setSince((old) => (old?.key === key ? old : { key, at: Date.now() }));
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [key]);
+  return key && since?.key === key
+    ? Math.max(0, Math.floor((now - since.at) / 1000))
+    : 0;
+}
+
+/** Ways to begin a conversation; a click puts the words in the input box, never sends them. */
+const STARTERS = [
+  'chat.starter.explain',
+  'chat.starter.improve',
+  'chat.starter.readme',
+] as const;
+
 export function Chat({
   threadId,
   project,
   mode,
+  model,
   onActivity,
-  onState,
   onSettings,
+  onOpenSettings,
 }: {
   threadId: string;
   project: string | null;
   /** The approval mode, one setting for every conversation; App owns it. */
   mode: Mode;
+  /** The configured model's name, shown beside the input box. */
+  model: string | null;
   onActivity: () => void;
-  onState: (state: RokoState) => void;
   /** The settings changed here (the approval mode); App keeps the one copy. */
   onSettings: (settings: Settings) => void;
+  onOpenSettings: () => void;
 }) {
   const { t } = useI18n();
   const { agent, isReady } = useAgent({
@@ -133,6 +181,43 @@ export function Chat({
   // Enter pressed before the conversation finished loading: send once it has.
   const sendWhenLoaded = useRef(false);
   const bottom = useRef<HTMLDivElement>(null);
+  const emptyView = useRef<HTMLDivElement>(null);
+  const composerBox = useRef<HTMLFormElement>(null);
+  const typing = draft.trim() !== '';
+  const [walking, setWalking] = useState<RokoState | null>(null);
+  // While the first message is typed, Roko walks from the middle of the page onto the input
+  // box, at the size it has there during the conversation; emptied, it is home again. The
+  // way there is measured, so it lands in the same place at any window size.
+  useLayoutEffect(() => {
+    const view = emptyView.current;
+    const roko = view?.querySelector<HTMLElement>(':scope > .roko');
+    const form = composerBox.current;
+    if (!view || !roko || !form) return;
+    if (!typing) {
+      setWalking(null);
+      return;
+    }
+    const from = roko.getBoundingClientRect();
+    const to = form.getBoundingClientRect();
+    const phone = window.matchMedia('(max-width: 600px)').matches;
+    const size = phone ? 66 : 88;
+    // Measured between bottom centres (the point Roko scales about).
+    const dx =
+      to.left + (phone ? 18 : 34) + size / 2 - (from.left + from.width / 2);
+    // Feet on the input box's top edge, where it sits during the conversation.
+    const dy = to.top + 12 - from.bottom;
+    view.style.setProperty('--dock-x', `${dx}px`);
+    view.style.setProperty('--dock-y', `${dy}px`);
+    view.style.setProperty('--dock-scale', String(size / from.width));
+    if (prefersReducedMotion()) return;
+    setWalking(dx < 0 ? 'walkingLeft' : 'walkingRight');
+    const arrived = setTimeout(() => setWalking(null), 900);
+    return () => clearTimeout(arrived);
+  }, [typing]);
+  const shortPlaceholder = useSyncExternalStore(
+    shortHint.subscribe,
+    shortHint.read,
+  );
   const input = useRef<HTMLTextAreaElement>(null);
 
   const refresh = useCallback(async () => {
@@ -210,19 +295,16 @@ export function Chat({
     return () => clearTimeout(timer);
   }, [justDone]);
 
-  useEffect(() => {
-    onState(
-      pending.length > 0
-        ? 'waiting'
-        : error
-          ? 'failed'
-          : running
-            ? 'running'
-            : justDone
-              ? 'done'
-              : 'idle',
-    );
-  }, [error, running, pending.length, justDone, onState]);
+  const roko: RokoState =
+    pending.length > 0
+      ? 'waiting'
+      : error
+        ? 'failed'
+        : running
+          ? 'running'
+          : justDone
+            ? 'done'
+            : 'idle';
 
   // Tell the user when Rocky starts waiting while the window is in the background.
   const waitingCount = useRef(0);
@@ -241,6 +323,35 @@ export function Chat({
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'end' });
   }, [agent.messages.length, running, pending.length]);
+
+  // Stay at the newest line while it grows (a reply streaming in, a card appearing, the window
+  // getting narrower), as long as the user was already there; scrolling up lets go.
+  const transcript = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const view = transcript.current;
+    if (!view) return;
+    let stuck = true;
+    const onScroll = () => {
+      stuck = view.scrollHeight - view.scrollTop - view.clientHeight < 80;
+    };
+    const keep = () => {
+      if (stuck) view.scrollTo({ top: view.scrollHeight, behavior: 'instant' });
+    };
+    view.addEventListener('scroll', onScroll, { passive: true });
+    const resized = new ResizeObserver(keep);
+    resized.observe(view);
+    const changed = new MutationObserver(keep);
+    changed.observe(view, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+    return () => {
+      view.removeEventListener('scroll', onScroll);
+      resized.disconnect();
+      changed.disconnect();
+    };
+  }, []);
 
   const send = async () => {
     const text = draft.trim();
@@ -341,12 +452,26 @@ export function Chat({
   const lastUser = messages.findLastIndex((m) => m.role === 'user');
   const toolCallsOf = (m: (typeof messages)[number]): ToolCall[] =>
     m.role === 'assistant' ? ((m.toolCalls ?? []) as ToolCall[]) : [];
+  // What Roko is doing this moment: the turn's latest tool call still without a result. Its
+  // status says it in words, and looking tools get the reading pose.
+  const doing =
+    roko === 'running'
+      ? messages
+          .slice(lastUser + 1)
+          .flatMap(toolCallsOf)
+          .filter((call) => !results.has(call.id))
+          .at(-1)
+      : undefined;
+  const pose: RokoState =
+    doing && LOOKING.has(doing.function.name) ? 'reading' : roko;
+  const seconds = useElapsed(doing?.id);
 
   // Each run's change card goes at the end of the turn that holds its last tool call.
   const { at: cardsAt, unanchored } = placeChangeCards(
     messages,
     runsWithChanges(receipts, snapshots),
   );
+  const inCards = shownInChangeCards(receipts, snapshots);
   const unknown = receipts.filter((r) => r.outcome === 'unknown');
   const visible = messages.some(
     (m) =>
@@ -356,12 +481,47 @@ export function Chat({
   );
 
   return (
-    <section className="chat">
-      <div className="transcript" aria-live="polite">
+    <main className="chat">
+      <h1 className="sr-only">{t('nav.chat')}</h1>
+      <div ref={transcript} className="transcript" aria-live="polite">
         {loaded && !visible && (
-          <div className="empty">
-            <Roko state="waving" size={120} />
+          <div ref={emptyView} className={typing ? 'empty typing' : 'empty'}>
+            <Roko state={walking ?? 'idle'} size={208} follow />
             <p>{t('chat.empty')}</p>
+            {/* Where Roko will work, so the first message has a place to start from. */}
+            {project ? (
+              <span className="empty-note">
+                {t('chat.empty.project', {
+                  name: project.split(/[\\/]/).filter(Boolean).pop() ?? project,
+                })}
+              </span>
+            ) : (
+              <button
+                type="button"
+                className="primary choose-folder"
+                onClick={onOpenSettings}
+              >
+                <FolderOpen size={15} aria-hidden="true" />
+                {t('chat.empty.noProject')}
+              </button>
+            )}
+            {/* The suggestions are about a project, so they wait until there is one. */}
+            {project && (
+              <div className="starters">
+                {STARTERS.map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      setDraft(t(key));
+                      input.current?.focus();
+                    }}
+                  >
+                    {t(key)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
         {messages.map((message, index) => {
@@ -371,6 +531,7 @@ export function Chat({
               threadId={threadId}
               runId={card.runId}
               count={card.count}
+              files={card.files}
               project={project}
               onRestored={() => void refresh().catch(() => undefined)}
             />
@@ -393,9 +554,10 @@ export function Chat({
           if (!text && calls.length === 0 && cards.length === 0) return null;
           return (
             <div key={message.id} className="turn-part">
+              {/* One Roko on screen, the one on the input box: replies are its words set as
+                  plain text, the user's are in bubbles. */}
               {text && (
                 <div className="reply">
-                  <Roko state="idle" size={32} />
                   <div className="markdown">
                     <ReactMarkdown components={markdownComponents}>
                       {textOf(message.content)}
@@ -411,8 +573,18 @@ export function Chat({
                       result !== undefined
                         ? 'done'
                         : running && index > lastUser
-                          ? 'running'
+                          ? pending.length > 0
+                            ? 'waiting'
+                            : 'running'
                           : 'interrupted';
+                    // The approval panel shows the action that waits, and the turn's change
+                    // card shows the files written: no second card for either.
+                    if (state === 'waiting') return null;
+                    // The call in progress is reported once, by Roko's status on the input
+                    // box; its row joins the transcript when it is done.
+                    if (state === 'running' && call.id === doing?.id)
+                      return null;
+                    if (state === 'done' && inCards.has(call.id)) return null;
                     return (
                       <ToolCard
                         key={call.id}
@@ -437,6 +609,7 @@ export function Chat({
               threadId={threadId}
               runId={card.runId}
               count={card.count}
+              files={card.files}
               project={project}
               onRestored={() => void refresh().catch(() => undefined)}
             />
@@ -454,7 +627,8 @@ export function Chat({
           />
         ))}
         <JobCards threadId={threadId} refreshKey={agent.messages.length} />
-        {running && pending.length === 0 && (
+        {/* While a tool runs, Roko's status on the input box already says what it is doing. */}
+        {running && pending.length === 0 && !doing && (
           <p className="thinking">{t('chat.thinking')}</p>
         )}
         {error && (
@@ -462,8 +636,45 @@ export function Chat({
             {error}
           </p>
         )}
-        <div ref={bottom} />
+        <div ref={bottom} className="transcript-end" />
       </div>
+      {visible && (
+        // Roko sits on the input box's top edge: its pose and the chip beside it say what it
+        // is doing, and it turns to the pointer while idle.
+        <div className={`stage ${roko}`} role="status">
+          <Roko state={pose} size={88} follow />
+          <span className="stage-chip">
+            <span className="stage-text">
+              {doing
+                ? seconds >= 3
+                  ? t('tool.elapsed', {
+                      what: toolSummary(
+                        doing.function.name,
+                        doing.function.arguments,
+                        t,
+                      ),
+                      seconds,
+                    })
+                  : toolSummary(
+                      doing.function.name,
+                      doing.function.arguments,
+                      t,
+                    )
+                : t(
+                    roko === 'waiting'
+                      ? 'panel.waiting'
+                      : roko === 'done'
+                        ? 'panel.done'
+                        : roko === 'running'
+                          ? 'panel.running'
+                          : roko === 'failed'
+                            ? 'panel.failed'
+                            : 'panel.idle',
+                  )}
+            </span>
+          </span>
+        </div>
+      )}
       {pending.length > 0 ? (
         <div className="composer">
           {pending[0]!.effect.kind === 'plan' ? (
@@ -484,6 +695,7 @@ export function Chat({
         </div>
       ) : (
         <form
+          ref={composerBox}
           className="composer"
           onSubmit={(e) => {
             e.preventDefault();
@@ -496,9 +708,14 @@ export function Chat({
               value={draft}
               rows={2}
               placeholder={t(
-                planning ? 'chat.placeholder.plan' : 'chat.placeholder',
+                planning
+                  ? 'chat.placeholder.plan'
+                  : shortPlaceholder
+                    ? 'chat.placeholder.touch'
+                    : 'chat.placeholder',
               )}
               aria-label={t('chat.placeholder')}
+              aria-keyshortcuts="/"
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={onKeyDown}
             />
@@ -514,15 +731,36 @@ export function Chat({
                 <ListChecks size={14} />
                 {t('plan.toggle')}
               </button>
+              <button
+                type="button"
+                className="chip"
+                title={project ?? undefined}
+                aria-label={`${t('panel.project')}: ${project ?? t('project.none')}`}
+                onClick={onOpenSettings}
+              >
+                <FolderOpen size={13} aria-hidden="true" />
+                <span>
+                  {project
+                    ? (project.split(/[\\/]/).filter(Boolean).pop() ?? project)
+                    : t('project.none')}
+                </span>
+              </button>
+              {model && (
+                <span className="chip model" title={model}>
+                  <Cpu size={13} aria-hidden="true" />
+                  <span className="sr-only">{t('panel.model')}: </span>
+                  <span>{model}</span>
+                </span>
+              )}
               <span className="spacer" />
               {running ? (
                 <button
                   type="button"
-                  className="icon-button"
-                  aria-label={t('chat.stop')}
+                  className="secondary stop"
                   onClick={() => copilotkit.stopAgent({ agent })}
                 >
-                  <Square size={16} />
+                  <CircleStop size={15} aria-hidden="true" />
+                  {t('chat.stop')}
                 </button>
               ) : (
                 <button
@@ -538,6 +776,6 @@ export function Chat({
           </div>
         </form>
       )}
-    </section>
+    </main>
   );
 }

@@ -1,5 +1,8 @@
 // Model settings: provider preset, address, API key (write-only), model, connection test.
-import { useState } from 'react';
+// On the first-run page the form has no save button of its own: the page's one "start"
+// button saves it. `onReady` hands the page the save and whether the form is complete; a save
+// of an incomplete form marks the missing fields and moves the cursor to the first one.
+import { useEffect, useRef, useState } from 'react';
 import {
   api,
   type ModelSettings,
@@ -24,9 +27,11 @@ type Test =
 export function ModelForm({
   current,
   onSaved,
+  onReady,
 }: {
   current: ModelSettings | null;
   onSaved: (settings: Settings) => void;
+  onReady?: (form: { complete: boolean; save: () => Promise<boolean> }) => void;
 }) {
   const { t } = useI18n();
   const [provider, setProvider] = useState<Provider>(
@@ -69,7 +74,7 @@ export function ModelForm({
     }
   };
 
-  const save = async () => {
+  const save = async (): Promise<boolean> => {
     setError('');
     try {
       const settings = await api<Settings>('/settings/model', 'PUT', {
@@ -81,10 +86,34 @@ export function ModelForm({
       setSaved(true);
       setApiKey('');
       onSaved(settings);
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : '');
+      return false;
     }
   };
+
+  const complete = model.trim() !== '' && baseURL.trim() !== '';
+  const [missing, setMissing] = useState(false);
+  const baseURLBox = useRef<HTMLInputElement>(null);
+  const modelBox = useRef<HTMLInputElement>(null);
+  const submit = async (): Promise<boolean> => {
+    if (!complete) {
+      setMissing(true);
+      (baseURL.trim() ? modelBox : baseURLBox).current?.focus();
+      return false;
+    }
+    return save();
+  };
+  const latest = useRef(submit);
+  latest.current = submit;
+  useEffect(() => {
+    onReady?.({ complete, save: () => latest.current() });
+  }, [complete, onReady]);
+  const required = (value: string) =>
+    missing && !value.trim() ? (
+      <span className="bad small">{t('model.required')}</span>
+    ) : null;
 
   return (
     <div className="model-form">
@@ -110,8 +139,11 @@ export function ModelForm({
       <div className="fields">
         <label>
           {t('model.baseURL')}
+          {required(baseURL)}
           <input
+            ref={baseURLBox}
             className="mono"
+            aria-invalid={missing && !baseURL.trim() ? true : undefined}
             value={baseURL}
             onChange={(e) => setBaseURL(e.target.value)}
             spellCheck={false}
@@ -151,8 +183,11 @@ export function ModelForm({
         </div>
         <label>
           {t('model.model')}
+          {required(model)}
           <input
+            ref={modelBox}
             className="mono"
+            aria-invalid={missing && !model.trim() ? true : undefined}
             list="rocky-models"
             value={model}
             placeholder={t('model.model.placeholder')}
@@ -164,18 +199,22 @@ export function ModelForm({
               test.models.map((m) => <option key={m} value={m} />)}
           </datalist>
         </label>
-        <div className="row">
-          <button
-            type="button"
-            className="primary"
-            disabled={!model.trim() || !baseURL.trim()}
-            onClick={() => void save()}
-          >
-            {t('model.save')}
-          </button>
-          {saved && <span className="ok">{t('model.saved')}</span>}
-          {error && <span className="bad">{error}</span>}
-        </div>
+        {onReady ? (
+          error && <p className="bad">{error}</p>
+        ) : (
+          <div className="row">
+            <button
+              type="button"
+              className="primary"
+              disabled={!complete}
+              onClick={() => void save()}
+            >
+              {t('model.save')}
+            </button>
+            {saved && <span className="ok">{t('model.saved')}</span>}
+            {error && <span className="bad">{error}</span>}
+          </div>
+        )}
       </div>
     </div>
   );

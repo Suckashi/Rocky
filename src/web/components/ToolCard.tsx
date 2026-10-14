@@ -1,5 +1,12 @@
 // One tool call in the transcript: what it did, its state, and its result on demand.
-import { Check, CircleSlash, LoaderCircle } from 'lucide-react';
+import {
+  Check,
+  ChevronRight,
+  CircleSlash,
+  Hourglass,
+  LoaderCircle,
+} from 'lucide-react';
+import { useState } from 'react';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
 import { commandLine } from '../effects.ts';
 import { filePreview, isPreviewable, useOpenPreview } from './PreviewPane.tsx';
@@ -36,12 +43,57 @@ function target(args: Record<string, unknown>): string {
     'title',
     'query',
   ]) {
-    if (typeof args[key] === 'string') return args[key];
+    const value = args[key];
+    if (typeof value !== 'string') continue;
+    // File tools see the project folder as "/"; show the path the way the user knows it.
+    return key === 'file_path' || key === 'path'
+      ? value.replace(/^\/+/, '') || '/'
+      : value;
   }
   return '';
 }
 
-export type ToolState = 'running' | 'done' | 'interrupted';
+/** A tool call in a few words, for Roko's status while the call runs ("讀取檔案：app.js"). */
+export function toolSummary(
+  name: string,
+  args: string,
+  t: (key: MessageKey, params?: Record<string, string | number>) => string,
+): string {
+  let parsed: Record<string, unknown> = {};
+  try {
+    parsed = JSON.parse(args || '{}') as Record<string, unknown>;
+  } catch {
+    // Arguments still streaming in: the label alone.
+  }
+  const label = KNOWN.has(name)
+    ? t(`tool.${name}` as MessageKey)
+    : t('tool.other', { name });
+  // A command by its program's name, not its full path; a long line is cut short.
+  const argv = Array.isArray(parsed['argv'])
+    ? parsed['argv'].map(String)
+    : null;
+  const full = argv
+    ? commandLine([
+        (argv[0] ?? '').split(/[\\/]/).pop() ?? '',
+        ...argv.slice(1),
+      ])
+    : target(parsed);
+  const what = full.length > 48 ? `${full.slice(0, 47)}…` : full;
+  return what ? t('tool.summary', { label, target: what }) : label;
+}
+
+/** Tools that only look: Roko reads (the sheet's "review" row) instead of running. */
+export const LOOKING = new Set([
+  'ls',
+  'read_file',
+  'glob',
+  'grep',
+  'read_document',
+  'search_memory',
+  'load_skill',
+]);
+
+export type ToolState = 'running' | 'waiting' | 'done' | 'interrupted';
 
 export function ToolCard({
   name,
@@ -56,6 +108,7 @@ export function ToolCard({
 }) {
   const { t } = useI18n();
   const openPreview = useOpenPreview();
+  const [open, setOpen] = useState(false);
   let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(args || '{}') as Record<string, unknown>;
@@ -80,47 +133,59 @@ export function ToolCard({
     ? t(`tool.${name}` as MessageKey)
     : t('tool.other', { name });
   const icon =
-    state === 'running' ? (
+    state === 'waiting' ? (
+      <Hourglass size={14} />
+    ) : state === 'running' ? (
       <LoaderCircle size={14} className="spin" />
     ) : state === 'done' ? (
       <Check size={14} />
     ) : (
       <CircleSlash size={14} />
     );
+  const head = (
+    <>
+      <span className="tool-icon" role="img" aria-label={t(`tool.${state}`)}>
+        {icon}
+      </span>
+      <span className="tool-name">{label}</span>
+      <span className="tool-target mono">{target(parsed)}</span>
+      {state === 'interrupted' && (
+        <span className="badge warn">{t('tool.interrupted')}</span>
+      )}
+    </>
+  );
   return (
-    <details className={`tool-card ${state}`}>
-      <summary>
-        <span className="tool-icon" aria-label={t(`tool.${state}`)}>
-          {icon}
-        </span>
-        <span className="tool-name">{label}</span>
-        <span className="tool-target mono">{target(parsed)}</span>
-        {state === 'interrupted' && (
-          <span className="badge warn">{t('tool.interrupted')}</span>
+    <div className={`tool-card ${state}${open ? ' open' : ''}`}>
+      <div className="tool-head">
+        {result !== undefined ? (
+          <button
+            type="button"
+            className="tool-toggle"
+            aria-expanded={open}
+            onClick={() => setOpen((o) => !o)}
+          >
+            {head}
+            <ChevronRight size={14} className="tool-chevron" aria-hidden />
+          </button>
+        ) : (
+          <div className="tool-toggle">{head}</div>
         )}
         {file && (
           <button
             type="button"
             className="link small"
-            onClick={(e) => {
-              e.preventDefault();
-              openPreview(filePreview(file));
-            }}
+            onClick={() => openPreview(filePreview(file))}
           >
             {t('preview.open')}
           </button>
         )}
         {jobId && (
-          <a
-            className="link small"
-            href={`#/jobs/${jobId}`}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <a className="link small" href={`#/jobs/${jobId}`}>
             {t('jobs.view')}
           </a>
         )}
-      </summary>
-      {result !== undefined && (
+      </div>
+      {open && result !== undefined && (
         <div className="tool-result">
           <span className="label">{t('tool.output')}</span>
           <pre className="code">
@@ -130,6 +195,6 @@ export function ToolCard({
           </pre>
         </div>
       )}
-    </details>
+    </div>
   );
 }

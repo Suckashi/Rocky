@@ -44,6 +44,8 @@ export interface PlanOption {
 }
 
 export type Locale = 'zh-TW' | 'en';
+/** Light, dark, or whatever the operating system uses. */
+export type Theme = 'system' | 'light' | 'dark';
 export type Provider = 'openai-compatible' | 'openai' | 'ollama';
 
 export type ReceiptDecision = 'allowed' | 'approved' | 'rejected' | 'denied';

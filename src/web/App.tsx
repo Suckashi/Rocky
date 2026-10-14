@@ -3,15 +3,18 @@ import { CopilotKitProvider } from '@copilotkit/react-core/v2';
 import {
   Briefcase,
   MessageSquare,
+  PanelLeft,
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError, type Settings } from './api.ts';
 import { Chat } from './components/Chat.tsx';
 import { usePreviewPane } from './components/PreviewPane.tsx';
-import { Roko, type RokoState } from './components/Roko.tsx';
+import { Roko } from './components/Roko.tsx';
 import { ThreadList } from './components/ThreadList.tsx';
 import { I18nProvider, useI18n, type MessageKey } from './i18n/index.tsx';
+import { isEditable } from './keys.ts';
+import { applyTheme } from './components/ThemeSwitch.tsx';
 import { Locked } from './pages/Locked.tsx';
 import { JobsPage } from './pages/JobsPage.tsx';
 import { Onboarding } from './pages/Onboarding.tsx';
@@ -96,7 +99,8 @@ function Shell({
     () => threadFromHash() ?? crypto.randomUUID(),
   );
   const [refreshKey, setRefreshKey] = useState(0);
-  const [roko, setRoko] = useState<RokoState>('idle');
+  /** Narrow windows fold the conversation list into a drawer opened from the rail. */
+  const [threadsOpen, setThreadsOpen] = useState(false);
   const jobsWaiting = useJobsWaiting();
   const preview = usePreviewPane();
 
@@ -129,6 +133,52 @@ function Shell({
 
   const onActivity = useCallback(() => setRefreshKey((k) => k + 1), []);
 
+  useEffect(() => {
+    if (!threadsOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setThreadsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [threadsOpen]);
+  const openThread = (id: string) => {
+    setThreadId(id);
+    setThreadsOpen(false);
+  };
+
+  // Keyboard: Ctrl/⌘+Shift+O starts a conversation; "/" outside a field goes to the input box.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.isComposing) return;
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === 'o'
+      ) {
+        e.preventDefault();
+        setView('chat');
+        setThreadId(crypto.randomUUID());
+        setThreadsOpen(false);
+        return;
+      }
+      if (
+        e.key === '/' &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        !isEditable(e.target)
+      ) {
+        const box =
+          document.querySelector<HTMLTextAreaElement>('.composer textarea');
+        if (!box) return;
+        e.preventDefault();
+        box.focus();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   if (view === 'onboarding') {
     return (
       <Onboarding
@@ -138,27 +188,33 @@ function Shell({
       />
     );
   }
-  if (view === 'settings') {
-    return (
-      <SettingsPage
-        settings={settings}
-        onChange={setSettings}
-        onBack={() => setView('chat')}
-      />
-    );
-  }
   return preview.provider(
     <div
-      className={`shell${view === 'jobs' ? ' jobs-view' : ''}${preview.open ? ' previewing' : ''}`}
+      className={`shell${view === 'jobs' ? ' jobs-view' : ''}${view === 'settings' ? ' settings-view' : ''}${preview.open ? ' previewing' : ''}${threadsOpen ? ' threads-open' : ''}`}
     >
       <nav className="rail" aria-label={t('app.name')}>
         <img src="/rocky/mark.svg" alt={t('app.name')} width={28} height={28} />
+        {view !== 'settings' && (
+          <button
+            type="button"
+            className="icon-button threads-toggle"
+            aria-label={t(view === 'jobs' ? 'jobs.title' : 'nav.threads')}
+            aria-expanded={threadsOpen}
+            onClick={() => setThreadsOpen((open) => !open)}
+          >
+            <PanelLeft size={18} />
+          </button>
+        )}
         <button
           type="button"
           className={`icon-button${view === 'chat' ? ' active' : ''}`}
           aria-label={t('nav.chat')}
+          title={t('nav.chat')}
           aria-current={view === 'chat' ? 'page' : undefined}
-          onClick={() => setView('chat')}
+          onClick={() => {
+            setView('chat');
+            setThreadsOpen(false);
+          }}
         >
           <MessageSquare size={18} />
         </button>
@@ -170,8 +226,12 @@ function Shell({
               ? t('nav.jobsWaiting', { count: jobsWaiting })
               : t('nav.jobs')
           }
+          title={t('nav.jobs')}
           aria-current={view === 'jobs' ? 'page' : undefined}
-          onClick={() => setView('jobs')}
+          onClick={() => {
+            setView('jobs');
+            setThreadsOpen(false);
+          }}
         >
           <Briefcase size={18} />
           {jobsWaiting > 0 && (
@@ -182,89 +242,62 @@ function Shell({
         </button>
         <button
           type="button"
-          className="icon-button bottom"
+          className={`icon-button bottom${view === 'settings' ? ' active' : ''}`}
+          aria-current={view === 'settings' ? 'page' : undefined}
           aria-label={t('nav.settings')}
+          title={t('nav.settings')}
           onClick={() => setView('settings')}
         >
           <SettingsIcon size={18} />
         </button>
       </nav>
-      {view === 'jobs' ? (
+      {view === 'settings' ? (
+        <SettingsPage
+          settings={settings}
+          onChange={setSettings}
+          onBack={() => setView('chat')}
+        />
+      ) : view === 'jobs' ? (
         <JobsPage
           selected={jobId}
           project={settings.project}
           autoApply={applyJob}
+          onOpenChat={() => setView('chat')}
           onSelect={(id) => {
             setApplyJob(false);
             setJobId(id);
+            setThreadsOpen(false);
           }}
         />
       ) : (
         <>
           <ThreadList
             selected={threadId}
-            onSelect={setThreadId}
-            onNew={() => setThreadId(crypto.randomUUID())}
+            onSelect={openThread}
+            onNew={() => openThread(crypto.randomUUID())}
             refreshKey={refreshKey}
+            onClose={() => setThreadsOpen(false)}
           />
           <Chat
             key={threadId}
             threadId={threadId}
             project={settings.project}
             mode={settings.mode}
+            model={settings.model?.model ?? null}
             onActivity={onActivity}
-            onState={setRoko}
             onSettings={setSettings}
+            onOpenSettings={() => setView('settings')}
           />
         </>
       )}
+      <button
+        type="button"
+        className="threads-backdrop"
+        tabIndex={-1}
+        aria-label={t('nav.threadsClose')}
+        onClick={() => setThreadsOpen(false)}
+      />
       {preview.pane}
-      <aside className="panel">
-        <div className={`presence ${roko}`}>
-          <Roko state={roko} size={128} />
-          <strong>
-            {t(
-              roko === 'waiting'
-                ? 'panel.waiting'
-                : roko === 'done'
-                  ? 'panel.done'
-                  : roko === 'running'
-                    ? 'panel.running'
-                    : roko === 'failed'
-                      ? 'panel.failed'
-                      : 'panel.idle',
-            )}
-          </strong>
-        </div>
-        <div className="panel-section">
-          <span className="label">{t('panel.project')}</span>
-          {settings.project ? (
-            <span className="mono small">{settings.project}</span>
-          ) : (
-            <button
-              type="button"
-              className="link"
-              onClick={() => setView('settings')}
-            >
-              {t('project.none')}
-            </button>
-          )}
-        </div>
-        <div className="panel-section">
-          <span className="label">{t('panel.model')}</span>
-          {settings.model ? (
-            <span className="mono small">{settings.model.model}</span>
-          ) : (
-            <button
-              type="button"
-              className="link"
-              onClick={() => setView('settings')}
-            >
-              {t('model.notConfigured')}
-            </button>
-          )}
-        </div>
-      </aside>
     </div>,
   );
 }
@@ -284,9 +317,10 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (settings)
-      document.documentElement.lang =
-        settings.locale === 'zh-TW' ? 'zh-Hant' : 'en';
+    if (!settings) return;
+    document.documentElement.lang =
+      settings.locale === 'zh-TW' ? 'zh-Hant' : 'en';
+    applyTheme(settings.theme);
   }, [settings]);
 
   const locale = settings?.locale ?? 'zh-TW';

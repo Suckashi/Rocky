@@ -180,17 +180,17 @@ try {
     });
   await page.getByLabel('網址').fill(fake.baseURL);
   await page.getByRole('combobox', { name: '模型' }).fill('fake-model');
-  await page.getByRole('button', { name: '儲存' }).first().click();
   await page.getByLabel('專案資料夾').fill(project);
   await page.getByRole('button', { name: '使用這個資料夾' }).click();
   await page.getByText('已設定').waitFor();
   await page.getByRole('button', { name: '開始和 Roko 對話' }).click();
+  await page.getByText('選好模型就能開始').waitFor({ state: 'detached' });
 
   await page.getByRole('textbox').fill('請交給 OpenCode 修好 add');
   await page.keyboard.press('Enter');
   const panel = page.getByRole('region', { name: '等你核准' });
   await panel
-    .getByText('Rocky 想把工作交給 OpenCode：修正 add')
+    .getByText('Roko 想把工作交給 OpenCode：修正 add')
     .waitFor({ timeout: 30_000 });
   check(true, 'starting a job asks first, in plain language');
   if (shots) await page.screenshot({ path: join(shots, 'm3-delegate.png') });
@@ -211,7 +211,7 @@ try {
   const cardText = await card.innerText();
   check(
     cardText.includes('改了 1 個檔案') &&
-      cardText.includes('Rocky 自己跑的檢查通過'),
+      cardText.includes('Roko 自己跑的檢查通過'),
     "the conversation shows the finished job: files changed and Rocky's own checks",
   );
   if (shots) await page.screenshot({ path: join(shots, 'm3-job-card.png') });
@@ -223,7 +223,7 @@ try {
   await card.getByRole('link', { name: '套用到專案' }).click();
   await page.getByText('要把這些改動套用到專案嗎？').waitFor();
   await page.getByText('每個改動都和核准的內容一致。').waitFor();
-  await page.getByText('Rocky 執行 npm test：結束代碼 0').waitFor();
+  await page.getByText('Roko 執行 npm test：結束代碼 0').waitFor();
   check(
     true,
     "Apply on the card opens the job page with the plan, Rocky's verification and its test run",

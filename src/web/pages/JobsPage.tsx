@@ -12,6 +12,8 @@ import {
 } from '../api.ts';
 import { ApprovalPanel, type Answer } from '../components/ApprovalPanel.tsx';
 import { Diff } from '../components/Diff.tsx';
+import { Info, RotateCw } from 'lucide-react';
+import { CodeBlock } from '../components/CodeBlock.tsx';
 import { Roko } from '../components/Roko.tsx';
 import { TurnChanges } from '../components/TurnChanges.tsx';
 import { useI18n, type MessageKey } from '../i18n/index.tsx';
@@ -479,11 +481,14 @@ export function JobsPage({
   project,
   autoApply = false,
   onSelect,
+  onOpenChat,
 }: {
   selected: string | undefined;
   project: string | null;
   autoApply?: boolean;
   onSelect: (id: string) => void;
+  /** The way out of an empty list: jobs start in a conversation. */
+  onOpenChat?: () => void;
 }) {
   const { t } = useI18n();
   const [list, setList] = useState<{ available: boolean; jobs: Job[] } | null>(
@@ -508,11 +513,8 @@ export function JobsPage({
     <>
       <aside className="threads" aria-label={t('jobs.title')}>
         <span className="label">{t('jobs.title')}</span>
-        {list && !list.available && (
+        {list && !list.available && list.jobs.length > 0 && (
           <p className="small warn">{t('jobs.unavailable')}</p>
-        )}
-        {list?.jobs.length === 0 && (
-          <p className="small muted">{t('jobs.empty')}</p>
         )}
         <ul>
           {list?.jobs.map((job) => (
@@ -536,9 +538,13 @@ export function JobsPage({
             </li>
           ))}
         </ul>
-        <p className="small muted">{t('jobs.network')}</p>
+        <p className="small muted info-note">
+          <Info size={14} aria-hidden="true" />
+          <span>{t('jobs.network')}</span>
+        </p>
       </aside>
       <main className="jobs-main">
+        <h1 className="sr-only">{t('jobs.title')}</h1>
         {selected ? (
           <JobDetail
             key={selected}
@@ -547,9 +553,32 @@ export function JobsPage({
             autoApply={autoApply}
             onChanged={load}
           />
+        ) : list?.jobs.length === 0 ? (
+          <div className="empty no-jobs">
+            <Roko state="resting" size={160} />
+            <p>{t('jobs.none')}</p>
+            <span className="empty-note">{t('jobs.empty')}</span>
+            {onOpenChat && list.available && (
+              <button type="button" className="primary" onClick={onOpenChat}>
+                {t('jobs.toChat')}
+              </button>
+            )}
+            {!list.available && (
+              <div className="install">
+                <span>{t('jobs.install')}</span>
+                <div className="row">
+                  <CodeBlock inline>{t('jobs.installCommand')}</CodeBlock>
+                  <button type="button" className="secondary" onClick={load}>
+                    <RotateCw size={15} aria-hidden="true" />
+                    {t('locked.retry')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="empty">
-            <Roko state="idle" size={120} />
+            <Roko state="idle" size={160} follow />
             <p>{t('jobs.select')}</p>
           </div>
         )}

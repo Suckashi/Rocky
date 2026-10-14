@@ -1,33 +1,73 @@
-/* Every color, font and spacing value lives here. Values follow the owner's design canvas
-   ("Rocky 主要畫面"). Fonts are local system fonts: Rocky makes no web-font requests. */
+/* Every color, font, spacing, depth and motion value lives here. The palette is Roko's: warm
+   stone neutrals and the amber of its eyes (ADR 0038); dark follows the system setting. Fonts are
+   local system fonts: Rocky makes no web-font requests. */
 :root {
-  --bg: #f8f7f4;
-  --surface: #ffffff;
-  --surface-muted: #fafaf8;
-  --border: #e9e8e6;
-  --border-strong: #dedee6;
-  --text: #333641;
-  --text-muted: #55576a;
-  --text-subtle: #6b6d78;
-  --primary: #5269bb;
-  --primary-text: #ffffff;
-  --primary-soft: #eeeffa;
-  --link: #3f55a8;
+  color-scheme: light;
+
+  --bg: #f5f1ea;
+  --bg-glow: rgb(232 150 46 / 12%);
+  --surface: #fffdf9;
+  --surface-muted: #faf6ef;
+  --surface-sunken: #efe9df;
+  --surface-raised: #ffffff;
+  --border: #e7dfd2;
+  --border-strong: #d6cbba;
+  /* Field outlines meet 3:1 against the surface (WCAG 1.4.11). */
+  --input-border: #958676;
+  --field-bg: #fffdf9;
+  --text: #2a2420;
+  --text-muted: #544a42;
+  --text-subtle: #6b6158;
+  --primary: #f0a238;
+  --primary-hover: #e8962b;
+  --primary-press: #d9861d;
+  --primary-text: #241503;
+  --primary-soft: #fbedd6;
+  --primary-soft-strong: #f5dcb1;
+  --link: #94530a;
+  /* The user's messages wear Roko's dark visor; the focus ring is a deep amber. */
+  --bubble-bg: #2f2925;
+  --bubble-text: #fbf6ef;
+  --focus: #b5650a;
+  /* Roko's eyes: the same amber as the brand, for glows and presence. */
+  --accent: #f0a238;
+  --accent-glow: rgb(240 162 56 / 32%);
   --ok: #2f7a4f;
-  --bad: #b4372f;
-  --warn: #c27a1a;
-  --warn-soft: #fff7ec;
-  --code-bg: #23252e;
-  --code-text: #e9eaf0;
-  --diff-add-bg: #e7f5ec;
+  --ok-soft: #e5f3e9;
+  --bad: #b0352b;
+  --bad-soft: #fbe9e6;
+  --warn: #a2470f;
+  --on-warn: #ffffff;
+  --warn-soft: #fdeee2;
+  --code-bg: #3a322b;
+  --code-text: #f1e9df;
+  --code-inline-bg: #f1eadf;
+  --code-ok: #9fe0b4;
+  --diff-add-bg: #e5f3e9;
   --diff-add-text: #1f5a37;
-  --diff-del-bg: #fbeceb;
+  --diff-del-bg: #fbe9e6;
   --diff-del-text: #8a2a24;
+  --paper-bg: #e9e3d8;
+  /* Roko's stone in the page: a faint grain (inline SVG noise, no request). */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .22 0 0 0 0 .14 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --floor-shadow: rgb(48 34 20 / 26%);
+  --selection: rgb(240 162 56 / 28%);
+  --scrollbar: rgb(42 36 32 / 18%);
+  --scrollbar-hover: rgb(42 36 32 / 32%);
+
+  --shadow-xs: 0 1px 2px rgb(48 34 20 / 5%);
+  --shadow-sm: 0 1px 2px rgb(48 34 20 / 4%), 0 2px 6px rgb(48 34 20 / 4%);
+  --shadow-md: 0 2px 4px rgb(48 34 20 / 4%), 0 8px 24px rgb(48 34 20 / 7%);
+  --shadow-lg: 0 4px 8px rgb(48 34 20 / 5%), 0 18px 48px rgb(48 34 20 / 12%);
   --shadow-overlay: 0 8px 40px rgb(0 0 0 / 20%);
+  --ring: 0 0 0 3px rgb(240 162 56 / 30%);
 
   --font-sans:
-    'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', system-ui,
-    sans-serif;
+    'Segoe UI Variable Text', 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC',
+    'Noto Sans TC', system-ui, sans-serif;
+  --font-display:
+    'Segoe UI Variable Display', 'Segoe UI', 'Microsoft JhengHei',
+    'PingFang TC', 'Noto Sans TC', system-ui, sans-serif;
   --font-mono:
     'Cascadia Mono', Consolas, 'JetBrains Mono', ui-monospace, monospace;
   --font-size: 14px;
@@ -35,14 +75,138 @@
   --radius-sm: 7px;
   --radius: 9px;
   --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-control: 10px;
+  --radius-full: 999px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 24px;
   --space-6: 32px;
+  --space-7: 48px;
   --rail-width: 56px;
   --threads-width: 240px;
-  --panel-width: 300px;
   --touch: 40px;
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 420ms;
+}
+
+/* Dark: when the system is dark and the user has not chosen light, or when the user chose
+   dark (Settings › General). Both blocks hold the same values. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --bg: #15120f;
+    --bg-glow: rgb(245 170 70 / 10%);
+    --surface: #1d1916;
+    --surface-muted: #221d19;
+    --surface-sunken: #110e0c;
+    --surface-raised: #2a241f;
+    --border: #332b25;
+    --border-strong: #463c34;
+    --input-border: #7d6f62;
+    --field-bg: #161310;
+    --text: #f2ece5;
+    --text-muted: #c9bdb0;
+    --text-subtle: #a09385;
+    --primary: #f2a640;
+    --primary-hover: #f6b357;
+    --primary-press: #e3952d;
+    --primary-text: #1d1206;
+    --primary-soft: #3b2c1c;
+    --primary-soft-strong: #45321d;
+    --link: #f6bb6c;
+    --bubble-bg: #4b3a2b;
+    --bubble-text: #f6efe8;
+    --focus: #f6bb6c;
+    --accent: #f5b04f;
+    --accent-glow: rgb(245 176 79 / 22%);
+    --ok: #6fcf97;
+    --ok-soft: #14291c;
+    --bad: #f28b82;
+    --bad-soft: #331a17;
+    --warn: #f39a5a;
+    --on-warn: #1d1006;
+    --warn-soft: #33200f;
+    --code-bg: #332c26;
+    --code-text: #efe7dd;
+    --code-inline-bg: #2e2721;
+    --diff-add-bg: #13291c;
+    --diff-add-text: #8fe0b0;
+    --diff-del-bg: #331716;
+    --diff-del-text: #f5a39b;
+    --paper-bg: #2b2620;
+    --floor-shadow: rgb(0 0 0 / 55%);
+    --selection: rgb(245 176 79 / 30%);
+    --scrollbar: rgb(242 236 229 / 14%);
+    --scrollbar-hover: rgb(242 236 229 / 26%);
+
+    --shadow-xs: 0 1px 2px rgb(0 0 0 / 30%);
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 8px rgb(0 0 0 / 20%);
+    --shadow-md: 0 2px 4px rgb(0 0 0 / 30%), 0 10px 28px rgb(0 0 0 / 35%);
+    --shadow-lg: 0 4px 10px rgb(0 0 0 / 35%), 0 22px 56px rgb(0 0 0 / 50%);
+    --shadow-overlay: 0 8px 40px rgb(0 0 0 / 60%);
+    --ring: 0 0 0 3px rgb(245 176 79 / 30%);
+  }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #15120f;
+  --bg-glow: rgb(245 170 70 / 10%);
+  --surface: #1d1916;
+  --surface-muted: #221d19;
+  --surface-sunken: #110e0c;
+  --surface-raised: #2a241f;
+  --border: #332b25;
+  --border-strong: #463c34;
+  --input-border: #7d6f62;
+  --field-bg: #161310;
+  --text: #f2ece5;
+  --text-muted: #c9bdb0;
+  --text-subtle: #a09385;
+  --primary: #f2a640;
+  --primary-hover: #f6b357;
+  --primary-press: #e3952d;
+  --primary-text: #1d1206;
+  --primary-soft: #3b2c1c;
+  --primary-soft-strong: #45321d;
+  --link: #f6bb6c;
+  --bubble-bg: #4b3a2b;
+  --bubble-text: #f6efe8;
+  --focus: #f6bb6c;
+  --accent: #f5b04f;
+  --accent-glow: rgb(245 176 79 / 22%);
+  --ok: #6fcf97;
+  --ok-soft: #14291c;
+  --bad: #f28b82;
+  --bad-soft: #331a17;
+  --warn: #f39a5a;
+  --on-warn: #1d1006;
+  --warn-soft: #33200f;
+  --code-bg: #332c26;
+  --code-text: #efe7dd;
+  --code-inline-bg: #2e2721;
+  --diff-add-bg: #13291c;
+  --diff-add-text: #8fe0b0;
+  --diff-del-bg: #331716;
+  --diff-del-text: #f5a39b;
+  --paper-bg: #2b2620;
+  --floor-shadow: rgb(0 0 0 / 55%);
+  --selection: rgb(245 176 79 / 30%);
+  --scrollbar: rgb(242 236 229 / 14%);
+  --scrollbar-hover: rgb(242 236 229 / 26%);
+
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 8px rgb(0 0 0 / 20%);
+  --shadow-md: 0 2px 4px rgb(0 0 0 / 30%), 0 10px 28px rgb(0 0 0 / 35%);
+  --shadow-lg: 0 4px 10px rgb(0 0 0 / 35%), 0 22px 56px rgb(0 0 0 / 50%);
+  --shadow-overlay: 0 8px 40px rgb(0 0 0 / 60%);
+  --ring: 0 0 0 3px rgb(245 176 79 / 30%);
 }

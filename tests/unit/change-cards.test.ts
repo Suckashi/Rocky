@@ -3,6 +3,7 @@ import type { Receipt } from '../../src/web/api.ts';
 import {
   placeChangeCards,
   runsWithChanges,
+  shownInChangeCards,
 } from '../../src/web/change-cards.ts';
 
 const receipt = (id: string, runId: string, toolCallId: string) =>
@@ -28,7 +29,7 @@ describe('change cards', () => {
       { role: 'user' },
     ];
     const { at, unanchored } = placeChangeCards(messages, runs);
-    expect(at.get(3)).toEqual([{ runId: 'run1', count: 1 }]);
+    expect(at.get(3)).toEqual([{ runId: 'run1', count: 1, files: ['a.txt'] }]);
     expect(unanchored).toEqual([]);
   });
 
@@ -42,6 +43,24 @@ describe('change cards', () => {
     );
     const { at, unanchored } = placeChangeCards([{ role: 'user' }], runs);
     expect(at.size).toBe(0);
-    expect(unanchored).toEqual([{ runId: 'lost', count: 2 }]);
+    expect(unanchored).toEqual([
+      { runId: 'lost', count: 2, files: ['a.txt', 'b.txt'] },
+    ]);
+  });
+
+  it('the tool calls a card shows are known, so their own tool cards are left out', () => {
+    const calls = shownInChangeCards(
+      [
+        receipt('r1', 'run1', 'c1'),
+        receipt('r2', 'run1', 'c2'),
+        { ...receipt('r3', 'run1', 'c3'), outcome: 'failed' } as Receipt,
+      ],
+      [
+        { receiptId: 'r1', path: 'a.txt' },
+        { receiptId: 'r3', path: 'b.txt' },
+      ],
+    );
+    // c2 wrote nothing the card shows; c3 failed.
+    expect([...calls]).toEqual(['c1']);
   });
 });

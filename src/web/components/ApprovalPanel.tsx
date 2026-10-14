@@ -1,5 +1,5 @@
 // Replaces the input box while Rocky waits for a decision. One question at a time, in order.
-import { Maximize2, Minimize2, Square } from 'lucide-react';
+import { Maximize2, Minimize2, CircleStop, ShieldAlert } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { displayPath, type PendingApproval } from '../api.ts';
 import { commandLine } from '../effects.ts';
@@ -189,6 +189,9 @@ function Preview({
   return null;
 }
 
+/** Reasons where a stray Enter must not approve: nothing is chosen until the user picks. */
+const NO_DEFAULT = new Set(['protected', 'dangerous', 'secret', 'external']);
+
 export function ApprovalPanel({
   approvals,
   project,
@@ -202,10 +205,14 @@ export function ApprovalPanel({
 }) {
   const { t } = useI18n();
   const approval = approvals[0]!;
-  const [selected, setSelected] = useState(0);
+  const noDefault = NO_DEFAULT.has(approval.reason);
+  const [selected, setSelected] = useState(noDefault ? -1 : 0);
   const [reason, setReason] = useState('');
   const [explaining, setExplaining] = useState(false);
-  const [busy, setBusy] = useState(false);
+  // Busy only for the question being answered: the next question can arrive (the run goes
+  // on) before the answer's request returns, and a key pressed on it must count.
+  const [answering, setAnswering] = useState<string | null>(null);
+  const busy = answering === approval.id;
   const [error, setError] = useState('');
   const [full, setFull] = useState(false);
   const reasonBox = useRef<HTMLInputElement>(null);
@@ -218,7 +225,7 @@ export function ApprovalPanel({
 
   // A new question starts fresh.
   useEffect(() => {
-    setSelected(0);
+    setSelected(NO_DEFAULT.has(approval.reason) ? -1 : 0);
     setReason('');
     setExplaining(false);
     setError('');
@@ -269,7 +276,7 @@ export function ApprovalPanel({
                   ? { reason: reason.trim() }
                   : {}),
               };
-    setBusy(true);
+    setAnswering(approval.id);
     setError('');
     try {
       await onAnswer(approval, answer);
@@ -278,7 +285,7 @@ export function ApprovalPanel({
         t('approval.failed', { error: e instanceof Error ? e.message : '' }),
       );
     } finally {
-      setBusy(false);
+      setAnswering((current) => (current === approval.id ? null : current));
     }
   };
 
@@ -315,8 +322,13 @@ export function ApprovalPanel({
       } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
         const next =
-          (selected + (event.key === 'ArrowDown' ? 1 : options.length - 1)) %
-          options.length;
+          selected < 0
+            ? event.key === 'ArrowDown'
+              ? 0
+              : options.length - 1
+            : (selected +
+                (event.key === 'ArrowDown' ? 1 : options.length - 1)) %
+              options.length;
         const button = optionButtons.current[next];
         if (button) button.focus();
         else setSelected(next);
@@ -343,6 +355,12 @@ export function ApprovalPanel({
             {t('approval.more', { count: approvals.length - 1 })}
           </span>
         )}
+        {/* Stopping the turn is a way out of the question, not one of its answers: it sits
+            with the card's controls, away from the options. */}
+        <button type="button" className="secondary stop" onClick={onStop}>
+          <CircleStop size={15} aria-hidden="true" />
+          {t('chat.stop')}
+        </button>
         <button
           type="button"
           className="icon-button"
@@ -352,25 +370,39 @@ export function ApprovalPanel({
           {full ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
         </button>
       </header>
-      <p className="small muted">
+      <p className={`small approval-why${noDefault ? ' risky' : ' muted'}`}>
+        {noDefault && <ShieldAlert size={14} aria-hidden="true" />}
         {t('approval.why', {
           reason: t(`approval.reason.${approval.reason}` as MessageKey),
         })}
-        {approval.detail ? (
-          <span className="mono"> · {approval.detail}</span>
+        {/* A file the title already names is not repeated here. */}
+        {approval.detail &&
+        !(
+          'path' in approval.effect &&
+          displayPath(approval.detail, project) ===
+            displayPath(String(approval.effect.path), project)
+        ) ? (
+          <span className="mono" title={approval.detail}>
+            {' '}
+            · {displayPath(approval.detail, project)}
+          </span>
         ) : null}
       </p>
       <Preview approval={approval} project={project} />
-      <ol
-        className="approval-options"
-        role="listbox"
-        aria-label={t('approval.region')}
-      >
+      <ol className="approval-options" aria-label={t('approval.region')}>
         {options.map((option, index) => (
-          <li key={option} role="option" aria-selected={selected === index}>
+          <li key={option}>
             <button
               type="button"
-              className={selected === index ? 'selected' : ''}
+              className={[
+                selected === index && 'selected',
+                (option === 'reject' || option === 'explain') && 'reject',
+                // Without a risk, "allow once" is the expected answer and looks like it;
+                // a risky question keeps every answer the same weight (nothing preselected).
+                option === 'once' && !noDefault && 'expected',
+              ]
+                .filter(Boolean)
+                .join(' ')}
               disabled={busy}
               onClick={() => void choose(index)}
               ref={(button) => {
@@ -401,21 +433,15 @@ export function ApprovalPanel({
         <span className="small muted">
           {busy
             ? t('approval.sending')
-            : t('approval.keys', { count: options.length })}
+            : t(noDefault ? 'approval.keysPick' : 'approval.keys', {
+                count: options.length,
+              })}
         </span>
         {error && (
           <span className="error small" role="alert">
             {error}
           </span>
         )}
-        <button
-          type="button"
-          className="icon-button"
-          aria-label={t('chat.stop')}
-          onClick={onStop}
-        >
-          <Square size={16} />
-        </button>
       </footer>
     </section>
   );

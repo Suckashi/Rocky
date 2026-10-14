@@ -699,6 +699,67 @@ describe('restoring a turn', () => {
     ).json()) as { changes: Change[] };
     expect(after.changes).toHaveLength(2);
   });
+
+  it('restores one file, and the restore can be undone', async () => {
+    const { call, project } = await setup('hands-off');
+    plan = [
+      {
+        name: 'edit_file',
+        args: {
+          file_path: '/app.js',
+          old_string: 'answer = 41',
+          new_string: 'answer = 42',
+        },
+      },
+      { name: 'write_file', args: { file_path: '/new.txt', content: 'hi\n' } },
+    ];
+    await run(call, 'p1');
+    type Change = { path: string; contentHash: string };
+    const { changes } = (await (
+      await call('/api/threads/p1/runs/p1-r/changes')
+    ).json()) as { changes: Change[] };
+    const app = changes.find((c) => c.path.endsWith('app.js'))!;
+
+    // A file the run did not change is refused.
+    const unknown = await call('/api/threads/p1/runs/p1-r/restore', {
+      method: 'POST',
+      body: {
+        items: [
+          { path: join(project, 'other.js'), contentHash: app.contentHash },
+        ],
+        partial: true,
+      },
+    });
+    expect(unknown.status).toBe(409);
+
+    const one = await call('/api/threads/p1/runs/p1-r/restore', {
+      method: 'POST',
+      body: {
+        items: [{ path: app.path, contentHash: app.contentHash }],
+        partial: true,
+      },
+    });
+    expect(one.status).toBe(200);
+    const result = (await one.json()) as {
+      restored: string[];
+      undo: { path: string; contentHash: string }[];
+    };
+    expect(result.restored).toEqual([app.path]);
+    expect(readFileSync(join(project, 'app.js'), 'utf8')).toBe(
+      'const answer = 41;\n',
+    );
+    // The other file the turn made is left alone.
+    expect(readFileSync(join(project, 'new.txt'), 'utf8')).toBe('hi\n');
+
+    const undo = await call('/api/threads/p1/runs/p1-r/restore', {
+      method: 'POST',
+      body: { items: result.undo, partial: true, target: 'after' },
+    });
+    expect(undo.status).toBe(200);
+    expect(readFileSync(join(project, 'app.js'), 'utf8')).toBe(
+      'const answer = 42;\n',
+    );
+  });
 });
 
 describe('memory', () => {

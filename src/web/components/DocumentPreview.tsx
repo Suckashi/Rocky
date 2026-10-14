@@ -17,11 +17,15 @@ export function DocumentChange({
   const open = useOpenPreview();
   return (
     <div className="doc-change">
-      <button type="button" className="secondary" onClick={() => open(target)}>
-        <PanelRight size={14} />
+      {diff}
+      <button
+        type="button"
+        className="link doc-preview-link"
+        onClick={() => open(target)}
+      >
+        <PanelRight size={14} aria-hidden="true" />
         {t('preview.layout')}
       </button>
-      {diff}
     </div>
   );
 }

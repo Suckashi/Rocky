@@ -1,4 +1,5 @@
 // The project folder: the only place Rocky reads, edits and runs commands.
+import { Check } from 'lucide-react';
 import { useState } from 'react';
 import { api, ApiError, type Settings } from '../api.ts';
 import { useI18n } from '../i18n/index.tsx';
@@ -32,6 +33,8 @@ export function ProjectForm({
     }
   };
 
+  // Filled only when there is something new to save; the saved folder needs no button.
+  const dirty = !!path.trim() && path.trim() !== current;
   return (
     <form
       className="project-form"
@@ -64,9 +67,18 @@ export function ProjectForm({
             {status}
           </span>
         ) : null}
-        <button type="submit" className="primary" disabled={!path.trim()}>
-          {t('project.save')}
-        </button>
+        {dirty || !current ? (
+          <button type="submit" className="secondary" disabled={!dirty}>
+            {t('project.save')}
+          </button>
+        ) : (
+          status !== 'saved' && (
+            <span className="ok small in-use">
+              <Check size={14} aria-hidden="true" />
+              {t('project.inUse')}
+            </span>
+          )
+        )}
       </div>
     </form>
   );

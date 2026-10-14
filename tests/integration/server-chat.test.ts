@@ -47,6 +47,28 @@ describe('chat through the local server', () => {
   });
   afterAll(() => fake.close());
 
+  it('keeps the theme: system by default, light or dark when chosen, nothing else', async () => {
+    const { call } = server(mkdtempSync(join(tmpdir(), 'rocky-int-')));
+    const initial = (await (await call('/api/settings')).json()) as {
+      theme: string;
+    };
+    expect(initial.theme).toBe('system');
+    const dark = await call('/api/settings/theme', {
+      method: 'PUT',
+      body: { theme: 'dark' },
+    });
+    expect(((await dark.json()) as { theme: string }).theme).toBe('dark');
+    const again = (await (await call('/api/settings')).json()) as {
+      theme: string;
+    };
+    expect(again.theme).toBe('dark');
+    const bad = await call('/api/settings/theme', {
+      method: 'PUT',
+      body: { theme: 'neon' },
+    });
+    expect(bad.status).toBe(400);
+  });
+
   it('reports telemetry as disabled and lists the rocky agent', async () => {
     const { call } = server(mkdtempSync(join(tmpdir(), 'rocky-int-')));
     const info = (await (await call('/api/copilotkit/info')).json()) as Record<

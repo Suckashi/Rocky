@@ -1,5 +1,6 @@
 // The HTTP app: security first, then the API, then the built web UI.
 import { serveStatic } from '@hono/node-server/serve-static';
+import { compress } from 'hono/compress';
 import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { setCookie } from 'hono/cookie';
@@ -76,7 +77,27 @@ export function createApp(options: AppOptions): Hono {
   app.all('/api/*', (c) => c.json({ error: 'not-found' }, 404));
 
   if (options.webRoot) {
+    // Vite names built files by content hash, so a browser can keep them for good and
+    // reuse its compiled code on the next launch instead of asking again.
+    // Text files go out gzipped (the script is about 1.6 MB raw, 0.45 MB gzipped). Every /api
+    // route has answered above, so chat streams are never buffered by this.
+    app.use('/*', compress());
+    app.use('/assets/*', async (c, next) => {
+      await next();
+      if (c.res.status === 200)
+        c.header('Cache-Control', 'public, max-age=31536000, immutable');
+    });
+    // Roko and the Rocky marks keep their names, so a day is as long as they can be kept.
+    for (const path of ['/roko/*', '/rocky/*'])
+      app.use(path, async (c, next) => {
+        await next();
+        if (c.res.status === 200)
+          c.header('Cache-Control', 'public, max-age=86400');
+      });
     app.use('/*', serveStatic({ root: options.webRoot }));
+    // A missing file is a 404, never the page: the page must not be kept as a script or image.
+    for (const path of ['/assets/*', '/roko/*', '/rocky/*'])
+      app.all(path, (c) => c.text('not found', 404));
     app.get('*', serveStatic({ root: options.webRoot, path: 'index.html' }));
   }
   app.onError((error, c) => {

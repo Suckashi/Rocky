@@ -1,4 +1,10 @@
-import { mkdtempSync, readFileSync, statSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -253,5 +259,43 @@ describe('shutdown', () => {
       report: () => {},
     })();
     expect(codes).toEqual([0]);
+  });
+});
+
+describe('web UI files', () => {
+  it('gzips text and lets the browser keep hashed build files, but not the page', async () => {
+    const web = mkdtempSync(join(tmpdir(), 'rocky-web-'));
+    mkdirSync(join(web, 'assets'));
+    writeFileSync(join(web, 'index.html'), '<!doctype html>');
+    writeFileSync(join(web, 'assets', 'index-abc123.js'), 'export {};');
+    writeFileSync(join(web, 'assets', 'big.js'), `// ${'x'.repeat(4096)}\n`);
+    const app = createApp({
+      token,
+      codes: new LoginCodes(),
+      port: PORT,
+      webRoot: web,
+    });
+    const get = (path: string) =>
+      app.request(`http://${HOST}${path}`, { headers: { host: HOST } });
+
+    const asset = await get('/assets/index-abc123.js');
+    expect(asset.status).toBe(200);
+    expect(asset.headers.get('cache-control')).toBe(
+      'public, max-age=31536000, immutable',
+    );
+    const page = await get('/');
+    expect(page.status).toBe(200);
+    expect(page.headers.get('cache-control')).toBeNull();
+    const big = await app.request(`http://${HOST}/assets/big.js`, {
+      headers: { host: HOST, 'accept-encoding': 'gzip' },
+    });
+    expect(big.headers.get('content-encoding')).toBe('gzip');
+    expect(await big.text()).not.toBe('');
+    const missing = await get('/assets/missing.js');
+    expect(missing.status).toBe(404);
+    expect(missing.headers.get('cache-control')).toBeNull();
+    const gone = await get('/roko/rows/roko-row-99.webp');
+    expect(gone.status).toBe(404);
+    expect(gone.headers.get('cache-control')).toBeNull();
   });
 });
